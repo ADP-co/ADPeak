@@ -1,0 +1,96 @@
+# Dependencias
+node_modules/
+npm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+venv/
+env/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+
+# Django (si aplica)
+*.log
+local_settings.py
+db.sqlite3
+media/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+.project
+.pydevproject
+.settings/
+
+# Archivos de Sistema
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Archivos Temporales
+*.tmp
+*.temp
+
+# Variables de Entorno
+.env
+.env.local
+.env.*.local
+
+# Build
+dist/
+build/
+*.o
+*.a
+*.lib
+*.exe
+
+# Testing
+coverage/
+.nyc_output/
+pytest_cache/
+.pytest_cache/
+
+# Documentación generada
+site/
+docs/_build/
+
+# Archivos compilados específicos
+*.o
+*.obj
+*.elf
+*.so.o
+
+# Configuración local no versionada
+config.local.js
+settings.local.json
+secrets.json
+
+# Reportes de carga
+uploads/
+reportes/
