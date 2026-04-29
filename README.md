@@ -1,18 +1,27 @@
-# SIGI-POA DGEMS 2026
+# SIGI-POA DGEMS
 
-Sistema Integral de Gestión de Indicadores del Programa Operativo Anual 2026 para la Dirección General de Educación Media Superior.
+Sistema Integral de Gestión de Indicadores del Programa Operativo Anual para la Dirección General de Educación Media Superior.
 
-Este repositorio contiene el código y la documentación no confidencial del proyecto. Los documentos fuente, evidencias, hojas de cálculo y archivos con datos personales se administran en el repositorio privado de materiales confidenciales y no deben copiarse aquí.
+Este repositorio contiene el código y la documentación no confidencial del proyecto. El ciclo inicial de operación será el POA 2026, pero el sistema debe quedar preparado para administrar futuros años. Los documentos fuente, evidencias, hojas de cálculo y archivos con datos personales se administran en el repositorio privado de materiales confidenciales y no deben copiarse aquí.
 
 ## Objetivo
 
-Centralizar la captura, seguimiento, validación y reporte de indicadores del POA 2026 por plantel y actividad, sustituyendo el manejo disperso de archivos Excel y carpetas en la nube por un sistema web con control de acceso, trazabilidad y reportes oportunos.
+Centralizar la captura, seguimiento, validación y reporte de indicadores del POA por plantel, actividad y año operativo, sustituyendo el manejo disperso de archivos Excel y carpetas en la nube por un sistema web con control de acceso, trazabilidad y reportes oportunos.
 
 ## Usuarios
 
 - **Plantel**: captura avances, carga evidencias y consulta el estado de sus actividades.
 - **Responsable de indicador**: revisa información de los planteles asignados, valida avances y solicita correcciones.
 - **Administrador DGEMS**: administra usuarios, planteles, indicadores, periodos, permisos y reportes globales.
+
+## Decisiones confirmadas
+
+- Nombre oficial para documentación institucional: **SIGI-POA DGEMS**.
+- Nombre interno del equipo: **ADPeak**.
+- Primer ciclo a cubrir: **POA 2026**.
+- El sistema debe soportar futuros ciclos anuales.
+- Primera demo funcional objetivo: **31 de mayo de 2026**.
+- Autoridad funcional para aprobación de requisitos y cambios: **Administrador DGEMS**.
 
 ## Alcance inicial
 
@@ -31,6 +40,7 @@ El análisis de los documentos fuente confirmó estos bloques de trabajo:
 - [Resumen del proyecto](docs/project/PROJECT_BRIEF.md)
 - [Requerimientos](docs/project/REQUIREMENTS.md)
 - [Plan de acción](docs/project/ACTION_PLAN.md)
+- [Preguntas para reunión con DGEMS](docs/project/MEETING_QUESTIONS.md)
 - [Manejo de datos confidenciales](docs/security/DATA_HANDLING.md)
 - [Guía de ramas](BRANCH_GUIDE.md)
 

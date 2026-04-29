@@ -2,13 +2,21 @@
 
 ## Nombre
 
-SIGI-POA DGEMS 2026: Sistema Integral de Gestión de Indicadores del Programa Operativo Anual.
+SIGI-POA DGEMS: Sistema Integral de Gestión de Indicadores del Programa Operativo Anual.
 
 ## Contexto
 
-DGEMS necesita recopilar, dar seguimiento y analizar avances de indicadores del POA 2026. El proceso actual depende de hojas de cálculo y carpetas distribuidas, lo que dificulta la revisión, genera duplicidad de información, expone datos sensibles y retrasa la toma de decisiones.
+DGEMS necesita recopilar, dar seguimiento y analizar avances de indicadores del POA. El ciclo inicial será 2026, pero el sistema debe quedar preparado para futuros años. El proceso actual depende de hojas de cálculo y carpetas distribuidas, lo que dificulta la revisión, genera duplicidad de información, expone datos sensibles y retrasa la toma de decisiones.
 
 El sistema debe convertir ese flujo en una plataforma web centralizada, con permisos por rol, formularios estructurados, evidencias controladas, trazabilidad y reportes.
+
+## Decisiones confirmadas
+
+- Nombre oficial: SIGI-POA DGEMS.
+- Nombre interno del equipo: ADPeak.
+- Alcance temporal: iniciar con POA 2026 y soportar ciclos anuales futuros.
+- Primera demo funcional: 31 de mayo de 2026.
+- Autoridad funcional esperada: Administrador DGEMS.
 
 ## Fuentes revisadas
 
@@ -35,7 +43,7 @@ El modelo manual actual presenta estos riesgos:
 
 ## Objetivo general
 
-Desarrollar una plataforma web para gestionar de forma centralizada, segura y eficiente los indicadores POA 2026, permitiendo captura, seguimiento, validación y análisis por plantel, actividad, periodo e indicador.
+Desarrollar una plataforma web para gestionar de forma centralizada, segura y eficiente los indicadores POA, permitiendo captura, seguimiento, validación y análisis por plantel, actividad, periodo, indicador y año operativo.
 
 ## Principios del producto
 
@@ -51,6 +59,7 @@ Desarrollar una plataforma web para gestionar de forma centralizada, segura y ef
 El MVP se considera útil cuando:
 
 - Un administrador puede registrar planteles, usuarios, indicadores, actividades y periodos.
+- Un administrador puede seleccionar o configurar el ciclo anual de trabajo.
 - Un plantel puede capturar avance y adjuntar evidencia.
 - Un responsable puede revisar avances, aceptar o solicitar corrección.
 - Un administrador puede consultar el avance general y filtrar por periodo, plantel, actividad e indicador.

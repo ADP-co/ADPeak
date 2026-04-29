@@ -2,6 +2,13 @@
 
 Este es el plan editable del proyecto. El PDF original queda solo como referencia histórica; las decisiones vigentes deben actualizarse aquí.
 
+## Hitos confirmados
+
+- Primera demo funcional: 31 de mayo de 2026.
+- Ciclo inicial: POA 2026.
+- Preparación futura: el sistema debe soportar nuevos ciclos anuales sin rehacer la plataforma.
+- Aprobación funcional: Administrador DGEMS.
+
 ## Fase 0: Alineación y alcance
 
 Objetivo: convertir los documentos fuente en backlog técnico claro.
@@ -10,6 +17,7 @@ Entregables:
 
 - Confirmar alcance del MVP.
 - Consolidar catálogo inicial de indicadores, actividades, responsables y periodos.
+- Definir cómo se parametriza cada ciclo anual del POA.
 - Definir stack final.
 - Definir políticas de manejo de evidencias.
 - Crear issues por módulo.
@@ -62,6 +70,7 @@ Entregables:
 - CRUD de actividades.
 - Asignación de responsables y contribuyentes.
 - Administración de periodos de captura.
+- Configuración de ciclo anual.
 - Importación inicial controlada desde el libro maestro.
 
 Criterio de salida:

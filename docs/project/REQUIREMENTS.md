@@ -20,6 +20,7 @@
 ### Administrador DGEMS
 
 - Administra usuarios, roles, planteles, responsables, indicadores, actividades y periodos.
+- Administra ciclos anuales del POA.
 - Consulta avances globales.
 - Exporta reportes institucionales.
 - Audita cambios y controla permisos.
@@ -38,6 +39,7 @@
 - Planteles.
 - Usuarios.
 - Responsables y contribuyentes.
+- Ciclos anuales del POA.
 - Indicadores POA.
 - Actividades asociadas a indicadores.
 - Periodos de captura: quincenal, mensual, bimestral y semestral.
@@ -70,7 +72,7 @@
 - Avance por plantel.
 - Avance por indicador.
 - Avance por responsable.
-- Filtros por periodo, plantel, actividad e indicador.
+- Filtros por ciclo anual, periodo, plantel, actividad e indicador.
 - Exportación de reportes.
 - Indicadores de faltantes, pendientes de revisión y aprobados.
 
@@ -92,6 +94,7 @@ Entidades principales:
 - `User`
 - `Role`
 - `Plantel`
+- `OperationalYear`
 - `Indicator`
 - `Activity`
 - `Period`
@@ -105,15 +108,16 @@ Entidades principales:
 Relaciones clave:
 
 - Un plantel tiene muchas capturas.
+- Un ciclo anual tiene indicadores, actividades, periodos y capturas.
 - Un indicador tiene muchas actividades.
 - Una actividad puede requerir uno o varios campos de captura.
 - Un responsable puede revisar varias actividades o indicadores.
-- Una captura pertenece a un plantel, actividad y periodo.
+- Una captura pertenece a un plantel, actividad, periodo y ciclo anual.
 - Una captura puede tener muchas evidencias y revisiones.
 
 ## Pendientes de definición
 
-- Lista definitiva de planteles activos.
+- Lista definitiva de planteles activos para el ciclo 2026.
 - Stack backend final.
 - Proveedor de almacenamiento de archivos.
 - Tamaño máximo por evidencia.
