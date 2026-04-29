@@ -1,30 +1,66 @@
-# Sistema de Reportes de Labores - Universidad de Colimas
+# SIGI-POA DGEMS
 
-Plataforma web para que los directivos de los bachilleratos de la Universidad de Colimas suban y gestionen sus reportes de labores para revisión de la DGEMS.
+Sistema Integral de Gestión de Indicadores del Programa Operativo Anual para la Dirección General de Educación Media Superior.
 
-## Descripción del Proyecto
+Este repositorio contiene el código y la documentación no confidencial del proyecto. El ciclo inicial de operación será el POA 2026, pero el sistema debe quedar preparado para administrar futuros años. Los documentos fuente, evidencias, hojas de cálculo y archivos con datos personales se administran en el repositorio privado de materiales confidenciales y no deben copiarse aquí.
 
-Este sistema permite:
-- Autenticación segura de directivos y administradores
-- Subida de reportes de actividades y labores
-- Visualización y seguimiento de reportes por DGEMS
-- Gestión de usuarios y roles
-- Generación de reportes consolidados
+## Objetivo
 
-## Estructura de Ramas
+Centralizar la captura, seguimiento, validación y reporte de indicadores del POA por plantel, actividad y año operativo, sustituyendo el manejo disperso de archivos Excel y carpetas en la nube por un sistema web con control de acceso, trazabilidad y reportes oportunos.
 
-- **main**: Rama de producción
-- **develop**: Rama de desarrollo
-- **feature/auth-users**: Sistema de autenticación y gestión de usuarios
-- **feature/upload-reports**: Módulo de carga de reportes
-- **feature/reports-dashboard**: Dashboard de visualización de reportes
-- **feature/email-notifications**: Sistema de notificaciones por correo
-- **feature/api-backend**: API backend principal
+## Usuarios
 
-## Stack Tecnológico
+- **Plantel**: captura avances, carga evidencias y consulta el estado de sus actividades.
+- **Responsable de indicador**: revisa información de los planteles asignados, valida avances y solicita correcciones.
+- **Administrador DGEMS**: administra usuarios, planteles, indicadores, periodos, permisos y reportes globales.
 
-(Por definir según el equipo)
+## Decisiones confirmadas
 
-## Integrantes del Equipo
+- Nombre oficial para documentación institucional: **SIGI-POA DGEMS**.
+- Nombre interno del equipo: **ADPeak**.
+- Primer ciclo a cubrir: **POA 2026**.
+- El sistema debe soportar futuros ciclos anuales.
+- Primera demo funcional objetivo: **31 de mayo de 2026**.
+- Autoridad funcional para aprobación de requisitos y cambios: **Administrador DGEMS**.
 
-(Por agregar)
+## Alcance inicial
+
+El análisis de los documentos fuente confirmó estos bloques de trabajo:
+
+- Catálogo de indicadores, actividades, responsables, contribuyentes y planteles.
+- Formularios de captura configurables por indicador.
+- Carga controlada de evidencias documentales.
+- Flujo de revisión, observaciones, correcciones y aprobación.
+- Dashboard de avance por periodo, plantel, actividad e indicador.
+- Reportes exportables para seguimiento institucional.
+- Auditoría de cambios y segregación de información por rol.
+
+## Documentación
+
+- [Resumen del proyecto](docs/project/PROJECT_BRIEF.md)
+- [Requerimientos](docs/project/REQUIREMENTS.md)
+- [Plan de acción](docs/project/ACTION_PLAN.md)
+- [Preguntas para reunión con DGEMS](docs/project/MEETING_QUESTIONS.md)
+- [Matriz de preguntas y respuestas](docs/project/QUESTION_MATRIX.md)
+- [Manejo de datos confidenciales](docs/security/DATA_HANDLING.md)
+- [Guía de ramas](BRANCH_GUIDE.md)
+
+El archivo original de planeación visual quedó archivado en [docs/project/action-plan-original.pdf](docs/project/action-plan-original.pdf). La versión editable y vigente del plan es [docs/project/ACTION_PLAN.md](docs/project/ACTION_PLAN.md).
+
+## Stack propuesto
+
+- **Frontend**: React, TypeScript, React Hook Form, Zod y TanStack Query.
+- **Backend**: API web con Python/FastAPI o stack equivalente definido por el equipo.
+- **Base de datos**: PostgreSQL o MySQL, con migraciones versionadas.
+- **Archivos**: almacenamiento privado para evidencias, con referencias en base de datos.
+- **Reportes**: exportación PDF/Excel y gráficos para tableros.
+- **Operación**: Docker para ambientes reproducibles.
+
+La decisión final del stack debe quedar registrada antes de iniciar implementación.
+
+## Reglas de seguridad
+
+- No subir ZIP, Excel, PDFs de evidencia, documentos fuente ni datos personales a este repositorio público.
+- No documentar nombres de estudiantes, números de cuenta, resultados de admisión o constancias individuales.
+- Las fuentes confidenciales se consultan únicamente desde el repositorio privado autorizado.
+- Cualquier credencial debe vivir en variables de entorno o secretos del proveedor, nunca en Git.
