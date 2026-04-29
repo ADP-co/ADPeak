@@ -1,190 +1,112 @@
-# Guía de Ramas del Proyecto
+# Guía de Ramas
 
-## Estructura de Ramas (Git Flow)
+Este proyecto usa una variante simple de Git Flow para mantener estable el código y permitir trabajo paralelo por módulo.
 
-### 🔴 Rama Main (Producción)
-- **main**: Versión en producción. Solo se actualiza desde `release` o `hotfix`
-- Uso: Código estable y testeado en producción
-- Política: No editar directamente, solo PRs desde release/hotfix
+## Ramas principales
 
-### 🟠 Rama Develop (Integración)
-- **develop**: Rama de desarrollo e integración
-- Uso: Base para todas las feature branches
-- Política: Código testeado pero en desarrollo
+### `main`
 
----
+Rama estable. Debe representar una versión lista para entrega, demo formal o despliegue.
 
-## 📋 Ramas de Características (Features)
+Reglas:
 
-Cada rama feature se crea desde `develop` y se fusiona nuevamente en `develop` al completarse.
+- No hacer commits directos.
+- Recibir cambios solo por Pull Request aprobado.
+- Proteger con revisión obligatoria antes de merge.
+- Mantener documentación y configuración coherentes con la versión publicada.
 
-### `feature/auth-users`
-- **Descripción**: Sistema de autenticación, login, y gestión de usuarios
-- **Responsables**: [Asignar]
-- **Funcionalidades**:
-  - Login/Logout de directivos y administradores
-  - Gestión de roles (Directivo, Administrador, DGEMS)
-  - Control de permisos
-  - Recuperación de contraseña
+### `develop`
 
-### `feature/api-backend`
-- **Descripción**: API REST backend principal
-- **Responsables**: [Asignar]
-- **Funcionalidades**:
-  - Endpoints para autenticación
-  - Endpoints para reportes
-  - Endpoints para usuarios
-  - Validaciones de datos
+Rama de integración del equipo.
 
-### `feature/frontend-ui`
-- **Descripción**: Interfaz de usuario (HTML, CSS, JavaScript/React/Vue)
-- **Responsables**: [Asignar]
-- **Funcionalidades**:
-  - Diseño responsivo
-  - Componentes reutilizables
-  - Sistema de temas
-  - Accesibilidad
+Reglas:
 
-### `feature/upload-reports`
-- **Descripción**: Módulo para carga de reportes de labores
-- **Responsables**: [Asignar]
-- **Funcionalidades**:
-  - Interfaz de carga de archivos
-  - Validación de formatos
-  - Generación de referencias
-  - Confirmación de carga
+- Todas las ramas de trabajo nacen desde `develop`.
+- Todo cambio funcional vuelve a `develop` por Pull Request.
+- Debe compilar y pasar validaciones básicas antes de aceptar merges.
 
-### `feature/reports-dashboard`
-- **Descripción**: Dashboard de visualización y seguimiento de reportes
-- **Responsables**: [Asignar]
-- **Funcionalidades**:
-  - Listado de reportes
-  - Filtros y búsqueda
-  - Estado de reportes
-  - Descarga de reportes
+## Ramas de trabajo
 
-### `feature/email-notifications`
-- **Descripción**: Sistema de notificaciones por correo electrónico
-- **Responsables**: [Asignar]
-- **Funcionalidades**:
-  - Notificaciones de carga de reportes
-  - Recordatorios a directivos
-  - Avisos a DGEMS
-  - Plantillas de correo
+Usar nombres claros y orientados al módulo:
 
-### `feature/file-storage`
-- **Descripción**: Gestión y almacenamiento de archivos
-- **Responsables**: [Asignar]
-- **Funcionalidades**:
-  - Almacenamiento en servidor
-  - Copias de seguridad
-  - Eliminación segura de archivos
-  - Historial de versiones
+- `feature/auth-rbac`
+- `feature/indicator-catalog`
+- `feature/capture-forms`
+- `feature/evidence-storage`
+- `feature/review-workflow`
+- `feature/dashboard-reports`
+- `feature/admin-panel`
+- `feature/audit-security`
+- `bugfix/descripcion-corta`
+- `hotfix/descripcion-corta`
+- `release/v0.1.0`
 
-### `feature/reporting-analytics`
-- **Descripción**: Reportes y análisis de datos
-- **Responsables**: [Asignar]
-- **Funcionalidades**:
-  - Reportes consolidados por institución
-  - Estadísticas de cumplimiento
-  - Gráficos y visualizaciones
-  - Exportación de datos
+## Flujo para una feature
 
----
-
-## 🔄 Flujo de Trabajo
-
-### Crear una Nueva Feature
 ```bash
-# 1. Actualizar develop
 git checkout develop
 git pull origin develop
+git checkout -b feature/nombre-del-modulo
+```
 
-# 2. Crear feature branch
-git checkout -b feature/nombre-descriptivo
+Durante el trabajo:
 
-# 3. Hacer cambios y commits
+```bash
+git status
 git add .
-git commit -m "Descripción clara del cambio"
-
-# 4. Push a la rama
-git push origin feature/nombre-descriptivo
+git commit -m "Describe el cambio realizado"
+git push -u origin feature/nombre-del-modulo
 ```
 
-### Completar una Feature
+Al terminar:
+
+1. Crear Pull Request hacia `develop`.
+2. Explicar alcance, evidencias de prueba y riesgos.
+3. Solicitar al menos una revisión.
+4. Corregir comentarios antes del merge.
+5. Eliminar la rama cuando quede integrada.
+
+## Criterios mínimos para Pull Request
+
+- La funcionalidad cumple el requerimiento documentado.
+- No incluye archivos confidenciales, datos reales, ZIP, Excel, PDFs de evidencia ni credenciales.
+- Incluye validaciones o pruebas cuando aplique.
+- Actualiza documentación si cambia flujo, configuración, modelo de datos o permisos.
+- Mantiene el alcance acotado a un módulo o cambio claro.
+
+## Releases
+
+Crear una rama `release/vX.Y.Z` cuando `develop` tenga un conjunto estable de funcionalidades.
+
+Checklist:
+
+- Versionar cambios relevantes.
+- Probar autenticación, captura, carga de evidencia, revisión y reportes.
+- Revisar migraciones y configuración de ambiente.
+- Fusionar a `main` cuando quede aprobada.
+- Fusionar de regreso a `develop` si hubo ajustes en release.
+
+## Hotfixes
+
+Usar `hotfix/*` solo para errores críticos detectados sobre una versión estable.
+
 ```bash
-# 1. Asegurar código actualizado
-git fetch origin
-git rebase origin/develop
-
-# 2. Hacer último push
-git push origin feature/nombre-descriptivo
-
-# 3. Crear Pull Request en GitHub/GitLab
-# - Asignar revisores
-# - Describir cambios
-# - Referenciar issues
-
-# 4. Después de aprobación, mergear a develop
-git checkout develop
-git merge feature/nombre-descriptivo
-git push origin develop
-
-# 5. Eliminar rama local
-git branch -d feature/nombre-descriptivo
+git checkout main
+git pull origin main
+git checkout -b hotfix/descripcion
 ```
 
----
+Después del arreglo, hacer Pull Request a `main` y replicar el cambio en `develop`.
 
-## 📦 Ramas de Release (cuando aplique)
+## Mapa inicial de módulos
 
-Cuando esté lista una versión:
-```bash
-git checkout -b release/v1.0.0
-# - Bump version
-# - Último testing
-# - Merge a main y develop
-```
-
----
-
-## 🚨 Ramas de Hotfix (emergencias)
-
-Si hay bug crítico en producción:
-```bash
-git checkout -b hotfix/descripcion main
-# - Arreglar bug
-# - Merge a main y develop
-```
-
----
-
-## ✅ Mejores Prácticas
-
-1. **Nombres de rama**: Usar `feature/`, `bugfix/`, `hotfix/`, `release/`
-2. **Commits**: Mensajes claros y descriptivos en español o inglés
-3. **Pull Requests**: Siempre usar PRs, no hacer push directo a develop/main
-4. **Code Review**: Mínimo 1 aprobación antes de mergear
-5. **Tests**: Ejecutar tests antes de push
-6. **Push Regular**: No mantener commits sin subir
-
----
-
-## 👥 Asignación de Equipos
-
-Por favor editar esta sección con los nombres de los integrantes:
-
-| Feature | Responsable | Estado |
-|---------|-------------|--------|
-| auth-users | | 🟡 Por Asignar |
-| api-backend | | 🟡 Por Asignar |
-| frontend-ui | | 🟡 Por Asignar |
-| upload-reports | | 🟡 Por Asignar |
-| reports-dashboard | | 🟡 Por Asignar |
-| email-notifications | | 🟡 Por Asignar |
-| file-storage | | 🟡 Por Asignar |
-| reporting-analytics | | 🟡 Por Asignar |
-
----
-
-**Última actualización**: 2026-03-03
+| Módulo | Rama sugerida | Resultado esperado |
+| --- | --- | --- |
+| Autenticación y roles | `feature/auth-rbac` | Login, permisos por rol y sesiones seguras |
+| Catálogo POA | `feature/indicator-catalog` | Indicadores, actividades, planteles, responsables y periodos |
+| Captura de avances | `feature/capture-forms` | Formularios por indicador con validaciones |
+| Evidencias | `feature/evidence-storage` | Carga, descarga autorizada y metadatos de archivos |
+| Revisión | `feature/review-workflow` | Estados, observaciones, correcciones y aprobación |
+| Dashboard y reportes | `feature/dashboard-reports` | Filtros, métricas, exportación y visualización |
+| Administración | `feature/admin-panel` | Gestión de usuarios, catálogos y permisos |
+| Auditoría y seguridad | `feature/audit-security` | Bitácora, trazabilidad y controles de datos |

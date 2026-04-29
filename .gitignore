@@ -1,9 +1,21 @@
-# Dependencias
+# Dependencies
 node_modules/
+
+# Logs
+*.log
 npm-debug.log*
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+secrets.json
+config.local.js
+settings.local.json
+local_settings.py
 
 # Python
 __pycache__/
@@ -13,84 +25,67 @@ __pycache__/
 venv/
 env/
 ENV/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
+.venv/
 *.egg-info/
-.installed.cfg
+.pytest_cache/
+pytest_cache/
 
-# Django (si aplica)
-*.log
-local_settings.py
+# Build outputs
+dist/
+build/
+coverage/
+.nyc_output/
+site/
+docs/_build/
+*.o
+*.obj
+*.a
+*.lib
+*.exe
+
+# Databases and runtime files
 db.sqlite3
+*.sqlite
+*.sqlite3
 media/
+uploads/
+reportes/
 
-# IDEs
+# Confidential source material and evidence
+private/
+confidential/
+source-materials/
+evidence/
+data/
+downloads/
+*.zip
+*.7z
+*.rar
+*.tar
+*.tar.gz
+*.tgz
+*.csv
+*.xlsx
+*.xls
+*.pdf
+*.docx
+*.pptx
+!docs/project/action-plan-original.pdf
+
+# IDEs and operating system files
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 .DS_Store
+Thumbs.db
 *.sublime-project
 *.sublime-workspace
 .project
 .pydevproject
 .settings/
 
-# Archivos de Sistema
-Thumbs.db
-.DS_Store
-.AppleDouble
-.LSOverride
-
-# Archivos Temporales
+# Temporary files
 *.tmp
 *.temp
-
-# Variables de Entorno
-.env
-.env.local
-.env.*.local
-
-# Build
-dist/
-build/
-*.o
-*.a
-*.lib
-*.exe
-
-# Testing
-coverage/
-.nyc_output/
-pytest_cache/
-.pytest_cache/
-
-# Documentación generada
-site/
-docs/_build/
-
-# Archivos compilados específicos
-*.o
-*.obj
-*.elf
-*.so.o
-
-# Configuración local no versionada
-config.local.js
-settings.local.json
-secrets.json
-
-# Reportes de carga
-uploads/
-reportes/
