@@ -41,6 +41,7 @@ El análisis de los documentos fuente confirmó estos bloques de trabajo:
 - [Requerimientos](docs/project/REQUIREMENTS.md)
 - [Plan de acción](docs/project/ACTION_PLAN.md)
 - [Preguntas para reunión con DGEMS](docs/project/MEETING_QUESTIONS.md)
+- [Matriz de preguntas y respuestas](docs/project/QUESTION_MATRIX.md)
 - [Manejo de datos confidenciales](docs/security/DATA_HANDLING.md)
 - [Guía de ramas](BRANCH_GUIDE.md)
 
