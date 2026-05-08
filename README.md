@@ -40,6 +40,7 @@ El análisis de los documentos fuente confirmó estos bloques de trabajo:
 - [Resumen del proyecto](docs/project/PROJECT_BRIEF.md)
 - [Requerimientos](docs/project/REQUIREMENTS.md)
 - [Plan de acción](docs/project/ACTION_PLAN.md)
+- [Roadmap de Edson](docs/project/EDSON_ROADMAP.md)
 - [Preguntas para reunión con DGEMS](docs/project/MEETING_QUESTIONS.md)
 - [Matriz de preguntas y respuestas](docs/project/QUESTION_MATRIX.md)
 - [Manejo de datos confidenciales](docs/security/DATA_HANDLING.md)
