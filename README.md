@@ -43,9 +43,35 @@ El análisis de los documentos fuente confirmó estos bloques de trabajo:
 - [Preguntas para reunión con DGEMS](docs/project/MEETING_QUESTIONS.md)
 - [Matriz de preguntas y respuestas](docs/project/QUESTION_MATRIX.md)
 - [Manejo de datos confidenciales](docs/security/DATA_HANDLING.md)
+- [Scripts de desarrollo](docs/development/SCRIPTS.md)
 - [Guía de ramas](BRANCH_GUIDE.md)
 
 El archivo original de planeación visual quedó archivado en [docs/project/action-plan-original.pdf](docs/project/action-plan-original.pdf). La versión editable y vigente del plan es [docs/project/ACTION_PLAN.md](docs/project/ACTION_PLAN.md).
+
+## Desarrollo local
+
+Requisitos:
+
+- Node.js 20.19 o superior, o Node.js 22.12 o superior.
+- npm 10 o superior.
+
+Instalacion y validacion inicial:
+
+```bash
+npm ci
+npm run check
+```
+
+Comandos principales:
+
+```bash
+npm run dev:frontend
+npm run dev:backend
+npm run migrate
+npm test
+```
+
+La documentacion completa de scripts esta en [docs/development/SCRIPTS.md](docs/development/SCRIPTS.md).
 
 ## Stack propuesto
 

@@ -35,6 +35,7 @@ dist/
 build/
 coverage/
 .nyc_output/
+*.tsbuildinfo
 site/
 docs/_build/
 *.o
