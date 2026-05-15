@@ -6,15 +6,19 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "start": "tsx src/server.ts",
+    "env:check": "tsx scripts/check-config.ts",
     "migrate": "tsx scripts/migrate.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "build": "tsc -p tsconfig.build.json"
   },
   "devDependencies": {
-    "@types/node": "^25.8.0",
+    "@types/node": "^20.19.41",
     "tsx": "^4.22.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.6"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2"
   }
 }

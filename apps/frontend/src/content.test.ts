@@ -1,13 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_API_URL, resolveApiUrl } from "./content";
+import { ClientConfigurationError, loadClientConfig } from "./content";
 
-describe("resolveApiUrl", () => {
-  it("uses the configured API URL when it is present", () => {
-    expect(resolveApiUrl("http://127.0.0.1:9000")).toBe("http://127.0.0.1:9000");
+describe("loadClientConfig", () => {
+  it("loads a configured API URL", () => {
+    expect(loadClientConfig({ VITE_API_URL: "http://127.0.0.1:9000" })).toEqual({
+      apiUrl: "http://127.0.0.1:9000"
+    });
   });
 
-  it("falls back to the local backend URL", () => {
-    expect(resolveApiUrl("")).toBe(DEFAULT_API_URL);
-    expect(resolveApiUrl(undefined)).toBe(DEFAULT_API_URL);
+  it("fails clearly when the API URL is missing", () => {
+    expect(() => loadClientConfig({})).toThrow(ClientConfigurationError);
+    expect(() => loadClientConfig({})).toThrow("VITE_API_URL");
+  });
+
+  it("rejects invalid API URLs", () => {
+    expect(() => loadClientConfig({ VITE_API_URL: "invalid" })).toThrow(
+      "VITE_API_URL debe ser una URL valida."
+    );
   });
 });

@@ -28,6 +28,10 @@ Uso prohibido:
 - Hojas de cálculo originales.
 - Credenciales o configuraciones reales.
 
+`.env.example` puede contener unicamente placeholders locales no secretos. Los
+archivos `.env` reales y cualquier configuracion con credenciales deben quedar
+fuera de Git.
+
 ### Repositorio privado
 
 Uso permitido:
@@ -78,6 +82,7 @@ Verificar que no aparezcan:
 - `.docx`
 - `.pptx`
 - `.env`
+- `.env.*`
 - carpetas `data/`, `private/`, `confidential/`, `evidence/`, `uploads/` o `source-materials/`
 
 Si alguno aparece, detener el PR y mover el archivo al repositorio privado o al almacenamiento autorizado.

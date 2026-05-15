@@ -15,6 +15,7 @@
     "setup": "npm install",
     "dev:frontend": "npm --workspace @adpeak/frontend run dev",
     "dev:backend": "npm --workspace @adpeak/backend run dev",
+    "env:check": "npm --workspace @adpeak/backend run env:check",
     "migrate": "npm --workspace @adpeak/backend run migrate",
     "docker:up": "docker compose up --build",
     "docker:down": "docker compose down",

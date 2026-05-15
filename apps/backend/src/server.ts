@@ -1,8 +1,28 @@
 import { createServer, type ServerResponse } from "node:http";
+import {
+  ConfigurationError,
+  getAppConfig,
+  loadLocalEnv,
+  redactConfig
+} from "./config.js";
 import { healthPayload } from "./health.js";
 
-const DEFAULT_PORT = 8000;
-const port = Number.parseInt(process.env.BACKEND_PORT ?? "", 10) || DEFAULT_PORT;
+loadLocalEnv();
+
+let appConfig;
+
+try {
+  appConfig = getAppConfig();
+} catch (error) {
+  if (error instanceof ConfigurationError) {
+    console.error(error.message);
+    process.exit(1);
+  }
+
+  throw error;
+}
+
+const port = appConfig.backendPort;
 
 function sendJson(
   response: ServerResponse,
@@ -36,4 +56,5 @@ const server = createServer((request, response) => {
 server.listen(port, () => {
   console.log(`Backend listo en http://127.0.0.1:${port}`);
   console.log(`Healthcheck: http://127.0.0.1:${port}/health`);
+  console.log(`Configuracion: ${JSON.stringify(redactConfig(appConfig))}`);
 });

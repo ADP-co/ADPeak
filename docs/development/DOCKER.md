@@ -48,9 +48,18 @@ de desarrollo.
 | `POSTGRES_PORT` | `5432` | Puerto publicado para PostgreSQL. |
 | `POSTGRES_DB` | `sigi_poa_dev` | Base de datos local. |
 | `POSTGRES_USER` | `sigi_poa` | Usuario local de PostgreSQL. |
-| `POSTGRES_PASSWORD` | `sigi_poa_dev_password` | Contrasena local no secreta. |
+| `APP_ENV` | `development` | Entorno de ejecucion del backend. |
+| `PUBLIC_APP_URL` | `http://127.0.0.1:5173` | URL publica del frontend. |
+| `INTERNAL_API_URL` | `http://backend:8000` | URL interna del backend dentro de Docker. |
+| `POSTGRES_PASSWORD` | `local_dev_password_not_secret` | Contrasena local no secreta. |
 | `VITE_API_URL` | `http://127.0.0.1:8000` | URL publica de backend usada por el frontend. |
-| `DATABASE_URL` | `postgresql://sigi_poa:sigi_poa_dev_password@127.0.0.1:5432/sigi_poa_dev` | URL para herramientas ejecutadas fuera de Docker. |
+| `DATABASE_URL` | `postgresql://sigi_poa:local_dev_password_not_secret@127.0.0.1:5432/sigi_poa_dev` | URL para herramientas ejecutadas fuera de Docker. |
+| `AUTH_SECRET` | `local-dev-auth-secret-change-me` | Placeholder local para auth. |
+| `AUTH_TOKEN_TTL_MINUTES` | `60` | Duracion local de tokens. |
+| `FILE_STORAGE_DRIVER` | `local` | Driver de archivos. |
+| `FILE_STORAGE_PATH` | `uploads` | Ruta local ignorada por Git. |
+| `EVIDENCE_MAX_FILE_MB` | `25` | Limite local de carga de evidencias. |
+| `CORS_ORIGIN` | `http://127.0.0.1:5173` | Origen permitido para frontend. |
 
 Dentro de Docker, el backend se conecta a PostgreSQL por el host interno `db`.
 

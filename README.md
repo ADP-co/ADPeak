@@ -43,6 +43,7 @@ El análisis de los documentos fuente confirmó estos bloques de trabajo:
 - [Preguntas para reunión con DGEMS](docs/project/MEETING_QUESTIONS.md)
 - [Matriz de preguntas y respuestas](docs/project/QUESTION_MATRIX.md)
 - [Manejo de datos confidenciales](docs/security/DATA_HANDLING.md)
+- [Configuracion de entorno](docs/development/CONFIGURATION.md)
 - [Scripts de desarrollo](docs/development/SCRIPTS.md)
 - [Guía de ramas](BRANCH_GUIDE.md)
 
@@ -59,6 +60,8 @@ Instalacion y validacion inicial:
 
 ```bash
 npm ci
+copy .env.example .env
+npm run env:check
 npm run check
 ```
 

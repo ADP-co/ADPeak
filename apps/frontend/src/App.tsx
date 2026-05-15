@@ -1,8 +1,29 @@
-import { resolveApiUrl } from "./content";
+import { ClientConfigurationError, loadClientConfig } from "./content";
 import "./styles.css";
 
 export function App() {
-  const apiUrl = resolveApiUrl(import.meta.env.VITE_API_URL);
+  let apiUrl: string;
+
+  try {
+    apiUrl = loadClientConfig({
+      VITE_API_URL: import.meta.env.VITE_API_URL
+    }).apiUrl;
+  } catch (error) {
+    const message =
+      error instanceof ClientConfigurationError
+        ? error.message
+        : "Error desconocido de configuracion.";
+
+    return (
+      <main className="app-shell">
+        <section className="intro" role="alert">
+          <p className="eyebrow">SIGI-POA DGEMS</p>
+          <h1>Configuracion incompleta</h1>
+          <p>{message}</p>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="app-shell">

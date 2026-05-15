@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-sigi_poa_dev}
       POSTGRES_USER: ${POSTGRES_USER:-sigi_poa}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sigi_poa_dev_password}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local_dev_password_not_secret}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
@@ -32,8 +32,17 @@ services:
       db:
         condition: service_healthy
     environment:
+      APP_ENV: ${APP_ENV:-development}
       BACKEND_PORT: ${BACKEND_PORT:-8000}
-      DATABASE_URL: "postgresql://${POSTGRES_USER:-sigi_poa}:${POSTGRES_PASSWORD:-sigi_poa_dev_password}@db:5432/${POSTGRES_DB:-sigi_poa_dev}"
+      PUBLIC_APP_URL: ${PUBLIC_APP_URL:-http://127.0.0.1:5173}
+      INTERNAL_API_URL: ${INTERNAL_API_URL:-http://backend:8000}
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-sigi_poa}:${POSTGRES_PASSWORD:-local_dev_password_not_secret}@db:5432/${POSTGRES_DB:-sigi_poa_dev}"
+      AUTH_SECRET: ${AUTH_SECRET:-local-dev-auth-secret-change-me}
+      AUTH_TOKEN_TTL_MINUTES: ${AUTH_TOKEN_TTL_MINUTES:-60}
+      FILE_STORAGE_DRIVER: ${FILE_STORAGE_DRIVER:-local}
+      FILE_STORAGE_PATH: ${FILE_STORAGE_PATH:-uploads}
+      EVIDENCE_MAX_FILE_MB: ${EVIDENCE_MAX_FILE_MB:-25}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://127.0.0.1:5173}
       NODE_ENV: development
     ports:
       - "${BACKEND_PORT:-8000}:${BACKEND_PORT:-8000}"
