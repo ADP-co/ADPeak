@@ -1,0 +1,26 @@
+{
+  "name": "sigi-poa-dgems",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Scripts de desarrollo para SIGI-POA DGEMS.",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0",
+    "npm": ">=10.0.0"
+  },
+  "workspaces": [
+    "apps/frontend",
+    "apps/backend"
+  ],
+  "scripts": {
+    "setup": "npm install",
+    "dev:frontend": "npm --workspace @adpeak/frontend run dev",
+    "dev:backend": "npm --workspace @adpeak/backend run dev",
+    "migrate": "npm --workspace @adpeak/backend run migrate",
+    "test": "npm --workspaces --if-present run test",
+    "test:frontend": "npm --workspace @adpeak/frontend run test",
+    "test:backend": "npm --workspace @adpeak/backend run test",
+    "typecheck": "npm --workspaces --if-present run typecheck",
+    "build": "npm --workspaces --if-present run build",
+    "check": "npm run typecheck && npm test && npm run build"
+  }
+}
