@@ -73,6 +73,18 @@ npm test
 
 La documentacion completa de scripts esta en [docs/development/SCRIPTS.md](docs/development/SCRIPTS.md).
 
+## Docker local
+
+El entorno local completo se levanta con:
+
+```bash
+npm run docker:up
+```
+
+Este comando inicia frontend, backend y PostgreSQL con variables de desarrollo
+definidas en `.env.example`; no requiere secretos reales. La guia completa esta
+en [docs/development/DOCKER.md](docs/development/DOCKER.md).
+
 ## Stack propuesto
 
 - **Frontend**: React, TypeScript, React Hook Form, Zod y TanStack Query.
