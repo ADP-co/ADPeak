@@ -1,55 +1,69 @@
-// ======================================================
-// GENERADOR PRINCIPAL DE PDF (ORQUESTADOR)
-// ------------------------------------------------------
-// Este archivo SOLO coordina los módulos:
-//
-// - encabezadoPDF
-// - tablaPDF
-//
-// NO dibuja nada directamente.
-// ======================================================
+const { jsPDF } =
+    require("jspdf");
 
 
-// Librería PDF
-const { jsPDF } = require("jspdf");
+
+const dibujarEncabezado =
+    require("./encabezadoPDF");
 
 
-// Importamos módulos creados
-const dibujarEncabezado = require("./encabezadoPDF");
-const dibujarTabla = require("./tablaPDF");
+
+const dibujarTabla =
+    require("./tablaPDF");
 
 
-// Función principal
+
 function generarPDF(reporte) {
 
-    // Crear documento
     const doc = new jsPDF();
 
 
-    // ==================================================
-    // PASO 1: ENCABEZADO
-    // ==================================================
-
-    dibujarEncabezado(doc, reporte);
-
 
     // ==================================================
-    // PASO 2: TABLA
+    // ENCABEZADO
     // ==================================================
 
-    dibujarTabla(doc, reporte);
+    const posicionFinalEncabezado =
+
+        dibujarEncabezado(
+
+            doc,
+
+            reporte
+
+        );
+
+
+
+    // ==================================================
+    // TABLAS
+    // ==================================================
+
+    dibujarTabla(
+
+        doc,
+
+        reporte,
+
+        posicionFinalEncabezado
+
+    );
+
 
 
     // ==================================================
     // GUARDAR PDF
     // ==================================================
 
-    doc.save("reporte.pdf");
+    doc.save(
 
+        "reporte.pdf"
 
-    console.log("PDF generado correctamente");
+    );
+
 }
 
 
-// Exportar
-module.exports = generarPDF;
+
+module.exports =
+    generarPDF;

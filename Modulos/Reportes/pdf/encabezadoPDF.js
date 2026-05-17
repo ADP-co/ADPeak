@@ -1,43 +1,328 @@
 // ======================================================
-// ENCABEZADO INSTITUCIONAL DEL PDF
-// ------------------------------------------------------
-// Este módulo se encarga únicamente de dibujar
-// el encabezado del documento PDF.
-//
-// Responsabilidad:
-// - Título del reporte
-// - Información básica (indicador, plantel, fecha)
-//
-// No debe contener lógica de tablas ni datos complejos.
+// IMPORTAR UTILIDADES
 // ======================================================
 
+const cargarImagenBase64 =
+    require("../utilidades/cargarImg");
 
-// Exportamos una función reutilizable
+
+
+// ======================================================
+// RUTA LOGO
+// ======================================================
+
+const rutaLogo =
+    "Modulos/Reportes/Public/Imagenes/MediaSuperior-11.png";
+
+
+
+// ======================================================
+// CARGAR LOGO
+// ======================================================
+
+const logoBase64 =
+    cargarImagenBase64(rutaLogo);
+
+
+
+// ======================================================
+// FUNCIÓN PRINCIPAL
+// ======================================================
+
 function dibujarEncabezado(doc, reporte) {
 
-    // ==================================================
-    // TÍTULO PRINCIPAL DEL REPORTE
-    // ==================================================
+    // Posición vertical dinámica
+    let posicionY = 18;
 
-    doc.setFontSize(18); // tamaño grande para título
-
-    doc.text(reporte.titulo, 20, 20); // posición fija en PDF
 
 
     // ==================================================
-    // INFORMACIÓN GENERAL
+    // LOGO
     // ==================================================
 
-    doc.setFontSize(12); // tamaño estándar institucional
+    doc.addImage(
 
-    doc.text(`Indicador: ${reporte.indicador}`, 20, 35);
+        logoBase64,
 
-    doc.text(`Plantel: ${reporte.plantel}`, 20, 45);
+        "PNG",
 
-    doc.text(`Fecha: ${reporte.fechaGeneracion}`, 20, 55);
+        15,
+
+        10,
+
+        28,
+
+        13
+
+    );
+
+
+
+    // ==================================================
+    // SISTEMA
+    // ==================================================
+
+    doc.setFont(
+
+        "helvetica",
+
+        "bold"
+
+    );
+
+    doc.setFontSize(20);
+
+    doc.setTextColor(
+
+        0,
+
+        90,
+
+        70
+
+    );
+
+    doc.text(
+
+        reporte.sistema,
+
+        55,
+
+        posicionY
+
+    );
+
+
+
+    // ==================================================
+    // TÍTULO REPORTE DINÁMICO
+    // ==================================================
+
+    posicionY += 12;
+
+    doc.setTextColor(
+
+        0,
+
+        0,
+
+        0
+
+    );
+
+    doc.setFont(
+
+        "helvetica",
+
+        "normal"
+
+    );
+
+    doc.setFontSize(15);
+
+
+
+    const tituloReporte =
+
+        `Reporte de ${reporte.identidadReporte.tipo} - ${reporte.identidadReporte.nombre}`;
+
+
+
+    doc.text(
+
+        tituloReporte,
+
+        55,
+
+        posicionY
+
+    );
+
+
+
+    // ==================================================
+    // METADATA GENERAL
+    // ==================================================
+
+    posicionY += 14;
+
+    doc.setFontSize(11);
+
+
+
+    // ==================================================
+    // LISTA INDICADORES
+    // ==================================================
+
+    doc.setFont(
+
+        "helvetica",
+
+        "bold"
+
+    );
+
+
+
+    doc.text(
+
+        "Indicadores incluidos:",
+
+        15,
+
+        posicionY
+
+    );
+
+
+
+    // ==================================================
+    // DATOS DERECHA
+    // ==================================================
+
+    doc.setFont(
+
+        "helvetica",
+
+        "normal"
+
+    );
+
+
+
+    doc.text(
+
+        `${reporte.identidadReporte.tipo}: ${reporte.identidadReporte.nombre}`,
+
+        130,
+
+        posicionY
+
+    );
+
+
+
+    doc.text(
+
+        `Periodo: ${reporte.periodo}`,
+
+        130,
+
+        posicionY + 8
+
+    );
+
+
+
+    doc.text(
+
+        `Fecha: ${reporte.fechaGeneracion}`,
+
+        130,
+
+        posicionY + 16
+
+    );
+
+
+
+    // ==================================================
+    // RECORRER INDICADORES
+    // ==================================================
+
+    posicionY += 8;
+
+
+
+    reporte.indicadores.forEach(
+
+        (indicador) => {
+
+            const indicadorPartido =
+
+                doc.splitTextToSize(
+
+                    `• ${indicador.nombre}`,
+
+                    95
+
+                );
+
+
+
+            doc.text(
+
+                indicadorPartido,
+
+                20,
+
+                posicionY
+
+            );
+
+
+
+            posicionY +=
+
+                indicadorPartido.length * 6;
+
+        }
+
+    );
+
+
+
+    // ==================================================
+    // ESPACIO FINAL
+    // ==================================================
+
+    posicionY += 6;
+
+
+
+    // ==================================================
+    // LÍNEA DIVISORIA
+    // ==================================================
+
+    doc.setDrawColor(
+
+        180,
+
+        180,
+
+        180
+
+    );
+
+
+
+    doc.line(
+
+        15,
+
+        posicionY,
+
+        195,
+
+        posicionY
+
+    );
+
+
+
+    // ==================================================
+    // RETORNAR ALTURA FINAL
+    // ==================================================
+
+    return posicionY + 8;
 
 }
 
 
-// Exportación del módulo
-module.exports = dibujarEncabezado;
+
+// ======================================================
+// EXPORTAR
+// ======================================================
+
+module.exports =
+    dibujarEncabezado;
