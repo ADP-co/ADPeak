@@ -1,20 +1,11 @@
-// ======================================================
-// IMPORTAR LIBRERÍAS
-// ======================================================
-
 const autoTable =
     require("jspdf-autotable").default;
-
-
-
-// ======================================================
-// IMPORTAR UTILIDADES
-// ======================================================
 
 const obtenerColumnasDinamicas =
     require("../utilidades/columnasDinamicas");
 
-
+const verificarSaltoPagina =
+    require("../utilidades/verificarSaltoPagina");
 
 const {
 
@@ -23,12 +14,8 @@ const {
 } = require("../utilidades/formateadores");
 
 
-
-// ======================================================
-// FUNCIÓN PRINCIPAL
-// ======================================================
-
 function dibujarTabla(
+
 
     doc,
 
@@ -142,7 +129,39 @@ function dibujarTabla(
 
 
             // ==========================================
-            // TÍTULO INDICADOR
+            // FONDO TÍTULO INDICADOR
+            // ==========================================
+
+            doc.setFillColor(
+
+                240,
+
+                240,
+
+                240
+
+            );
+
+
+
+            doc.rect(
+
+                15,
+
+                posicionY - 5,
+
+                180,
+
+                10,
+
+                "F"
+
+            );
+
+
+
+            // ==========================================
+            // TEXTO INDICADOR
             // ==========================================
 
             doc.setFont(
@@ -159,19 +178,51 @@ function dibujarTabla(
 
 
 
-            doc.text(
+            doc.setTextColor(
 
-                indicador.nombre,
+                0,
 
-                15,
+                90,
 
-                posicionY
+                70
 
             );
 
 
 
-            posicionY += 8;
+            doc.text(
+
+                indicador.nombre,
+
+                20,
+
+                posicionY + 1
+
+            );
+
+
+
+            // ==========================================
+            // RESTAURAR COLOR TEXTO
+            // ==========================================
+
+            doc.setTextColor(
+
+                0,
+
+                0,
+
+                0
+
+            );
+
+
+
+            // ==========================================
+            // ESPACIO DESPUÉS TÍTULO
+            // ==========================================
+
+            posicionY += 12;
 
 
 
@@ -256,9 +307,101 @@ function dibujarTabla(
                     indicador.datos
 
                 );
+            // ==========================================
+            // ALTURA TÍTULO
+            // ==========================================
+
+            const alturaTitulo = 15;
 
 
 
+            // ==========================================
+            // ALTURA DESCRIPCIÓN
+            // ==========================================
+
+            let alturaDescripcion = 0;
+
+
+
+            if (indicador.descripcion) {
+
+                const descripcionPartida =
+
+                    doc.splitTextToSize(
+
+                        indicador.descripcion,
+
+                        170
+
+                    );
+
+
+
+                alturaDescripcion =
+
+                    descripcionPartida.length * 5;
+
+            }
+
+
+
+            // ==========================================
+            // ALTURA TABLA
+            // ==========================================
+
+            const alturaTabla =
+
+                filas.length * 10 + 30;
+
+
+
+            // ==========================================
+            // ESPACIO TOTAL NECESARIO
+            // ==========================================
+
+            const espacioEstimado =
+
+                alturaTitulo +
+
+                alturaDescripcion +
+
+                alturaTabla;
+            // ==========================================
+            // VERIFICAR SALTO DE PÁGINA
+            // ==========================================
+
+            // ==========================================
+            // DEFINIR SI BLOQUE ES GRANDE
+            // ==========================================
+
+            const bloqueGrande =
+
+                espacioEstimado > 120;
+
+
+
+            // ==========================================
+            // SOLO FORZAR SALTO
+            // EN BLOQUES PEQUEÑOS
+            // ==========================================
+
+            if (!bloqueGrande) {
+
+                posicionY =
+
+                    verificarSaltoPagina(
+
+                        doc,
+
+                        posicionY,
+
+                        espacioEstimado,
+
+                        reporte
+
+                    );
+
+            }
             // ==========================================
             // CREAR TABLA
             // ==========================================
@@ -310,6 +453,9 @@ function dibujarTabla(
             posicionY =
 
                 doc.lastAutoTable.finalY + 15;
+
+
+
 
         }
 

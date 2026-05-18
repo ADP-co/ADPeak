@@ -13,6 +13,12 @@ const dibujarTabla =
 
 
 
+const dibujarEncabezadoSecundario =
+    require("./encabezadoSecundario");
+
+const verificarSaltoPagina =
+    require("../utilidades/verificarSaltoPagina");
+
 function generarPDF(reporte) {
 
     const doc = new jsPDF();
