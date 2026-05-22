@@ -1,5 +1,17 @@
+// ======================================================
+// IMPORTAR AUTOTABLE
+// ------------------------------------------------------
+// Esta librería permite crear tablas dinámicas
+// dentro del PDF.
+// ======================================================
+
 const autoTable =
     require("jspdf-autotable").default;
+
+
+// ======================================================
+// IMPORTAR UTILIDADES
+// ======================================================
 
 const obtenerColumnasDinamicas =
     require("../utilidades/columnasDinamicas");
@@ -14,8 +26,18 @@ const {
 } = require("../utilidades/formateadores");
 
 
-function dibujarTabla(
 
+// ======================================================
+// FUNCIÓN PRINCIPAL
+// ------------------------------------------------------
+// Esta función se encarga de:
+// - recorrer indicadores
+// - generar tablas dinámicas
+// - controlar saltos de página
+// - aplicar estilos institucionales
+// ======================================================
+
+function dibujarTabla(
 
     doc,
 
@@ -25,13 +47,15 @@ function dibujarTabla(
 
 ) {
 
-    // Controla la altura dinámica
+    // ==================================================
+    // CONTROLAR POSICIÓN VERTICAL
+    // ==================================================
+
     let posicionY = posicionInicialY;
 
 
-
     // ==================================================
-    // VALIDAR INDICADORES
+    // VALIDAR SI EXISTEN INDICADORES
     // ==================================================
 
     if (
@@ -50,11 +74,7 @@ function dibujarTabla(
 
         );
 
-
-
         doc.setFontSize(11);
-
-
 
         doc.text(
 
@@ -66,16 +86,13 @@ function dibujarTabla(
 
         );
 
-
-
         return;
 
     }
 
 
-
     // ==================================================
-    // RECORRER INDICADORES
+    // RECORRER TODOS LOS INDICADORES
     // ==================================================
 
     reporte.indicadores.forEach(
@@ -83,14 +100,54 @@ function dibujarTabla(
         (indicador) => {
 
             // ==========================================
-            // VALIDAR DATOS
+            // OBTENER NOMBRE DINÁMICO
+            // ------------------------------------------
+            // Se valida por si algunos datos vienen
+            // con mayúsculas o minúsculas.
+            // ==========================================
+
+            const nombreIndicador =
+
+                indicador.nombre ||
+
+                indicador.Nombre ||
+
+                "Sin nombre";
+
+
+            // ==========================================
+            // OBTENER DESCRIPCIÓN DINÁMICA
+            // ==========================================
+
+            const descripcionIndicador =
+
+                indicador.descripcion ||
+
+                indicador.Descripcion ||
+
+                "";
+
+
+            // ==========================================
+            // OBTENER DATOS DINÁMICOS
+            // ==========================================
+
+            const datosIndicador =
+
+                indicador.datos ||
+
+                indicador.Datos ||
+
+                [];
+
+
+            // ==========================================
+            // VALIDAR SI EXISTEN DATOS
             // ==========================================
 
             if (
 
-                !indicador.datos ||
-
-                indicador.datos.length === 0
+                datosIndicador.length === 0
 
             ) {
 
@@ -102,23 +159,17 @@ function dibujarTabla(
 
                 );
 
-
-
                 doc.setFontSize(10);
-
-
 
                 doc.text(
 
-                    `No hay datos disponibles para ${indicador.nombre}.`,
+                    `No hay datos disponibles para ${nombreIndicador}.`,
 
                     15,
 
                     posicionY
 
                 );
-
-
 
                 posicionY += 15;
 
@@ -127,237 +178,51 @@ function dibujarTabla(
             }
 
 
-
             // ==========================================
-            // FONDO TÍTULO INDICADOR
-            // ==========================================
-
-            doc.setFillColor(
-
-                240,
-
-                240,
-
-                240
-
-            );
-
-
-
-            doc.rect(
-
-                15,
-
-                posicionY - 5,
-
-                180,
-
-                10,
-
-                "F"
-
-            );
-
-
-
-            // ==========================================
-            // TEXTO INDICADOR
-            // ==========================================
-
-            doc.setFont(
-
-                "helvetica",
-
-                "bold"
-
-            );
-
-
-
-            doc.setFontSize(13);
-
-
-
-            doc.setTextColor(
-
-                0,
-
-                90,
-
-                70
-
-            );
-
-
-
-            doc.text(
-
-                indicador.nombre,
-
-                20,
-
-                posicionY + 1
-
-            );
-
-
-
-            // ==========================================
-            // RESTAURAR COLOR TEXTO
-            // ==========================================
-
-            doc.setTextColor(
-
-                0,
-
-                0,
-
-                0
-
-            );
-
-
-
-            // ==========================================
-            // ESPACIO DESPUÉS TÍTULO
-            // ==========================================
-
-            posicionY += 12;
-
-
-
-            // ==========================================
-            // DESCRIPCIÓN
-            // ==========================================
-
-            if (
-
-                indicador.descripcion
-
-            ) {
-
-                doc.setFont(
-
-                    "helvetica",
-
-                    "normal"
-
-                );
-
-
-
-                doc.setFontSize(10);
-
-
-
-                const descripcionPartida =
-
-                    doc.splitTextToSize(
-
-                        indicador.descripcion,
-
-                        170
-
-                    );
-
-
-
-                doc.text(
-
-                    descripcionPartida,
-
-                    15,
-
-                    posicionY
-
-                );
-
-
-
-                posicionY +=
-
-                    descripcionPartida.length * 5;
-
-            }
-
-
-
-            // ==========================================
-            // COLUMNAS DINÁMICAS
+            // GENERAR COLUMNAS DINÁMICAS
             // ==========================================
 
             const columnas =
 
                 obtenerColumnasDinamicas(
 
-                    indicador.datos
+                    datosIndicador
 
                 );
 
 
-
             // ==========================================
-            // FILAS DINÁMICAS
+            // GENERAR FILAS DINÁMICAS
             // ==========================================
 
             const filas =
 
                 convertirObjetosAFilas(
 
-                    indicador.datos
+                    datosIndicador
 
                 );
+
+
             // ==========================================
-            // ALTURA TÍTULO
+            // CALCULAR ALTURA ESTIMADA
+            // ------------------------------------------
+            // Esto ayuda a controlar mejor
+            // los saltos de página.
             // ==========================================
 
             const alturaTitulo = 15;
 
+            const alturaDescripcion =
 
-
-            // ==========================================
-            // ALTURA DESCRIPCIÓN
-            // ==========================================
-
-            let alturaDescripcion = 0;
-
-
-
-            if (indicador.descripcion) {
-
-                const descripcionPartida =
-
-                    doc.splitTextToSize(
-
-                        indicador.descripcion,
-
-                        170
-
-                    );
-
-
-
-                alturaDescripcion =
-
-                    descripcionPartida.length * 5;
-
-            }
-
-
-
-            // ==========================================
-            // ALTURA TABLA
-            // ==========================================
+                descripcionIndicador
+                    ? 10
+                    : 0;
 
             const alturaTabla =
 
-                filas.length * 10 + 30;
+                filas.length * 10 + 35;
 
-
-
-            // ==========================================
-            // ESPACIO TOTAL NECESARIO
-            // ==========================================
 
             const espacioEstimado =
 
@@ -366,18 +231,15 @@ function dibujarTabla(
                 alturaDescripcion +
 
                 alturaTabla;
-            // ==========================================
-            // VERIFICAR SALTO DE PÁGINA
-            // ==========================================
+
 
             // ==========================================
-            // DEFINIR SI BLOQUE ES GRANDE
+            // VALIDAR SI EL BLOQUE CABE EN LA PÁGINA
             // ==========================================
 
             const bloqueGrande =
 
                 espacioEstimado > 120;
-
 
 
             // ==========================================
@@ -402,61 +264,378 @@ function dibujarTabla(
                     );
 
             }
+
+
             // ==========================================
-            // CREAR TABLA
+            // FONDO DEL TÍTULO
+            // ==========================================
+
+            doc.setFillColor(
+
+                240,
+
+                240,
+
+                240
+
+            );
+
+            doc.rect(
+
+                15,
+
+                posicionY - 5,
+
+                180,
+
+                10,
+
+                "F"
+
+            );
+
+
+            // ==========================================
+            // TÍTULO DEL INDICADOR
+            // ==========================================
+
+            doc.setFont(
+
+                "helvetica",
+
+                "bold"
+
+            );
+
+            doc.setFontSize(13);
+
+
+            // ==========================================
+            // COLOR INSTITUCIONAL
+            // ------------------------------------------
+            // Se usa el verde institucional
+            // de la universidad.
+            // ==========================================
+
+            doc.setTextColor(
+
+                82,
+
+                118,
+
+                48
+
+            );
+
+
+            doc.text(
+
+                nombreIndicador,
+
+                20,
+
+                posicionY + 1
+
+            );
+
+
+            // ==========================================
+            // RESTAURAR COLOR NEGRO
+            // ==========================================
+
+            doc.setTextColor(
+
+                0,
+
+                0,
+
+                0
+
+            );
+
+
+            // ==========================================
+            // ESPACIO DESPUÉS DEL TÍTULO
+            // ==========================================
+
+            posicionY += 12;
+
+
+            // ==========================================
+            // DESCRIPCIÓN DEL INDICADOR
+            // ==========================================
+
+            if (
+
+                descripcionIndicador
+
+            ) {
+
+                doc.setFont(
+
+                    "helvetica",
+
+                    "normal"
+
+                );
+
+                doc.setFontSize(10);
+
+
+                // ======================================
+                // DIVIDIR TEXTO SI ES MUY LARGO
+                // ======================================
+
+                const descripcionPartida =
+
+                    doc.splitTextToSize(
+
+                        descripcionIndicador,
+
+                        170
+
+                    );
+
+
+                doc.text(
+
+                    descripcionPartida,
+
+                    15,
+
+                    posicionY
+
+                );
+
+
+                posicionY +=
+
+                    descripcionPartida.length * 5;
+
+            }
+
+
+            // ==========================================
+            // CREAR TABLA DINÁMICA
             // ==========================================
 
             autoTable(doc, {
 
-                head: [columnas],
+                // ======================================
+                // COLUMNAS DINÁMICAS
+                // ======================================
 
-                body: filas,
+                columns: columnas,
 
 
+                // ======================================
+                // DATOS DINÁMICOS
+                // ======================================
+
+                body: datosIndicador,
+
+
+                // ======================================
+                // POSICIÓN INICIAL
+                // ======================================
 
                 startY:
 
                     posicionY + 4,
 
 
+                // ======================================
+                // ANCHO AUTOMÁTICO TABLA
+                // ======================================
+
+                tableWidth: "auto",
+
+
+                // ======================================
+                // ESTILOS GENERALES
+                // ======================================
 
                 styles: {
 
-                    fontSize: 10
+                    fontSize: 9,
+
+                    cellPadding: 3,
+
+                    overflow: "linebreak",
+
+                    valign: "middle",
+
+                    textColor: [
+
+                        40,
+
+                        40,
+
+                        40
+
+                    ],
+
+                    lineColor: [
+
+                        220,
+
+                        220,
+
+                        220
+
+                    ],
+
+                    lineWidth: 0.2
 
                 },
 
 
+                // ======================================
+                // ESTILO ENCABEZADOS
+                // ======================================
 
                 headStyles: {
 
                     fillColor: [
 
-                        0,
+                        82,
 
-                        90,
+                        118,
 
-                        70
+                        48
+
+                    ],
+
+                    textColor: [
+
+                        255,
+
+                        255,
+
+                        255
+
+                    ],
+
+                    fontStyle: "bold",
+
+                    halign: "center"
+
+                },
+
+
+                // ======================================
+                // FILAS ALTERNADAS
+                // ======================================
+
+                alternateRowStyles: {
+
+                    fillColor: [
+
+                        248,
+
+                        248,
+
+                        248
 
                     ]
+
+                },
+
+
+                // ======================================
+                // PERSONALIZAR CELDAS
+                // --------------------------------------
+                // Detecta automáticamente:
+                // - números
+                // - porcentajes
+                // - fechas
+                //
+                // y los centra.
+                // ======================================
+
+                didParseCell: function (data) {
+
+                    if (
+
+                        data.section === "body"
+
+                    ) {
+
+                        const valor =
+
+                            String(
+
+                                data.cell.raw
+
+                            );
+
+
+                        // ==============================
+                        // DETECTAR NÚMEROS
+                        // ==============================
+
+                        const esNumero =
+
+                            !isNaN(valor);
+
+
+                        // ==============================
+                        // DETECTAR PORCENTAJES
+                        // ==============================
+
+                        const esPorcentaje =
+
+                            valor.includes("%");
+
+
+                        // ==============================
+                        // DETECTAR FECHAS
+                        // ==============================
+
+                        const esFecha =
+
+                            valor.includes("/");
+
+
+                        // ==============================
+                        // CENTRAR AUTOMÁTICAMENTE
+                        // ==============================
+
+                        if (
+
+                            esNumero ||
+
+                            esPorcentaje ||
+
+                            esFecha
+
+                        ) {
+
+                            data.cell.styles.halign =
+
+                                "center";
+
+                        }
+
+                    }
 
                 }
 
             });
 
 
-
             // ==========================================
-            // ACTUALIZAR ALTURA
+            // ACTUALIZAR POSICIÓN FINAL
+            // ------------------------------------------
+            // Esto permite que el siguiente indicador
+            // se dibuje debajo de la tabla actual.
             // ==========================================
 
             posicionY =
 
-                doc.lastAutoTable.finalY + 15;
+                doc.lastAutoTable.finalY + 10;
 
-
-
-
+         
         }
 
     );
@@ -465,8 +644,9 @@ function dibujarTabla(
 
 
 
+
 // ======================================================
-// EXPORTAR
+// EXPORTAR FUNCIÓN
 // ======================================================
 
 module.exports =

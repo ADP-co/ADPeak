@@ -16,11 +16,33 @@
 // FUNCIÓN PRINCIPAL
 // ======================================================
 
-function obtenerColumnasDinamicas(datos) {
+// ======================================================
+// FORMATEAR TÍTULOS
+// ======================================================
 
-    // ==================================================
-    // VALIDAR SI EXISTEN DATOS
-    // ==================================================
+function formatearTitulo(texto) {
+
+    return texto
+
+        .replace(/_/g, " ")
+
+        .replace(
+
+            /\b\w/g,
+
+            letra => letra.toUpperCase()
+
+        );
+
+}
+
+
+
+// ======================================================
+// FUNCIÓN PRINCIPAL
+// ======================================================
+
+function obtenerColumnasDinamicas(datos) {
 
     if (!datos || datos.length === 0) {
 
@@ -29,34 +51,45 @@ function obtenerColumnasDinamicas(datos) {
     }
 
 
-    // ==================================================
-    // OBTENER PRIMER OBJETO
-    // --------------------------------------------------
-    // Usamos el primer registro para detectar
-    // las propiedades disponibles.
-    // ==================================================
 
     const primerRegistro = datos[0];
 
 
-    // ==================================================
-    // OBTENER NOMBRES DE COLUMNAS
-    // ==================================================
-
-    const columnas = Object.keys(primerRegistro);
-
 
     // ==================================================
-    // RETORNAR COLUMNAS
+    // CREAR COLUMNAS PARA AUTOTABLE
     // ==================================================
+
+    const columnas = Object.keys(
+
+        primerRegistro
+
+    ).map(
+
+        clave => ({
+
+            header:
+
+                formatearTitulo(clave),
+
+            dataKey:
+
+                clave
+
+        })
+
+    );
+
+
 
     return columnas;
 
 }
 
 
+
 // ======================================================
-// EXPORTAR FUNCIÓN
+// EXPORTAR
 // ======================================================
 
 module.exports = obtenerColumnasDinamicas;

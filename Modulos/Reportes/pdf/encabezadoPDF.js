@@ -1,23 +1,42 @@
 // ======================================================
 // IMPORTAR UTILIDADES
+// ------------------------------------------------------
+// Esta utilidad convierte el logo a Base64 para poder
+// insertarlo directamente en el PDF.
 // ======================================================
 
 const cargarImagenBase64 =
     require("../utilidades/cargarImg");
 
 
+// ======================================================
+// IMPORTAR FECHA AUTOMÁTICA
+// ------------------------------------------------------
+// Esta utilidad genera automáticamente la fecha actual
+// del sistema para mostrarla dentro del reporte.
+// ======================================================
+
+const {
+
+    obtenerFechaActual
+
+} = require("../utilidades/fechas");
+
 
 // ======================================================
-// RUTA LOGO
+// RUTA DEL LOGO
+// ------------------------------------------------------
+// Se utiliza el logo institucional del sistema.
 // ======================================================
 
 const rutaLogo =
     "Modulos/Reportes/Public/Imagenes/MediaSuperior-11.png";
 
 
-
 // ======================================================
-// CARGAR LOGO
+// CARGAR LOGO EN BASE64
+// ------------------------------------------------------
+// Esto permite insertar la imagen dentro del PDF.
 // ======================================================
 
 const logoBase64 =
@@ -27,17 +46,37 @@ const logoBase64 =
 
 // ======================================================
 // FUNCIÓN PRINCIPAL
+// ------------------------------------------------------
+// Esta función se encarga de dibujar todo el encabezado
+// superior del PDF.
+//
+// Incluye:
+//
+// - Logo
+// - Nombre del sistema
+// - Título dinámico del reporte
+// - Información general
+// - Lista de indicadores
+//
+// Además todo se adapta automáticamente dependiendo
+// de la longitud del texto.
 // ======================================================
 
 function dibujarEncabezado(doc, reporte) {
 
-    // Posición vertical dinámica
+    // ==================================================
+    // POSICIÓN INICIAL VERTICAL
+    // --------------------------------------------------
+    // Esta variable controla en qué altura se va
+    // dibujando el contenido.
+    // ==================================================
+
     let posicionY = 18;
 
 
 
     // ==================================================
-    // LOGO
+    // INSERTAR LOGO
     // ==================================================
 
     doc.addImage(
@@ -59,7 +98,7 @@ function dibujarEncabezado(doc, reporte) {
 
 
     // ==================================================
-    // SISTEMA
+    // NOMBRE DEL SISTEMA
     // ==================================================
 
     doc.setFont(
@@ -70,17 +109,24 @@ function dibujarEncabezado(doc, reporte) {
 
     );
 
+
+
     doc.setFontSize(20);
 
+
+
+    // Color gris institucional suave
     doc.setTextColor(
 
-        0,
+        78,
 
-        90,
+        77,
 
-        70
+        77
 
     );
+
+
 
     doc.text(
 
@@ -95,11 +141,31 @@ function dibujarEncabezado(doc, reporte) {
 
 
     // ==================================================
-    // TÍTULO REPORTE DINÁMICO
+    // TÍTULO DEL REPORTE
+    // --------------------------------------------------
+    // Aquí se genera dinámicamente el nombre del
+    // reporte dependiendo del responsable o tipo.
     // ==================================================
 
     posicionY += 12;
 
+
+
+    doc.setFont(
+
+        "helvetica",
+
+        "normal"
+
+    );
+
+
+
+    doc.setFontSize(14);
+
+
+
+    // Restaurar color negro
     doc.setTextColor(
 
         0,
@@ -110,27 +176,44 @@ function dibujarEncabezado(doc, reporte) {
 
     );
 
-    doc.setFont(
-
-        "helvetica",
-
-        "normal"
-
-    );
-
-    doc.setFontSize(15);
 
 
+    // ==================================================
+    // TEXTO DINÁMICO
+    // ==================================================
 
-    const tituloReporte =
+    const identidadTexto =
 
         `Reporte de ${reporte.identidadReporte.tipo} - ${reporte.identidadReporte.nombre}`;
 
 
 
+    // ==================================================
+    // DIVIDIR TEXTO AUTOMÁTICAMENTE
+    // --------------------------------------------------
+    // Si el nombre es muy largo se baja automáticamente
+    // a otra línea para evitar salirse del margen.
+    // ==================================================
+
+    const identidadPartida =
+
+        doc.splitTextToSize(
+
+            identidadTexto,
+
+            90
+
+        );
+
+
+
+    // ==================================================
+    // DIBUJAR TEXTO DEL REPORTE
+    // ==================================================
+
     doc.text(
 
-        tituloReporte,
+        identidadPartida,
 
         55,
 
@@ -141,17 +224,36 @@ function dibujarEncabezado(doc, reporte) {
 
 
     // ==================================================
-    // METADATA GENERAL
+    // CALCULAR ALTURA DINÁMICA
+    // --------------------------------------------------
+    // Dependiendo de cuántas líneas ocupe el título,
+    // se ajusta automáticamente el resto del contenido.
     // ==================================================
 
-    posicionY += 14;
+    const alturaIdentidad =
+
+        identidadPartida.length * 6;
+
+
+
+    // ==================================================
+    // ACTUALIZAR POSICIÓN
+    // ==================================================
+
+    posicionY += alturaIdentidad + 9;
+
+
+
+    // ==================================================
+    // CONFIGURACIÓN GENERAL DEL TEXTO
+    // ==================================================
 
     doc.setFontSize(11);
 
 
 
     // ==================================================
-    // LISTA INDICADORES
+    // TÍTULO DE INDICADORES
     // ==================================================
 
     doc.setFont(
@@ -166,7 +268,7 @@ function dibujarEncabezado(doc, reporte) {
 
     doc.text(
 
-        "Indicadores incluidos:",
+        "Indicadores evaluados",
 
         15,
 
@@ -177,8 +279,46 @@ function dibujarEncabezado(doc, reporte) {
 
 
     // ==================================================
-    // DATOS DERECHA
+    // INFORMACIÓN GENERAL DERECHA
+    // --------------------------------------------------
+    // Esta parte muestra:
+    //
+    // - Periodo
+    // - Fecha
+    //
+    // Se acomoda dinámicamente para evitar que
+    // los textos se encimen.
     // ==================================================
+
+    let metadataY = posicionY;
+
+
+
+    // ==================================================
+    // PERIODO
+    // ==================================================
+
+    doc.setFont(
+
+        "helvetica",
+
+        "bold"
+
+    );
+
+
+
+    doc.text(
+
+        "Periodo:",
+
+        125,
+
+        metadataY
+
+    );
+
+
 
     doc.setFont(
 
@@ -190,63 +330,170 @@ function dibujarEncabezado(doc, reporte) {
 
 
 
-    doc.text(
+    const periodoPartido =
 
-        `${reporte.identidadReporte.tipo}: ${reporte.identidadReporte.nombre}`,
+        doc.splitTextToSize(
 
-        130,
+            reporte.periodo,
 
-        posicionY
+            42
 
-    );
-
-
-
-    doc.text(
-
-        `Periodo: ${reporte.periodo}`,
-
-        130,
-
-        posicionY + 8
-
-    );
+        );
 
 
 
     doc.text(
 
-        `Fecha: ${reporte.fechaGeneracion}`,
+        periodoPartido,
 
-        130,
+        150,
 
-        posicionY + 16
+        metadataY
 
     );
+
+
+
+    // Ajustar altura automática
+    metadataY +=
+
+        periodoPartido.length * 5 + 4;
 
 
 
     // ==================================================
-    // RECORRER INDICADORES
+    // FECHA AUTOMÁTICA
+    // --------------------------------------------------
+    // La fecha se genera automáticamente utilizando
+    // la utilidad de fechas del sistema.
+    // ==================================================
+
+    doc.setFont(
+
+        "helvetica",
+
+        "bold"
+
+    );
+
+
+
+    doc.text(
+
+        "Fecha:",
+
+        125,
+
+        metadataY
+
+    );
+
+
+
+    doc.setFont(
+
+        "helvetica",
+
+        "normal"
+
+    );
+
+
+
+    const fechaPartida =
+
+        doc.splitTextToSize(
+
+            obtenerFechaActual(),
+
+            42
+
+        );
+
+
+
+    doc.text(
+
+        fechaPartida,
+
+        150,
+
+        metadataY
+
+    );
+
+
+
+    // Ajustar altura automática
+    metadataY +=
+
+        fechaPartida.length * 5 + 4;
+
+
+
+    // ==================================================
+    // ESPACIO DESPUÉS DEL TÍTULO
     // ==================================================
 
     posicionY += 8;
 
 
 
+    // ==================================================
+    // LISTA DE INDICADORES
+    // --------------------------------------------------
+    // Aquí se recorren todos los indicadores incluidos
+    // dentro del reporte.
+    // ==================================================
+
     reporte.indicadores.forEach(
 
         (indicador) => {
+
+            // ==========================================
+            // VALIDAR NOMBRE DEL INDICADOR
+            // --------------------------------------------------
+            // Se valida por seguridad porque algunos datos
+            // vienen con mayúsculas y otros con minúsculas.
+            // ==========================================
+
+            const nombreIndicador =
+
+                indicador.nombre ||
+
+                indicador.Nombre ||
+
+                "Sin nombre";
+
+
+
+            // ==========================================
+            // DIVIDIR TEXTO SI ES LARGO
+            // ==========================================
 
             const indicadorPartido =
 
                 doc.splitTextToSize(
 
-                    `• ${indicador.nombre}`,
+                    `• ${nombreIndicador}`,
 
                     95
 
                 );
+
+
+
+            // ==========================================
+            // DIBUJAR TEXTO
+            // ==========================================
+
+            doc.setFont(
+
+                "helvetica",
+
+                "normal"
+
+            );
 
 
 
@@ -261,6 +508,10 @@ function dibujarEncabezado(doc, reporte) {
             );
 
 
+
+            // ==========================================
+            // AJUSTAR POSICIÓN DINÁMICAMENTE
+            // ==========================================
 
             posicionY +=
 
@@ -282,15 +533,18 @@ function dibujarEncabezado(doc, reporte) {
 
     // ==================================================
     // LÍNEA DIVISORIA
+    // --------------------------------------------------
+    // Se utiliza para separar visualmente el encabezado
+    // del contenido principal del reporte.
     // ==================================================
 
     doc.setDrawColor(
 
-        180,
+        200,
 
-        180,
+        200,
 
-        180
+        200
 
     );
 
@@ -312,6 +566,9 @@ function dibujarEncabezado(doc, reporte) {
 
     // ==================================================
     // RETORNAR ALTURA FINAL
+    // --------------------------------------------------
+    // Esto permite que el siguiente módulo continúe
+    // dibujando desde la posición correcta.
     // ==================================================
 
     return posicionY + 8;
@@ -321,7 +578,7 @@ function dibujarEncabezado(doc, reporte) {
 
 
 // ======================================================
-// EXPORTAR
+// EXPORTAR FUNCIÓN
 // ======================================================
 
 module.exports =

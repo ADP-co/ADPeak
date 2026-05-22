@@ -15,7 +15,7 @@ function dibujarEncabezadoSecundario(
 
         "helvetica",
 
-        "bold"
+        "normal"
 
     );
 
