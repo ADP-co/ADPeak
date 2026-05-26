@@ -14,6 +14,28 @@
 
 
 // ======================================================
+// IMPORTAR RUTAS REPORTES
+// ======================================================
+
+const reportesRoutes =
+    require("./Modulos/Reportes/routes/reportes.routes");
+
+
+
+// ======================================================
+// USAR RUTAS
+// ======================================================
+
+app.use(
+
+    "/api/reportes",
+
+    reportesRoutes
+
+);
+
+
+// ======================================================
 // IMPORTAR REPORTE DE EJEMPLO
 // ------------------------------------------------------
 // Este archivo contiene datos simulados que representan
