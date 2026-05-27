@@ -157,6 +157,45 @@ app.get('/api/poa/bitacora', verificarAutenticacion, autorizarRoles('Admin'), (r
     });
 });
 
+// lógica de permisos para que el admin pueda modificar
+//  los permisos de otros usuarios, y que esa acción quede registrada en la bitácora con todo detalle.
+app.put('/api/usuarios/:id/permisos', verificarAutenticacion, autorizarRoles('Admin'), (req, res) => {
+    // Sacamos el ID de la URL y lo convertimos a número
+    const usuarioIdModificar = parseInt(req.params.id);
+    
+    // Sacamos los nuevos permisos que el Admin mandó en el body
+    const { rol, plantel_id } = req.body;
+
+    // Buscamos al usuario dentro del arreglo temporal
+    const usuario = usuariosPrueba.find(u => u.id === usuarioIdModificar);
+
+    if (!usuario) {
+        return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    // Actualizamos los datos (si es que el Admin los mandó)
+    if (rol) usuario.rol = rol;
+    if (plantel_id) usuario.plantel_id = plantel_id;
+
+    // guardamos todo en la bitácora a full detalle para que quede claro qué se cambió, quién lo hizo y cuándo.
+    registrarBitacora(
+        req.usuario.id, 
+        'MODIFICACION_PERMISOS', 
+        `Usuario modificado ID: ${usuario.id}`, 
+        `Nuevos permisos -> Rol: ${usuario.rol}, Plantel: ${usuario.plantel_id}`
+    );
+
+    res.json({ 
+        mensaje: 'Permisos actualizados correctamente', 
+        usuario_actualizado: {
+            id: usuario.id,
+            email: usuario.email,
+            rol: usuario.rol,
+            plantel_id: usuario.plantel_id
+        }
+    });
+});
+
 // todos los usuarios
 app.get('/api/poa/ver-datos', verificarAutenticacion, autorizarRoles('Admin', 'Responsable', 'Plantel'), (req, res) => {
     res.json({ mensaje: 'Éxito. Usuarios autenticados pueden ver esto.' });
