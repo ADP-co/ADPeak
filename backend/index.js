@@ -1,18 +1,20 @@
+require('dotenv').config();
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const { createClient } = require('redis');
 const cors = require('cors');
+const { autorizarRoles } = require('./middlewares/roleAuth');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Configuración de redis y JWT
-const SECRET_KEY = 'clave_deprueba'; // En producción, esto va en un archivo .env
+// Configuración de redis y JWT jalando desde el .env
+const SECRET_KEY = process.env.SECRET_KEY;
 
-// Aquí le paso la URL de Upstash (una base de datos Redis gestionada en la nube)
+// Aquí le paso la URL de Upstash desde el .env
 const redisClient = createClient({
-    url: 'rediss://default:gQAAAAAAAd5XAAIgcDFlYWM0MmI5NDBhNzM0OGE1YjkxZDVlMDQ1ODI1OWFiNw@optimal-aphid-122455.upstash.io:6379'
+    url: process.env.REDIS_URL
 });
 
 // Mensajes en consola para saber si nos conectamos o si hubo error
@@ -29,6 +31,15 @@ const usuariosPrueba = [
     { id: 1, email: 'admin@poa.gov', password: '123', rol: 'Admin', plantel_id: null },
     { id: 2, email: 'responsable@poa.gov', password: '123', rol: 'Responsable', plantel_id: 10 },
     { id: 3, email: 'plantel@poa.gov', password: '123', rol: 'Plantel', plantel_id: 10 }
+];
+
+// ¡esto será temporal en lo que se hace la conexión a la base de datos! 
+// Aquí simulamos algunos indicadores asociados a planteles y uno global para el admin.
+const indicadoresPrueba = [
+    { id: 101, plantel_id: 10, nombre: 'Tasa de Aprobación', valor: '85%' },
+    { id: 102, plantel_id: 10, nombre: 'Deserción Escolar', valor: '5%' },
+    { id: 103, plantel_id: 20, nombre: 'Tasa de Aprobación', valor: '90%' }, // De otro plantel
+    { id: 104, plantel_id: null, nombre: 'Presupuesto Global', valor: '$1M' } // Global del Admin
 ];
 
 // inicio de sesión (Login)
@@ -82,6 +93,7 @@ const verificarAutenticacion = async (req, res, next) => {
     }
 };
 
+//----------------------------------------------------------------------------
 // Rutas de prueba
 app.get('/api/poa/dashboard', verificarAutenticacion, (req, res) => {
     res.json({ 
@@ -89,6 +101,52 @@ app.get('/api/poa/dashboard', verificarAutenticacion, (req, res) => {
         tusDatos: req.usuario 
     });
 });
+
+// Admin
+app.delete('/api/poa/admin-only', verificarAutenticacion, autorizarRoles('Admin'), (req, res) => {
+    res.json({ mensaje: 'Éxito. Bienvenido Admin.' });
+});
+
+// Admin y resposable
+app.post('/api/poa/edicion', verificarAutenticacion, autorizarRoles('Admin', 'Responsable'), (req, res) => {
+    res.json({ mensaje: 'Éxito. Permisos de edición habilitados.' });
+});
+
+// todos los usuarios
+app.get('/api/poa/ver-datos', verificarAutenticacion, autorizarRoles('Admin', 'Responsable', 'Plantel'), (req, res) => {
+    res.json({ mensaje: 'Éxito. Usuarios autenticados pueden ver esto.' });
+});
+
+// Ruta con Segmentación de Datos 
+app.get('/api/poa/indicadores', verificarAutenticacion, (req, res) => {
+    const { rol, plantel_id } = req.usuario;
+
+    // Si es Admin, le mandamos TODOS los datos sin filtrar
+    if (rol === 'Admin') {
+        return res.json({ 
+            mensaje: 'Eres Admin, aquí tienes todos los datos del estado:', 
+            datos: indicadoresPrueba 
+        });
+    }
+
+    // Si es Plantel o Responsable, filtramos la base de datos (nuestro array) 
+    // para que SOLO vea los que coinciden con su plantel_id
+    if (rol === 'Plantel' || rol === 'Responsable') {
+        const datosFiltrados = indicadoresPrueba.filter(
+            (indicador) => indicador.plantel_id === plantel_id
+        );
+
+        return res.json({ 
+            mensaje: `Aquí tienes los datos exclusivos de tu plantel (ID: ${plantel_id}):`, 
+            datos: datosFiltrados 
+        });
+    }
+
+    // un extra por si el rol no es reconocido (aunque no debería pasar porque el middleware de autorización ya lo controla)
+    return res.status(403).json({ error: 'Rol no reconocido para esta consulta.' });
+});
+//----------------------------------------------------------------------------
+
 
 // Cierre de sesión (Logout)
 app.post('/api/auth/logout', verificarAutenticacion, async (req, res) => {
