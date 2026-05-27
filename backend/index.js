@@ -266,6 +266,61 @@ app.get('/api/indicadores/:id/responsables', verificarAutenticacion, (req, res) 
     });
 });
 
+// validaicipn del alcance de los permisos
+app.get('/api/validar-alcance/indicador/:id', verificarAutenticacion, (req, res) => {
+    const indicadorId = parseInt(req.params.id);
+    const { id: usuarioId, rol, plantel_id } = req.usuario;
+
+    // Buscamos el indicador solicitado
+    const indicador = indicadoresPrueba.find(i => i.id === indicadorId);
+
+    if (!indicador) {
+        return res.status(404).json({ error: 'Indicador no encontrado' });
+    }
+
+    let tieneAcceso = false;
+    let motivo = '';
+
+    // El Admin tiene alcance total
+    if (rol === 'Admin') {
+        tieneAcceso = true;
+        motivo = 'Acceso total validado por rol: Admin';
+    } 
+    // Alcance validado por pertenecer al mismo plantel
+    else if (indicador.plantel_id === plantel_id) {
+        tieneAcceso = true;
+        motivo = `Acceso validado por Plantel (ID: ${plantel_id})`;
+    } 
+    // Alcance validado por ser responsable explícito (Primario o Secundario)
+    else {
+        const esResponsable = responsabilidadesPrueba.some(
+            r => r.entidad_tipo === 'Indicador' && r.entidad_id === indicadorId && r.usuario_id === usuarioId
+        );
+        if (esResponsable) {
+            tieneAcceso = true;
+            motivo = 'Acceso validado por ser Responsable directo del indicador';
+        } else {
+            motivo = 'Discrepancia/Bloqueo: No tienes permisos sobre este indicador';
+        }
+    }
+
+    // Si no pasó ninguna regla, lo rechazamos
+    if (!tieneAcceso) {
+        return res.status(403).json({ 
+            acceso: false, 
+            motivo: motivo,
+            indicador_id: indicadorId
+        });
+    }
+
+    // Si tiene acceso, mostramos lo correspondiente
+    res.json({
+        acceso: true,
+        motivo: motivo,
+        datos_permitidos: indicador
+    });
+});
+
 // Cierre de sesión (Logout)
 app.post('/api/auth/logout', verificarAutenticacion, async (req, res) => {
     // Se borra la sesión de Redis. Aunque el JWT siga existiendo, ya no servirá
