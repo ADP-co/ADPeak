@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const { createClient } = require('redis');
 const cors = require('cors');
 const { autorizarRoles } = require('./middlewares/roleAuth');
+const { body, validationResult } = require('express-validator');
 
 const app = express();
 app.use(express.json());
@@ -42,8 +43,20 @@ const indicadoresPrueba = [
     { id: 104, plantel_id: null, nombre: 'Presupuesto Global', valor: '$1M' } // Global del Admin
 ];
 
-// inicio de sesión (Login)
-app.post('/api/auth/login', async (req, res) => {
+// inicio de sesión (Login) asegurado
+app.post('/api/auth/login', [
+    // Aquí están las validaciones de seguridad (Server-side validation)
+    body('email').isEmail().withMessage('Por favor ingresa un correo con formato válido (ejemplo@dominio.com)'),
+    body('password').notEmpty().withMessage('La contraseña no puede ir vacía')
+], async (req, res) => {
+    
+    // Revisamos si se encontró algún error en el req.body según nuestras validaciones. 
+    // Si es así, rebotamos la petición con un status 400 (Bad Request) y un mensaje de error.
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errores: errors.array() });
+    }
+
     const { email, password } = req.body;
 
     // Buscar al usuario
@@ -55,10 +68,9 @@ app.post('/api/auth/login', async (req, res) => {
 
     // Generar el JWT
     const payload = { id: usuario.id, rol: usuario.rol, plantel_id: usuario.plantel_id };
-    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '1h' }); // Expira en 1 hora
+    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '1h' });
 
-    // Guardar en Redis la sesión activa del usuario. Esto nos permitirá invalidar el token si el usuario cierra sesión o si queremos revocar el acceso.
-    // Guardamos la llave "sesion:<id_usuario>" con el token. EX = 3600 segundos (1 hora)
+    // Guardar en Redis la sesión activa
     await redisClient.set(`sesion:${usuario.id}`, token, { EX: 3600 });
 
     res.json({ mensaje: `Bienvenido ${usuario.rol}`, token });
