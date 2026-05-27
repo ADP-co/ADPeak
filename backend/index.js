@@ -43,6 +43,23 @@ const indicadoresPrueba = [
     { id: 104, plantel_id: null, nombre: 'Presupuesto Global', valor: '$1M' } // Global del Admin
 ];
 
+// --- por el momento se va a simular la bitácora ---
+const bitacoraPrueba = [];
+
+const registrarBitacora = (usuario_id, tipo_evento, entidad_afectada, detalles = '') => {
+    const nuevoRegistro = {
+        id: bitacoraPrueba.length + 1,
+        usuario_id: usuario_id,
+        fecha: new Date().toISOString(), // Guarda la fecha y hora exacta
+        tipo_evento: tipo_evento,
+        entidad_afectada: entidad_afectada,
+        detalles: detalles
+    };
+    bitacoraPrueba.push(nuevoRegistro);
+    console.log('📝 [BITÁCORA]', nuevoRegistro); // Lo imprimimos en consola para verlo en vivo
+};
+// --- aquí termina ---
+
 // inicio de sesión (Login) asegurado
 app.post('/api/auth/login', [
     // Aquí están las validaciones de seguridad (Server-side validation)
@@ -72,6 +89,8 @@ app.post('/api/auth/login', [
 
     // Guardar en Redis la sesión activa
     await redisClient.set(`sesion:${usuario.id}`, token, { EX: 3600 });
+
+    registrarBitacora(usuario.id, 'LOGIN', 'Sistema', `El usuario ${usuario.email} inició sesión`);
 
     res.json({ mensaje: `Bienvenido ${usuario.rol}`, token });
 });
@@ -119,9 +138,23 @@ app.delete('/api/poa/admin-only', verificarAutenticacion, autorizarRoles('Admin'
     res.json({ mensaje: 'Éxito. Bienvenido Admin.' });
 });
 
-// Admin y resposable
+// Admin y responsable (se implementó la bitácora)
 app.post('/api/poa/edicion', verificarAutenticacion, autorizarRoles('Admin', 'Responsable'), (req, res) => {
-    res.json({ mensaje: 'Éxito. Permisos de edición habilitados.' });
+    
+    // Registramos la acción crítica
+    registrarBitacora(req.usuario.id, 'CAMBIO_PERMISOS', 'Indicadores', 'Se habilitaron permisos de edición');
+    
+    res.json({ mensaje: 'Éxito. Permisos de edición habilitados y registrados en bitácora.' });
+});
+
+// el admin es el único que puede ver la bitácora completa,
+// porque ahí se registran eventos críticos como cambios de permisos, inicios de sesión, etc.
+app.get('/api/poa/bitacora', verificarAutenticacion, autorizarRoles('Admin'), (req, res) => {
+    res.json({ 
+        mensaje: 'Historial de auditoría (Audit Trail)', 
+        total_eventos: bitacoraPrueba.length,
+        datos: bitacoraPrueba 
+    });
 });
 
 // todos los usuarios
