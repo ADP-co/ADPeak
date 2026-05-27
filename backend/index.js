@@ -46,6 +46,14 @@ const indicadoresPrueba = [
 // --- por el momento se va a simular la bitácora ---
 const bitacoraPrueba = [];
 
+// --- nuevamente en simulacion se manejaran las responsabilidades ---
+// difiriendo entre primario y secundario
+const responsabilidadesPrueba = [
+    { id: 1, entidad_tipo: 'Indicador', entidad_id: 1, usuario_id: 2, tipo_responsabilidad: 'Primario' },
+    { id: 2, entidad_tipo: 'Indicador', entidad_id: 1, usuario_id: 1, tipo_responsabilidad: 'Secundario' },
+    { id: 3, entidad_tipo: 'Indicador', entidad_id: 2, usuario_id: 2, tipo_responsabilidad: 'Primario' }
+];
+
 const registrarBitacora = (usuario_id, tipo_evento, entidad_afectada, detalles = '') => {
     const nuevoRegistro = {
         id: bitacoraPrueba.length + 1,
@@ -231,6 +239,32 @@ app.get('/api/poa/indicadores', verificarAutenticacion, (req, res) => {
 });
 //----------------------------------------------------------------------------
 
+// Consultar a los responsables de un indicador específico
+app.get('/api/indicadores/:id/responsables', verificarAutenticacion, (req, res) => {
+    const indicadorId = parseInt(req.params.id);
+
+    // se busca quienres son los responsables de este indicador en la tabla de responsabilidades simulada
+    const asignaciones = responsabilidadesPrueba.filter(
+        r => r.entidad_id === indicadorId && r.entidad_tipo === 'Indicador'
+    );
+
+    // se cruzan con la tabla de usuarios para obtener los detalles de cada responsable (email, rol, etc.)
+    const responsables = asignaciones.map(asignacion => {
+        const usuario = usuariosPrueba.find(u => u.id === asignacion.usuario_id);
+        return {
+            usuario_id: usuario ? usuario.id : null,
+            email: usuario ? usuario.email : 'Usuario no encontrado',
+            rol: usuario ? usuario.rol : 'Sin rol',
+            tipo_responsabilidad: asignacion.tipo_responsabilidad
+        };
+    });
+
+    res.json({
+        mensaje: `Consulta de responsables para el Indicador ${indicadorId}`,
+        total_responsables: responsables.length,
+        datos: responsables
+    });
+});
 
 // Cierre de sesión (Logout)
 app.post('/api/auth/logout', verificarAutenticacion, async (req, res) => {
