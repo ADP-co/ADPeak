@@ -24,6 +24,14 @@ const {
 
 
 // ======================================================
+// NOMBRE DEL SISTEMA
+// ======================================================
+
+const SISTEMA =
+    "SIGI-POA DGEMS";
+
+
+// ======================================================
 // RUTA DEL LOGO
 // ------------------------------------------------------
 // Se utiliza el logo institucional del sistema.
@@ -130,7 +138,7 @@ function dibujarEncabezado(doc, reporte) {
 
     doc.text(
 
-        reporte.sistema,
+        SISTEMA,
 
         55,
 

@@ -1,4 +1,12 @@
 // ======================================================
+// NOMBRE DEL SISTEMA
+// ======================================================
+const SISTEMA =
+    "SIGI-POA DGEMS";
+
+
+
+// ======================================================
 // ENCABEZADO SECUNDARIO
 // ======================================================
 
@@ -22,6 +30,20 @@ function dibujarEncabezadoSecundario(
     doc.setFontSize(10);
 
 
+    // ==============================================
+    // COLOR TEXTO
+    // ==============================================
+
+    doc.setTextColor(
+
+        78,
+
+        77,
+
+        77
+
+    );
+
 
     // ==============================================
     // TEXTO
@@ -29,7 +51,7 @@ function dibujarEncabezadoSecundario(
 
     doc.text(
 
-        `${reporte.sistema} | Reporte de ${reporte.identidadReporte.tipo}`,
+        `${SISTEMA} | Reporte de ${reporte.identidadReporte.tipo}`,
 
         15,
 
@@ -38,9 +60,8 @@ function dibujarEncabezadoSecundario(
     );
 
 
-
     // ==============================================
-    // LÍNEA
+    // LÍNEA DIVISORIA
     // ==============================================
 
     doc.setDrawColor(
@@ -52,7 +73,6 @@ function dibujarEncabezadoSecundario(
         180
 
     );
-
 
 
     doc.line(
@@ -68,6 +88,11 @@ function dibujarEncabezadoSecundario(
     );
 
 }
+
+
+// ======================================================
+// EXPORTAR FUNCIÓN
+// ======================================================
 
 module.exports =
     dibujarEncabezadoSecundario;

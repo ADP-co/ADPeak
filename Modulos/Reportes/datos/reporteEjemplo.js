@@ -1,5 +1,17 @@
 // ======================================================
-// REPORTE POR PLANTEL
+// REPORTE GLOBAL ADMINISTRATIVO
+// ------------------------------------------------------
+// Este objeto simula la información que backend
+// enviaría al módulo PDF.
+//
+// Se utiliza para probar:
+//
+// - portada
+// - resumen global
+// - tablas dinámicas
+// - indicadores
+// - estilos institucionales
+// - múltiples páginas
 // ======================================================
 
 const reporte = {
@@ -8,8 +20,7 @@ const reporte = {
     // TIPO DE REPORTE
     // ==================================================
 
-    tipoReporte: "plantel",
-
+    tipoReporte: "global",
 
 
     // ==================================================
@@ -18,26 +29,54 @@ const reporte = {
 
     identidadReporte: {
 
-        tipo: "Plantel",
+        tipo: "Global",
 
-        nombre: "Bachillerato No. 04 Villa de Álvarez"
+        nombre:
+            "Reporte Administrativo Institucional"
 
     },
 
 
+    // ==================================================
+    // INFORMACIÓN GENERAL
+    // ==================================================
+
+    periodo:
+        "Enero - Junio 2026",
+
+    cicloEscolar:
+        "2026-A",
+
+    generadoPor:
+        "Administrador General DGEMS",
+
 
     // ==================================================
-    // DATOS GENERALES
+    // RESUMEN GLOBAL
+    // --------------------------------------------------
+    // Este bloque se utiliza únicamente
+    // en los reportes globales.
     // ==================================================
 
-    sistema: "SIGI-POA DGEMS",
+    resumenGlobal: {
 
-    periodo: "Enero - Junio 2026",
+        totalPlanteles: 24,
 
-    cicloEscolar: "2026-A",
+        totalResponsables: 63,
 
-    generadoPor: "Sistema Institucional DGEMS",
+        totalIndicadores: 18,
 
+        reportesEnviados: 21,
+
+        reportesAprobados: 17,
+
+        reportesObservados: 3,
+
+        reportesAtrasados: 1,
+
+        porcentajeAvance: "88%"
+
+    },
 
 
     // ==================================================
@@ -46,72 +85,66 @@ const reporte = {
 
     indicadores: [
 
-        // ==================================================
+        // ==============================================
         // INDICADOR 1
-        // ==================================================
+        // ==============================================
 
         {
 
             nombre:
-
                 "Participación Académica Estudiantil",
 
-
-
             descripcion:
-
-                "Este indicador muestra el nivel de participación de estudiantes en actividades académicas y de integración institucional.",
-
-
+                "Este indicador muestra el nivel de participación de estudiantes en actividades académicas institucionales.",
 
             datos: [
 
                 {
-                    grupo: "2A",
-                    alumnos: 42,
-                    participacion: "88%",
-                    tutor: "María González",
-                    turno: "Matutino"
+
+                    plantel: "Plantel Colima",
+
+                    alumnos: 540,
+
+                    participantes: 498,
+
+                    avance: "92%"
+
                 },
 
                 {
-                    grupo: "2B",
-                    alumnos: 39,
-                    participacion: "91%",
-                    tutor: "Carlos Ramírez",
-                    turno: "Matutino"
+
+                    plantel: "Plantel Tecomán",
+
+                    alumnos: 480,
+
+                    participantes: 401,
+
+                    avance: "83%"
+
                 },
 
                 {
-                    grupo: "2C",
-                    alumnos: 44,
-                    participacion: "79%",
-                    tutor: "Laura Torres",
-                    turno: "Vespertino"
+
+                    plantel: "Plantel Villa de Álvarez",
+
+                    alumnos: 620,
+
+                    participantes: 577,
+
+                    avance: "93%"
+
                 },
 
                 {
-                    grupo: "4A",
-                    alumnos: 40,
-                    participacion: "93%",
-                    tutor: "José Mendoza",
-                    turno: "Matutino"
-                },
 
-                {
-                    grupo: "4B",
-                    alumnos: 37,
-                    participacion: "85%",
-                    tutor: "Ana López",
-                    turno: "Vespertino"
-                },
+                    plantel: "Plantel Manzanillo",
 
-                {
-                    grupo: "6A",
-                    alumnos: 35,
-                    participacion: "95%",
-                    tutor: "Miguel Chávez",
-                    turno: "Matutino"
+                    alumnos: 510,
+
+                    participantes: 452,
+
+                    avance: "88%"
+
                 }
 
             ]
@@ -119,228 +152,204 @@ const reporte = {
         },
 
 
-
-        // ==================================================
+        // ==============================================
         // INDICADOR 2
-        // ==================================================
+        // ==============================================
 
         {
 
             nombre:
-
-                "Rendimiento Escolar General",
-
-
-
-            descripcion:
-
-                "Permite visualizar promedios generales y alumnos reprobados por grupo durante el semestre.",
-
-
-
-            datos: [
-
-                {
-                    semestre: "2",
-                    grupo: "A",
-                    promedio: 8.9,
-                    reprobados: 1,
-                    aprobados: 41
-                },
-
-                {
-                    semestre: "2",
-                    grupo: "B",
-                    promedio: 8.4,
-                    reprobados: 3,
-                    aprobados: 36
-                },
-
-                {
-                    semestre: "4",
-                    grupo: "A",
-                    promedio: 9.1,
-                    reprobados: 0,
-                    aprobados: 40
-                },
-
-                {
-                    semestre: "4",
-                    grupo: "B",
-                    promedio: 8.2,
-                    reprobados: 4,
-                    aprobados: 33
-                },
-
-                {
-                    semestre: "6",
-                    grupo: "A",
-                    promedio: 9.3,
-                    reprobados: 0,
-                    aprobados: 35
-                }
-
-            ]
-
-        },
-
-
-
-        // ==================================================
-        // INDICADOR 3
-        // ==================================================
-
-        {
-
-            nombre:
-
-                "Capacitación y Actualización Docente",
-
-
-
-            descripcion:
-
-                "Información relacionada con cursos y capacitaciones tomadas por docentes del plantel.",
-
-
-
-            datos: [
-
-                {
-                    docente: "Carlos Ramírez",
-                    curso: "Planeación Académica",
-                    horas: 20,
-                    estado: "Completado",
-                    fecha: "12/02/2026"
-                },
-
-                {
-                    docente: "Ana Torres",
-                    curso: "Herramientas Digitales",
-                    horas: 15,
-                    estado: "En proceso",
-                    fecha: "18/03/2026"
-                },
-
-                {
-                    docente: "Luis Hernández",
-                    curso: "Evaluación por Competencias",
-                    horas: 25,
-                    estado: "Completado",
-                    fecha: "07/04/2026"
-                },
-
-                {
-                    docente: "Martha Silva",
-                    curso: "Uso de Plataformas Educativas",
-                    horas: 18,
-                    estado: "Completado",
-                    fecha: "21/04/2026"
-                }
-
-            ]
-
-        },
-
-
-
-        // ==================================================
-        // INDICADOR 4
-        // ==================================================
-
-        {
-
-            nombre:
-
-                "Vinculación Comunitaria",
-
-
-
-            descripcion:
-
-                "Actividades comunitarias organizadas por el plantel con participación estudiantil.",
-
-
-
-            datos: [
-
-                {
-                    actividad: "Campaña ecológica",
-                    participantes: 120,
-                    fecha: "12/03/2026",
-                    responsable: "Departamento Académico"
-                },
-
-                {
-                    actividad: "Conferencia ambiental",
-                    participantes: 85,
-                    fecha: "25/04/2026",
-                    responsable: "Coordinación Cultural"
-                },
-
-                {
-                    actividad: "Reforestación comunitaria",
-                    participantes: 140,
-                    fecha: "09/05/2026",
-                    responsable: "Tutorías"
-                }
-
-            ]
-
-        },
-
-
-
-        // ==================================================
-        // INDICADOR 5
-        // ==================================================
-
-        {
-
-            nombre:
-
                 "Seguimiento de Tutorías Académicas",
 
-
-
             descripcion:
-
-                "Muestra el seguimiento realizado a estudiantes con bajo rendimiento académico.",
-
-
+                "Permite visualizar el seguimiento realizado a estudiantes con riesgo académico.",
 
             datos: [
 
                 {
-                    alumno: "Juan Pérez",
-                    grupo: "2A",
-                    promedio: 6.8,
-                    sesiones: 4,
-                    estado: "En seguimiento"
+
+                    responsable:
+                        "Mtra. Laura Torres",
+
+                    tutorias:
+                        34,
+
+                    alumnosAtendidos:
+                        98,
+
+                    porcentajeSeguimiento:
+                        "90%"
+
                 },
 
                 {
-                    alumno: "Andrea López",
-                    grupo: "2B",
-                    promedio: 7.1,
-                    sesiones: 3,
-                    estado: "Regularizado"
+
+                    responsable:
+                        "Dr. Miguel Hernández",
+
+                    tutorias:
+                        29,
+
+                    alumnosAtendidos:
+                        81,
+
+                    porcentajeSeguimiento:
+                        "85%"
+
                 },
 
                 {
-                    alumno: "Miguel Torres",
-                    grupo: "4A",
-                    promedio: 6.5,
-                    sesiones: 5,
-                    estado: "En seguimiento"
+
+                    responsable:
+                        "Lic. Ana Martínez",
+
+                    tutorias:
+                        31,
+
+                    alumnosAtendidos:
+                        92,
+
+                    porcentajeSeguimiento:
+                        "93%"
+
+                }
+
+            ]
+
+        },
+
+
+        // ==============================================
+        // INDICADOR 3
+        // ==============================================
+
+        {
+
+            nombre:
+                "Capacitación Docente",
+
+            descripcion:
+                "Contiene información relacionada con cursos y capacitaciones realizadas por el personal docente.",
+
+            datos: [
+
+                {
+
+                    plantel:
+                        "Plantel Colima",
+
+                    docentes:
+                        65,
+
+                    capacitados:
+                        58,
+
+                    avance:
+                        "89%"
+
                 },
 
                 {
-                    alumno: "Fernanda Ruiz",
-                    grupo: "6A",
-                    promedio: 7.0,
-                    sesiones: 2,
-                    estado: "Regularizado"
+
+                    plantel:
+                        "Plantel Tecomán",
+
+                    docentes:
+                        52,
+
+                    capacitados:
+                        43,
+
+                    avance:
+                        "82%"
+
+                },
+
+                {
+
+                    plantel:
+                        "Plantel Manzanillo",
+
+                    docentes:
+                        60,
+
+                    capacitados:
+                        56,
+
+                    avance:
+                        "93%"
+
+                }
+
+            ]
+
+        },
+
+
+        // ==============================================
+        // INDICADOR 4
+        // ==============================================
+
+        {
+
+            nombre:
+                "Entrega de Reportes Institucionales",
+
+            descripcion:
+                "Muestra el estado general de cumplimiento en la entrega de reportes por plantel.",
+
+            datos: [
+
+                {
+
+                    plantel:
+                        "Plantel Colima",
+
+                    estado:
+                        "Aprobado",
+
+                    fechaEntrega:
+                        "20/05/2026"
+
+                },
+
+                {
+
+                    plantel:
+                        "Plantel Tecomán",
+
+                    estado:
+                        "Observado",
+
+                    fechaEntrega:
+                        "19/05/2026"
+
+                },
+
+                {
+
+                    plantel:
+                        "Plantel Villa de Álvarez",
+
+                    estado:
+                        "Aprobado",
+
+                    fechaEntrega:
+                        "18/05/2026"
+
+                },
+
+                {
+
+                    plantel:
+                        "Plantel Manzanillo",
+
+                    estado:
+                        "Pendiente",
+
+                    fechaEntrega:
+                        "Sin entrega"
+
                 }
 
             ]
@@ -352,9 +361,9 @@ const reporte = {
 };
 
 
-
 // ======================================================
 // EXPORTAR REPORTE
 // ======================================================
 
-module.exports = reporte;
+module.exports =
+    reporte;

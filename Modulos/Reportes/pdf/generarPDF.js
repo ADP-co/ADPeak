@@ -1,3 +1,5 @@
+// generarPDF.js
+
 const { jsPDF } =
     require("jspdf");
 
@@ -18,6 +20,9 @@ const dibujarPiePagina =
 const dibujarTabla =
     require("./tablaPDF");
 
+const dibujarResumenGlobal =
+    require("./resumenGlobalPDF");
+
 
 // ======================================================
 // FUNCIÓN PRINCIPAL
@@ -25,11 +30,16 @@ const dibujarTabla =
 // Esta función genera todo el documento PDF.
 //
 // Aquí se controla:
+//
 // - portada
 // - encabezado
-// - tablas
+// - resumen global
+// - tablas dinámicas
 // - pie de página
 // - guardado final
+//
+// Todo el contenido se dibuja dinámicamente
+// dependiendo del tipo de reporte.
 // ======================================================
 
 function generarPDF(reporte) {
@@ -43,6 +53,9 @@ function generarPDF(reporte) {
 
     // ==================================================
     // DIBUJAR PORTADA
+    // --------------------------------------------------
+    // La portada siempre será la primera página
+    // del documento institucional.
     // ==================================================
 
     dibujarPortada(
@@ -57,8 +70,7 @@ function generarPDF(reporte) {
     // ==================================================
     // CREAR NUEVA PÁGINA
     // --------------------------------------------------
-    // La portada ocupa la primera página.
-    // El contenido inicia desde la segunda.
+    // Después de la portada comienza el contenido.
     // ==================================================
 
     doc.addPage();
@@ -68,7 +80,7 @@ function generarPDF(reporte) {
     // DIBUJAR ENCABEZADO
     // ==================================================
 
-    const posicionFinalEncabezado =
+    let posicionActual =
 
         dibujarEncabezado(
 
@@ -80,7 +92,40 @@ function generarPDF(reporte) {
 
 
     // ==================================================
-    // DIBUJAR TABLAS
+    // VALIDAR REPORTE GLOBAL
+    // --------------------------------------------------
+    // Si el reporte es global se dibuja
+    // el resumen administrativo institucional.
+    // ==================================================
+
+    if (
+
+        reporte.tipoReporte ===
+
+        "global"
+
+    ) {
+
+        posicionActual =
+
+            dibujarResumenGlobal(
+
+                doc,
+
+                reporte,
+
+                posicionActual
+
+            );
+
+    }
+
+
+    // ==================================================
+    // DIBUJAR TABLAS DINÁMICAS
+    // --------------------------------------------------
+    // Aquí se dibujan automáticamente todos
+    // los indicadores y tablas del reporte.
     // ==================================================
 
     dibujarTabla(
@@ -89,7 +134,7 @@ function generarPDF(reporte) {
 
         reporte,
 
-        posicionFinalEncabezado
+        posicionActual
 
     );
 
@@ -97,9 +142,9 @@ function generarPDF(reporte) {
     // ==================================================
     // DIBUJAR PIE DE PÁGINA
     // --------------------------------------------------
-    // Esto se hace al final porque primero
-    // necesitamos saber cuántas páginas
-    // tiene el documento.
+    // Esto se realiza al final porque primero
+    // es necesario conocer cuántas páginas
+    // tiene el documento completo.
     // ==================================================
 
     dibujarPiePagina(
