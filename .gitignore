@@ -51,6 +51,7 @@ db.sqlite3
 media/
 uploads/
 reportes/
+backend/data/*.json
 
 # Confidential source material and evidence
 private/
