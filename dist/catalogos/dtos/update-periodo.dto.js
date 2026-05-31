@@ -13,6 +13,8 @@ exports.UpdatePeriodoDto = void 0;
 const class_validator_1 = require("class-validator");
 class UpdatePeriodoDto {
     nombre;
+    fechaInicio;
+    fechaFin;
 }
 exports.UpdatePeriodoDto = UpdatePeriodoDto;
 __decorate([
@@ -21,4 +23,14 @@ __decorate([
     (0, class_validator_1.MinLength)(2),
     __metadata("design:type", String)
 ], UpdatePeriodoDto.prototype, "nombre", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], UpdatePeriodoDto.prototype, "fechaInicio", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], UpdatePeriodoDto.prototype, "fechaFin", void 0);
 //# sourceMappingURL=update-periodo.dto.js.map

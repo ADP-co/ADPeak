@@ -4,9 +4,9 @@ import { UpdateIndicadorDto } from '../dtos/update-indicador.dto';
 export declare class IndicadoresController {
     private readonly indicadoresService;
     constructor(indicadoresService: IndicadoresService);
-    findAll(): any;
-    findOne(id: string): any;
-    create(createIndicadorDto: CreateIndicadorDto): any;
-    update(id: string, updateIndicadorDto: UpdateIndicadorDto): any;
-    deactivate(id: string): any;
+    findAll(): import("../../common/in-memory-crud.service").CrudEntity<CreateIndicadorDto>[];
+    findOne(id: number): import("../../common/in-memory-crud.service").CrudEntity<CreateIndicadorDto>;
+    create(createIndicadorDto: CreateIndicadorDto): import("../../common/in-memory-crud.service").CrudEntity<CreateIndicadorDto>;
+    update(id: number, updateIndicadorDto: UpdateIndicadorDto): import("../../common/in-memory-crud.service").CrudEntity<CreateIndicadorDto>;
+    deactivate(id: number): import("../../common/in-memory-crud.service").CrudEntity<CreateIndicadorDto>;
 }

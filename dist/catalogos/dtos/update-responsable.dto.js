@@ -10,11 +10,40 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateResponsableDto = void 0;
+const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
 class UpdateResponsableDto {
+    usuarioId;
+    entidadTipo;
+    entidadId;
+    tipoResponsabilidad;
     nombre;
 }
 exports.UpdateResponsableDto = UpdateResponsableDto;
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(1),
+    __metadata("design:type", Number)
+], UpdateResponsableDto.prototype, "usuarioId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsIn)(['Indicador', 'Actividad', 'Plantel']),
+    __metadata("design:type", String)
+], UpdateResponsableDto.prototype, "entidadTipo", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(1),
+    __metadata("design:type", Number)
+], UpdateResponsableDto.prototype, "entidadId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsIn)(['Primario', 'Secundario']),
+    __metadata("design:type", String)
+], UpdateResponsableDto.prototype, "tipoResponsabilidad", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),

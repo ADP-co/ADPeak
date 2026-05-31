@@ -26,16 +26,16 @@ let CiclosPoaController = class CiclosPoaController {
         return this.ciclosPoaService.findAll();
     }
     findOne(id) {
-        return this.ciclosPoaService.findOne(+id);
+        return this.ciclosPoaService.findOne(id);
     }
     create(createCicloPoaDto) {
         return this.ciclosPoaService.create(createCicloPoaDto);
     }
     update(id, updateCicloPoaDto) {
-        return this.ciclosPoaService.update(+id, updateCicloPoaDto);
+        return this.ciclosPoaService.update(id, updateCicloPoaDto);
     }
     deactivate(id) {
-        return this.ciclosPoaService.deactivate(+id);
+        return this.ciclosPoaService.deactivate(id);
     }
 };
 exports.CiclosPoaController = CiclosPoaController;
@@ -43,36 +43,36 @@ __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Object)
+    __metadata("design:returntype", void 0)
 ], CiclosPoaController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Object)
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
 ], CiclosPoaController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_ciclo_poa_dto_1.CreateCicloPoaDto]),
-    __metadata("design:returntype", Object)
+    __metadata("design:returntype", void 0)
 ], CiclosPoaController.prototype, "create", null);
 __decorate([
     (0, common_1.Put)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_ciclo_poa_dto_1.UpdateCicloPoaDto]),
-    __metadata("design:returntype", Object)
+    __metadata("design:paramtypes", [Number, update_ciclo_poa_dto_1.UpdateCicloPoaDto]),
+    __metadata("design:returntype", void 0)
 ], CiclosPoaController.prototype, "update", null);
 __decorate([
     (0, common_1.Patch)(':id/desactivar'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Object)
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
 ], CiclosPoaController.prototype, "deactivate", null);
 exports.CiclosPoaController = CiclosPoaController = __decorate([
     (0, common_1.Controller)('catalogos/ciclos-poa'),

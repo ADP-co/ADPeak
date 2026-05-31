@@ -4,9 +4,9 @@ import { UpdateUsuarioDto } from '../dtos/update-usuario.dto';
 export declare class UsuariosController {
     private readonly usuariosService;
     constructor(usuariosService: UsuariosService);
-    findAll(): any;
-    findOne(id: string): any;
-    create(createUsuarioDto: CreateUsuarioDto): any;
-    update(id: string, updateUsuarioDto: UpdateUsuarioDto): any;
-    deactivate(id: string): any;
+    findAll(): import("../../common/in-memory-crud.service").CrudEntity<CreateUsuarioDto>[];
+    findOne(id: number): import("../../common/in-memory-crud.service").CrudEntity<CreateUsuarioDto>;
+    create(createUsuarioDto: CreateUsuarioDto): import("../../common/in-memory-crud.service").CrudEntity<CreateUsuarioDto>;
+    update(id: number, updateUsuarioDto: UpdateUsuarioDto): import("../../common/in-memory-crud.service").CrudEntity<CreateUsuarioDto>;
+    deactivate(id: number): import("../../common/in-memory-crud.service").CrudEntity<CreateUsuarioDto>;
 }

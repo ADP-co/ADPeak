@@ -26,16 +26,16 @@ let IndicadoresController = class IndicadoresController {
         return this.indicadoresService.findAll();
     }
     findOne(id) {
-        return this.indicadoresService.findOne(+id);
+        return this.indicadoresService.findOne(id);
     }
     create(createIndicadorDto) {
         return this.indicadoresService.create(createIndicadorDto);
     }
     update(id, updateIndicadorDto) {
-        return this.indicadoresService.update(+id, updateIndicadorDto);
+        return this.indicadoresService.update(id, updateIndicadorDto);
     }
     deactivate(id) {
-        return this.indicadoresService.deactivate(+id);
+        return this.indicadoresService.deactivate(id);
     }
 };
 exports.IndicadoresController = IndicadoresController;
@@ -43,36 +43,36 @@ __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Object)
+    __metadata("design:returntype", void 0)
 ], IndicadoresController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Object)
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
 ], IndicadoresController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_indicador_dto_1.CreateIndicadorDto]),
-    __metadata("design:returntype", Object)
+    __metadata("design:returntype", void 0)
 ], IndicadoresController.prototype, "create", null);
 __decorate([
     (0, common_1.Put)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_indicador_dto_1.UpdateIndicadorDto]),
-    __metadata("design:returntype", Object)
+    __metadata("design:paramtypes", [Number, update_indicador_dto_1.UpdateIndicadorDto]),
+    __metadata("design:returntype", void 0)
 ], IndicadoresController.prototype, "update", null);
 __decorate([
     (0, common_1.Patch)(':id/desactivar'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Object)
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
 ], IndicadoresController.prototype, "deactivate", null);
 exports.IndicadoresController = IndicadoresController = __decorate([
     (0, common_1.Controller)('catalogos/indicadores'),

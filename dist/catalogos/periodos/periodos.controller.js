@@ -26,16 +26,16 @@ let PeriodosController = class PeriodosController {
         return this.periodosService.findAll();
     }
     findOne(id) {
-        return this.periodosService.findOne(+id);
+        return this.periodosService.findOne(id);
     }
     create(createPeriodoDto) {
         return this.periodosService.create(createPeriodoDto);
     }
     update(id, updatePeriodoDto) {
-        return this.periodosService.update(+id, updatePeriodoDto);
+        return this.periodosService.update(id, updatePeriodoDto);
     }
     deactivate(id) {
-        return this.periodosService.deactivate(+id);
+        return this.periodosService.deactivate(id);
     }
 };
 exports.PeriodosController = PeriodosController;
@@ -43,36 +43,36 @@ __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Object)
+    __metadata("design:returntype", void 0)
 ], PeriodosController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Object)
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
 ], PeriodosController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_periodo_dto_1.CreatePeriodoDto]),
-    __metadata("design:returntype", Object)
+    __metadata("design:returntype", void 0)
 ], PeriodosController.prototype, "create", null);
 __decorate([
     (0, common_1.Put)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_periodo_dto_1.UpdatePeriodoDto]),
-    __metadata("design:returntype", Object)
+    __metadata("design:paramtypes", [Number, update_periodo_dto_1.UpdatePeriodoDto]),
+    __metadata("design:returntype", void 0)
 ], PeriodosController.prototype, "update", null);
 __decorate([
     (0, common_1.Patch)(':id/desactivar'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Object)
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
 ], PeriodosController.prototype, "deactivate", null);
 exports.PeriodosController = PeriodosController = __decorate([
     (0, common_1.Controller)('catalogos/periodos'),

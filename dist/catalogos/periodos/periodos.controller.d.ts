@@ -4,9 +4,9 @@ import { UpdatePeriodoDto } from '../dtos/update-periodo.dto';
 export declare class PeriodosController {
     private readonly periodosService;
     constructor(periodosService: PeriodosService);
-    findAll(): any;
-    findOne(id: string): any;
-    create(createPeriodoDto: CreatePeriodoDto): any;
-    update(id: string, updatePeriodoDto: UpdatePeriodoDto): any;
-    deactivate(id: string): any;
+    findAll(): import("../../common/in-memory-crud.service").CrudEntity<CreatePeriodoDto>[];
+    findOne(id: number): import("../../common/in-memory-crud.service").CrudEntity<CreatePeriodoDto>;
+    create(createPeriodoDto: CreatePeriodoDto): import("../../common/in-memory-crud.service").CrudEntity<CreatePeriodoDto>;
+    update(id: number, updatePeriodoDto: UpdatePeriodoDto): import("../../common/in-memory-crud.service").CrudEntity<CreatePeriodoDto>;
+    deactivate(id: number): import("../../common/in-memory-crud.service").CrudEntity<CreatePeriodoDto>;
 }

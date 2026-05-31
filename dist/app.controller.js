@@ -17,8 +17,8 @@ let AppController = class AppController {
             status: 'ADPeak API Operational',
             timestamp: new Date().toISOString(),
             sprint: 1,
-            responsible: 'Julián Menatiní',
-            institution: 'Universidad de Colima'
+            responsible: 'Julian Menatini',
+            institution: 'Universidad de Colima',
         };
     }
 };

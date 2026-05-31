@@ -26,16 +26,16 @@ let ResponsablesController = class ResponsablesController {
         return this.responsablesService.findAll();
     }
     findOne(id) {
-        return this.responsablesService.findOne(+id);
+        return this.responsablesService.findOne(id);
     }
     create(createResponsableDto) {
         return this.responsablesService.create(createResponsableDto);
     }
     update(id, updateResponsableDto) {
-        return this.responsablesService.update(+id, updateResponsableDto);
+        return this.responsablesService.update(id, updateResponsableDto);
     }
     deactivate(id) {
-        return this.responsablesService.deactivate(+id);
+        return this.responsablesService.deactivate(id);
     }
 };
 exports.ResponsablesController = ResponsablesController;
@@ -43,36 +43,36 @@ __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Object)
+    __metadata("design:returntype", void 0)
 ], ResponsablesController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Object)
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
 ], ResponsablesController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_responsable_dto_1.CreateResponsableDto]),
-    __metadata("design:returntype", Object)
+    __metadata("design:returntype", void 0)
 ], ResponsablesController.prototype, "create", null);
 __decorate([
     (0, common_1.Put)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_responsable_dto_1.UpdateResponsableDto]),
-    __metadata("design:returntype", Object)
+    __metadata("design:paramtypes", [Number, update_responsable_dto_1.UpdateResponsableDto]),
+    __metadata("design:returntype", void 0)
 ], ResponsablesController.prototype, "update", null);
 __decorate([
     (0, common_1.Patch)(':id/desactivar'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Object)
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
 ], ResponsablesController.prototype, "deactivate", null);
 exports.ResponsablesController = ResponsablesController = __decorate([
     (0, common_1.Controller)('catalogos/responsables'),

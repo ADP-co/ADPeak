@@ -5,43 +5,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ContribuyentesService = void 0;
 const common_1 = require("@nestjs/common");
-let ContribuyentesService = class ContribuyentesService {
-    contribuyentes = [];
-    idCounter = 1;
-    findAll() {
-        return this.contribuyentes;
-    }
-    findOne(id) {
-        const contribuyente = this.contribuyentes.find(p => p.id === id);
-        if (!contribuyente)
-            throw new common_1.NotFoundException('Contribuyente no encontrado');
-        return contribuyente;
-    }
-    create(dto) {
-        const contribuyente = {
-            id: this.idCounter++,
-            nombre: dto.nombre,
-            activo: true,
-        };
-        this.contribuyentes.push(contribuyente);
-        return contribuyente;
-    }
-    update(id, dto) {
-        const contribuyente = this.findOne(id);
-        contribuyente.nombre = dto.nombre ?? contribuyente.nombre;
-        return contribuyente;
-    }
-    deactivate(id) {
-        const contribuyente = this.findOne(id);
-        contribuyente.activo = false;
-        return contribuyente;
+const in_memory_crud_service_1 = require("../../common/in-memory-crud.service");
+let ContribuyentesService = class ContribuyentesService extends in_memory_crud_service_1.InMemoryCrudService {
+    constructor() {
+        super('Contribuyente');
     }
 };
 exports.ContribuyentesService = ContribuyentesService;
 exports.ContribuyentesService = ContribuyentesService = __decorate([
-    (0, common_1.Injectable)()
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [])
 ], ContribuyentesService);
 //# sourceMappingURL=contribuyentes.service.js.map

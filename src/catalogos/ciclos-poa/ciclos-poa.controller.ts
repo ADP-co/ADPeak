@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Patch, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Put } from '@nestjs/common';
 import { CiclosPoaService } from './ciclos-poa.service';
 import { CreateCicloPoaDto } from '../dtos/create-ciclo-poa.dto';
 import { UpdateCicloPoaDto } from '../dtos/update-ciclo-poa.dto';
@@ -8,27 +8,27 @@ export class CiclosPoaController {
   constructor(private readonly ciclosPoaService: CiclosPoaService) {}
 
   @Get()
-  findAll(): any {
+  findAll() {
     return this.ciclosPoaService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): any {
-    return this.ciclosPoaService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.ciclosPoaService.findOne(id);
   }
 
   @Post()
-  create(@Body() createCicloPoaDto: CreateCicloPoaDto): any {
+  create(@Body() createCicloPoaDto: CreateCicloPoaDto) {
     return this.ciclosPoaService.create(createCicloPoaDto);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateCicloPoaDto: UpdateCicloPoaDto): any {
-    return this.ciclosPoaService.update(+id, updateCicloPoaDto);
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateCicloPoaDto: UpdateCicloPoaDto) {
+    return this.ciclosPoaService.update(id, updateCicloPoaDto);
   }
 
   @Patch(':id/desactivar')
-  deactivate(@Param('id') id: string): any {
-    return this.ciclosPoaService.deactivate(+id);
+  deactivate(@Param('id', ParseIntPipe) id: number) {
+    return this.ciclosPoaService.deactivate(id);
   }
 }

@@ -1,3 +1,7 @@
 export declare class CreateResponsableDto {
-    nombre: string;
+    usuarioId: number;
+    entidadTipo: string;
+    entidadId: number;
+    tipoResponsabilidad: string;
+    nombre?: string;
 }

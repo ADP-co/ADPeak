@@ -10,9 +10,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateCicloPoaDto = void 0;
+const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
 class UpdateCicloPoaDto {
     nombre;
+    anio;
+    estado;
 }
 exports.UpdateCicloPoaDto = UpdateCicloPoaDto;
 __decorate([
@@ -21,4 +24,17 @@ __decorate([
     (0, class_validator_1.MinLength)(2),
     __metadata("design:type", String)
 ], UpdateCicloPoaDto.prototype, "nombre", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(2020),
+    (0, class_validator_1.Max)(2100),
+    __metadata("design:type", Number)
+], UpdateCicloPoaDto.prototype, "anio", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsIn)(['planeacion', 'abierto', 'cerrado']),
+    __metadata("design:type", String)
+], UpdateCicloPoaDto.prototype, "estado", void 0);
 //# sourceMappingURL=update-ciclo-poa.dto.js.map

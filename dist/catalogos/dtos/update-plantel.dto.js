@@ -13,6 +13,8 @@ exports.UpdatePlantelDto = void 0;
 const class_validator_1 = require("class-validator");
 class UpdatePlantelDto {
     nombre;
+    clave;
+    municipio;
 }
 exports.UpdatePlantelDto = UpdatePlantelDto;
 __decorate([
@@ -21,4 +23,16 @@ __decorate([
     (0, class_validator_1.MinLength)(2),
     __metadata("design:type", String)
 ], UpdatePlantelDto.prototype, "nombre", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(2),
+    __metadata("design:type", String)
+], UpdatePlantelDto.prototype, "clave", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(2),
+    __metadata("design:type", String)
+], UpdatePlantelDto.prototype, "municipio", void 0);
 //# sourceMappingURL=update-plantel.dto.js.map

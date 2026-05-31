@@ -26,16 +26,16 @@ let ActividadesController = class ActividadesController {
         return this.actividadesService.findAll();
     }
     findOne(id) {
-        return this.actividadesService.findOne(+id);
+        return this.actividadesService.findOne(id);
     }
     create(createActividadDto) {
         return this.actividadesService.create(createActividadDto);
     }
     update(id, updateActividadDto) {
-        return this.actividadesService.update(+id, updateActividadDto);
+        return this.actividadesService.update(id, updateActividadDto);
     }
     deactivate(id) {
-        return this.actividadesService.deactivate(+id);
+        return this.actividadesService.deactivate(id);
     }
 };
 exports.ActividadesController = ActividadesController;
@@ -43,36 +43,36 @@ __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Object)
+    __metadata("design:returntype", void 0)
 ], ActividadesController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Object)
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
 ], ActividadesController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_actividad_dto_1.CreateActividadDto]),
-    __metadata("design:returntype", Object)
+    __metadata("design:returntype", void 0)
 ], ActividadesController.prototype, "create", null);
 __decorate([
     (0, common_1.Put)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_actividad_dto_1.UpdateActividadDto]),
-    __metadata("design:returntype", Object)
+    __metadata("design:paramtypes", [Number, update_actividad_dto_1.UpdateActividadDto]),
+    __metadata("design:returntype", void 0)
 ], ActividadesController.prototype, "update", null);
 __decorate([
     (0, common_1.Patch)(':id/desactivar'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Object)
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
 ], ActividadesController.prototype, "deactivate", null);
 exports.ActividadesController = ActividadesController = __decorate([
     (0, common_1.Controller)('catalogos/actividades'),

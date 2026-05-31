@@ -5,43 +5,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ResponsablesService = void 0;
 const common_1 = require("@nestjs/common");
-let ResponsablesService = class ResponsablesService {
-    responsables = [];
-    idCounter = 1;
-    findAll() {
-        return this.responsables;
-    }
-    findOne(id) {
-        const responsable = this.responsables.find(p => p.id === id);
-        if (!responsable)
-            throw new common_1.NotFoundException('Responsable no encontrado');
-        return responsable;
-    }
-    create(dto) {
-        const responsable = {
-            id: this.idCounter++,
-            nombre: dto.nombre,
-            activo: true,
-        };
-        this.responsables.push(responsable);
-        return responsable;
-    }
-    update(id, dto) {
-        const responsable = this.findOne(id);
-        responsable.nombre = dto.nombre ?? responsable.nombre;
-        return responsable;
-    }
-    deactivate(id) {
-        const responsable = this.findOne(id);
-        responsable.activo = false;
-        return responsable;
+const in_memory_crud_service_1 = require("../../common/in-memory-crud.service");
+let ResponsablesService = class ResponsablesService extends in_memory_crud_service_1.InMemoryCrudService {
+    constructor() {
+        super('Responsable');
     }
 };
 exports.ResponsablesService = ResponsablesService;
 exports.ResponsablesService = ResponsablesService = __decorate([
-    (0, common_1.Injectable)()
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [])
 ], ResponsablesService);
 //# sourceMappingURL=responsables.service.js.map

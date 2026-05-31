@@ -5,4 +5,14 @@ export class UpdatePlantelDto {
   @IsString()
   @MinLength(2)
   nombre?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  clave?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  municipio?: string;
 }

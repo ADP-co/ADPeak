@@ -26,16 +26,16 @@ let PlantelesController = class PlantelesController {
         return this.plantelesService.findAll();
     }
     findOne(id) {
-        return this.plantelesService.findOne(+id);
+        return this.plantelesService.findOne(id);
     }
     create(createPlantelDto) {
         return this.plantelesService.create(createPlantelDto);
     }
     update(id, updatePlantelDto) {
-        return this.plantelesService.update(+id, updatePlantelDto);
+        return this.plantelesService.update(id, updatePlantelDto);
     }
     deactivate(id) {
-        return this.plantelesService.deactivate(+id);
+        return this.plantelesService.deactivate(id);
     }
 };
 exports.PlantelesController = PlantelesController;
@@ -43,36 +43,36 @@ __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Object)
+    __metadata("design:returntype", void 0)
 ], PlantelesController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Object)
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
 ], PlantelesController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_plantel_dto_1.CreatePlantelDto]),
-    __metadata("design:returntype", Object)
+    __metadata("design:returntype", void 0)
 ], PlantelesController.prototype, "create", null);
 __decorate([
     (0, common_1.Put)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_plantel_dto_1.UpdatePlantelDto]),
-    __metadata("design:returntype", Object)
+    __metadata("design:paramtypes", [Number, update_plantel_dto_1.UpdatePlantelDto]),
+    __metadata("design:returntype", void 0)
 ], PlantelesController.prototype, "update", null);
 __decorate([
     (0, common_1.Patch)(':id/desactivar'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Object)
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
 ], PlantelesController.prototype, "deactivate", null);
 exports.PlantelesController = PlantelesController = __decorate([
     (0, common_1.Controller)('catalogos/planteles'),

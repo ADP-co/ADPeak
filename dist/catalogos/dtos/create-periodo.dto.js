@@ -13,6 +13,8 @@ exports.CreatePeriodoDto = void 0;
 const class_validator_1 = require("class-validator");
 class CreatePeriodoDto {
     nombre;
+    fechaInicio;
+    fechaFin;
 }
 exports.CreatePeriodoDto = CreatePeriodoDto;
 __decorate([
@@ -20,4 +22,12 @@ __decorate([
     (0, class_validator_1.MinLength)(2),
     __metadata("design:type", String)
 ], CreatePeriodoDto.prototype, "nombre", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], CreatePeriodoDto.prototype, "fechaInicio", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], CreatePeriodoDto.prototype, "fechaFin", void 0);
 //# sourceMappingURL=create-periodo.dto.js.map

@@ -10,9 +10,13 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateUsuarioDto = void 0;
+const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
 class CreateUsuarioDto {
     nombre;
+    email;
+    rol;
+    plantelId;
 }
 exports.CreateUsuarioDto = CreateUsuarioDto;
 __decorate([
@@ -20,4 +24,19 @@ __decorate([
     (0, class_validator_1.MinLength)(2),
     __metadata("design:type", String)
 ], CreateUsuarioDto.prototype, "nombre", void 0);
+__decorate([
+    (0, class_validator_1.IsEmail)(),
+    __metadata("design:type", String)
+], CreateUsuarioDto.prototype, "email", void 0);
+__decorate([
+    (0, class_validator_1.IsIn)(['Admin', 'Responsable', 'Plantel']),
+    __metadata("design:type", String)
+], CreateUsuarioDto.prototype, "rol", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(1),
+    __metadata("design:type", Number)
+], CreateUsuarioDto.prototype, "plantelId", void 0);
 //# sourceMappingURL=create-usuario.dto.js.map

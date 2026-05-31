@@ -4,9 +4,9 @@ import { UpdateContribuyenteDto } from '../dtos/update-contribuyente.dto';
 export declare class ContribuyentesController {
     private readonly contribuyentesService;
     constructor(contribuyentesService: ContribuyentesService);
-    findAll(): any;
-    findOne(id: string): any;
-    create(createContribuyenteDto: CreateContribuyenteDto): any;
-    update(id: string, updateContribuyenteDto: UpdateContribuyenteDto): any;
-    deactivate(id: string): any;
+    findAll(): import("../../common/in-memory-crud.service").CrudEntity<CreateContribuyenteDto>[];
+    findOne(id: number): import("../../common/in-memory-crud.service").CrudEntity<CreateContribuyenteDto>;
+    create(createContribuyenteDto: CreateContribuyenteDto): import("../../common/in-memory-crud.service").CrudEntity<CreateContribuyenteDto>;
+    update(id: number, updateContribuyenteDto: UpdateContribuyenteDto): import("../../common/in-memory-crud.service").CrudEntity<CreateContribuyenteDto>;
+    deactivate(id: number): import("../../common/in-memory-crud.service").CrudEntity<CreateContribuyenteDto>;
 }
