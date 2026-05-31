@@ -11,6 +11,7 @@ const validEnv = {
   BACKEND_PORT: "8000",
   PUBLIC_APP_URL: "http://127.0.0.1:5173",
   INTERNAL_API_URL: "http://127.0.0.1:8000",
+  VITE_API_URL: "http://127.0.0.1:8000",
   DATABASE_URL: "postgresql://sigi_poa:local_password@127.0.0.1:5432/sigi_poa_dev",
   AUTH_SECRET: "local-dev-auth-secret-change-me",
   AUTH_TOKEN_TTL_MINUTES: "60",
@@ -25,6 +26,7 @@ describe("getAppConfig", () => {
     expect(getAppConfig(validEnv)).toMatchObject({
       appEnv: "development",
       backendPort: 8000,
+      viteApiUrl: "http://127.0.0.1:8000",
       fileStorageDriver: "local",
       fileStoragePath: "uploads"
     });
@@ -42,6 +44,12 @@ describe("getAppConfig", () => {
         DATABASE_URL: "not-a-url"
       })
     ).toThrow("DATABASE_URL debe ser una URL valida.");
+  });
+
+  it("requires the frontend API URL used by Vite", () => {
+    const { VITE_API_URL: _viteApiUrl, ...envWithoutViteApiUrl } = validEnv;
+
+    expect(() => getAppConfig(envWithoutViteApiUrl)).toThrow("VITE_API_URL");
   });
 
   it("redacts sensitive values from diagnostics", () => {

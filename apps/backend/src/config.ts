@@ -7,6 +7,7 @@ export const REQUIRED_ENV_KEYS = [
   "BACKEND_PORT",
   "PUBLIC_APP_URL",
   "INTERNAL_API_URL",
+  "VITE_API_URL",
   "DATABASE_URL",
   "AUTH_SECRET",
   "AUTH_TOKEN_TTL_MINUTES",
@@ -23,6 +24,7 @@ export type AppConfig = {
   backendPort: number;
   publicAppUrl: string;
   internalApiUrl: string;
+  viteApiUrl: string;
   databaseUrl: string;
   authSecret: string;
   authTokenTtlMinutes: number;
@@ -90,6 +92,7 @@ export function getAppConfig(
     backendPort: parsePort(readEnv(env, "BACKEND_PORT"), "BACKEND_PORT"),
     publicAppUrl: parseUrl(readEnv(env, "PUBLIC_APP_URL"), "PUBLIC_APP_URL"),
     internalApiUrl: parseUrl(readEnv(env, "INTERNAL_API_URL"), "INTERNAL_API_URL"),
+    viteApiUrl: parseUrl(readEnv(env, "VITE_API_URL"), "VITE_API_URL"),
     databaseUrl: parseUrl(readEnv(env, "DATABASE_URL"), "DATABASE_URL"),
     authSecret,
     authTokenTtlMinutes: parsePositiveInteger(
