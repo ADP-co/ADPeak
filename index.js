@@ -1,71 +1,32 @@
-// ======================================================
-// ARCHIVO PRINCIPAL DEL PROYECTO
-// ------------------------------------------------------
-// Este archivo funciona como punto de entrada principal
-// para ejecutar pruebas del módulo de reportes.
-//
-// Desde aquí:
-//
-// - cargamos datos de prueba
-// - llamamos generación PDF
-// - probamos funcionalidades
-//
-// ======================================================
+const http = require('node:http');
 
+const { handleReportesRequest } = require('./Modulos/Reportes/routes/reportes.routes');
 
-// ======================================================
-// IMPORTAR RUTAS REPORTES
-// ======================================================
+function writeJson(res, statusCode, payload) {
+  res.writeHead(statusCode, { 'content-type': 'application/json; charset=utf-8' });
+  res.end(JSON.stringify(payload));
+}
 
-const reportesRoutes =
-    require("./Modulos/Reportes/routes/reportes.routes");
+function createServer() {
+  return http.createServer((req, res) => {
+    if (handleReportesRequest(req, res)) {
+      return;
+    }
 
+    if (req.method === 'GET' && new URL(req.url, 'http://localhost').pathname === '/health') {
+      writeJson(res, 200, { ok: true, service: 'reportes' });
+      return;
+    }
 
+    writeJson(res, 404, { error: 'Ruta no encontrada' });
+  });
+}
 
-// ======================================================
-// USAR RUTAS
-// ======================================================
+if (require.main === module) {
+  const port = Number(process.env.PORT || 3000);
+  createServer().listen(port, () => {
+    console.log(`Modulo de reportes escuchando en http://localhost:${port}`);
+  });
+}
 
-app.use(
-
-    "/api/reportes",
-
-    reportesRoutes
-
-);
-
-
-// ======================================================
-// IMPORTAR REPORTE DE EJEMPLO
-// ------------------------------------------------------
-// Este archivo contiene datos simulados que representan
-// información enviada desde backend.
-// ======================================================
-
-const reporteEjemplo = require("./Modulos/Reportes/datos/reporteEjemplo");
-
-
-// ======================================================
-// MOSTRAR DATOS EN CONSOLA
-// ------------------------------------------------------
-// Esto nos ayuda a verificar que los datos se estén
-// cargando correctamente.
-// ======================================================
-
-console.log("====================================");
-console.log("REPORTE CARGADO CORRECTAMENTE");
-console.log("====================================");
-
-console.log(reporteEjemplo);
-// ======================================================
-// IMPORTAR GENERADOR DE PDF
-// ======================================================
-
-const generarPDF = require("./Modulos/Reportes/pdf/generarPDF");
-
-
-// ======================================================
-// GENERAR PDF UTILIZANDO DATOS DINÁMICOS
-// ======================================================
-
-generarPDF(reporteEjemplo);
+module.exports = { createServer };

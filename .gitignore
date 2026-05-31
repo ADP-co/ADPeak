@@ -1,15 +1,16 @@
-<<<<<<< HEAD
-node_modules/
-.next/
-.env
-*.pdf
-=======
 # Dependencias
 node_modules/
 npm-debug.log*
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
+
+# Entorno y secretos
+.env
+.env.local
+.env.*.local
+secrets.json
+config.local.js
+settings.local.json
 
 # Python
 __pycache__/
@@ -19,85 +20,45 @@ __pycache__/
 venv/
 env/
 ENV/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
 *.egg-info/
-.installed.cfg
+.pytest_cache/
+pytest_cache/
 
-# Django (si aplica)
-*.log
-local_settings.py
+# Build y cobertura
+.next/
+dist/
+build/
+coverage/
+.nyc_output/
+site/
+docs/_build/
+*.o
+*.obj
+*.a
+*.lib
+*.exe
+
+# Runtime
 db.sqlite3
 media/
+uploads/
+reportes/
+*.pdf
 
-# IDEs
+# IDEs y sistema operativo
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 .DS_Store
+Thumbs.db
 *.sublime-project
 *.sublime-workspace
 .project
 .pydevproject
 .settings/
 
-# Archivos de Sistema
-Thumbs.db
-.DS_Store
-.AppleDouble
-.LSOverride
-
-# Archivos Temporales
+# Temporales
 *.tmp
 *.temp
-
-# Variables de Entorno
-.env
-.env.local
-.env.*.local
-
-# Build
-dist/
-build/
-*.o
-*.a
-*.lib
-*.exe
-
-# Testing
-coverage/
-.nyc_output/
-pytest_cache/
-.pytest_cache/
-
-# Documentación generada
-site/
-docs/_build/
-
-# Archivos compilados específicos
-*.o
-*.obj
-*.elf
-*.so.o
-
-# Configuración local no versionada
-config.local.js
-settings.local.json
-secrets.json
-
-# Reportes de carga
-uploads/
-reportes/
->>>>>>> 39226e7980dde70d1d54e67884bbc352500a6f76
