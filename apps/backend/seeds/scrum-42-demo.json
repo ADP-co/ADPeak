@@ -1,0 +1,19 @@
+{
+  "sourceName": "scrum-42-demo-anonimizado",
+  "operationalYear": {
+    "year": 2026,
+    "label": "POA 2026",
+    "startsAt": "2026-01-01",
+    "endsAt": "2026-12-31"
+  },
+  "planteles": [
+    { "code": "B10", "name": "Bachillerato 10", "municipality": "Colima" },
+    { "code": "B20", "name": "Bachillerato 20", "municipality": "Villa de Alvarez" }
+  ],
+  "generation": {
+    "indicatorCount": 48,
+    "activityCount": 99,
+    "responsibleCount": 12,
+    "contributorCount": 16
+  }
+}

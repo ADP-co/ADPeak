@@ -1,14 +1,14 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
-const migrationPath = path.resolve(
-  process.cwd(),
-  "migrations",
-  "001_initial_sigi_poa_schema.sql"
-);
-
-const migrationSql = readFileSync(migrationPath, "utf8").toLowerCase();
+const migrationsDir = path.resolve(process.cwd(), "migrations");
+const migrationSql = readdirSync(migrationsDir)
+  .filter((fileName) => fileName.endsWith(".sql"))
+  .sort()
+  .map((fileName) => readFileSync(path.join(migrationsDir, fileName), "utf8"))
+  .join("\n")
+  .toLowerCase();
 
 const requiredTables = [
   "users",
@@ -64,5 +64,13 @@ describe("initial SIGI-POA migrations", () => {
     expect(migrationSql).toContain("new_value jsonb");
     expect(migrationSql).toContain("change_set jsonb");
     expect(migrationSql).toContain("version_number");
+  });
+
+  it("adds workflow and import safeguards required by SCRUM-42 and SCRUM-43", () => {
+    expect(migrationSql).toContain("create table if not exists submission_status_transitions");
+    expect(migrationSql).toContain("create table if not exists import_runs");
+    expect(migrationSql).toContain("submission_versions_one_current");
+    expect(migrationSql).toContain("assignments_unique_user_indicator_responsibility");
+    expect(migrationSql).toContain("drop column if exists public_url");
   });
 });
