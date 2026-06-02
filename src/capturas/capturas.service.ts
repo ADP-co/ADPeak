@@ -20,7 +20,7 @@ type SubmissionRow = {
   id: number;
   plantel_id: number;
   indicator_id: number;
-  activity_id: number | null;
+  activity_id: number;
   period_id: number;
   responsable_id: number | null;
   status: SubmissionStatus;
@@ -57,7 +57,7 @@ export class CapturasService {
       [
         dto.plantelId,
         dto.indicadorId,
-        dto.actividadId ?? null,
+        dto.actividadId,
         dto.periodoId,
         dto.responsableId ?? null,
         payload,
@@ -233,9 +233,7 @@ export class CapturasService {
 
     const submission = this.findSubmission(id);
     this.ensureCanRead(actor, submission);
-    if (submission.status === 'cerrado') {
-      throw new ForbiddenException('No se puede modificar una captura cerrada');
-    }
+    this.ensureValidReviewTransition(actor, submission, status);
 
     const closedAt = status === 'cerrado' ? new Date().toISOString() : null;
     this.database.run(
@@ -316,6 +314,34 @@ export class CapturasService {
     if (!assignment) {
       throw new ForbiddenException(
         'El responsable no tiene acceso a esta captura',
+      );
+    }
+  }
+
+  private ensureValidReviewTransition(
+    actor: RequestActor,
+    submission: SubmissionRow,
+    nextStatus: 'correccion_solicitada' | 'aprobado' | 'cerrado',
+  ) {
+    if (submission.status === 'cerrado') {
+      throw new ForbiddenException('No se puede modificar una captura cerrada');
+    }
+
+    if (nextStatus === 'cerrado') {
+      requireRole(actor, ['admin']);
+
+      if (submission.status !== 'aprobado') {
+        throw new ForbiddenException(
+          'Solo se puede cerrar una captura aprobada',
+        );
+      }
+
+      return;
+    }
+
+    if (submission.status !== 'en_revision') {
+      throw new ForbiddenException(
+        'Solo se puede resolver una captura en revision',
       );
     }
   }

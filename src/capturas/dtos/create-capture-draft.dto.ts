@@ -24,11 +24,10 @@ export class CreateCaptureDraftDto {
   @Min(1)
   periodoId: number;
 
-  @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  actividadId?: number;
+  actividadId: number;
 
   @IsOptional()
   @Type(() => Number)

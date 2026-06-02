@@ -7,7 +7,7 @@ export declare class RevisionesController {
         id: number;
         plantelId: number;
         indicadorId: number;
-        actividadId: number | null;
+        actividadId: number;
         periodoId: number;
         responsableId: number | null;
         estado: "cerrado" | "borrador" | "enviado" | "en_revision" | "correccion_solicitada" | "aprobado";
@@ -21,7 +21,7 @@ export declare class RevisionesController {
         id: number;
         plantelId: number;
         indicadorId: number;
-        actividadId: number | null;
+        actividadId: number;
         periodoId: number;
         responsableId: number | null;
         estado: "cerrado" | "borrador" | "enviado" | "en_revision" | "correccion_solicitada" | "aprobado";

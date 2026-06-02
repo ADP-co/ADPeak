@@ -187,6 +187,34 @@ describe('SCRUM-37 captura y revision (e2e)', () => {
     await request(app.getHttpServer() as SupertestApp)
       .post('/api/v1/revisiones/1/resolver')
       .set(responsableHeaders)
+      .send({ estado: 'cerrado', comentario: 'Cierre prematuro' })
+      .expect(403);
+
+    await request(app.getHttpServer() as SupertestApp)
+      .post('/api/v1/revisiones/1/resolver')
+      .set(responsableHeaders)
+      .send({ estado: 'aprobado', comentario: 'Revision validada' })
+      .expect(201)
+      .expect((response) => {
+        const body = response.body as RevisionSummary;
+        expect(body.estado).toBe('aprobado');
+      });
+
+    await request(app.getHttpServer() as SupertestApp)
+      .post('/api/v1/revisiones/1/resolver')
+      .set(responsableHeaders)
+      .send({ estado: 'correccion_solicitada' })
+      .expect(403);
+
+    await request(app.getHttpServer() as SupertestApp)
+      .post('/api/v1/revisiones/1/resolver')
+      .set(responsableHeaders)
+      .send({ estado: 'cerrado', comentario: 'Cierre sin rol admin' })
+      .expect(403);
+
+    await request(app.getHttpServer() as SupertestApp)
+      .post('/api/v1/revisiones/1/resolver')
+      .set(adminHeaders)
       .send({ estado: 'cerrado', comentario: 'Cierre validado' })
       .expect(201)
       .expect((response) => {
@@ -196,7 +224,7 @@ describe('SCRUM-37 captura y revision (e2e)', () => {
 
     await request(app.getHttpServer() as SupertestApp)
       .post('/api/v1/revisiones/1/resolver')
-      .set(responsableHeaders)
+      .set(adminHeaders)
       .send({ estado: 'correccion_solicitada' })
       .expect(403);
   });
@@ -230,5 +258,23 @@ describe('SCRUM-37 captura y revision (e2e)', () => {
       .set(adminHeaders)
       .send({ ...draftPayload, payload: 'texto no valido' })
       .expect(400);
+
+    await request(app.getHttpServer() as SupertestApp)
+      .post('/api/v1/capturas/borradores')
+      .set(adminHeaders)
+      .send({ ...draftPayload, actividadId: undefined })
+      .expect(400);
+
+    await request(app.getHttpServer() as SupertestApp)
+      .post('/api/v1/capturas/borradores')
+      .set(adminHeaders)
+      .send(draftPayload)
+      .expect(201);
+
+    await request(app.getHttpServer() as SupertestApp)
+      .post('/api/v1/revisiones/1/resolver')
+      .set(adminHeaders)
+      .send({ estado: 'aprobado' })
+      .expect(403);
   });
 });

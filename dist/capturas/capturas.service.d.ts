@@ -10,7 +10,7 @@ export declare class CapturasService {
         id: number;
         plantelId: number;
         indicadorId: number;
-        actividadId: number | null;
+        actividadId: number;
         periodoId: number;
         responsableId: number | null;
         estado: SubmissionStatus;
@@ -24,7 +24,7 @@ export declare class CapturasService {
         id: number;
         plantelId: number;
         indicadorId: number;
-        actividadId: number | null;
+        actividadId: number;
         periodoId: number;
         responsableId: number | null;
         estado: SubmissionStatus;
@@ -57,7 +57,7 @@ export declare class CapturasService {
         id: number;
         plantelId: number;
         indicadorId: number;
-        actividadId: number | null;
+        actividadId: number;
         periodoId: number;
         responsableId: number | null;
         estado: SubmissionStatus;
@@ -71,7 +71,7 @@ export declare class CapturasService {
         id: number;
         plantelId: number;
         indicadorId: number;
-        actividadId: number | null;
+        actividadId: number;
         periodoId: number;
         responsableId: number | null;
         estado: SubmissionStatus;
@@ -85,7 +85,7 @@ export declare class CapturasService {
         id: number;
         plantelId: number;
         indicadorId: number;
-        actividadId: number | null;
+        actividadId: number;
         periodoId: number;
         responsableId: number | null;
         estado: SubmissionStatus;
@@ -99,7 +99,7 @@ export declare class CapturasService {
         id: number;
         plantelId: number;
         indicadorId: number;
-        actividadId: number | null;
+        actividadId: number;
         periodoId: number;
         responsableId: number | null;
         estado: SubmissionStatus;
@@ -112,6 +112,7 @@ export declare class CapturasService {
     private findSubmission;
     private ensureCanCreateOrEdit;
     private ensureCanRead;
+    private ensureValidReviewTransition;
     private ensureEditable;
     private insertVersion;
     private insertAudit;

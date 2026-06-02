@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS submissions (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   plantel_id INTEGER NOT NULL REFERENCES planteles(id),
   indicator_id INTEGER NOT NULL REFERENCES indicators(id),
-  activity_id INTEGER REFERENCES activities(id),
+  activity_id INTEGER NOT NULL REFERENCES activities(id),
   period_id INTEGER NOT NULL REFERENCES periods(id),
   responsable_id INTEGER REFERENCES users(id),
   status TEXT NOT NULL CHECK (status IN ('borrador', 'enviado', 'en_revision', 'correccion_solicitada', 'aprobado', 'cerrado')),

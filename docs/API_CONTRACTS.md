@@ -69,6 +69,8 @@ Response `201`:
 }
 ```
 
+`actividadId` es requerido; la captura no acepta actividad nula porque forma parte de la llave logica de unicidad por plantel, indicador, actividad y periodo.
+
 ### Actualizar borrador o autoguardado
 
 `PUT /capturas/{id}`
@@ -170,6 +172,10 @@ Request:
 ```
 
 `estado` admite `correccion_solicitada`, `aprobado` o `cerrado`.
+
+Reglas de transicion: `correccion_solicitada` y `aprobado` solo salen de `en_revision`. `cerrado` solo sale de `aprobado` y requiere rol `admin`. Una captura `cerrado` no puede modificarse ni resolverse de nuevo.
+
+Estas reglas evitan aprobaciones directas de borradores y cierres prematuros antes de la validacion del responsable.
 
 ## Dashboard
 

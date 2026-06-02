@@ -41,7 +41,6 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateCaptureDraftDto.prototype, "periodoId", void 0);
 __decorate([
-    (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(1),

@@ -26,7 +26,7 @@ let CapturasService = class CapturasService {
        VALUES (?, ?, ?, ?, ?, 'borrador', 1, ?)`, [
             dto.plantelId,
             dto.indicadorId,
-            dto.actividadId ?? null,
+            dto.actividadId,
             dto.periodoId,
             dto.responsableId ?? null,
             payload,
@@ -117,9 +117,7 @@ let CapturasService = class CapturasService {
         (0, request_actor_1.requireRole)(actor, ['admin', 'responsable']);
         const submission = this.findSubmission(id);
         this.ensureCanRead(actor, submission);
-        if (submission.status === 'cerrado') {
-            throw new common_1.ForbiddenException('No se puede modificar una captura cerrada');
-        }
+        this.ensureValidReviewTransition(actor, submission, status);
         const closedAt = status === 'cerrado' ? new Date().toISOString() : null;
         this.database.run(`UPDATE submissions
        SET status = ?, closed_at = COALESCE(?, closed_at), updated_at = CURRENT_TIMESTAMP
@@ -163,6 +161,21 @@ let CapturasService = class CapturasService {
        WHERE plantel_id = ? AND indicator_id = ? AND responsable_id = ? AND active = 1`, [submission.plantel_id, submission.indicator_id, responsableId]);
         if (!assignment) {
             throw new common_1.ForbiddenException('El responsable no tiene acceso a esta captura');
+        }
+    }
+    ensureValidReviewTransition(actor, submission, nextStatus) {
+        if (submission.status === 'cerrado') {
+            throw new common_1.ForbiddenException('No se puede modificar una captura cerrada');
+        }
+        if (nextStatus === 'cerrado') {
+            (0, request_actor_1.requireRole)(actor, ['admin']);
+            if (submission.status !== 'aprobado') {
+                throw new common_1.ForbiddenException('Solo se puede cerrar una captura aprobada');
+            }
+            return;
+        }
+        if (submission.status !== 'en_revision') {
+            throw new common_1.ForbiddenException('Solo se puede resolver una captura en revision');
         }
     }
     ensureEditable(submission) {
