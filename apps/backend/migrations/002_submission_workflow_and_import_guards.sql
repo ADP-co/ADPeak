@@ -22,6 +22,28 @@ ALTER TABLE submission_versions
   ADD COLUMN IF NOT EXISTS is_current BOOLEAN NOT NULL DEFAULT FALSE,
   ADD COLUMN IF NOT EXISTS active BOOLEAN NOT NULL DEFAULT TRUE;
 
+UPDATE submissions
+SET current_version_number = COALESCE(
+  (
+    SELECT MAX(version_number)
+    FROM submission_versions
+    WHERE submission_versions.submission_id = submissions.id
+      AND submission_versions.deleted_at IS NULL
+  ),
+  current_version_number
+);
+
+UPDATE submission_versions
+SET is_current = FALSE;
+
+UPDATE submission_versions
+SET is_current = TRUE
+FROM submissions
+WHERE submission_versions.submission_id = submissions.id
+  AND submission_versions.version_number = submissions.current_version_number
+  AND submission_versions.active = TRUE
+  AND submission_versions.deleted_at IS NULL;
+
 CREATE UNIQUE INDEX IF NOT EXISTS submission_versions_one_current
   ON submission_versions (submission_id)
   WHERE is_current = TRUE AND active = TRUE AND deleted_at IS NULL;

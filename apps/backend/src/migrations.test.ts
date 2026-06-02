@@ -70,6 +70,9 @@ describe("initial SIGI-POA migrations", () => {
     expect(migrationSql).toContain("create table if not exists submission_status_transitions");
     expect(migrationSql).toContain("create table if not exists import_runs");
     expect(migrationSql).toContain("submission_versions_one_current");
+    expect(migrationSql).toContain("update submissions");
+    expect(migrationSql).toContain("max(version_number)");
+    expect(migrationSql).toContain("set is_current = true");
     expect(migrationSql).toContain("assignments_unique_user_indicator_responsibility");
     expect(migrationSql).toContain("drop column if exists public_url");
   });
