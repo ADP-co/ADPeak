@@ -10,9 +10,19 @@ import { RevisionesModule } from './revisiones/revisiones.module';
 import { ReportesModule } from './reportes/reportes.module';
 import { HealthcheckController } from './healthcheck/healthcheck.controller';
 import { HealthcheckService } from './healthcheck/healthcheck.service';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
-  imports: [AuthModule, UsuariosModule, CatalogosModule, CapturasModule, EvidenciasModule, RevisionesModule, ReportesModule],
+  imports: [
+    DatabaseModule,
+    AuthModule,
+    UsuariosModule,
+    CatalogosModule,
+    CapturasModule,
+    EvidenciasModule,
+    RevisionesModule,
+    ReportesModule,
+  ],
   controllers: [AppController, HealthcheckController],
   providers: [AppService, HealthcheckService],
 })

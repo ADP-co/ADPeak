@@ -5,7 +5,10 @@ export type CrudEntity<T extends object = Record<string, unknown>> = T & {
   activo: boolean;
 };
 
-export abstract class InMemoryCrudService<TCreate extends object, TUpdate extends object> {
+export abstract class InMemoryCrudService<
+  TCreate extends object,
+  TUpdate extends object,
+> {
   private readonly items: Array<CrudEntity<TCreate>>;
   private idCounter: number;
 
@@ -41,9 +44,9 @@ export abstract class InMemoryCrudService<TCreate extends object, TUpdate extend
 
   update(id: number, dto: TUpdate): CrudEntity<TCreate> {
     const item = this.findOne(id);
-    Object.entries(dto).forEach(([key, value]) => {
+    Object.entries(dto as Record<string, unknown>).forEach(([key, value]) => {
       if (value !== undefined) {
-        Object.assign(item, { [key]: value });
+        (item as Record<string, unknown>)[key] = value;
       }
     });
     return item;

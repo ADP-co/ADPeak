@@ -19,12 +19,22 @@ const revisiones_module_1 = require("./revisiones/revisiones.module");
 const reportes_module_1 = require("./reportes/reportes.module");
 const healthcheck_controller_1 = require("./healthcheck/healthcheck.controller");
 const healthcheck_service_1 = require("./healthcheck/healthcheck.service");
+const database_module_1 = require("./database/database.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [auth_module_1.AuthModule, usuarios_module_1.UsuariosModule, catalogos_module_1.CatalogosModule, capturas_module_1.CapturasModule, evidencias_module_1.EvidenciasModule, revisiones_module_1.RevisionesModule, reportes_module_1.ReportesModule],
+        imports: [
+            database_module_1.DatabaseModule,
+            auth_module_1.AuthModule,
+            usuarios_module_1.UsuariosModule,
+            catalogos_module_1.CatalogosModule,
+            capturas_module_1.CapturasModule,
+            evidencias_module_1.EvidenciasModule,
+            revisiones_module_1.RevisionesModule,
+            reportes_module_1.ReportesModule,
+        ],
         controllers: [app_controller_1.AppController, healthcheck_controller_1.HealthcheckController],
         providers: [app_service_1.AppService, healthcheck_service_1.HealthcheckService],
     })

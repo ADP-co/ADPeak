@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { IndicadoresService } from './indicadores.service';
 import { CreateIndicadorDto } from '../dtos/create-indicador.dto';
 import { UpdateIndicadorDto } from '../dtos/update-indicador.dto';
@@ -23,7 +32,10 @@ export class IndicadoresController {
   }
 
   @Put(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateIndicadorDto: UpdateIndicadorDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateIndicadorDto: UpdateIndicadorDto,
+  ) {
     return this.indicadoresService.update(id, updateIndicadorDto);
   }
 

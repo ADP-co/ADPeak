@@ -15,23 +15,23 @@ import { ContribuyentesController } from './contribuyentes/contribuyentes.contro
 import { ContribuyentesService } from './contribuyentes/contribuyentes.service';
 
 @Module({
-	controllers: [
-		PlantelesController,
-		IndicadoresController,
-		ActividadesController,
-		PeriodosController,
-		CiclosPoaController,
-		ResponsablesController,
-		ContribuyentesController,
-	],
-	providers: [
-		PlantelesService,
-		IndicadoresService,
-		ActividadesService,
-		PeriodosService,
-		CiclosPoaService,
-		ResponsablesService,
-		ContribuyentesService,
-	],
+  controllers: [
+    PlantelesController,
+    IndicadoresController,
+    ActividadesController,
+    PeriodosController,
+    CiclosPoaController,
+    ResponsablesController,
+    ContribuyentesController,
+  ],
+  providers: [
+    PlantelesService,
+    IndicadoresService,
+    ActividadesService,
+    PeriodosService,
+    CiclosPoaService,
+    ResponsablesService,
+    ContribuyentesService,
+  ],
 })
 export class CatalogosModule {}

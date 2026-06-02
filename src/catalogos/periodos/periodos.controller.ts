@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { PeriodosService } from './periodos.service';
 import { CreatePeriodoDto } from '../dtos/create-periodo.dto';
 import { UpdatePeriodoDto } from '../dtos/update-periodo.dto';
@@ -23,7 +32,10 @@ export class PeriodosController {
   }
 
   @Put(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() updatePeriodoDto: UpdatePeriodoDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updatePeriodoDto: UpdatePeriodoDto,
+  ) {
     return this.periodosService.update(id, updatePeriodoDto);
   }
 

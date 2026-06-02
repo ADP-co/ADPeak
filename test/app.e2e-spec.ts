@@ -1,6 +1,7 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
+import type { App as SupertestApp } from 'supertest/types';
 import { AppModule } from '../src/app.module';
 
 type ResourceCase = {
@@ -33,7 +34,10 @@ const resources: ResourceCase[] = [
       actividadId: 1,
       unidadMedida: 'porcentaje',
     },
-    update: { nombre: 'Tasa de aprobacion ajustada', unidadMedida: 'porcentaje' },
+    update: {
+      nombre: 'Tasa de aprobacion ajustada',
+      unidadMedida: 'porcentaje',
+    },
   },
   {
     name: 'actividades',
@@ -49,7 +53,11 @@ const resources: ResourceCase[] = [
   {
     name: 'periodos',
     path: '/api/v1/catalogos/periodos',
-    create: { nombre: 'Periodo 2026-A', fechaInicio: '2026-01-01', fechaFin: '2026-06-30' },
+    create: {
+      nombre: 'Periodo 2026-A',
+      fechaInicio: '2026-01-01',
+      fechaFin: '2026-06-30',
+    },
     update: { nombre: 'Periodo 2026-A editado' },
   },
   {
@@ -87,6 +95,8 @@ describe('SCRUM-36 CRUD administrativo (e2e)', () => {
   let app: INestApplication;
 
   beforeEach(async () => {
+    process.env.ADPEAK_DB_PATH = ':memory:';
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -107,57 +117,78 @@ describe('SCRUM-36 CRUD administrativo (e2e)', () => {
     await app.close();
   });
 
-  it.each(resources)('$name permite listar, crear, consultar, editar y desactivar', async (resource) => {
-    await request(app.getHttpServer()).get(resource.path).expect(200).expect([]);
+  it.each(resources)(
+    '$name permite listar, crear, consultar, editar y desactivar',
+    async (resource) => {
+      await request(app.getHttpServer() as SupertestApp)
+        .get(resource.path)
+        .expect(200)
+        .expect([]);
 
-    const createResponse = await request(app.getHttpServer())
-      .post(resource.path)
-      .send(resource.create)
-      .expect(201);
+      const createResponse = await request(app.getHttpServer() as SupertestApp)
+        .post(resource.path)
+        .send(resource.create)
+        .expect(201);
+      const createdBody = createResponse.body as Record<string, unknown>;
 
-    expect(createResponse.body).toMatchObject({
-      id: 1,
-      activo: true,
-      ...resource.create,
-    });
-
-    await request(app.getHttpServer())
-      .get(resource.path)
-      .expect(200)
-      .expect([createResponse.body]);
-
-    await request(app.getHttpServer()).get(`${resource.path}/1`).expect(200).expect(createResponse.body);
-
-    const updateResponse = await request(app.getHttpServer())
-      .put(`${resource.path}/1`)
-      .send(resource.update)
-      .expect(200);
-
-    expect(updateResponse.body).toMatchObject({
-      id: 1,
-      activo: true,
-      ...resource.create,
-      ...resource.update,
-    });
-
-    await request(app.getHttpServer())
-      .patch(`${resource.path}/1/desactivar`)
-      .expect(200)
-      .expect((response) => {
-        expect(response.body.activo).toBe(false);
+      expect(createdBody).toMatchObject({
+        id: 1,
+        activo: true,
+        ...resource.create,
       });
 
-    await request(app.getHttpServer()).get(`${resource.path}/999`).expect(404);
-  });
+      await request(app.getHttpServer() as SupertestApp)
+        .get(resource.path)
+        .expect(200)
+        .expect([createdBody]);
 
-  it.each(resources)('$name rechaza payloads invalidos y campos no permitidos', async (resource) => {
-    await request(app.getHttpServer()).post(resource.path).send({}).expect(400);
+      await request(app.getHttpServer() as SupertestApp)
+        .get(`${resource.path}/1`)
+        .expect(200)
+        .expect(createdBody);
 
-    await request(app.getHttpServer())
-      .post(resource.path)
-      .send({ ...resource.create, campoNoPermitido: true })
-      .expect(400);
+      const updateResponse = await request(app.getHttpServer() as SupertestApp)
+        .put(`${resource.path}/1`)
+        .send(resource.update)
+        .expect(200);
 
-    await request(app.getHttpServer()).get(`${resource.path}/abc`).expect(400);
-  });
+      expect(updateResponse.body).toMatchObject({
+        id: 1,
+        activo: true,
+        ...resource.create,
+        ...resource.update,
+      });
+
+      await request(app.getHttpServer() as SupertestApp)
+        .patch(`${resource.path}/1/desactivar`)
+        .expect(200)
+        .expect((response) => {
+          const body = response.body as { activo: boolean };
+          expect(body.activo).toBe(false);
+        });
+
+      await request(app.getHttpServer() as SupertestApp)
+        .get(`${resource.path}/999`)
+        .expect(404);
+    },
+  );
+
+  it.each(resources)(
+    '$name rechaza payloads invalidos y campos no permitidos',
+    async (resource) => {
+      await request(app.getHttpServer() as SupertestApp)
+        .post(resource.path)
+        .send({})
+        .expect(400);
+
+      await request(app.getHttpServer() as SupertestApp)
+        .post(resource.path)
+        .send({ ...resource.create, campoNoPermitido: true })
+        .expect(400);
+
+      await request(app.getHttpServer() as SupertestApp)
+        .get(`${resource.path}/abc`)
+        .expect(400);
+    },
+  );
 });

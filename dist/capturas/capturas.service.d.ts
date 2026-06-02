@@ -1,0 +1,120 @@
+import { RequestActor } from '../auth/request-actor';
+import { DatabaseService } from '../database/database.service';
+import { CreateCaptureDraftDto } from './dtos/create-capture-draft.dto';
+import { UpdateCaptureDto } from './dtos/update-capture.dto';
+type SubmissionStatus = 'borrador' | 'enviado' | 'en_revision' | 'correccion_solicitada' | 'aprobado' | 'cerrado';
+export declare class CapturasService {
+    private readonly database;
+    constructor(database: DatabaseService);
+    createDraft(actor: RequestActor, dto: CreateCaptureDraftDto): {
+        id: number;
+        plantelId: number;
+        indicadorId: number;
+        actividadId: number | null;
+        periodoId: number;
+        responsableId: number | null;
+        estado: SubmissionStatus;
+        versionActual: number;
+        payload: unknown;
+        cerradoEn: string | null;
+        creadoEn: string;
+        actualizadoEn: string;
+    };
+    findOneForActor(id: number, actor: RequestActor): {
+        id: number;
+        plantelId: number;
+        indicadorId: number;
+        actividadId: number | null;
+        periodoId: number;
+        responsableId: number | null;
+        estado: SubmissionStatus;
+        versionActual: number;
+        payload: unknown;
+        cerradoEn: string | null;
+        creadoEn: string;
+        actualizadoEn: string;
+    };
+    getStatus(id: number, actor: RequestActor): {
+        id: number;
+        estado: SubmissionStatus;
+        versionActual: number;
+        cerrado: boolean;
+        actualizadoEn: string;
+    };
+    getHistory(id: number, actor: RequestActor): {
+        capturaId: number;
+        versionActual: number;
+        versiones: {
+            id: number;
+            numero: number;
+            payload: unknown;
+            motivoCambio: string | null;
+            creadoPorUsuarioId: number | null;
+            creadoEn: string;
+        }[];
+    };
+    updateDraft(id: number, actor: RequestActor, dto: UpdateCaptureDto): {
+        id: number;
+        plantelId: number;
+        indicadorId: number;
+        actividadId: number | null;
+        periodoId: number;
+        responsableId: number | null;
+        estado: SubmissionStatus;
+        versionActual: number;
+        payload: unknown;
+        cerradoEn: string | null;
+        creadoEn: string;
+        actualizadoEn: string;
+    };
+    sendToReview(id: number, actor: RequestActor): {
+        id: number;
+        plantelId: number;
+        indicadorId: number;
+        actividadId: number | null;
+        periodoId: number;
+        responsableId: number | null;
+        estado: SubmissionStatus;
+        versionActual: number;
+        payload: unknown;
+        cerradoEn: string | null;
+        creadoEn: string;
+        actualizadoEn: string;
+    };
+    listForReview(actor: RequestActor): {
+        id: number;
+        plantelId: number;
+        indicadorId: number;
+        actividadId: number | null;
+        periodoId: number;
+        responsableId: number | null;
+        estado: SubmissionStatus;
+        versionActual: number;
+        payload: unknown;
+        cerradoEn: string | null;
+        creadoEn: string;
+        actualizadoEn: string;
+    }[];
+    resolveReview(id: number, actor: RequestActor, status: 'correccion_solicitada' | 'aprobado' | 'cerrado', comments?: string): {
+        id: number;
+        plantelId: number;
+        indicadorId: number;
+        actividadId: number | null;
+        periodoId: number;
+        responsableId: number | null;
+        estado: SubmissionStatus;
+        versionActual: number;
+        payload: unknown;
+        cerradoEn: string | null;
+        creadoEn: string;
+        actualizadoEn: string;
+    };
+    private findSubmission;
+    private ensureCanCreateOrEdit;
+    private ensureCanRead;
+    private ensureEditable;
+    private insertVersion;
+    private insertAudit;
+    private toDto;
+}
+export {};

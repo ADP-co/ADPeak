@@ -4,7 +4,10 @@ import { CreateActividadDto } from '../dtos/create-actividad.dto';
 import { UpdateActividadDto } from '../dtos/update-actividad.dto';
 
 @Injectable()
-export class ActividadesService extends InMemoryCrudService<CreateActividadDto, UpdateActividadDto> {
+export class ActividadesService extends InMemoryCrudService<
+  CreateActividadDto,
+  UpdateActividadDto
+> {
   constructor() {
     super('Actividad');
   }

@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { ResponsablesService } from './responsables.service';
 import { CreateResponsableDto } from '../dtos/create-responsable.dto';
 import { UpdateResponsableDto } from '../dtos/update-responsable.dto';
@@ -23,7 +32,10 @@ export class ResponsablesController {
   }
 
   @Put(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateResponsableDto: UpdateResponsableDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateResponsableDto: UpdateResponsableDto,
+  ) {
     return this.responsablesService.update(id, updateResponsableDto);
   }
 

@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { ContribuyentesService } from './contribuyentes.service';
 import { CreateContribuyenteDto } from '../dtos/create-contribuyente.dto';
 import { UpdateContribuyenteDto } from '../dtos/update-contribuyente.dto';

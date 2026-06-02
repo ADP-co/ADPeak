@@ -34,7 +34,7 @@ class InMemoryCrudService {
         const item = this.findOne(id);
         Object.entries(dto).forEach(([key, value]) => {
             if (value !== undefined) {
-                Object.assign(item, { [key]: value });
+                item[key] = value;
             }
         });
         return item;

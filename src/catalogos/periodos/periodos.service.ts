@@ -4,7 +4,10 @@ import { CreatePeriodoDto } from '../dtos/create-periodo.dto';
 import { UpdatePeriodoDto } from '../dtos/update-periodo.dto';
 
 @Injectable()
-export class PeriodosService extends InMemoryCrudService<CreatePeriodoDto, UpdatePeriodoDto> {
+export class PeriodosService extends InMemoryCrudService<
+  CreatePeriodoDto,
+  UpdatePeriodoDto
+> {
   constructor() {
     super('Periodo');
   }

@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { ActividadesService } from './actividades.service';
 import { CreateActividadDto } from '../dtos/create-actividad.dto';
 import { UpdateActividadDto } from '../dtos/update-actividad.dto';
@@ -23,7 +32,10 @@ export class ActividadesController {
   }
 
   @Put(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateActividadDto: UpdateActividadDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateActividadDto: UpdateActividadDto,
+  ) {
     return this.actividadesService.update(id, updateActividadDto);
   }
 

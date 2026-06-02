@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { CiclosPoaService } from './ciclos-poa.service';
 import { CreateCicloPoaDto } from '../dtos/create-ciclo-poa.dto';
 import { UpdateCicloPoaDto } from '../dtos/update-ciclo-poa.dto';
@@ -23,7 +32,10 @@ export class CiclosPoaController {
   }
 
   @Put(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateCicloPoaDto: UpdateCicloPoaDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateCicloPoaDto: UpdateCicloPoaDto,
+  ) {
     return this.ciclosPoaService.update(id, updateCicloPoaDto);
   }
 

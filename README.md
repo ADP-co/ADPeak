@@ -1,30 +1,40 @@
-# Sistema de Reportes de Labores - Universidad de Colimas
+# ADPeak API
 
-Plataforma web para que los directivos de los bachilleratos de la Universidad de Colimas suban y gestionen sus reportes de labores para revisión de la DGEMS.
+API NestJS para el MVP SIGI/POA de ADPeak.
 
-## Descripción del Proyecto
+## Stack
 
-Este sistema permite:
-- Autenticación segura de directivos y administradores
-- Subida de reportes de actividades y labores
-- Visualización y seguimiento de reportes por DGEMS
-- Gestión de usuarios y roles
-- Generación de reportes consolidados
+- NestJS + TypeScript.
+- Validacion global con `ValidationPipe`, `whitelist`, `forbidNonWhitelisted` y `transform`.
+- SQLite local mediante `node:sqlite` para persistencia demo y pruebas de integracion.
 
-## Estructura de Ramas
+## Comandos
 
-- **main**: Rama de producción
-- **develop**: Rama de desarrollo
-- **feature/auth-users**: Sistema de autenticación y gestión de usuarios
-- **feature/upload-reports**: Módulo de carga de reportes
-- **feature/reports-dashboard**: Dashboard de visualización de reportes
-- **feature/email-notifications**: Sistema de notificaciones por correo
-- **feature/api-backend**: API backend principal
+```bash
+npm install
+npm run migrate
+npm run start:dev
+npm run build
+npm test
+npm run test:e2e
+```
 
-## Stack Tecnológico
+La API escucha en `http://localhost:3000/api/v1`.
 
-(Por definir según el equipo)
+## Migraciones y datos demo
 
-## Integrantes del Equipo
+Por defecto se crea `data/adpeak.sqlite`. Para pruebas aisladas se puede usar:
 
-(Por agregar)
+```bash
+ADPEAK_DB_PATH=:memory: npm run test:e2e
+```
+
+El esquema versionado se define en `src/database/schema.ts` y crea tablas base de roles, usuarios, planteles, ciclos POA, periodos, indicadores, actividades, asignaciones, capturas, versiones, evidencias, revisiones y auditoria.
+
+## Contratos
+
+Los contratos de captura, revision, dashboard y reportes estan documentados en `docs/API_CONTRACTS.md`.
+
+## Seguridad de datos
+
+No versionar bases SQLite generadas, archivos de evidencia, excels institucionales, PDFs privados ni secretos reales. La rama usa datos demo controlados para pruebas.

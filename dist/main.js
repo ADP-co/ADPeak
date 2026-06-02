@@ -14,5 +14,5 @@ async function bootstrap() {
     await app.listen(3000);
     console.log('API lista en: http://localhost:3000/api/v1/health');
 }
-bootstrap();
+void bootstrap();
 //# sourceMappingURL=main.js.map
