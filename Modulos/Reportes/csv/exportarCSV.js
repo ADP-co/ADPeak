@@ -1,28 +1,38 @@
-// ======================================================
-// IMPORTAR GENERADOR CSV
-// ======================================================
+function escaparCSV(valor) {
+  if (valor === null || valor === undefined) {
+    return '';
+  }
 
-const generarIndicadorCSV =
-    require("./generarIndicadorCSV");
+  const texto = String(valor);
+  if (/[",\n\r]/.test(texto)) {
+    return `"${texto.replace(/"/g, '""')}"`;
+  }
 
-
-// ======================================================
-// FUNCIÓN PRINCIPAL
-// ------------------------------------------------------
-// Esta función controla la exportación
-// general del archivo CSV.
-// ======================================================
-
-function exportarCSV(reporte) {
-
-    generarIndicadorCSV(reporte);
-
+  return texto;
 }
 
+function generarCSVReporte(reporte) {
+  const columnas = reporte.columnas || [];
+  const filas = reporte.datos || [];
 
-// ======================================================
-// EXPORTAR FUNCIÓN
-// ======================================================
+  return [
+    ['Reporte', reporte.titulo || 'Reporte DGEMS'],
+    ['Fecha de generacion', reporte.fechaGeneracion || new Date().toISOString()],
+    ['Filtros aplicados', JSON.stringify(reporte.filtros || {})],
+    [],
+    columnas,
+    ...filas.map((fila) => columnas.map((columna) => fila[columna])),
+  ]
+    .map((fila) => fila.map(escaparCSV).join(','))
+    .join('\n');
+}
 
-module.exports =
-    exportarCSV;
+function exportarCSV(reporte) {
+  return generarCSVReporte(reporte);
+}
+
+module.exports = {
+  escaparCSV,
+  exportarCSV,
+  generarCSVReporte,
+};
