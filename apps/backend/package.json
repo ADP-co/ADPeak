@@ -8,6 +8,9 @@
     "start": "tsx src/server.ts",
     "env:check": "tsx scripts/check-config.ts",
     "migrate": "tsx scripts/migrate.ts",
+    "migrate:check": "tsx scripts/migrate.ts --dry-run",
+    "seed:scrum42": "tsx scripts/import-poa.ts --fixture seeds/scrum-42-demo.json",
+    "seed:scrum42:check": "tsx scripts/import-poa.ts --fixture seeds/scrum-42-demo.json --dry-run",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "build": "tsc -p tsconfig.build.json"
@@ -19,6 +22,8 @@
     "vitest": "^4.1.6"
   },
   "dependencies": {
-    "dotenv": "^17.4.2"
+    "@types/pg": "^8.20.0",
+    "dotenv": "^17.4.2",
+    "pg": "^8.21.0"
   }
 }

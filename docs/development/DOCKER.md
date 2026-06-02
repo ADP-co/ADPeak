@@ -71,8 +71,10 @@ Para ejecutar el punto unico de migraciones dentro del entorno Docker:
 npm run docker:migrate
 ```
 
-El comando actual prepara y lista archivos SQL en `apps/backend/migrations`
-hasta que el equipo cierre el motor de migraciones definitivo.
+El comando actual valida y lista archivos SQL versionados en
+`apps/backend/migrations`, incluyendo checksum. La migracion inicial esta
+preparada para PostgreSQL; cuando se conecte el motor definitivo, este comando
+debe seguir siendo el punto unico de ejecucion dentro de Docker.
 
 ## Volumenes
 
