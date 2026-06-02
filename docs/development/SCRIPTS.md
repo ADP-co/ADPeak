@@ -33,7 +33,7 @@ npm run check
 | `npm run env:check` | Valida variables requeridas desde `.env`. |
 | `npm run dev:frontend` | Levanta Vite en `http://127.0.0.1:5173`. |
 | `npm run dev:backend` | Levanta la API local en `http://127.0.0.1:8000`. |
-| `npm run migrate` | Prepara/lista migraciones SQL en `apps/backend/migrations`. |
+| `npm run migrate` | Valida y lista migraciones SQL versionadas en `apps/backend/migrations`. |
 | `npm run docker:up` | Levanta frontend, backend y PostgreSQL con Docker Compose. |
 | `npm run docker:down` | Detiene el entorno Docker local. |
 | `npm run docker:logs` | Muestra logs del entorno Docker local. |
@@ -81,7 +81,8 @@ La guia especifica de Docker esta en [DOCKER.md](DOCKER.md).
 
 ## Migraciones
 
-Mientras el motor de base de datos final no este cerrado, el script
-`npm run migrate` prepara el directorio `apps/backend/migrations` y lista los
-archivos `.sql` versionados. Cuando se defina PostgreSQL o MySQL, este comando
-debe mantenerse como punto unico para ejecutar migraciones reales.
+El script `npm run migrate` prepara el directorio `apps/backend/migrations`,
+valida nombres, contenido DDL y checksum de los archivos `.sql` versionados.
+La migracion inicial esta escrita para PostgreSQL y cubre las tablas base del
+MVP. Cuando se conecte el motor definitivo, este comando debe mantenerse como
+punto unico para ejecutar migraciones reales.
