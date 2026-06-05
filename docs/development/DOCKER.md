@@ -86,3 +86,32 @@ Para reiniciar la base local desde cero:
 ```bash
 docker compose down -v
 ```
+
+## Modo demo
+
+`SCRUM-62` y `SCRUM-63` agregan un override separado para presentar avances con
+datos ficticios:
+
+```bash
+npm run demo:up
+```
+
+Este comando usa:
+
+- `.env.demo.example`
+- `compose.yaml`
+- `compose.demo.yaml`
+- Base local `sigi_poa_demo`
+- Endpoints `/demo/status`, `/demo/users`, `/demo/data` y `/demo/login`
+
+Validacion posterior al arranque:
+
+```bash
+npm run demo:validate-access
+```
+
+Detener demo:
+
+```bash
+npm run demo:down
+```

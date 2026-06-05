@@ -8,6 +8,10 @@
     "start": "tsx src/server.ts",
     "env:check": "tsx scripts/check-config.ts",
     "migrate": "tsx scripts/migrate.ts",
+    "demo:prepare-env": "tsx scripts/prepare-demo-env.ts",
+    "demo:seed": "tsx scripts/seed-demo.ts",
+    "demo:validate": "tsx scripts/validate-demo.ts",
+    "demo:validate-access": "tsx scripts/validate-demo-access.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "build": "tsc -p tsconfig.build.json"

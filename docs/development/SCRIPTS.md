@@ -38,6 +38,16 @@ npm run check
 | `npm run docker:down` | Detiene el entorno Docker local. |
 | `npm run docker:logs` | Muestra logs del entorno Docker local. |
 | `npm run docker:migrate` | Ejecuta migraciones desde el servicio backend de Docker. |
+| `npm run demo:prepare-env` | Crea o valida `.env` desde `.env.demo.example`. |
+| `npm run demo:seed` | Valida seed SQL y datos ficticios de demo. |
+| `npm run demo:validate` | Valida configuracion, usuarios, dataset y archivos requeridos de demo. |
+| `npm run demo:build` | Valida demo y ejecuta build de frontend/backend. |
+| `npm run demo:check` | Ejecuta seed, check completo y validacion demo. |
+| `npm run demo:up` | Levanta frontend, backend y PostgreSQL en modo demo. |
+| `npm run demo:down` | Detiene el entorno demo. |
+| `npm run demo:logs` | Muestra logs del entorno demo. |
+| `npm run demo:validate-access` | Valida frontend, API, dataset y login demo por rol. |
+| `npm run demo:preview` | Sirve el build frontend de demo en `http://127.0.0.1:5173`. |
 | `npm test` | Ejecuta pruebas de frontend y backend. |
 | `npm run build` | Compila frontend y backend. |
 | `npm run typecheck` | Valida TypeScript en todos los workspaces. |
@@ -75,9 +85,12 @@ npm --workspace @adpeak/backend run start
 | `CORS_ORIGIN` | `http://127.0.0.1:5173` | Origen permitido para frontend. |
 
 El backend expone `GET /health` para verificar que el servicio local responde.
+El modo demo agrega `GET /demo/status`, `GET /demo/users`, `GET /demo/data`,
+`GET /demo/roles` y `POST /demo/login`.
 
 La guia especifica de configuracion esta en [CONFIGURATION.md](CONFIGURATION.md).
 La guia especifica de Docker esta en [DOCKER.md](DOCKER.md).
+La guia especifica de demo esta en [DEMO.md](DEMO.md).
 
 ## Migraciones
 

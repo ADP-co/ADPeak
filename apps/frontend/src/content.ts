@@ -30,3 +30,40 @@ export function loadClientConfig(env: ClientEnv): ClientConfig {
     throw new ClientConfigurationError("VITE_API_URL debe ser una URL valida.");
   }
 }
+
+export type DemoRoleCard = {
+  role: "Administrador DGEMS" | "Plantel" | "Responsable de indicador";
+  email: string;
+  accessCode: string;
+  flow: string[];
+};
+
+export const demoRoleCards: DemoRoleCard[] = [
+  {
+    role: "Administrador DGEMS",
+    email: "admin.demo@adpeak.local",
+    accessCode: "demo-admin",
+    flow: ["Resumen global", "Filtros por plantel", "Reporte institucional"]
+  },
+  {
+    role: "Plantel",
+    email: "plantel.demo@adpeak.local",
+    accessCode: "demo-plantel",
+    flow: ["Captura de avance", "Evidencia ficticia", "Envio a revision"]
+  },
+  {
+    role: "Responsable de indicador",
+    email: "responsable.demo@adpeak.local",
+    accessCode: "demo-responsable",
+    flow: ["Revision", "Observacion", "Aprobacion"]
+  }
+];
+
+export function buildDemoLinks(apiUrl: string) {
+  return {
+    health: `${apiUrl}/health`,
+    status: `${apiUrl}/demo/status`,
+    data: `${apiUrl}/demo/data`,
+    users: `${apiUrl}/demo/users`
+  };
+}

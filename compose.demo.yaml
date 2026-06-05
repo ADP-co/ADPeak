@@ -1,0 +1,21 @@
+services:
+  db:
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-sigi_poa_demo}
+      POSTGRES_USER: ${POSTGRES_USER:-sigi_poa_demo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-demo_local_password_not_secret}
+
+  backend:
+    environment:
+      APP_ENV: demo
+      PUBLIC_APP_URL: ${PUBLIC_APP_URL:-http://127.0.0.1:5173}
+      INTERNAL_API_URL: ${INTERNAL_API_URL:-http://127.0.0.1:8000}
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-sigi_poa_demo}:${POSTGRES_PASSWORD:-demo_local_password_not_secret}@db:5432/${POSTGRES_DB:-sigi_poa_demo}"
+      AUTH_SECRET: ${AUTH_SECRET:-demo-local-placeholder-not-secret}
+      FILE_STORAGE_PATH: ${FILE_STORAGE_PATH:-uploads-demo}
+      NODE_ENV: development
+
+  frontend:
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://127.0.0.1:8000}
+      NODE_ENV: development

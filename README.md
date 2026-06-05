@@ -45,6 +45,7 @@ El análisis de los documentos fuente confirmó estos bloques de trabajo:
 - [Manejo de datos confidenciales](docs/security/DATA_HANDLING.md)
 - [Configuracion de entorno](docs/development/CONFIGURATION.md)
 - [Scripts de desarrollo](docs/development/SCRIPTS.md)
+- [Ambiente demo](docs/development/DEMO.md)
 - [Guía de ramas](BRANCH_GUIDE.md)
 
 El archivo original de planeación visual quedó archivado en [docs/project/action-plan-original.pdf](docs/project/action-plan-original.pdf). La versión editable y vigente del plan es [docs/project/ACTION_PLAN.md](docs/project/ACTION_PLAN.md).
@@ -75,6 +76,27 @@ npm test
 ```
 
 La documentacion completa de scripts esta en [docs/development/SCRIPTS.md](docs/development/SCRIPTS.md).
+
+## Demo local
+
+La demo controlada usa datos ficticios, tres roles de prueba y variables
+separadas de desarrollo:
+
+```bash
+npm ci
+npm run demo:check
+npm run demo:up
+npm run demo:validate-access
+```
+
+URLs principales:
+
+- Frontend: `http://127.0.0.1:5173`
+- Backend: `http://127.0.0.1:8000`
+- Healthcheck: `http://127.0.0.1:8000/health`
+- Dataset demo: `http://127.0.0.1:8000/demo/data`
+
+La guia completa esta en [docs/development/DEMO.md](docs/development/DEMO.md).
 
 ## Docker local
 

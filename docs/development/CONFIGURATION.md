@@ -14,6 +14,15 @@ copy .env.example .env
 Los valores incluidos son placeholders de desarrollo local. No son secretos
 reales y no deben copiarse a produccion.
 
+Para demo local controlada, usar `.env.demo.example`:
+
+```bash
+copy .env.demo.example .env
+```
+
+Esa plantilla usa `APP_ENV=demo`, base `sigi_poa_demo`, usuarios ficticios y
+codigos publicos de demo.
+
 ## Validar configuracion
 
 ```bash
@@ -27,7 +36,7 @@ variables faltantes y pide copiar `.env.example` a `.env`.
 
 | Variable | Uso |
 | --- | --- |
-| `APP_ENV` | Entorno de ejecucion: `development`, `test` o `production`. |
+| `APP_ENV` | Entorno de ejecucion: `development`, `test`, `demo` o `production`. |
 | `BACKEND_PORT` | Puerto HTTP del backend. |
 | `PUBLIC_APP_URL` | URL publica del frontend. |
 | `INTERNAL_API_URL` | URL interna usada para comunicacion entre servicios. |
@@ -43,6 +52,7 @@ variables faltantes y pide copiar `.env.example` a `.env`.
 ## Manejo de secretos y evidencias
 
 - `.env` y `.env.*` estan ignorados por Git, excepto `.env.example`.
+- `.env.demo.example` tambien esta permitido porque no contiene secretos reales.
 - `uploads/`, `evidence/`, `source-materials/`, `private/` y formatos de
   evidencia/documentos fuente estan ignorados por Git.
 - No se deben versionar credenciales, archivos fuente confidenciales,

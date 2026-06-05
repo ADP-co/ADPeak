@@ -19,7 +19,7 @@ export const REQUIRED_ENV_KEYS = [
 type RequiredEnvKey = (typeof REQUIRED_ENV_KEYS)[number];
 
 export type AppConfig = {
-  appEnv: "development" | "test" | "production";
+  appEnv: "development" | "test" | "demo" | "production";
   backendPort: number;
   publicAppUrl: string;
   internalApiUrl: string;
@@ -72,6 +72,7 @@ export function getAppConfig(
   const appEnv = parseEnum(readEnv(env, "APP_ENV"), "APP_ENV", [
     "development",
     "test",
+    "demo",
     "production"
   ]);
   const authSecret = readEnv(env, "AUTH_SECRET");

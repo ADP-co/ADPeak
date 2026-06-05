@@ -12,6 +12,7 @@ pnpm-debug.log*
 .env
 .env.*
 !.env.example
+!.env.demo.example
 secrets.json
 config.local.js
 settings.local.json

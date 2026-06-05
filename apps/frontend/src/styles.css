@@ -14,7 +14,7 @@ body {
   align-items: center;
   display: grid;
   gap: 32px;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 440px);
   min-height: 100vh;
   padding: 48px clamp(24px, 6vw, 88px);
 }
@@ -58,6 +58,104 @@ p {
   padding: 24px;
 }
 
+.demo-grid {
+  display: grid;
+  gap: 12px;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.role-card {
+  background: #ffffff;
+  border: 1px solid #dce5dd;
+  border-radius: 8px;
+  color: #172026;
+  cursor: pointer;
+  display: grid;
+  gap: 8px;
+  min-height: 132px;
+  padding: 18px;
+  text-align: left;
+}
+
+.role-card:hover,
+.role-card:focus-visible {
+  border-color: #2d6a4f;
+  outline: none;
+}
+
+.role-card.selected {
+  border-color: #2d6a4f;
+  box-shadow: inset 0 0 0 2px #2d6a4f;
+}
+
+.role-card span {
+  color: #2d6a4f;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.role-card strong,
+.role-card small {
+  overflow-wrap: anywhere;
+}
+
+.role-card strong {
+  font-size: 1rem;
+}
+
+.role-card small {
+  color: #587168;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+.flow-panel {
+  background: #12241f;
+  border-radius: 8px;
+  color: #ffffff;
+  display: grid;
+  gap: 24px;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+  padding: 24px;
+}
+
+.flow-panel h2 {
+  color: #ffffff;
+  font-size: 1.5rem;
+  letter-spacing: 0;
+  margin: 0 0 12px;
+}
+
+.flow-panel ol {
+  color: #d8ebe2;
+  line-height: 1.7;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.api-links {
+  align-content: start;
+  display: grid;
+  gap: 10px;
+}
+
+.api-links a {
+  background: #e7f3ed;
+  border-radius: 8px;
+  color: #0f2e24;
+  font-weight: 700;
+  padding: 12px 14px;
+  text-decoration: none;
+}
+
+.api-links a:hover,
+.api-links a:focus-visible {
+  background: #ffffff;
+  outline: none;
+}
+
 .status-panel div {
   display: grid;
   gap: 6px;
@@ -84,5 +182,10 @@ dd {
     align-content: center;
     grid-template-columns: 1fr;
     padding: 32px 20px;
+  }
+
+  .demo-grid,
+  .flow-panel {
+    grid-template-columns: 1fr;
   }
 }

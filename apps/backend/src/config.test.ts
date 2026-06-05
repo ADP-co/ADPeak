@@ -30,6 +30,20 @@ describe("getAppConfig", () => {
     });
   });
 
+  it("accepts the demo environment as separate from development", () => {
+    expect(
+      getAppConfig({
+        ...validEnv,
+        APP_ENV: "demo",
+        DATABASE_URL: "postgresql://sigi_poa_demo:demo_local_password@127.0.0.1:5432/sigi_poa_demo"
+      })
+    ).toMatchObject({
+      appEnv: "demo",
+      databaseUrl:
+        "postgresql://sigi_poa_demo:demo_local_password@127.0.0.1:5432/sigi_poa_demo"
+    });
+  });
+
   it("fails clearly when required variables are missing", () => {
     expect(() => getAppConfig({})).toThrow(ConfigurationError);
     expect(() => getAppConfig({})).toThrow(REQUIRED_ENV_KEYS.join(", "));
@@ -49,5 +63,15 @@ describe("getAppConfig", () => {
       authSecret: "[redacted]",
       databaseUrl: "postgresql://[redacted]@127.0.0.1:5432/sigi_poa_dev"
     });
+  });
+
+  it("rejects placeholder auth secrets in production", () => {
+    expect(() =>
+      getAppConfig({
+        ...validEnv,
+        APP_ENV: "production",
+        AUTH_SECRET: "local-dev-auth-secret-change-me"
+      })
+    ).toThrow("AUTH_SECRET no puede usar un valor de ejemplo en produccion.");
   });
 });
