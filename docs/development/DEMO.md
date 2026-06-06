@@ -97,6 +97,26 @@ La validacion comprueba:
 - Login demo funciona para los tres roles.
 - Cada rol recibe su flujo principal.
 
+## Conexion frontend-backend
+
+La pantalla demo no debe funcionar solo como maqueta visual. Al abrir
+`http://127.0.0.1:5173`, el frontend consulta el backend configurado en
+`VITE_API_URL`:
+
+- `GET /demo/status` para confirmar modo demo.
+- `GET /demo/users` para pintar los roles de prueba.
+- `GET /demo/data` para mostrar resumen del ciclo.
+- `POST /demo/login` al seleccionar un rol.
+
+Si Gael ve solo el cascaron visual o el mensaje `Backend demo no disponible`,
+debe revisar:
+
+1. Que `.env` exista y use `VITE_API_URL=http://127.0.0.1:8000`.
+2. Que el backend este levantado en `http://127.0.0.1:8000`.
+3. Que `http://127.0.0.1:8000/health` responda.
+4. Que `http://127.0.0.1:8000/demo/status` responda.
+5. Que el frontend se haya recompilado despues de preparar `.env`.
+
 ## Checklist previo a presentacion
 
 1. `git status` limpio en la rama de demo.

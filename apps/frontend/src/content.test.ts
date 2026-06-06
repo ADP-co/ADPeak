@@ -2,8 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   ClientConfigurationError,
   buildDemoLinks,
-  demoRoleCards,
-  loadClientConfig
+  labelDemoRole,
+  loadClientConfig,
+  toDemoRoleCard
 } from "./content";
 
 describe("loadClientConfig", () => {
@@ -24,13 +25,16 @@ describe("loadClientConfig", () => {
     );
   });
 
-  it("keeps the three demo role cards visible", () => {
-    expect(demoRoleCards.map((card) => card.role)).toEqual([
+  it("maps backend role ids to visible labels", () => {
+    expect([
+      labelDemoRole("admin_dgems"),
+      labelDemoRole("plantel"),
+      labelDemoRole("responsable_indicador")
+    ]).toEqual([
       "Administrador DGEMS",
       "Plantel",
       "Responsable de indicador"
     ]);
-    expect(demoRoleCards.every((card) => card.flow.length >= 3)).toBe(true);
   });
 
   it("builds stable demo API links", () => {
@@ -39,6 +43,24 @@ describe("loadClientConfig", () => {
       status: "http://127.0.0.1:8000/demo/status",
       data: "http://127.0.0.1:8000/demo/data",
       users: "http://127.0.0.1:8000/demo/users"
+    });
+  });
+
+  it("converts backend users into role cards", () => {
+    expect(
+      toDemoRoleCard({
+        accessCode: "demo-plantel",
+        displayName: "Plantel Norte Demo",
+        email: "plantel.demo@adpeak.local",
+        id: "demo-plantel",
+        mainFlow: ["Captura", "Evidencia", "Revision"],
+        role: "plantel"
+      })
+    ).toEqual({
+      accessCode: "demo-plantel",
+      email: "plantel.demo@adpeak.local",
+      flow: ["Captura", "Evidencia", "Revision"],
+      role: "Plantel"
     });
   });
 });

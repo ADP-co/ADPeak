@@ -58,6 +58,38 @@ p {
   padding: 24px;
 }
 
+.summary-grid {
+  display: grid;
+  gap: 12px;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.summary-grid div,
+.api-warning {
+  background: #ffffff;
+  border: 1px solid #dce5dd;
+  border-radius: 8px;
+  display: grid;
+  gap: 6px;
+  padding: 18px;
+}
+
+.api-warning {
+  border-color: #b94a48;
+  grid-column: 1 / -1;
+}
+
+.api-warning strong,
+.error-text {
+  color: #8f2f2d;
+}
+
+.api-warning span {
+  color: #344b43;
+  overflow-wrap: anywhere;
+}
+
 .demo-grid {
   display: grid;
   gap: 12px;
@@ -76,6 +108,11 @@ p {
   min-height: 132px;
   padding: 18px;
   text-align: left;
+}
+
+.role-card:disabled {
+  cursor: wait;
+  opacity: 0.7;
 }
 
 .role-card:hover,
@@ -117,7 +154,7 @@ p {
   display: grid;
   gap: 24px;
   grid-column: 1 / -1;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px) minmax(180px, 260px);
   padding: 24px;
 }
 
@@ -133,6 +170,31 @@ p {
   line-height: 1.7;
   margin: 0;
   padding-left: 20px;
+}
+
+.flow-empty,
+.session-panel span {
+  color: #d8ebe2;
+  font-size: 1rem;
+}
+
+.session-panel {
+  align-content: start;
+  display: grid;
+  gap: 10px;
+}
+
+.session-panel strong {
+  color: #ffffff;
+}
+
+.session-panel code {
+  background: rgb(255 255 255 / 12%);
+  border-radius: 8px;
+  color: #e7f3ed;
+  font-size: 0.86rem;
+  overflow-wrap: anywhere;
+  padding: 10px;
 }
 
 .api-links {
@@ -185,7 +247,8 @@ dd {
   }
 
   .demo-grid,
-  .flow-panel {
+  .flow-panel,
+  .summary-grid {
     grid-template-columns: 1fr;
   }
 }
