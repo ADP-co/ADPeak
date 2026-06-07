@@ -89,6 +89,11 @@ npm --workspace @adpeak/backend run start
 npm run demo:preview
 ```
 
+`npm run demo:preview` prepara `.env` si falta y construye `apps/frontend/dist`
+antes de iniciar Vite Preview. Si aparece el error `The directory "dist" does
+not exist`, se esta usando una version vieja del script o no se ha actualizado
+la rama `develop`.
+
 La validacion comprueba:
 
 - Frontend responde.
@@ -116,6 +121,7 @@ debe revisar:
 3. Que `http://127.0.0.1:8000/health` responda.
 4. Que `http://127.0.0.1:8000/demo/status` responda.
 5. Que el frontend se haya recompilado despues de preparar `.env`.
+6. Que la rama local este actualizada con `git pull origin develop`.
 
 ## Checklist previo a presentacion
 

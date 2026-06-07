@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 5173",
     "preview": "vite preview --host 127.0.0.1 --port 4173",
-    "demo:preview": "vite preview --host 127.0.0.1 --port 5173",
+    "demo:preview": "npm --prefix ../.. --workspace @adpeak/backend run demo:prepare-env && npm run build && vite preview --host 127.0.0.1 --port 5173",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "build": "tsc -b && vite build"

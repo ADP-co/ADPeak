@@ -47,7 +47,7 @@ npm run check
 | `npm run demo:down` | Detiene el entorno demo. |
 | `npm run demo:logs` | Muestra logs del entorno demo. |
 | `npm run demo:validate-access` | Valida frontend, API, dataset y login demo por rol. |
-| `npm run demo:preview` | Sirve el build frontend de demo en `http://127.0.0.1:5173`. |
+| `npm run demo:preview` | Prepara env, construye `apps/frontend/dist` y sirve la demo en `http://127.0.0.1:5173`. |
 | `npm test` | Ejecuta pruebas de frontend y backend. |
 | `npm run build` | Compila frontend y backend. |
 | `npm run typecheck` | Valida TypeScript en todos los workspaces. |
