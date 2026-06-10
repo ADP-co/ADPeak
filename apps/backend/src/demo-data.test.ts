@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   authenticateDemoUser,
   demoDatasetPayload,
+  demoReportCsv,
   demoRoleFlows,
   demoStatusPayload,
-  publicDemoUsers
+  publicDemoUsers,
+  runDemoAction
 } from "./demo-data.js";
 
 describe("demo data", () => {
@@ -47,10 +49,14 @@ describe("demo data", () => {
       dataPolicy: expect.stringContaining("Datos ficticios")
     });
     expect(dataset.summary).toMatchObject({
-      indicators: 3,
-      evidenceFiles: 4,
-      approved: 1
+      approved: 1,
+      evidenceFiles: 5,
+      indicators: 5,
+      late: 2,
+      missing: 1
     });
+    expect(dataset.filters.campuses).toContain("Plantel Norte");
+    expect(dataset.progress.every((item) => item.plantelId)).toBe(true);
   });
 
   it("documents a main flow for every demo role", () => {
@@ -65,5 +71,24 @@ describe("demo data", () => {
     for (const flow of Object.values(flows)) {
       expect(flow.mainFlow.length).toBeGreaterThanOrEqual(3);
     }
+  });
+
+  it("records only actions allowed by the active demo role", () => {
+    expect(runDemoAction("plantel", "capture_submit")).toMatchObject({
+      recorded: true,
+      role: "plantel"
+    });
+    expect(runDemoAction("plantel", "approve")).toBeUndefined();
+    expect(runDemoAction("responsable_indicador", "request_correction")).toMatchObject({
+      recorded: true
+    });
+  });
+
+  it("exports a CSV report with the same demo dimensions", () => {
+    const report = demoReportCsv();
+
+    expect(report).toContain('"plantel"');
+    expect(report).toContain('"Plantel Norte"');
+    expect(report).toContain('"vencimiento"');
   });
 });

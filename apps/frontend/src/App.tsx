@@ -1,24 +1,50 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   ClientConfigurationError,
+  actionsForRole,
   buildDemoLinks,
+  defaultDashboardFilters,
+  filterDashboardProgress,
+  labelDemoAction,
+  labelStatus,
   loadClientConfig,
   loadDemoApiState,
   loginDemoUser,
+  runDemoAction,
+  scopeProgressForSession,
+  summarizeDashboardProgress,
+  type DemoAction,
   type DemoApiState,
+  type DemoDashboardFilters,
   type DemoRoleCard,
   type DemoSession
 } from "./content";
 import "./styles.css";
 
+const metricLabels = {
+  approved: "Aprobados",
+  completionPercent: "Avance",
+  evidenceFiles: "Evidencias",
+  indicators: "Indicadores",
+  late: "Atrasados",
+  missing: "Faltantes",
+  observed: "Observados",
+  pendingReview: "En revision"
+};
+
 export function App() {
   const [demoState, setDemoState] = useState<DemoApiState | undefined>();
   const [selectedEmail, setSelectedEmail] = useState("");
   const [session, setSession] = useState<DemoSession | undefined>();
+  const [filters, setFilters] = useState<DemoDashboardFilters>(
+    defaultDashboardFilters
+  );
   const [apiError, setApiError] = useState("");
   const [loginError, setLoginError] = useState("");
+  const [actionMessage, setActionMessage] = useState("");
   const [isLoadingApi, setIsLoadingApi] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isRunningAction, setIsRunningAction] = useState(false);
 
   const config = useMemo(() => {
     try {
@@ -81,28 +107,32 @@ export function App() {
     };
   }, [config.apiUrl]);
 
-  if (config.error) {
-    return (
-      <main className="app-shell">
-        <section className="intro" role="alert">
-          <p className="eyebrow">SIGI-POA DGEMS</p>
-          <h1>Configuracion incompleta</h1>
-          <p>{config.error}</p>
-        </section>
-      </main>
-    );
-  }
-
   const apiUrl = config.apiUrl;
-  const links = buildDemoLinks(apiUrl);
+  const links = apiUrl ? buildDemoLinks(apiUrl) : undefined;
   const roleCards = demoState?.users ?? [];
   const selectedRole = roleCards.find((role) => role.email === selectedEmail);
+  const scopedProgress = scopeProgressForSession(
+    demoState?.dataset.progress ?? [],
+    session
+  );
+  const filteredProgress = filterDashboardProgress(scopedProgress, filters);
+  const dashboardSummary = summarizeDashboardProgress(filteredProgress);
+  const roleActions = actionsForRole(session?.user.role);
+
+  function updateFilter(name: keyof DemoDashboardFilters, value: string) {
+    setFilters((currentFilters) => ({
+      ...currentFilters,
+      [name]: value
+    }));
+  }
 
   async function handleRoleLogin(role: DemoRoleCard) {
     setSelectedEmail(role.email);
     setSession(undefined);
     setLoginError("");
+    setActionMessage("");
     setIsLoggingIn(true);
+    setFilters(defaultDashboardFilters());
 
     try {
       setSession(await loginDemoUser(apiUrl, role));
@@ -117,16 +147,51 @@ export function App() {
     }
   }
 
+  async function handleDemoAction(action: DemoAction) {
+    if (!session) {
+      return;
+    }
+
+    setActionMessage("");
+    setIsRunningAction(true);
+
+    try {
+      const result = await runDemoAction(apiUrl, session.user.role, action);
+      setActionMessage(`${result.message} Folio: ${result.auditId}.`);
+    } catch (error) {
+      setActionMessage(
+        error instanceof Error
+          ? error.message
+          : "No se pudo registrar la accion demo."
+      );
+    } finally {
+      setIsRunningAction(false);
+    }
+  }
+
+  if (config.error) {
+    return (
+      <main className="app-shell">
+        <section className="intro" role="alert">
+          <p className="eyebrow">SIGI-POA DGEMS</p>
+          <h1>Configuracion incompleta</h1>
+          <p>{config.error}</p>
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main className="app-shell">
       <section className="intro">
         <p className="eyebrow">SIGI-POA DGEMS</p>
         <h1>Ambiente demo conectado</h1>
         <p>
-          La pantalla carga datos desde la API demo y valida sesion contra el
-          backend local.
+          Frontend, API demo, filtros, acciones por rol y reportes usando datos
+          ficticios controlados.
         </p>
       </section>
+
       <dl className="status-panel" aria-label="Configuracion local">
         <div>
           <dt>Frontend</dt>
@@ -151,32 +216,27 @@ export function App() {
           <dd>{demoState?.status.environment ?? "Demo local controlada"}</dd>
         </div>
       </dl>
+
       {apiError ? (
         <section className="api-warning" role="alert">
           <strong>Backend demo no disponible</strong>
           <span>{apiError}</span>
         </section>
       ) : null}
-      {demoState ? (
-        <section className="summary-grid" aria-label="Resumen demo desde API">
-          <div>
-            <dt>Ciclo</dt>
-            <dd>{demoState.dataset.cycle}</dd>
+
+      <section className="summary-grid" aria-label="Resumen demo filtrado">
+        {Object.entries(metricLabels).map(([key, label]) => (
+          <div key={key}>
+            <dt>{label}</dt>
+            <dd>
+              {key === "completionPercent"
+                ? `${dashboardSummary.completionPercent}%`
+                : dashboardSummary[key as keyof typeof dashboardSummary]}
+            </dd>
           </div>
-          <div>
-            <dt>Indicadores</dt>
-            <dd>{demoState.dataset.summary.indicators}</dd>
-          </div>
-          <div>
-            <dt>Evidencias</dt>
-            <dd>{demoState.dataset.summary.evidenceFiles}</dd>
-          </div>
-          <div>
-            <dt>Avance</dt>
-            <dd>{demoState.dataset.summary.completionPercent}%</dd>
-          </div>
-        </section>
-      ) : null}
+        ))}
+      </section>
+
       <section className="demo-grid" aria-label="Usuarios de prueba">
         {roleCards.map((roleCard) => (
           <button
@@ -196,6 +256,7 @@ export function App() {
           </button>
         ))}
       </section>
+
       <section className="flow-panel" aria-label="Flujo principal por rol">
         <div>
           <p className="eyebrow">Flujo demo</p>
@@ -229,21 +290,166 @@ export function App() {
           )}
           {loginError ? <span className="error-text">{loginError}</span> : null}
         </div>
+        <div className="action-panel">
+          <p className="eyebrow">Acciones</p>
+          {roleActions.length > 0 ? (
+            roleActions.map((action) => (
+              <button
+                disabled={isRunningAction}
+                key={action}
+                onClick={() => void handleDemoAction(action)}
+                type="button"
+              >
+                {labelDemoAction(action)}
+              </button>
+            ))
+          ) : (
+            <span>Inicia sesion demo para activar acciones.</span>
+          )}
+          {actionMessage ? <strong>{actionMessage}</strong> : null}
+        </div>
         <nav className="api-links" aria-label="Endpoints demo">
-          <a href={links.health} rel="noreferrer" target="_blank">
+          <a href={links?.health} rel="noreferrer" target="_blank">
             Health
           </a>
-          <a href={links.status} rel="noreferrer" target="_blank">
-            Estado demo
-          </a>
-          <a href={links.users} rel="noreferrer" target="_blank">
-            Usuarios
-          </a>
-          <a href={links.data} rel="noreferrer" target="_blank">
+          <a href={links?.data} rel="noreferrer" target="_blank">
             Dataset
+          </a>
+          <a href={links?.report} rel="noreferrer" target="_blank">
+            CSV
           </a>
         </nav>
       </section>
+
+      {demoState ? (
+        <section className="dashboard-panel" aria-label="Dashboard con filtros">
+          <header>
+            <p className="eyebrow">SCRUM-34</p>
+            <h2>Dashboard reactivo</h2>
+          </header>
+          <div className="filters-grid">
+            <FilterSelect
+              label="Ciclo"
+              name="cycle"
+              onChange={updateFilter}
+              options={demoState.dataset.filters.cycles}
+              value={filters.cycle}
+            />
+            <FilterSelect
+              label="Periodo"
+              name="period"
+              onChange={updateFilter}
+              options={demoState.dataset.filters.periods}
+              value={filters.period}
+            />
+            <FilterSelect
+              label="Plantel"
+              name="campus"
+              onChange={updateFilter}
+              options={demoState.dataset.filters.campuses}
+              value={filters.campus}
+            />
+            <FilterSelect
+              label="Indicador"
+              name="indicator"
+              onChange={updateFilter}
+              options={demoState.dataset.filters.indicators}
+              value={filters.indicator}
+            />
+            <FilterSelect
+              label="Actividad"
+              name="activity"
+              onChange={updateFilter}
+              options={demoState.dataset.filters.activities}
+              value={filters.activity}
+            />
+            <FilterSelect
+              label="Responsable"
+              name="responsible"
+              onChange={updateFilter}
+              options={demoState.dataset.filters.responsibles}
+              value={filters.responsible}
+            />
+            <FilterSelect
+              label="Estado"
+              name="status"
+              onChange={updateFilter}
+              options={demoState.dataset.filters.statuses}
+              value={filters.status}
+            />
+          </div>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Plantel</th>
+                  <th>Actividad</th>
+                  <th>Indicador</th>
+                  <th>Responsable</th>
+                  <th>Periodo</th>
+                  <th>Estado</th>
+                  <th>Avance</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredProgress.map((item) => (
+                  <tr key={item.id}>
+                    <td>{item.plantel}</td>
+                    <td>{item.activity}</td>
+                    <td>{item.indicador}</td>
+                    <td>{item.responsable}</td>
+                    <td>{item.periodo}</td>
+                    <td>
+                      <span className={`status-pill status-${item.estado}`}>
+                        {labelStatus(item.estado)}
+                      </span>
+                      {item.vencimiento === "atrasado" ? (
+                        <span className="status-pill status-late">
+                          Atrasado
+                        </span>
+                      ) : null}
+                    </td>
+                    <td>
+                      {item.avance}/{item.meta}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
     </main>
+  );
+}
+
+function FilterSelect({
+  label,
+  name,
+  onChange,
+  options,
+  value
+}: {
+  label: string;
+  name: keyof DemoDashboardFilters;
+  onChange: (name: keyof DemoDashboardFilters, value: string) => void;
+  options: string[];
+  value: string;
+}) {
+  return (
+    <label>
+      <span>{label}</span>
+      <select
+        onChange={(event) => onChange(name, event.currentTarget.value)}
+        value={value}
+      >
+        <option value="">Todos</option>
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {labelStatus(option)}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }

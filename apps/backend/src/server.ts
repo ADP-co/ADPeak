@@ -8,9 +8,13 @@ import {
 import {
   authenticateDemoUser,
   demoDatasetPayload,
+  demoReportCsv,
   demoRoleFlows,
   demoStatusPayload,
-  publicDemoUsers
+  publicDemoUsers,
+  runDemoAction,
+  type DemoAction,
+  type DemoRole
 } from "./demo-data.js";
 import { healthPayload } from "./health.js";
 
@@ -41,6 +45,15 @@ function sendJson(
     "Content-Type": "application/json; charset=utf-8"
   });
   response.end(JSON.stringify(payload));
+}
+
+function sendCsv(response: ServerResponse, payload: string) {
+  response.writeHead(200, {
+    "Access-Control-Allow-Origin": "*",
+    "Content-Disposition": "attachment; filename=\"adpeak-demo-report.csv\"",
+    "Content-Type": "text/csv; charset=utf-8"
+  });
+  response.end(payload);
 }
 
 async function readJsonBody(request: IncomingMessage) {
@@ -93,6 +106,11 @@ const server = createServer(async (request, response) => {
     return;
   }
 
+  if (request.method === "GET" && url.pathname === "/demo/report.csv") {
+    sendCsv(response, demoReportCsv());
+    return;
+  }
+
   if (request.method === "GET" && url.pathname === "/demo/roles") {
     sendJson(response, 200, { roles: demoRoleFlows() });
     return;
@@ -116,6 +134,32 @@ const server = createServer(async (request, response) => {
       }
 
       sendJson(response, 200, session);
+      return;
+    } catch {
+      sendJson(response, 400, {
+        error: "invalid_json",
+        message: "El cuerpo de la solicitud debe ser JSON valido."
+      });
+      return;
+    }
+  }
+
+  if (request.method === "POST" && url.pathname === "/demo/action") {
+    try {
+      const payload = await readJsonBody(request);
+      const role = typeof payload.role === "string" ? payload.role : "";
+      const action = typeof payload.action === "string" ? payload.action : "";
+      const result = runDemoAction(role as DemoRole, action as DemoAction);
+
+      if (!result) {
+        sendJson(response, 403, {
+          error: "demo_action_forbidden",
+          message: "La accion demo no esta permitida para el rol seleccionado."
+        });
+        return;
+      }
+
+      sendJson(response, 200, result);
       return;
     } catch {
       sendJson(response, 400, {

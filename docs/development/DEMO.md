@@ -13,6 +13,8 @@ informacion confidencial.
 - Usuarios demo: `GET /demo/users`.
 - Dataset demo: `GET /demo/data`.
 - Login demo: `POST /demo/login`.
+- Acciones demo: `POST /demo/action`.
+- Reporte CSV: `GET /demo/report.csv`.
 
 ## Usuarios de prueba
 
@@ -101,6 +103,8 @@ La validacion comprueba:
 - Dataset demo responde.
 - Login demo funciona para los tres roles.
 - Cada rol recibe su flujo principal.
+- Cada rol puede ejecutar al menos una accion permitida en `/demo/action`.
+- El reporte CSV demo responde desde backend.
 
 ## Conexion frontend-backend
 
@@ -112,6 +116,8 @@ La pantalla demo no debe funcionar solo como maqueta visual. Al abrir
 - `GET /demo/users` para pintar los roles de prueba.
 - `GET /demo/data` para mostrar resumen del ciclo.
 - `POST /demo/login` al seleccionar un rol.
+- `POST /demo/action` al ejecutar captura/envio, correccion o aprobacion demo.
+- `GET /demo/report.csv` al descargar el reporte basico.
 
 Si Gael ve solo el cascaron visual o el mensaje `Backend demo no disponible`,
 debe revisar:
@@ -132,9 +138,13 @@ debe revisar:
 5. `npm run demo:validate-access` pasa con los tres roles.
 6. Abrir `http://127.0.0.1:5173` y seleccionar cada rol.
 7. Confirmar que `GET /demo/data` muestra solo informacion ficticia.
-8. Confirmar que no hay archivos reales en `uploads-demo/`.
-9. Tomar evidencia visual de frontend, healthcheck y dataset demo.
-10. Detener el entorno con `npm run demo:down`.
+8. Probar filtros por ciclo, periodo, plantel, indicador, actividad, responsable y estado.
+9. Ejecutar una accion permitida por rol y confirmar el folio en pantalla.
+10. Descargar el CSV desde la pantalla demo.
+11. Confirmar que no hay archivos reales en `uploads-demo/`.
+12. Revisar [DEMO_QA_CHECKLIST.md](DEMO_QA_CHECKLIST.md).
+13. Tomar evidencia visual de frontend, healthcheck y dataset demo.
+14. Detener el entorno con `npm run demo:down`.
 
 ## Rollback manual
 

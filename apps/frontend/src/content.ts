@@ -31,17 +31,25 @@ export function loadClientConfig(env: ClientEnv): ClientConfig {
   }
 }
 
+export type ApiDemoRole =
+  | "admin_dgems"
+  | "plantel"
+  | "responsable_indicador";
+
+export type DemoProgressStatus =
+  | "borrador"
+  | "en_revision"
+  | "observado"
+  | "aprobado";
+
+export type DemoAction = "capture_submit" | "request_correction" | "approve";
+
 export type DemoRoleCard = {
   role: "Administrador DGEMS" | "Plantel" | "Responsable de indicador";
   email: string;
   accessCode: string;
   flow: string[];
 };
-
-export type ApiDemoRole =
-  | "admin_dgems"
-  | "plantel"
-  | "responsable_indicador";
 
 export type ApiDemoUser = {
   id: string;
@@ -59,16 +67,47 @@ export type DemoStatus = {
   dataPolicy: string;
 };
 
+export type DemoIndicatorProgress = {
+  id: string;
+  cycle: string;
+  activity: string;
+  indicador: string;
+  plantel: string;
+  plantelId: string;
+  responsable: string;
+  responsableId: string;
+  periodo: string;
+  meta: number;
+  avance: number;
+  estado: DemoProgressStatus;
+  vencimiento: "en_tiempo" | "atrasado";
+  evidencias: number;
+};
+
+export type DemoSummary = {
+  indicators: number;
+  evidenceFiles: number;
+  completionPercent: number;
+  approved: number;
+  pendingReview: number;
+  observed: number;
+  missing: number;
+  late: number;
+};
+
 export type DemoDataset = {
   cycle: string;
-  summary: {
-    indicators: number;
-    evidenceFiles: number;
-    completionPercent: number;
-    approved: number;
-    pendingReview: number;
-    observed: number;
+  filters: {
+    cycles: string[];
+    periods: string[];
+    campuses: string[];
+    indicators: string[];
+    activities: string[];
+    responsibles: string[];
+    statuses: string[];
   };
+  progress: DemoIndicatorProgress[];
+  summary: DemoSummary;
 };
 
 export type DemoApiState = {
@@ -84,8 +123,20 @@ export type DemoSession = {
     displayName: string;
     email: string;
     role: ApiDemoRole;
+    plantelId?: string;
+    responsableId?: string;
     mainFlow: string[];
   };
+};
+
+export type DemoDashboardFilters = {
+  cycle: string;
+  period: string;
+  campus: string;
+  indicator: string;
+  activity: string;
+  responsible: string;
+  status: string;
 };
 
 export function buildDemoLinks(apiUrl: string) {
@@ -93,7 +144,8 @@ export function buildDemoLinks(apiUrl: string) {
     health: `${apiUrl}/health`,
     status: `${apiUrl}/demo/status`,
     data: `${apiUrl}/demo/data`,
-    users: `${apiUrl}/demo/users`
+    users: `${apiUrl}/demo/users`,
+    report: `${apiUrl}/demo/report.csv`
   };
 }
 
@@ -144,6 +196,131 @@ export async function loginDemoUser(
     },
     method: "POST"
   });
+}
+
+export async function runDemoAction(
+  apiUrl: string,
+  role: ApiDemoRole,
+  action: DemoAction
+): Promise<{ auditId: string; message: string; recorded: boolean }> {
+  return fetchJson(`${apiUrl}/demo/action`, {
+    body: JSON.stringify({ action, role }),
+    headers: {
+      "Content-Type": "application/json"
+    },
+    method: "POST"
+  });
+}
+
+export function defaultDashboardFilters(): DemoDashboardFilters {
+  return {
+    activity: "",
+    campus: "",
+    cycle: "",
+    indicator: "",
+    period: "",
+    responsible: "",
+    status: ""
+  };
+}
+
+export function scopeProgressForSession(
+  progress: DemoIndicatorProgress[],
+  session?: DemoSession
+) {
+  if (!session) {
+    return progress;
+  }
+
+  if (session.user.role === "plantel") {
+    return progress.filter((item) => item.plantelId === session.user.plantelId);
+  }
+
+  if (session.user.role === "responsable_indicador") {
+    return progress.filter(
+      (item) => item.responsableId === session.user.responsableId
+    );
+  }
+
+  return progress;
+}
+
+export function filterDashboardProgress(
+  progress: DemoIndicatorProgress[],
+  filters: DemoDashboardFilters
+) {
+  return progress.filter(
+    (item) =>
+      matchesFilter(item.cycle, filters.cycle) &&
+      matchesFilter(item.periodo, filters.period) &&
+      matchesFilter(item.plantel, filters.campus) &&
+      matchesFilter(item.indicador, filters.indicator) &&
+      matchesFilter(item.activity, filters.activity) &&
+      matchesFilter(item.responsable, filters.responsible) &&
+      matchesFilter(item.estado, filters.status)
+  );
+}
+
+export function summarizeDashboardProgress(
+  progress: DemoIndicatorProgress[]
+): DemoSummary {
+  const totalMeta = progress.reduce((total, item) => total + item.meta, 0);
+  const totalAvance = progress.reduce((total, item) => total + item.avance, 0);
+
+  return {
+    approved: progress.filter((item) => item.estado === "aprobado").length,
+    completionPercent:
+      totalMeta === 0 ? 0 : Number(((totalAvance / totalMeta) * 100).toFixed(2)),
+    evidenceFiles: progress.reduce((total, item) => total + item.evidencias, 0),
+    indicators: progress.length,
+    late: progress.filter((item) => item.vencimiento === "atrasado").length,
+    missing: progress.filter((item) => item.estado === "borrador").length,
+    observed: progress.filter((item) => item.estado === "observado").length,
+    pendingReview: progress.filter((item) => item.estado === "en_revision").length
+  };
+}
+
+export function labelStatus(status: string) {
+  const labels: Record<string, string> = {
+    aprobado: "Aprobado",
+    atrasado: "Atrasado",
+    borrador: "Faltante",
+    en_revision: "En revision",
+    en_tiempo: "En tiempo",
+    observado: "Observado"
+  };
+
+  return labels[status] ?? status;
+}
+
+export function actionsForRole(role?: ApiDemoRole): DemoAction[] {
+  if (role === "plantel") {
+    return ["capture_submit"];
+  }
+
+  if (role === "responsable_indicador") {
+    return ["request_correction", "approve"];
+  }
+
+  if (role === "admin_dgems") {
+    return ["approve"];
+  }
+
+  return [];
+}
+
+export function labelDemoAction(action: DemoAction) {
+  const labels: Record<DemoAction, string> = {
+    approve: "Aprobar avance",
+    capture_submit: "Capturar y enviar",
+    request_correction: "Solicitar correccion"
+  };
+
+  return labels[action];
+}
+
+function matchesFilter(value: string, filterValue: string) {
+  return !filterValue || value === filterValue;
 }
 
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {

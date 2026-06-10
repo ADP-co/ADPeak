@@ -16,6 +16,7 @@ const requiredFiles = [
   ".env.demo.example",
   "compose.demo.yaml",
   "docs/development/DEMO.md",
+  "docs/development/DEMO_QA_CHECKLIST.md",
   "apps/backend/migrations/20260605_001_demo_schema.sql",
   "apps/backend/migrations/20260605_002_demo_seed.sql"
 ];
@@ -64,7 +65,12 @@ for (const requiredRole of requiredRoles) {
   }
 }
 
-if (dataset.summary.indicators < 3 || dataset.summary.evidenceFiles < 3) {
+if (
+  dataset.summary.indicators < 5 ||
+  dataset.summary.evidenceFiles < 5 ||
+  dataset.summary.late < 1 ||
+  dataset.summary.missing < 1
+) {
   console.error("El dataset demo no cubre indicadores y evidencias suficientes.");
   process.exit(1);
 }
