@@ -62,8 +62,12 @@ const DonutCard = ({ title, percentage, colorClass, strokeColor }: DonutCardProp
   );
 };
 
+interface DashboardProps {
+  onSelectIndicator?: (code: string) => void;
+}
+
 // Pantalla Principal del Dashboard ---
-export const Dashboard = () => {
+export const Dashboard = ({ onSelectIndicator }: DashboardProps) => {
   // Estados para almacenar las opciones de los filtros que vendrán del backend
   const [dateOptions, setDateOptions] = useState<{value: string, label: string}[]>([{ value: '', label: 'Cargando...' }]);
   const [plantelOptions, setPlantelOptions] = useState<{value: string, label: string}[]>([{ value: '', label: 'Cargando...' }]);
@@ -126,11 +130,23 @@ export const Dashboard = () => {
     { code: '1.1.2.2.8', name: 'Porcentaje de estudiantes certificados en el dominio de unal engua extranjera', status: 'Aprobado' },
   ];
 
+  const statusSequence: Indicator['status'][] = ['Corregir', 'Pendiente', 'En revisión', 'Aprobado'];
+  const scopedIndicators = selectedPlantel && selectedPlantel !== 'todos'
+    ? DataIndicators.map((indicator, index) => {
+        const plantelNumber = Number(selectedPlantel.replace(/\D/g, '')) || 0;
+        const dateOffset = selectedDate === '2024-2025' ? 1 : 0;
+        return {
+          ...indicator,
+          status: statusSequence[(index + plantelNumber + dateOffset) % statusSequence.length],
+        };
+      })
+    : DataIndicators;
+
   // Cálculo automático de porcentajes
-  const totalIndicators = DataIndicators.length;
-  const approvedCount = DataIndicators.filter((i) => i.status === 'Aprobado').length;
-  const pendingCount = DataIndicators.filter((i) => i.status === 'Pendiente' || i.status === 'Corregir').length;
-  const reviewCount = DataIndicators.filter((i) => i.status === 'En revisión').length;
+  const totalIndicators = scopedIndicators.length;
+  const approvedCount = scopedIndicators.filter((i) => i.status === 'Aprobado').length;
+  const pendingCount = scopedIndicators.filter((i) => i.status === 'Pendiente' || i.status === 'Corregir').length;
+  const reviewCount = scopedIndicators.filter((i) => i.status === 'En revisión').length;
 
   const approvedPercentage = totalIndicators > 0 ? Math.round((approvedCount / totalIndicators) * 100) : 0;
   const pendingPercentage = totalIndicators > 0 ? Math.round((pendingCount / totalIndicators) * 100) : 0;
@@ -193,7 +209,7 @@ export const Dashboard = () => {
       </div>
 
       {/*Tabla de Indicadores */}
-      <IndicatorsTable indicators={DataIndicators} />
+      <IndicatorsTable indicators={scopedIndicators} onSelectIndicator={onSelectIndicator} />
 
     </div>
   );

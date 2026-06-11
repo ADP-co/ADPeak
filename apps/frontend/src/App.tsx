@@ -216,14 +216,14 @@ function AppContent() {
         {/* Vistas de Admin */}
         {role === 'admin' && (
           <>
-            <Route path="/analisis" element={<Dashboard />} />
+            <Route path="/analisis" element={<Dashboard onSelectIndicator={handleSelectIndicator} />} />
             <Route path="/usuarios" element={<UsersTable />} />
           </>
         )}
 
         {/* Vistas de Responsable */}
         {role === 'responsable' && (
-          <Route path="/revision" element={<Dashboard />} />
+          <Route path="/revision" element={<Dashboard onSelectIndicator={handleSelectIndicator} />} />
         )}
 
         {/* Vistas compartidas: Indicadores (Admin ve gestión, Plantel solo ve tabla) */}
