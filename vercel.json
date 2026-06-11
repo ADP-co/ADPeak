@@ -1,0 +1,19 @@
+{
+  "installCommand": "npm ci",
+  "buildCommand": "npm run build",
+  "outputDirectory": "apps/frontend/dist",
+  "rewrites": [
+    {
+      "source": "/health",
+      "destination": "/api/health"
+    },
+    {
+      "source": "/demo/(.*)",
+      "destination": "/api/demo/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

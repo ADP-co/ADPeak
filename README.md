@@ -75,6 +75,13 @@ npm run docker:config
 npm run demo:config
 ```
 
+## Despliegue publico
+
+El repositorio incluye `vercel.json` y funciones serverless en `api/` para
+desplegar frontend y API en un mismo dominio de Vercel. En hosting, el
+frontend usa `/api/v1` por defecto, por lo que no depende de `127.0.0.1`,
+Docker local ni tuneles temporales.
+
 ## Documentacion clave
 
 - [Arquitectura](docs/architecture/OVERVIEW.md)

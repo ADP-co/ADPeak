@@ -39,6 +39,7 @@ coverage/
 *.tsbuildinfo
 .vite/
 .cache/
+.vercel/
 playwright-report/
 test-results/
 site/
