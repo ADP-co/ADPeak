@@ -50,7 +50,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
   };
 
   const handleEditIndicator = (indicator: IndicatorRecord) => {
-    setStatusMessage(`Abriendo captura de ${indicator.code}.`);
+    setStatusMessage(`Abriendo configuración de ${indicator.code}.`);
     onEditIndicator?.(indicator.code);
   };
 
@@ -154,7 +154,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
                         onClick={() => handleEditIndicator(indicator)}
                         className="px-6 py-1 rounded-full border border-brand-Verde_oscuro text-brand-Verde_oscuro font-bold text-sm hover:bg-brand-Verde_oscuro hover:text-brand-Blanco transition-colors w-[120px]"
                       >
-                        Modificar
+                        Configurar
                       </button>
                       <button
                         onClick={() => handleDeleteIndicator(indicator)}

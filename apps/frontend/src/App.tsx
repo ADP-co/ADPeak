@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, usePa
 import { Navbar } from './components/layout/Navbar';
 import { UserBanner } from './components/layout/UserBanner';
 import { IndicatorForm, type FormSubmission } from './components/forms/IndicatorForm';
+import { IndicatorConfigForm } from './components/forms/IndicatorConfigForm';
 import type { IndicatorTemplate } from './components/forms/formConfig';
 import { ProgressBar } from './components/layout/ProgressBar';
 import { IndicatorsTable } from './components/ui/IndicatorsTable';
@@ -102,10 +103,14 @@ const mockupIndicators: Indicator[] = [
 function IndicatorFormWrapper() {
   const { code } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   console.log('El código del indicador seleccionado es:', code);
   // En una app real, usarías el "code" de la URL (ej. 1.0.0.0.2) para hacer un GET al backend
   // y cargar su configuración dinámica.
+  
+  // Buscamos el indicador en nuestros datos de prueba para obtener su estatus
+  const currentIndicator = mockupIndicators.find((ind) => ind.code === code);
 
   const captureDraft = useCaptureDraft({
     plantelId: 1,
@@ -135,12 +140,19 @@ function IndicatorFormWrapper() {
     <IndicatorForm
       template={template1_0_0_0_2}
       initialData={formInitialData}
+      status={currentIndicator?.status}
       onSaveDraft={handleSaveDraft}
       onSendReview={handleSendReview}
       isBusy={captureDraft.isBusy}
       statusMessage={captureDraft.statusMessage}
       errorMessage={captureDraft.errorMessage}
-      onBack={() => navigate('/indicadores')}
+      onBack={() => {
+        if (location.state?.from) {
+          navigate(-1);
+        } else {
+          navigate('/indicadores');
+        }
+      }}
     />
   );
 }
@@ -155,7 +167,8 @@ function ProtectedLayout() {
     return <Navigate to="/login" replace />;
   }
 
-  const currentView = location.pathname.split('/')[1] || 'analisis';
+  const effectivePath = location.state?.from ? location.state.from : location.pathname;
+  const currentView = effectivePath.split('/')[1] || 'analisis';
 
   const handleNavigate = (view: string) => {
     navigate(`/${view}`);
@@ -192,9 +205,14 @@ function ProtectedLayout() {
 function AppContent() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSelectIndicator = (code: string) => {
-    navigate(`/indicadores/captura/${code}`);
+    navigate(`/indicadores/captura/${code}`, { state: { from: location.pathname } });
+  };
+
+  const handleConfigIndicator = (code: string) => {
+    navigate(`/indicadores/configurar/${code}`, { state: { from: location.pathname } });
   };
 
   const role = user?.role || 'plantel'; // Fallback por defecto
@@ -230,7 +248,7 @@ function AppContent() {
         {(role === 'admin' || role === 'plantel') && (
           <Route path="/indicadores" element={
             role === 'admin' ? (
-              <IndicatorsManagementTable onEditIndicator={handleSelectIndicator} />
+              <IndicatorsManagementTable onEditIndicator={handleConfigIndicator} />
             ) : (
               <>
                 <ProgressBar totalIndicators={mockupIndicators.length} completedIndicators={completedCount} />
@@ -242,6 +260,17 @@ function AppContent() {
 
         {/* Formulario de captura accesible para quienes tengan acceso a indicadores */}
         <Route path="/indicadores/captura/:code" element={<IndicatorFormWrapper />} />
+
+        {/* Formulario de configuración de campos (Solo Admin) */}
+        {role === 'admin' && (
+          <Route path="/indicadores/configurar/:code" element={<IndicatorConfigForm onBack={() => {
+            if (location.state?.from) {
+              navigate(-1);
+            } else {
+              navigate('/indicadores');
+            }
+          }} />} />
+        )}
 
         {/* Vistas compartidas para todos */}
         <Route path="/reportes" element={<ReportsDashboard />} />

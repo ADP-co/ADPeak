@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from './Button';
 import { Select } from './Select';
+import { useAuth } from '../../context/AuthContext';
 
 // Estados posibles de los Indicadores
 export type IndicatorStatus = 'Corregir' | 'Pendiente' | 'En revisión' | 'Aprobado';
@@ -18,12 +19,14 @@ interface IndicatorsTableProps {
 }
 
 export const IndicatorsTable = ({ indicators, onSelectIndicator }: IndicatorsTableProps) => {
-
+  
   const [filter, setFilter] = useState<string>('todos');
 
   // Estados para simular la carga del periodo
   const [dateOptions, setDateOptions] = useState<{value: string, label: string}[]>([{ value: '', label: 'Cargando...' }]);
   const [selectedDate, setSelectedDate] = useState('');
+
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -53,6 +56,11 @@ export const IndicatorsTable = ({ indicators, onSelectIndicator }: IndicatorsTab
 
   // Función para determinar el texto del botón de acción según el estatus
   const getActionLabel = (status: IndicatorStatus) => {
+    const isRestrictedRole = user?.role === 'admin' || user?.role === 'responsable';
+    if (isRestrictedRole && (status === 'Corregir' || status === 'Pendiente')) {
+      return 'Ver Datos';
+    }
+
     if (status === 'Corregir') return 'Modificar Datos';
     if (status === 'Pendiente') return 'Nueva Captura';
     return 'Ver Datos'; // Para En revisión y Aprobado
@@ -64,6 +72,11 @@ export const IndicatorsTable = ({ indicators, onSelectIndicator }: IndicatorsTab
     'Pendiente': 2,
     'En revisión': 3,
     'Aprobado': 4,
+  };
+
+  const isActionDisabled = (status: IndicatorStatus) => {
+    const isRestrictedRole = user?.role === 'admin' || user?.role === 'responsable';
+    return isRestrictedRole && (status === 'Corregir' || status === 'Pendiente');
   };
 
   // Filtramos los indicadores según el valor seleccionado en el Select
@@ -86,7 +99,7 @@ export const IndicatorsTable = ({ indicators, onSelectIndicator }: IndicatorsTab
 
   return (
     <div className="w-full max-w-[1250px] mx-auto mb-10">
-
+      
       {/* Controles de Filtro */}
         <div className="flex items-center justify-between gap-4 pb-4 pt-8">
           <h1 className="font-title text-3xl font-bold text-brand-Gris_oscuro shrink-0 select-none">
@@ -94,7 +107,7 @@ export const IndicatorsTable = ({ indicators, onSelectIndicator }: IndicatorsTab
           </h1>
           <div className="flex items-center gap-2">
             <span className="text-xs text-brand-Gris_oscuro font-bold font-accent whitespace-nowrap">Filtrar por</span>
-            <Select
+            <Select 
               options={[
                 { value: 'todos', label: 'Todos' },
                 { value: 'aprobado', label: 'Aprobado' },
@@ -114,7 +127,7 @@ export const IndicatorsTable = ({ indicators, onSelectIndicator }: IndicatorsTab
         <div className="bg-brand-Blanco rounded-lg shadow-md overflow-hidden border border-brand-Gris_bajo/20">
         <div className="w-full overflow-x-auto">
           <table className="w-full border-collapse text-left">
-
+            
             {/* Cabecera de la tabla con fondo gris claro al 35% de opacidad */}
             <thead>
               <tr className="bg-brand-Gris_bajo/35 text-brand-Gris_oscuro font-title font-bold text-sm select-none">
@@ -128,33 +141,34 @@ export const IndicatorsTable = ({ indicators, onSelectIndicator }: IndicatorsTab
             {/* Cuerpo de la tabla */}
             <tbody className="divide-y divide-brand-Gris_bajo/20 font-body text-sm text-brand-Gris_oscuro">
               {filteredIndicators.map((indicator) => (
-                <tr
-                  key={indicator.code}
+                <tr 
+                  key={indicator.code} 
                   className="hover:bg-brand-Gris_bajo/15 transition-colors duration-150 ease-in-out group"
                 >
                   {/* Código del Indicador */}
                   <td className="py-4 px-6 text-center font-mono font-medium text-brand-Gris_oscuro/80">
                     {indicator.code}
                   </td>
-
+                  
                   {/* Nombre del Indicador */}
                   <td className="py-4 px-6 font-medium leading-relaxed pr-8">
                     {indicator.name}
                   </td>
-
+                  
                   {/* Estatus (Badge estilizado) */}
                   <td className="py-4 px-6 text-center whitespace-nowrap">
                     <span className={`inline-block px-4 py-1 text-xs font-bold font-accent rounded-full shadow-xs tracking-wide min-w-[100px] ${statusStyles[indicator.status]}`}>
                       {indicator.status}
                     </span>
                   </td>
-
+                  
                   {/* Acción (Button atómico) */}
                   <td className="py-4 px-6 text-center whitespace-nowrap">
-                    <Button
+                    <Button 
                       variant="secondary"
                       onClick={() => onSelectIndicator && onSelectIndicator(indicator.code)}
-                      className="w-[135px] text-xs py-1.5 px-4">
+                  disabled={isActionDisabled(indicator.status)}
+                  className="w-[135px] text-xs py-1.5 px-4 disabled:opacity-50 disabled:cursor-not-allowed">
                       {getActionLabel(indicator.status)}
                     </Button>
                   </td>
