@@ -73,6 +73,7 @@ export const ReportsDashboard = () => {
   
   // Estado para el filtrado
   const [filterBy, setFilterBy] = useState('todos');
+  const [reportMessage, setReportMessage] = useState('');
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -107,6 +108,25 @@ export const ReportsDashboard = () => {
     { id: '10', plantel: 'Bach. 9', percentage: 5, status: 'Rezagado' },
     { id: '11', plantel: 'Bach. 10', percentage: 0, status: 'Rezagado' },
   ];
+
+  const handleGenerateReport = (item: PlantelProgressRecord) => {
+    const rows = [
+      ['plantel', 'periodo', 'progreso', 'estado'],
+      [item.plantel, selectedDate, `${item.percentage}%`, item.status],
+    ];
+    const csv = rows.map((row) => row.map((cell) => `"${cell}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = `reporte-${item.plantel.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${selectedDate}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    setReportMessage(`Reporte generado para ${item.plantel}.`);
+  };
 
   // Filtramos por progreso y siempre ordenamos alfabéticamente/numéricamente por plantel
   const processedPlanteles = mockPlanteles
@@ -240,6 +260,12 @@ export const ReportsDashboard = () => {
           </div>
         </div>
 
+        {reportMessage && (
+          <p className="mb-4 text-sm font-body font-semibold text-brand-Verde_oscuro">
+            {reportMessage}
+          </p>
+        )}
+
         <div className="bg-brand-Blanco rounded-lg shadow-md overflow-hidden border border-brand-Gris_bajo/20">
           <table className="w-full border-collapse text-center">
             
@@ -269,6 +295,7 @@ export const ReportsDashboard = () => {
                   <td className="py-4 px-6">
                     <Button 
                       variant="secondary"
+                      onClick={() => handleGenerateReport(item)}
                       // Solo se habilita si el estatus es "Completo"
                       disabled={item.status !== 'Completo'} 
                       className={`w-[160px] text-xs py-1.5 px-4 ${

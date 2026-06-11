@@ -28,12 +28,51 @@ export const UsersTable = () => {
   // Estados para la búsqueda
   const [searchTerm, setSearchTerm] = useState('');
   const [activeSearch, setActiveSearch] = useState('');
+  const [statusMessage, setStatusMessage] = useState('');
+
+  const handleAddUser = () => {
+    const nextNumber = users.length + 1;
+    const newUser: UserRecord = {
+      id: `local-${Date.now()}`,
+      name: `Usuario ${nextNumber}`,
+      role: 'Plantel',
+      plantel: `Bach. ${nextNumber}`,
+      indicadores: '-',
+    };
+
+    setUsers((current) => [newUser, ...current]);
+    setSearchTerm('');
+    setActiveSearch('');
+    setStatusMessage(`${newUser.name} agregado a la gestion local.`);
+  };
+
+  const handleEditUser = (id: string) => {
+    setUsers((current) =>
+      current.map((user) =>
+        user.id === id
+          ? {
+              ...user,
+              indicadores: user.indicadores === '-' ? '1.1.0.0.1' : `${user.indicadores}, editado`,
+            }
+          : user
+      )
+    );
+    setStatusMessage('Usuario actualizado en la vista.');
+  };
+
+  const handleDeleteUser = (user: UserRecord) => {
+    setUsers((current) => current.filter((item) => item.id !== user.id));
+    setStatusMessage(`${user.name} eliminado de la vista.`);
+  };
 
   // Función para bloquear o desbloquear un usuario
   const toggleBlockUser = (id: string) => {
-    setUsers(users.map(user => 
+    const target = users.find((user) => user.id === id);
+
+    setUsers((current) => current.map(user =>
       user.id === id ? { ...user, isBlocked: !user.isBlocked } : user
     ));
+    setStatusMessage(target?.isBlocked ? 'Usuario desbloqueado.' : 'Usuario bloqueado.');
   };
 
   // Filtrar usuarios por nombre, rol o plantel
@@ -76,11 +115,20 @@ export const UsersTable = () => {
           </div>
 
           {/* Botón Agregar */}
-          <button className="h-9 flex items-center gap-2 bg-brand-Verde_oscuro text-brand-Blanco px-5 rounded-full font-bold text-sm hover:bg-brand-Verde_principal transition-colors">
+          <button
+            onClick={handleAddUser}
+            className="h-9 flex items-center gap-2 bg-brand-Verde_oscuro text-brand-Blanco px-5 rounded-full font-bold text-sm hover:bg-brand-Verde_principal transition-colors"
+          >
             Agregar
             <PlusCircle size={18} strokeWidth={2.5} />
           </button>
         </div>
+
+        {statusMessage && (
+          <p className="text-sm font-body font-semibold text-brand-Verde_oscuro">
+            {statusMessage}
+          </p>
+        )}
 
       </div>
 
@@ -115,7 +163,10 @@ export const UsersTable = () => {
                   {/* Botones de Acción */}
                   <td className="py-4 px-6">
                     <div className="flex items-center justify-center gap-3">
-                      <button className="px-6 py-1 rounded-full border border-brand-Verde_oscuro text-brand-Verde_oscuro font-bold text-sm hover:bg-brand-Verde_oscuro hover:text-brand-Blanco transition-colors w-[120px]">
+                      <button
+                        onClick={() => handleEditUser(user.id)}
+                        className="px-6 py-1 rounded-full border border-brand-Verde_oscuro text-brand-Verde_oscuro font-bold text-sm hover:bg-brand-Verde_oscuro hover:text-brand-Blanco transition-colors w-[120px]"
+                      >
                         Modificar
                       </button>
                       
@@ -130,6 +181,7 @@ export const UsersTable = () => {
                             {user.isBlocked ? <Lock size={20} /> : <Unlock size={20} />}
                           </button>
                           <button 
+                            onClick={() => handleDeleteUser(user)}
                             className="text-brand-Verde_oscuro hover:text-brand-Status_rojo transition-colors p-1 rounded-md hover:bg-brand-Status_rojo/10 cursor-pointer"
                             title="Eliminar usuario"
                           >

@@ -44,6 +44,7 @@ interface AccountProfileProps {
 export const AccountProfile = ({ onBack }: AccountProfileProps) => {
   // Extraemos los datos del usuario logeado desde el AuthContext
   const { user } = useAuth();
+  const [saveMessage, setSaveMessage] = useState('');
 
   return (
     <div className="w-full max-w-[900px] mx-auto pt-8 pb-10">
@@ -114,8 +115,14 @@ export const AccountProfile = ({ onBack }: AccountProfileProps) => {
           </div>
 
           {/* Botón de Guardar */}
+          {saveMessage && (
+            <p className="text-sm font-body font-semibold text-brand-Verde_oscuro text-right">
+              {saveMessage}
+            </p>
+          )}
+
           <div className="mt-4 flex justify-end">
-            <Button variant="primary" className="text-sm px-8 py-2.5">
+            <Button variant="primary" onClick={() => setSaveMessage('Contrasena actualizada para la sesion actual.')} className="text-sm px-8 py-2.5">
               Guardar Contraseña
             </Button>
           </div>

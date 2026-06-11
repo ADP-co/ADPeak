@@ -230,7 +230,7 @@ function AppContent() {
         {(role === 'admin' || role === 'plantel') && (
           <Route path="/indicadores" element={
             role === 'admin' ? (
-              <IndicatorsManagementTable />
+              <IndicatorsManagementTable onEditIndicator={handleSelectIndicator} />
             ) : (
               <>
                 <ProgressBar totalIndicators={mockupIndicators.length} completedIndicators={completedCount} />

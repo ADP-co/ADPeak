@@ -15,16 +15,26 @@ export interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AUTH_STORAGE_KEY = 'adpeak.session.user';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const storedUser = window.localStorage.getItem(AUTH_STORAGE_KEY);
+      return storedUser ? JSON.parse(storedUser) as User : null;
+    } catch {
+      return null;
+    }
+  });
 
   const login = (userData: User) => {
     setUser(userData);
+    window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
   };
 
   const logout = () => {
     setUser(null);
+    window.localStorage.removeItem(AUTH_STORAGE_KEY);
   };
 
   return (

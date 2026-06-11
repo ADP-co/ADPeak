@@ -9,9 +9,13 @@ export interface IndicatorRecord {
   responsable: string;
 }
 
-export const IndicatorsManagementTable = () => {
+interface IndicatorsManagementTableProps {
+  onEditIndicator?: (code: string) => void;
+}
+
+export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagementTableProps) => {
   // Datos de prueba
-  const DataIndicators: IndicatorRecord[] = [
+  const [indicators, setIndicators] = useState<IndicatorRecord[]>([
     { id: '1', code: '1.1.0.0.1', name: 'Porcentaje de cobertura en educación media superior', responsable: 'Usuario08' },
     { id: '2', code: '1.0.0.0.2', name: 'Porcentaje de titulación por cohorte de educación media superior', responsable: 'Usuario08' },
     { id: '3', code: '1.1.0.0.2', name: 'Porcentaje de cobertura en educación media superior', responsable: 'Usuario08' },
@@ -23,14 +27,40 @@ export const IndicatorsManagementTable = () => {
     { id: '9', code: '1.1.2.1.3', name: 'Porcentaje de estudiantes que sus padres, madres o tutores legales participan', responsable: 'Usuario08' },
     { id: '10', code: '1.1.2.1.4', name: 'Porcentaje de estudiantes atendidos en los servicios de salud', responsable: 'Usuario08' },
     { id: '11', code: '1.1.2.2.1', name: 'Porcentaje de estudiantes atendidos en acciones de reforzamiento', responsable: 'Usuario08' },
-  ];
+  ]);
 
   // Estados para la búsqueda
   const [searchTerm, setSearchTerm] = useState('');
   const [activeSearch, setActiveSearch] = useState('');
+  const [statusMessage, setStatusMessage] = useState('');
+
+  const handleAddIndicator = () => {
+    const nextNumber = indicators.length + 1;
+    const newIndicator: IndicatorRecord = {
+      id: `local-${Date.now()}`,
+      code: `TMP-${nextNumber}`,
+      name: `Indicador nuevo ${nextNumber}`,
+      responsable: 'Sin asignar',
+    };
+
+    setIndicators((current) => [newIndicator, ...current]);
+    setSearchTerm('');
+    setActiveSearch('');
+    setStatusMessage(`Indicador ${newIndicator.code} agregado a la gestion local.`);
+  };
+
+  const handleEditIndicator = (indicator: IndicatorRecord) => {
+    setStatusMessage(`Abriendo captura de ${indicator.code}.`);
+    onEditIndicator?.(indicator.code);
+  };
+
+  const handleDeleteIndicator = (indicator: IndicatorRecord) => {
+    setIndicators((current) => current.filter((item) => item.id !== indicator.id));
+    setStatusMessage(`Indicador ${indicator.code} eliminado de la vista.`);
+  };
 
   // Filtramos los indicadores por código, nombre o responsable
-  const filteredIndicators = DataIndicators.filter((indicator) => 
+  const filteredIndicators = indicators.filter((indicator) =>
     indicator.code.toLowerCase().includes(activeSearch.toLowerCase()) || 
     indicator.name.toLowerCase().includes(activeSearch.toLowerCase()) ||
     indicator.responsable.toLowerCase().includes(activeSearch.toLowerCase())
@@ -69,11 +99,20 @@ export const IndicatorsManagementTable = () => {
           </div>
 
           {/* Botón Agregar */}
-          <button className="h-9 flex items-center gap-2 bg-brand-Verde_oscuro text-brand-Blanco px-5 rounded-full font-bold text-sm hover:bg-brand-Verde_principal transition-colors">
+          <button
+            onClick={handleAddIndicator}
+            className="h-9 flex items-center gap-2 bg-brand-Verde_oscuro text-brand-Blanco px-5 rounded-full font-bold text-sm hover:bg-brand-Verde_principal transition-colors"
+          >
             Agregar
             <PlusCircle size={18} strokeWidth={2.5} />
           </button>
         </div>
+
+        {statusMessage && (
+          <p className="text-sm font-body font-semibold text-brand-Verde_oscuro">
+            {statusMessage}
+          </p>
+        )}
 
       </div>
 
@@ -111,10 +150,14 @@ export const IndicatorsManagementTable = () => {
                   {/* Columna Acciones */}
                   <td className="py-4 px-6">
                     <div className="flex items-center justify-center gap-3">
-                      <button className="px-6 py-1 rounded-full border border-brand-Verde_oscuro text-brand-Verde_oscuro font-bold text-sm hover:bg-brand-Verde_oscuro hover:text-brand-Blanco transition-colors w-[120px]">
+                      <button
+                        onClick={() => handleEditIndicator(indicator)}
+                        className="px-6 py-1 rounded-full border border-brand-Verde_oscuro text-brand-Verde_oscuro font-bold text-sm hover:bg-brand-Verde_oscuro hover:text-brand-Blanco transition-colors w-[120px]"
+                      >
                         Modificar
                       </button>
                       <button 
+                        onClick={() => handleDeleteIndicator(indicator)}
                         className="text-brand-Verde_oscuro hover:text-brand-Status_rojo transition-colors p-1 rounded-md hover:bg-brand-Status_rojo/10 cursor-pointer"
                         title="Eliminar indicador"
                       >
