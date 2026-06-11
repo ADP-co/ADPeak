@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Select } from './Select';
 import { Button } from './Button';
+import { useAuth } from '../../context/AuthContext';
+import { ProgressBar } from '../layout/ProgressBar';
+import type { Indicator } from './IndicatorsTable';
 
 // Tarjeta de Gráfica de Dona
 interface DonutCardProps {
@@ -64,8 +67,13 @@ interface PlantelProgressRecord {
   status: PlantelStatus;
 }
 
+interface ReportsDashboardProps {
+  indicators?: Indicator[];
+}
+
 // Pantalla Principal de Reportes
-export const ReportsDashboard = () => {
+export const ReportsDashboard = ({ indicators = [] }: ReportsDashboardProps) => {
+  const { user } = useAuth();
 
   // Estados para simular la carga del backend
   const [dateOptions, setDateOptions] = useState<{value: string, label: string}[]>([{ value: '', label: 'Cargando...' }]);
@@ -194,6 +202,86 @@ export const ReportsDashboard = () => {
     );
   };
 
+  // --- Variables y lógica para la vista del Plantel ---
+  const totalIndicatorsPlantel = indicators.length;
+  const approvedIndicatorsPlantel = indicators.filter(i => i.status === 'Aprobado').length;
+  // Calculamos el progreso visual de captura (Aprobados + En revisión) al igual que en App.tsx
+  const completedIndicatorsPlantel = indicators.filter(i => i.status === 'Aprobado' || i.status === 'En revisión').length;
+  const isAllApproved = totalIndicatorsPlantel > 0 && totalIndicatorsPlantel === approvedIndicatorsPlantel;
+  
+  const handleGeneratePlantelReport = () => {
+    const rows = [
+      ['Código', 'Nombre del Indicador', 'Estatus', 'Periodo'],
+      ...indicators.map(ind => [ind.code, ind.name, ind.status, selectedDate])
+    ];
+    const csv = rows.map((row) => row.map((cell) => `"${cell}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = `reporte-concentrado-${user?.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'plantel'}-${selectedDate}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    setReportMessage(`Reporte concentrado generado correctamente.`);
+  };
+
+  // --- VISTA EXCLUSIVA PARA EL ROL PLANTEL ---
+  if (user?.role === 'plantel') {
+    return (
+      <div className="w-full max-w-[1250px] mx-auto pt-8 pb-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
+          <h1 className="font-title text-3xl font-bold text-brand-Gris_oscuro">
+            Mi Progreso y Reportes
+          </h1>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-brand-Gris_oscuro font-bold font-accent">Periodo</span>
+            <Select
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              options={dateOptions}
+              variant="outline"
+              containerClassName="w-36"
+            />
+          </div>
+        </div>
+
+        <div className="bg-brand-Blanco rounded-lg shadow-md border border-brand-Gris_bajo/20 p-6 mb-8">
+          <h2 className="font-title text-xl font-bold text-brand-Gris_oscuro -mb-4">Avance de Captura</h2>
+          <ProgressBar totalIndicators={totalIndicatorsPlantel || 11} completedIndicators={completedIndicatorsPlantel || 5} />
+        </div>
+
+        <div className="bg-brand-Blanco rounded-lg shadow-md border border-brand-Gris_bajo/20 p-10 flex flex-col items-center justify-center text-center gap-4">
+          <h2 className="font-title text-2xl font-bold text-brand-Gris_oscuro">Descargar reporte</h2>
+          <p className="font-body text-sm text-brand-Gris_oscuro/70 max-w-md">
+            Obtén un resumen detallado en formato CSV con la información concentrada de todos tus indicadores para el periodo seleccionado.
+          </p>
+          <Button 
+            variant="primary" 
+            onClick={handleGeneratePlantelReport}
+            disabled={!isAllApproved}
+            className="mt-4 px-8 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Descargar Reporte CSV
+          </Button>
+          {!isAllApproved && (
+            <p className="text-sm font-body text-brand-Status_rojo mt-2">
+              El reporte estará disponible cuando todos los indicadores hayan sido aprobados.
+            </p>
+          )}
+          {reportMessage && isAllApproved && (
+            <p className="mt-2 text-sm font-body font-semibold text-brand-Verde_oscuro">
+              {reportMessage}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // --- VISTA PARA ROLES ADMIN / RESPONSABLE ---
   return (
     <div className="w-full max-w-[1250px] mx-auto pt-8 pb-4">
 

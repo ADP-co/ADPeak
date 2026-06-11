@@ -120,20 +120,42 @@ function IndicatorFormWrapper() {
     responsableId: 2,
   });
 
-  const formInitialData = captureDraft.capture?.payload.rows ?? mockInitialData;
+  // Extraemos la información del borrador de manera segura para evitar caídas de React (Blank Screen)
+  // si el backend responde con un payload vacío, nulo o en formato de texto.
+  let formInitialData = mockInitialData;
+  try {
+    const payload = captureDraft.capture?.payload;
+    if (payload) {
+      const parsedPayload = typeof payload === 'string' ? JSON.parse(payload) : payload;
+      if (parsedPayload && Array.isArray(parsedPayload.rows) && parsedPayload.rows.length > 0) {
+        formInitialData = parsedPayload.rows;
+      } else if (Array.isArray(parsedPayload) && parsedPayload.length > 0) {
+        formInitialData = parsedPayload;
+      }
+    }
+  } catch (error) {
+    console.error('Error al cargar los datos guardados:', error);
+  }
 
   const handleSaveDraft = (data: FormSubmission) => {
     captureDraft.saveDraft({ rows: data.rows });
-    toast.success('Borrador guardado', {
-      description: 'Tu progreso se esta guardando en el backend.'
-    });
+    toast.success('Borrador guardado');
   };
 
   const handleSendReview = (data: FormSubmission) => {
     captureDraft.sendToReview({ rows: data.rows });
-    toast.success('Enviado a revision', {
-      description: 'Los datos se enviaron al flujo de revision.'
-    });
+    
+    // Actualizamos el estado del indicador localmente
+    if (currentIndicator) {
+      currentIndicator.status = 'En revisión';
+    }
+
+    toast.success('Enviado a revisión');
+    if (location.state?.from) {
+      navigate(-1);
+    } else {
+      navigate('/indicadores');
+    }
   };
 
   return (
@@ -231,49 +253,37 @@ function AppContent() {
           <Navigate to="/indicadores" replace />
         } />
 
-        {/* Vistas de Admin */}
+        {/* Vistas exclusivas de Admin */}
         {role === 'admin' && (
           <>
             <Route path="/analisis" element={<Dashboard onSelectIndicator={handleSelectIndicator} />} />
             <Route path="/usuarios" element={<UsersTable />} />
+            <Route path="/indicadores" element={<IndicatorsManagementTable onEditIndicator={handleConfigIndicator} />} />
+            <Route path="/indicadores/configurar/:code" element={<IndicatorConfigForm onBack={() => {
+              if (location.state?.from) navigate(-1);
+              else navigate('/indicadores');
+            }} />} />
           </>
         )}
 
-        {/* Vistas de Responsable */}
+        {/* Vistas exclusivas de Responsable */}
         {role === 'responsable' && (
           <Route path="/revision" element={<Dashboard onSelectIndicator={handleSelectIndicator} />} />
         )}
 
-        {/* Vistas compartidas: Indicadores (Admin ve gestión, Plantel solo ve tabla) */}
-        {(role === 'admin' || role === 'plantel') && (
+        {/* Vistas exclusivas de Plantel */}
+        {role === 'plantel' && (
           <Route path="/indicadores" element={
-            role === 'admin' ? (
-              <IndicatorsManagementTable onEditIndicator={handleConfigIndicator} />
-            ) : (
-              <>
-                <ProgressBar totalIndicators={mockupIndicators.length} completedIndicators={completedCount} />
-                <IndicatorsTable indicators={mockupIndicators} onSelectIndicator={handleSelectIndicator} />
-              </>
-            )
+            <>
+              <ProgressBar totalIndicators={mockupIndicators.length} completedIndicators={completedCount} />
+              <IndicatorsTable indicators={mockupIndicators} onSelectIndicator={handleSelectIndicator} />
+            </>
           } />
         )}
 
-        {/* Formulario de captura accesible para quienes tengan acceso a indicadores */}
-        <Route path="/indicadores/captura/:code" element={<IndicatorFormWrapper />} />
-
-        {/* Formulario de configuración de campos (Solo Admin) */}
-        {role === 'admin' && (
-          <Route path="/indicadores/configurar/:code" element={<IndicatorConfigForm onBack={() => {
-            if (location.state?.from) {
-              navigate(-1);
-            } else {
-              navigate('/indicadores');
-            }
-          }} />} />
-        )}
-
         {/* Vistas compartidas para todos */}
-        <Route path="/reportes" element={<ReportsDashboard />} />
+        <Route path="/indicadores/captura/:code" element={<IndicatorFormWrapper />} />
+        <Route path="/reportes" element={<ReportsDashboard indicators={mockupIndicators} />} />
         <Route path="/perfil" element={<AccountProfile onBack={() => navigate(-1)} />} />
       </Route>
 

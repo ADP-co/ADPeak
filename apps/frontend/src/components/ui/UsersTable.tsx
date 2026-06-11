@@ -39,8 +39,8 @@ export const UsersTable = () => {
     { id: '3', name: 'Angél Ordóñez', role: 'Responsable', plantel: '-', indicadores: '1.1.0.0.1' },
     { id: '4', name: 'Usuario', role: 'Responsable', plantel: '-', indicadores: '1.0.0.0.2' },
     { id: '5', name: 'Usuario', role: 'Responsable', plantel: '-', indicadores: '1.1.2.0.1' },
-    { id: '6', name: 'Usuario', role: 'Plantel', plantel: 'Bach. 16', indicadores: '-' },
-    { id: '7', name: 'Usuario', role: 'Plantel', plantel: 'Bach. 33', indicadores: '-' },
+    { id: '6', name: 'Bach. 16', role: 'Plantel', plantel: 'Bach. 16', indicadores: '-' },
+    { id: '7', name: 'Bach. 33', role: 'Plantel', plantel: 'Bach. 33', indicadores: '-' },
   ]);
 
   // Estados para la búsqueda
@@ -50,19 +50,16 @@ export const UsersTable = () => {
   const [editingUser, setEditingUser] = useState<UserRecord | null>(null);
 
   const handleAddUser = () => {
-    const nextNumber = users.length + 1;
     const newUser: UserRecord = {
       id: `local-${Date.now()}`,
-      name: `Usuario ${nextNumber}`,
+      name: '',
       role: 'Plantel',
-      plantel: `Bach. ${nextNumber}`,
+      plantel: '-',
       indicadores: '-',
     };
 
-    setUsers((current) => [newUser, ...current]);
-    setSearchTerm('');
-    setActiveSearch('');
-    setStatusMessage(`${newUser.name} agregado a la gestion local.`);
+    setEditingUser(newUser);
+    setStatusMessage('');
   };
 
   const handleEditUser = (user: UserRecord) => {
@@ -72,9 +69,17 @@ export const UsersTable = () => {
 
   const saveEditedUser = () => {
     if (!editingUser) return;
-    setUsers((current) => current.map((user) => (user.id === editingUser.id ? editingUser : user)));
+    
+    const isNew = !users.some((u) => u.id === editingUser.id);
+    setUsers((current) => {
+      if (isNew) {
+        return [...current, editingUser];
+      }
+      return current.map((user) => (user.id === editingUser.id ? editingUser : user));
+    });
+    
     setEditingUser(null);
-    setStatusMessage(`Usuario ${editingUser.name} actualizado correctamente.`);
+    setStatusMessage(`Usuario ${editingUser.name || 'nuevo'} ${isNew ? 'agregado' : 'actualizado'} correctamente.`);
   };
 
   const handleDeleteUser = (user: UserRecord) => {
@@ -92,12 +97,28 @@ export const UsersTable = () => {
     setStatusMessage(target?.isBlocked ? 'Usuario desbloqueado.' : 'Usuario bloqueado.');
   };
 
+  // Mapa de prioridades para el ordenamiento de roles
+  const rolePriority: Record<SystemRole, number> = {
+    'Administrador': 1,
+    'Responsable': 2,
+    'Plantel': 3,
+  };
+
   // Filtrar usuarios por nombre, rol o plantel
-  const filteredUsers = users.filter((user) =>
-    user.name.toLowerCase().includes(activeSearch.toLowerCase()) ||
-    user.role.toLowerCase().includes(activeSearch.toLowerCase()) ||
-    user.plantel.toLowerCase().includes(activeSearch.toLowerCase())
-  );
+  const filteredUsers = users
+    .filter((user) =>
+      user.name.toLowerCase().includes(activeSearch.toLowerCase()) ||
+      user.role.toLowerCase().includes(activeSearch.toLowerCase()) ||
+      user.plantel.toLowerCase().includes(activeSearch.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (rolePriority[a.role] !== rolePriority[b.role]) {
+        return rolePriority[a.role] - rolePriority[b.role];
+      }
+      return a.plantel.localeCompare(b.plantel, undefined, { numeric: true });
+    });
+
+  const isCreatingUser = editingUser && !users.some((u) => u.id === editingUser.id);
 
   return (
     <div className="w-full max-w-[1250px] mx-auto pt-8 pb-10">
@@ -157,11 +178,10 @@ export const UsersTable = () => {
             {/* Cabecera */}
             <thead>
               <tr className="bg-brand-Gris_bajo/35 text-brand-Gris_oscuro font-title font-bold text-sm select-none border-b border-brand-Gris_bajo/20">
-                <th className="py-4 px-6 w-[20%]">Usuario</th>
-                <th className="py-4 px-6 w-[20%]">Rol</th>
-                <th className="py-4 px-6 w-[20%]">Plantel</th>
-                <th className="py-4 px-6 w-[20%]">Indicadores</th>
-                <th className="py-4 px-6 w-[20%]">Acciones</th>
+                 <th className="py-4 px-6 w-[25%]">Usuario</th>
+                <th className="py-4 px-6 w-[25%]">Rol</th>
+                <th className="py-4 px-6 w-[25%]">Indicadores</th>
+                <th className="py-4 px-6 w-[25%]">Acciones</th>
               </tr>
             </thead>
 
@@ -174,7 +194,6 @@ export const UsersTable = () => {
                 >
                   <td className="py-4 px-6 font-medium leading-relaxed pr-8 text-brand-Gris_oscuro">{user.name}</td>
                   <td className="py-4 px-6 font-medium leading-relaxed pr-8 text-brand-Gris_oscuro/80">{user.role}</td>
-                  <td className="py-4 px-6 font-medium text-brand-Verde_oscuro">{user.plantel}</td>
                   <td className="py-4 px-6 text-center font-mono font-medium text-brand-Gris_oscuro/80">
                     {user.indicadores === '-' || !user.indicadores ? (
                       '-'
@@ -233,7 +252,7 @@ export const UsersTable = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-brand-Gris_oscuro/60 backdrop-blur-sm p-4">
           <div className="bg-brand-Blanco rounded-lg shadow-xl p-6 w-full max-w-md border border-brand-Gris_bajo/20">
             <h2 className="text-xl font-title font-bold text-brand-Gris_oscuro mb-6">
-              Modificar Usuario
+              {isCreatingUser ? 'Agregar Usuario' : 'Modificar Usuario'}
             </h2>
             
             <div className="space-y-4">
@@ -243,14 +262,28 @@ export const UsersTable = () => {
                   type="text"
                   value={editingUser.name}
                   onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
-                  className="w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco"
+                  disabled={editingUser.role === 'Plantel'}
+                  placeholder={editingUser.role === 'Plantel' ? 'El nombre se asigna automáticamente' : ''}
+                  className="w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco disabled:bg-brand-Gris_bajo/10 disabled:opacity-70 disabled:cursor-not-allowed"
                 />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-brand-Gris_oscuro font-body mb-1">Rol</label>
                 <select
                   value={editingUser.role}
-                  onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value as SystemRole })}
+                  onChange={(e) => {
+                    const newRole = e.target.value as SystemRole;
+                    const newPlantel = newRole === 'Plantel' ? editingUser.plantel : '-';
+                    setEditingUser({ 
+                      ...editingUser, 
+                      role: newRole,
+                      plantel: newPlantel,
+                      indicadores: newRole === 'Responsable' ? editingUser.indicadores : '-',
+                      name: newRole === 'Plantel' 
+                        ? (newPlantel === '-' ? '' : newPlantel) 
+                        : (editingUser.role === 'Plantel' ? '' : editingUser.name)
+                    });
+                  }}
                   className="w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco"
                 >
                   <option value="Administrador">Administrador</option>
@@ -258,69 +291,80 @@ export const UsersTable = () => {
                   <option value="Plantel">Plantel</option>
                 </select>
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-brand-Gris_oscuro font-body mb-1">Plantel</label>
-                <select
-                  value={editingUser.plantel}
-                  onChange={(e) => setEditingUser({ ...editingUser, plantel: e.target.value })}
-                  className="w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco"
-                >
-                  {MOCK_PLANTELES.map(plantel => (
-                    <option key={plantel} value={plantel}>{plantel === '-' ? 'Sin asignar (-)' : plantel}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-brand-Gris_oscuro font-body mb-1">Indicadores Asignados</label>
-                {(() => {
-                  const assignedList = editingUser.indicadores === '-' || !editingUser.indicadores 
-                    ? [] 
-                    : editingUser.indicadores.split(',').map(i => i.trim()).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-                  
-                  return (
-                    <>
-                      <select
-                        value=""
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (val && !assignedList.includes(val)) {
-                            const newList = [...assignedList, val].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-                            setEditingUser({ ...editingUser, indicadores: newList.join(', ') });
-                          }
-                        }}
-                        className="w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco mb-3"
-                      >
-                        <option value="" disabled hidden>Seleccione para agregar...</option>
-                        {MOCK_INDICADORES.filter(ind => ind !== '-' && !assignedList.includes(ind)).map(indicador => (
-                          <option key={indicador} value={indicador}>{indicador}</option>
-                        ))}
-                      </select>
-                      
-                      <div className="flex flex-wrap gap-2 p-3 bg-brand-Gris_bajo/5 rounded-md border border-brand-Gris_bajo/20 min-h-[50px] items-center">
-                        {assignedList.length > 0 ? (
-                          assignedList.map(indicador => (
-                            <span key={indicador} className="flex items-center gap-1.5 bg-brand-Verde_oscuro text-brand-Blanco px-2.5 py-1 rounded-full text-xs font-accent font-semibold shadow-sm">
-                              {indicador}
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const newList = assignedList.filter(ind => ind !== indicador);
-                                  setEditingUser({ ...editingUser, indicadores: newList.length > 0 ? newList.join(', ') : '-' });
-                                }}
-                                className="hover:text-brand-Status_rojo transition-colors p-0.5 rounded-full hover:bg-brand-Blanco/20 cursor-pointer"
-                              >
-                                <X size={12} strokeWidth={3} />
-                              </button>
-                            </span>
-                          ))
-                        ) : (
-                          <span className="text-xs text-brand-Gris_oscuro/50 font-body italic w-full text-center">Sin indicadores asignados</span>
-                        )}
-                      </div>
-                    </>
-                  );
-                })()}
-              </div>
+              {editingUser.role === 'Plantel' && (
+                <div>
+                  <label className="block text-sm font-semibold text-brand-Gris_oscuro font-body mb-1">Plantel</label>
+                  <select
+                    value={editingUser.plantel}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setEditingUser({ 
+                        ...editingUser, 
+                        plantel: val,
+                        name: val === '-' ? '' : val
+                      });
+                    }}
+                    className="w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco"
+                  >
+                    {MOCK_PLANTELES.map(plantel => (
+                      <option key={plantel} value={plantel}>{plantel === '-' ? 'Sin asignar (-)' : plantel}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              {editingUser.role === 'Responsable' && (
+                <div>
+                  <label className="block text-sm font-semibold text-brand-Gris_oscuro font-body mb-1">Indicadores Asignados</label>
+                  {(() => {
+                    const assignedList = editingUser.indicadores === '-' || !editingUser.indicadores 
+                      ? [] 
+                      : editingUser.indicadores.split(',').map(i => i.trim()).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+                    
+                    return (
+                      <>
+                        <select
+                          value=""
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val && !assignedList.includes(val)) {
+                              const newList = [...assignedList, val].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+                              setEditingUser({ ...editingUser, indicadores: newList.join(', ') });
+                            }
+                          }}
+                          className="w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco mb-3"
+                        >
+                          <option value="" disabled hidden>Seleccione para agregar...</option>
+                          {MOCK_INDICADORES.filter(ind => ind !== '-' && !assignedList.includes(ind)).map(indicador => (
+                            <option key={indicador} value={indicador}>{indicador}</option>
+                          ))}
+                        </select>
+                        
+                        <div className="flex flex-wrap gap-2 p-3 bg-brand-Gris_bajo/5 rounded-md border border-brand-Gris_bajo/20 min-h-[50px] items-center">
+                          {assignedList.length > 0 ? (
+                            assignedList.map(indicador => (
+                              <span key={indicador} className="flex items-center gap-1.5 bg-brand-Verde_oscuro text-brand-Blanco px-2.5 py-1 rounded-full text-xs font-accent font-semibold shadow-sm">
+                                {indicador}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newList = assignedList.filter(ind => ind !== indicador);
+                                    setEditingUser({ ...editingUser, indicadores: newList.length > 0 ? newList.join(', ') : '-' });
+                                  }}
+                                  className="hover:text-brand-Status_rojo transition-colors p-0.5 rounded-full hover:bg-brand-Blanco/20 cursor-pointer"
+                                >
+                                  <X size={12} strokeWidth={3} />
+                                </button>
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-xs text-brand-Gris_oscuro/50 font-body italic w-full text-center">Sin indicadores asignados</span>
+                          )}
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              )}
             </div>
             
             <div className="flex justify-end gap-3 mt-8">
@@ -332,7 +376,8 @@ export const UsersTable = () => {
               </button>
               <button
                 onClick={saveEditedUser}
-                className="px-5 py-2 rounded-md bg-brand-Verde_oscuro text-brand-Blanco text-sm font-bold hover:bg-brand-Verde_principal transition-colors"
+                disabled={!editingUser.name.trim()}
+                className="px-5 py-2 rounded-md bg-brand-Verde_oscuro text-brand-Blanco text-sm font-bold hover:bg-brand-Verde_principal transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Guardar Cambios
               </button>
