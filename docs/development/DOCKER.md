@@ -53,6 +53,7 @@ de desarrollo.
 | `INTERNAL_API_URL` | `http://backend:8000` | URL interna del backend dentro de Docker. |
 | `POSTGRES_PASSWORD` | `local_dev_password_not_secret` | Contrasena local no secreta. |
 | `VITE_API_URL` | `http://127.0.0.1:8000` | URL publica de backend usada por el frontend. |
+| `VITE_API_BASE_URL` | `http://127.0.0.1:8000/api/v1` | URL base de API versionada usada por el frontend. |
 | `DATABASE_URL` | `postgresql://sigi_poa:local_dev_password_not_secret@127.0.0.1:5432/sigi_poa_dev` | URL para herramientas ejecutadas fuera de Docker. |
 | `AUTH_SECRET` | `local-dev-auth-secret-change-me` | Placeholder local para auth. |
 | `AUTH_TOKEN_TTL_MINUTES` | `60` | Duracion local de tokens. |
@@ -103,6 +104,7 @@ Este comando usa:
 - `compose.demo.yaml`
 - Base local `sigi_poa_demo`
 - Endpoints `/demo/status`, `/demo/users`, `/demo/data` y `/demo/login`
+- Endpoints de captura bajo `/api/v1/capturas`
 
 Validacion posterior al arranque:
 

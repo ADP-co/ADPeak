@@ -37,6 +37,10 @@ build/
 coverage/
 .nyc_output/
 *.tsbuildinfo
+.vite/
+.cache/
+playwright-report/
+test-results/
 site/
 docs/_build/
 *.o

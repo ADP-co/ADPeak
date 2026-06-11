@@ -66,11 +66,11 @@ interface PlantelProgressRecord {
 
 // Pantalla Principal de Reportes
 export const ReportsDashboard = () => {
-  
+
   // Estados para simular la carga del backend
   const [dateOptions, setDateOptions] = useState<{value: string, label: string}[]>([{ value: '', label: 'Cargando...' }]);
   const [selectedDate, setSelectedDate] = useState('');
-  
+
   // Estado para el filtrado
   const [filterBy, setFilterBy] = useState('todos');
   const [reportMessage, setReportMessage] = useState('');
@@ -93,7 +93,7 @@ export const ReportsDashboard = () => {
     };
     fetchFilters();
   }, []);
-  
+
   // Datos simulados extraídos
   const mockPlanteles: PlantelProgressRecord[] = [
     { id: '1', plantel: 'Bach. 16', percentage: 100, status: 'Completo' },
@@ -182,8 +182,8 @@ export const ReportsDashboard = () => {
     return (
       <div className={`relative w-full h-6 rounded-full overflow-hidden ${bgColor}`}>
         {/* Relleno que crece según el porcentaje */}
-        <div 
-          className={`absolute top-0 left-0 h-full rounded-full ${fillColor} transition-all duration-1000 ease-out`} 
+        <div
+          className={`absolute top-0 left-0 h-full rounded-full ${fillColor} transition-all duration-1000 ease-out`}
           style={{ width: `${item.percentage}%` }}
         ></div>
         {/* Texto centrado que flota sobre el relleno */}
@@ -196,7 +196,7 @@ export const ReportsDashboard = () => {
 
   return (
     <div className="w-full max-w-[1250px] mx-auto pt-8 pb-4">
-      
+
       {/* Título y Gráficas */}
       <div className="mb-10">
         <div className="flex flex-wrap items-center justify-between mb-4">
@@ -204,7 +204,7 @@ export const ReportsDashboard = () => {
             Reportes Dinámicos
           </h1>
           <div className="flex gap-4">
-            <Select 
+            <Select
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
               options={dateOptions}
@@ -215,23 +215,23 @@ export const ReportsDashboard = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <DonutCard 
-            title="Bachilleratos Completos" 
-            percentage={completosPercentage} 
-            colorClass="bg-[#C1D82F]" 
-            strokeColor="#C1D82F" 
+          <DonutCard
+            title="Bachilleratos Completos"
+            percentage={completosPercentage}
+            colorClass="bg-[#C1D82F]"
+            strokeColor="#C1D82F"
           />
-          <DonutCard 
-            title="Bachilleratos Pendientes" 
-            percentage={pendientesPercentage} 
-            colorClass="bg-[#FFD100]" 
-            strokeColor="#FFD100" 
+          <DonutCard
+            title="Bachilleratos Pendientes"
+            percentage={pendientesPercentage}
+            colorClass="bg-[#FFD100]"
+            strokeColor="#FFD100"
           />
-          <DonutCard 
-            title="Bachilleratos Rezagados" 
-            percentage={rezagadosPercentage} 
-            colorClass="bg-[#770F00]" 
-            strokeColor="#770F00" 
+          <DonutCard
+            title="Bachilleratos Rezagados"
+            percentage={rezagadosPercentage}
+            colorClass="bg-[#770F00]"
+            strokeColor="#770F00"
           />
         </div>
       </div>
@@ -244,7 +244,7 @@ export const ReportsDashboard = () => {
           </h2>
           <div className="flex items-center gap-2">
             <span className="text-xs text-brand-Gris_oscuro font-bold font-accent">Filtrar por</span>
-            <Select 
+            <Select
               value={filterBy}
               onChange={(e) => setFilterBy(e.target.value)}
               options={[
@@ -268,7 +268,7 @@ export const ReportsDashboard = () => {
 
         <div className="bg-brand-Blanco rounded-lg shadow-md overflow-hidden border border-brand-Gris_bajo/20">
           <table className="w-full border-collapse text-center">
-            
+
             <thead>
               <tr className="bg-brand-Gris_bajo/35 text-brand-Gris_oscuro font-title font-bold text-sm select-none border-b border-brand-Gris_bajo/20">
                 <th className="py-4 px-6 w-[20%] text-left">Plantel</th>
@@ -280,27 +280,27 @@ export const ReportsDashboard = () => {
             <tbody className="divide-y divide-brand-Gris_bajo/20 font-body text-sm text-brand-Gris_oscuro">
               {processedPlanteles.map((item) => (
                 <tr key={item.id} className="hover:bg-brand-Gris_bajo/10 transition-colors">
-                  
+
                   {/* Nombre del Plantel */}
                   <td className="py-4 px-6 text-left font-medium text-brand-Gris_oscuro/90">
                     {item.plantel}
                   </td>
-                  
+
                   {/* Barra Mágica */}
                   <td className="py-4 px-6">
                     {renderProgressBar(item)}
                   </td>
-                  
+
                   {/* Botón de Acción */}
                   <td className="py-4 px-6">
-                    <Button 
+                    <Button
                       variant="secondary"
                       onClick={() => handleGenerateReport(item)}
                       // Solo se habilita si el estatus es "Completo"
-                      disabled={item.status !== 'Completo'} 
+                      disabled={item.status !== 'Completo'}
                       className={`w-[160px] text-xs py-1.5 px-4 ${
-                        item.status !== 'Completo' 
-                          ? 'border-brand-Gris_bajo text-brand-Gris_bajo opacity-40 cursor-not-allowed hover:bg-transparent hover:text-brand-Gris_bajo' 
+                        item.status !== 'Completo'
+                          ? 'border-brand-Gris_bajo text-brand-Gris_bajo opacity-40 cursor-not-allowed hover:bg-transparent hover:text-brand-Gris_bajo'
                           : ''
                       }`}
                     >

@@ -37,6 +37,7 @@ npm run check
 | `npm run docker:up` | Levanta frontend, backend y PostgreSQL con Docker Compose. |
 | `npm run docker:down` | Detiene el entorno Docker local. |
 | `npm run docker:logs` | Muestra logs del entorno Docker local. |
+| `npm run docker:config` | Valida y renderiza la configuracion Docker de desarrollo. |
 | `npm run docker:migrate` | Ejecuta migraciones desde el servicio backend de Docker. |
 | `npm run demo:prepare-env` | Crea o valida `.env` desde `.env.demo.example`. |
 | `npm run demo:seed` | Valida seed SQL y datos ficticios de demo. |
@@ -46,12 +47,14 @@ npm run check
 | `npm run demo:up` | Levanta frontend, backend y PostgreSQL en modo demo. |
 | `npm run demo:down` | Detiene el entorno demo. |
 | `npm run demo:logs` | Muestra logs del entorno demo. |
+| `npm run demo:config` | Valida y renderiza la configuracion Docker de demo. |
 | `npm run demo:validate-access` | Valida frontend, API, dataset y login demo por rol. |
 | `npm run demo:preview` | Prepara env, construye `apps/frontend/dist` y sirve la demo en `http://127.0.0.1:5173`. |
 | `npm test` | Ejecuta pruebas de frontend y backend. |
 | `npm run build` | Compila frontend y backend. |
 | `npm run typecheck` | Valida TypeScript en todos los workspaces. |
 | `npm run check` | Corre `typecheck`, `test` y `build`. |
+| `npm run repo:verify` | Corre `check` y `git diff --check` antes de un PR o entrega. |
 
 ## Comandos por workspace
 
@@ -76,6 +79,7 @@ npm --workspace @adpeak/backend run start
 | `POSTGRES_USER` | `sigi_poa` | Usuario local de PostgreSQL. |
 | `POSTGRES_PASSWORD` | `local_dev_password_not_secret` | Contrasena local no secreta. |
 | `VITE_API_URL` | `http://127.0.0.1:8000` | URL de backend usada por el frontend. |
+| `VITE_API_BASE_URL` | `http://127.0.0.1:8000/api/v1` | URL base de API versionada consumida por el frontend. |
 | `DATABASE_URL` | `postgresql://sigi_poa:local_dev_password_not_secret@127.0.0.1:5432/sigi_poa_dev` | URL local para herramientas fuera de Docker. |
 | `AUTH_SECRET` | `local-dev-auth-secret-change-me` | Placeholder local para auth; no usar en produccion. |
 | `AUTH_TOKEN_TTL_MINUTES` | `60` | Duracion local de tokens. |

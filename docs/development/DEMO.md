@@ -110,7 +110,7 @@ La validacion comprueba:
 
 La pantalla demo no debe funcionar solo como maqueta visual. Al abrir
 `http://127.0.0.1:5173`, el frontend consulta el backend configurado en
-`VITE_API_URL`:
+`VITE_API_URL` y `VITE_API_BASE_URL`:
 
 - `GET /demo/status` para confirmar modo demo.
 - `GET /demo/users` para pintar los roles de prueba.
@@ -118,11 +118,14 @@ La pantalla demo no debe funcionar solo como maqueta visual. Al abrir
 - `POST /demo/login` al seleccionar un rol.
 - `POST /demo/action` al ejecutar captura/envio, correccion o aprobacion demo.
 - `GET /demo/report.csv` al descargar el reporte basico.
+- `POST /api/v1/capturas/borradores` al guardar una captura desde Plantel.
+- `PUT /api/v1/capturas/:id` al actualizar un borrador existente.
+- `POST /api/v1/capturas/:id/enviar-revision` al enviar la captura a revision.
 
 Si Gael ve solo el cascaron visual o el mensaje `Backend demo no disponible`,
 debe revisar:
 
-1. Que `.env` exista y use `VITE_API_URL=http://127.0.0.1:8000`.
+1. Que `.env` exista y use `VITE_API_URL=http://127.0.0.1:8000` y `VITE_API_BASE_URL=http://127.0.0.1:8000/api/v1`.
 2. Que el backend este levantado en `http://127.0.0.1:8000`.
 3. Que `http://127.0.0.1:8000/health` responda.
 4. Que `http://127.0.0.1:8000/demo/status` responda.

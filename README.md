@@ -1,63 +1,41 @@
-# SIGI-POA DGEMS
+# ADPeak / SIGI-POA DGEMS
 
-Sistema Integral de Gestión de Indicadores del Programa Operativo Anual para la Dirección General de Educación Media Superior.
+Sistema web para la captura, seguimiento, revision y reporte de indicadores del Programa Operativo Anual de la Direccion General de Educacion Media Superior.
 
-Este repositorio contiene el código y la documentación no confidencial del proyecto. El ciclo inicial de operación será el POA 2026, pero el sistema debe quedar preparado para administrar futuros años. Los documentos fuente, evidencias, hojas de cálculo y archivos con datos personales se administran en el repositorio privado de materiales confidenciales y no deben copiarse aquí.
+Este repositorio contiene el codigo y la documentacion tecnica no confidencial del proyecto. No debe almacenar evidencias reales, hojas de calculo institucionales, documentos fuente con datos personales ni credenciales.
 
-## Objetivo
+## Estado del proyecto
 
-Centralizar la captura, seguimiento, validación y reporte de indicadores del POA por plantel, actividad y año operativo, sustituyendo el manejo disperso de archivos Excel y carpetas en la nube por un sistema web con control de acceso, trazabilidad y reportes oportunos.
+- Producto: SIGI-POA DGEMS.
+- Nombre interno: ADPeak.
+- Ciclo inicial: POA 2026.
+- Rama de integracion: `develop`.
+- Stack actual: monorepo npm con frontend React/TypeScript y backend TypeScript/Node.
+- Base local: PostgreSQL por Docker Compose.
+- Demo local: datos ficticios bajo scripts `demo:*`.
 
-## Usuarios
+## Arquitectura
 
-- **Plantel**: captura avances, carga evidencias y consulta el estado de sus actividades.
-- **Responsable de indicador**: revisa información de los planteles asignados, valida avances y solicita correcciones.
-- **Administrador DGEMS**: administra usuarios, planteles, indicadores, periodos, permisos y reportes globales.
+```txt
+apps/
+  frontend/        React, Vite, TypeScript, Tailwind, React Hook Form, Zod
+  backend/         TypeScript, API HTTP nativa, validaciones y endpoints demo
+docs/
+  architecture/    Vision tecnica y limites del sistema
+  development/     Configuracion, scripts, Docker, demo y mantenimiento
+  project/         Alcance funcional, requisitos y planeacion
+  security/        Manejo de informacion sensible
+```
 
-## Decisiones confirmadas
+El detalle tecnico esta en [docs/architecture/OVERVIEW.md](docs/architecture/OVERVIEW.md).
 
-- Nombre oficial para documentación institucional: **SIGI-POA DGEMS**.
-- Nombre interno del equipo: **ADPeak**.
-- Primer ciclo a cubrir: **POA 2026**.
-- El sistema debe soportar futuros ciclos anuales.
-- Primera demo funcional objetivo: **31 de mayo de 2026**.
-- Autoridad funcional para aprobación de requisitos y cambios: **Administrador DGEMS**.
+## Requisitos
 
-## Alcance inicial
+- Node.js `20.19+` o `22.12+`.
+- npm `10+`.
+- Docker Desktop para levantar frontend, backend y PostgreSQL juntos.
 
-El análisis de los documentos fuente confirmó estos bloques de trabajo:
-
-- Catálogo de indicadores, actividades, responsables, contribuyentes y planteles.
-- Formularios de captura configurables por indicador.
-- Carga controlada de evidencias documentales.
-- Flujo de revisión, observaciones, correcciones y aprobación.
-- Dashboard de avance por periodo, plantel, actividad e indicador.
-- Reportes exportables para seguimiento institucional.
-- Auditoría de cambios y segregación de información por rol.
-
-## Documentación
-
-- [Resumen del proyecto](docs/project/PROJECT_BRIEF.md)
-- [Requerimientos](docs/project/REQUIREMENTS.md)
-- [Plan de acción](docs/project/ACTION_PLAN.md)
-- [Preguntas para reunión con DGEMS](docs/project/MEETING_QUESTIONS.md)
-- [Matriz de preguntas y respuestas](docs/project/QUESTION_MATRIX.md)
-- [Manejo de datos confidenciales](docs/security/DATA_HANDLING.md)
-- [Configuracion de entorno](docs/development/CONFIGURATION.md)
-- [Scripts de desarrollo](docs/development/SCRIPTS.md)
-- [Ambiente demo](docs/development/DEMO.md)
-- [Guía de ramas](BRANCH_GUIDE.md)
-
-El archivo original de planeación visual quedó archivado en [docs/project/action-plan-original.pdf](docs/project/action-plan-original.pdf). La versión editable y vigente del plan es [docs/project/ACTION_PLAN.md](docs/project/ACTION_PLAN.md).
-
-## Desarrollo local
-
-Requisitos:
-
-- Node.js 20.19 o superior, o Node.js 22.12 o superior.
-- npm 10 o superior.
-
-Instalacion y validacion inicial:
+## Inicio rapido
 
 ```bash
 npm ci
@@ -71,59 +49,72 @@ Comandos principales:
 ```bash
 npm run dev:frontend
 npm run dev:backend
-npm run migrate
-npm test
-```
-
-La documentacion completa de scripts esta en [docs/development/SCRIPTS.md](docs/development/SCRIPTS.md).
-
-## Demo local
-
-La demo controlada usa datos ficticios, tres roles de prueba y variables
-separadas de desarrollo:
-
-```bash
-npm ci
-npm run demo:check
+npm run docker:up
 npm run demo:up
-npm run demo:validate-access
 ```
 
-URLs principales:
+URLs locales:
 
 - Frontend: `http://127.0.0.1:5173`
 - Backend: `http://127.0.0.1:8000`
 - Healthcheck: `http://127.0.0.1:8000/health`
 - Dataset demo: `http://127.0.0.1:8000/demo/data`
 
-La guia completa esta en [docs/development/DEMO.md](docs/development/DEMO.md).
+## Verificacion antes de entregar
 
-## Docker local
-
-El entorno local completo se levanta con:
+Ejecutar siempre:
 
 ```bash
-npm run docker:up
+npm run repo:verify
 ```
 
-Este comando inicia frontend, backend y PostgreSQL con variables de desarrollo
-definidas en `.env.example`; no requiere secretos reales. La guia completa esta
-en [docs/development/DOCKER.md](docs/development/DOCKER.md).
+Ese comando corre tipado, pruebas, build y revision de whitespace con Git. Para validar Docker:
 
-## Stack propuesto
+```bash
+npm run docker:config
+npm run demo:config
+```
 
-- **Frontend**: React, TypeScript, React Hook Form, Zod y TanStack Query.
-- **Backend**: API web con Python/FastAPI o stack equivalente definido por el equipo.
-- **Base de datos**: PostgreSQL o MySQL, con migraciones versionadas.
-- **Archivos**: almacenamiento privado para evidencias, con referencias en base de datos.
-- **Reportes**: exportación PDF/Excel y gráficos para tableros.
-- **Operación**: Docker para ambientes reproducibles.
+## Documentacion clave
 
-La decisión final del stack debe quedar registrada antes de iniciar implementación.
+- [Arquitectura](docs/architecture/OVERVIEW.md)
+- [Guia de mantenimiento](docs/development/MAINTENANCE.md)
+- [Configuracion](docs/development/CONFIGURATION.md)
+- [Scripts](docs/development/SCRIPTS.md)
+- [Docker](docs/development/DOCKER.md)
+- [Demo](docs/development/DEMO.md)
+- [Checklist QA demo](docs/development/DEMO_QA_CHECKLIST.md)
+- [Requerimientos](docs/project/REQUIREMENTS.md)
+- [Resumen funcional](docs/project/PROJECT_BRIEF.md)
+- [Manejo de datos confidenciales](docs/security/DATA_HANDLING.md)
+- [Guia de ramas](BRANCH_GUIDE.md)
 
-## Reglas de seguridad
+## Convenciones de codigo
 
-- No subir ZIP, Excel, PDFs de evidencia, documentos fuente ni datos personales a este repositorio público.
-- No documentar nombres de estudiantes, números de cuenta, resultados de admisión o constancias individuales.
-- Las fuentes confidenciales se consultan únicamente desde el repositorio privado autorizado.
-- Cualquier credencial debe vivir en variables de entorno o secretos del proveedor, nunca en Git.
+- Frontend canonical: `apps/frontend/src/components`.
+- API frontend: `apps/frontend/src/api`.
+- Estado transversal frontend: `apps/frontend/src/context` y `apps/frontend/src/hooks`.
+- Backend: `apps/backend/src`.
+- Scripts backend: `apps/backend/scripts`.
+- Migraciones SQL: `apps/backend/migrations`.
+- Documentacion tecnica: `docs/development` y `docs/architecture`.
+
+No crear carpetas duplicadas para el mismo concepto. Si se cambia un flujo, actualizar su documentacion en el mismo Pull Request.
+
+## Seguridad
+
+- `.env` esta ignorado por Git.
+- Solo se versionan `.env.example` y `.env.demo.example`.
+- No subir ZIP, Excel, PDFs de evidencia, documentos fuente ni datos personales.
+- No usar secretos reales en desarrollo, demo, documentacion o capturas.
+- Los valores `*_not_secret`, `placeholder` y `change-me` son solo placeholders locales.
+
+## Flujo de trabajo
+
+1. Crear rama desde `develop`.
+2. Mantener cambios acotados por modulo.
+3. Ejecutar `npm run repo:verify`.
+4. Abrir Pull Request hacia `develop` con alcance, pruebas y riesgos.
+5. Fusionar a `main` solo desde una rama de release aprobada.
+
+La politica completa esta en [BRANCH_GUIDE.md](BRANCH_GUIDE.md).

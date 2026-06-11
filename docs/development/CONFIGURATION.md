@@ -48,6 +48,7 @@ variables faltantes y pide copiar `.env.example` a `.env`.
 | `EVIDENCE_MAX_FILE_MB` | Limite local de tamano para evidencias. |
 | `CORS_ORIGIN` | Origen permitido para llamadas desde frontend. |
 | `VITE_API_URL` | URL publica del backend para el frontend. |
+| `VITE_API_BASE_URL` | URL base de API versionada para clientes frontend. |
 
 ## Manejo de secretos y evidencias
 

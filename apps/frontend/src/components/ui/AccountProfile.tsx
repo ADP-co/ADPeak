@@ -48,7 +48,7 @@ export const AccountProfile = ({ onBack }: AccountProfileProps) => {
 
   return (
     <div className="w-full max-w-[900px] mx-auto pt-8 pb-10">
-      
+
       {/* Cabecera: Título y Botón de Regresar */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-title text-3xl font-bold text-brand-Gris_oscuro">
@@ -68,17 +68,17 @@ export const AccountProfile = ({ onBack }: AccountProfileProps) => {
 
         {/* --- LADO IZQUIERDO: Identidad del Usuario --- */}
         <div className="flex flex-col items-center justify-center md:w-[35%] md:border-r border-brand-Gris_bajo/20 md:pr-10">
-          
+
           {/* Avatar (Círculo con icono) */}
           <div className="w-36 h-36 rounded-full flex items-center justify-center bg-brand-Gris_bajo/10 text-brand-Verde_oscuro mb-6">
             <User size={80} strokeWidth={2} />
           </div>
-          
+
           {/* Nombre extraído del Contexto */}
           <h2 className="font-title text-xl font-bold text-brand-Gris_oscuro text-center">
             {user?.name || 'Nombre de Usuario'}
           </h2>
-          
+
           {/* Descripción/Rol extraído del Contexto */}
           <p className="font-body text-base text-brand-Gris_oscuro/70 text-center mt-1">
             {user?.description || 'Descripción'}
@@ -102,15 +102,15 @@ export const AccountProfile = ({ onBack }: AccountProfileProps) => {
 
           {/* Bloque de Contraseñas usando el Micro-componente */}
           <div className="flex flex-col gap-5 mt-2">
-            <PasswordField 
-              label="Contraseña" 
-              placeholder="Escribe Aquí" 
+            <PasswordField
+              label="Contraseña"
+              placeholder="Escribe Aquí"
             />
-            <PasswordField 
-              label="Nueva Contraseña" 
+            <PasswordField
+              label="Nueva Contraseña"
             />
-            <PasswordField 
-              label="Confirmar Nueva Contraseña" 
+            <PasswordField
+              label="Confirmar Nueva Contraseña"
             />
           </div>
 

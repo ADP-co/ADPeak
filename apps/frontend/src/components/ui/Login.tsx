@@ -42,7 +42,7 @@ export const Login = () => {
   };
 
   return (
-    <div 
+    <div
       className="min-h-screen flex flex-col p-6 md:p-10 relative"
       style={{
         backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${UDCBanner})`,
@@ -54,14 +54,14 @@ export const Login = () => {
       <div className="w-full flex flex-col gap-6 md:gap-8">
         {/* Contenedor de los Logos */}
         <div className="w-full flex items-center justify-between">
-          <img 
-            src={LogoUdec} 
-            alt="Logo UdeC" 
+          <img
+            src={LogoUdec}
+            alt="Logo UdeC"
             className="h-14 md:h-18 w-auto drop-shadow-md shrink-0"
           />
-          <img 
-            src={MediaSuperiorLogo} 
-            alt="Media Superior" 
+          <img
+            src={MediaSuperiorLogo}
+            alt="Media Superior"
             className="h-6 md:h-10 w-auto drop-shadow-md shrink-0"
           />
         </div>
@@ -80,15 +80,15 @@ export const Login = () => {
           Iniciar Sesión
         </h2>
         <form onSubmit={handleLogin} className="space-y-4">
-          <Input 
-            label="Usuario" 
+          <Input
+            label="Usuario"
             placeholder="Ingrese su usuario..."
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
-          <Input 
-            label="Contraseña" 
-            type="password" 
+          <Input
+            label="Contraseña"
+            type="password"
             placeholder="Ingrese su contraseña..."
           />
           <label className="block">
