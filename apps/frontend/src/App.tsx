@@ -1,455 +1,268 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  ClientConfigurationError,
-  actionsForRole,
-  buildDemoLinks,
-  defaultDashboardFilters,
-  filterDashboardProgress,
-  labelDemoAction,
-  labelStatus,
-  loadClientConfig,
-  loadDemoApiState,
-  loginDemoUser,
-  runDemoAction,
-  scopeProgressForSession,
-  summarizeDashboardProgress,
-  type DemoAction,
-  type DemoApiState,
-  type DemoDashboardFilters,
-  type DemoRoleCard,
-  type DemoSession
-} from "./content";
-import "./styles.css";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useParams, Outlet } from 'react-router-dom';
+import { Navbar } from './componentes/layout/Navbar';
+import { UserBanner } from './componentes/layout/UserBanner';
+import { IndicatorForm, type FormSubmission } from './componentes/forms/IndicatorForm';
+import type { IndicatorTemplate } from './componentes/forms/formConfig';
+import { ProgressBar } from './componentes/layout/ProgressBar';
+import { IndicatorsTable } from './componentes/ui/IndicatorsTable';
+import { IndicatorsManagementTable } from './componentes/ui/IndicatorsManagement';
+import type { Indicator } from './componentes/ui/IndicatorsTable';
+import { UsersTable } from './componentes/ui/UsersTable';
+import { Dashboard } from './componentes/ui/Dashboard';
+import { ReportsDashboard } from './componentes/ui/ReportsDashboard';
+import { AccountProfile } from './componentes/ui/AccountProfile';
+import MediaSuperiorLogo from './assets/MediaSuperiorLogo.png';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { Login } from './componentes/ui/Login';
+import { Toaster, toast } from 'sonner';
+import { useCaptureDraft } from './hooks/useCaptureDraft';
 
-const metricLabels = {
-  approved: "Aprobados",
-  completionPercent: "Avance",
-  evidenceFiles: "Evidencias",
-  indicators: "Indicadores",
-  late: "Atrasados",
-  missing: "Faltantes",
-  observed: "Observados",
-  pendingReview: "En revision"
-};
+const mockupIndicators: Indicator[] = [
+    { code: '1.1.0.0.1', name: 'Porcentaje de cobertura en educacion media superior', status: 'Corregir' },
+    { code: '1.1.1.0.1', name: 'Porcentaje de aceptacion en educacion media superior', status: 'Corregir' },
+    { code: '1.1.1.1.1', name: 'Porcentaje de programas educativos de educacion media superior nuevos', status: 'Pendiente' },
+    { code: '1.1.2.0.1', name: 'Porcentaje retencion escolar de educacion media superior', status: 'Pendiente' },
+    { code: '1.1.2.0.3', name: 'Tasa de abandono escolar de educacion media superior', status: 'Pendiente' },
+    { code: '1.1.2.1.1', name: 'Porcentaje de estudiantes de educacion media superior', status: 'Pendiente' },
+    { code: '1.1.2.1.3', name: 'Porcentaje de estudiantes de educacion media superior que sus padres...', status: 'Pendiente' },
+    { code: '1.1.2.1.4', name: 'Porcentaje de estudiantes atendidos en los servicios de salud integral.', status: 'En revisión' },
+    { code: '1.1.2.2.1.', name: 'Porcentaje de estudiantes atendidos en acciones de reforzamiento', status: 'En revisión' },
+    { code: '1.1.2.2.5', name: 'Numero de programas educativos de media superior', status: 'Aprobado' },
+    { code: '1.1.2.2.8', name: 'Porcentaje de estudiantes certificados en el dominio de una lengua extranjera', status: 'Aprobado' },
+  ];
 
-export function App() {
-  const [demoState, setDemoState] = useState<DemoApiState | undefined>();
-  const [selectedEmail, setSelectedEmail] = useState("");
-  const [session, setSession] = useState<DemoSession | undefined>();
-  const [filters, setFilters] = useState<DemoDashboardFilters>(
-    defaultDashboardFilters
+  const template1_0_0_0_2: IndicatorTemplate = {
+    indicatorCode: '1.0.0.0.2',
+    indicatorName: 'Porcentaje de titulacion por cohorte del NMS',
+    groups: [
+      { label: 'Contexto Escolar', colspan: 3 },
+      { label: 'Egresados titulados en el ano 2025', colspan: 3 },
+      { label: 'Matricula de primer ingreso (agosto 2022)', colspan: 3 },
+      { label: 'Resultados', colspan: 1 },
+    ],
+    columns: [
+      { key: 'delegacion', label: 'Delegacion', type: 'readonly' },
+      { key: 'plantel', label: 'Plantel', type: 'readonly' },
+      { key: 'programa', label: 'Programa Educativo', type: 'readonly' },
+      { key: 'egresados_mujeres', label: 'Mujeres', type: 'number', required: true },
+      { key: 'egresados_hombres', label: 'Hombres', type: 'number', required: true },
+      {
+        key: 'egresados_total',
+        label: 'Total',
+        type: 'calculated',
+        calculation: { type: 'sum', sourceKeys: ['egresados_mujeres', 'egresados_hombres'] },
+      },
+      { key: 'matricula_mujeres', label: 'Mujeres', type: 'number', required: true },
+      { key: 'matricula_hombres', label: 'Hombres', type: 'number', required: true },
+      {
+        key: 'matricula_total',
+        label: 'Total',
+        type: 'calculated',
+        calculation: { type: 'sum', sourceKeys: ['matricula_mujeres', 'matricula_hombres'] },
+      },
+      {
+        key: 'porcentaje_titulacion',
+        label: '% de titulacion',
+        type: 'calculated',
+        calculation: {
+          type: 'percentage',
+          numeratorKey: 'egresados_total',
+          denominatorKey: 'matricula_total',
+          decimals: 2,
+        },
+      },
+    ],
+  };
+
+  const mockInitialData = [
+    {
+      delegacion: 'Villa de Alvarez',
+      plantel: 'Bachillerato 16',
+      programa: 'Tecnico Analista Programador',
+      egresados_mujeres: '',
+      egresados_hombres: '',
+      matricula_mujeres: '',
+      matricula_hombres: '',
+    },
+    {
+      delegacion: 'Villa de Alvarez',
+      plantel: 'Bachillerato 16',
+      programa: 'Tecnico Analista Quimico',
+      egresados_mujeres: '',
+      egresados_hombres: '',
+      matricula_mujeres: '',
+      matricula_hombres: '',
+    },
+  ];
+
+  const completedCount = mockupIndicators.filter(
+    (indicator) => indicator.status === 'Aprobado' || indicator.status === 'En revisión'
+  ).length;
+
+function IndicatorFormWrapper() {
+  const { code } = useParams();
+  const navigate = useNavigate();
+
+  console.log('El código del indicador seleccionado es:', code);
+  // En una app real, usarías el "code" de la URL (ej. 1.0.0.0.2) para hacer un GET al backend
+  // y cargar su configuración dinámica.
+
+  const captureDraft = useCaptureDraft({
+    plantelId: 1,
+    indicadorId: 1,
+    periodoId: 1,
+    actividadId: 1,
+    responsableId: 2,
+  });
+
+  const formInitialData = captureDraft.capture?.payload.rows ?? mockInitialData;
+
+  const handleSaveDraft = (data: FormSubmission) => {
+    captureDraft.saveDraft({ rows: data.rows });
+    toast.success('Borrador guardado', {
+      description: 'Tu progreso se esta guardando en el backend.'
+    });
+  };
+
+  const handleSendReview = (data: FormSubmission) => {
+    captureDraft.sendToReview({ rows: data.rows });
+    toast.success('Enviado a revision', {
+      description: 'Los datos se enviaron al flujo de revision.'
+    });
+  };
+
+  return (
+    <IndicatorForm
+      template={template1_0_0_0_2}
+      initialData={formInitialData}
+      onSaveDraft={handleSaveDraft}
+      onSendReview={handleSendReview}
+      isBusy={captureDraft.isBusy}
+      statusMessage={captureDraft.statusMessage}
+      errorMessage={captureDraft.errorMessage}
+      onBack={() => navigate('/indicadores')}
+    />
   );
-  const [apiError, setApiError] = useState("");
-  const [loginError, setLoginError] = useState("");
-  const [actionMessage, setActionMessage] = useState("");
-  const [isLoadingApi, setIsLoadingApi] = useState(false);
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [isRunningAction, setIsRunningAction] = useState(false);
+}
 
-  const config = useMemo(() => {
-    try {
-      return {
-        apiUrl: loadClientConfig({
-          VITE_API_URL: import.meta.env.VITE_API_URL
-        }).apiUrl,
-        error: ""
-      };
-    } catch (error) {
-      return {
-        apiUrl: "",
-        error:
-          error instanceof ClientConfigurationError
-            ? error.message
-            : "Error desconocido de configuracion."
-      };
-    }
-  }, []);
+function ProtectedLayout() {
+  const { isAuthenticated, user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!config.apiUrl) {
-      return;
-    }
-
-    let isCancelled = false;
-    setIsLoadingApi(true);
-    setApiError("");
-
-    loadDemoApiState(config.apiUrl)
-      .then((state) => {
-        if (isCancelled) {
-          return;
-        }
-
-        setDemoState(state);
-        setSelectedEmail((currentEmail) =>
-          currentEmail || state.users[0]?.email || ""
-        );
-      })
-      .catch((error: unknown) => {
-        if (isCancelled) {
-          return;
-        }
-
-        setApiError(
-          error instanceof Error
-            ? error.message
-            : "No se pudo conectar con la API demo."
-        );
-      })
-      .finally(() => {
-        if (!isCancelled) {
-          setIsLoadingApi(false);
-        }
-      });
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [config.apiUrl]);
-
-  const apiUrl = config.apiUrl;
-  const links = apiUrl ? buildDemoLinks(apiUrl) : undefined;
-  const roleCards = demoState?.users ?? [];
-  const selectedRole = roleCards.find((role) => role.email === selectedEmail);
-  const scopedProgress = scopeProgressForSession(
-    demoState?.dataset.progress ?? [],
-    session
-  );
-  const filteredProgress = filterDashboardProgress(scopedProgress, filters);
-  const dashboardSummary = summarizeDashboardProgress(filteredProgress);
-  const roleActions = actionsForRole(session?.user.role);
-
-  function updateFilter(name: keyof DemoDashboardFilters, value: string) {
-    setFilters((currentFilters) => ({
-      ...currentFilters,
-      [name]: value
-    }));
+  // Si no está logueado, lo mandamos directo al login
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
   }
 
-  async function handleRoleLogin(role: DemoRoleCard) {
-    setSelectedEmail(role.email);
-    setSession(undefined);
-    setLoginError("");
-    setActionMessage("");
-    setIsLoggingIn(true);
-    setFilters(defaultDashboardFilters());
+  const currentView = location.pathname.split('/')[1] || 'analisis';
 
-    try {
-      setSession(await loginDemoUser(apiUrl, role));
-    } catch (error) {
-      setLoginError(
-        error instanceof Error
-          ? error.message
-          : "No se pudo iniciar sesion demo."
-      );
-    } finally {
-      setIsLoggingIn(false);
-    }
-  }
+  const handleNavigate = (view: string) => {
+    navigate(`/${view}`);
+  };
 
-  async function handleDemoAction(action: DemoAction) {
-    if (!session) {
-      return;
-    }
+  return (
+    <div className="min-h-screen bg-brand-Fondo flex flex-col">
+      <Navbar />
+      {user && (
+        <UserBanner
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          role={user.role as any}
+          name={user.name}
+          description={user.description}
+          onNavigate={handleNavigate}
+          currentView={currentView}
+        />
+      )}
 
-    setActionMessage("");
-    setIsRunningAction(true);
-
-    try {
-      const result = await runDemoAction(apiUrl, session.user.role, action);
-      setActionMessage(`${result.message} Folio: ${result.auditId}.`);
-    } catch (error) {
-      setActionMessage(
-        error instanceof Error
-          ? error.message
-          : "No se pudo registrar la accion demo."
-      );
-    } finally {
-      setIsRunningAction(false);
-    }
-  }
-
-  if (config.error) {
-    return (
-      <main className="app-shell">
-        <section className="intro" role="alert">
-          <p className="eyebrow">SIGI-POA DGEMS</p>
-          <h1>Configuracion incompleta</h1>
-          <p>{config.error}</p>
-        </section>
+      <main className="flex-1 px-6 pt-10">
+        {/* Outlet renderizará las sub-rutas dinámicamente aquí */}
+        <Outlet />
       </main>
-    );
-  }
 
-  return (
-    <main className="app-shell">
-      <section className="intro">
-        <p className="eyebrow">SIGI-POA DGEMS</p>
-        <h1>Ambiente demo conectado</h1>
-        <p>
-          Frontend, API demo, filtros, acciones por rol y reportes usando datos
-          ficticios controlados.
-        </p>
-      </section>
-
-      <dl className="status-panel" aria-label="Configuracion local">
-        <div>
-          <dt>Frontend</dt>
-          <dd>http://127.0.0.1:5173</dd>
+      <footer className="w-full mt-auto py-8 bg-brand-Blanco border-t border-brand-Gris_bajo/20">
+        <div className="max-w-[1250px] mx-auto px-6 flex justify-center items-center">
+          <img src={MediaSuperiorLogo} alt="Media Superior" className="h-10 w-auto object-contain opacity-90" />
         </div>
-        <div>
-          <dt>Backend</dt>
-          <dd>{apiUrl}</dd>
-        </div>
-        <div>
-          <dt>Conexion API</dt>
-          <dd>
-            {isLoadingApi
-              ? "Validando..."
-              : demoState
-                ? "Conectada"
-                : "Sin conexion"}
-          </dd>
-        </div>
-        <div>
-          <dt>Modo</dt>
-          <dd>{demoState?.status.environment ?? "Demo local controlada"}</dd>
-        </div>
-      </dl>
-
-      {apiError ? (
-        <section className="api-warning" role="alert">
-          <strong>Backend demo no disponible</strong>
-          <span>{apiError}</span>
-        </section>
-      ) : null}
-
-      <section className="summary-grid" aria-label="Resumen demo filtrado">
-        {Object.entries(metricLabels).map(([key, label]) => (
-          <div key={key}>
-            <dt>{label}</dt>
-            <dd>
-              {key === "completionPercent"
-                ? `${dashboardSummary.completionPercent}%`
-                : dashboardSummary[key as keyof typeof dashboardSummary]}
-            </dd>
-          </div>
-        ))}
-      </section>
-
-      <section className="demo-grid" aria-label="Usuarios de prueba">
-        {roleCards.map((roleCard) => (
-          <button
-            className={
-              roleCard.email === selectedEmail
-                ? "role-card selected"
-                : "role-card"
-            }
-            disabled={isLoggingIn}
-            key={roleCard.email}
-            onClick={() => void handleRoleLogin(roleCard)}
-            type="button"
-          >
-            <span>{roleCard.role}</span>
-            <strong>{roleCard.email}</strong>
-            <small>Codigo: {roleCard.accessCode}</small>
-          </button>
-        ))}
-      </section>
-
-      <section className="flow-panel" aria-label="Flujo principal por rol">
-        <div>
-          <p className="eyebrow">Flujo demo</p>
-          <h2>{selectedRole?.role ?? "Esperando backend"}</h2>
-          {selectedRole ? (
-            <ol>
-              {selectedRole.flow.map((step) => (
-                <li key={step}>{step}</li>
-              ))}
-            </ol>
-          ) : (
-            <p className="flow-empty">
-              Inicia backend y recarga para cargar usuarios demo desde la API.
-            </p>
-          )}
-        </div>
-        <div className="session-panel" aria-live="polite">
-          <p className="eyebrow">Sesion backend</p>
-          {session ? (
-            <>
-              <strong>{session.user.displayName}</strong>
-              <span>{session.user.email}</span>
-              <code>{session.token}</code>
-            </>
-          ) : (
-            <span>
-              {isLoggingIn
-                ? "Validando login..."
-                : "Selecciona un rol para llamar /demo/login."}
-            </span>
-          )}
-          {loginError ? <span className="error-text">{loginError}</span> : null}
-        </div>
-        <div className="action-panel">
-          <p className="eyebrow">Acciones</p>
-          {roleActions.length > 0 ? (
-            roleActions.map((action) => (
-              <button
-                disabled={isRunningAction}
-                key={action}
-                onClick={() => void handleDemoAction(action)}
-                type="button"
-              >
-                {labelDemoAction(action)}
-              </button>
-            ))
-          ) : (
-            <span>Inicia sesion demo para activar acciones.</span>
-          )}
-          {actionMessage ? <strong>{actionMessage}</strong> : null}
-        </div>
-        <nav className="api-links" aria-label="Endpoints demo">
-          <a href={links?.health} rel="noreferrer" target="_blank">
-            Health
-          </a>
-          <a href={links?.data} rel="noreferrer" target="_blank">
-            Dataset
-          </a>
-          <a href={links?.report} rel="noreferrer" target="_blank">
-            CSV
-          </a>
-        </nav>
-      </section>
-
-      {demoState ? (
-        <section className="dashboard-panel" aria-label="Dashboard con filtros">
-          <header>
-            <p className="eyebrow">SCRUM-34</p>
-            <h2>Dashboard reactivo</h2>
-          </header>
-          <div className="filters-grid">
-            <FilterSelect
-              label="Ciclo"
-              name="cycle"
-              onChange={updateFilter}
-              options={demoState.dataset.filters.cycles}
-              value={filters.cycle}
-            />
-            <FilterSelect
-              label="Periodo"
-              name="period"
-              onChange={updateFilter}
-              options={demoState.dataset.filters.periods}
-              value={filters.period}
-            />
-            <FilterSelect
-              label="Plantel"
-              name="campus"
-              onChange={updateFilter}
-              options={demoState.dataset.filters.campuses}
-              value={filters.campus}
-            />
-            <FilterSelect
-              label="Indicador"
-              name="indicator"
-              onChange={updateFilter}
-              options={demoState.dataset.filters.indicators}
-              value={filters.indicator}
-            />
-            <FilterSelect
-              label="Actividad"
-              name="activity"
-              onChange={updateFilter}
-              options={demoState.dataset.filters.activities}
-              value={filters.activity}
-            />
-            <FilterSelect
-              label="Responsable"
-              name="responsible"
-              onChange={updateFilter}
-              options={demoState.dataset.filters.responsibles}
-              value={filters.responsible}
-            />
-            <FilterSelect
-              label="Estado"
-              name="status"
-              onChange={updateFilter}
-              options={demoState.dataset.filters.statuses}
-              value={filters.status}
-            />
-          </div>
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Plantel</th>
-                  <th>Actividad</th>
-                  <th>Indicador</th>
-                  <th>Responsable</th>
-                  <th>Periodo</th>
-                  <th>Estado</th>
-                  <th>Avance</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredProgress.map((item) => (
-                  <tr key={item.id}>
-                    <td>{item.plantel}</td>
-                    <td>{item.activity}</td>
-                    <td>{item.indicador}</td>
-                    <td>{item.responsable}</td>
-                    <td>{item.periodo}</td>
-                    <td>
-                      <span className={`status-pill status-${item.estado}`}>
-                        {labelStatus(item.estado)}
-                      </span>
-                      {item.vencimiento === "atrasado" ? (
-                        <span className="status-pill status-late">
-                          Atrasado
-                        </span>
-                      ) : null}
-                    </td>
-                    <td>
-                      {item.avance}/{item.meta}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      ) : null}
-    </main>
+      </footer>
+    </div>
   );
 }
 
-function FilterSelect({
-  label,
-  name,
-  onChange,
-  options,
-  value
-}: {
-  label: string;
-  name: keyof DemoDashboardFilters;
-  onChange: (name: keyof DemoDashboardFilters, value: string) => void;
-  options: string[];
-  value: string;
-}) {
+function AppContent() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSelectIndicator = (code: string) => {
+    navigate(`/indicadores/captura/${code}`);
+  };
+
+  const role = user?.role || 'plantel'; // Fallback por defecto
+
   return (
-    <label>
-      <span>{label}</span>
-      <select
-        onChange={(event) => onChange(name, event.currentTarget.value)}
-        value={value}
-      >
-        <option value="">Todos</option>
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {labelStatus(option)}
-          </option>
-        ))}
-      </select>
-    </label>
+    <Routes>
+      {/* Ruta pública */}
+      <Route path="/login" element={<Login />} />
+
+      {/* Rutas Privadas envueltas por nuestro Layout */}
+      <Route element={<ProtectedLayout />}>
+        {/* Redirección dinámica según el rol */}
+        <Route path="/" element={
+          role === 'admin' ? <Navigate to="/analisis" replace /> :
+          role === 'responsable' ? <Navigate to="/revision" replace /> :
+          <Navigate to="/indicadores" replace />
+        } />
+
+        {/* Vistas de Admin */}
+        {role === 'admin' && (
+          <>
+            <Route path="/analisis" element={<Dashboard />} />
+            <Route path="/usuarios" element={<UsersTable />} />
+          </>
+        )}
+
+        {/* Vistas de Responsable */}
+        {role === 'responsable' && (
+          <Route path="/revision" element={<Dashboard />} />
+        )}
+
+        {/* Vistas compartidas: Indicadores (Admin ve gestión, Plantel solo ve tabla) */}
+        {(role === 'admin' || role === 'plantel') && (
+          <Route path="/indicadores" element={
+            role === 'admin' ? (
+              <IndicatorsManagementTable />
+            ) : (
+              <>
+                <ProgressBar totalIndicators={mockupIndicators.length} completedIndicators={completedCount} />
+                <IndicatorsTable indicators={mockupIndicators} onSelectIndicator={handleSelectIndicator} />
+              </>
+            )
+          } />
+        )}
+
+        {/* Formulario de captura accesible para quienes tengan acceso a indicadores */}
+        <Route path="/indicadores/captura/:code" element={<IndicatorFormWrapper />} />
+
+        {/* Vistas compartidas para todos */}
+        <Route path="/reportes" element={<ReportsDashboard />} />
+        <Route path="/perfil" element={<AccountProfile onBack={() => navigate(-1)} />} />
+      </Route>
+
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
+
+function App() {
+  return (
+    <BrowserRouter>
+      {/* El proveedor global va dentro del Router para poder usar navegación */}
+      <AuthProvider>
+        <AppContent />
+        <Toaster position="top-right" richColors expand={false} />
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
+
+export default App;

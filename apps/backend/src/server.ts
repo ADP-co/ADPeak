@@ -6,6 +6,14 @@ import {
   redactConfig
 } from "./config.js";
 import {
+  createCaptureDraft,
+  getCaptureDraft,
+  isCaptureDraftRequest,
+  isCapturePayload,
+  sendCaptureToReview,
+  updateCaptureDraft
+} from "./capture-store.js";
+import {
   authenticateDemoUser,
   demoDatasetPayload,
   demoReportCsv,
@@ -38,7 +46,7 @@ const port = appConfig.backendPort;
 function sendJson(
   response: ServerResponse,
   statusCode: number,
-  payload: Record<string, unknown>
+  payload: unknown
 ) {
   response.writeHead(statusCode, {
     "Access-Control-Allow-Origin": "*",
@@ -78,8 +86,8 @@ const server = createServer(async (request, response) => {
 
   if (request.method === "OPTIONS") {
     response.writeHead(204, {
-      "Access-Control-Allow-Headers": "Content-Type",
-      "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, x-user-id, x-role, x-plantel-id, x-responsable-id",
+      "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,OPTIONS",
       "Access-Control-Allow-Origin": "*"
     });
     response.end();
@@ -89,6 +97,102 @@ const server = createServer(async (request, response) => {
   if (request.method === "GET" && url.pathname === "/health") {
     sendJson(response, 200, healthPayload());
     return;
+  }
+
+  if (request.method === "POST" && url.pathname === "/api/v1/capturas/borradores") {
+    try {
+      const payload = await readJsonBody(request);
+
+      if (!isCaptureDraftRequest(payload)) {
+        sendJson(response, 400, {
+          error: "invalid_capture_draft",
+          message: "La captura debe incluir IDs positivos y payload.rows."
+        });
+        return;
+      }
+
+      sendJson(response, 201, createCaptureDraft(payload));
+      return;
+    } catch {
+      sendJson(response, 400, {
+        error: "invalid_json",
+        message: "El cuerpo de la solicitud debe ser JSON valido."
+      });
+      return;
+    }
+  }
+
+  const captureMatch = url.pathname.match(/^\/api\/v1\/capturas\/(\d+)(?:\/(enviar-revision))?$/);
+
+  if (captureMatch) {
+    const captureId = Number(captureMatch[1]);
+    const action = captureMatch[2];
+
+    if (request.method === "GET" && !action) {
+      const draft = getCaptureDraft(captureId);
+
+      if (!draft) {
+        sendJson(response, 404, {
+          error: "capture_not_found",
+          message: "No existe una captura con ese ID."
+        });
+        return;
+      }
+
+      sendJson(response, 200, draft);
+      return;
+    }
+
+    if (request.method === "PUT" && !action) {
+      try {
+        const body = await readJsonBody(request);
+        const payload = typeof body === "object" && body !== null && "payload" in body
+          ? (body as { payload?: unknown }).payload
+          : undefined;
+
+        if (!isCapturePayload(payload)) {
+          sendJson(response, 400, {
+            error: "invalid_capture_payload",
+            message: "La actualizacion debe incluir payload.rows."
+          });
+          return;
+        }
+
+        const updatedDraft = updateCaptureDraft(captureId, payload);
+
+        if (!updatedDraft) {
+          sendJson(response, 404, {
+            error: "capture_not_found",
+            message: "No existe una captura con ese ID."
+          });
+          return;
+        }
+
+        sendJson(response, 200, updatedDraft);
+        return;
+      } catch {
+        sendJson(response, 400, {
+          error: "invalid_json",
+          message: "El cuerpo de la solicitud debe ser JSON valido."
+        });
+        return;
+      }
+    }
+
+    if (request.method === "POST" && action === "enviar-revision") {
+      const updatedDraft = sendCaptureToReview(captureId);
+
+      if (!updatedDraft) {
+        sendJson(response, 404, {
+          error: "capture_not_found",
+          message: "No existe una captura con ese ID."
+        });
+        return;
+      }
+
+      sendJson(response, 200, updatedDraft);
+      return;
+    }
   }
 
   if (request.method === "GET" && url.pathname === "/demo/status") {
