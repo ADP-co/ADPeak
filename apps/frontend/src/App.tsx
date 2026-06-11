@@ -254,8 +254,10 @@ function AppContent() {
 }
 
 function App() {
+  const routerBasename = import.meta.env.BASE_URL === '/' ? undefined : import.meta.env.BASE_URL.replace(/\/$/, '');
+
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={routerBasename}>
       {/* El proveedor global va dentro del Router para poder usar navegación */}
       <AuthProvider>
         <AppContent />
