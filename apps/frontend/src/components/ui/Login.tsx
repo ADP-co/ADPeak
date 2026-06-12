@@ -45,8 +45,6 @@ export const Login = () => {
       redirectTo: '/revision'
     },
   } as const;
-  const detectedRoleLabel = roleProfiles[role].description;
-
   const handleLogin = (e: FormEvent) => {
     e.preventDefault();
     const selectedProfile = roleProfiles[role];
@@ -110,14 +108,6 @@ export const Login = () => {
             type="password"
             placeholder="Ingrese su contraseña..."
           />
-          <div className="rounded-md border border-brand-Verde_principal/30 bg-brand-Verde_principal/10 px-3 py-2">
-            <span className="block text-xs font-semibold uppercase text-brand-Verde_oscuro font-body">
-              Rol detectado
-            </span>
-            <span className="block text-sm font-bold text-brand-Gris_oscuro font-body">
-              {detectedRoleLabel}
-            </span>
-          </div>
           <Button type="submit" className="w-full mt-4">
             Ingresar
           </Button>

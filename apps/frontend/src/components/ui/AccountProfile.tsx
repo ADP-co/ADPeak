@@ -157,7 +157,6 @@ export const AccountProfile = ({ onBack }: AccountProfileProps) => {
           <div className="flex flex-col gap-5 mt-2">
             <PasswordField
               label="Contraseña"
-              placeholder="Escribe Aquí"
               value={currentPassword}
               onChange={setCurrentPassword}
               autoComplete="current-password"
