@@ -176,8 +176,8 @@ export const UsersTable = () => {
           <div className="flex items-center gap-2 w-full max-w-xl">
             <input
               type="text"
-              aria-label="Filtro de usuarios por nombre, rol, plantel, indicador o estado"
-              placeholder="Buscar por nombre, rol, plantel, indicador o estado..."
+              aria-label="Filtro de usuarios por nombre, rol, plantel o indicador"
+              placeholder="Buscar por nombre, rol, plantel o indicador..."
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               onKeyDown={(event) => event.key === 'Enter' && setActiveSearch(searchTerm.trim())}
@@ -216,26 +216,26 @@ export const UsersTable = () => {
           <table className="w-full min-w-[860px] border-collapse text-center">
             <thead>
               <tr className="bg-brand-Gris_bajo/35 text-brand-Gris_oscuro font-title font-bold text-sm select-none border-b border-brand-Gris_bajo/20">
-                <th className="py-4 px-6 w-[22%]">Usuario</th>
-                <th className="py-4 px-6 w-[16%]">Rol</th>
-                <th className="py-4 px-6 w-[16%]">Plantel</th>
-                <th className="py-4 px-6 w-[22%]">Indicadores</th>
-                <th className="py-4 px-6 w-[12%]">Estado</th>
-                <th className="py-4 px-6 w-[12%]">Acciones</th>
+                <th className="py-4 px-6 w-[25%]">Usuario</th>
+                <th className="py-4 px-6 w-[25%]">Rol</th>
+                <th className="py-4 px-6 w-[25%]">Indicadores</th>
+                <th className="py-4 px-6 w-[25%]">Acciones</th>
               </tr>
             </thead>
 
             <tbody className="divide-y divide-brand-Gris_bajo/20 font-body text-sm text-brand-Gris_oscuro">
               {filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-brand-Gris_bajo/15 transition-colors duration-150 ease-in-out">
+                <tr
+                  key={user.id}
+                  className={`hover:bg-brand-Gris_bajo/15 transition-colors duration-150 ease-in-out ${
+                    user.isBlocked ? 'opacity-60' : ''
+                  }`}
+                >
                   <td className="py-4 px-6 font-medium leading-relaxed text-brand-Gris_oscuro">
                     {user.name}
                   </td>
                   <td className="py-4 px-6 font-medium leading-relaxed text-brand-Gris_oscuro/80">
                     {user.role}
-                  </td>
-                  <td className="py-4 px-6 font-medium text-brand-Verde_oscuro">
-                    {user.plantel}
                   </td>
                   <td className="py-4 px-6 text-center font-mono font-medium text-brand-Gris_oscuro/80">
                     {splitIndicators(user.indicadores).length === 0 ? (
@@ -251,15 +251,6 @@ export const UsersTable = () => {
                           ))}
                       </div>
                     )}
-                  </td>
-                  <td className="py-4 px-6">
-                    <span className={`rounded-full px-3 py-1 text-xs font-bold ${
-                      user.isBlocked
-                        ? 'bg-brand-Status_rojo/10 text-brand-Status_rojo'
-                        : 'bg-brand-Status_verde/20 text-brand-Verde_oscuro'
-                    }`}>
-                      {user.isBlocked ? 'Bloqueado' : 'Activo'}
-                    </span>
                   </td>
                   <td className="py-4 px-6">
                     <div className="flex items-center justify-center gap-3">
@@ -303,7 +294,7 @@ export const UsersTable = () => {
               ))}
               {filteredUsers.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="py-8 px-6 text-center text-brand-Gris_oscuro/70">
+                  <td colSpan={4} className="py-8 px-6 text-center text-brand-Gris_oscuro/70">
                     Sin resultados para la busqueda actual.
                   </td>
                 </tr>

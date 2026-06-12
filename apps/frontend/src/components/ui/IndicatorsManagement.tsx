@@ -39,18 +39,6 @@ function normalizeSearch(value: string) {
     .toLowerCase();
 }
 
-function getManagementPlantelScope(indicator: IndicatorRecord) {
-  if (indicator.plantel) {
-    return indicator.plantel;
-  }
-
-  return indicator.contribuidor === 'Planteles' ? 'Todos los planteles' : 'Asignacion directa';
-}
-
-function getManagementSupervisor(indicator: IndicatorRecord) {
-  return indicator.supervisor ?? indicator.responsable;
-}
-
 export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagementTableProps) => {
   const [indicators, setIndicators] = useState<IndicatorRecord[]>(initialIndicators);
   const [searchTerm, setSearchTerm] = useState('');
@@ -97,8 +85,6 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
       return [
         indicator.code,
         indicator.name,
-        getManagementPlantelScope(indicator),
-        getManagementSupervisor(indicator),
         indicator.responsable,
         indicator.contribuidor,
         indicator.enabled === false ? 'deshabilitado' : 'habilitado',
@@ -117,8 +103,8 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
           <div className="flex items-center gap-2 w-full max-w-xl">
             <input
               type="text"
-              aria-label="Filtro de indicadores por codigo, nombre, plantel, supervisor, responsable, contribuidor o estado"
-              placeholder="Buscar por codigo, nombre, plantel, supervisor, responsable, contribuidor o estado..."
+              aria-label="Filtro de indicadores por codigo, nombre, responsable, contribuidor o estado"
+              placeholder="Buscar por codigo, nombre, responsable, contribuidor o estado..."
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               onKeyDown={(event) => event.key === 'Enter' && setActiveSearch(searchTerm.trim())}
@@ -154,17 +140,14 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
 
       <div className="bg-brand-Blanco rounded-lg shadow-md overflow-hidden border border-brand-Gris_bajo/20">
         <div className="w-full overflow-x-auto">
-          <table className="w-full min-w-[1180px] border-collapse text-center">
+          <table className="w-full min-w-[920px] border-collapse text-center">
             <thead>
               <tr className="bg-brand-Gris_bajo/35 text-brand-Gris_oscuro font-title font-bold text-sm select-none border-b border-brand-Gris_bajo/20">
-                <th className="py-4 px-6 w-[11%]">Codigo</th>
-                <th className="py-4 px-6 w-[27%] text-left">Nombre</th>
-                <th className="py-4 px-6 w-[13%]">Plantel</th>
-                <th className="py-4 px-6 w-[13%]">Supervisor</th>
-                <th className="py-4 px-6 w-[12%]">Contribuidor</th>
-                <th className="py-4 px-6 w-[12%]">Responsable</th>
-                <th className="py-4 px-6 w-[6%]">Estado</th>
-                <th className="py-4 px-6 w-[6%]">Acciones</th>
+                <th className="py-4 px-6 w-[15%]">Codigo</th>
+                <th className="py-4 px-6 w-[35%] text-left">Nombre</th>
+                <th className="py-4 px-6 w-[20%]">Contribuidor</th>
+                <th className="py-4 px-6 w-[15%]">Responsable</th>
+                <th className="py-4 px-6 w-[15%]">Acciones</th>
               </tr>
             </thead>
 
@@ -183,25 +166,10 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
                     {indicator.name}
                   </td>
                   <td className="py-4 px-6 font-medium text-brand-Gris_oscuro/80">
-                    {getManagementPlantelScope(indicator)}
-                  </td>
-                  <td className="py-4 px-6 font-medium text-brand-Gris_oscuro/80">
-                    {getManagementSupervisor(indicator)}
-                  </td>
-                  <td className="py-4 px-6 font-medium text-brand-Gris_oscuro/80">
                     {indicator.contribuidor}
                   </td>
                   <td className="py-4 px-6 font-medium text-brand-Gris_oscuro/80">
                     {indicator.responsable}
-                  </td>
-                  <td className="py-4 px-6">
-                    <span className={`rounded-full px-3 py-1 text-xs font-bold ${
-                      indicator.enabled === false
-                        ? 'bg-brand-Gris_bajo/30 text-brand-Gris_oscuro'
-                        : 'bg-brand-Status_verde/20 text-brand-Verde_oscuro'
-                    }`}>
-                      {indicator.enabled === false ? 'Inactivo' : 'Activo'}
-                    </span>
                   </td>
                   <td className="py-4 px-6">
                     <div className="flex items-center justify-center gap-3">
@@ -209,7 +177,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
                         type="button"
                         onClick={() => handleEditIndicator(indicator)}
                         aria-label={`Configurar indicador ${indicator.code}`}
-                        className="px-5 py-1 rounded-full border border-brand-Verde_oscuro text-brand-Verde_oscuro font-bold text-sm hover:bg-brand-Verde_oscuro hover:text-brand-Blanco transition-colors w-[112px]"
+                        className="px-6 py-1 rounded-full border border-brand-Verde_oscuro text-brand-Verde_oscuro font-bold text-sm hover:bg-brand-Verde_oscuro hover:text-brand-Blanco transition-colors w-[120px]"
                       >
                         Configurar
                       </button>
@@ -235,7 +203,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
               ))}
               {filteredIndicators.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="py-8 px-6 text-center text-brand-Gris_oscuro/70">
+                  <td colSpan={5} className="py-8 px-6 text-center text-brand-Gris_oscuro/70">
                     Sin resultados para la busqueda actual.
                   </td>
                 </tr>
