@@ -232,7 +232,7 @@ export const ReportsDashboard = () => {
   const handleGeneratePdf = async (item: PlantelProgressRecord) => {
     setGeneratingDocumentId(`${item.id}:pdf`);
     const report = await loadReport(item);
-    const pdf = reportToPdfBlob(report);
+    const pdf = await reportToPdfBlob(report);
     const recordCount = countReportRows(report);
 
     downloadDocument(pdf, `reporte-${slugify(item.plantel)}-${selectedDate}.pdf`);

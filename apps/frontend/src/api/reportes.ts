@@ -1,3 +1,5 @@
+import logoUdecUrl from '../assets/logo-udec.svg';
+import mediaSuperiorLogoUrl from '../assets/MediaSuperiorLogo.png';
 import { API_BASE_URL, API_REQUESTS_ENABLED, sessionHeaders } from './client';
 
 export type ReportDataRow = {
@@ -106,43 +108,94 @@ export function reportToCsv(report: ExportReport) {
     .join('\n');
 }
 
-export function reportToPdfBlob(report: ExportReport) {
+type PdfStream = {
+  dictionary: string;
+  stream: string | Uint8Array;
+};
+
+type PdfObject = string | PdfStream;
+
+type PdfHeaderImage = {
+  width: number;
+  height: number;
+  bytes: Uint8Array;
+};
+
+export async function reportToPdfBlob(report: ExportReport) {
   const lines = buildPdfLines(report);
-  const pages = chunkLines(lines, 44);
-  const objects: string[] = [
+  const pages = chunkLines(lines, 40);
+  const headerImage = await createHeaderImage();
+  const objects: PdfObject[] = [
     '<< /Type /Catalog /Pages 2 0 R >>',
     '',
     '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
   ];
+  let headerImageObjectNumber: number | undefined;
+
+  if (headerImage) {
+    headerImageObjectNumber = objects.length + 1;
+    objects.push({
+      dictionary: [
+        '<< /Type /XObject',
+        '/Subtype /Image',
+        `/Width ${headerImage.width}`,
+        `/Height ${headerImage.height}`,
+        '/ColorSpace /DeviceRGB',
+        '/BitsPerComponent 8',
+        '/Filter /DCTDecode',
+        `/Length ${headerImage.bytes.byteLength} >>`,
+      ].join(' '),
+      stream: headerImage.bytes,
+    });
+  }
+
   const pageRefs: string[] = [];
 
   pages.forEach((pageLines, pageIndex) => {
     const pageObjectNumber = objects.length + 1;
     const contentObjectNumber = pageObjectNumber + 1;
+    const xObjectResource = headerImageObjectNumber
+      ? ` /XObject << /HeaderLogos ${headerImageObjectNumber} 0 R >>`
+      : '';
+
     pageRefs.push(`${pageObjectNumber} 0 R`);
-    objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents ${contentObjectNumber} 0 R >>`);
-    const content = renderPdfPage(pageLines, pageIndex + 1, pages.length);
-    objects.push(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`);
+    objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >>${xObjectResource} >> /Contents ${contentObjectNumber} 0 R >>`);
+    const content = renderPdfPage(pageLines, pageIndex + 1, pages.length, Boolean(headerImageObjectNumber));
+    objects.push({
+      dictionary: `<< /Length ${byteLength(content)} >>`,
+      stream: content,
+    });
   });
 
   objects[1] = `<< /Type /Pages /Kids [${pageRefs.join(' ')}] /Count ${pages.length} >>`;
 
-  const bodyParts: string[] = ['%PDF-1.4\n'];
+  const bodyParts: Array<string | Uint8Array> = ['%PDF-1.4\n'];
   const offsets = [0];
+  let currentOffset = byteLength(bodyParts[0]);
 
   objects.forEach((object, index) => {
-    offsets.push(bodyParts.join('').length);
-    bodyParts.push(`${index + 1} 0 obj\n${object}\nendobj\n`);
+    offsets.push(currentOffset);
+    currentOffset += pushPdfPart(bodyParts, `${index + 1} 0 obj\n`);
+
+    if (typeof object === 'string') {
+      currentOffset += pushPdfPart(bodyParts, object);
+    } else {
+      currentOffset += pushPdfPart(bodyParts, `${object.dictionary}\nstream\n`);
+      currentOffset += pushPdfPart(bodyParts, object.stream);
+      currentOffset += pushPdfPart(bodyParts, '\nendstream');
+    }
+
+    currentOffset += pushPdfPart(bodyParts, '\nendobj\n');
   });
 
-  const xrefOffset = bodyParts.join('').length;
+  const xrefOffset = currentOffset;
   const xrefRows = offsets.map((offset, index) =>
     index === 0 ? '0000000000 65535 f ' : `${String(offset).padStart(10, '0')} 00000 n `
   );
   bodyParts.push(`xref\n0 ${objects.length + 1}\n${xrefRows.join('\n')}\n`);
   bodyParts.push(`trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`);
 
-  return new Blob([bodyParts.join('')], { type: 'application/pdf' });
+  return new Blob(bodyParts.map(toBlobPart), { type: 'application/pdf' });
 }
 
 export function countReportRows(report: ExportReport) {
@@ -153,7 +206,6 @@ function buildPdfLines(report: ExportReport) {
   const statusSummary = summarizeReport(report);
   const lines = [
     'Resumen',
-    'Universidad de Colima | Media Superior',
     report.identidadReporte.nombre,
     `Periodo: ${report.periodo} | Ciclo escolar: ${report.cicloEscolar}`,
     `Generado: ${formatReportDate(report.fechaGeneracion)}`,
@@ -185,25 +237,30 @@ function buildPdfLines(report: ExportReport) {
   return lines.flatMap((line) => wrapPdfLine(line));
 }
 
-function renderPdfPage(lines: string[], pageNumber: number, pageCount: number) {
+function renderPdfPage(lines: string[], pageNumber: number, pageCount: number, hasHeaderImage: boolean) {
+  const titleY = hasHeaderImage ? 705 : 750;
   const commands = [
-    'q',
-    '0.32 0.46 0.19 rg',
-    '50 772 120 4 re f',
-    '1 0.56 0 rg',
-    '458 770 8 8 re f',
-    '0.78 0 0.5 rg',
-    '472 770 8 8 re f',
-    '0.32 0.15 0.51 rg',
-    '486 770 8 8 re f',
-    '0 0.64 0.89 rg',
-    '500 770 8 8 re f',
-    '0.76 0.85 0.18 rg',
-    '514 770 8 8 re f',
-    'Q',
+    ...(hasHeaderImage
+      ? ['q', '520 0 0 72 46 712 cm', '/HeaderLogos Do', 'Q']
+      : [
+          'q',
+          '0.32 0.46 0.19 rg',
+          '50 772 120 4 re f',
+          '1 0.56 0 rg',
+          '458 770 8 8 re f',
+          '0.78 0 0.5 rg',
+          '472 770 8 8 re f',
+          '0.32 0.15 0.51 rg',
+          '486 770 8 8 re f',
+          '0 0.64 0.89 rg',
+          '500 770 8 8 re f',
+          '0.76 0.85 0.18 rg',
+          '514 770 8 8 re f',
+          'Q',
+        ]),
     'BT',
     '/F1 16 Tf',
-    '50 750 Td',
+    `50 ${titleY} Td`,
     `(${escapePdfText(lines[0] ?? '')}) Tj`,
     '/F1 10 Tf'
   ];
@@ -212,6 +269,101 @@ function renderPdfPage(lines: string[], pageNumber: number, pageCount: number) {
   });
   commands.push('/F1 9 Tf', '0 -24 Td', `(${escapePdfText(`Pagina ${pageNumber} de ${pageCount}`)}) Tj`, 'ET');
   return commands.join('\n');
+}
+
+async function createHeaderImage(): Promise<PdfHeaderImage | undefined> {
+  if (
+    typeof document === 'undefined' ||
+    typeof Image === 'undefined' ||
+    typeof atob === 'undefined'
+  ) {
+    return undefined;
+  }
+
+  try {
+    const [logoUdec, mediaSuperiorLogo] = await Promise.all([
+      loadBrowserImage(logoUdecUrl),
+      loadBrowserImage(mediaSuperiorLogoUrl),
+    ]);
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+
+    if (!context) {
+      return undefined;
+    }
+
+    canvas.width = 1200;
+    canvas.height = 170;
+
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    drawImageContained(context, logoUdec, 0, 20, 380, 110);
+    drawImageContained(context, mediaSuperiorLogo, 930, 30, 250, 95);
+
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+
+    return {
+      width: canvas.width,
+      height: canvas.height,
+      bytes: dataUrlToBytes(dataUrl),
+    };
+  } catch {
+    return undefined;
+  }
+}
+
+function loadBrowserImage(src: string) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error('logo_load_failed'));
+    image.src = src;
+  });
+}
+
+function drawImageContained(
+  context: CanvasRenderingContext2D,
+  image: HTMLImageElement,
+  x: number,
+  y: number,
+  maxWidth: number,
+  maxHeight: number
+) {
+  const ratio = Math.min(maxWidth / image.naturalWidth, maxHeight / image.naturalHeight);
+  const width = image.naturalWidth * ratio;
+  const height = image.naturalHeight * ratio;
+  context.drawImage(image, x, y + (maxHeight - height) / 2, width, height);
+}
+
+function dataUrlToBytes(dataUrl: string) {
+  const base64 = dataUrl.split(',')[1] ?? '';
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+
+  return bytes;
+}
+
+function byteLength(value: string | Uint8Array) {
+  return typeof value === 'string' ? new TextEncoder().encode(value).byteLength : value.byteLength;
+}
+
+function pushPdfPart(parts: Array<string | Uint8Array>, part: string | Uint8Array) {
+  parts.push(part);
+  return byteLength(part);
+}
+
+function toBlobPart(part: string | Uint8Array): BlobPart {
+  if (typeof part === 'string') {
+    return part;
+  }
+
+  const bytes = new Uint8Array(part.byteLength);
+  bytes.set(part);
+  return bytes.buffer;
 }
 
 function wrapPdfLine(line: string, maxLength = 92) {
