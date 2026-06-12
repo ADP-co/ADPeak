@@ -94,7 +94,7 @@ export const AccountProfile = ({ onBack }: AccountProfileProps) => {
     setCurrentPassword('');
     setNewPassword('');
     setConfirmPassword('');
-    setSaveMessage('Contraseña actualizada para la sesión actual.');
+    setSaveMessage('Contrasena actualizada.');
   };
 
   return (

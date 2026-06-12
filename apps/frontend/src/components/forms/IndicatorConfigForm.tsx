@@ -60,9 +60,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
   };
 
   const handleSave = () => {
-    toast.success('Configuracion guardada', {
-      description: 'La estructura del indicador quedo registrada en la vista local.',
-    });
+    toast.success('Configuracion guardada');
     handleBack();
   };
 

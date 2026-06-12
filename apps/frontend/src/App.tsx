@@ -186,9 +186,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange }: IndicatorFormWrapperP
   const handleSaveDraft = (data: FormSubmission) => {
     captureDraft.saveDraft(buildCapturePayload(data), {
       onSuccess: () => {
-        toast.success('Borrador guardado', {
-          description: 'Tu progreso se está guardando en el sistema.'
-        });
+        toast.success('Cambios guardados');
       },
       onError: () => {
         toast.error('No se pudo guardar el borrador');
@@ -200,9 +198,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange }: IndicatorFormWrapperP
     captureDraft.sendToReview(buildCapturePayload(data), {
       onSuccess: () => {
         onIndicatorStatusChange?.(selectedCode, 'En revisión');
-        toast.success('Enviado a revision', {
-          description: 'Los datos se enviaron al flujo de revision.'
-        });
+        toast.success('Enviado a revision');
       },
       onError: () => {
         toast.error('No se pudo enviar a revision');

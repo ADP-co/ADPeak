@@ -82,37 +82,35 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
 
   const statusMessage = useMemo(() => {
     if (captureQuery.isLoading) {
-      return 'Recuperando borrador existente...';
+      return 'Cargando borrador...';
     }
 
     if (sendToReviewMutation.isPending) {
-      return 'Enviando captura a revision...';
+      return 'Enviando...';
     }
 
     if (sendToReviewMutation.isSuccess) {
-      return `Captura enviada a revision. Estado: ${sendToReviewMutation.data.estado}.`;
+      return 'Enviado a revision.';
     }
 
     if (saveDraftMutation.isPending) {
-      return 'Guardando borrador...';
+      return 'Guardando...';
     }
 
     if (saveDraftMutation.isSuccess) {
-      return `Borrador guardado en el sistema. Captura #${saveDraftMutation.data.id}, version ${saveDraftMutation.data.versionActual}.`;
+      return 'Borrador guardado.';
     }
 
     if (captureQuery.data) {
-      return `Borrador recuperado. Captura #${captureQuery.data.id}, estado ${captureQuery.data.estado}.`;
+      return 'Borrador disponible.';
     }
 
     return undefined;
   }, [
     captureQuery.data,
     captureQuery.isLoading,
-    saveDraftMutation.data,
     saveDraftMutation.isPending,
     saveDraftMutation.isSuccess,
-    sendToReviewMutation.data,
     sendToReviewMutation.isPending,
     sendToReviewMutation.isSuccess,
   ]);

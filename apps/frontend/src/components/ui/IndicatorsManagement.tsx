@@ -52,7 +52,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
   };
 
   const handleEditIndicator = (indicator: IndicatorRecord) => {
-    setStatusMessage(`Abriendo configuracion de ${indicator.code}.`);
+    setStatusMessage('');
     onEditIndicator?.(indicator.code);
   };
 
@@ -62,7 +62,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
         item.id === indicator.id ? { ...item, enabled: item.enabled === false } : item
       )
     );
-    setStatusMessage(`Indicador ${indicator.code} ${indicator.enabled === false ? 'habilitado' : 'deshabilitado'}.`);
+    setStatusMessage(indicator.enabled === false ? 'Indicador habilitado.' : 'Indicador deshabilitado.');
   };
 
   const confirmDeleteIndicator = () => {
@@ -71,7 +71,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
     }
 
     setIndicators((current) => current.filter((item) => item.id !== indicatorToDelete.id));
-    setStatusMessage(`Indicador ${indicatorToDelete.code} eliminado de la vista.`);
+    setStatusMessage('Indicador eliminado.');
     setIndicatorToDelete(null);
   };
 
@@ -216,7 +216,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
       <ConfirmModal
         isOpen={!!indicatorToDelete}
         title="Eliminar indicador"
-        message={`Deseas eliminar el indicador ${indicatorToDelete?.code}? Esta accion no se puede deshacer en la vista local.`}
+        message={`Deseas eliminar el indicador ${indicatorToDelete?.code}? Esta accion no se puede deshacer.`}
         onConfirm={confirmDeleteIndicator}
         onCancel={() => setIndicatorToDelete(null)}
         confirmText="Eliminar"

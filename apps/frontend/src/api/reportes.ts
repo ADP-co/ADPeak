@@ -53,13 +53,13 @@ export async function fetchExportReport(request: ReportRequest) {
   const contentType = response.headers.get('content-type') ?? '';
 
   if (!response.ok || !contentType.includes('application/json')) {
-    throw new Error('El backend de reportes no devolvio JSON valido.');
+    throw new Error('No se pudo obtener la informacion del reporte.');
   }
 
   const report = await response.json() as ExportReport;
 
   if (!Array.isArray(report.indicadores) || report.indicadores.some((indicator) => !Array.isArray(indicator.datos))) {
-    throw new Error('El reporte no incluye indicadores[].datos[].');
+    throw new Error('La informacion del reporte esta incompleta.');
   }
 
   return report;
@@ -67,47 +67,33 @@ export async function fetchExportReport(request: ReportRequest) {
 
 export function reportToCsv(report: ExportReport) {
   const headers = [
-    'tipo_reporte',
-    'periodo_reporte',
-    'ciclo_escolar',
-    'fecha_generacion',
-    'identidad_tipo',
-    'identidad_nombre',
-    'indicador',
-    'descripcion_indicador',
-    'registro_id',
-    'ciclo',
-    'periodo',
-    'plantel',
-    'actividad',
-    'responsable',
-    'estado',
-    'vencimiento',
-    'meta',
-    'avance',
-    'evidencias',
+    'Periodo',
+    'Ciclo escolar',
+    'Fecha de generacion',
+    'Alcance',
+    'Plantel',
+    'Indicador',
+    'Actividad',
+    'Responsable',
+    'Estado',
+    'Avance',
+    'Evidencias',
+    'Vencimiento',
   ];
   const rows = report.indicadores.flatMap((indicator) =>
     indicator.datos.map((dataRow) => [
-      report.tipoReporte,
       report.periodo,
       report.cicloEscolar,
-      report.fechaGeneracion,
-      report.identidadReporte.tipo,
+      formatReportDate(report.fechaGeneracion),
       report.identidadReporte.nombre,
-      indicator.nombre,
-      indicator.descripcion ?? '',
-      dataRow.id ?? '',
-      dataRow.ciclo ?? '',
-      dataRow.periodo ?? '',
       dataRow.plantel ?? report.identidadReporte.nombre,
+      indicator.nombre,
       dataRow.actividad,
       dataRow.responsable,
-      dataRow.estado,
-      dataRow.vencimiento ?? '',
-      dataRow.meta?.toString() ?? '',
+      formatStatusLabel(dataRow.estado),
       dataRow.avance,
       dataRow.evidencias?.toString() ?? '',
+      formatDeadline(dataRow.vencimiento),
     ])
   );
 
@@ -160,29 +146,32 @@ export function countReportRows(report: ExportReport) {
 }
 
 function buildPdfLines(report: ExportReport) {
+  const statusSummary = summarizeReport(report);
   const lines = [
-    'Reporte de indicadores',
-    `${report.identidadReporte.tipo}: ${report.identidadReporte.nombre}`,
+    'Resumen ejecutivo de indicadores',
+    report.identidadReporte.nombre,
     `Periodo: ${report.periodo} | Ciclo escolar: ${report.cicloEscolar}`,
-    `Fecha de generacion: ${report.fechaGeneracion}`,
-    `Registros exportados: ${countReportRows(report)}`,
+    `Generado: ${formatReportDate(report.fechaGeneracion)}`,
     '',
-    'Indicadores y registros',
+    `Registros revisados: ${statusSummary.total}`,
+    `Aprobados: ${statusSummary.approved} | En revision: ${statusSummary.inReview} | Observados: ${statusSummary.observed}`,
+    `Pendientes: ${statusSummary.pending} | Atrasados: ${statusSummary.late}`,
+    '',
+    'Detalle por indicador',
     '',
   ];
 
   report.indicadores.forEach((indicator) => {
-    lines.push(`Indicador: ${indicator.nombre}`);
-
-    if (indicator.descripcion) {
-      lines.push(`Descripcion: ${indicator.descripcion}`);
-    }
+    lines.push(indicator.nombre);
+    lines.push(`${indicator.datos.length} registros | Avance promedio: ${averageProgress(indicator.datos)} | Estado principal: ${dominantStatus(indicator.datos)}`);
 
     indicator.datos.forEach((dataRow) => {
-      lines.push(`- Registro: ${dataRow.id ?? 'sin-id'} | Actividad: ${dataRow.actividad}`);
-      lines.push(`  Responsable: ${dataRow.responsable} | Estado: ${dataRow.estado} | Avance: ${dataRow.avance}`);
-      lines.push(`  Plantel: ${dataRow.plantel ?? report.identidadReporte.nombre} | Periodo: ${dataRow.periodo ?? report.periodo} | Ciclo: ${dataRow.ciclo ?? report.cicloEscolar}`);
-      lines.push(`  Meta: ${dataRow.meta ?? 'N/D'} | Evidencias: ${dataRow.evidencias ?? 0} | Vencimiento: ${dataRow.vencimiento ?? 'N/D'}`);
+      lines.push(buildRecordLine(dataRow, report));
+
+      const details = buildRecordDetails(dataRow);
+      if (details) {
+        lines.push(details);
+      }
     });
 
     lines.push('');
@@ -246,4 +235,151 @@ function normalizePdfText(value: string) {
 
 function escapePdfText(value: string) {
   return normalizePdfText(value).replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
+}
+
+function normalizeStatus(value: string) {
+  return normalizePdfText(value).toLowerCase().replace(/_/g, ' ').trim();
+}
+
+function formatStatusLabel(value: string) {
+  const status = normalizeStatus(value);
+
+  if (status.includes('aprobado') || status.includes('completo')) {
+    return 'Aprobado';
+  }
+
+  if (status.includes('revision') || status.includes('enviado')) {
+    return 'En revision';
+  }
+
+  if (status.includes('observado') || status.includes('corregir')) {
+    return 'Observado';
+  }
+
+  if (status.includes('rezagado') || status.includes('atrasado')) {
+    return 'Atrasado';
+  }
+
+  if (status.includes('pendiente') || status.includes('borrador') || status.includes('progreso')) {
+    return 'Pendiente';
+  }
+
+  return value.replace(/_/g, ' ');
+}
+
+function formatDeadline(value?: string) {
+  if (!value) {
+    return '';
+  }
+
+  const deadline = normalizeStatus(value);
+
+  if (deadline.includes('atrasado')) {
+    return 'Atrasado';
+  }
+
+  if (deadline.includes('en tiempo')) {
+    return 'En tiempo';
+  }
+
+  return value.replace(/_/g, ' ');
+}
+
+function formatReportDate(value: string) {
+  if (!value) {
+    return '';
+  }
+
+  const date = new Date(`${value}T00:00:00`);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat('es-MX', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(date);
+}
+
+function summarizeReport(report: ExportReport) {
+  const rows = report.indicadores.flatMap((indicator) => indicator.datos);
+
+  return rows.reduce(
+    (summary, dataRow) => {
+      const status = formatStatusLabel(dataRow.estado);
+      const deadline = formatDeadline(dataRow.vencimiento);
+
+      if (status === 'Aprobado') {
+        summary.approved += 1;
+      } else if (status === 'En revision') {
+        summary.inReview += 1;
+      } else if (status === 'Observado') {
+        summary.observed += 1;
+      } else if (status === 'Atrasado') {
+        summary.late += 1;
+      } else {
+        summary.pending += 1;
+      }
+
+      if (deadline === 'Atrasado' && status !== 'Atrasado') {
+        summary.late += 1;
+      }
+
+      summary.total += 1;
+      return summary;
+    },
+    { total: 0, approved: 0, inReview: 0, observed: 0, pending: 0, late: 0 }
+  );
+}
+
+function progressValue(value: string) {
+  const numericValue = Number(value.replace('%', '').trim());
+  return Number.isFinite(numericValue) ? numericValue : undefined;
+}
+
+function averageProgress(rows: ReportDataRow[]) {
+  const values = rows.map((row) => progressValue(row.avance)).filter((value): value is number => value !== undefined);
+
+  if (values.length === 0) {
+    return 'Sin avance';
+  }
+
+  const average = values.reduce((total, value) => total + value, 0) / values.length;
+  return `${Math.round(average)}%`;
+}
+
+function dominantStatus(rows: ReportDataRow[]) {
+  if (rows.length === 0) {
+    return 'Sin registros';
+  }
+
+  const counts = rows.reduce<Record<string, number>>((current, row) => {
+    const status = formatStatusLabel(row.estado);
+    current[status] = (current[status] ?? 0) + 1;
+    return current;
+  }, {});
+
+  return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'Sin registros';
+}
+
+function buildRecordLine(dataRow: ReportDataRow, report: ExportReport) {
+  const plantel = dataRow.plantel ?? report.identidadReporte.nombre;
+  return `- ${dataRow.actividad} | ${plantel} | ${dataRow.responsable} | ${formatStatusLabel(dataRow.estado)} | ${dataRow.avance}`;
+}
+
+function buildRecordDetails(dataRow: ReportDataRow) {
+  const details: string[] = [];
+  const deadline = formatDeadline(dataRow.vencimiento);
+
+  if (typeof dataRow.evidencias === 'number' && dataRow.evidencias > 0) {
+    details.push(`Evidencias: ${dataRow.evidencias}`);
+  }
+
+  if (deadline === 'Atrasado') {
+    details.push('Atencion: vencido');
+  }
+
+  return details.length > 0 ? `  ${details.join(' | ')}` : '';
 }

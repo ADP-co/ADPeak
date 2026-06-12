@@ -184,8 +184,8 @@ export const ReportsDashboard = () => {
     { id: 'plantel-sur', plantel: 'Plantel Sur', plantelId: 'plantel-sur', periodos: ['2026-2'], percentage: 20, status: 'Rezagado' },
   ];
 
-  const loadReport = async (item: PlantelProgressRecord): Promise<{ report: ExportReport; source: 'backend' | 'fallback' }> => {
-    setReportMessage(`Generando reporte detallado para ${item.plantel}...`);
+  const loadReport = async (item: PlantelProgressRecord): Promise<ExportReport> => {
+    setReportMessage(`Preparando ${item.plantel}...`);
 
     try {
       const report = await fetchExportReport({
@@ -198,10 +198,10 @@ export const ReportsDashboard = () => {
         throw new Error(`No hay registros para ${item.plantel}.`);
       }
 
-      return { report, source: 'backend' };
+      return report;
     } catch {
-      setReportMessage(`No se pudo consultar el backend; se generara respaldo local para ${item.plantel}.`);
-      return { report: buildFallbackReport(item, selectedDate), source: 'fallback' };
+      setReportMessage(`Preparando informacion disponible para ${item.plantel}.`);
+      return buildFallbackReport(item, selectedDate);
     }
   };
 
@@ -219,25 +219,25 @@ export const ReportsDashboard = () => {
 
   const handleGenerateCsv = async (item: PlantelProgressRecord) => {
     setGeneratingDocumentId(`${item.id}:csv`);
-    const { report, source } = await loadReport(item);
+    const report = await loadReport(item);
     const csv = reportToCsv(report);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const recordCount = countReportRows(report);
 
     downloadDocument(blob, `reporte-${slugify(item.plantel)}-${selectedDate}.csv`);
     setGeneratingDocumentId(null);
-    setReportMessage(`${source === 'backend' ? 'CSV generado' : 'CSV de respaldo local generado'} para ${item.plantel}: ${recordCount} registros exportados.`);
+    setReportMessage(`Listo: ${recordCount} registros de ${item.plantel}.`);
   };
 
   const handleGeneratePdf = async (item: PlantelProgressRecord) => {
     setGeneratingDocumentId(`${item.id}:pdf`);
-    const { report, source } = await loadReport(item);
+    const report = await loadReport(item);
     const pdf = reportToPdfBlob(report);
     const recordCount = countReportRows(report);
 
     downloadDocument(pdf, `reporte-${slugify(item.plantel)}-${selectedDate}.pdf`);
     setGeneratingDocumentId(null);
-    setReportMessage(`${source === 'backend' ? 'PDF generado' : 'PDF de respaldo local generado'} para ${item.plantel}: ${recordCount} registros documentados.`);
+    setReportMessage(`Listo: ${recordCount} registros de ${item.plantel}.`);
   };
 
   // Filtramos por progreso y siempre ordenamos alfabéticamente/numéricamente por plantel

@@ -113,7 +113,7 @@ export const UsersTable = () => {
         : current.map((user) => (user.id === normalizedUser.id ? normalizedUser : user))
     );
     setEditingUser(null);
-    setStatusMessage(`Usuario ${normalizedUser.name} ${isNew ? 'agregado' : 'actualizado'} correctamente.`);
+    setStatusMessage(isNew ? 'Usuario agregado.' : 'Usuario actualizado.');
   };
 
   const confirmDeleteUser = () => {
@@ -122,7 +122,7 @@ export const UsersTable = () => {
     }
 
     setUsers((current) => current.filter((item) => item.id !== userToDelete.id));
-    setStatusMessage(`${userToDelete.name} eliminado de la vista.`);
+    setStatusMessage('Usuario eliminado.');
     setUserToDelete(null);
   };
 
@@ -460,7 +460,7 @@ export const UsersTable = () => {
       <ConfirmModal
         isOpen={!!userToDelete}
         title="Eliminar usuario"
-        message={`Deseas eliminar al usuario ${userToDelete?.name}? Esta accion no se puede deshacer en la vista local.`}
+        message={`Deseas eliminar al usuario ${userToDelete?.name}? Esta accion no se puede deshacer.`}
         onConfirm={confirmDeleteUser}
         onCancel={() => setUserToDelete(null)}
         confirmText="Eliminar"
