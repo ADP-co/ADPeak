@@ -1,4 +1,9 @@
 import { officialCatalogRows } from "./official-catalog.generated.js";
+import {
+  officialDataSummary,
+  officialEvidenceGroups,
+  officialWorkbookSummaries
+} from "./official-data.generated.js";
 import type { CapturePayload } from "./capture-store.js";
 
 export type SystemRole = "director" | "responsable" | "plantel";
@@ -81,6 +86,16 @@ export type SigiReportPayload = {
       vencimiento: "en_tiempo" | "atrasado";
     }>;
   }>;
+};
+
+export type OfficialSourcesPayload = {
+  summary: typeof officialDataSummary;
+  evidenceGroups: typeof officialEvidenceGroups;
+  workbookSummaries: typeof officialWorkbookSummaries;
+  scope: {
+    plantel: string;
+    visibleForRole: SystemRole;
+  };
 };
 
 export class SigiAuthError extends Error {
@@ -326,6 +341,22 @@ export function validateCapturePayload(indicator: SigiIndicator, payload: Captur
   }
 }
 
+export function officialSourcesPayload(session: SigiSession): OfficialSourcesPayload {
+  if (session.role === "plantel" && session.plantelId !== 1) {
+    throw new SigiForbiddenError("El plantel solo puede consultar sus propias fuentes oficiales.");
+  }
+
+  return {
+    summary: officialDataSummary,
+    evidenceGroups: officialEvidenceGroups,
+    workbookSummaries: officialWorkbookSummaries,
+    scope: {
+      plantel: officialDataSummary.plantel,
+      visibleForRole: session.role
+    }
+  };
+}
+
 export function buildReportPayload(
   session: SigiSession,
   filters: { plantelId?: string; plantel?: string; periodo?: string; cicloEscolar?: string; now?: Date } = {}
@@ -356,7 +387,7 @@ export function buildReportPayload(
           periodo,
           ciclo: cicloEscolar,
           meta: 100,
-          evidencias: status === "Borrador" ? 0 : 1,
+          evidencias: evidenceCountForReportRow(indicator, activity, status, plantel.id),
           vencimiento: status === "Borrador" ? "atrasado" as const : "en_tiempo" as const
         };
       })
@@ -368,6 +399,7 @@ export function buildReportPayload(
       datos: rows
     };
   }).filter((indicator) => indicator.datos.length > 0);
+  const officialSourcesReport = officialSourcesReportRows(plantelId, periodo, cicloEscolar);
 
   const identityPlantel = plantelId ? planteles.find((plantel) => plantel.id === plantelId) : undefined;
   const responsibleUser = session.role === "responsable"
@@ -383,8 +415,76 @@ export function buildReportPayload(
       tipo: identityPlantel ? "Plantel" : session.role === "responsable" ? "Responsable" : "Institucional",
       nombre: identityPlantel?.name ?? responsibleUser?.name ?? "DGEMS"
     },
-    indicadores: grouped
+    indicadores: officialSourcesReport ? [...grouped, officialSourcesReport] : grouped
   };
+}
+
+function officialSourcesReportRows(
+  plantelId: number | undefined,
+  periodo: string,
+  cicloEscolar: string
+): SigiReportPayload["indicadores"][number] | undefined {
+  if (plantelId && plantelId !== 1) {
+    return undefined;
+  }
+
+  return {
+    nombre: "Fuentes oficiales cargadas",
+    descripcion: "Inventario agregado del paquete oficial recibido.",
+    datos: officialEvidenceGroups.map((group, index) => ({
+      id: `fuente-oficial-${index + 1}`,
+      actividad: group.category,
+      responsable: officialDataSummary.plantel,
+      estado: "Aprobado",
+      avance: "100%",
+      plantel: officialDataSummary.plantel,
+      plantelId: "1",
+      periodo,
+      ciclo: cicloEscolar,
+      meta: group.fileCount,
+      evidencias: group.fileCount,
+      vencimiento: "en_tiempo"
+    }))
+  };
+}
+
+function evidenceCountForReportRow(
+  indicator: SigiIndicator,
+  activity: string,
+  status: SigiReportPayload["indicadores"][number]["datos"][number]["estado"],
+  plantelId: number
+) {
+  if (status === "Borrador") {
+    return 0;
+  }
+
+  if (plantelId !== 1) {
+    return 1;
+  }
+
+  const candidates = [indicator.name, indicator.description, activity].map(normalizeKey);
+  const matchedGroup = officialEvidenceGroups.find((group) => {
+    const category = normalizeKey(group.category);
+    return candidates.some((candidate) => areRelatedText(category, candidate));
+  });
+
+  return matchedGroup ? Math.max(1, matchedGroup.fileCount) : 1;
+}
+
+function areRelatedText(a: string, b: string) {
+  if (!a || !b) {
+    return false;
+  }
+
+  if (a.includes(b) || b.includes(a)) {
+    return true;
+  }
+
+  const aTokens = a.split(/\s+/).filter((token) => token.length > 4);
+  const bTokens = new Set(b.split(/\s+/).filter((token) => token.length > 4));
+  const overlap = aTokens.filter((token) => bTokens.has(token)).length;
+
+  return overlap >= 2 || (aTokens.length === 1 && bTokens.has(aTokens[0]));
 }
 
 function buildIndicators() {

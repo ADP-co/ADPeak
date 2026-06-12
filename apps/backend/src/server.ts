@@ -24,6 +24,7 @@ import {
   getIndicatorById,
   listIndicators,
   listUsers,
+  officialSourcesPayload,
   saveIndicator,
   saveUser,
   sessionFromHeaders,
@@ -274,6 +275,19 @@ const server = createServer(async (request, response) => {
   if (request.method === "GET" && url.pathname === "/api/v1/reportes") {
     try {
       sendJson(response, 200, buildReportPayload(sessionFromHeaders(request.headers), reportFiltersFromUrl(url)));
+      return;
+    } catch (error) {
+      if (sendError(response, error)) {
+        return;
+      }
+
+      throw error;
+    }
+  }
+
+  if (request.method === "GET" && url.pathname === "/api/v1/fuentes-oficiales") {
+    try {
+      sendJson(response, 200, officialSourcesPayload(sessionFromHeaders(request.headers)));
       return;
     } catch (error) {
       if (sendError(response, error)) {

@@ -6,6 +6,7 @@ import {
   getIndicatorByCode,
   listIndicators,
   listUsers,
+  officialSourcesPayload,
   saveIndicator,
   sessionFromHeaders,
   templateForIndicator,
@@ -44,6 +45,32 @@ describe("SIGI store and RBAC", () => {
     });
 
     expect(() => buildReportPayload(plantel)).toThrow(SigiForbiddenError);
+  });
+
+  it("exposes the complete official source package as sanitized structured data", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const sources = officialSourcesPayload(director);
+
+    expect(sources.summary).toMatchObject({
+      plantel: "Bachillerato 16",
+      topLevelFiles: 3,
+      nestedFiles: 981,
+      workbookCount: 39,
+      worksheetCount: 53
+    });
+    expect(sources.summary.worksheetNonEmptyRows).toBeGreaterThan(2000);
+    expect(sources.evidenceGroups).toHaveLength(18);
+    expect(sources.workbookSummaries).toHaveLength(39);
+  });
+
+  it("includes official evidence groups in Bachillerato 16 report exports", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const report = buildReportPayload(director, { plantelId: "1", now: new Date("2026-06-12T00:00:00.000Z") });
+    const officialSources = report.indicadores.find((indicator) => indicator.nombre === "Fuentes oficiales cargadas");
+
+    expect(officialSources).toBeDefined();
+    expect(officialSources?.datos).toHaveLength(18);
+    expect(officialSources?.datos.reduce((total, row) => total + row.evidencias, 0)).toBe(981);
   });
 
   it("uses active false for logical indicator deletion", () => {

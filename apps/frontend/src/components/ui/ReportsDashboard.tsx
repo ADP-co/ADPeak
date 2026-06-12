@@ -8,6 +8,11 @@ import {
   reportToPdfBlob,
   type ExportReport,
 } from '../../api/reportes';
+import {
+  fallbackOfficialSources,
+  fetchOfficialSources,
+  type OfficialSourcesPayload,
+} from '../../api/officialData';
 
 // Tarjeta de Gráfica de Dona
 interface DonutCardProps {
@@ -61,8 +66,32 @@ const DonutCard = ({ title, percentage, colorClass, strokeColor }: DonutCardProp
   );
 };
 
-function buildFallbackReport(item: PlantelProgressRecord, selectedDate: string): ExportReport {
+function buildFallbackReport(
+  item: PlantelProgressRecord,
+  selectedDate: string,
+  officialSources: OfficialSourcesPayload
+): ExportReport {
   const fechaGeneracion = new Date().toISOString().slice(0, 10);
+  const officialIndicator = item.plantelId === '1'
+    ? {
+        nombre: 'Fuentes oficiales cargadas',
+        descripcion: 'Inventario agregado del paquete oficial recibido.',
+        datos: officialSources.evidenceGroups.map((group, index) => ({
+          id: `fuente-oficial-${index + 1}`,
+          actividad: group.category,
+          responsable: officialSources.summary.plantel,
+          estado: 'Aprobado',
+          avance: '100%',
+          plantel: officialSources.summary.plantel,
+          plantelId: '1',
+          periodo: selectedDate,
+          ciclo: '2025-2026',
+          meta: group.fileCount,
+          evidencias: group.fileCount,
+          vencimiento: 'en_tiempo',
+        })),
+      }
+    : undefined;
 
   return {
     tipoReporte: 'plantel',
@@ -125,6 +154,7 @@ function buildFallbackReport(item: PlantelProgressRecord, selectedDate: string):
           },
         ],
       },
+      ...(officialIndicator ? [officialIndicator] : []),
     ],
   };
 }
@@ -143,6 +173,9 @@ interface PlantelProgressRecord {
   periodos: string[];
   percentage: number;
   status: PlantelStatus;
+  officialEvidenceCount?: number;
+  officialWorkbookCount?: number;
+  officialRowCount?: number;
 }
 
 const periodOptions = [
@@ -161,6 +194,7 @@ export const ReportsDashboard = () => {
   const [filterBy, setFilterBy] = useState('todos');
   const [reportMessage, setReportMessage] = useState('');
   const [generatingDocumentId, setGeneratingDocumentId] = useState<string | null>(null);
+  const [officialSources, setOfficialSources] = useState<OfficialSourcesPayload>(fallbackOfficialSources);
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -177,11 +211,26 @@ export const ReportsDashboard = () => {
     fetchFilters();
   }, []);
 
-  // Datos simulados extraídos
+  useEffect(() => {
+    fetchOfficialSources().then(setOfficialSources);
+  }, []);
+
+  // Datos de avance disponibles para la entrega actual.
   const mockPlanteles: PlantelProgressRecord[] = [
-    { id: 'plantel-norte', plantel: 'Plantel Norte', plantelId: 'plantel-norte', periodos: ['2026-1', '2026-2'], percentage: 48, status: 'En Revisión' },
-    { id: 'plantel-centro', plantel: 'Plantel Centro', plantelId: 'plantel-centro', periodos: ['2026-1'], percentage: 80, status: 'Completo' },
-    { id: 'plantel-sur', plantel: 'Plantel Sur', plantelId: 'plantel-sur', periodos: ['2026-2'], percentage: 20, status: 'Rezagado' },
+    {
+      id: 'bach-16',
+      plantel: officialSources.summary.plantel,
+      plantelId: '1',
+      periodos: ['2026-1', '2026-2'],
+      percentage: 100,
+      status: 'Completo',
+      officialEvidenceCount: officialSources.summary.nestedFiles,
+      officialWorkbookCount: officialSources.summary.workbookCount,
+      officialRowCount: officialSources.summary.worksheetNonEmptyRows,
+    },
+    { id: 'bach-4', plantel: 'Bachillerato 4', plantelId: '2', periodos: ['2026-1'], percentage: 80, status: 'Completo' },
+    { id: 'bach-1', plantel: 'Bachillerato 1', plantelId: '3', periodos: ['2026-2'], percentage: 48, status: 'En Revisión' },
+    { id: 'bach-33', plantel: 'Bachillerato 33', plantelId: '4', periodos: ['2026-2'], percentage: 20, status: 'Rezagado' },
   ];
 
   const loadReport = async (item: PlantelProgressRecord): Promise<ExportReport> => {
@@ -201,7 +250,7 @@ export const ReportsDashboard = () => {
       return report;
     } catch {
       setReportMessage(`Preparando informacion disponible para ${item.plantel}.`);
-      return buildFallbackReport(item, selectedDate);
+      return buildFallbackReport(item, selectedDate, officialSources);
     }
   };
 
@@ -399,7 +448,12 @@ export const ReportsDashboard = () => {
 
                   {/* Nombre del Plantel */}
                   <td className="py-4 px-6 text-left font-medium text-brand-Gris_oscuro/90">
-                    {item.plantel}
+                    <span className="block">{item.plantel}</span>
+                    {item.officialEvidenceCount && (
+                      <span className="block mt-1 text-xs font-accent text-brand-Gris_oscuro/60">
+                        {item.officialEvidenceCount} archivos, {item.officialWorkbookCount} libros, {item.officialRowCount} filas
+                      </span>
+                    )}
                   </td>
 
                   {/* Barra Mágica */}
