@@ -1,6 +1,9 @@
 name: Deploy ADPeak to Institutional FTP
 
 on:
+  push:
+    branches:
+      - develop
   workflow_dispatch:
     inputs:
       server_dir:
@@ -14,6 +17,10 @@ on:
 
 permissions:
   contents: read
+
+env:
+  INSTITUTIONAL_BASE_PATH: ${{ github.event.inputs.base_path || '/adpeak/' }}
+  INSTITUTIONAL_SERVER_DIR: ${{ github.event.inputs.server_dir || 'adpeak/' }}
 
 jobs:
   deploy:
@@ -37,7 +44,7 @@ jobs:
       - name: Build frontend for institutional subdirectory
         run: npm --workspace @adpeak/frontend run build
         env:
-          VITE_BASE_PATH: ${{ inputs.base_path }}
+          VITE_BASE_PATH: ${{ env.INSTITUTIONAL_BASE_PATH }}
           VITE_API_DISABLED: "true"
 
       - name: Add Apache SPA fallback
@@ -47,11 +54,11 @@ jobs:
           cat > apps/frontend/dist/.htaccess <<'HTACCESS'
           <IfModule mod_rewrite.c>
           RewriteEngine On
-          RewriteBase ${{ inputs.base_path }}
+          RewriteBase ${{ env.INSTITUTIONAL_BASE_PATH }}
           RewriteRule ^index\.html$ - [L]
           RewriteCond %{REQUEST_FILENAME} !-f
           RewriteCond %{REQUEST_FILENAME} !-d
-          RewriteRule . ${{ inputs.base_path }}index.html [L]
+          RewriteRule . ${{ env.INSTITUTIONAL_BASE_PATH }}index.html [L]
           </IfModule>
           HTACCESS
 
@@ -62,6 +69,6 @@ jobs:
           username: ${{ secrets.INSTITUTIONAL_FTP_USER }}
           password: ${{ secrets.INSTITUTIONAL_FTP_PASSWORD }}
           local-dir: apps/frontend/dist/
-          server-dir: ${{ inputs.server_dir }}
+          server-dir: ${{ env.INSTITUTIONAL_SERVER_DIR }}
           protocol: ftp
           dangerous-clean-slate: false
