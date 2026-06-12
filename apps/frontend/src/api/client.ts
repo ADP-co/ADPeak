@@ -3,10 +3,11 @@ export const AUTH_STORAGE_KEY = 'adpeak.session.user';
 const configuredApiUrl =
   import.meta.env.VITE_API_BASE_URL ??
   (import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api/v1` : undefined);
+const apiRequestsDisabled = import.meta.env.VITE_API_DISABLED === 'true';
 
 export const API_BASE_URL = (configuredApiUrl ?? '/api/v1').replace(/\/$/, '');
 export const API_ORIGIN = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
-export const API_REQUESTS_ENABLED = Boolean(configuredApiUrl) || !isStaticPublishedHost();
+export const API_REQUESTS_ENABLED = !apiRequestsDisabled && (Boolean(configuredApiUrl) || !isStaticPublishedHost());
 
 type StoredSession = {
   id?: string;
