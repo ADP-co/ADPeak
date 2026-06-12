@@ -83,6 +83,7 @@ describe("demo data", () => {
     expect(runDemoAction("responsable_indicador", "request_correction")).toMatchObject({
       recorded: true
     });
+    expect(runDemoAction("rol_invalido" as never, "approve")).toBeUndefined();
   });
 
   it("exports a CSV report with the same demo dimensions", () => {
@@ -124,5 +125,20 @@ describe("demo data", () => {
         })
       ])
     );
+  });
+
+  it("filters report rows by periodo", () => {
+    const report = demoReportPayload({
+      periodo: "2026-2",
+      plantelId: "plantel-norte"
+    });
+    const rows = report.indicadores.flatMap((indicator) => indicator.datos);
+
+    expect(rows).toHaveLength(1);
+    expect(rows.every((row) => row.periodo === "2026-2")).toBe(true);
+    expect(rows[0]).toMatchObject({
+      actividad: "Participacion academica",
+      plantel: "Plantel Norte"
+    });
   });
 });

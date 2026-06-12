@@ -99,12 +99,45 @@ const mockupIndicators: Indicator[] = [
 
 const INDICATOR_STATUS_STORAGE_KEY = 'adpeak.indicator.statuses';
 
+function homePathForRole(role?: string) {
+  if (role === 'admin') {
+    return '/analisis';
+  }
+
+  if (role === 'responsable') {
+    return '/revision';
+  }
+
+  return '/indicadores';
+}
+
 function readIndicatorStatusOverrides() {
   try {
     return JSON.parse(window.localStorage.getItem(INDICATOR_STATUS_STORAGE_KEY) ?? '{}') as Record<string, Indicator['status']>;
   } catch {
     return {};
   }
+}
+
+function getIndicatorIdByCode(code: string) {
+  const index = mockupIndicators.findIndex((indicator) => indicator.code === code);
+  return index >= 0 ? index + 1 : 1;
+}
+
+function buildCapturePayload(data: FormSubmission) {
+  const evidenceFile = data.evidencia?.[0];
+
+  return {
+    rows: data.rows,
+    justificacion: data.justificacion?.trim() || undefined,
+    evidencia: evidenceFile
+      ? {
+          nombre: evidenceFile.name,
+          tipo: evidenceFile.type,
+          tamanoBytes: evidenceFile.size,
+        }
+      : undefined,
+  };
 }
 
 interface IndicatorFormWrapperProps {
@@ -114,6 +147,13 @@ interface IndicatorFormWrapperProps {
 function IndicatorFormWrapper({ onIndicatorStatusChange }: IndicatorFormWrapperProps) {
   const { code } = useParams();
   const navigate = useNavigate();
+  const selectedCode = code ?? template1_0_0_0_2.indicatorCode;
+  const selectedIndicator = mockupIndicators.find((indicator) => indicator.code === selectedCode);
+  const selectedTemplate = {
+    ...template1_0_0_0_2,
+    indicatorCode: selectedCode,
+    indicatorName: selectedIndicator?.name ?? template1_0_0_0_2.indicatorName,
+  };
 
   console.log('El código del indicador seleccionado es:', code);
   // En una app real, usarías el "code" de la URL (ej. 1.0.0.0.2) para hacer un GET al backend
@@ -121,32 +161,45 @@ function IndicatorFormWrapper({ onIndicatorStatusChange }: IndicatorFormWrapperP
 
   const captureDraft = useCaptureDraft({
     plantelId: 1,
-    indicadorId: 1,
+    indicadorId: getIndicatorIdByCode(selectedCode),
     periodoId: 1,
     actividadId: 1,
     responsableId: 2,
+    storageScope: `plantel-1:${selectedCode}:periodo-1:actividad-1`,
   });
 
   const formInitialData = captureDraft.capture?.payload.rows ?? mockInitialData;
 
   const handleSaveDraft = (data: FormSubmission) => {
-    captureDraft.saveDraft({ rows: data.rows });
-    toast.success('Borrador guardado', {
-      description: 'Tu progreso se está guardando en el sistema.'
+    captureDraft.saveDraft(buildCapturePayload(data), {
+      onSuccess: () => {
+        toast.success('Borrador guardado', {
+          description: 'Tu progreso se está guardando en el sistema.'
+        });
+      },
+      onError: () => {
+        toast.error('No se pudo guardar el borrador');
+      },
     });
   };
 
   const handleSendReview = (data: FormSubmission) => {
-    captureDraft.sendToReview({ rows: data.rows });
-    onIndicatorStatusChange?.(code ?? template1_0_0_0_2.indicatorCode, 'En revisión');
-    toast.success('Enviado a revision', {
-      description: 'Los datos se enviaron al flujo de revision.'
+    captureDraft.sendToReview(buildCapturePayload(data), {
+      onSuccess: () => {
+        onIndicatorStatusChange?.(selectedCode, 'En revisión');
+        toast.success('Enviado a revision', {
+          description: 'Los datos se enviaron al flujo de revision.'
+        });
+      },
+      onError: () => {
+        toast.error('No se pudo enviar a revision');
+      },
     });
   };
 
   return (
     <IndicatorForm
-      template={template1_0_0_0_2}
+      template={selectedTemplate}
       initialData={formInitialData}
       onSaveDraft={handleSaveDraft}
       onSendReview={handleSendReview}
@@ -202,6 +255,16 @@ function ProtectedLayout() {
   );
 }
 
+function LoginRoute() {
+  const { isAuthenticated, user } = useAuth();
+
+  if (isAuthenticated) {
+    return <Navigate to={homePathForRole(user?.role)} replace />;
+  }
+
+  return <Login />;
+}
+
 function AppContent() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -238,15 +301,13 @@ function AppContent() {
   return (
     <Routes>
       {/* Ruta pública */}
-      <Route path="/login" element={<Login />} />
+      <Route path="/login" element={<LoginRoute />} />
 
       {/* Rutas Privadas envueltas por nuestro Layout */}
       <Route element={<ProtectedLayout />}>
         {/* Redirección dinámica según el rol */}
         <Route path="/" element={
-          role === 'admin' ? <Navigate to="/analisis" replace /> :
-          role === 'responsable' ? <Navigate to="/revision" replace /> :
-          <Navigate to="/indicadores" replace />
+          <Navigate to={homePathForRole(role)} replace />
         } />
 
         {/* Vistas de Admin */}
@@ -279,12 +340,16 @@ function AppContent() {
         {/* Formulario de captura accesible para quienes tengan acceso a indicadores */}
         <Route
           path="/indicadores/captura/:code"
-          element={<IndicatorFormWrapper onIndicatorStatusChange={handleIndicatorStatusChange} />}
+          element={
+            role === 'admin' || role === 'plantel'
+              ? <IndicatorFormWrapper onIndicatorStatusChange={handleIndicatorStatusChange} />
+              : <Navigate to="/revision" replace />
+          }
         />
 
         {/* Vistas compartidas para todos */}
         <Route path="/reportes" element={<ReportsDashboard />} />
-        <Route path="/perfil" element={<AccountProfile onBack={() => navigate(-1)} />} />
+        <Route path="/perfil" element={<AccountProfile onBack={() => navigate(homePathForRole(role))} />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

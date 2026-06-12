@@ -40,6 +40,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key !== AUTH_STORAGE_KEY) {
+        return;
+      }
+
+      if (!event.newValue) {
+        setUser(null);
+        return;
+      }
+
+      try {
+        setUser(JSON.parse(event.newValue) as User);
+      } catch {
+        setUser(null);
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
+  useEffect(() => {
     if (!user) {
       return undefined;
     }

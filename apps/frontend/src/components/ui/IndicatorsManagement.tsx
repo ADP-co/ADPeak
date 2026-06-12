@@ -84,6 +84,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
           <div className="flex items-center gap-2 w-full max-w-xl">
             <input
               type="text"
+              aria-label="Filtro de indicadores por codigo, nombre o responsable"
               placeholder="Buscar por código, nombre o responsable..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -91,7 +92,9 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
               className="w-full h-9 pl-4 pr-4 rounded-full border border-brand-Gris_bajo/50 focus:outline-none focus:border-brand-Verde_principal text-sm text-brand-Gris_oscuro"
             />
             <button
+              type="button"
               onClick={() => setActiveSearch(searchTerm)}
+              aria-label="Buscar indicadores"
               className="h-9 flex items-center justify-center bg-brand-Verde_oscuro text-brand-Blanco px-4 rounded-full hover:bg-brand-Verde_principal transition-colors shrink-0"
             >
               <Search size={18} />
@@ -100,7 +103,9 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
 
           {/* Botón Agregar */}
           <button
+            type="button"
             onClick={handleAddIndicator}
+            aria-label="Agregar indicador"
             className="h-9 flex items-center gap-2 bg-brand-Verde_oscuro text-brand-Blanco px-5 rounded-full font-bold text-sm hover:bg-brand-Verde_principal transition-colors"
           >
             Agregar
@@ -109,7 +114,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
         </div>
 
         {statusMessage && (
-          <p className="text-sm font-body font-semibold text-brand-Verde_oscuro">
+          <p className="text-sm font-body font-semibold text-brand-Verde_oscuro" role="status">
             {statusMessage}
           </p>
         )}
@@ -151,13 +156,17 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
                   <td className="py-4 px-6">
                     <div className="flex items-center justify-center gap-3">
                       <button
+                        type="button"
                         onClick={() => handleEditIndicator(indicator)}
+                        aria-label={`Modificar indicador ${indicator.code}`}
                         className="px-6 py-1 rounded-full border border-brand-Verde_oscuro text-brand-Verde_oscuro font-bold text-sm hover:bg-brand-Verde_oscuro hover:text-brand-Blanco transition-colors w-[120px]"
                       >
                         Modificar
                       </button>
                       <button
+                        type="button"
                         onClick={() => handleDeleteIndicator(indicator)}
+                        aria-label={`Eliminar indicador ${indicator.code}`}
                         className="text-brand-Verde_oscuro hover:text-brand-Status_rojo transition-colors p-1 rounded-md hover:bg-brand-Status_rojo/10 cursor-pointer"
                         title="Eliminar indicador"
                       >

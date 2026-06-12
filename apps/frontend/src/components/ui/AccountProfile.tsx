@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { ArrowLeft, User, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from './Button';
@@ -22,26 +22,29 @@ const PasswordField = ({
 }: PasswordFieldProps) => {
   // Estado para alternar entre texto visible y oculto
   const [showPassword, setShowPassword] = useState(false);
+  const inputId = useId();
 
   return (
     <div className="flex flex-col gap-1 w-full">
-      <label className="font-title text-sm font-bold text-brand-Gris_oscuro">
+      <label htmlFor={inputId} className="font-title text-sm font-bold text-brand-Gris_oscuro">
         {label}
       </label>
       <div className="relative">
         <input
+          id={inputId}
           type={showPassword ? 'text' : 'password'}
           placeholder={placeholder}
           value={value}
           onChange={(event) => onChange(event.target.value)}
           autoComplete={autoComplete}
-          className="w-full h-10 pl-3 pr-10 rounded-md border border-brand-Gris_bajo/50 focus:outline-none focus:border-brand-Verde_oscuro focus:ring-1 focus:ring-brand-Verde_oscuro font-body text-sm text-brand-Gris_oscuro bg-brand-Blanco transition-colors"
+          className="w-full h-10 pl-3 pr-12 rounded-md border border-brand-Gris_bajo/50 focus:outline-none focus:border-brand-Verde_oscuro focus:ring-1 focus:ring-brand-Verde_oscuro font-body text-sm text-brand-Gris_oscuro bg-brand-Blanco transition-colors"
         />
         {/* Botón del ojito posicionado de forma absoluta a la derecha */}
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-Gris_oscuro hover:text-brand-Verde_oscuro transition-colors cursor-pointer"
+          aria-label={showPassword ? `Ocultar ${label}` : `Mostrar ${label}`}
+          className="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-brand-Gris_oscuro hover:text-brand-Verde_oscuro transition-colors cursor-pointer"
         >
           {showPassword ? <Eye size={20} strokeWidth={2} /> : <EyeOff size={20} strokeWidth={2} />}
         </button>
@@ -103,7 +106,9 @@ export const AccountProfile = ({ onBack }: AccountProfileProps) => {
           Cuenta
         </h1>
         <button
+          type="button"
           onClick={onBack}
+          aria-label="Regresar"
           className="text-brand-Verde_oscuro hover:bg-brand-Verde_oscuro/10 p-2 rounded-full transition-colors cursor-pointer"
           title="Regresar"
         >

@@ -67,7 +67,7 @@ function buildFallbackReport(item: PlantelProgressRecord, selectedDate: string):
   return {
     tipoReporte: 'plantel',
     periodo: selectedDate || '2026-A',
-    cicloEscolar: selectedDate || '2025-2026',
+    cicloEscolar: '2025-2026',
     fechaGeneracion,
     identidadReporte: {
       tipo: 'Plantel',
@@ -139,16 +139,23 @@ type PlantelStatus = 'Completo' | 'En Revisión' | 'En Progreso' | 'Rezagado';
 interface PlantelProgressRecord {
   id: string;
   plantel: string;
+  plantelId: string;
+  periodos: string[];
   percentage: number;
   status: PlantelStatus;
 }
+
+const periodOptions = [
+  { value: '2026-2', label: '2026-2' },
+  { value: '2026-1', label: '2026-1' },
+];
 
 // Pantalla Principal de Reportes
 export const ReportsDashboard = () => {
 
   // Estados para simular la carga del backend
-  const [dateOptions, setDateOptions] = useState<{value: string, label: string}[]>([{ value: '', label: 'Cargando...' }]);
-  const [selectedDate, setSelectedDate] = useState('');
+  const [dateOptions, setDateOptions] = useState<{value: string, label: string}[]>(periodOptions);
+  const [selectedDate, setSelectedDate] = useState(periodOptions[0].value);
 
   // Estado para el filtrado
   const [filterBy, setFilterBy] = useState('todos');
@@ -159,14 +166,10 @@ export const ReportsDashboard = () => {
     const fetchFilters = async () => {
       try {
         await new Promise(resolve => setTimeout(resolve, 600));
-        const mockDates = [
-          { value: '2024-2025', label: '2024 - 2025' },
-          { value: '2025-2026', label: '2025 - 2026' }
-        ];
+        const mockDates = periodOptions;
         // Ordenar fechas de la más actual a la más antigua
-        mockDates.sort((a, b) => b.value.localeCompare(a.value));
         setDateOptions(mockDates);
-        setSelectedDate(mockDates[0].value);
+        setSelectedDate((current) => current || mockDates[0].value);
       } catch (error) {
         console.error("Error al cargar los filtros:", error);
       }
@@ -176,36 +179,29 @@ export const ReportsDashboard = () => {
 
   // Datos simulados extraídos
   const mockPlanteles: PlantelProgressRecord[] = [
-    { id: '1', plantel: 'Bach. 16', percentage: 100, status: 'Completo' },
-    { id: '2', plantel: 'Bach. 1', percentage: 100, status: 'Completo' },
-    { id: '3', plantel: 'Bach. 2', percentage: 100, status: 'Completo' },
-    { id: '4', plantel: 'Bach. 3', percentage: 100, status: 'Completo' },
-    { id: '5', plantel: 'Bach. 4', percentage: 100, status: 'En Revisión' },
-    { id: '6', plantel: 'Bach. 5', percentage: 100, status: 'En Revisión' },
-    { id: '7', plantel: 'Bach. 6', percentage: 90, status: 'En Progreso' },
-    { id: '8', plantel: 'Bach. 7', percentage: 85, status: 'En Progreso' },
-    { id: '9', plantel: 'Bach. 8', percentage: 65, status: 'En Progreso' },
-    { id: '10', plantel: 'Bach. 9', percentage: 5, status: 'Rezagado' },
-    { id: '11', plantel: 'Bach. 10', percentage: 0, status: 'Rezagado' },
+    { id: 'plantel-norte', plantel: 'Plantel Norte', plantelId: 'plantel-norte', periodos: ['2026-1', '2026-2'], percentage: 48, status: 'En Revisión' },
+    { id: 'plantel-centro', plantel: 'Plantel Centro', plantelId: 'plantel-centro', periodos: ['2026-1'], percentage: 80, status: 'Completo' },
+    { id: 'plantel-sur', plantel: 'Plantel Sur', plantelId: 'plantel-sur', periodos: ['2026-2'], percentage: 20, status: 'Rezagado' },
   ];
 
-  const loadReport = async (item: PlantelProgressRecord) => {
+  const loadReport = async (item: PlantelProgressRecord): Promise<{ report: ExportReport; source: 'backend' | 'fallback' }> => {
     setReportMessage(`Generando reporte detallado para ${item.plantel}...`);
 
     try {
       const report = await fetchExportReport({
-        cicloEscolar: selectedDate,
+        cicloEscolar: '2025-2026',
         periodo: selectedDate,
-        plantel: item.plantel,
+        plantelId: item.plantelId,
       });
 
       if (countReportRows(report) === 0) {
-        return buildFallbackReport(item, selectedDate);
+        throw new Error(`No hay registros para ${item.plantel}.`);
       }
 
-      return report;
+      return { report, source: 'backend' };
     } catch {
-      return buildFallbackReport(item, selectedDate);
+      setReportMessage(`No se pudo consultar el backend; se generara respaldo local para ${item.plantel}.`);
+      return { report: buildFallbackReport(item, selectedDate), source: 'fallback' };
     }
   };
 
@@ -223,38 +219,39 @@ export const ReportsDashboard = () => {
 
   const handleGenerateCsv = async (item: PlantelProgressRecord) => {
     setGeneratingDocumentId(`${item.id}:csv`);
-    const report = await loadReport(item);
+    const { report, source } = await loadReport(item);
     const csv = reportToCsv(report);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const recordCount = countReportRows(report);
 
     downloadDocument(blob, `reporte-${slugify(item.plantel)}-${selectedDate}.csv`);
     setGeneratingDocumentId(null);
-    setReportMessage(`CSV generado para ${item.plantel}: ${recordCount} registros exportados.`);
+    setReportMessage(`${source === 'backend' ? 'CSV generado' : 'CSV de respaldo local generado'} para ${item.plantel}: ${recordCount} registros exportados.`);
   };
 
   const handleGeneratePdf = async (item: PlantelProgressRecord) => {
     setGeneratingDocumentId(`${item.id}:pdf`);
-    const report = await loadReport(item);
+    const { report, source } = await loadReport(item);
     const pdf = reportToPdfBlob(report);
     const recordCount = countReportRows(report);
 
     downloadDocument(pdf, `reporte-${slugify(item.plantel)}-${selectedDate}.pdf`);
     setGeneratingDocumentId(null);
-    setReportMessage(`PDF generado para ${item.plantel}: ${recordCount} registros documentados.`);
+    setReportMessage(`${source === 'backend' ? 'PDF generado' : 'PDF de respaldo local generado'} para ${item.plantel}: ${recordCount} registros documentados.`);
   };
 
   // Filtramos por progreso y siempre ordenamos alfabéticamente/numéricamente por plantel
-  const processedPlanteles = mockPlanteles
+  const visiblePlanteles = mockPlanteles.filter((item) => !selectedDate || item.periodos.includes(selectedDate));
+  const processedPlanteles = visiblePlanteles
     .filter((item) => filterBy === 'todos' || item.status === filterBy)
     .sort((a, b) => a.plantel.localeCompare(b.plantel, undefined, { numeric: true }));
 
   // Cálculo automático para las gráficas
-  const totalPlanteles = mockPlanteles.length;
-  const completosCount = mockPlanteles.filter(p => p.status === 'Completo').length;
+  const totalPlanteles = visiblePlanteles.length;
+  const completosCount = visiblePlanteles.filter(p => p.status === 'Completo').length;
   // La gráfica de "Pendientes" incluye 'En Progreso' (> 15%) y 'En Revisión' (100% pero sin completar)
-  const pendientesCount = mockPlanteles.filter(p => p.status === 'En Progreso' || p.status === 'En Revisión').length;
-  const rezagadosCount = mockPlanteles.filter(p => p.status === 'Rezagado').length;
+  const pendientesCount = visiblePlanteles.filter(p => p.status === 'En Progreso' || p.status === 'En Revisión').length;
+  const rezagadosCount = visiblePlanteles.filter(p => p.status === 'Rezagado').length;
 
   const completosPercentage = totalPlanteles > 0 ? Math.round((completosCount / totalPlanteles) * 100) : 0;
   const pendientesPercentage = totalPlanteles > 0 ? Math.round((pendientesCount / totalPlanteles) * 100) : 0;
@@ -321,6 +318,8 @@ export const ReportsDashboard = () => {
           </h1>
           <div className="flex gap-4">
             <Select
+              id="reports-period-filter"
+              aria-label="Periodo del reporte"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
               options={dateOptions}
@@ -359,8 +358,9 @@ export const ReportsDashboard = () => {
             Progreso de los Planteles
           </h2>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-brand-Gris_oscuro font-bold font-accent">Filtrar por</span>
+            <label htmlFor="reports-status-filter" className="text-xs text-brand-Gris_oscuro font-bold font-accent">Filtrar por</label>
             <Select
+              id="reports-status-filter"
               value={filterBy}
               onChange={(e) => setFilterBy(e.target.value)}
               options={[
@@ -382,8 +382,8 @@ export const ReportsDashboard = () => {
           </p>
         )}
 
-        <div className="bg-brand-Blanco rounded-lg shadow-md overflow-hidden border border-brand-Gris_bajo/20">
-          <table className="w-full border-collapse text-center">
+        <div className="bg-brand-Blanco rounded-lg shadow-md border border-brand-Gris_bajo/20 overflow-x-auto">
+          <table className="w-full min-w-[720px] border-collapse text-center">
 
             <thead>
               <tr className="bg-brand-Gris_bajo/35 text-brand-Gris_oscuro font-title font-bold text-sm select-none border-b border-brand-Gris_bajo/20">
@@ -414,17 +414,19 @@ export const ReportsDashboard = () => {
                         variant="secondary"
                         onClick={() => handleGenerateCsv(item)}
                         disabled={generatingDocumentId === `${item.id}:csv`}
-                        className="w-[78px] text-xs py-1.5 px-3"
+                        aria-label={`Descargar CSV para ${item.plantel}`}
+                        className="w-[104px] text-xs py-1.5 px-3"
                       >
-                        {generatingDocumentId === `${item.id}:csv` ? '...' : 'CSV'}
+                        {generatingDocumentId === `${item.id}:csv` ? 'Generando' : 'CSV'}
                       </Button>
                       <Button
                         variant="secondary"
                         onClick={() => handleGeneratePdf(item)}
                         disabled={generatingDocumentId === `${item.id}:pdf`}
-                        className="w-[78px] text-xs py-1.5 px-3"
+                        aria-label={`Descargar PDF para ${item.plantel}`}
+                        className="w-[104px] text-xs py-1.5 px-3"
                       >
-                        {generatingDocumentId === `${item.id}:pdf` ? '...' : 'PDF'}
+                        {generatingDocumentId === `${item.id}:pdf` ? 'Generando' : 'PDF'}
                       </Button>
                     </div>
                   </td>

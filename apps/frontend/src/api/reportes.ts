@@ -179,9 +179,10 @@ function buildPdfLines(report: ExportReport) {
     }
 
     indicator.datos.forEach((dataRow) => {
-      lines.push(`- Actividad: ${dataRow.actividad}`);
+      lines.push(`- Registro: ${dataRow.id ?? 'sin-id'} | Actividad: ${dataRow.actividad}`);
       lines.push(`  Responsable: ${dataRow.responsable} | Estado: ${dataRow.estado} | Avance: ${dataRow.avance}`);
-      lines.push(`  Plantel: ${dataRow.plantel ?? report.identidadReporte.nombre} | Periodo: ${dataRow.periodo ?? report.periodo} | Evidencias: ${dataRow.evidencias ?? 0}`);
+      lines.push(`  Plantel: ${dataRow.plantel ?? report.identidadReporte.nombre} | Periodo: ${dataRow.periodo ?? report.periodo} | Ciclo: ${dataRow.ciclo ?? report.cicloEscolar}`);
+      lines.push(`  Meta: ${dataRow.meta ?? 'N/D'} | Evidencias: ${dataRow.evidencias ?? 0} | Vencimiento: ${dataRow.vencimiento ?? 'N/D'}`);
     });
 
     lines.push('');

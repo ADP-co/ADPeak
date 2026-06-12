@@ -20,6 +20,12 @@ const FALLBACK_STORAGE_KEY = 'adpeak.static.captures';
 
 export type CapturePayload = {
   rows: Record<string, unknown>[];
+  justificacion?: string;
+  evidencia?: {
+    nombre: string;
+    tipo: string;
+    tamanoBytes: number;
+  };
 };
 
 export type CaptureDraftRequest = {

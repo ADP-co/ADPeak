@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createCaptureDraft,
@@ -10,30 +10,43 @@ import {
   type CapturePayload,
 } from '../api/capturas';
 
-const STORAGE_KEY = 'sigi-poa:capture-draft-id';
+const STORAGE_KEY_PREFIX = 'sigi-poa:capture-draft-id';
 
-type UseCaptureDraftOptions = Omit<CaptureDraftRequest, 'payload' | 'motivoCambio'>;
+type UseCaptureDraftOptions = Omit<CaptureDraftRequest, 'payload' | 'motivoCambio'> & {
+  storageScope?: string;
+};
 
-function initialCaptureId() {
-  const value = window.localStorage.getItem(STORAGE_KEY);
+function initialCaptureId(storageKey: string) {
+  const value = window.localStorage.getItem(storageKey);
   const parsed = value ? Number(value) : undefined;
   return parsed && Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
 }
 
 export function useCaptureDraft(options: UseCaptureDraftOptions) {
   const queryClient = useQueryClient();
-  const [captureId, setCaptureId] = useState<number | undefined>(() => initialCaptureId());
+  const { storageScope, ...captureOptions } = options;
+  const storageKey = `${STORAGE_KEY_PREFIX}:${storageScope ?? [
+    options.plantelId,
+    options.indicadorId,
+    options.periodoId,
+    options.actividadId,
+  ].join(':')}`;
+  const [captureId, setCaptureId] = useState<number | undefined>(() => initialCaptureId(storageKey));
+
+  useEffect(() => {
+    setCaptureId(initialCaptureId(storageKey));
+  }, [storageKey]);
 
   const captureQuery = useQuery({
-    queryKey: ['capture-draft', captureId],
+    queryKey: ['capture-draft', storageKey, captureId],
     queryFn: () => getCaptureDraft(captureId as number),
     enabled: Boolean(captureId),
   });
 
   const persistCapture = (capture: CaptureDraft) => {
     setCaptureId(capture.id);
-    window.localStorage.setItem(STORAGE_KEY, String(capture.id));
-    queryClient.setQueryData(['capture-draft', capture.id], capture);
+    window.localStorage.setItem(storageKey, String(capture.id));
+    queryClient.setQueryData(['capture-draft', storageKey, capture.id], capture);
   };
 
   const saveDraftMutation = useMutation({
@@ -43,7 +56,7 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
       }
 
       return createCaptureDraft({
-        ...options,
+        ...captureOptions,
         payload,
         motivoCambio: 'borrador desde frontend',
       });
@@ -56,7 +69,7 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
       const draft = captureId
         ? await updateCaptureDraft(captureId, payload, 'envio a revision desde frontend')
         : await createCaptureDraft({
-            ...options,
+            ...captureOptions,
             payload,
             motivoCambio: 'borrador previo a envio a revision',
           });

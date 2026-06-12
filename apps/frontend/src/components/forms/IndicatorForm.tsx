@@ -197,6 +197,7 @@ export const IndicatorForm = ({
     register,
     control,
     handleSubmit,
+    getValues,
     formState: { errors, isValid },
     reset,
   } = useForm<FormData>({
@@ -213,6 +214,8 @@ export const IndicatorForm = ({
 
   const watchedRows = useWatch({ control, name: 'rows' });
   const watchedEvidencia = useWatch({ control, name: 'evidencia' }) as FileList | undefined;
+  const evidenciaInputId = `evidencia-${template.indicatorCode.replace(/[^a-zA-Z0-9]+/g, '-')}`;
+  const justificacionInputId = `justificacion-${template.indicatorCode.replace(/[^a-zA-Z0-9]+/g, '-')}`;
 
   useEffect(() => {
     reset({ rows: initialData });
@@ -226,7 +229,7 @@ export const IndicatorForm = ({
     evidencia: data.evidencia,
   });
 
-  const handleSaveDraft = handleSubmit((data) => onSaveDraft(toSubmission(data)));
+  const handleSaveDraft = () => onSaveDraft(toSubmission(getValues() as FormData));
   const handleValidSubmit = (data: FormData) => onSendReview(toSubmission(data));
 
   return (
@@ -307,6 +310,7 @@ export const IndicatorForm = ({
                             type="number"
                             className="w-full min-w-[80px] text-center !p-1 h-8"
                             label=""
+                            aria-label={`${column.label}, fila ${rowIndex + 1}`}
                             {...register(`rows.${rowIndex}.${column.key}` as const)}
                             error={error}
                           />
@@ -317,6 +321,7 @@ export const IndicatorForm = ({
                             type="text"
                             className="w-full min-w-[160px] !p-1 h-8"
                             label=""
+                            aria-label={`${column.label}, fila ${rowIndex + 1}`}
                             {...register(`rows.${rowIndex}.${column.key}` as const)}
                             error={error}
                           />
@@ -344,10 +349,11 @@ export const IndicatorForm = ({
         </h3>
         <div className="flex flex-col md:flex-row gap-6">
           <div className="flex-1">
-            <label className="block text-sm font-bold font-accent text-brand-Gris_oscuro mb-2">
+            <label htmlFor={justificacionInputId} className="block text-sm font-bold font-accent text-brand-Gris_oscuro mb-2">
               Justificación
             </label>
             <textarea
+              id={justificacionInputId}
               className="w-full border border-brand-Gris_bajo/40 p-3 rounded-md font-body text-sm outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal min-h-[100px] resize-y"
               placeholder="Ingrese la justificación correspondiente..."
               {...register('justificacion')}
@@ -358,12 +364,17 @@ export const IndicatorForm = ({
               Evidencia (PDF)
             </label>
             <div className="flex items-center w-full h-[46px] border border-brand-Gris_bajo/40 rounded-md bg-brand-Blanco overflow-hidden focus-within:border-brand-Verde_principal focus-within:ring-1 focus-within:ring-brand-Verde_principal">
-              <label className="flex items-center justify-center h-full cursor-pointer bg-brand-Verde_principal text-brand-Blanco px-4 text-sm font-bold hover:bg-brand-Verde_oscuro transition-colors whitespace-nowrap">
+              <label
+                htmlFor={evidenciaInputId}
+                className="flex items-center justify-center h-full cursor-pointer bg-brand-Verde_principal text-brand-Blanco px-4 text-sm font-bold hover:bg-brand-Verde_oscuro transition-colors whitespace-nowrap"
+              >
                 Buscar Archivo
                 <input
+                  id={evidenciaInputId}
                   type="file"
                   accept=".pdf"
-                  className="hidden"
+                  className="sr-only"
+                  aria-label="Seleccionar evidencia en PDF"
                   {...register('evidencia')}
                 />
               </label>

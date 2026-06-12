@@ -207,6 +207,7 @@ export function runDemoAction(role: DemoRole, action: DemoAction) {
 export function demoReportPayload(filters: DemoReportFilters = {}) {
   const normalizedPlantel = normalizeFilter(filters.plantel);
   const normalizedPlantelId = normalizeFilter(filters.plantelId);
+  const normalizedPeriodo = normalizeFilter(filters.periodo);
   const scopedProgress = demoProgress.filter((item) => {
     const matchesPlantel =
       !normalizedPlantel ||
@@ -214,8 +215,10 @@ export function demoReportPayload(filters: DemoReportFilters = {}) {
       normalizeFilter(item.plantelId) === normalizedPlantel;
     const matchesPlantelId =
       !normalizedPlantelId || normalizeFilter(item.plantelId) === normalizedPlantelId;
+    const matchesPeriodo =
+      !normalizedPeriodo || normalizeFilter(item.periodo) === normalizedPeriodo;
 
-    return matchesPlantel && matchesPlantelId;
+    return matchesPlantel && matchesPlantelId && matchesPeriodo;
   });
   const isPlantelReport = Boolean(normalizedPlantel || normalizedPlantelId);
   const identityName =
