@@ -17,6 +17,7 @@ import {
   authenticateDemoUser,
   demoDatasetPayload,
   demoReportCsv,
+  demoReportPayload,
   demoRoleFlows,
   demoStatusPayload,
   publicDemoUsers,
@@ -210,8 +211,13 @@ const server = createServer(async (request, response) => {
     return;
   }
 
+  if (request.method === "GET" && url.pathname === "/demo/report") {
+    sendJson(response, 200, demoReportPayload(reportFiltersFromUrl(url)));
+    return;
+  }
+
   if (request.method === "GET" && url.pathname === "/demo/report.csv") {
-    sendCsv(response, demoReportCsv());
+    sendCsv(response, demoReportCsv(reportFiltersFromUrl(url)));
     return;
   }
 
@@ -285,3 +291,12 @@ server.listen(port, () => {
   console.log(`Healthcheck: http://127.0.0.1:${port}/health`);
   console.log(`Configuracion: ${JSON.stringify(redactConfig(appConfig))}`);
 });
+
+function reportFiltersFromUrl(url: URL) {
+  return {
+    cicloEscolar: url.searchParams.get("cicloEscolar") ?? undefined,
+    periodo: url.searchParams.get("periodo") ?? undefined,
+    plantel: url.searchParams.get("plantel") ?? undefined,
+    plantelId: url.searchParams.get("plantelId") ?? undefined
+  };
+}

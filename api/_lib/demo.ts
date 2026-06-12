@@ -1,5 +1,12 @@
 export type DemoRole = "admin_dgems" | "plantel" | "responsable_indicador";
 export type DemoAction = "capture_submit" | "request_correction" | "approve";
+type DemoIndicatorProgress = (typeof demoProgress)[number];
+type DemoReportFilters = {
+  plantel?: string;
+  plantelId?: string;
+  periodo?: string;
+  cicloEscolar?: string;
+};
 
 const demoUsers = [
   {
@@ -77,6 +84,38 @@ const demoProgress = [
     avance: 42,
     estado: "observado",
     vencimiento: "atrasado",
+    evidencias: 1
+  },
+  {
+    id: "avance-004",
+    cycle: "POA 2026",
+    activity: "Gestion administrativa",
+    indicador: "Actualizacion de expedientes",
+    plantel: "Plantel Sur",
+    plantelId: "plantel-sur",
+    responsable: "Responsable Planeacion Demo",
+    responsableId: "resp-planeacion",
+    periodo: "2026-2",
+    meta: 50,
+    avance: 20,
+    estado: "borrador",
+    vencimiento: "atrasado",
+    evidencias: 0
+  },
+  {
+    id: "avance-005",
+    cycle: "POA 2026",
+    activity: "Vinculacion",
+    indicador: "Convenios activos",
+    plantel: "Plantel Norte",
+    plantelId: "plantel-norte",
+    responsable: "Responsable Planeacion Demo",
+    responsableId: "resp-planeacion",
+    periodo: "2026-1",
+    meta: 30,
+    avance: 18,
+    estado: "en_revision",
+    vencimiento: "en_tiempo",
     evidencias: 1
   }
 ];
@@ -165,21 +204,131 @@ export function runDemoAction(role: DemoRole, action: DemoAction) {
   };
 }
 
-export function demoReportCsv() {
-  const headers = ["ciclo", "periodo", "plantel", "actividad", "indicador", "responsable", "estado", "meta", "avance"];
-  const rows = demoProgress.map((item) => [
-    item.cycle,
-    item.periodo,
-    item.plantel,
-    item.activity,
-    item.indicador,
-    item.responsable,
-    item.estado,
-    String(item.meta),
-    String(item.avance)
-  ]);
+export function demoReportPayload(filters: DemoReportFilters = {}) {
+  const normalizedPlantel = normalizeFilter(filters.plantel);
+  const normalizedPlantelId = normalizeFilter(filters.plantelId);
+  const scopedProgress = demoProgress.filter((item) => {
+    const matchesPlantel =
+      !normalizedPlantel ||
+      normalizeFilter(item.plantel) === normalizedPlantel ||
+      normalizeFilter(item.plantelId) === normalizedPlantel;
+    const matchesPlantelId =
+      !normalizedPlantelId || normalizeFilter(item.plantelId) === normalizedPlantelId;
 
-  return [headers, ...rows].map((row) => row.map((value) => `"${value.replace(/"/g, '""')}"`).join(",")).join("\n");
+    return matchesPlantel && matchesPlantelId;
+  });
+  const isPlantelReport = Boolean(normalizedPlantel || normalizedPlantelId);
+  const identityName =
+    scopedProgress[0]?.plantel ??
+    filters.plantel ??
+    filters.plantelId ??
+    "DGEMS";
+  const cicloEscolar = filters.cicloEscolar ?? "2025-2026";
+
+  return {
+    tipoReporte: isPlantelReport ? "plantel" : "institucional",
+    periodo: filters.periodo ?? "2026-A",
+    cicloEscolar,
+    fechaGeneracion: new Date().toISOString().slice(0, 10),
+    identidadReporte: {
+      tipo: isPlantelReport ? "Plantel" : "Institucional",
+      nombre: isPlantelReport ? identityName : "DGEMS"
+    },
+    indicadores: groupReportIndicators(scopedProgress, cicloEscolar)
+  };
+}
+
+export function demoReportCsv(filters: DemoReportFilters = {}) {
+  const report = demoReportPayload(filters);
+  const headers = [
+    "tipo_reporte",
+    "periodo_reporte",
+    "ciclo_escolar",
+    "fecha_generacion",
+    "identidad_tipo",
+    "identidad_nombre",
+    "indicador",
+    "descripcion_indicador",
+    "registro_id",
+    "ciclo",
+    "periodo",
+    "plantel",
+    "actividad",
+    "responsable",
+    "estado",
+    "vencimiento",
+    "meta",
+    "avance",
+    "evidencias"
+  ];
+  const rows = report.indicadores.flatMap((indicador) =>
+    indicador.datos.map((dato) => [
+      report.tipoReporte,
+      report.periodo,
+      report.cicloEscolar,
+      report.fechaGeneracion,
+      report.identidadReporte.tipo,
+      report.identidadReporte.nombre,
+      indicador.nombre,
+      indicador.descripcion,
+      dato.id,
+      dato.ciclo,
+      dato.periodo,
+      dato.plantel,
+      dato.actividad,
+      dato.responsable,
+      dato.estado,
+      dato.vencimiento,
+      String(dato.meta),
+      dato.avance,
+      String(dato.evidencias)
+    ])
+  );
+
+  return [headers, ...rows].map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(",")).join("\n");
+}
+
+function groupReportIndicators(progress: DemoIndicatorProgress[], cicloEscolar: string) {
+  const indicators = new Map<string, { nombre: string; descripcion: string; datos: Array<Record<string, unknown>> }>();
+
+  for (const item of progress) {
+    const current = indicators.get(item.indicador) ?? {
+      nombre: item.indicador,
+      descripcion: `Registros capturados para ${item.indicador} en el ciclo escolar ${cicloEscolar}.`,
+      datos: []
+    };
+
+    current.datos.push({
+      id: item.id,
+      actividad: item.activity,
+      responsable: item.responsable,
+      estado: reportStatusLabel(item.estado),
+      avance: `${item.avance}%`,
+      plantel: item.plantel,
+      plantelId: item.plantelId,
+      periodo: item.periodo,
+      ciclo: item.cycle,
+      meta: item.meta,
+      evidencias: item.evidencias,
+      vencimiento: item.vencimiento
+    });
+    indicators.set(item.indicador, current);
+  }
+
+  return Array.from(indicators.values()).sort((a, b) =>
+    a.nombre.localeCompare(b.nombre, "es")
+  );
+}
+
+function reportStatusLabel(status: DemoIndicatorProgress["estado"]) {
+  const labels: Record<DemoIndicatorProgress["estado"], string> = {
+    aprobado: "Aprobado",
+    borrador: "Borrador",
+    en_revision: "Enviado",
+    observado: "Observado"
+  };
+
+  return labels[status];
 }
 
 function summarizeProgress() {
@@ -200,4 +349,8 @@ function summarizeProgress() {
 
 function uniqueSorted(values: string[]) {
   return Array.from(new Set(values)).sort((a, b) => a.localeCompare(b, "es"));
+}
+
+function normalizeFilter(value?: string) {
+  return value?.trim().toLowerCase();
 }

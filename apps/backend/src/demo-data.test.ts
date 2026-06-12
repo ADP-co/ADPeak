@@ -3,6 +3,7 @@ import {
   authenticateDemoUser,
   demoDatasetPayload,
   demoReportCsv,
+  demoReportPayload,
   demoRoleFlows,
   demoStatusPayload,
   publicDemoUsers,
@@ -87,8 +88,41 @@ describe("demo data", () => {
   it("exports a CSV report with the same demo dimensions", () => {
     const report = demoReportCsv();
 
-    expect(report).toContain('"plantel"');
+    expect(report).toContain('"indicador"');
     expect(report).toContain('"Plantel Norte"');
     expect(report).toContain('"vencimiento"');
+    expect(report).toContain('"Seguimiento academico"');
+    expect(report).toContain('"84%"');
+  });
+
+  it("exposes report indicators with complete nested records", () => {
+    const report = demoReportPayload({
+      now: new Date("2026-06-11T00:00:00.000Z"),
+      plantelId: "plantel-norte"
+    });
+
+    expect(report).toMatchObject({
+      tipoReporte: "plantel",
+      periodo: "2026-A",
+      cicloEscolar: "2025-2026",
+      fechaGeneracion: "2026-06-11",
+      identidadReporte: {
+        tipo: "Plantel",
+        nombre: "Plantel Norte"
+      }
+    });
+    expect(report.indicadores.length).toBeGreaterThan(0);
+    expect(report.indicadores.every((indicator) => indicator.datos.length > 0)).toBe(true);
+    expect(report.indicadores.flatMap((indicator) => indicator.datos)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          actividad: "Seguimiento academico",
+          avance: "84%",
+          estado: "Enviado",
+          plantel: "Plantel Norte",
+          responsable: "Responsable Indicador Demo"
+        })
+      ])
+    );
   });
 });

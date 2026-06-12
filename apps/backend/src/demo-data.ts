@@ -30,6 +30,47 @@ export type DemoIndicatorProgress = {
 
 export type DemoAction = "capture_submit" | "request_correction" | "approve";
 
+export type DemoReportRecord = {
+  id: string;
+  actividad: string;
+  responsable: string;
+  estado: "Borrador" | "Enviado" | "Observado" | "Aprobado";
+  avance: string;
+  plantel: string;
+  plantelId: string;
+  periodo: string;
+  ciclo: string;
+  meta: number;
+  evidencias: number;
+  vencimiento: "en_tiempo" | "atrasado";
+};
+
+export type DemoReportIndicator = {
+  nombre: string;
+  descripcion: string;
+  datos: DemoReportRecord[];
+};
+
+export type DemoReportPayload = {
+  tipoReporte: "plantel" | "institucional";
+  periodo: string;
+  cicloEscolar: string;
+  fechaGeneracion: string;
+  identidadReporte: {
+    tipo: "Plantel" | "Institucional";
+    nombre: string;
+  };
+  indicadores: DemoReportIndicator[];
+};
+
+export type DemoReportFilters = {
+  plantel?: string;
+  plantelId?: string;
+  periodo?: string;
+  cicloEscolar?: string;
+  now?: Date;
+};
+
 export const demoUsers: DemoUser[] = [
   {
     id: "demo-admin",
@@ -281,13 +322,56 @@ export function runDemoAction(role: DemoRole, action: DemoAction) {
   };
 }
 
-export function demoReportCsv() {
+export function demoReportPayload(filters: DemoReportFilters = {}): DemoReportPayload {
+  const normalizedPlantel = normalizeFilter(filters.plantel);
+  const normalizedPlantelId = normalizeFilter(filters.plantelId);
+  const scopedProgress = demoProgress.filter((item) => {
+    const matchesPlantel =
+      !normalizedPlantel ||
+      normalizeFilter(item.plantel) === normalizedPlantel ||
+      normalizeFilter(item.plantelId) === normalizedPlantel;
+    const matchesPlantelId =
+      !normalizedPlantelId || normalizeFilter(item.plantelId) === normalizedPlantelId;
+
+    return matchesPlantel && matchesPlantelId;
+  });
+  const isPlantelReport = Boolean(normalizedPlantel || normalizedPlantelId);
+  const identityName =
+    scopedProgress[0]?.plantel ??
+    filters.plantel ??
+    filters.plantelId ??
+    "DGEMS";
+  const cicloEscolar = filters.cicloEscolar ?? "2025-2026";
+
+  return {
+    tipoReporte: isPlantelReport ? "plantel" : "institucional",
+    periodo: filters.periodo ?? "2026-A",
+    cicloEscolar,
+    fechaGeneracion: (filters.now ?? new Date()).toISOString().slice(0, 10),
+    identidadReporte: {
+      tipo: isPlantelReport ? "Plantel" : "Institucional",
+      nombre: isPlantelReport ? identityName : "DGEMS"
+    },
+    indicadores: groupReportIndicators(scopedProgress, cicloEscolar)
+  };
+}
+
+export function demoReportCsv(filters: DemoReportFilters = {}) {
+  const report = demoReportPayload(filters);
   const headers = [
+    "tipo_reporte",
+    "periodo_reporte",
+    "ciclo_escolar",
+    "fecha_generacion",
+    "identidad_tipo",
+    "identidad_nombre",
+    "indicador",
+    "descripcion_indicador",
+    "registro_id",
     "ciclo",
     "periodo",
     "plantel",
     "actividad",
-    "indicador",
     "responsable",
     "estado",
     "vencimiento",
@@ -295,23 +379,83 @@ export function demoReportCsv() {
     "avance",
     "evidencias"
   ];
-  const rows = demoProgress.map((item) => [
-    item.cycle,
-    item.periodo,
-    item.plantel,
-    item.activity,
-    item.indicador,
-    item.responsable,
-    item.estado,
-    item.vencimiento,
-    String(item.meta),
-    String(item.avance),
-    String(item.evidencias)
-  ]);
+  const rows = report.indicadores.flatMap((indicador) =>
+    indicador.datos.map((dato) => [
+      report.tipoReporte,
+      report.periodo,
+      report.cicloEscolar,
+      report.fechaGeneracion,
+      report.identidadReporte.tipo,
+      report.identidadReporte.nombre,
+      indicador.nombre,
+      indicador.descripcion,
+      dato.id,
+      dato.ciclo,
+      dato.periodo,
+      dato.plantel,
+      dato.actividad,
+      dato.responsable,
+      dato.estado,
+      dato.vencimiento,
+      String(dato.meta),
+      dato.avance,
+      String(dato.evidencias)
+    ])
+  );
 
   return [headers, ...rows]
-    .map((row) => row.map((value) => `"${value.replace(/"/g, '""')}"`).join(","))
+    .map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(","))
     .join("\n");
+}
+
+function groupReportIndicators(
+  progress: DemoIndicatorProgress[],
+  cicloEscolar: string
+): DemoReportIndicator[] {
+  const indicators = new Map<string, DemoReportIndicator>();
+
+  for (const item of progress) {
+    const current = indicators.get(item.indicador) ?? {
+      nombre: item.indicador,
+      descripcion: `Registros capturados para ${item.indicador} en el ciclo escolar ${cicloEscolar}.`,
+      datos: []
+    };
+
+    current.datos.push({
+      id: item.id,
+      actividad: item.activity,
+      responsable: item.responsable,
+      estado: reportStatusLabel(item.estado),
+      avance: `${item.avance}%`,
+      plantel: item.plantel,
+      plantelId: item.plantelId,
+      periodo: item.periodo,
+      ciclo: item.cycle,
+      meta: item.meta,
+      evidencias: item.evidencias,
+      vencimiento: item.vencimiento
+    });
+    indicators.set(item.indicador, current);
+  }
+
+  return Array.from(indicators.values()).sort((a, b) =>
+    a.nombre.localeCompare(b.nombre, "es")
+  );
+}
+
+function reportStatusLabel(status: DemoIndicatorProgress["estado"]): DemoReportRecord["estado"] {
+  const labels: Record<DemoIndicatorProgress["estado"], DemoReportRecord["estado"]> = {
+    aprobado: "Aprobado",
+    borrador: "Borrador",
+    en_revision: "Enviado",
+    observado: "Observado"
+  };
+
+  return labels[status];
+}
+
+function normalizeFilter(value?: string) {
+  return value?.trim().toLowerCase();
 }
 
 function uniqueSorted(values: string[]) {

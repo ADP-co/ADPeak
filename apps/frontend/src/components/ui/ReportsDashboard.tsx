@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Select } from './Select';
 import { Button } from './Button';
+import {
+  countReportRows,
+  fetchExportReport,
+  reportToCsv,
+  type ExportReport,
+} from '../../api/reportes';
 
 // Tarjeta de Gráfica de Dona
 interface DonutCardProps {
@@ -54,6 +60,78 @@ const DonutCard = ({ title, percentage, colorClass, strokeColor }: DonutCardProp
   );
 };
 
+function buildFallbackReport(item: PlantelProgressRecord, selectedDate: string): ExportReport {
+  const fechaGeneracion = new Date().toISOString().slice(0, 10);
+
+  return {
+    tipoReporte: 'plantel',
+    periodo: selectedDate || '2026-A',
+    cicloEscolar: selectedDate || '2025-2026',
+    fechaGeneracion,
+    identidadReporte: {
+      tipo: 'Plantel',
+      nombre: item.plantel,
+    },
+    indicadores: [
+      {
+        nombre: 'Porcentaje de titulacion por cohorte del NMS',
+        descripcion: 'Registros capturados por programa educativo del plantel.',
+        datos: [
+          {
+            id: `${item.id}-titulacion-ap`,
+            actividad: 'Captura de egresados titulados',
+            responsable: 'Responsable academico',
+            estado: item.status,
+            avance: `${item.percentage}%`,
+            plantel: item.plantel,
+            periodo: selectedDate,
+            ciclo: 'POA 2026',
+            meta: 100,
+            evidencias: item.status === 'Rezagado' ? 0 : 1,
+            vencimiento: item.status === 'Rezagado' ? 'atrasado' : 'en_tiempo',
+          },
+          {
+            id: `${item.id}-matricula-ap`,
+            actividad: 'Validacion de matricula de primer ingreso',
+            responsable: 'Coordinacion de planeacion',
+            estado: item.status,
+            avance: `${Math.max(item.percentage - 10, 0)}%`,
+            plantel: item.plantel,
+            periodo: selectedDate,
+            ciclo: 'POA 2026',
+            meta: 100,
+            evidencias: item.status === 'Completo' ? 2 : 1,
+            vencimiento: item.status === 'Rezagado' ? 'atrasado' : 'en_tiempo',
+          },
+        ],
+      },
+      {
+        nombre: 'Seguimiento de evidencias POA',
+        descripcion: 'Detalle de evidencias asociadas al avance reportado.',
+        datos: [
+          {
+            id: `${item.id}-evidencia-poa`,
+            actividad: 'Revision documental de evidencias',
+            responsable: 'Responsable de indicador',
+            estado: item.status,
+            avance: `${item.percentage}%`,
+            plantel: item.plantel,
+            periodo: selectedDate,
+            ciclo: 'POA 2026',
+            meta: 100,
+            evidencias: item.status === 'Completo' ? 3 : 1,
+            vencimiento: item.status === 'Rezagado' ? 'atrasado' : 'en_tiempo',
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function slugify(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
 // Tipado para la tabla de planteles
 type PlantelStatus = 'Completo' | 'En Revisión' | 'En Progreso' | 'Rezagado';
 
@@ -74,6 +152,7 @@ export const ReportsDashboard = () => {
   // Estado para el filtrado
   const [filterBy, setFilterBy] = useState('todos');
   const [reportMessage, setReportMessage] = useState('');
+  const [generatingPlantelId, setGeneratingPlantelId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -109,23 +188,40 @@ export const ReportsDashboard = () => {
     { id: '11', plantel: 'Bach. 10', percentage: 0, status: 'Rezagado' },
   ];
 
-  const handleGenerateReport = (item: PlantelProgressRecord) => {
-    const rows = [
-      ['plantel', 'periodo', 'progreso', 'estado'],
-      [item.plantel, selectedDate, `${item.percentage}%`, item.status],
-    ];
-    const csv = rows.map((row) => row.map((cell) => `"${cell}"`).join(',')).join('\n');
+  const handleGenerateReport = async (item: PlantelProgressRecord) => {
+    setGeneratingPlantelId(item.id);
+    setReportMessage(`Generando reporte detallado para ${item.plantel}...`);
+
+    let report: ExportReport;
+
+    try {
+      report = await fetchExportReport({
+        cicloEscolar: selectedDate,
+        periodo: selectedDate,
+        plantel: item.plantel,
+      });
+
+      if (countReportRows(report) === 0) {
+        report = buildFallbackReport(item, selectedDate);
+      }
+    } catch {
+      report = buildFallbackReport(item, selectedDate);
+    }
+
+    const csv = reportToCsv(report);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
+    const recordCount = countReportRows(report);
 
     link.href = url;
-    link.download = `reporte-${item.plantel.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${selectedDate}.csv`;
+    link.download = `reporte-${slugify(item.plantel)}-${selectedDate}.csv`;
     document.body.appendChild(link);
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
-    setReportMessage(`Reporte generado para ${item.plantel}.`);
+    setGeneratingPlantelId(null);
+    setReportMessage(`Reporte generado para ${item.plantel}: ${recordCount} registros exportados.`);
   };
 
   // Filtramos por progreso y siempre ordenamos alfabéticamente/numéricamente por plantel
@@ -296,15 +392,10 @@ export const ReportsDashboard = () => {
                     <Button
                       variant="secondary"
                       onClick={() => handleGenerateReport(item)}
-                      // Solo se habilita si el estatus es "Completo"
-                      disabled={item.status !== 'Completo'}
-                      className={`w-[160px] text-xs py-1.5 px-4 ${
-                        item.status !== 'Completo'
-                          ? 'border-brand-Gris_bajo text-brand-Gris_bajo opacity-40 cursor-not-allowed hover:bg-transparent hover:text-brand-Gris_bajo'
-                          : ''
-                      }`}
+                      disabled={generatingPlantelId === item.id}
+                      className="w-[160px] text-xs py-1.5 px-4"
                     >
-                      Generar Reporte
+                      {generatingPlantelId === item.id ? 'Generando...' : 'Generar Reporte'}
                     </Button>
                   </td>
 

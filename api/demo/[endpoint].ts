@@ -2,6 +2,7 @@ import {
   authenticateDemoUser,
   demoDatasetPayload,
   demoReportCsv,
+  demoReportPayload,
   demoRoleFlows,
   demoStatusPayload,
   publicDemoUsers,
@@ -39,9 +40,14 @@ export default async function handler(request: any, response: any) {
       return;
     }
 
+    if (endpoint === "report") {
+      response.status(200).json(demoReportPayload(reportFiltersFromQuery(request.query ?? {})));
+      return;
+    }
+
     if (endpoint === "report.csv") {
       response.setHeader("Content-Type", "text/csv; charset=utf-8");
-      response.status(200).send(demoReportCsv());
+      response.status(200).send(demoReportCsv(reportFiltersFromQuery(request.query ?? {})));
       return;
     }
 
@@ -88,4 +94,17 @@ export default async function handler(request: any, response: any) {
   }
 
   methodNotAllowed(response, ["GET", "POST", "OPTIONS"]);
+}
+
+function reportFiltersFromQuery(query: Record<string, unknown>) {
+  return {
+    cicloEscolar: queryValue(query.cicloEscolar),
+    periodo: queryValue(query.periodo),
+    plantel: queryValue(query.plantel),
+    plantelId: queryValue(query.plantelId)
+  };
+}
+
+function queryValue(value: unknown) {
+  return Array.isArray(value) ? String(value[0] ?? "") : typeof value === "string" ? value : undefined;
 }

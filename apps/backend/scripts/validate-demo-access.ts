@@ -24,6 +24,7 @@ const frontendUrl = config.publicAppUrl;
 await requireOk(`${apiUrl}/health`, "API healthcheck");
 await requireOk(`${apiUrl}/demo/status`, "API demo status");
 await requireOk(`${apiUrl}/demo/data`, "API demo data");
+await requireReportPayload(`${apiUrl}/demo/report`);
 await requireOk(`${apiUrl}/demo/report.csv`, "Reporte CSV demo");
 
 for (const user of publicDemoUsers()) {
@@ -69,6 +70,28 @@ async function requireOk(url: string, label: string) {
 
   if (!response.ok) {
     console.error(`${label} no responde correctamente: ${response.status} ${url}`);
+    process.exit(1);
+  }
+}
+
+async function requireReportPayload(url: string) {
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    console.error(`Reporte JSON demo no responde correctamente: ${response.status} ${url}`);
+    process.exit(1);
+  }
+
+  const report = (await response.json()) as {
+    indicadores?: Array<{ datos?: unknown[] }>;
+  };
+
+  if (
+    !Array.isArray(report.indicadores) ||
+    report.indicadores.length === 0 ||
+    report.indicadores.some((indicator) => !Array.isArray(indicator.datos))
+  ) {
+    console.error("Reporte JSON demo no incluye indicadores[].datos[].");
     process.exit(1);
   }
 }
