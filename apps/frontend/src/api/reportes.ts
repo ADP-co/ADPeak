@@ -1,3 +1,5 @@
+import { API_BASE_URL, API_REQUESTS_ENABLED, sessionHeaders } from './client';
+
 export type ReportDataRow = {
   id?: string;
   actividad: string;
@@ -39,6 +41,10 @@ export type ReportRequest = {
 };
 
 export async function fetchExportReport(request: ReportRequest) {
+  if (!API_REQUESTS_ENABLED) {
+    throw new Error('api_unavailable');
+  }
+
   const url = new URL(`${API_BASE_URL}/reportes`, window.location.origin);
 
   for (const [key, value] of Object.entries(request)) {
@@ -402,4 +408,3 @@ function buildRecordDetails(dataRow: ReportDataRow) {
 
   return details.length > 0 ? `  ${details.join(' | ')}` : '';
 }
-import { API_BASE_URL, sessionHeaders } from './client';

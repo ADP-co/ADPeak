@@ -6,6 +6,7 @@ const configuredApiUrl =
 
 export const API_BASE_URL = (configuredApiUrl ?? '/api/v1').replace(/\/$/, '');
 export const API_ORIGIN = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
+export const API_REQUESTS_ENABLED = Boolean(configuredApiUrl) || !isStaticPublishedHost();
 
 type StoredSession = {
   id?: string;
@@ -39,6 +40,10 @@ export function sessionHeaders() {
 }
 
 export async function apiJson<T>(path: string, init: RequestInit = {}) {
+  if (!API_REQUESTS_ENABLED) {
+    throw new Error('api_unavailable');
+  }
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
     headers: {
@@ -53,6 +58,14 @@ export async function apiJson<T>(path: string, init: RequestInit = {}) {
   }
 
   return response.json() as Promise<T>;
+}
+
+function isStaticPublishedHost() {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  return window.location.hostname.endsWith('github.io');
 }
 
 function defaultUserId(role: string) {
