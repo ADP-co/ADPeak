@@ -6,9 +6,20 @@ import { Button } from './Button';
 interface PasswordFieldProps {
   label: string;
   placeholder?: string;
+  value: string;
+  onChange: (value: string) => void;
+  autoComplete?: string;
+  error?: string;
 }
 
-const PasswordField = ({ label, placeholder = '••••••••' }: PasswordFieldProps) => {
+const PasswordField = ({
+  label,
+  placeholder = '••••••••',
+  value,
+  onChange,
+  autoComplete,
+  error,
+}: PasswordFieldProps) => {
   // Estado para alternar entre texto visible y oculto
   const [showPassword, setShowPassword] = useState(false);
 
@@ -21,6 +32,9 @@ const PasswordField = ({ label, placeholder = '••••••••' }: Pass
         <input
           type={showPassword ? 'text' : 'password'}
           placeholder={placeholder}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          autoComplete={autoComplete}
           className="w-full h-10 pl-3 pr-10 rounded-md border border-brand-Gris_bajo/50 focus:outline-none focus:border-brand-Verde_oscuro focus:ring-1 focus:ring-brand-Verde_oscuro font-body text-sm text-brand-Gris_oscuro bg-brand-Blanco transition-colors"
         />
         {/* Botón del ojito posicionado de forma absoluta a la derecha */}
@@ -32,6 +46,11 @@ const PasswordField = ({ label, placeholder = '••••••••' }: Pass
           {showPassword ? <Eye size={20} strokeWidth={2} /> : <EyeOff size={20} strokeWidth={2} />}
         </button>
       </div>
+      {error && (
+        <span className="text-xs font-body font-semibold text-brand-Status_rojo">
+          {error}
+        </span>
+      )}
     </div>
   );
 };
@@ -45,6 +64,35 @@ export const AccountProfile = ({ onBack }: AccountProfileProps) => {
   // Extraemos los datos del usuario logeado desde el AuthContext
   const { user } = useAuth();
   const [saveMessage, setSaveMessage] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const handleSavePassword = () => {
+    setSaveMessage('');
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordError('Completa los tres campos de contraseña.');
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setPasswordError('La nueva contraseña debe tener al menos 8 caracteres.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError('La confirmación no coincide con la nueva contraseña.');
+      return;
+    }
+
+    setPasswordError('');
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setSaveMessage('Contraseña actualizada para la sesión actual.');
+  };
 
   return (
     <div className="w-full max-w-[900px] mx-auto pt-8 pb-10">
@@ -105,13 +153,28 @@ export const AccountProfile = ({ onBack }: AccountProfileProps) => {
             <PasswordField
               label="Contraseña"
               placeholder="Escribe Aquí"
+              value={currentPassword}
+              onChange={setCurrentPassword}
+              autoComplete="current-password"
             />
             <PasswordField
               label="Nueva Contraseña"
+              value={newPassword}
+              onChange={setNewPassword}
+              autoComplete="new-password"
+              error={passwordError && newPassword !== confirmPassword ? passwordError : undefined}
             />
             <PasswordField
               label="Confirmar Nueva Contraseña"
+              value={confirmPassword}
+              onChange={setConfirmPassword}
+              autoComplete="new-password"
             />
+            {passwordError && newPassword === confirmPassword && (
+              <p className="text-xs font-body font-semibold text-brand-Status_rojo">
+                {passwordError}
+              </p>
+            )}
           </div>
 
           {/* Botón de Guardar */}
@@ -122,7 +185,7 @@ export const AccountProfile = ({ onBack }: AccountProfileProps) => {
           )}
 
           <div className="mt-4 flex justify-end">
-            <Button variant="primary" onClick={() => setSaveMessage('Contrasena actualizada para la sesion actual.')} className="text-sm px-8 py-2.5">
+            <Button variant="primary" onClick={handleSavePassword} className="text-sm px-8 py-2.5">
               Guardar Contraseña
             </Button>
           </div>

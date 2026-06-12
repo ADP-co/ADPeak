@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from './Button';
@@ -12,6 +12,24 @@ export const Login = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [role, setRole] = useState<'admin' | 'plantel' | 'responsable'>('admin');
+
+  useEffect(() => {
+    const normalizedUsername = username.trim().toLowerCase();
+
+    if (normalizedUsername.includes('plantel') || normalizedUsername.includes('bach')) {
+      setRole('plantel');
+      return;
+    }
+
+    if (normalizedUsername.includes('responsable')) {
+      setRole('responsable');
+      return;
+    }
+
+    if (normalizedUsername.includes('admin') || normalizedUsername.includes('director')) {
+      setRole('admin');
+    }
+  }, [username]);
 
   const roleProfiles = {
     admin: {
@@ -27,6 +45,7 @@ export const Login = () => {
       redirectTo: '/revision'
     },
   } as const;
+  const detectedRoleLabel = roleProfiles[role].description;
 
   const handleLogin = (e: FormEvent) => {
     e.preventDefault();
@@ -91,20 +110,14 @@ export const Login = () => {
             type="password"
             placeholder="Ingrese su contraseña..."
           />
-          <label className="block">
-            <span className="block text-sm font-semibold text-brand-Gris_oscuro font-body mb-1">
-              Rol
+          <div className="rounded-md border border-brand-Verde_principal/30 bg-brand-Verde_principal/10 px-3 py-2">
+            <span className="block text-xs font-semibold uppercase text-brand-Verde_oscuro font-body">
+              Rol detectado
             </span>
-            <select
-              value={role}
-              onChange={(event) => setRole(event.target.value as 'admin' | 'plantel' | 'responsable')}
-              className="w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro font-body bg-brand-Blanco outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal"
-            >
-              <option value="admin">Administrador</option>
-              <option value="plantel">Plantel</option>
-              <option value="responsable">Responsable</option>
-            </select>
-          </label>
+            <span className="block text-sm font-bold text-brand-Gris_oscuro font-body">
+              {detectedRoleLabel}
+            </span>
+          </div>
           <Button type="submit" className="w-full mt-4">
             Ingresar
           </Button>

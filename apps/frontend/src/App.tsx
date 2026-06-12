@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useParams, Outlet } from 'react-router-dom';
+import { useMemo, useState } from 'react';
 import { Navbar } from './components/layout/Navbar';
 import { UserBanner } from './components/layout/UserBanner';
 import { IndicatorForm, type FormSubmission } from './components/forms/IndicatorForm';
@@ -18,6 +19,7 @@ import { Toaster, toast } from 'sonner';
 import { useCaptureDraft } from './hooks/useCaptureDraft';
 
 const mockupIndicators: Indicator[] = [
+    { code: '1.0.0.0.2', name: 'Porcentaje de titulacion por cohorte del NMS', status: 'Pendiente' },
     { code: '1.1.0.0.1', name: 'Porcentaje de cobertura en educacion media superior', status: 'Corregir' },
     { code: '1.1.1.0.1', name: 'Porcentaje de aceptacion en educacion media superior', status: 'Corregir' },
     { code: '1.1.1.1.1', name: 'Porcentaje de programas educativos de educacion media superior nuevos', status: 'Pendiente' },
@@ -95,11 +97,21 @@ const mockupIndicators: Indicator[] = [
     },
   ];
 
-  const completedCount = mockupIndicators.filter(
-    (indicator) => indicator.status === 'Aprobado' || indicator.status === 'En revisión'
-  ).length;
+const INDICATOR_STATUS_STORAGE_KEY = 'adpeak.indicator.statuses';
 
-function IndicatorFormWrapper() {
+function readIndicatorStatusOverrides() {
+  try {
+    return JSON.parse(window.localStorage.getItem(INDICATOR_STATUS_STORAGE_KEY) ?? '{}') as Record<string, Indicator['status']>;
+  } catch {
+    return {};
+  }
+}
+
+interface IndicatorFormWrapperProps {
+  onIndicatorStatusChange?: (code: string, status: Indicator['status']) => void;
+}
+
+function IndicatorFormWrapper({ onIndicatorStatusChange }: IndicatorFormWrapperProps) {
   const { code } = useParams();
   const navigate = useNavigate();
 
@@ -120,12 +132,13 @@ function IndicatorFormWrapper() {
   const handleSaveDraft = (data: FormSubmission) => {
     captureDraft.saveDraft({ rows: data.rows });
     toast.success('Borrador guardado', {
-      description: 'Tu progreso se esta guardando en el backend.'
+      description: 'Tu progreso se está guardando en el sistema.'
     });
   };
 
   const handleSendReview = (data: FormSubmission) => {
     captureDraft.sendToReview({ rows: data.rows });
+    onIndicatorStatusChange?.(code ?? template1_0_0_0_2.indicatorCode, 'En revisión');
     toast.success('Enviado a revision', {
       description: 'Los datos se enviaron al flujo de revision.'
     });
@@ -192,9 +205,32 @@ function ProtectedLayout() {
 function AppContent() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [indicatorStatusOverrides, setIndicatorStatusOverrides] = useState<Record<string, Indicator['status']>>(
+    () => readIndicatorStatusOverrides()
+  );
+  const indicators = useMemo(
+    () =>
+      mockupIndicators.map((indicator) => ({
+        ...indicator,
+        status: indicatorStatusOverrides[indicator.code] ?? indicator.status,
+      })),
+    [indicatorStatusOverrides]
+  );
+  const completedIndicatorCount = useMemo(
+    () => indicators.filter((indicator) => indicator.status === 'Aprobado' || indicator.status === 'En revisión').length,
+    [indicators]
+  );
 
   const handleSelectIndicator = (code: string) => {
     navigate(`/indicadores/captura/${code}`);
+  };
+
+  const handleIndicatorStatusChange = (code: string, status: Indicator['status']) => {
+    setIndicatorStatusOverrides((current) => {
+      const next = { ...current, [code]: status };
+      window.localStorage.setItem(INDICATOR_STATUS_STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
   };
 
   const role = user?.role || 'plantel'; // Fallback por defecto
@@ -233,15 +269,18 @@ function AppContent() {
               <IndicatorsManagementTable onEditIndicator={handleSelectIndicator} />
             ) : (
               <>
-                <ProgressBar totalIndicators={mockupIndicators.length} completedIndicators={completedCount} />
-                <IndicatorsTable indicators={mockupIndicators} onSelectIndicator={handleSelectIndicator} />
+                <ProgressBar totalIndicators={indicators.length} completedIndicators={completedIndicatorCount} />
+                <IndicatorsTable indicators={indicators} onSelectIndicator={handleSelectIndicator} />
               </>
             )
           } />
         )}
 
         {/* Formulario de captura accesible para quienes tengan acceso a indicadores */}
-        <Route path="/indicadores/captura/:code" element={<IndicatorFormWrapper />} />
+        <Route
+          path="/indicadores/captura/:code"
+          element={<IndicatorFormWrapper onIndicatorStatusChange={handleIndicatorStatusChange} />}
+        />
 
         {/* Vistas compartidas para todos */}
         <Route path="/reportes" element={<ReportsDashboard />} />

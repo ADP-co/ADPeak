@@ -117,6 +117,7 @@ export const Dashboard = ({ onSelectIndicator }: DashboardProps) => {
 
   // Datos simulados idénticos a tu imagen
   const DataIndicators: Indicator[] = [
+    { code: '1.0.0.0.2', name: 'Porcentaje de titulación por cohorte del NMS', status: 'Pendiente' },
     { code: '1.1.0.0.1', name: 'Porcentaje de cobertura en educación media superior', status: 'En revisión' },
     { code: '1.1.1.0.1', name: 'Porcentaje de aceptación en educación media superior', status: 'En revisión' },
     { code: '1.1.1.1.1', name: 'Porcentaje de programas educativos de educación media superior nuevos', status: 'En revisión' },

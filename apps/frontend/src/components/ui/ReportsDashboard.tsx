@@ -5,6 +5,7 @@ import {
   countReportRows,
   fetchExportReport,
   reportToCsv,
+  reportToPdfBlob,
   type ExportReport,
 } from '../../api/reportes';
 
@@ -152,7 +153,7 @@ export const ReportsDashboard = () => {
   // Estado para el filtrado
   const [filterBy, setFilterBy] = useState('todos');
   const [reportMessage, setReportMessage] = useState('');
-  const [generatingPlantelId, setGeneratingPlantelId] = useState<string | null>(null);
+  const [generatingDocumentId, setGeneratingDocumentId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -188,40 +189,59 @@ export const ReportsDashboard = () => {
     { id: '11', plantel: 'Bach. 10', percentage: 0, status: 'Rezagado' },
   ];
 
-  const handleGenerateReport = async (item: PlantelProgressRecord) => {
-    setGeneratingPlantelId(item.id);
+  const loadReport = async (item: PlantelProgressRecord) => {
     setReportMessage(`Generando reporte detallado para ${item.plantel}...`);
 
-    let report: ExportReport;
-
     try {
-      report = await fetchExportReport({
+      const report = await fetchExportReport({
         cicloEscolar: selectedDate,
         periodo: selectedDate,
         plantel: item.plantel,
       });
 
       if (countReportRows(report) === 0) {
-        report = buildFallbackReport(item, selectedDate);
+        return buildFallbackReport(item, selectedDate);
       }
-    } catch {
-      report = buildFallbackReport(item, selectedDate);
-    }
 
-    const csv = reportToCsv(report);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      return report;
+    } catch {
+      return buildFallbackReport(item, selectedDate);
+    }
+  };
+
+  const downloadDocument = (blob: Blob, filename: string) => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    const recordCount = countReportRows(report);
 
     link.href = url;
-    link.download = `reporte-${slugify(item.plantel)}-${selectedDate}.csv`;
+    link.download = filename;
     document.body.appendChild(link);
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
-    setGeneratingPlantelId(null);
-    setReportMessage(`Reporte generado para ${item.plantel}: ${recordCount} registros exportados.`);
+  };
+
+  const handleGenerateCsv = async (item: PlantelProgressRecord) => {
+    setGeneratingDocumentId(`${item.id}:csv`);
+    const report = await loadReport(item);
+    const csv = reportToCsv(report);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const recordCount = countReportRows(report);
+
+    downloadDocument(blob, `reporte-${slugify(item.plantel)}-${selectedDate}.csv`);
+    setGeneratingDocumentId(null);
+    setReportMessage(`CSV generado para ${item.plantel}: ${recordCount} registros exportados.`);
+  };
+
+  const handleGeneratePdf = async (item: PlantelProgressRecord) => {
+    setGeneratingDocumentId(`${item.id}:pdf`);
+    const report = await loadReport(item);
+    const pdf = reportToPdfBlob(report);
+    const recordCount = countReportRows(report);
+
+    downloadDocument(pdf, `reporte-${slugify(item.plantel)}-${selectedDate}.pdf`);
+    setGeneratingDocumentId(null);
+    setReportMessage(`PDF generado para ${item.plantel}: ${recordCount} registros documentados.`);
   };
 
   // Filtramos por progreso y siempre ordenamos alfabéticamente/numéricamente por plantel
@@ -369,7 +389,7 @@ export const ReportsDashboard = () => {
               <tr className="bg-brand-Gris_bajo/35 text-brand-Gris_oscuro font-title font-bold text-sm select-none border-b border-brand-Gris_bajo/20">
                 <th className="py-4 px-6 w-[20%] text-left">Plantel</th>
                 <th className="py-4 px-6 w-[55%]">Progreso</th>
-                <th className="py-4 px-6 w-[25%]">Acción</th>
+                <th className="py-4 px-6 w-[25%]">Documentos</th>
               </tr>
             </thead>
 
@@ -387,16 +407,26 @@ export const ReportsDashboard = () => {
                     {renderProgressBar(item)}
                   </td>
 
-                  {/* Botón de Acción */}
+                  {/* Botones de documentos */}
                   <td className="py-4 px-6">
-                    <Button
-                      variant="secondary"
-                      onClick={() => handleGenerateReport(item)}
-                      disabled={generatingPlantelId === item.id}
-                      className="w-[160px] text-xs py-1.5 px-4"
-                    >
-                      {generatingPlantelId === item.id ? 'Generando...' : 'Generar Reporte'}
-                    </Button>
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                      <Button
+                        variant="secondary"
+                        onClick={() => handleGenerateCsv(item)}
+                        disabled={generatingDocumentId === `${item.id}:csv`}
+                        className="w-[78px] text-xs py-1.5 px-3"
+                      >
+                        {generatingDocumentId === `${item.id}:csv` ? '...' : 'CSV'}
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        onClick={() => handleGeneratePdf(item)}
+                        disabled={generatingDocumentId === `${item.id}:pdf`}
+                        className="w-[78px] text-xs py-1.5 px-3"
+                      >
+                        {generatingDocumentId === `${item.id}:pdf` ? '...' : 'PDF'}
+                      </Button>
+                    </div>
                   </td>
 
                 </tr>

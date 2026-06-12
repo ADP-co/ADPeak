@@ -4,6 +4,11 @@ import LogoUdec from '../../assets/logo-udec.svg';
 
 export const Navbar = () => {
   const { logout } = useAuth();
+  const handleLogout = () => {
+    if (window.confirm('¿Deseas cerrar la sesión actual?')) {
+      logout();
+    }
+  };
 
   return (
     // Fondo
@@ -31,9 +36,10 @@ export const Navbar = () => {
         {/* Extremo Derecho: Botón de Cerrar Sesión */}
         <div className="flex items-center">
           <button
-            onClick={() => logout()}
+            onClick={handleLogout}
             className="p-2 text-brand-Gris_oscuro hover:text-brand-Status_rojo transition-colors duration-200 rounded-md hover:bg-brand-Fondo cursor-pointer"
             title="Cerrar sesión"
+            aria-label="Cerrar sesión"
           >
             <LogOut size={22} strokeWidth={2} />
           </button>

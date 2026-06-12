@@ -55,7 +55,7 @@ export const UserBanner = ({ role, name, description, onNavigate, currentView }:
             <span className="font-title text-sm font-bold leading-tight underline-offset-4 group-hover:underline">
               {name}
             </span>
-            {role !== 'plantel' && description && (
+            {description && (
               <span className="font-body text-xs text-brand-Blanco/80 leading-tight mt-0.5">
                 {description}
               </span>

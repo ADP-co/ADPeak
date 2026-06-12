@@ -85,7 +85,7 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
     }
 
     if (saveDraftMutation.isSuccess) {
-      return `Borrador guardado. Captura #${saveDraftMutation.data.id}, version ${saveDraftMutation.data.versionActual}.`;
+      return `Borrador guardado en el sistema. Captura #${saveDraftMutation.data.id}, version ${saveDraftMutation.data.versionActual}.`;
     }
 
     if (captureQuery.data) {
