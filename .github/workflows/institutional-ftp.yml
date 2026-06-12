@@ -1,0 +1,69 @@
+name: Deploy ADPeak to Institutional FTP
+
+on:
+  workflow_dispatch:
+    inputs:
+      server_dir:
+        description: FTP target directory
+        required: true
+        default: adpeak/
+      base_path:
+        description: Public base path
+        required: true
+        default: /adpeak/
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout develop
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify repository
+        run: npm run check
+
+      - name: Build frontend for institutional subdirectory
+        run: npm --workspace @adpeak/frontend run build
+        env:
+          VITE_BASE_PATH: ${{ inputs.base_path }}
+          VITE_API_DISABLED: "true"
+
+      - name: Add Apache SPA fallback
+        shell: bash
+        run: |
+          cp apps/frontend/dist/index.html apps/frontend/dist/404.html
+          cat > apps/frontend/dist/.htaccess <<'HTACCESS'
+          <IfModule mod_rewrite.c>
+          RewriteEngine On
+          RewriteBase ${{ inputs.base_path }}
+          RewriteRule ^index\.html$ - [L]
+          RewriteCond %{REQUEST_FILENAME} !-f
+          RewriteCond %{REQUEST_FILENAME} !-d
+          RewriteRule . ${{ inputs.base_path }}index.html [L]
+          </IfModule>
+          HTACCESS
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.INSTITUTIONAL_FTP_HOST }}
+          username: ${{ secrets.INSTITUTIONAL_FTP_USER }}
+          password: ${{ secrets.INSTITUTIONAL_FTP_PASSWORD }}
+          local-dir: apps/frontend/dist/
+          server-dir: ${{ inputs.server_dir }}
+          protocol: ftp
+          dangerous-clean-slate: false
