@@ -218,7 +218,7 @@ export const Dashboard = ({ onSelectIndicator }: DashboardProps) => {
       </div>
 
       {/*Tabla de Indicadores */}
-      <IndicatorsTable indicators={scopedIndicators} onSelectIndicator={onSelectIndicator} />
+      <IndicatorsTable indicators={scopedIndicators} onSelectIndicator={onSelectIndicator} showScopeColumns={false} />
 
     </div>
   );

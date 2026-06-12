@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from './Button';
 import { Select } from './Select';
+import { useAuth } from '../../context/AuthContext';
 
 // Estados posibles de los Indicadores
 export type IndicatorStatus = 'Corregir' | 'Pendiente' | 'En revisión' | 'Aprobado';
@@ -19,15 +20,17 @@ export interface Indicator {
 interface IndicatorsTableProps {
   indicators: Indicator[];
   onSelectIndicator?: (code: string) => void;
+  showScopeColumns?: boolean;
 }
 
-export const IndicatorsTable = ({ indicators, onSelectIndicator }: IndicatorsTableProps) => {
+export const IndicatorsTable = ({ indicators, onSelectIndicator, showScopeColumns = true }: IndicatorsTableProps) => {
 
   const [filter, setFilter] = useState<string>('todos');
 
   // Estados para simular la carga del periodo
   const [dateOptions, setDateOptions] = useState<{value: string, label: string}[]>([{ value: '', label: 'Cargando...' }]);
   const [selectedDate, setSelectedDate] = useState('');
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -57,6 +60,11 @@ export const IndicatorsTable = ({ indicators, onSelectIndicator }: IndicatorsTab
 
   // Función para determinar el texto del botón de acción según el estatus
   const getActionLabel = (status: IndicatorStatus) => {
+    const isRestrictedRole = user?.role === 'admin' || user?.role === 'responsable';
+    if (isRestrictedRole && (status === 'Corregir' || status === 'Pendiente')) {
+      return 'Ver Datos';
+    }
+
     if (status === 'Corregir') return 'Modificar Datos';
     if (status === 'Pendiente') return 'Nueva Captura';
     return 'Ver Datos'; // Para En revisión y Aprobado
@@ -64,6 +72,11 @@ export const IndicatorsTable = ({ indicators, onSelectIndicator }: IndicatorsTab
 
   const getPlantelLabel = (indicator: Indicator) => indicator.plantel ?? indicator.contribuidor ?? 'Sin asignar';
   const getSupervisorLabel = (indicator: Indicator) => indicator.supervisor ?? indicator.responsable ?? 'Sin asignar';
+
+  const isActionDisabled = (status: IndicatorStatus) => {
+    const isRestrictedRole = user?.role === 'admin' || user?.role === 'responsable';
+    return isRestrictedRole && (status === 'Corregir' || status === 'Pendiente');
+  };
 
   // Mapeo de prioridad para ordenar por estatus cuando el filtro es "todos"
   const statusPriority: Record<IndicatorStatus, number> = {
@@ -120,17 +133,21 @@ export const IndicatorsTable = ({ indicators, onSelectIndicator }: IndicatorsTab
         {/* Tarjeta blanca contenedora de la tabla */}
         <div className="bg-brand-Blanco rounded-lg shadow-md overflow-hidden border border-brand-Gris_bajo/20">
         <div className="w-full overflow-x-auto">
-          <table className="w-full min-w-[1040px] border-collapse text-left">
+          <table className={`w-full border-collapse text-left ${showScopeColumns ? 'min-w-[1040px]' : ''}`}>
 
             {/* Cabecera de la tabla con fondo gris claro al 35% de opacidad */}
             <thead>
               <tr className="bg-brand-Gris_bajo/35 text-brand-Gris_oscuro font-title font-bold text-sm select-none">
-                <th className="py-4 px-6 w-[12%] text-center">Código</th>
-                <th className="py-4 px-6 w-[34%]">Nombre</th>
-                <th className="py-4 px-6 w-[14%] text-center">Plantel</th>
-                <th className="py-4 px-6 w-[14%] text-center">Supervisor</th>
-                <th className="py-4 px-6 w-[12%] text-center">Estatus</th>
-                <th className="py-4 px-6 w-[14%] text-center">Acción</th>
+                <th className={`py-4 px-6 text-center ${showScopeColumns ? 'w-[12%]' : 'w-[15%]'}`}>Código</th>
+                <th className={`py-4 px-6 ${showScopeColumns ? 'w-[34%]' : 'w-[50%]'}`}>Nombre</th>
+                {showScopeColumns && (
+                  <>
+                    <th className="py-4 px-6 w-[14%] text-center">Plantel</th>
+                    <th className="py-4 px-6 w-[14%] text-center">Supervisor</th>
+                  </>
+                )}
+                <th className={`py-4 px-6 text-center ${showScopeColumns ? 'w-[12%]' : 'w-[15%]'}`}>Estatus</th>
+                <th className={`py-4 px-6 text-center ${showScopeColumns ? 'w-[14%]' : 'w-[20%]'}`}>Acción</th>
               </tr>
             </thead>
 
@@ -151,13 +168,17 @@ export const IndicatorsTable = ({ indicators, onSelectIndicator }: IndicatorsTab
                     {indicator.name}
                   </td>
 
-                  <td className="py-4 px-6 text-center font-medium text-brand-Gris_oscuro/80">
-                    {getPlantelLabel(indicator)}
-                  </td>
+                  {showScopeColumns && (
+                    <>
+                      <td className="py-4 px-6 text-center font-medium text-brand-Gris_oscuro/80">
+                        {getPlantelLabel(indicator)}
+                      </td>
 
-                  <td className="py-4 px-6 text-center font-medium text-brand-Gris_oscuro/80">
-                    {getSupervisorLabel(indicator)}
-                  </td>
+                      <td className="py-4 px-6 text-center font-medium text-brand-Gris_oscuro/80">
+                        {getSupervisorLabel(indicator)}
+                      </td>
+                    </>
+                  )}
 
                   {/* Estatus (Badge estilizado) */}
                   <td className="py-4 px-6 text-center whitespace-nowrap">
@@ -171,7 +192,8 @@ export const IndicatorsTable = ({ indicators, onSelectIndicator }: IndicatorsTab
                     <Button
                       variant="secondary"
                       onClick={() => onSelectIndicator && onSelectIndicator(indicator.code)}
-                      className="w-[135px] text-xs py-1.5 px-4">
+                      disabled={isActionDisabled(indicator.status)}
+                      className="w-[135px] text-xs py-1.5 px-4 disabled:opacity-50 disabled:cursor-not-allowed">
                       {getActionLabel(indicator.status)}
                     </Button>
                   </td>
