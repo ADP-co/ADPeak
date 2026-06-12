@@ -63,6 +63,8 @@ jobs:
           HTACCESS
 
       - name: Deploy via FTP
+        id: ftp_deploy
+        continue-on-error: true
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           server: ${{ secrets.INSTITUTIONAL_FTP_HOST }}
@@ -72,3 +74,48 @@ jobs:
           server-dir: ${{ env.INSTITUTIONAL_SERVER_DIR }}
           protocol: ftp
           dangerous-clean-slate: false
+
+      - name: Deploy via SSH fallback
+        if: steps.ftp_deploy.outcome == 'failure'
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.INSTITUTIONAL_FTP_HOST }}
+          SSH_USER: ${{ secrets.INSTITUTIONAL_SSH_USER }}
+          SSHPASS: ${{ secrets.INSTITUTIONAL_SSH_PASSWORD }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sshpass
+
+          remote_base="${INSTITUTIONAL_SERVER_DIR%/}"
+          candidates=(
+            "public_html/${remote_base}"
+            "www/${remote_base}"
+            "htdocs/${remote_base}"
+            "html/${remote_base}"
+            "${remote_base}"
+          )
+          remote_dir=""
+
+          for candidate in "${candidates[@]}"; do
+            if timeout 35 sshpass -e ssh \
+              -o StrictHostKeyChecking=no \
+              -o UserKnownHostsFile=/dev/null \
+              -o ConnectTimeout=20 \
+              "${SSH_USER}@${SSH_HOST}" \
+              "mkdir -p '${candidate}' && test -d '${candidate}'"; then
+              remote_dir="${candidate}"
+              break
+            fi
+          done
+
+          if [ -z "${remote_dir}" ]; then
+            echo "No SSH target directory could be prepared."
+            exit 1
+          fi
+
+          tar -C apps/frontend/dist -czf - . | timeout 90 sshpass -e ssh \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            -o ConnectTimeout=20 \
+            "${SSH_USER}@${SSH_HOST}" \
+            "tar -xzf - -C '${remote_dir}'"
