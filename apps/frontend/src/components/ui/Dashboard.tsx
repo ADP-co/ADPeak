@@ -132,16 +132,24 @@ export const Dashboard = ({ onSelectIndicator }: DashboardProps) => {
   ];
 
   const statusSequence: Indicator['status'][] = ['Corregir', 'Pendiente', 'En revisión', 'Aprobado'];
-  const scopedIndicators = selectedPlantel && selectedPlantel !== 'todos'
-    ? DataIndicators.map((indicator, index) => {
-        const plantelNumber = Number(selectedPlantel.replace(/\D/g, '')) || 0;
-        const dateOffset = selectedDate === '2024-2025' ? 1 : 0;
-        return {
-          ...indicator,
-          status: statusSequence[(index + plantelNumber + dateOffset) % statusSequence.length],
-        };
-      })
-    : DataIndicators;
+  const selectedPlantelLabel = plantelOptions.find((option) => option.value === selectedPlantel)?.label ?? 'Todos';
+  const visiblePlantel = selectedPlantel && selectedPlantel !== 'todos' ? selectedPlantelLabel : 'Todos los planteles';
+  const scopedIndicators = DataIndicators.map((indicator, index) => {
+    const plantelNumber = Number(selectedPlantel.replace(/\D/g, '')) || 0;
+    const dateOffset = selectedDate === '2024-2025' ? 1 : 0;
+    const scopedStatus = selectedPlantel && selectedPlantel !== 'todos'
+      ? statusSequence[(index + plantelNumber + dateOffset) % statusSequence.length]
+      : indicator.status;
+
+    return {
+      ...indicator,
+      plantel: visiblePlantel,
+      supervisor: 'Supervisor DGEMS',
+      responsable: 'Usuario08',
+      contribuidor: visiblePlantel,
+      status: scopedStatus,
+    };
+  });
 
   // Cálculo automático de porcentajes
   const totalIndicators = scopedIndicators.length;

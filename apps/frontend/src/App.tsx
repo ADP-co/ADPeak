@@ -19,7 +19,14 @@ import { Login } from './components/ui/Login';
 import { Toaster, toast } from 'sonner';
 import { useCaptureDraft } from './hooks/useCaptureDraft';
 
-const mockupIndicators: Indicator[] = [
+const plantelIndicatorScope: Pick<Indicator, 'plantel' | 'supervisor' | 'responsable' | 'contribuidor'> = {
+  plantel: 'Bachillerato 16',
+  supervisor: 'Supervisor DGEMS',
+  responsable: 'Usuario08',
+  contribuidor: 'Bachillerato 16',
+};
+
+const mockupIndicatorsBase: Indicator[] = [
     { code: '1.0.0.0.2', name: 'Porcentaje de titulacion por cohorte del NMS', status: 'Pendiente' },
     { code: '1.1.0.0.1', name: 'Porcentaje de cobertura en educacion media superior', status: 'Corregir' },
     { code: '1.1.1.0.1', name: 'Porcentaje de aceptacion en educacion media superior', status: 'Corregir' },
@@ -33,6 +40,11 @@ const mockupIndicators: Indicator[] = [
     { code: '1.1.2.2.5', name: 'Numero de programas educativos de media superior', status: 'Aprobado' },
     { code: '1.1.2.2.8', name: 'Porcentaje de estudiantes certificados en el dominio de una lengua extranjera', status: 'Aprobado' },
   ];
+
+const mockupIndicators: Indicator[] = mockupIndicatorsBase.map((indicator) => ({
+  ...indicator,
+  ...plantelIndicatorScope,
+}));
 
   const template1_0_0_0_2: IndicatorTemplate = {
     indicatorCode: '1.0.0.0.2',

@@ -9,6 +9,10 @@ export type IndicatorStatus = 'Corregir' | 'Pendiente' | 'En revisión' | 'Aprob
 export interface Indicator {
   code: string;
   name: string;
+  plantel?: string;
+  supervisor?: string;
+  responsable?: string;
+  contribuidor?: string;
   status: IndicatorStatus;
 }
 
@@ -57,6 +61,9 @@ export const IndicatorsTable = ({ indicators, onSelectIndicator }: IndicatorsTab
     if (status === 'Pendiente') return 'Nueva Captura';
     return 'Ver Datos'; // Para En revisión y Aprobado
   };
+
+  const getPlantelLabel = (indicator: Indicator) => indicator.plantel ?? indicator.contribuidor ?? 'Sin asignar';
+  const getSupervisorLabel = (indicator: Indicator) => indicator.supervisor ?? indicator.responsable ?? 'Sin asignar';
 
   // Mapeo de prioridad para ordenar por estatus cuando el filtro es "todos"
   const statusPriority: Record<IndicatorStatus, number> = {
@@ -113,15 +120,17 @@ export const IndicatorsTable = ({ indicators, onSelectIndicator }: IndicatorsTab
         {/* Tarjeta blanca contenedora de la tabla */}
         <div className="bg-brand-Blanco rounded-lg shadow-md overflow-hidden border border-brand-Gris_bajo/20">
         <div className="w-full overflow-x-auto">
-          <table className="w-full border-collapse text-left">
+          <table className="w-full min-w-[1040px] border-collapse text-left">
 
             {/* Cabecera de la tabla con fondo gris claro al 35% de opacidad */}
             <thead>
               <tr className="bg-brand-Gris_bajo/35 text-brand-Gris_oscuro font-title font-bold text-sm select-none">
-                <th className="py-4 px-6 w-[15%] text-center">Código</th>
-                <th className="py-4 px-6 w-[50%]">Nombre</th>
-                <th className="py-4 px-6 w-[15%] text-center">Estatus</th>
-                <th className="py-4 px-6 w-[20%] text-center">Acción</th>
+                <th className="py-4 px-6 w-[12%] text-center">Código</th>
+                <th className="py-4 px-6 w-[34%]">Nombre</th>
+                <th className="py-4 px-6 w-[14%] text-center">Plantel</th>
+                <th className="py-4 px-6 w-[14%] text-center">Supervisor</th>
+                <th className="py-4 px-6 w-[12%] text-center">Estatus</th>
+                <th className="py-4 px-6 w-[14%] text-center">Acción</th>
               </tr>
             </thead>
 
@@ -140,6 +149,14 @@ export const IndicatorsTable = ({ indicators, onSelectIndicator }: IndicatorsTab
                   {/* Nombre del Indicador */}
                   <td className="py-4 px-6 font-medium leading-relaxed pr-8">
                     {indicator.name}
+                  </td>
+
+                  <td className="py-4 px-6 text-center font-medium text-brand-Gris_oscuro/80">
+                    {getPlantelLabel(indicator)}
+                  </td>
+
+                  <td className="py-4 px-6 text-center font-medium text-brand-Gris_oscuro/80">
+                    {getSupervisorLabel(indicator)}
                   </td>
 
                   {/* Estatus (Badge estilizado) */}

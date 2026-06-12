@@ -6,6 +6,8 @@ export interface IndicatorRecord {
   id: string;
   code: string;
   name: string;
+  plantel?: string;
+  supervisor?: string;
   responsable: string;
   contribuidor: string;
   enabled?: boolean;
@@ -35,6 +37,18 @@ function normalizeSearch(value: string) {
     .replace(/[\u0300-\u036f]/g, '')
     .trim()
     .toLowerCase();
+}
+
+function getManagementPlantelScope(indicator: IndicatorRecord) {
+  if (indicator.plantel) {
+    return indicator.plantel;
+  }
+
+  return indicator.contribuidor === 'Planteles' ? 'Todos los planteles' : 'Asignacion directa';
+}
+
+function getManagementSupervisor(indicator: IndicatorRecord) {
+  return indicator.supervisor ?? indicator.responsable;
 }
 
 export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagementTableProps) => {
@@ -83,6 +97,8 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
       return [
         indicator.code,
         indicator.name,
+        getManagementPlantelScope(indicator),
+        getManagementSupervisor(indicator),
         indicator.responsable,
         indicator.contribuidor,
         indicator.enabled === false ? 'deshabilitado' : 'habilitado',
@@ -101,8 +117,8 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
           <div className="flex items-center gap-2 w-full max-w-xl">
             <input
               type="text"
-              aria-label="Filtro de indicadores por codigo, nombre, responsable, contribuidor o estado"
-              placeholder="Buscar por codigo, nombre, responsable, contribuidor o estado..."
+              aria-label="Filtro de indicadores por codigo, nombre, plantel, supervisor, responsable, contribuidor o estado"
+              placeholder="Buscar por codigo, nombre, plantel, supervisor, responsable, contribuidor o estado..."
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               onKeyDown={(event) => event.key === 'Enter' && setActiveSearch(searchTerm.trim())}
@@ -138,15 +154,17 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
 
       <div className="bg-brand-Blanco rounded-lg shadow-md overflow-hidden border border-brand-Gris_bajo/20">
         <div className="w-full overflow-x-auto">
-          <table className="w-full min-w-[920px] border-collapse text-center">
+          <table className="w-full min-w-[1180px] border-collapse text-center">
             <thead>
               <tr className="bg-brand-Gris_bajo/35 text-brand-Gris_oscuro font-title font-bold text-sm select-none border-b border-brand-Gris_bajo/20">
-                <th className="py-4 px-6 w-[14%]">Codigo</th>
-                <th className="py-4 px-6 w-[34%] text-left">Nombre</th>
-                <th className="py-4 px-6 w-[16%]">Contribuidor</th>
-                <th className="py-4 px-6 w-[14%]">Responsable</th>
-                <th className="py-4 px-6 w-[10%]">Estado</th>
-                <th className="py-4 px-6 w-[12%]">Acciones</th>
+                <th className="py-4 px-6 w-[11%]">Codigo</th>
+                <th className="py-4 px-6 w-[27%] text-left">Nombre</th>
+                <th className="py-4 px-6 w-[13%]">Plantel</th>
+                <th className="py-4 px-6 w-[13%]">Supervisor</th>
+                <th className="py-4 px-6 w-[12%]">Contribuidor</th>
+                <th className="py-4 px-6 w-[12%]">Responsable</th>
+                <th className="py-4 px-6 w-[6%]">Estado</th>
+                <th className="py-4 px-6 w-[6%]">Acciones</th>
               </tr>
             </thead>
 
@@ -163,6 +181,12 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
                   </td>
                   <td className="py-4 px-6 font-medium leading-relaxed text-left">
                     {indicator.name}
+                  </td>
+                  <td className="py-4 px-6 font-medium text-brand-Gris_oscuro/80">
+                    {getManagementPlantelScope(indicator)}
+                  </td>
+                  <td className="py-4 px-6 font-medium text-brand-Gris_oscuro/80">
+                    {getManagementSupervisor(indicator)}
                   </td>
                   <td className="py-4 px-6 font-medium text-brand-Gris_oscuro/80">
                     {indicator.contribuidor}
@@ -211,7 +235,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
               ))}
               {filteredIndicators.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="py-8 px-6 text-center text-brand-Gris_oscuro/70">
+                  <td colSpan={8} className="py-8 px-6 text-center text-brand-Gris_oscuro/70">
                     Sin resultados para la busqueda actual.
                   </td>
                 </tr>
