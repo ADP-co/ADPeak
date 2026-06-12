@@ -63,18 +63,18 @@ const DonutCard = ({ title, percentage, colorClass, strokeColor }: DonutCardProp
 };
 
 interface DashboardProps {
-  onSelectIndicator?: (code: string) => void;
+  onSelectIndicator?: (code: string, status?: string) => void;
 }
 
 // Pantalla Principal del Dashboard ---
 export const Dashboard = ({ onSelectIndicator }: DashboardProps) => {
   // Estados para almacenar las opciones de los filtros que vendrán del backend
   const [dateOptions, setDateOptions] = useState<{value: string, label: string}[]>([{ value: '', label: 'Cargando...' }]);
-  const [plantelOptions, setPlantelOptions] = useState<{value: string, label: string}[]>([{ value: '', label: 'Cargando...' }]);
+  const [plantelOptions, setPlantelOptions] = useState<{value: string, label: string}[]>([{ value: 'Bach1', label: 'Bach. 1' }]);
 
   // Estados para almacenar los valores actualmente seleccionados
   const [selectedDate, setSelectedDate] = useState('');
-  const [selectedPlantel, setSelectedPlantel] = useState('');
+  const [selectedPlantel, setSelectedPlantel] = useState('Bach1');
 
   // Efecto para simular la carga asíncrona desde el backend
   useEffect(() => {
@@ -96,7 +96,6 @@ export const Dashboard = ({ onSelectIndicator }: DashboardProps) => {
         mockDates.sort((a, b) => b.value.localeCompare(a.value));
 
         const mockPlanteles = [
-          { value: 'todos', label: 'Todos' },
           ...Array.from({ length: 37 }, (_, i) => ({ value: `Bach${i + 1}`, label: `Bach. ${i + 1}` }))
         ];
 
@@ -131,7 +130,7 @@ export const Dashboard = ({ onSelectIndicator }: DashboardProps) => {
   ];
 
   const statusSequence: Indicator['status'][] = ['Corregir', 'Pendiente', 'En revisión', 'Aprobado'];
-  const scopedIndicators = selectedPlantel && selectedPlantel !== 'todos'
+  const scopedIndicators = selectedPlantel
     ? DataIndicators.map((indicator, index) => {
         const plantelNumber = Number(selectedPlantel.replace(/\D/g, '')) || 0;
         const dateOffset = selectedDate === '2024-2025' ? 1 : 0;
@@ -152,6 +151,11 @@ export const Dashboard = ({ onSelectIndicator }: DashboardProps) => {
   const pendingPercentage = totalIndicators > 0 ? Math.round((pendingCount / totalIndicators) * 100) : 0;
   const reviewPercentage = totalIndicators > 0 ? Math.round((reviewCount / totalIndicators) * 100) : 0;
 
+  const currentPlantelLabel = plantelOptions.find(p => p.value === selectedPlantel)?.label;
+  const displayTitle = currentPlantelLabel && currentPlantelLabel !== 'Cargando...' 
+    ? `Progreso del ${currentPlantelLabel}` 
+    : 'Progreso General';
+
   return (
     <div className="w-full max-w-[1250px] mx-auto pt-8 pb-10">
 
@@ -159,7 +163,7 @@ export const Dashboard = ({ onSelectIndicator }: DashboardProps) => {
       <div className="mb-10">
         <div className="flex flex-wrap items-center justify-between mb-4">
           <h1 className="font-title text-3xl font-bold text-brand-Gris_oscuro">
-            Progreso General
+            {displayTitle}
           </h1>
 
           <div className="flex gap-4">
@@ -209,7 +213,13 @@ export const Dashboard = ({ onSelectIndicator }: DashboardProps) => {
       </div>
 
       {/*Tabla de Indicadores */}
-      <IndicatorsTable indicators={scopedIndicators} onSelectIndicator={onSelectIndicator} />
+      <IndicatorsTable 
+        indicators={scopedIndicators} 
+        onSelectIndicator={(code) => {
+          const selected = scopedIndicators.find((i) => i.code === code);
+          onSelectIndicator?.(code, selected?.status);
+        }} 
+      />
 
     </div>
   );

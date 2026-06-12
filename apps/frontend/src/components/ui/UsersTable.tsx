@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Search, PlusCircle, Trash2, Lock, Unlock, X } from 'lucide-react';
+import { ConfirmModal } from './ConfirmModal';
 
 // Tipado de datos para los usuarios
 export type SystemRole = 'Administrador' | 'Responsable' | 'Plantel';
@@ -48,6 +49,8 @@ export const UsersTable = () => {
   const [activeSearch, setActiveSearch] = useState('');
   const [statusMessage, setStatusMessage] = useState('');
   const [editingUser, setEditingUser] = useState<UserRecord | null>(null);
+  const [userToDelete, setUserToDelete] = useState<UserRecord | null>(null);
+  const [userToToggleBlock, setUserToToggleBlock] = useState<UserRecord | null>(null);
 
   const handleAddUser = () => {
     const newUser: UserRecord = {
@@ -83,18 +86,31 @@ export const UsersTable = () => {
   };
 
   const handleDeleteUser = (user: UserRecord) => {
-    setUsers((current) => current.filter((item) => item.id !== user.id));
-    setStatusMessage(`${user.name} eliminado de la vista.`);
+    setUserToDelete(user);
+  };
+
+  const confirmDeleteUser = () => {
+    if (!userToDelete) return;
+    setUsers((current) => current.filter((item) => item.id !== userToDelete.id));
+    setStatusMessage(`${userToDelete.name} eliminado de la vista.`);
+    setUserToDelete(null);
   };
 
   // Función para bloquear o desbloquear un usuario
   const toggleBlockUser = (id: string) => {
     const target = users.find((user) => user.id === id);
+    if (target) {
+      setUserToToggleBlock(target);
+    }
+  };
 
+  const confirmToggleBlockUser = () => {
+    if (!userToToggleBlock) return;
     setUsers((current) => current.map(user =>
-      user.id === id ? { ...user, isBlocked: !user.isBlocked } : user
+      user.id === userToToggleBlock.id ? { ...user, isBlocked: !user.isBlocked } : user
     ));
-    setStatusMessage(target?.isBlocked ? 'Usuario desbloqueado.' : 'Usuario bloqueado.');
+    setStatusMessage(userToToggleBlock.isBlocked ? 'Usuario desbloqueado.' : 'Usuario bloqueado.');
+    setUserToToggleBlock(null);
   };
 
   // Mapa de prioridades para el ordenamiento de roles
@@ -385,6 +401,27 @@ export const UsersTable = () => {
           </div>
         </div>
       )}
+
+      {/* Modal de Confirmación para Eliminar */}
+      <ConfirmModal
+        isOpen={!!userToDelete}
+        title="Eliminar Usuario"
+        message={`¿Está seguro de que desea eliminar al usuario ${userToDelete?.name}? Esta acción no se puede deshacer.`}
+        onConfirm={confirmDeleteUser}
+        onCancel={() => setUserToDelete(null)}
+        confirmText="Eliminar"
+      />
+
+      {/* Modal de Confirmación para Bloquear/Desbloquear */}
+      <ConfirmModal
+        isOpen={!!userToToggleBlock}
+        title={userToToggleBlock?.isBlocked ? "Desbloquear Usuario" : "Bloquear Usuario"}
+        message={`¿Está seguro de que desea ${userToToggleBlock?.isBlocked ? 'desbloquear' : 'bloquear'} al usuario ${userToToggleBlock?.name}?`}
+        onConfirm={confirmToggleBlockUser}
+        onCancel={() => setUserToToggleBlock(null)}
+        confirmText={userToToggleBlock?.isBlocked ? "Desbloquear" : "Bloquear"}
+        isDestructive={!userToToggleBlock?.isBlocked}
+      />
     </div>
   );
 };

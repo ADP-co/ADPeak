@@ -17,6 +17,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { Login } from './components/ui/Login';
 import { Toaster, toast } from 'sonner';
 import { useCaptureDraft } from './hooks/useCaptureDraft';
+import useInactivityTimer from './hooks/useInactivityTimer';
 
 const mockupIndicators: Indicator[] = [
     { code: '1.1.0.0.1', name: 'Porcentaje de cobertura en educacion media superior', status: 'Corregir' },
@@ -112,6 +113,16 @@ function IndicatorFormWrapper() {
   // Buscamos el indicador en nuestros datos de prueba para obtener su estatus
   const currentIndicator = mockupIndicators.find((ind) => ind.code === code);
 
+  // Recuperamos el estatus exacto desde la vista anterior si fue provisto
+  const statusFromState = location.state?.status;
+
+  // Adaptamos el template para que muestre el código y nombre correctos del indicador
+  const currentTemplate = {
+    ...template1_0_0_0_2,
+    indicatorCode: currentIndicator?.code || template1_0_0_0_2.indicatorCode,
+    indicatorName: currentIndicator?.name || template1_0_0_0_2.indicatorName,
+  };
+
   const captureDraft = useCaptureDraft({
     plantelId: 1,
     indicadorId: 1,
@@ -158,15 +169,51 @@ function IndicatorFormWrapper() {
     }
   };
 
+  const handleApprove = () => {
+    // Actualizamos el estado del indicador localmente
+    if (currentIndicator) {
+      currentIndicator.status = 'Aprobado';
+    }
+
+    toast.success('Indicador aprobado exitosamente');
+    if (location.state?.from) {
+      navigate(-1);
+    } else {
+      navigate('/indicadores');
+    }
+  };
+
+  const handleRequestCorrection = (notes: string) => {
+    // Actualizamos el estado del indicador localmente
+    if (currentIndicator) {
+      currentIndicator.status = 'Corregir';
+    }
+
+    toast.success('Corrección solicitada al plantel');
+    if (location.state?.from) {
+      navigate(-1);
+    } else {
+      navigate('/indicadores');
+    }
+  };
+
+  // Limpiamos el mensaje de estado si contiene 'undefined' (común al usar datos de prueba)
+  let displayStatusMessage = captureDraft.statusMessage;
+  if (displayStatusMessage?.includes('undefined')) {
+    displayStatusMessage = 'Datos de captura cargados.';
+  }
+
   return (
     <IndicatorForm
-      template={template1_0_0_0_2}
+      template={currentTemplate}
       initialData={formInitialData}
-      status={currentIndicator?.status}
+      status={statusFromState || currentIndicator?.status}
       onSaveDraft={handleSaveDraft}
       onSendReview={handleSendReview}
+      onApprove={handleApprove}
+      onRequestCorrection={handleRequestCorrection}
       isBusy={captureDraft.isBusy}
-      statusMessage={captureDraft.statusMessage}
+      statusMessage={displayStatusMessage}
       errorMessage={captureDraft.errorMessage}
       onBack={() => {
         if (location.state?.from) {
@@ -183,6 +230,9 @@ function ProtectedLayout() {
   const { isAuthenticated, user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Iniciar el temporizador de inactividad (por defecto 15 minutos = 900000 ms)
+  useInactivityTimer();
 
   // Si no está logueado, lo mandamos directo al login
   if (!isAuthenticated) {
@@ -229,8 +279,8 @@ function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleSelectIndicator = (code: string) => {
-    navigate(`/indicadores/captura/${code}`, { state: { from: location.pathname } });
+  const handleSelectIndicator = (code: string, status?: string) => {
+    navigate(`/indicadores/captura/${code}`, { state: { from: location.pathname, status } });
   };
 
   const handleConfigIndicator = (code: string) => {
