@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { Navbar } from './components/layout/Navbar';
 import { UserBanner } from './components/layout/UserBanner';
 import { IndicatorForm, type FormSubmission } from './components/forms/IndicatorForm';
+import { IndicatorConfigForm } from './components/forms/IndicatorConfigForm';
 import type { IndicatorTemplate } from './components/forms/formConfig';
 import { ProgressBar } from './components/layout/ProgressBar';
 import { IndicatorsTable } from './components/ui/IndicatorsTable';
@@ -288,6 +289,10 @@ function AppContent() {
     navigate(`/indicadores/captura/${code}`);
   };
 
+  const handleConfigureIndicator = (code: string) => {
+    navigate(`/indicadores/configurar/${code}`);
+  };
+
   const handleIndicatorStatusChange = (code: string, status: Indicator['status']) => {
     setIndicatorStatusOverrides((current) => {
       const next = { ...current, [code]: status };
@@ -315,6 +320,7 @@ function AppContent() {
           <>
             <Route path="/analisis" element={<Dashboard onSelectIndicator={handleSelectIndicator} />} />
             <Route path="/usuarios" element={<UsersTable />} />
+            <Route path="/indicadores/configurar/:code" element={<IndicatorConfigForm onBack={() => navigate('/indicadores')} />} />
           </>
         )}
 
@@ -327,7 +333,7 @@ function AppContent() {
         {(role === 'admin' || role === 'plantel') && (
           <Route path="/indicadores" element={
             role === 'admin' ? (
-              <IndicatorsManagementTable onEditIndicator={handleSelectIndicator} />
+              <IndicatorsManagementTable onEditIndicator={handleConfigureIndicator} />
             ) : (
               <>
                 <ProgressBar totalIndicators={indicators.length} completedIndicators={completedIndicatorCount} />

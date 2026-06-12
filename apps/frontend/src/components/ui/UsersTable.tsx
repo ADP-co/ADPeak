@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Search, PlusCircle, Trash2, Lock, Unlock } from 'lucide-react';
+import { Lock, PlusCircle, Search, Trash2, Unlock, X } from 'lucide-react';
+import { ConfirmModal } from './ConfirmModal';
 
-// Tipado de datos para los usuarios
 export type SystemRole = 'Administrador' | 'Responsable' | 'Plantel';
 
 export interface UserRecord {
@@ -13,6 +13,22 @@ export interface UserRecord {
   isBlocked?: boolean;
 }
 
+const MOCK_PLANTELES = ['-', ...Array.from({ length: 37 }, (_, index) => `Bach. ${index + 1}`)];
+const MOCK_INDICADORES = [
+  '1.0.0.0.2',
+  '1.1.0.0.1',
+  '1.1.1.0.1',
+  '1.1.1.1.1',
+  '1.1.2.0.1',
+  '1.1.2.0.3',
+  '1.1.2.1.1',
+  '1.1.2.1.3',
+  '1.1.2.1.4',
+  '1.1.2.2.1',
+  '1.1.2.2.5',
+  '1.1.2.2.8',
+];
+
 function normalizeSearch(value: string) {
   return value
     .normalize('NFD')
@@ -21,136 +37,150 @@ function normalizeSearch(value: string) {
     .toLowerCase();
 }
 
-export const UsersTable = () => {
-  // Datos de prueba basados
-  const [users, setUsers] = useState<UserRecord[]>([
-    { id: '1', name: 'Director', role: 'Administrador', plantel: '-', indicadores: '-' },
-    { id: '2', name: 'Subdirector', role: 'Administrador', plantel: '-', indicadores: '-' },
-    { id: '3', name: 'Angél Ordóñez', role: 'Responsable', plantel: '-', indicadores: '1.1.0.0.1' },
-    { id: '4', name: 'Usuario', role: 'Responsable', plantel: '-', indicadores: '1.0.0.0.2' },
-    { id: '5', name: 'Usuario', role: 'Responsable', plantel: '-', indicadores: '1.1.2.0.1' },
-    { id: '6', name: 'Usuario', role: 'Plantel', plantel: 'Bach. 16', indicadores: '-' },
-    { id: '7', name: 'Usuario', role: 'Plantel', plantel: 'Bach. 33', indicadores: '-' },
-  ]);
+function splitIndicators(value: string) {
+  return value === '-' || !value
+    ? []
+    : value.split(',').map((indicator) => indicator.trim()).filter(Boolean);
+}
 
-  // Estados para la búsqueda
+const rolePriority: Record<SystemRole, number> = {
+  Administrador: 1,
+  Responsable: 2,
+  Plantel: 3,
+};
+
+const initialUsers: UserRecord[] = [
+  { id: '1', name: 'Director', role: 'Administrador', plantel: '-', indicadores: '-' },
+  { id: '2', name: 'Subdirector', role: 'Administrador', plantel: '-', indicadores: '-' },
+  { id: '3', name: 'Angel Ordonez', role: 'Responsable', plantel: '-', indicadores: '1.1.0.0.1' },
+  { id: '4', name: 'Usuario responsable', role: 'Responsable', plantel: '-', indicadores: '1.0.0.0.2, 1.1.2.0.1' },
+  { id: '5', name: 'Planeacion', role: 'Responsable', plantel: '-', indicadores: '1.1.2.0.1' },
+  { id: '6', name: 'Bach. 16', role: 'Plantel', plantel: 'Bach. 16', indicadores: '-' },
+  { id: '7', name: 'Bach. 33', role: 'Plantel', plantel: 'Bach. 33', indicadores: '-' },
+];
+
+export const UsersTable = () => {
+  const [users, setUsers] = useState<UserRecord[]>(initialUsers);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeSearch, setActiveSearch] = useState('');
   const [statusMessage, setStatusMessage] = useState('');
+  const [editingUser, setEditingUser] = useState<UserRecord | null>(null);
+  const [userToDelete, setUserToDelete] = useState<UserRecord | null>(null);
+  const [userToToggleBlock, setUserToToggleBlock] = useState<UserRecord | null>(null);
 
   const handleAddUser = () => {
-    const nextNumber = users.reduce((max, user) => {
-      const match = user.plantel.match(/\d+/);
-      return match ? Math.max(max, Number(match[0])) : max;
-    }, 0) + 1;
-    const newUser: UserRecord = {
+    setEditingUser({
       id: `local-${Date.now()}`,
-      name: `Usuario ${nextNumber}`,
+      name: '',
       role: 'Plantel',
-      plantel: `Bach. ${nextNumber}`,
+      plantel: '-',
       indicadores: '-',
-    };
-
-    setUsers((current) => [newUser, ...current]);
-    setSearchTerm('');
-    setActiveSearch('');
-    setStatusMessage(`${newUser.name} agregado a la gestion local.`);
+    });
+    setStatusMessage('');
   };
 
-  const handleEditUser = (id: string) => {
-    const target = users.find((user) => user.id === id);
-
-    if (!target) {
-      return;
-    }
-
-    if (target.isBlocked) {
+  const handleEditUser = (user: UserRecord) => {
+    if (user.isBlocked) {
       setStatusMessage('Desbloquea el usuario antes de modificarlo.');
       return;
     }
 
-    if (target.role === 'Administrador') {
-      setStatusMessage('Los administradores no tienen plantel ni indicadores asignados.');
+    setEditingUser(user);
+    setStatusMessage('');
+  };
+
+  const saveEditedUser = () => {
+    if (!editingUser) {
+      return;
+    }
+
+    const normalizedUser: UserRecord = {
+      ...editingUser,
+      name: editingUser.role === 'Plantel' ? editingUser.plantel : editingUser.name.trim(),
+      plantel: editingUser.role === 'Plantel' ? editingUser.plantel : '-',
+      indicadores: editingUser.role === 'Responsable' ? editingUser.indicadores : '-',
+    };
+
+    if (!normalizedUser.name || normalizedUser.name === '-') {
+      setStatusMessage('Completa el nombre o plantel del usuario antes de guardar.');
+      return;
+    }
+
+    const isNew = !users.some((user) => user.id === normalizedUser.id);
+    setUsers((current) =>
+      isNew
+        ? [normalizedUser, ...current]
+        : current.map((user) => (user.id === normalizedUser.id ? normalizedUser : user))
+    );
+    setEditingUser(null);
+    setStatusMessage(`Usuario ${normalizedUser.name} ${isNew ? 'agregado' : 'actualizado'} correctamente.`);
+  };
+
+  const confirmDeleteUser = () => {
+    if (!userToDelete) {
+      return;
+    }
+
+    setUsers((current) => current.filter((item) => item.id !== userToDelete.id));
+    setStatusMessage(`${userToDelete.name} eliminado de la vista.`);
+    setUserToDelete(null);
+  };
+
+  const confirmToggleBlockUser = () => {
+    if (!userToToggleBlock) {
       return;
     }
 
     setUsers((current) =>
       current.map((user) =>
-        user.id === id
-          ? user.role === 'Responsable'
-            ? {
-                ...user,
-                indicadores: user.indicadores === '-' ? '1.0.0.0.2' : user.indicadores,
-              }
-            : {
-                ...user,
-                plantel: user.plantel === '-' ? 'Bach. 16' : user.plantel,
-                indicadores: '-',
-              }
-          : user
+        user.id === userToToggleBlock.id ? { ...user, isBlocked: !user.isBlocked } : user
       )
     );
-    setStatusMessage(
-      target.role === 'Responsable'
-        ? 'Asignacion de indicadores verificada para responsable.'
-        : 'Asignacion de plantel verificada para usuario plantel.'
-    );
+    setStatusMessage(userToToggleBlock.isBlocked ? 'Usuario desbloqueado.' : 'Usuario bloqueado.');
+    setUserToToggleBlock(null);
   };
 
-  const handleDeleteUser = (user: UserRecord) => {
-    setUsers((current) => current.filter((item) => item.id !== user.id));
-    setStatusMessage(`${user.name} eliminado de la vista.`);
-  };
-
-  // Función para bloquear o desbloquear un usuario
-  const toggleBlockUser = (id: string) => {
-    const target = users.find((user) => user.id === id);
-
-    setUsers((current) => current.map(user =>
-      user.id === id ? { ...user, isBlocked: !user.isBlocked } : user
-    ));
-    setStatusMessage(target?.isBlocked ? 'Usuario desbloqueado.' : 'Usuario bloqueado.');
-  };
-
-  // Filtrar usuarios por nombre, rol, plantel, indicadores o estado
   const normalizedSearch = normalizeSearch(activeSearch);
-  const filteredUsers = users.filter((user) => {
-    if (!normalizedSearch) {
-      return true;
-    }
+  const filteredUsers = users
+    .filter((user) => {
+      if (!normalizedSearch) {
+        return true;
+      }
 
-    return [
-      user.name,
-      user.role,
-      user.plantel,
-      user.indicadores,
-      user.isBlocked ? 'bloqueado' : 'activo',
-    ].some((value) => normalizeSearch(value).includes(normalizedSearch));
-  });
+      return [
+        user.name,
+        user.role,
+        user.plantel,
+        user.indicadores,
+        user.isBlocked ? 'bloqueado' : 'activo',
+      ].some((value) => normalizeSearch(value).includes(normalizedSearch));
+    })
+    .sort((a, b) => {
+      if (rolePriority[a.role] !== rolePriority[b.role]) {
+        return rolePriority[a.role] - rolePriority[b.role];
+      }
+
+      return a.name.localeCompare(b.name, undefined, { numeric: true });
+    });
+
+  const isCreatingUser = editingUser ? !users.some((user) => user.id === editingUser.id) : false;
 
   return (
     <div className="w-full max-w-[1250px] mx-auto pt-8 pb-10">
-
-      {/* Encabezado y filtros */}
       <div className="flex flex-col gap-4 mb-6">
-
-        {/* Título */}
         <h1 className="font-title text-3xl font-bold text-brand-Gris_oscuro">
-          Gestión de Usuarios
+          Gestion de Usuarios
         </h1>
 
-        {/* Controles */}
         <div className="flex flex-wrap items-center justify-between gap-4 w-full">
-
-          {/* Barra de Búsqueda */}
           <div className="flex items-center gap-2 w-full max-w-xl">
             <input
               type="text"
               aria-label="Filtro de usuarios por nombre, rol, plantel, indicador o estado"
               placeholder="Buscar por nombre, rol, plantel, indicador o estado..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && setActiveSearch(searchTerm.trim())}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              onKeyDown={(event) => event.key === 'Enter' && setActiveSearch(searchTerm.trim())}
               className="w-full h-9 pl-4 pr-4 rounded-full border border-brand-Gris_bajo/50 focus:outline-none focus:border-brand-Verde_principal text-sm text-brand-Gris_oscuro"
             />
             <button
@@ -163,7 +193,6 @@ export const UsersTable = () => {
             </button>
           </div>
 
-          {/* Botón Agregar */}
           <button
             type="button"
             onClick={handleAddUser}
@@ -180,74 +209,89 @@ export const UsersTable = () => {
             {statusMessage}
           </p>
         )}
-
       </div>
 
-      {/* Tabla de Usuarios */}
       <div className="bg-brand-Blanco rounded-lg shadow-md overflow-hidden border border-brand-Gris_bajo/20">
         <div className="w-full overflow-x-auto">
-          <table className="w-full border-collapse text-center">
-
-            {/* Cabecera */}
+          <table className="w-full min-w-[860px] border-collapse text-center">
             <thead>
               <tr className="bg-brand-Gris_bajo/35 text-brand-Gris_oscuro font-title font-bold text-sm select-none border-b border-brand-Gris_bajo/20">
-                <th className="py-4 px-6 w-[18%]">Usuario</th>
-                <th className="py-4 px-6 w-[17%]">Rol</th>
-                <th className="py-4 px-6 w-[17%]">Plantel</th>
-                <th className="py-4 px-6 w-[20%]">Indicadores</th>
-                <th className="py-4 px-6 w-[13%]">Estado</th>
-                <th className="py-4 px-6 w-[15%]">Acciones</th>
+                <th className="py-4 px-6 w-[22%]">Usuario</th>
+                <th className="py-4 px-6 w-[16%]">Rol</th>
+                <th className="py-4 px-6 w-[16%]">Plantel</th>
+                <th className="py-4 px-6 w-[22%]">Indicadores</th>
+                <th className="py-4 px-6 w-[12%]">Estado</th>
+                <th className="py-4 px-6 w-[12%]">Acciones</th>
               </tr>
             </thead>
 
-            {/* Cuerpo */}
             <tbody className="divide-y divide-brand-Gris_bajo/20 font-body text-sm text-brand-Gris_oscuro">
               {filteredUsers.map((user) => (
-                <tr
-                  key={user.id}
-                  className="hover:bg-brand-Gris_bajo/15 transition-colors duration-150 ease-in-out"
-                >
-                  <td className="py-4 px-6 font-medium leading-relaxed pr-8 text-brand-Gris_oscuro">{user.name}</td>
-                  <td className="py-4 px-6 font-medium leading-relaxed pr-8 text-brand-Gris_oscuro/80">{user.role}</td>
-                  <td className="py-4 px-6 font-medium text-brand-Verde_oscuro">{user.plantel}</td>
-                  <td className="py-4 px-6 text-center font-mono font-medium text-brand-Gris_oscuro/80">{user.indicadores}</td>
+                <tr key={user.id} className="hover:bg-brand-Gris_bajo/15 transition-colors duration-150 ease-in-out">
+                  <td className="py-4 px-6 font-medium leading-relaxed text-brand-Gris_oscuro">
+                    {user.name}
+                  </td>
+                  <td className="py-4 px-6 font-medium leading-relaxed text-brand-Gris_oscuro/80">
+                    {user.role}
+                  </td>
+                  <td className="py-4 px-6 font-medium text-brand-Verde_oscuro">
+                    {user.plantel}
+                  </td>
+                  <td className="py-4 px-6 text-center font-mono font-medium text-brand-Gris_oscuro/80">
+                    {splitIndicators(user.indicadores).length === 0 ? (
+                      '-'
+                    ) : (
+                      <div className="flex flex-wrap gap-1 justify-center">
+                        {splitIndicators(user.indicadores)
+                          .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+                          .map((indicator) => (
+                            <span key={indicator} className="bg-brand-Gris_bajo/10 px-2 py-0.5 rounded text-xs">
+                              {indicator}
+                            </span>
+                          ))}
+                      </div>
+                    )}
+                  </td>
                   <td className="py-4 px-6">
-                    <span className={`rounded-full px-3 py-1 text-xs font-bold ${user.isBlocked ? 'bg-brand-Status_rojo/10 text-brand-Status_rojo' : 'bg-brand-Status_verde/20 text-brand-Verde_oscuro'}`}>
+                    <span className={`rounded-full px-3 py-1 text-xs font-bold ${
+                      user.isBlocked
+                        ? 'bg-brand-Status_rojo/10 text-brand-Status_rojo'
+                        : 'bg-brand-Status_verde/20 text-brand-Verde_oscuro'
+                    }`}>
                       {user.isBlocked ? 'Bloqueado' : 'Activo'}
                     </span>
                   </td>
-
-                  {/* Botones de Acción */}
                   <td className="py-4 px-6">
                     <div className="flex items-center justify-center gap-3">
                       <button
                         type="button"
-                        onClick={() => handleEditUser(user.id)}
+                        onClick={() => handleEditUser(user)}
                         disabled={user.isBlocked}
                         aria-label={`Modificar usuario ${user.name}`}
-                        className="px-6 py-1 rounded-full border border-brand-Verde_oscuro text-brand-Verde_oscuro font-bold text-sm hover:bg-brand-Verde_oscuro hover:text-brand-Blanco transition-colors w-[120px] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-brand-Verde_oscuro"
+                        className="px-5 py-1 rounded-full border border-brand-Verde_oscuro text-brand-Verde_oscuro font-bold text-sm hover:bg-brand-Verde_oscuro hover:text-brand-Blanco transition-colors w-[112px] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-brand-Verde_oscuro"
                       >
                         Modificar
                       </button>
 
-                      {/* Controles restringidos: Administradores no tienen botón de eliminar ni bloquear */}
                       {user.role !== 'Administrador' && (
                         <>
                           <button
                             type="button"
-                            onClick={() => toggleBlockUser(user.id)}
+                            onClick={() => setUserToToggleBlock(user)}
                             aria-label={user.isBlocked ? `Desbloquear usuario ${user.name}` : `Bloquear usuario ${user.name}`}
-                            className={`transition-colors p-1 rounded-md cursor-pointer ${user.isBlocked ? 'text-brand-Status_rojo hover:bg-brand-Status_rojo/10' : 'text-brand-Verde_oscuro hover:text-brand-Status_amarillo hover:bg-brand-Status_amarillo/10'}`}
-                            title={user.isBlocked ? "Desbloquear usuario" : "Bloquear usuario"}
+                            className={`transition-colors p-1 rounded-md cursor-pointer ${
+                              user.isBlocked
+                                ? 'text-brand-Status_rojo hover:bg-brand-Status_rojo/10'
+                                : 'text-brand-Verde_oscuro hover:text-brand-Status_amarillo hover:bg-brand-Status_amarillo/10'
+                            }`}
                           >
                             {user.isBlocked ? <Lock size={20} /> : <Unlock size={20} />}
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleDeleteUser(user)}
+                            onClick={() => setUserToDelete(user)}
                             aria-label={`Eliminar usuario ${user.name}`}
                             className="text-brand-Verde_oscuro hover:text-brand-Status_rojo transition-colors p-1 rounded-md hover:bg-brand-Status_rojo/10 cursor-pointer"
-                            title="Eliminar usuario"
                           >
                             <Trash2 size={20} />
                           </button>
@@ -265,11 +309,181 @@ export const UsersTable = () => {
                 </tr>
               )}
             </tbody>
-
           </table>
         </div>
       </div>
 
+      {editingUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-brand-Gris_oscuro/60 backdrop-blur-sm p-4">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="user-editor-title"
+            className="bg-brand-Blanco rounded-lg shadow-xl p-6 w-full max-w-md border border-brand-Gris_bajo/20"
+          >
+            <h2 id="user-editor-title" className="text-xl font-title font-bold text-brand-Gris_oscuro mb-6">
+              {isCreatingUser ? 'Agregar usuario' : 'Modificar usuario'}
+            </h2>
+
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="user-editor-name" className="block text-sm font-semibold text-brand-Gris_oscuro font-body">
+                  Nombre
+                </label>
+                <input
+                  id="user-editor-name"
+                  type="text"
+                  value={editingUser.name}
+                  onChange={(event) => setEditingUser({ ...editingUser, name: event.target.value })}
+                  disabled={editingUser.role === 'Plantel'}
+                  placeholder={editingUser.role === 'Plantel' ? 'Se asigna desde el plantel' : 'Nombre del usuario'}
+                  className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco disabled:bg-brand-Gris_bajo/10 disabled:opacity-70 disabled:cursor-not-allowed"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="user-editor-role" className="block text-sm font-semibold text-brand-Gris_oscuro font-body">
+                  Rol
+                </label>
+                <select
+                  id="user-editor-role"
+                  value={editingUser.role}
+                  onChange={(event) => {
+                    const role = event.target.value as SystemRole;
+                    setEditingUser({
+                      ...editingUser,
+                      role,
+                      plantel: role === 'Plantel' ? editingUser.plantel : '-',
+                      indicadores: role === 'Responsable' ? editingUser.indicadores : '-',
+                      name: role === 'Plantel' ? (editingUser.plantel === '-' ? '' : editingUser.plantel) : editingUser.name,
+                    });
+                  }}
+                  className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco"
+                >
+                  <option value="Administrador">Administrador</option>
+                  <option value="Responsable">Responsable</option>
+                  <option value="Plantel">Plantel</option>
+                </select>
+              </div>
+
+              {editingUser.role === 'Plantel' && (
+                <div>
+                  <label htmlFor="user-editor-campus" className="block text-sm font-semibold text-brand-Gris_oscuro font-body">
+                    Plantel
+                  </label>
+                  <select
+                    id="user-editor-campus"
+                    value={editingUser.plantel}
+                    onChange={(event) => {
+                      const plantel = event.target.value;
+                      setEditingUser({
+                        ...editingUser,
+                        plantel,
+                        name: plantel === '-' ? '' : plantel,
+                      });
+                    }}
+                    className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco"
+                  >
+                    {MOCK_PLANTELES.map((plantel) => (
+                      <option key={plantel} value={plantel}>{plantel === '-' ? 'Sin asignar' : plantel}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {editingUser.role === 'Responsable' && (
+                <div>
+                  <label htmlFor="user-indicator-select" className="block text-sm font-semibold text-brand-Gris_oscuro font-body mb-1">
+                    Indicadores asignados
+                  </label>
+                  <select
+                    id="user-indicator-select"
+                    value=""
+                    onChange={(event) => {
+                      const selected = event.target.value;
+                      const assigned = splitIndicators(editingUser.indicadores);
+
+                      if (selected && !assigned.includes(selected)) {
+                        const next = [...assigned, selected].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+                        setEditingUser({ ...editingUser, indicadores: next.join(', ') });
+                      }
+                    }}
+                    className="w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco mb-3"
+                  >
+                    <option value="" disabled hidden>Seleccione para agregar...</option>
+                    {MOCK_INDICADORES
+                      .filter((indicator) => !splitIndicators(editingUser.indicadores).includes(indicator))
+                      .map((indicator) => (
+                        <option key={indicator} value={indicator}>{indicator}</option>
+                      ))}
+                  </select>
+
+                  <div className="flex flex-wrap gap-2 p-3 bg-brand-Gris_bajo/5 rounded-md border border-brand-Gris_bajo/20 min-h-[50px] items-center">
+                    {splitIndicators(editingUser.indicadores).length > 0 ? (
+                      splitIndicators(editingUser.indicadores).map((indicator) => (
+                        <span key={indicator} className="flex items-center gap-1.5 bg-brand-Verde_oscuro text-brand-Blanco px-2.5 py-1 rounded-full text-xs font-accent font-semibold shadow-sm">
+                          {indicator}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const next = splitIndicators(editingUser.indicadores).filter((item) => item !== indicator);
+                              setEditingUser({ ...editingUser, indicadores: next.length > 0 ? next.join(', ') : '-' });
+                            }}
+                            className="hover:text-brand-Status_rojo transition-colors p-0.5 rounded-full hover:bg-brand-Blanco/20 cursor-pointer"
+                            aria-label={`Quitar indicador ${indicator}`}
+                          >
+                            <X size={12} strokeWidth={3} />
+                          </button>
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-xs text-brand-Gris_oscuro/50 font-body italic w-full text-center">
+                        Sin indicadores asignados
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-3 mt-8">
+              <button
+                type="button"
+                onClick={() => setEditingUser(null)}
+                className="px-5 py-2 rounded-md border border-brand-Gris_bajo/50 text-brand-Gris_oscuro text-sm font-bold hover:bg-brand-Gris_bajo/10 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={saveEditedUser}
+                className="px-5 py-2 rounded-md bg-brand-Verde_oscuro text-brand-Blanco text-sm font-bold hover:bg-brand-Verde_principal transition-colors"
+              >
+                Guardar cambios
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ConfirmModal
+        isOpen={!!userToDelete}
+        title="Eliminar usuario"
+        message={`Deseas eliminar al usuario ${userToDelete?.name}? Esta accion no se puede deshacer en la vista local.`}
+        onConfirm={confirmDeleteUser}
+        onCancel={() => setUserToDelete(null)}
+        confirmText="Eliminar"
+      />
+
+      <ConfirmModal
+        isOpen={!!userToToggleBlock}
+        title={userToToggleBlock?.isBlocked ? 'Desbloquear usuario' : 'Bloquear usuario'}
+        message={`Deseas ${userToToggleBlock?.isBlocked ? 'desbloquear' : 'bloquear'} al usuario ${userToToggleBlock?.name}?`}
+        onConfirm={confirmToggleBlockUser}
+        onCancel={() => setUserToToggleBlock(null)}
+        confirmText={userToToggleBlock?.isBlocked ? 'Desbloquear' : 'Bloquear'}
+        isDestructive={!userToToggleBlock?.isBlocked}
+      />
     </div>
   );
 };
