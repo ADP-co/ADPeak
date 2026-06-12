@@ -34,15 +34,20 @@ export const Login = () => {
   const roleProfiles = {
     admin: {
       description: 'Administrador',
-      redirectTo: '/analisis'
+      redirectTo: '/analisis',
+      userId: 'director-1',
     },
     plantel: {
       description: 'Plantel',
-      redirectTo: '/indicadores'
+      redirectTo: '/indicadores',
+      userId: 'plantel-1',
+      plantelId: 1,
     },
     responsable: {
       description: 'Responsable de indicador',
-      redirectTo: '/revision'
+      redirectTo: '/revision',
+      userId: 'responsable-1',
+      responsableId: 1,
     },
   } as const;
   const handleLogin = (e: FormEvent) => {
@@ -50,10 +55,12 @@ export const Login = () => {
     const selectedProfile = roleProfiles[role];
 
     login({
-      id: '1',
+      id: selectedProfile.userId,
       name: username || 'Prueba',
       role,
-      description: selectedProfile.description
+      description: selectedProfile.description,
+      plantelId: 'plantelId' in selectedProfile ? selectedProfile.plantelId : undefined,
+      responsableId: 'responsableId' in selectedProfile ? selectedProfile.responsableId : undefined,
     });
     navigate(selectedProfile.redirectTo);
   };

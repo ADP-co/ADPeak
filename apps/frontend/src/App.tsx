@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useParams, Outlet } from 'react-router-dom';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Navbar } from './components/layout/Navbar';
 import { UserBanner } from './components/layout/UserBanner';
 import { IndicatorForm, type FormSubmission } from './components/forms/IndicatorForm';
@@ -18,6 +18,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { Login } from './components/ui/Login';
 import { Toaster, toast } from 'sonner';
 import { useCaptureDraft } from './hooks/useCaptureDraft';
+import { fetchIndicatorTemplate, fetchIndicators, type CatalogIndicator } from './api/catalog';
 
 const plantelIndicatorScope: Pick<Indicator, 'plantel' | 'supervisor' | 'responsable' | 'contribuidor'> = {
   plantel: 'Bachillerato 16',
@@ -137,6 +138,20 @@ function getIndicatorIdByCode(code: string) {
   return index >= 0 ? index + 1 : 1;
 }
 
+function catalogToIndicator(indicator: CatalogIndicator): Indicator {
+  const scope = indicator.responsibleNames.join(', ') || 'Supervisor DGEMS';
+
+  return {
+    code: indicator.code,
+    name: indicator.name,
+    status: indicator.active ? 'Pendiente' : 'Corregir',
+    plantel: 'Bachillerato 16',
+    supervisor: scope,
+    responsable: scope,
+    contribuidor: indicator.contributorNames.join(', ') || 'Planteles',
+  };
+}
+
 function buildCapturePayload(data: FormSubmission) {
   const evidenceFile = data.evidencia?.[0];
 
@@ -155,33 +170,52 @@ function buildCapturePayload(data: FormSubmission) {
 
 interface IndicatorFormWrapperProps {
   onIndicatorStatusChange?: (code: string, status: Indicator['status']) => void;
+  catalogIndicators?: CatalogIndicator[];
 }
 
-function IndicatorFormWrapper({ onIndicatorStatusChange }: IndicatorFormWrapperProps) {
+function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [] }: IndicatorFormWrapperProps) {
   const { code } = useParams();
   const navigate = useNavigate();
   const selectedCode = code ?? template1_0_0_0_2.indicatorCode;
-  const selectedIndicator = mockupIndicators.find((indicator) => indicator.code === selectedCode);
+  const selectedCatalogIndicator = catalogIndicators.find((indicator) => indicator.code === selectedCode);
+  const selectedIndicator = selectedCatalogIndicator ? catalogToIndicator(selectedCatalogIndicator) : mockupIndicators.find((indicator) => indicator.code === selectedCode);
+  const [remoteTemplate, setRemoteTemplate] = useState<(IndicatorTemplate & { initialRows?: Record<string, unknown>[] }) | null>(null);
   const selectedTemplate = {
-    ...template1_0_0_0_2,
+    ...(remoteTemplate ?? template1_0_0_0_2),
     indicatorCode: selectedCode,
-    indicatorName: selectedIndicator?.name ?? template1_0_0_0_2.indicatorName,
+    indicatorName: remoteTemplate?.indicatorName ?? selectedIndicator?.name ?? template1_0_0_0_2.indicatorName,
   };
 
-  console.log('El código del indicador seleccionado es:', code);
-  // En una app real, usarías el "code" de la URL (ej. 1.0.0.0.2) para hacer un GET al backend
-  // y cargar su configuración dinámica.
+  useEffect(() => {
+    let isMounted = true;
+
+    fetchIndicatorTemplate(selectedCode)
+      .then((template) => {
+        if (isMounted) {
+          setRemoteTemplate(template);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setRemoteTemplate(null);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedCode]);
 
   const captureDraft = useCaptureDraft({
     plantelId: 1,
-    indicadorId: getIndicatorIdByCode(selectedCode),
+    indicadorId: selectedCatalogIndicator?.id ?? getIndicatorIdByCode(selectedCode),
     periodoId: 1,
     actividadId: 1,
     responsableId: 2,
     storageScope: `plantel-1:${selectedCode}:periodo-1:actividad-1`,
   });
 
-  const formInitialData = captureDraft.capture?.payload.rows ?? mockInitialData;
+  const formInitialData = captureDraft.capture?.payload.rows ?? remoteTemplate?.initialRows ?? mockInitialData;
 
   const handleSaveDraft = (data: FormSubmission) => {
     captureDraft.saveDraft(buildCapturePayload(data), {
@@ -277,16 +311,38 @@ function LoginRoute() {
 function AppContent() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [catalogIndicators, setCatalogIndicators] = useState<CatalogIndicator[]>([]);
   const [indicatorStatusOverrides, setIndicatorStatusOverrides] = useState<Record<string, Indicator['status']>>(
     () => readIndicatorStatusOverrides()
   );
+
+  useEffect(() => {
+    let isMounted = true;
+
+    fetchIndicators()
+      .then((items) => {
+        if (isMounted) {
+          setCatalogIndicators(items);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setCatalogIndicators([]);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const indicators = useMemo(
     () =>
-      mockupIndicators.map((indicator) => ({
+      (catalogIndicators.length > 0 ? catalogIndicators.map(catalogToIndicator) : mockupIndicators).map((indicator) => ({
         ...indicator,
         status: indicatorStatusOverrides[indicator.code] ?? indicator.status,
       })),
-    [indicatorStatusOverrides]
+    [catalogIndicators, indicatorStatusOverrides]
   );
   const completedIndicatorCount = useMemo(
     () => indicators.filter((indicator) => indicator.status === 'Aprobado' || indicator.status === 'En revisión').length,
@@ -356,13 +412,13 @@ function AppContent() {
           path="/indicadores/captura/:code"
           element={
             role === 'admin' || role === 'plantel'
-              ? <IndicatorFormWrapper onIndicatorStatusChange={handleIndicatorStatusChange} />
+              ? <IndicatorFormWrapper onIndicatorStatusChange={handleIndicatorStatusChange} catalogIndicators={catalogIndicators} />
               : <Navigate to="/revision" replace />
           }
         />
 
-        {/* Vistas compartidas para todos */}
-        <Route path="/reportes" element={<ReportsDashboard />} />
+        {/* Reportes disponibles para direccion y responsables; Plantel permanece en captura. */}
+        <Route path="/reportes" element={role === 'plantel' ? <Navigate to="/indicadores" replace /> : <ReportsDashboard />} />
         <Route path="/perfil" element={<AccountProfile onBack={() => navigate(homePathForRole(role))} />} />
       </Route>
 

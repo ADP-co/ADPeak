@@ -2,6 +2,12 @@ import { isRecord, positiveInteger } from "./http";
 
 export type CapturePayload = {
   rows: Record<string, unknown>[];
+  justificacion?: string;
+  evidencia?: {
+    nombre: string;
+    tipo: string;
+    tamanoBytes: number;
+  };
 };
 
 export type CaptureDraftRequest = {
@@ -31,6 +37,26 @@ export function isCapturePayload(value: unknown): value is CapturePayload {
   return isRecord(value) && Array.isArray(value.rows);
 }
 
+export function assertServerlessCaptureScope(request: any, plantelId: number) {
+  const role = String(request.headers?.["x-role"] ?? "").toLowerCase();
+  const headerPlantelId = Number(request.headers?.["x-plantel-id"]);
+  const responsableId = Number(request.headers?.["x-responsable-id"]);
+
+  if (!role) {
+    return { ok: false, status: 401, error: "session_required" };
+  }
+
+  if (["plantel"].includes(role) && (!positiveInteger(headerPlantelId) || headerPlantelId !== plantelId)) {
+    return { ok: false, status: 403, error: "plantel_scope_forbidden" };
+  }
+
+  if (["responsable", "responsable_indicador"].includes(role) && !positiveInteger(responsableId)) {
+    return { ok: false, status: 403, error: "responsable_scope_required" };
+  }
+
+  return { ok: true };
+}
+
 export function buildCaptureDraft({
   id,
   request,
@@ -56,6 +82,7 @@ export function buildCaptureDraft({
     estado,
     versionActual,
     payload: payload ?? request?.payload ?? { rows: [] },
+    observacion: null,
     cerradoEn: null,
     creadoEn: timestamp,
     actualizadoEn: timestamp

@@ -14,8 +14,7 @@ interface UserBannerProps {
 // Diccionario de enlaces
 const navLinksByRole: Record<UserRole, { label: string; href: string }[]> = {
   plantel: [
-    { label: 'Indicadores', href: '/indicadores' },
-    { label: 'Reportes', href: '/reportes' }
+    { label: 'Indicadores', href: '/indicadores' }
   ],
   admin: [
     { label: 'Análisis', href: '/analisis' },

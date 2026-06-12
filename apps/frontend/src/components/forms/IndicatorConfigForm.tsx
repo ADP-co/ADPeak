@@ -4,6 +4,7 @@ import { ArrowLeft, GripVertical, PlusCircle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { saveIndicator } from '../../api/catalog';
 
 type ColumnType = 'readonly' | 'number' | 'text' | 'calculated';
 
@@ -59,9 +60,22 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
     );
   };
 
-  const handleSave = () => {
-    toast.success('Configuracion guardada');
-    handleBack();
+  const handleSave = async () => {
+    try {
+      await saveIndicator({
+        code: isNew ? undefined : code,
+        name: indicatorName,
+        description: indicatorName,
+        responsibleNames: responsables.filter(Boolean),
+        contributorNames: contributorType === 'planteles' ? ['Planteles'] : contributors.filter(Boolean),
+        activities: columns.length > 0 ? ['Captura configurada'] : ['Actividad general'],
+        active: true,
+      });
+      toast.success('Configuracion guardada');
+      handleBack();
+    } catch {
+      toast.error('No se pudo guardar');
+    }
   };
 
   return (

@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   createCaptureDraft,
+  approveCapture,
   getCaptureDraft,
   isCaptureDraftRequest,
+  requestCaptureCorrection,
   resetCaptureDraftsForTest,
   sendCaptureToReview,
   updateCaptureDraft
@@ -53,6 +55,22 @@ describe("capture store", () => {
       versionActual: 3
     });
     expect(getCaptureDraft(1)?.estado).toBe("en_revision");
+
+    const observed = requestCaptureCorrection(1, "Corregir evidencia");
+
+    expect(observed).toMatchObject({
+      estado: "correccion_solicitada",
+      observacion: "Corregir evidencia",
+      versionActual: 4
+    });
+
+    const approved = approveCapture(1);
+
+    expect(approved).toMatchObject({
+      estado: "aprobado",
+      observacion: null,
+      versionActual: 5
+    });
   });
 
   it("validates the request shape expected by the final frontend", () => {

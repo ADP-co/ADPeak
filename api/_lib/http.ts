@@ -1,6 +1,6 @@
 export function applyCors(response: any) {
   response.setHeader("Access-Control-Allow-Origin", "*");
-  response.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,OPTIONS");
+  response.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,OPTIONS");
   response.setHeader("Access-Control-Allow-Headers", "Content-Type, x-user-id, x-role, x-plantel-id, x-responsable-id");
 }
 

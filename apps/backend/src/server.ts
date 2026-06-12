@@ -6,13 +6,32 @@ import {
   redactConfig
 } from "./config.js";
 import {
+  approveCapture,
   createCaptureDraft,
   getCaptureDraft,
   isCaptureDraftRequest,
   isCapturePayload,
+  requestCaptureCorrection,
   sendCaptureToReview,
   updateCaptureDraft
 } from "./capture-store.js";
+import {
+  assertCaptureAccess,
+  buildReportPayload,
+  deactivateIndicator,
+  deactivateUser,
+  getIndicatorByCode,
+  getIndicatorById,
+  listIndicators,
+  listUsers,
+  saveIndicator,
+  saveUser,
+  sessionFromHeaders,
+  SigiAuthError,
+  SigiForbiddenError,
+  SigiValidationError,
+  templateForIndicator
+} from "./sigi-store.js";
 import {
   authenticateDemoUser,
   demoDatasetPayload,
@@ -65,6 +84,22 @@ function sendCsv(response: ServerResponse, payload: string) {
   response.end(payload);
 }
 
+function sendError(response: ServerResponse, error: unknown) {
+  if (
+    error instanceof SigiAuthError ||
+    error instanceof SigiForbiddenError ||
+    error instanceof SigiValidationError
+  ) {
+    sendJson(response, error.statusCode, {
+      error: error.code,
+      message: error.message
+    });
+    return true;
+  }
+
+  return false;
+}
+
 async function readJsonBody(request: IncomingMessage) {
   const chunks: Buffer[] = [];
 
@@ -100,8 +135,158 @@ const server = createServer(async (request, response) => {
     return;
   }
 
+  if (url.pathname === "/api/v1/usuarios") {
+    try {
+      const session = sessionFromHeaders(request.headers);
+
+      if (request.method === "GET") {
+        sendJson(response, 200, { users: listUsers(session) });
+        return;
+      }
+
+      if (request.method === "POST") {
+        sendJson(response, 201, saveUser(session, await readJsonBody(request)));
+        return;
+      }
+    } catch (error) {
+      if (sendError(response, error)) {
+        return;
+      }
+
+      sendJson(response, 400, {
+        error: "invalid_json",
+        message: "El cuerpo de la solicitud debe ser JSON valido."
+      });
+      return;
+    }
+  }
+
+  const userMatch = url.pathname.match(/^\/api\/v1\/usuarios\/([^/]+)(?:\/(desactivar))?$/);
+
+  if (userMatch) {
+    try {
+      const session = sessionFromHeaders(request.headers);
+      const userId = decodeURIComponent(userMatch[1]);
+      const action = userMatch[2];
+
+      if (request.method === "PUT" && !action) {
+        sendJson(response, 200, saveUser(session, { ...(await readJsonBody(request)), id: userId }));
+        return;
+      }
+
+      if (request.method === "PATCH" && action === "desactivar") {
+        const updated = deactivateUser(session, userId);
+
+        if (!updated) {
+          sendJson(response, 404, { error: "user_not_found", message: "No existe un usuario con ese ID." });
+          return;
+        }
+
+        sendJson(response, 200, updated);
+        return;
+      }
+    } catch (error) {
+      if (sendError(response, error)) {
+        return;
+      }
+
+      sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON valido." });
+      return;
+    }
+  }
+
+  if (url.pathname === "/api/v1/indicadores") {
+    try {
+      const session = sessionFromHeaders(request.headers);
+
+      if (request.method === "GET") {
+        sendJson(response, 200, { indicators: listIndicators(session, { includeInactive: session.role === "director" }) });
+        return;
+      }
+
+      if (request.method === "POST") {
+        sendJson(response, 201, saveIndicator(session, await readJsonBody(request)));
+        return;
+      }
+    } catch (error) {
+      if (sendError(response, error)) {
+        return;
+      }
+
+      sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON valido." });
+      return;
+    }
+  }
+
+  const indicatorMatch = url.pathname.match(/^\/api\/v1\/indicadores\/([^/]+)(?:\/(template|desactivar))?$/);
+
+  if (indicatorMatch) {
+    try {
+      const session = sessionFromHeaders(request.headers);
+      const idOrCode = decodeURIComponent(indicatorMatch[1]);
+      const action = indicatorMatch[2];
+      const indicatorId = Number(idOrCode);
+      const indicator = Number.isInteger(indicatorId)
+        ? getIndicatorById(indicatorId)
+        : getIndicatorByCode(idOrCode);
+
+      if (request.method === "GET" && action === "template") {
+        if (!indicator || !listIndicators(session, { includeInactive: session.role === "director" }).some((item) => item.id === indicator.id)) {
+          sendJson(response, 404, { error: "indicator_not_found", message: "No existe un indicador con ese ID o codigo." });
+          return;
+        }
+
+        sendJson(response, 200, templateForIndicator(indicator));
+        return;
+      }
+
+      if (request.method === "PUT" && !action) {
+        sendJson(response, 200, saveIndicator(session, { ...(await readJsonBody(request)), id: indicator?.id ?? indicatorId }));
+        return;
+      }
+
+      if (request.method === "PATCH" && action === "desactivar") {
+        if (!Number.isInteger(indicatorId)) {
+          sendJson(response, 400, { error: "invalid_indicator_id", message: "El ID del indicador debe ser numerico." });
+          return;
+        }
+
+        const updated = deactivateIndicator(session, indicatorId);
+
+        if (!updated) {
+          sendJson(response, 404, { error: "indicator_not_found", message: "No existe un indicador con ese ID." });
+          return;
+        }
+
+        sendJson(response, 200, updated);
+        return;
+      }
+    } catch (error) {
+      if (sendError(response, error)) {
+        return;
+      }
+
+      sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON valido." });
+      return;
+    }
+  }
+
+  if (request.method === "GET" && url.pathname === "/api/v1/reportes") {
+    try {
+      sendJson(response, 200, buildReportPayload(sessionFromHeaders(request.headers), reportFiltersFromUrl(url)));
+      return;
+    } catch (error) {
+      if (sendError(response, error)) {
+        return;
+      }
+
+      throw error;
+    }
+  }
+
   if (request.method === "POST" && url.pathname === "/api/v1/capturas/borradores") {
     try {
+      const session = sessionFromHeaders(request.headers);
       const payload = await readJsonBody(request);
 
       if (!isCaptureDraftRequest(payload)) {
@@ -112,9 +297,14 @@ const server = createServer(async (request, response) => {
         return;
       }
 
+      assertCaptureAccess(session, payload, "draft");
       sendJson(response, 201, createCaptureDraft(payload));
       return;
-    } catch {
+    } catch (error) {
+      if (sendError(response, error)) {
+        return;
+      }
+
       sendJson(response, 400, {
         error: "invalid_json",
         message: "El cuerpo de la solicitud debe ser JSON valido."
@@ -123,9 +313,21 @@ const server = createServer(async (request, response) => {
     }
   }
 
-  const captureMatch = url.pathname.match(/^\/api\/v1\/capturas\/(\d+)(?:\/(enviar-revision))?$/);
+  const captureMatch = url.pathname.match(/^\/api\/v1\/capturas\/(\d+)(?:\/(enviar-revision|observar|aprobar))?$/);
 
   if (captureMatch) {
+    let session: ReturnType<typeof sessionFromHeaders>;
+
+    try {
+      session = sessionFromHeaders(request.headers);
+    } catch (error) {
+      if (sendError(response, error)) {
+        return;
+      }
+
+      throw error;
+    }
+
     const captureId = Number(captureMatch[1]);
     const action = captureMatch[2];
 
@@ -140,6 +342,7 @@ const server = createServer(async (request, response) => {
         return;
       }
 
+      assertCaptureAccess(session, draft, "read");
       sendJson(response, 200, draft);
       return;
     }
@@ -159,9 +362,9 @@ const server = createServer(async (request, response) => {
           return;
         }
 
-        const updatedDraft = updateCaptureDraft(captureId, payload);
+        const draft = getCaptureDraft(captureId);
 
-        if (!updatedDraft) {
+        if (!draft) {
           sendJson(response, 404, {
             error: "capture_not_found",
             message: "No existe una captura con ese ID."
@@ -169,9 +372,15 @@ const server = createServer(async (request, response) => {
           return;
         }
 
+        assertCaptureAccess(session, { ...draft, payload }, "draft");
+        const updatedDraft = updateCaptureDraft(captureId, payload);
         sendJson(response, 200, updatedDraft);
         return;
-      } catch {
+      } catch (error) {
+        if (sendError(response, error)) {
+          return;
+        }
+
         sendJson(response, 400, {
           error: "invalid_json",
           message: "El cuerpo de la solicitud debe ser JSON valido."
@@ -181,9 +390,9 @@ const server = createServer(async (request, response) => {
     }
 
     if (request.method === "POST" && action === "enviar-revision") {
-      const updatedDraft = sendCaptureToReview(captureId);
+      const draft = getCaptureDraft(captureId);
 
-      if (!updatedDraft) {
+      if (!draft) {
         sendJson(response, 404, {
           error: "capture_not_found",
           message: "No existe una captura con ese ID."
@@ -191,7 +400,65 @@ const server = createServer(async (request, response) => {
         return;
       }
 
+      assertCaptureAccess(session, { ...draft, payload: draft.payload }, "submit");
+      const updatedDraft = sendCaptureToReview(captureId);
+
       sendJson(response, 200, updatedDraft);
+      return;
+    }
+
+    if (request.method === "POST" && action === "observar") {
+      try {
+        const draft = getCaptureDraft(captureId);
+
+        if (!draft) {
+          sendJson(response, 404, {
+            error: "capture_not_found",
+            message: "No existe una captura con ese ID."
+          });
+          return;
+        }
+
+        assertCaptureAccess(session, draft, "review");
+        const body = await readJsonBody(request);
+        const observacion = typeof body.observacion === "string" ? body.observacion.trim() : "";
+
+        if (!observacion) {
+          sendJson(response, 400, {
+            error: "observation_required",
+            message: "Agrega una observacion para solicitar correccion."
+          });
+          return;
+        }
+
+        sendJson(response, 200, requestCaptureCorrection(captureId, observacion));
+        return;
+      } catch (error) {
+        if (sendError(response, error)) {
+          return;
+        }
+
+        sendJson(response, 400, {
+          error: "invalid_json",
+          message: "El cuerpo de la solicitud debe ser JSON valido."
+        });
+        return;
+      }
+    }
+
+    if (request.method === "POST" && action === "aprobar") {
+      const draft = getCaptureDraft(captureId);
+
+      if (!draft) {
+        sendJson(response, 404, {
+          error: "capture_not_found",
+          message: "No existe una captura con ese ID."
+        });
+        return;
+      }
+
+      assertCaptureAccess(session, draft, "review");
+      sendJson(response, 200, approveCapture(captureId));
       return;
     }
   }

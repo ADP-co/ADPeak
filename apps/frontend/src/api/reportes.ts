@@ -38,10 +38,8 @@ export type ReportRequest = {
   cicloEscolar?: string;
 };
 
-const API_ORIGIN = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
-
 export async function fetchExportReport(request: ReportRequest) {
-  const url = new URL(`${API_ORIGIN}/demo/report`, window.location.origin);
+  const url = new URL(`${API_BASE_URL}/reportes`, window.location.origin);
 
   for (const [key, value] of Object.entries(request)) {
     if (value) {
@@ -49,7 +47,7 @@ export async function fetchExportReport(request: ReportRequest) {
     }
   }
 
-  const response = await fetch(url);
+  const response = await fetch(url, { headers: sessionHeaders() });
   const contentType = response.headers.get('content-type') ?? '';
 
   if (!response.ok || !contentType.includes('application/json')) {
@@ -148,7 +146,8 @@ export function countReportRows(report: ExportReport) {
 function buildPdfLines(report: ExportReport) {
   const statusSummary = summarizeReport(report);
   const lines = [
-    'Resumen ejecutivo de indicadores',
+    'Resumen',
+    'Universidad de Colima | Media Superior',
     report.identidadReporte.nombre,
     `Periodo: ${report.periodo} | Ciclo escolar: ${report.cicloEscolar}`,
     `Generado: ${formatReportDate(report.fechaGeneracion)}`,
@@ -157,7 +156,7 @@ function buildPdfLines(report: ExportReport) {
     `Aprobados: ${statusSummary.approved} | En revision: ${statusSummary.inReview} | Observados: ${statusSummary.observed}`,
     `Pendientes: ${statusSummary.pending} | Atrasados: ${statusSummary.late}`,
     '',
-    'Detalle por indicador',
+    'Indicadores',
     '',
   ];
 
@@ -181,7 +180,27 @@ function buildPdfLines(report: ExportReport) {
 }
 
 function renderPdfPage(lines: string[], pageNumber: number, pageCount: number) {
-  const commands = ['BT', '/F1 16 Tf', '50 750 Td', `(${escapePdfText(lines[0] ?? '')}) Tj`, '/F1 10 Tf'];
+  const commands = [
+    'q',
+    '0.32 0.46 0.19 rg',
+    '50 772 120 4 re f',
+    '1 0.56 0 rg',
+    '458 770 8 8 re f',
+    '0.78 0 0.5 rg',
+    '472 770 8 8 re f',
+    '0.32 0.15 0.51 rg',
+    '486 770 8 8 re f',
+    '0 0.64 0.89 rg',
+    '500 770 8 8 re f',
+    '0.76 0.85 0.18 rg',
+    '514 770 8 8 re f',
+    'Q',
+    'BT',
+    '/F1 16 Tf',
+    '50 750 Td',
+    `(${escapePdfText(lines[0] ?? '')}) Tj`,
+    '/F1 10 Tf'
+  ];
   lines.slice(1).forEach((line) => {
     commands.push('0 -15 Td', `(${escapePdfText(line)}) Tj`);
   });
@@ -383,3 +402,4 @@ function buildRecordDetails(dataRow: ReportDataRow) {
 
   return details.length > 0 ? `  ${details.join(' | ')}` : '';
 }
+import { API_BASE_URL, sessionHeaders } from './client';

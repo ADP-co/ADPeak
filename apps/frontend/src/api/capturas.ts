@@ -1,19 +1,15 @@
-import axios from 'axios';
-
-const configuredApiUrl =
-  import.meta.env.VITE_API_BASE_URL ??
-  (import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api/v1` : undefined);
-
-const API_BASE_URL = configuredApiUrl ?? '/api/v1';
+import axios, { AxiosHeaders } from 'axios';
+import { API_BASE_URL, sessionHeaders } from './client';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'x-user-id': import.meta.env.VITE_USER_ID ?? '3',
-    'x-role': import.meta.env.VITE_ROLE ?? 'plantel',
-    'x-plantel-id': import.meta.env.VITE_PLANTEL_ID ?? '1',
-    'x-responsable-id': import.meta.env.VITE_RESPONSABLE_ID ?? '2',
-  },
+});
+
+api.interceptors.request.use((config) => {
+  const headers = AxiosHeaders.from(config.headers);
+  Object.entries(sessionHeaders()).forEach(([key, value]) => headers.set(key, value));
+  config.headers = headers;
+  return config;
 });
 
 const FALLBACK_STORAGE_KEY = 'adpeak.static.captures';
@@ -181,7 +177,7 @@ export async function updateCaptureDraft(
     const response = await api.put<CaptureDraft>(`/capturas/${captureId}`, {
       payload,
       motivoCambio,
-    });
+    }, { headers: sessionHeaders() });
     return response.data;
   } catch (error) {
     if (shouldUseStaticFallback(error)) {

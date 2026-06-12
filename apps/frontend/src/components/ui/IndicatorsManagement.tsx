@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Eye, EyeOff, PlusCircle, Search, Trash2 } from 'lucide-react';
 import { ConfirmModal } from './ConfirmModal';
+import { deactivateIndicator, fetchIndicators, saveIndicator, type CatalogIndicator } from '../../api/catalog';
 
 export interface IndicatorRecord {
   id: string;
@@ -31,6 +32,17 @@ const initialIndicators: IndicatorRecord[] = [
   { id: '11', code: '1.1.2.2.1', name: 'Porcentaje de estudiantes atendidos en acciones de reforzamiento', responsable: 'Usuario08', contribuidor: 'Planteles', enabled: true },
 ];
 
+function fromCatalogIndicator(indicator: CatalogIndicator): IndicatorRecord {
+  return {
+    id: String(indicator.id),
+    code: indicator.code,
+    name: indicator.name,
+    responsable: indicator.responsibleNames.join(', ') || 'Sin asignar',
+    contribuidor: indicator.contributorNames.join(', ') || 'Planteles',
+    enabled: indicator.active,
+  };
+}
+
 function normalizeSearch(value: string) {
   return value
     .normalize('NFD')
@@ -46,6 +58,22 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
   const [statusMessage, setStatusMessage] = useState('');
   const [indicatorToDelete, setIndicatorToDelete] = useState<IndicatorRecord | null>(null);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    fetchIndicators()
+      .then((items) => {
+        if (isMounted) {
+          setIndicators(items.map(fromCatalogIndicator));
+        }
+      })
+      .catch(() => undefined);
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const handleAddIndicator = () => {
     const nextNumber = indicators.length + 1;
     onEditIndicator?.(`TMP-${nextNumber}`);
@@ -56,22 +84,51 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
     onEditIndicator?.(indicator.code);
   };
 
-  const handleToggleEnable = (indicator: IndicatorRecord) => {
+  const handleToggleEnable = async (indicator: IndicatorRecord) => {
+    const nextEnabled = indicator.enabled === false;
+
+    try {
+      if (nextEnabled) {
+        await saveIndicator({
+          id: Number(indicator.id),
+          code: indicator.code,
+          name: indicator.name,
+          responsibleNames: indicator.responsable.split(',').map((item) => item.trim()).filter(Boolean),
+          contributorNames: indicator.contribuidor.split(',').map((item) => item.trim()).filter(Boolean),
+          active: true,
+        });
+      } else {
+        await deactivateIndicator(Number(indicator.id));
+      }
+    } catch {
+      // El fallback local mantiene la pantalla funcional si no hay API publica.
+    }
+
     setIndicators((current) =>
       current.map((item) =>
-        item.id === indicator.id ? { ...item, enabled: item.enabled === false } : item
+        item.id === indicator.id ? { ...item, enabled: nextEnabled } : item
       )
     );
-    setStatusMessage(indicator.enabled === false ? 'Indicador habilitado.' : 'Indicador deshabilitado.');
+    setStatusMessage(nextEnabled ? 'Indicador habilitado.' : 'Indicador deshabilitado.');
   };
 
-  const confirmDeleteIndicator = () => {
+  const confirmDeleteIndicator = async () => {
     if (!indicatorToDelete) {
       return;
     }
 
-    setIndicators((current) => current.filter((item) => item.id !== indicatorToDelete.id));
-    setStatusMessage('Indicador eliminado.');
+    try {
+      await deactivateIndicator(Number(indicatorToDelete.id));
+    } catch {
+      // Fallback local.
+    }
+
+    setIndicators((current) =>
+      current.map((item) =>
+        item.id === indicatorToDelete.id ? { ...item, enabled: false } : item
+      )
+    );
+    setStatusMessage('Indicador desactivado.');
     setIndicatorToDelete(null);
   };
 
@@ -192,7 +249,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
                       <button
                         type="button"
                         onClick={() => setIndicatorToDelete(indicator)}
-                        aria-label={`Eliminar indicador ${indicator.code}`}
+                        aria-label={`Desactivar indicador ${indicator.code}`}
                         className="text-brand-Verde_oscuro hover:text-brand-Status_rojo transition-colors p-1 rounded-md hover:bg-brand-Status_rojo/10 cursor-pointer"
                       >
                         <Trash2 size={20} />
@@ -215,11 +272,11 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
 
       <ConfirmModal
         isOpen={!!indicatorToDelete}
-        title="Eliminar indicador"
-        message={`Deseas eliminar el indicador ${indicatorToDelete?.code}? Esta accion no se puede deshacer.`}
+        title="Desactivar indicador"
+        message={`Deseas desactivar el indicador ${indicatorToDelete?.code}? Se conservara su historial.`}
         onConfirm={confirmDeleteIndicator}
         onCancel={() => setIndicatorToDelete(null)}
-        confirmText="Eliminar"
+        confirmText="Desactivar"
       />
     </div>
   );

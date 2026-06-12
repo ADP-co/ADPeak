@@ -43,7 +43,8 @@ describe('report exports', () => {
   it('builds an executive PDF without internal field names', async () => {
     const pdfText = await reportToPdfBlob(sampleReport).text();
 
-    expect(pdfText).toContain('Resumen ejecutivo de indicadores');
+    expect(pdfText).toContain('(Resumen) Tj');
+    expect(pdfText).toContain('Universidad de Colima | Media Superior');
     expect(pdfText).toContain('Captura de egresados titulados');
     expect(pdfText).not.toContain('sin-id');
     expect(pdfText).not.toContain('registro_id');

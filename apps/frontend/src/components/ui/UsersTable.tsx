@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Lock, PlusCircle, Search, Trash2, Unlock, X } from 'lucide-react';
 import { ConfirmModal } from './ConfirmModal';
+import { deactivateUser, fetchUsers, saveUser, type CatalogUser } from '../../api/catalog';
 
 export type SystemRole = 'Administrador' | 'Responsable' | 'Plantel';
 
@@ -59,6 +60,41 @@ const initialUsers: UserRecord[] = [
   { id: '7', name: 'Bach. 33', role: 'Plantel', plantel: 'Bach. 33', indicadores: '-' },
 ];
 
+function roleFromCatalog(role: CatalogUser['role']): SystemRole {
+  if (role === 'director') {
+    return 'Administrador';
+  }
+
+  if (role === 'responsable') {
+    return 'Responsable';
+  }
+
+  return 'Plantel';
+}
+
+function roleToCatalog(role: SystemRole): CatalogUser['role'] {
+  if (role === 'Administrador') {
+    return 'director';
+  }
+
+  if (role === 'Responsable') {
+    return 'responsable';
+  }
+
+  return 'plantel';
+}
+
+function fromCatalogUser(user: CatalogUser): UserRecord {
+  return {
+    id: user.id,
+    name: user.name,
+    role: roleFromCatalog(user.role),
+    plantel: user.plantelId ? `Bach. ${user.plantelId === 1 ? 16 : user.plantelId}` : '-',
+    indicadores: user.indicatorCodes.length > 0 ? user.indicatorCodes.join(', ') : '-',
+    isBlocked: !user.active,
+  };
+}
+
 export const UsersTable = () => {
   const [users, setUsers] = useState<UserRecord[]>(initialUsers);
   const [searchTerm, setSearchTerm] = useState('');
@@ -67,6 +103,22 @@ export const UsersTable = () => {
   const [editingUser, setEditingUser] = useState<UserRecord | null>(null);
   const [userToDelete, setUserToDelete] = useState<UserRecord | null>(null);
   const [userToToggleBlock, setUserToToggleBlock] = useState<UserRecord | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    fetchUsers()
+      .then((items) => {
+        if (isMounted) {
+          setUsers(items.map(fromCatalogUser));
+        }
+      })
+      .catch(() => undefined);
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleAddUser = () => {
     setEditingUser({
@@ -89,7 +141,7 @@ export const UsersTable = () => {
     setStatusMessage('');
   };
 
-  const saveEditedUser = () => {
+  const saveEditedUser = async () => {
     if (!editingUser) {
       return;
     }
@@ -107,6 +159,20 @@ export const UsersTable = () => {
     }
 
     const isNew = !users.some((user) => user.id === normalizedUser.id);
+    try {
+      await saveUser({
+        id: normalizedUser.id.startsWith('local-') ? undefined : normalizedUser.id,
+        name: normalizedUser.name,
+        role: roleToCatalog(normalizedUser.role),
+        plantelId: normalizedUser.role === 'Plantel' ? 1 : undefined,
+        responsableId: normalizedUser.role === 'Responsable' ? 1 : undefined,
+        indicatorCodes: splitIndicators(normalizedUser.indicadores),
+        active: !normalizedUser.isBlocked,
+      });
+    } catch {
+      // La tabla conserva fallback local si no hay API disponible.
+    }
+
     setUsers((current) =>
       isNew
         ? [normalizedUser, ...current]
@@ -116,19 +182,45 @@ export const UsersTable = () => {
     setStatusMessage(isNew ? 'Usuario agregado.' : 'Usuario actualizado.');
   };
 
-  const confirmDeleteUser = () => {
+  const confirmDeleteUser = async () => {
     if (!userToDelete) {
       return;
     }
 
-    setUsers((current) => current.filter((item) => item.id !== userToDelete.id));
-    setStatusMessage('Usuario eliminado.');
+    try {
+      await deactivateUser(userToDelete.id);
+    } catch {
+      // Fallback local.
+    }
+
+    setUsers((current) =>
+      current.map((item) =>
+        item.id === userToDelete.id ? { ...item, isBlocked: true } : item
+      )
+    );
+    setStatusMessage('Usuario desactivado.');
     setUserToDelete(null);
   };
 
-  const confirmToggleBlockUser = () => {
+  const confirmToggleBlockUser = async () => {
     if (!userToToggleBlock) {
       return;
+    }
+
+    try {
+      if (userToToggleBlock.isBlocked) {
+        await saveUser({
+          id: userToToggleBlock.id,
+          name: userToToggleBlock.name,
+          role: roleToCatalog(userToToggleBlock.role),
+          indicatorCodes: splitIndicators(userToToggleBlock.indicadores),
+          active: true,
+        });
+      } else {
+        await deactivateUser(userToToggleBlock.id);
+      }
+    } catch {
+      // Fallback local.
     }
 
     setUsers((current) =>
@@ -459,11 +551,11 @@ export const UsersTable = () => {
 
       <ConfirmModal
         isOpen={!!userToDelete}
-        title="Eliminar usuario"
-        message={`Deseas eliminar al usuario ${userToDelete?.name}? Esta accion no se puede deshacer.`}
+        title="Desactivar usuario"
+        message={`Deseas desactivar al usuario ${userToDelete?.name}? Se conservara su historial.`}
         onConfirm={confirmDeleteUser}
         onCancel={() => setUserToDelete(null)}
-        confirmText="Eliminar"
+        confirmText="Desactivar"
       />
 
       <ConfirmModal

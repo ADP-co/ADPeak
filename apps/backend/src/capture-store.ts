@@ -18,6 +18,7 @@ export type CaptureDraft = {
   estado: "borrador" | "en_revision" | "correccion_solicitada" | "aprobado" | "cerrado";
   versionActual: number;
   payload: CapturePayload;
+  observacion: string | null;
   cerradoEn: string | null;
   creadoEn: string;
   actualizadoEn: string;
@@ -83,6 +84,7 @@ export function createCaptureDraft(request: CaptureDraftRequest): CaptureDraft {
     estado: "borrador",
     versionActual: 1,
     payload: request.payload,
+    observacion: null,
     cerradoEn: null,
     creadoEn: timestamp,
     actualizadoEn: timestamp
@@ -107,6 +109,7 @@ export function updateCaptureDraft(captureId: number, payload: CapturePayload) {
   const updatedDraft: CaptureDraft = {
     ...draft,
     payload,
+    observacion: null,
     versionActual: draft.versionActual + 1,
     actualizadoEn: nowIso()
   };
@@ -125,6 +128,44 @@ export function sendCaptureToReview(captureId: number) {
   const updatedDraft: CaptureDraft = {
     ...draft,
     estado: "en_revision",
+    versionActual: draft.versionActual + 1,
+    actualizadoEn: nowIso()
+  };
+
+  captureDrafts.set(captureId, updatedDraft);
+  return updatedDraft;
+}
+
+export function requestCaptureCorrection(captureId: number, observacion: string) {
+  const draft = captureDrafts.get(captureId);
+
+  if (!draft) {
+    return undefined;
+  }
+
+  const updatedDraft: CaptureDraft = {
+    ...draft,
+    estado: "correccion_solicitada",
+    observacion,
+    versionActual: draft.versionActual + 1,
+    actualizadoEn: nowIso()
+  };
+
+  captureDrafts.set(captureId, updatedDraft);
+  return updatedDraft;
+}
+
+export function approveCapture(captureId: number) {
+  const draft = captureDrafts.get(captureId);
+
+  if (!draft) {
+    return undefined;
+  }
+
+  const updatedDraft: CaptureDraft = {
+    ...draft,
+    estado: "aprobado",
+    observacion: null,
     versionActual: draft.versionActual + 1,
     actualizadoEn: nowIso()
   };

@@ -1,10 +1,13 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+import { AUTH_STORAGE_KEY } from '../api/client';
 
 export interface User {
   id: string;
   name: string;
   role: string;
   description: string;
+  plantelId?: number;
+  responsableId?: number;
 }
 
 export interface AuthContextType {
@@ -15,7 +18,6 @@ export interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-const AUTH_STORAGE_KEY = 'adpeak.session.user';
 const INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000;
 const ACTIVITY_EVENTS = ['click', 'keydown', 'mousemove', 'scroll', 'touchstart'] as const;
 
