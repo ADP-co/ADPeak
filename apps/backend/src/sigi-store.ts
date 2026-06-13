@@ -474,6 +474,7 @@ export function buildReportPayload(
 
   const cicloEscolar = filters.cicloEscolar ?? "2025-2026";
   const periodo = filters.periodo ?? "2026-A";
+  const temporalSeed = temporalFilterSeed(periodo, cicloEscolar);
   const plantelId = resolvePlantelId(filters.plantelId ?? filters.plantel);
   const scopedPlanteles = plantelId
     ? planteles.filter((plantel) => plantel.id === plantelId)
@@ -497,13 +498,14 @@ export function buildReportPayload(
           return capturedRows;
         }
 
-        const status = deterministicStatus(indicator.id + plantel.id + activityIndex);
+        const statusSeed = indicator.id * 13 + plantel.id * 7 + activityIndex * 3 + temporalSeed;
+        const status = deterministicStatus(statusSeed);
         return {
           registro_id: `${indicator.code}-${plantel.id}-${activityIndex + 1}`,
           actividad: activity || "Actividad general",
           responsable: indicator.responsibleNames.join(", "),
           estado: status,
-          avance: `${deterministicProgress(status, indicator.id, activityIndex)}%`,
+          avance: `${deterministicProgress(status, statusSeed, activityIndex)}%`,
           plantel: plantel.name,
           plantelId: String(plantel.id),
           periodo,
@@ -522,7 +524,9 @@ export function buildReportPayload(
       datos: rows
     };
   }).filter((indicator) => indicator.datos.length > 0);
-  const officialSourcesReport = officialSourcesReportRows(plantelId, periodo, cicloEscolar);
+  const officialSourcesReport = session.role === "director"
+    ? officialSourcesReportRows(plantelId, periodo, cicloEscolar)
+    : undefined;
 
   const identityPlantel = plantelId ? planteles.find((plantel) => plantel.id === plantelId) : undefined;
   const responsibleUser = session.role === "responsable"
@@ -1077,7 +1081,7 @@ function deterministicStatus(seed: number): SigiReportPayload["indicadores"][num
 
 function deterministicProgress(
   status: SigiReportPayload["indicadores"][number]["datos"][number]["estado"],
-  indicatorId: number,
+  seed: number,
   activityIndex: number
 ) {
   if (status === "Aprobado") {
@@ -1088,7 +1092,13 @@ function deterministicProgress(
     return 0;
   }
 
-  return 45 + ((indicatorId + activityIndex) % 45);
+  return 45 + ((seed + activityIndex) % 45);
+}
+
+function temporalFilterSeed(periodo: string, cicloEscolar: string) {
+  return `${periodo}:${cicloEscolar}`
+    .split("")
+    .reduce((total, character) => total + character.charCodeAt(0), 0);
 }
 
 function resolvePlantelId(value?: string) {

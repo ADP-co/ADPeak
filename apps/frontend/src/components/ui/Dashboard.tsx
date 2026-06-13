@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
-import {IndicatorsTable} from './IndicatorsTable';
-import type { Indicator } from './IndicatorsTable';
+import { useEffect, useMemo, useState } from 'react';
+import { IndicatorsTable, type Indicator, type IndicatorStatus } from './IndicatorsTable';
 import { Select } from './Select';
+import { useAuth } from '../../context/AuthContext';
+import { catalogPlanteles } from '../../api/catalog';
+import { fetchExportReport, type ExportReport, type ReportDataRow } from '../../api/reportes';
 
-// Tarjeta de Gráfica de Dona ---
 interface DonutCardProps {
   title: string;
   percentage: number;
@@ -11,25 +12,30 @@ interface DonutCardProps {
   strokeColor: string;
 }
 
-// Componente de dona de progreso
+const cycleOptions = [
+  { value: '2025-2026', label: '2025 - 2026' },
+  { value: '2024-2025', label: '2024 - 2025' },
+];
+
+const periodByCycle: Record<string, string> = {
+  '2025-2026': '2026-2',
+  '2024-2025': '2025-2',
+};
+
 const DonutCard = ({ title, percentage, colorClass, strokeColor }: DonutCardProps) => {
-  // Matemáticas para el SVG circular
   const radius = 38;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   return (
     <div className="bg-brand-Blanco rounded-lg shadow-sm border border-brand-Gris_bajo/20 p-6 flex flex-col items-center relative">
-      {/* Título y puntito de color */}
       <div className="w-full flex items-center justify-between mb-4">
         <h3 className="font-title text-brand-Gris_oscuro text-lg">{title}</h3>
-        <div className={`w-4 h-4 rounded-full ${colorClass}`}></div>
+        <div className={`w-4 h-4 rounded-full ${colorClass}`} />
       </div>
 
-      {/* Gráfica de Dona SVG */}
       <div className="relative flex items-center justify-center w-32 h-32">
         <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-          {/* Círculo de fondo */}
           <circle
             cx="50"
             cy="50"
@@ -39,7 +45,6 @@ const DonutCard = ({ title, percentage, colorClass, strokeColor }: DonutCardProp
             strokeWidth="12"
             className="text-brand-Gris_bajo/30"
           />
-          {/* Círculo de progreso */}
           <circle
             cx="50"
             cy="50"
@@ -53,7 +58,6 @@ const DonutCard = ({ title, percentage, colorClass, strokeColor }: DonutCardProp
             className="transition-all duration-1000 ease-out"
           />
         </svg>
-        {/* Porcentaje en el centro */}
         <span className="absolute font-accent font-bold text-sm text-brand-Gris_oscuro">
           {percentage}%
         </span>
@@ -66,135 +70,120 @@ interface DashboardProps {
   onSelectIndicator?: (code: string) => void;
 }
 
-// Pantalla Principal del Dashboard ---
 export const Dashboard = ({ onSelectIndicator }: DashboardProps) => {
-  // Estados para almacenar las opciones de los filtros que vendrán del backend
-  const [dateOptions, setDateOptions] = useState<{value: string, label: string}[]>([{ value: '', label: 'Cargando...' }]);
-  const [plantelOptions, setPlantelOptions] = useState<{value: string, label: string}[]>([{ value: '', label: 'Cargando...' }]);
+  const { user } = useAuth();
+  const [selectedCycle, setSelectedCycle] = useState(cycleOptions[0].value);
+  const [selectedPlantel, setSelectedPlantel] = useState('todos');
+  const [report, setReport] = useState<ExportReport | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState('');
 
-  // Estados para almacenar los valores actualmente seleccionados
-  const [selectedDate, setSelectedDate] = useState('');
-  const [selectedPlantel, setSelectedPlantel] = useState('');
+  const plantelOptions = useMemo(
+    () => [
+      {
+        value: 'todos',
+        label: user?.role === 'responsable' ? 'Todos asignados' : 'Todos',
+      },
+      ...catalogPlanteles.map((plantel) => ({
+        value: String(plantel.id),
+        label: shortPlantelLabel(plantel.name),
+      })),
+    ],
+    [user?.role]
+  );
 
-  // Efecto para simular la carga asíncrona desde el backend
   useEffect(() => {
-    const fetchFilters = async () => {
-      try {
-        // TODO: Reemplazar este delay y los mocks con llamadas reales a la API cuando esté listo
-        // Ejemplo: const responseFechas = await axios.get('/api/fechas');
+    let isMounted = true;
+    const periodo = periodByCycle[selectedCycle] ?? periodByCycle['2025-2026'];
 
-        // Simulación de retraso de red
-        await new Promise(resolve => setTimeout(resolve, 600));
+    setIsLoading(true);
+    setLoadError('');
 
-        // Datos Mockeados (simulando respuesta de backend)
-        const mockDates = [
-          { value: '2024-2025', label: '2024 - 2025' },
-          { value: '2025-2026', label: '2025 - 2026' }
-        ];
+    fetchExportReport({
+      cicloEscolar: selectedCycle,
+      periodo,
+      plantelId: selectedPlantel === 'todos' ? undefined : selectedPlantel,
+    })
+      .then((nextReport) => {
+        if (isMounted) {
+          setReport(nextReport);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setReport(null);
+          setLoadError('No se pudo cargar la información del alcance seleccionado.');
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      });
 
-        // Ordenar fechas de la más actual a la más antigua
-        mockDates.sort((a, b) => b.value.localeCompare(a.value));
-
-        const mockPlanteles = [
-          { value: 'todos', label: 'Todos' },
-          ...Array.from({ length: 37 }, (_, i) => ({ value: `Bach${i + 1}`, label: `Bach. ${i + 1}` }))
-        ];
-
-        // Cargar estados con los datos
-        setDateOptions(mockDates);
-        setPlantelOptions(mockPlanteles);
-
-        // Seleccionar el primer valor por defecto
-        setSelectedDate(mockDates[0].value);
-        setSelectedPlantel(mockPlanteles[0].value);
-      } catch (error) {
-        console.error("Error al cargar los filtros:", error);
-      }
+    return () => {
+      isMounted = false;
     };
+  }, [selectedCycle, selectedPlantel, user?.id]);
 
-    fetchFilters();
-  }, []);
+  const scopedIndicators = useMemo(() => reportToIndicators(report), [report]);
+  const totalRows = useMemo(
+    () => report?.indicadores.flatMap((indicator) => indicator.datos).length ?? 0,
+    [report]
+  );
 
-  // Datos simulados idénticos a tu imagen
-  const DataIndicators: Indicator[] = [
-    { code: '1.0.0.0.2', name: 'Porcentaje de titulación por cohorte del NMS', status: 'Pendiente' },
-    { code: '1.1.0.0.1', name: 'Porcentaje de cobertura en educación media superior', status: 'En revisión' },
-    { code: '1.1.1.0.1', name: 'Porcentaje de aceptación en educación media superior', status: 'En revisión' },
-    { code: '1.1.1.1.1', name: 'Porcentaje de programas educativos de educación media superior nuevos', status: 'En revisión' },
-    { code: '1.1.2.0.1', name: 'Porcentaje retención escolar de educación media superior', status: 'En revisión' },
-    { code: '1.1.2.0.3', name: 'Tasa de abandono escolar de educación media superior', status: 'Corregir' },
-    { code: '1.1.2.1.1', name: 'Porcentaje de estudiantes de educación media superior', status: 'Corregir' },
-    { code: '1.1.2.1.3', name: 'Porcentaje de estudiantes de educación media superior que sus padres', status: 'Pendiente' },
-    { code: '1.1.2.1.4', name: 'Porcentaje de estudiantes atendidos en los servicios de salud integral.', status: 'Pendiente' },
-    { code: '1.1.2.2.1.', name: 'Porcentaje de estudiantes atendidos en acciones de reforzamiento', status: 'Pendiente' },
-    { code: '1.1.2.2.5', name: 'Número de programas educativos de media superior', status: 'Aprobado' },
-    { code: '1.1.2.2.8', name: 'Porcentaje de estudiantes certificados en el dominio de unal engua extranjera', status: 'Aprobado' },
-  ];
-
-  const statusSequence: Indicator['status'][] = ['Corregir', 'Pendiente', 'En revisión', 'Aprobado'];
-  const selectedPlantelLabel = plantelOptions.find((option) => option.value === selectedPlantel)?.label ?? 'Todos';
-  const visiblePlantel = selectedPlantel && selectedPlantel !== 'todos' ? selectedPlantelLabel : 'Todos los planteles';
-  const scopedIndicators = DataIndicators.map((indicator, index) => {
-    const plantelNumber = Number(selectedPlantel.replace(/\D/g, '')) || 0;
-    const dateOffset = selectedDate === '2024-2025' ? 1 : 0;
-    const scopedStatus = selectedPlantel && selectedPlantel !== 'todos'
-      ? statusSequence[(index + plantelNumber + dateOffset) % statusSequence.length]
-      : indicator.status;
-
-    return {
-      ...indicator,
-      plantel: visiblePlantel,
-      supervisor: 'Supervisor DGEMS',
-      responsable: 'Usuario08',
-      contribuidor: visiblePlantel,
-      status: scopedStatus,
-    };
-  });
-
-  // Cálculo automático de porcentajes
   const totalIndicators = scopedIndicators.length;
-  const approvedCount = scopedIndicators.filter((i) => i.status === 'Aprobado').length;
-  const pendingCount = scopedIndicators.filter((i) => i.status === 'Pendiente' || i.status === 'Corregir').length;
-  const reviewCount = scopedIndicators.filter((i) => i.status === 'En revisión').length;
+  const approvedCount = scopedIndicators.filter((indicator) => indicator.status === 'Aprobado').length;
+  const pendingCount = scopedIndicators.filter((indicator) => indicator.status === 'Pendiente' || indicator.status === 'Corregir').length;
+  const reviewCount = scopedIndicators.filter((indicator) => indicator.status === 'En revisión').length;
 
-  const approvedPercentage = totalIndicators > 0 ? Math.round((approvedCount / totalIndicators) * 100) : 0;
-  const pendingPercentage = totalIndicators > 0 ? Math.round((pendingCount / totalIndicators) * 100) : 0;
-  const reviewPercentage = totalIndicators > 0 ? Math.round((reviewCount / totalIndicators) * 100) : 0;
+  const approvedPercentage = percentage(approvedCount, totalIndicators);
+  const pendingPercentage = percentage(pendingCount, totalIndicators);
+  const reviewPercentage = percentage(reviewCount, totalIndicators);
+  const selectedCycleLabel = cycleOptions.find((option) => option.value === selectedCycle)?.label ?? selectedCycle;
 
   return (
     <div className="w-full max-w-[1250px] mx-auto pt-8 pb-10">
-
-      {/* SECCIÓN 1: Tarjetas de Progreso General */}
       <div className="mb-10">
-        <div className="flex flex-wrap items-center justify-between mb-4">
-          <h1 className="font-title text-3xl font-bold text-brand-Gris_oscuro">
-            Progreso General
-          </h1>
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+          <div>
+            <h1 className="font-title text-3xl font-bold text-brand-Gris_oscuro">
+              Progreso General
+            </h1>
+            <p className="mt-1 text-sm font-body text-brand-Gris_oscuro/70">
+              {isLoading
+                ? 'Actualizando alcance...'
+                : `${totalIndicators} indicadores y ${totalRows} registros visibles`}
+            </p>
+          </div>
 
-          <div className="flex gap-4">
-
-            {/* Filtro: Fecha */}
+          <div className="flex flex-wrap gap-4">
             <Select
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              options={dateOptions}
+              aria-label="Ciclo escolar"
+              value={selectedCycle}
+              onChange={(event) => setSelectedCycle(event.target.value)}
+              options={cycleOptions}
               variant="outline"
-              containerClassName="w-36"
+              containerClassName="w-40"
             />
 
-            {/* Filtro: Planteles */}
             <Select
+              aria-label="Plantel"
               value={selectedPlantel}
-              onChange={(e) => setSelectedPlantel(e.target.value)}
+              onChange={(event) => setSelectedPlantel(event.target.value)}
               options={plantelOptions}
               variant="solid"
-              containerClassName="w-36"
+              containerClassName="w-44"
             />
-
           </div>
         </div>
 
-        {/* Grid de Donas */}
+        {loadError && (
+          <p className="mb-4 text-sm font-body font-semibold text-brand-Status_rojo" role="alert">
+            {loadError}
+          </p>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <DonutCard
             title="Indicadores Aprobados"
@@ -217,9 +206,119 @@ export const Dashboard = ({ onSelectIndicator }: DashboardProps) => {
         </div>
       </div>
 
-      {/*Tabla de Indicadores */}
-      <IndicatorsTable indicators={scopedIndicators} onSelectIndicator={onSelectIndicator} showScopeColumns={false} />
-
+      <IndicatorsTable
+        indicators={scopedIndicators}
+        onSelectIndicator={onSelectIndicator}
+        showScopeColumns
+        periodLabel={`Ciclo ${selectedCycleLabel}`}
+      />
     </div>
   );
 };
+
+function reportToIndicators(report: ExportReport | null): Indicator[] {
+  if (!report) {
+    return [];
+  }
+
+  return report.indicadores
+    .filter((indicator) => indicator.id !== 'fuentes-oficiales-cargadas')
+    .map((indicator) => {
+      const rows = indicator.datos;
+      const planteles = uniqueLabels(rows.map((row) => row.plantel).filter(Boolean));
+      const responsables = uniqueLabels(rows.map((row) => row.responsable).filter(Boolean));
+
+      return {
+        code: indicator.id ?? slugCode(indicator.nombre),
+        name: indicator.nombre,
+        status: statusFromRows(rows),
+        plantel: summarizeLabels(planteles, 'planteles'),
+        supervisor: summarizeLabels(responsables, 'responsables'),
+        responsable: summarizeLabels(responsables, 'responsables'),
+        contribuidor: summarizeLabels(planteles, 'planteles'),
+      };
+    })
+    .sort((a, b) => a.code.localeCompare(b.code, 'es', { numeric: true }));
+}
+
+function statusFromRows(rows: ReportDataRow[]): IndicatorStatus {
+  if (rows.length === 0) {
+    return 'Pendiente';
+  }
+
+  const statusPriority: Record<IndicatorStatus, number> = {
+    Corregir: 1,
+    Pendiente: 2,
+    'En revisión': 3,
+    Aprobado: 4,
+  };
+  const counts = rows.reduce<Record<IndicatorStatus, number>>((current, row) => {
+    const status = normalizeStatus(row.estado);
+    current[status] = (current[status] ?? 0) + 1;
+    return current;
+  }, {
+    Corregir: 0,
+    Pendiente: 0,
+    'En revisión': 0,
+    Aprobado: 0,
+  });
+
+  return (Object.entries(counts) as Array<[IndicatorStatus, number]>)
+    .sort((a, b) => b[1] - a[1] || statusPriority[a[0]] - statusPriority[b[0]])[0][0];
+}
+
+function normalizeStatus(value: string): IndicatorStatus {
+  const normalized = value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+
+  if (normalized.includes('observado')) {
+    return 'Corregir';
+  }
+
+  if (normalized.includes('borrador') || normalized.includes('pendiente')) {
+    return 'Pendiente';
+  }
+
+  if (normalized.includes('enviado') || normalized.includes('revision')) {
+    return 'En revisión';
+  }
+
+  return 'Aprobado';
+}
+
+function uniqueLabels(values: Array<string | undefined>): string[] {
+  return Array.from(new Set(values.map((value) => value?.trim()).filter(Boolean) as string[]));
+}
+
+function summarizeLabels(values: string[], pluralLabel: string) {
+  if (values.length === 0) {
+    return 'Sin asignar';
+  }
+
+  if (values.length <= 2) {
+    return values.join(', ');
+  }
+
+  return `${values.length} ${pluralLabel}`;
+}
+
+function percentage(count: number, total: number) {
+  return total > 0 ? Math.round((count / total) * 100) : 0;
+}
+
+function shortPlantelLabel(name: string) {
+  return name
+    .replace('Bachillerato en línea', 'Bach. en línea')
+    .replace('Bachillerato', 'Bach.');
+}
+
+function slugCode(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}

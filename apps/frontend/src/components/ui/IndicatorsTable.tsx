@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from './Button';
 import { Input } from './Input';
 import { Select } from './Select';
@@ -22,35 +22,19 @@ interface IndicatorsTableProps {
   indicators: Indicator[];
   onSelectIndicator?: (code: string) => void;
   showScopeColumns?: boolean;
+  periodLabel?: string;
 }
 
-export const IndicatorsTable = ({ indicators, onSelectIndicator, showScopeColumns = true }: IndicatorsTableProps) => {
+export const IndicatorsTable = ({
+  indicators,
+  onSelectIndicator,
+  showScopeColumns = true,
+  periodLabel = 'Periodo 2025 - 2026',
+}: IndicatorsTableProps) => {
 
   const [filter, setFilter] = useState<string>('todos');
   const [searchTerm, setSearchTerm] = useState('');
-
-  // Estados para simular la carga del periodo
-  const [dateOptions, setDateOptions] = useState<{value: string, label: string}[]>([{ value: '', label: 'Cargando...' }]);
-  const [selectedDate, setSelectedDate] = useState('');
   const { user } = useAuth();
-
-  useEffect(() => {
-    const fetchFilters = async () => {
-      try {
-        await new Promise(resolve => setTimeout(resolve, 600));
-        const mockDates = [
-          { value: '2024-2025', label: '2024 - 2025' },
-          { value: '2025-2026', label: '2025 - 2026' }
-        ];
-        mockDates.sort((a, b) => b.value.localeCompare(a.value));
-        setDateOptions(mockDates);
-        setSelectedDate(mockDates[0].value);
-      } catch (error) {
-        console.error("Error al cargar los filtros:", error);
-      }
-    };
-    fetchFilters();
-  }, []);
 
   // Mapeo de estilos para los Badges de Estatus
   const statusStyles = {
@@ -239,12 +223,13 @@ export const IndicatorsTable = ({ indicators, onSelectIndicator, showScopeColumn
         </div>
       </div>
 
-      {/* Footer del Período */}
-      <div className="mt-4 text-center">
-        <span className="font-accent text-xs font-semibold text-brand-Gris_oscuro/60">
-          Periodo {dateOptions.find(d => d.value === selectedDate)?.label || selectedDate}
-        </span>
-      </div>
+      {periodLabel && (
+        <div className="mt-4 text-center">
+          <span className="font-accent text-xs font-semibold text-brand-Gris_oscuro/60">
+            {periodLabel}
+          </span>
+        </div>
+      )}
     </div>
   );
 };

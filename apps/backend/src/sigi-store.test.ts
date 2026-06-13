@@ -118,6 +118,50 @@ describe("SIGI store and RBAC", () => {
     expect(indicators.every((indicator) => indicator.responsibleIds.includes(1))).toBe(true);
   });
 
+  it("scopes report indicators for responsible users", () => {
+    const responsable = sessionFromHeaders({
+      "x-role": "responsable",
+      "x-responsable-id": "1"
+    });
+    const assignedCodes = listIndicators(responsable).map((indicator) => indicator.code);
+    const report = buildReportPayload(responsable, {
+      cicloEscolar: "2025-2026",
+      periodo: "2026-2"
+    });
+
+    expect(report.tipoReporte).toBe("responsable");
+    expect(report.indicadores.length).toBeGreaterThan(0);
+    expect(report.indicadores.every((indicator) => assignedCodes.includes(indicator.id))).toBe(true);
+  });
+
+  it("changes report progress when cycle and plantel filters change", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const currentCycle = buildReportPayload(director, {
+      plantelId: "3",
+      cicloEscolar: "2025-2026",
+      periodo: "2026-2"
+    });
+    const previousCycle = buildReportPayload(director, {
+      plantelId: "3",
+      cicloEscolar: "2024-2025",
+      periodo: "2025-2"
+    });
+    const anotherPlantel = buildReportPayload(director, {
+      plantelId: "4",
+      cicloEscolar: "2025-2026",
+      periodo: "2026-2"
+    });
+    const signature = (report: ReturnType<typeof buildReportPayload>) =>
+      report.indicadores
+        .flatMap((indicator) => indicator.datos)
+        .slice(0, 20)
+        .map((row) => `${row.estado}:${row.avance}:${row.plantel}`)
+        .join("|");
+
+    expect(signature(currentCycle)).not.toBe(signature(previousCycle));
+    expect(signature(currentCycle)).not.toBe(signature(anotherPlantel));
+  });
+
   it("prevents plantel users from reading institutional reports", () => {
     const plantel = sessionFromHeaders({
       "x-role": "plantel",
