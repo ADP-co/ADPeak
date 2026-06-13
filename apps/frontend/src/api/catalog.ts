@@ -126,6 +126,23 @@ export async function fetchUsers() {
 }
 
 export async function saveUser(input: Partial<CatalogUser>) {
+  const current = readStorage(USERS_STORAGE_KEY, fallbackUsers);
+  const existing = current.find((user) => user.id === input.id);
+  const nextRole = input.role ?? existing?.role ?? 'plantel';
+
+  if (existing?.role === 'director' && nextRole !== 'director') {
+    throw new Error('single_director_required');
+  }
+
+  if (nextRole === 'director') {
+    const nextId = existing?.id ?? input.id;
+    const hasAnotherDirector = current.some((user) => user.role === 'director' && user.id !== nextId);
+
+    if (hasAnotherDirector || input.active === false) {
+      throw new Error('single_director_required');
+    }
+  }
+
   try {
     const path = input.id ? `/usuarios/${encodeURIComponent(input.id)}` : '/usuarios';
     const method = input.id ? 'PUT' : 'POST';
@@ -136,12 +153,10 @@ export async function saveUser(input: Partial<CatalogUser>) {
     mergeUser(response);
     return response;
   } catch {
-    const current = readStorage(USERS_STORAGE_KEY, fallbackUsers);
-    const existing = current.find((user) => user.id === input.id);
     const next: CatalogUser = {
       id: existing?.id ?? input.id ?? `user-${Date.now()}`,
       name: input.name?.trim() || existing?.name || 'Usuario',
-      role: input.role ?? existing?.role ?? 'plantel',
+      role: nextRole,
       plantelId: input.plantelId ?? existing?.plantelId,
       responsableId: input.responsableId ?? existing?.responsableId,
       indicatorCodes: input.indicatorCodes ?? existing?.indicatorCodes ?? [],

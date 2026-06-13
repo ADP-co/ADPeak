@@ -4,11 +4,13 @@ import {
   authenticateUser,
   buildReportPayload,
   deactivateIndicator,
+  deactivateUser,
   getIndicatorByCode,
   listIndicators,
   listUsers,
   officialSourcesPayload,
   saveIndicator,
+  saveUser,
   sessionFromHeaders,
   templateForIndicator,
   SigiForbiddenError,
@@ -46,6 +48,26 @@ describe("SIGI store and RBAC", () => {
     });
     expect(authenticateUser("director", "incorrecta")).toBeUndefined();
     expect(users.some((user) => "passwordHash" in user)).toBe(false);
+  });
+
+  it("keeps exactly one administrator user", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+
+    expect(listUsers(director).filter((user) => user.role === "director")).toHaveLength(1);
+    expect(() =>
+      saveUser(director, {
+        name: "Segundo administrador",
+        role: "director"
+      })
+    ).toThrow(SigiValidationError);
+    expect(() =>
+      saveUser(director, {
+        id: "director-1",
+        name: "Director DGEMS",
+        role: "responsable"
+      })
+    ).toThrow(SigiValidationError);
+    expect(() => deactivateUser(director, "director-1")).toThrow(SigiValidationError);
   });
 
   it("scopes indicators for responsible users", () => {

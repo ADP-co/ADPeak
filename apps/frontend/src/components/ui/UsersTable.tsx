@@ -68,7 +68,6 @@ const rolePriority: Record<SystemRole, number> = {
 
 const initialUsers: UserRecord[] = [
   { id: '1', name: 'Director', role: 'Administrador', plantel: '-', indicadores: '-' },
-  { id: '2', name: 'Subdirector', role: 'Administrador', plantel: '-', indicadores: '-' },
   { id: '3', name: 'Angel Ordonez', role: 'Responsable', plantel: '-', indicadores: '1.1.0.0.1' },
   { id: '4', name: 'Usuario responsable', role: 'Responsable', plantel: '-', indicadores: '1.0.0.0.2, 1.1.2.0.1' },
   { id: '5', name: 'Planeacion', role: 'Responsable', plantel: '-', indicadores: '1.1.2.0.1' },
@@ -206,6 +205,14 @@ export const UsersTable = () => {
 
     if (!normalizedUser.name || normalizedUser.name === '-') {
       setStatusMessage('Completa el nombre o plantel del usuario antes de guardar.');
+      return;
+    }
+
+    const isDuplicatedAdmin = normalizedUser.role === 'Administrador' &&
+      users.some((user) => user.role === 'Administrador' && user.id !== normalizedUser.id);
+
+    if (isDuplicatedAdmin) {
+      setStatusMessage('Solo puede existir un administrador.');
       return;
     }
 
@@ -484,6 +491,7 @@ export const UsersTable = () => {
                 <select
                   id="user-editor-role"
                   value={editingUser.role}
+                  disabled={editingUser.role === 'Administrador'}
                   onChange={(event) => {
                     const role = event.target.value as SystemRole;
                     setEditingUser({
@@ -496,12 +504,19 @@ export const UsersTable = () => {
                       name: role === 'Plantel' ? plantelDisplayNameFromLabel(editingUser.plantel) : editingUser.name,
                     });
                   }}
-                  className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco"
+                  className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco disabled:bg-brand-Gris_bajo/10 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  <option value="Administrador">Administrador</option>
+                  {editingUser.role === 'Administrador' && (
+                    <option value="Administrador">Administrador</option>
+                  )}
                   <option value="Responsable">Responsable</option>
                   <option value="Plantel">Plantel</option>
                 </select>
+                {editingUser.role === 'Administrador' && (
+                  <p className="mt-1 text-xs text-brand-Gris_oscuro/70">
+                    El sistema conserva un solo administrador principal.
+                  </p>
+                )}
               </div>
 
               {editingUser.role === 'Plantel' && (

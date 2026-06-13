@@ -218,6 +218,23 @@ export function saveUser(session: SigiSession, input: Partial<SigiUser> & { pass
 
   const id = input.id || `user-${Date.now()}`;
   const existing = users.get(id);
+
+  if (existing?.role === "director" && role !== "director") {
+    throw new SigiValidationError("El administrador principal no puede cambiar de rol.");
+  }
+
+  if (role === "director") {
+    const hasAnotherDirector = Array.from(users.values()).some((user) => user.role === "director" && user.id !== id);
+
+    if (hasAnotherDirector) {
+      throw new SigiValidationError("Solo puede existir un administrador.");
+    }
+
+    if (input.active === false) {
+      throw new SigiValidationError("El administrador principal no puede desactivarse.");
+    }
+  }
+
   const user: SigiUser = {
     id,
     username: input.username?.trim().toLowerCase() || existing?.username || usernameForUser(id, input.name, role),
@@ -241,6 +258,10 @@ export function deactivateUser(session: SigiSession, id: string) {
 
   if (!user) {
     return undefined;
+  }
+
+  if (user.role === "director") {
+    throw new SigiValidationError("El administrador principal no puede desactivarse.");
   }
 
   const updated = { ...user, active: false };
