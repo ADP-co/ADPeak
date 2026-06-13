@@ -6,9 +6,9 @@ import {
   demoRoleFlows,
   demoStatusPayload,
   publicDemoUsers,
-  runDemoAction
-} from "../_lib/demo";
-import { applyCors, handleOptions, isRecord, methodNotAllowed, readJsonBody } from "../_lib/http";
+  runDemoAction,
+} from "./_lib/demo";
+import { applyCors, handleOptions, isRecord, methodNotAllowed, readJsonBody } from "./_lib/http";
 
 export default async function handler(request: any, response: any) {
   if (handleOptions(request, response)) {
@@ -101,7 +101,7 @@ function reportFiltersFromQuery(query: Record<string, unknown>) {
     cicloEscolar: queryValue(query.cicloEscolar),
     periodo: queryValue(query.periodo),
     plantel: queryValue(query.plantel),
-    plantelId: queryValue(query.plantelId)
+    plantelId: queryValue(query.plantelId),
   };
 }
 

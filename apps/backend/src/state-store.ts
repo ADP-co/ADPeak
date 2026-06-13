@@ -1,4 +1,7 @@
+/// <reference types="node" />
+
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 
 type PersistedState = Record<string, unknown>;
@@ -9,7 +12,9 @@ const stateFilePath = configuredStateFile
   ? path.resolve(configuredStateFile)
   : isTestRun
     ? ""
-    : path.resolve(process.cwd(), "data", "sigi-state.json");
+    : process.env.VERCEL
+      ? path.join(os.tmpdir(), "adpeak", "sigi-state.json")
+      : path.resolve(process.cwd(), "data", "sigi-state.json");
 
 let cachedState: PersistedState = loadStateFromDisk();
 

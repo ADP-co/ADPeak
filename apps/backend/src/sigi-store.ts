@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 import { createHash } from "node:crypto";
 import { officialCatalogRows } from "./official-catalog.generated.js";
 import {
