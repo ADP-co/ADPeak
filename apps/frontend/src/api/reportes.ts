@@ -59,13 +59,13 @@ export async function fetchExportReport(request: ReportRequest) {
   const contentType = response.headers.get('content-type') ?? '';
 
   if (!response.ok || !contentType.includes('application/json')) {
-    throw new Error('No se pudo obtener la informacion del reporte.');
+    throw new Error('No se pudo obtener la información del reporte.');
   }
 
   const report = await response.json() as ExportReport;
 
   if (!Array.isArray(report.indicadores) || report.indicadores.some((indicator) => !Array.isArray(indicator.datos))) {
-    throw new Error('La informacion del reporte esta incompleta.');
+    throw new Error('La información del reporte está incompleta.');
   }
 
   return report;
@@ -123,14 +123,41 @@ type PdfHeaderImage = {
   bytes: Uint8Array;
 };
 
+type PdfColor = [number, number, number];
+type PdfFont = 'F1' | 'F2';
+
+type PdfReportPage = {
+  content: PdfContentBuilder;
+  y: number;
+};
+
+type PdfTableColumn = {
+  label: string;
+  width: number;
+  align?: 'left' | 'center';
+  value: (row: ReportDataRow, report: ExportReport) => string;
+};
+
+const PDF_WIDTH = 612;
+const PDF_HEIGHT = 792;
+const PDF_MARGIN_X = 42;
+const PDF_CONTENT_WIDTH = PDF_WIDTH - PDF_MARGIN_X * 2;
+const PDF_BOTTOM_Y = 58;
+const PDF_GREEN: PdfColor = [82, 118, 48];
+const PDF_DARK_GREEN: PdfColor = [0, 72, 60];
+const PDF_TEXT: PdfColor = [48, 54, 61];
+const PDF_MUTED: PdfColor = [93, 101, 111];
+const PDF_LINE: PdfColor = [220, 224, 229];
+const PDF_LIGHT_GREEN: PdfColor = [238, 246, 232];
+const PDF_LIGHT_GRAY: PdfColor = [246, 248, 247];
+
 export async function reportToPdfBlob(report: ExportReport) {
-  const lines = buildPdfLines(report);
-  const pages = chunkLines(lines, 40);
   const headerImage = await createHeaderImage();
   const objects: PdfObject[] = [
     '<< /Type /Catalog /Pages 2 0 R >>',
     '',
     '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>',
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>',
   ];
   let headerImageObjectNumber: number | undefined;
 
@@ -152,8 +179,9 @@ export async function reportToPdfBlob(report: ExportReport) {
   }
 
   const pageRefs: string[] = [];
+  const pageContents = renderPdfReport(report, Boolean(headerImageObjectNumber));
 
-  pages.forEach((pageLines, pageIndex) => {
+  pageContents.forEach((content) => {
     const pageObjectNumber = objects.length + 1;
     const contentObjectNumber = pageObjectNumber + 1;
     const xObjectResource = headerImageObjectNumber
@@ -161,15 +189,14 @@ export async function reportToPdfBlob(report: ExportReport) {
       : '';
 
     pageRefs.push(`${pageObjectNumber} 0 R`);
-    objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >>${xObjectResource} >> /Contents ${contentObjectNumber} 0 R >>`);
-    const content = renderPdfPage(pageLines, pageIndex + 1, pages.length, Boolean(headerImageObjectNumber));
+    objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PDF_WIDTH} ${PDF_HEIGHT}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >>${xObjectResource} >> /Contents ${contentObjectNumber} 0 R >>`);
     objects.push({
       dictionary: `<< /Length ${byteLength(content)} >>`,
       stream: content,
     });
   });
 
-  objects[1] = `<< /Type /Pages /Kids [${pageRefs.join(' ')}] /Count ${pages.length} >>`;
+  objects[1] = `<< /Type /Pages /Kids [${pageRefs.join(' ')}] /Count ${pageContents.length} >>`;
 
   const bodyParts: Array<string | Uint8Array> = ['%PDF-1.4\n'];
   const offsets = [0];
@@ -202,6 +229,232 @@ export async function reportToPdfBlob(report: ExportReport) {
 
 export function countReportRows(report: ExportReport) {
   return report.indicadores.reduce((total, indicator) => total + indicator.datos.length, 0);
+}
+
+function renderPdfReport(report: ExportReport, hasHeaderImage: boolean) {
+  const pages: PdfContentBuilder[] = [];
+  let current = createPdfReportPage(pages, hasHeaderImage);
+  const allRows = report.indicadores.flatMap((indicator) => indicator.datos);
+  const statusSummary = summarizeReport(report);
+
+  const ensureSpace = (height: number) => {
+    if (current.y - height < PDF_BOTTOM_Y) {
+      current = createPdfReportPage(pages, hasHeaderImage);
+    }
+  };
+
+  const drawSectionTitle = (title: string) => {
+    ensureSpace(32);
+    current.content.fillRect(PDF_MARGIN_X, current.y - 24, PDF_CONTENT_WIDTH, 24, PDF_LIGHT_GREEN);
+    current.content.textAt(title, PDF_MARGIN_X + 10, current.y - 16, 11, 'F2', PDF_DARK_GREEN);
+    current.y -= 34;
+  };
+
+  current.content.textAt('Resumen', PDF_MARGIN_X, current.y, 20, 'F2', PDF_DARK_GREEN);
+  current.y -= 24;
+  current.content.textAt(
+    `${cleanExportText(report.identidadReporte.tipo)}: ${cleanExportText(report.identidadReporte.nombre)}`,
+    PDF_MARGIN_X,
+    current.y,
+    11,
+    'F1',
+    PDF_TEXT
+  );
+  current.y -= 16;
+  current.content.textAt(
+    `Periodo ${cleanExportText(report.periodo)} | Ciclo escolar ${cleanExportText(report.cicloEscolar)} | Generado ${formatReportDate(report.fechaGeneracion)}`,
+    PDF_MARGIN_X,
+    current.y,
+    9,
+    'F1',
+    PDF_MUTED
+  );
+  current.y -= 26;
+
+  drawSectionTitle('Resumen global');
+  drawMetricGrid(current, [
+    ['Registros revisados', String(statusSummary.total)],
+    ['Avance promedio', averageProgress(allRows)],
+    ['Aprobados', String(statusSummary.approved)],
+    ['En revisión', String(statusSummary.inReview)],
+    ['Observados', String(statusSummary.observed)],
+    ['Pendientes', String(statusSummary.pending)],
+    ['Atrasados', String(statusSummary.late)],
+    ['Indicadores', String(report.indicadores.length)],
+  ]);
+  current.y -= 18;
+
+  drawSectionTitle('Detalle por indicador');
+
+  if (report.indicadores.length === 0) {
+    current.content.textAt('No hay indicadores disponibles para el alcance seleccionado.', PDF_MARGIN_X, current.y, 10, 'F1', PDF_MUTED);
+    current.y -= 18;
+  }
+
+  report.indicadores.forEach((indicator) => {
+    ensureSpace(84);
+    current.content.fillRect(PDF_MARGIN_X, current.y - 24, PDF_CONTENT_WIDTH, 24, PDF_LIGHT_GRAY);
+    current.content.textAt(cleanExportText(indicator.nombre), PDF_MARGIN_X + 10, current.y - 16, 10.5, 'F2', PDF_GREEN);
+    current.y -= 32;
+
+    const description = cleanExportText(indicator.descripcion ?? '');
+    if (description) {
+      wrapPdfLine(description, 118).slice(0, 2).forEach((line) => {
+        current.content.textAt(line, PDF_MARGIN_X, current.y, 8.5, 'F1', PDF_MUTED);
+        current.y -= 11;
+      });
+      current.y -= 2;
+    }
+
+    current.content.textAt(
+      `${indicator.datos.length} registros | Avance promedio ${averageProgress(indicator.datos)} | Estado principal ${dominantStatus(indicator.datos)}`,
+      PDF_MARGIN_X,
+      current.y,
+      8.5,
+      'F1',
+      PDF_MUTED
+    );
+    current.y -= 14;
+
+    if (indicator.datos.length === 0) {
+      current.content.textAt('Sin registros capturados para este indicador.', PDF_MARGIN_X, current.y, 9, 'F1', PDF_MUTED);
+      current.y -= 22;
+      return;
+    }
+
+    drawIndicatorTable(indicator.datos, report, () => current, ensureSpace, (nextPage) => {
+      current = nextPage;
+    }, hasHeaderImage, pages);
+    current.y -= 14;
+  });
+
+  pages.forEach((content, index) => drawPdfFooter(content, index + 1, pages.length));
+
+  return pages.map((content) => content.toBytes());
+}
+
+function createPdfReportPage(pages: PdfContentBuilder[], hasHeaderImage: boolean): PdfReportPage {
+  const content = new PdfContentBuilder();
+  drawPdfHeader(content, hasHeaderImage);
+  pages.push(content);
+
+  return {
+    content,
+    y: 676,
+  };
+}
+
+function drawPdfHeader(content: PdfContentBuilder, hasHeaderImage: boolean) {
+  if (hasHeaderImage) {
+    content.line('q');
+    content.line('500 0 0 70 56 710 cm');
+    content.line('/HeaderLogos Do');
+    content.line('Q');
+  } else {
+    content.textAt('Universidad de Colima', PDF_MARGIN_X, 748, 11, 'F2', PDF_DARK_GREEN);
+    content.textAt('Media Superior', PDF_WIDTH - PDF_MARGIN_X - 86, 748, 11, 'F2', PDF_DARK_GREEN);
+  }
+
+  content.fillRect(PDF_MARGIN_X, 700, PDF_CONTENT_WIDTH, 3, PDF_GREEN);
+}
+
+function drawPdfFooter(content: PdfContentBuilder, pageNumber: number, pageCount: number) {
+  content.strokeLine(PDF_MARGIN_X, 44, PDF_WIDTH - PDF_MARGIN_X, 44, PDF_LINE);
+  content.textAt(`ADPeak SIGI-POA DGEMS | Página ${pageNumber} de ${pageCount}`, PDF_MARGIN_X, 28, 8, 'F1', PDF_MUTED);
+}
+
+function drawMetricGrid(page: PdfReportPage, metrics: Array<[string, string]>) {
+  const columns = 4;
+  const columnWidth = PDF_CONTENT_WIDTH / columns;
+  const rowHeight = 42;
+
+  metrics.forEach(([label, value], index) => {
+    const column = index % columns;
+    const row = Math.floor(index / columns);
+    const x = PDF_MARGIN_X + column * columnWidth;
+    const y = page.y - row * rowHeight;
+
+    page.content.fillRect(x, y - rowHeight + 5, columnWidth - 8, rowHeight - 8, PDF_LIGHT_GRAY);
+    page.content.strokeRect(x, y - rowHeight + 5, columnWidth - 8, rowHeight - 8, PDF_LINE);
+    page.content.textAt(cleanExportText(label), x + 8, y - 16, 7.5, 'F1', PDF_MUTED);
+    page.content.textAt(cleanExportText(value), x + 8, y - 31, 13, 'F2', PDF_DARK_GREEN);
+  });
+
+  page.y -= Math.ceil(metrics.length / columns) * rowHeight + 2;
+}
+
+function drawIndicatorTable(
+  rows: ReportDataRow[],
+  report: ExportReport,
+  getCurrentPage: () => PdfReportPage,
+  ensureSpace: (height: number) => void,
+  setCurrentPage: (page: PdfReportPage) => void,
+  hasHeaderImage: boolean,
+  pages: PdfContentBuilder[]
+) {
+  const columns: PdfTableColumn[] = [
+    { label: 'Actividad', width: 136, value: (row) => row.actividad },
+    { label: 'Responsable', width: 92, value: (row) => row.responsable },
+    { label: 'Plantel', width: 82, value: (row, currentReport) => row.plantel ?? currentReport.identidadReporte.nombre },
+    { label: 'Estado', width: 68, align: 'center', value: (row) => formatStatusLabel(row.estado) },
+    { label: 'Avance', width: 50, align: 'center', value: (row) => row.avance },
+    { label: 'Evid.', width: 42, align: 'center', value: (row) => (typeof row.evidencias === 'number' ? String(row.evidencias) : '') },
+    { label: 'Vence', width: 58, align: 'center', value: (row) => formatDeadline(row.vencimiento) },
+  ];
+
+  const drawHeader = () => {
+    ensureSpace(24);
+    const page = getCurrentPage();
+    let x = PDF_MARGIN_X;
+
+    page.content.fillRect(PDF_MARGIN_X, page.y - 20, PDF_CONTENT_WIDTH, 20, PDF_DARK_GREEN);
+    columns.forEach((column) => {
+      page.content.textAt(column.label, x + 5, page.y - 13, 7.4, 'F2', [255, 255, 255]);
+      x += column.width;
+    });
+    page.y -= 20;
+  };
+
+  drawHeader();
+
+  rows.forEach((row, rowIndex) => {
+    let page = getCurrentPage();
+    const wrappedCells = columns.map((column) => wrapPdfLine(column.value(row, report), Math.max(8, Math.floor(column.width / 4.4))));
+    const lineCount = Math.max(...wrappedCells.map((cellLines) => cellLines.length));
+    const rowHeight = Math.max(24, lineCount * 9.5 + 10);
+
+    if (page.y - rowHeight < PDF_BOTTOM_Y) {
+      const nextPage = createPdfReportPage(pages, hasHeaderImage);
+      setCurrentPage(nextPage);
+      drawHeader();
+      page = getCurrentPage();
+    }
+
+    let x = PDF_MARGIN_X;
+    const fill = rowIndex % 2 === 0 ? [255, 255, 255] as PdfColor : PDF_LIGHT_GRAY;
+    page.content.fillRect(PDF_MARGIN_X, page.y - rowHeight, PDF_CONTENT_WIDTH, rowHeight, fill);
+    page.content.strokeRect(PDF_MARGIN_X, page.y - rowHeight, PDF_CONTENT_WIDTH, rowHeight, PDF_LINE);
+
+    columns.forEach((column, columnIndex) => {
+      const cellLines = wrappedCells[columnIndex];
+      const textX = column.align === 'center' ? x + column.width / 2 : x + 5;
+
+      cellLines.slice(0, 3).forEach((line, lineIndex) => {
+        page.content.textAt(
+          line,
+          textX,
+          page.y - 12 - lineIndex * 9.5,
+          7.1,
+          'F1',
+          PDF_TEXT,
+          column.align ?? 'left'
+        );
+      });
+      x += column.width;
+    });
+
+    page.y -= rowHeight;
+  });
 }
 
 function buildPdfLines(report: ExportReport) {
@@ -249,22 +502,7 @@ function renderPdfPage(lines: string[], pageNumber: number, pageCount: number, h
     content.line('/HeaderLogos Do');
     content.line('Q');
   } else {
-    [
-      'q',
-      '0.32 0.46 0.19 rg',
-      '50 772 120 4 re f',
-      '1 0.56 0 rg',
-      '458 770 8 8 re f',
-      '0.78 0 0.5 rg',
-      '472 770 8 8 re f',
-      '0.32 0.15 0.51 rg',
-      '486 770 8 8 re f',
-      '0 0.64 0.89 rg',
-      '500 770 8 8 re f',
-      '0.76 0.85 0.18 rg',
-      '514 770 8 8 re f',
-      'Q',
-    ].forEach((command) => content.line(command));
+    content.fillRect(50, 772, 120, 4, PDF_GREEN);
   }
 
   content.line('BT');
@@ -392,9 +630,68 @@ class PdfContentBuilder {
     this.bytes.push(...pdfTextLiteralBytes(value), 0x20, 0x54, 0x6a, 0x0a);
   }
 
+  textAt(
+    value: string,
+    x: number,
+    y: number,
+    size = 10,
+    font: PdfFont = 'F1',
+    color: PdfColor = PDF_TEXT,
+    align: 'left' | 'center' = 'left'
+  ) {
+    const normalizedValue = cleanExportText(value);
+    const textX = align === 'center'
+      ? x - estimatePdfTextWidth(normalizedValue, size) / 2
+      : x;
+
+    this.line('BT');
+    this.line(`/${font} ${formatPdfNumber(size)} Tf`);
+    this.line(`${formatPdfColor(color)} rg`);
+    this.line(`${formatPdfNumber(textX)} ${formatPdfNumber(y)} Td`);
+    this.text(normalizedValue);
+    this.line('ET');
+  }
+
+  fillRect(x: number, y: number, width: number, height: number, color: PdfColor) {
+    this.line('q');
+    this.line(`${formatPdfColor(color)} rg`);
+    this.line(`${formatPdfNumber(x)} ${formatPdfNumber(y)} ${formatPdfNumber(width)} ${formatPdfNumber(height)} re f`);
+    this.line('Q');
+  }
+
+  strokeRect(x: number, y: number, width: number, height: number, color: PdfColor) {
+    this.line('q');
+    this.line(`${formatPdfColor(color)} RG`);
+    this.line('0.5 w');
+    this.line(`${formatPdfNumber(x)} ${formatPdfNumber(y)} ${formatPdfNumber(width)} ${formatPdfNumber(height)} re S`);
+    this.line('Q');
+  }
+
+  strokeLine(x1: number, y1: number, x2: number, y2: number, color: PdfColor) {
+    this.line('q');
+    this.line(`${formatPdfColor(color)} RG`);
+    this.line('0.5 w');
+    this.line(`${formatPdfNumber(x1)} ${formatPdfNumber(y1)} m`);
+    this.line(`${formatPdfNumber(x2)} ${formatPdfNumber(y2)} l`);
+    this.line('S');
+    this.line('Q');
+  }
+
   toBytes() {
     return new Uint8Array(this.bytes);
   }
+}
+
+function formatPdfNumber(value: number) {
+  return Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/\.?0+$/, '');
+}
+
+function formatPdfColor(color: PdfColor) {
+  return color.map((value) => (value / 255).toFixed(3).replace(/\.?0+$/, '')).join(' ');
+}
+
+function estimatePdfTextWidth(value: string, size: number) {
+  return cleanExportText(value).length * size * 0.45;
 }
 
 function asciiBytes(value: string) {
@@ -523,10 +820,31 @@ function wrapPdfLine(line: string, maxLength = 92) {
   let currentLine = '';
 
   words.forEach((word) => {
+    if (word.length > maxLength) {
+      if (currentLine) {
+        wrappedLines.push(currentLine);
+        currentLine = '';
+      }
+
+      for (let index = 0; index < word.length; index += maxLength) {
+        const chunk = word.slice(index, index + maxLength);
+
+        if (chunk.length === maxLength) {
+          wrappedLines.push(chunk);
+        } else {
+          currentLine = chunk;
+        }
+      }
+
+      return;
+    }
+
     const nextLine = currentLine ? `${currentLine} ${word}` : word;
 
     if (nextLine.length > maxLength) {
-      wrappedLines.push(currentLine);
+      if (currentLine) {
+        wrappedLines.push(currentLine);
+      }
       currentLine = word;
       return;
     }
@@ -539,16 +857,6 @@ function wrapPdfLine(line: string, maxLength = 92) {
   }
 
   return wrappedLines;
-}
-
-function chunkLines(lines: string[], size: number) {
-  const chunks: string[][] = [];
-
-  for (let index = 0; index < lines.length; index += size) {
-    chunks.push(lines.slice(index, index + size));
-  }
-
-  return chunks.length > 0 ? chunks : [['Reporte de indicadores']];
 }
 
 function normalizePdfText(value: string) {
@@ -696,7 +1004,7 @@ function buildRecordDetails(dataRow: ReportDataRow) {
   }
 
   if (deadline === 'Atrasado') {
-    details.push('Atencion: vencido');
+    details.push('Atención: vencido');
   }
 
   return details.length > 0 ? `  ${details.join(' | ')}` : '';
