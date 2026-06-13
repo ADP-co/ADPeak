@@ -92,7 +92,7 @@ describe("demo data", () => {
     expect(report).toContain('"indicador"');
     expect(report).toContain('"Plantel Norte"');
     expect(report).toContain('"vencimiento"');
-    expect(report).toContain('"Seguimiento academico"');
+    expect(report).toContain('"Seguimiento académico"');
     expect(report).toContain('"84%"');
   });
 
@@ -117,7 +117,7 @@ describe("demo data", () => {
     expect(report.indicadores.flatMap((indicator) => indicator.datos)).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          actividad: "Seguimiento academico",
+          actividad: "Seguimiento académico",
           avance: "84%",
           estado: "Enviado",
           plantel: "Plantel Norte",

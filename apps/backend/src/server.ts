@@ -269,7 +269,7 @@ const server = createServer(async (request, response) => {
 
       if (request.method === "GET" && action === "template") {
         if (!indicator || !listIndicators(session, { includeInactive: session.role === "director" }).some((item) => item.id === indicator.id)) {
-          sendJson(response, 404, { error: "indicator_not_found", message: "No existe un indicador con ese ID o codigo." });
+          sendJson(response, 404, { error: "indicator_not_found", message: "No existe un indicador con ese ID o código." });
           return;
         }
 
@@ -501,7 +501,7 @@ const server = createServer(async (request, response) => {
         if (!observacion) {
           sendJson(response, 400, {
             error: "observation_required",
-            message: "Agrega una observacion para solicitar correccion."
+            message: "Agrega una observación para solicitar corrección."
           });
           return;
         }
@@ -580,7 +580,7 @@ const server = createServer(async (request, response) => {
       if (!session) {
         sendJson(response, 401, {
           error: "demo_login_invalid",
-          message: "Usuario demo o codigo de acceso invalido."
+          message: "Usuario demo o código de acceso inválido."
         });
         return;
       }
@@ -590,7 +590,7 @@ const server = createServer(async (request, response) => {
     } catch {
       sendJson(response, 400, {
         error: "invalid_json",
-        message: "El cuerpo de la solicitud debe ser JSON valido."
+          message: "El cuerpo de la solicitud debe ser JSON válido."
       });
       return;
     }
@@ -606,7 +606,7 @@ const server = createServer(async (request, response) => {
       if (!result) {
         sendJson(response, 403, {
           error: "demo_action_forbidden",
-          message: "La accion demo no esta permitida para el rol seleccionado."
+          message: "La acción demo no está permitida para el rol seleccionado."
         });
         return;
       }
@@ -631,7 +631,7 @@ const server = createServer(async (request, response) => {
 server.listen(port, () => {
   console.log(`Backend listo en http://127.0.0.1:${port}`);
   console.log(`Healthcheck: http://127.0.0.1:${port}/health`);
-  console.log(`Configuracion: ${JSON.stringify(redactConfig(appConfig))}`);
+  console.log(`Configuración: ${JSON.stringify(redactConfig(appConfig))}`);
 });
 
 function reportFiltersFromUrl(url: URL) {

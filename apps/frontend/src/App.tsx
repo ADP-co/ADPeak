@@ -28,17 +28,17 @@ const plantelIndicatorScope: Pick<Indicator, 'plantel' | 'supervisor' | 'respons
 };
 
 const mockupIndicatorsBase: Indicator[] = [
-    { code: '1.0.0.0.2', name: 'Porcentaje de titulacion por cohorte del NMS', status: 'Pendiente' },
-    { code: '1.1.0.0.1', name: 'Porcentaje de cobertura en educacion media superior', status: 'Corregir' },
-    { code: '1.1.1.0.1', name: 'Porcentaje de aceptacion en educacion media superior', status: 'Corregir' },
-    { code: '1.1.1.1.1', name: 'Porcentaje de programas educativos de educacion media superior nuevos', status: 'Pendiente' },
-    { code: '1.1.2.0.1', name: 'Porcentaje retencion escolar de educacion media superior', status: 'Pendiente' },
-    { code: '1.1.2.0.3', name: 'Tasa de abandono escolar de educacion media superior', status: 'Pendiente' },
-    { code: '1.1.2.1.1', name: 'Porcentaje de estudiantes de educacion media superior', status: 'Pendiente' },
-    { code: '1.1.2.1.3', name: 'Porcentaje de estudiantes de educacion media superior que sus padres...', status: 'Pendiente' },
+    { code: '1.0.0.0.2', name: 'Porcentaje de titulación por cohorte del NMS', status: 'Pendiente' },
+    { code: '1.1.0.0.1', name: 'Porcentaje de cobertura en educación media superior', status: 'Corregir' },
+    { code: '1.1.1.0.1', name: 'Porcentaje de aceptación en educación media superior', status: 'Corregir' },
+    { code: '1.1.1.1.1', name: 'Porcentaje de programas educativos de educación media superior nuevos', status: 'Pendiente' },
+    { code: '1.1.2.0.1', name: 'Porcentaje de retención escolar de educación media superior', status: 'Pendiente' },
+    { code: '1.1.2.0.3', name: 'Tasa de abandono escolar de educación media superior', status: 'Pendiente' },
+    { code: '1.1.2.1.1', name: 'Porcentaje de estudiantes de educación media superior', status: 'Pendiente' },
+    { code: '1.1.2.1.3', name: 'Porcentaje de estudiantes de educación media superior que sus padres...', status: 'Pendiente' },
     { code: '1.1.2.1.4', name: 'Porcentaje de estudiantes atendidos en los servicios de salud integral.', status: 'En revisión' },
     { code: '1.1.2.2.1.', name: 'Porcentaje de estudiantes atendidos en acciones de reforzamiento', status: 'En revisión' },
-    { code: '1.1.2.2.5', name: 'Numero de programas educativos de media superior', status: 'Aprobado' },
+    { code: '1.1.2.2.5', name: 'Número de programas educativos de media superior', status: 'Aprobado' },
     { code: '1.1.2.2.8', name: 'Porcentaje de estudiantes certificados en el dominio de una lengua extranjera', status: 'Aprobado' },
   ];
 
@@ -49,15 +49,15 @@ const mockupIndicators: Indicator[] = mockupIndicatorsBase.map((indicator) => ({
 
   const template1_0_0_0_2: IndicatorTemplate = {
     indicatorCode: '1.0.0.0.2',
-    indicatorName: 'Porcentaje de titulacion por cohorte del NMS',
+    indicatorName: 'Porcentaje de titulación por cohorte del NMS',
     groups: [
       { label: 'Contexto Escolar', colspan: 3 },
-      { label: 'Egresados titulados en el ano 2025', colspan: 3 },
-      { label: 'Matricula de primer ingreso (agosto 2022)', colspan: 3 },
+      { label: 'Egresados titulados en el año 2025', colspan: 3 },
+      { label: 'Matrícula de primer ingreso (agosto 2022)', colspan: 3 },
       { label: 'Resultados', colspan: 1 },
     ],
     columns: [
-      { key: 'delegacion', label: 'Delegacion', type: 'readonly' },
+      { key: 'delegacion', label: 'Delegación', type: 'readonly' },
       { key: 'plantel', label: 'Plantel', type: 'readonly' },
       { key: 'programa', label: 'Programa Educativo', type: 'readonly' },
       { key: 'egresados_mujeres', label: 'Mujeres', type: 'number', required: true },
@@ -78,7 +78,7 @@ const mockupIndicators: Indicator[] = mockupIndicatorsBase.map((indicator) => ({
       },
       {
         key: 'porcentaje_titulacion',
-        label: '% de titulacion',
+        label: '% de titulación',
         type: 'calculated',
         calculation: {
           type: 'percentage',
@@ -92,18 +92,18 @@ const mockupIndicators: Indicator[] = mockupIndicatorsBase.map((indicator) => ({
 
   const mockInitialData = [
     {
-      delegacion: 'Villa de Alvarez',
+      delegacion: 'Villa de Álvarez',
       plantel: 'Bachillerato 16',
-      programa: 'Tecnico Analista Programador',
+      programa: 'Técnico Analista Programador',
       egresados_mujeres: '',
       egresados_hombres: '',
       matricula_mujeres: '',
       matricula_hombres: '',
     },
     {
-      delegacion: 'Villa de Alvarez',
+      delegacion: 'Villa de Álvarez',
       plantel: 'Bachillerato 16',
-      programa: 'Tecnico Analista Quimico',
+      programa: 'Técnico Analista Químico',
       egresados_mujeres: '',
       egresados_hombres: '',
       matricula_mujeres: '',
@@ -271,10 +271,10 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [] 
     captureDraft.sendToReview(buildCapturePayload(data), {
       onSuccess: () => {
         onIndicatorStatusChange?.(selectedCode, 'En revisión');
-        toast.success('Enviado a revision');
+        toast.success('Enviado a revisión');
       },
       onError: () => {
-        toast.error('No se pudo enviar a revision');
+        toast.error('No se pudo enviar a revisión');
       },
     });
   };

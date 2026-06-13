@@ -104,13 +104,13 @@ function buildFallbackReport(
     },
     indicadores: [
       {
-        nombre: 'Porcentaje de titulacion por cohorte del NMS',
+        nombre: 'Porcentaje de titulación por cohorte del NMS',
         descripcion: 'Registros capturados por programa educativo del plantel.',
         datos: [
           {
             id: `${item.id}-titulacion-ap`,
             actividad: 'Captura de egresados titulados',
-            responsable: 'Responsable academico',
+            responsable: 'Responsable académico',
             estado: item.status,
             avance: `${item.percentage}%`,
             plantel: item.plantel,
@@ -122,8 +122,8 @@ function buildFallbackReport(
           },
           {
             id: `${item.id}-matricula-ap`,
-            actividad: 'Validacion de matricula de primer ingreso',
-            responsable: 'Coordinacion de planeacion',
+            actividad: 'Validación de matrícula de primer ingreso',
+            responsable: 'Coordinación de planeación',
             estado: item.status,
             avance: `${Math.max(item.percentage - 10, 0)}%`,
             plantel: item.plantel,
@@ -141,7 +141,7 @@ function buildFallbackReport(
         datos: [
           {
             id: `${item.id}-evidencia-poa`,
-            actividad: 'Revision documental de evidencias',
+            actividad: 'Revisión documental de evidencias',
             responsable: 'Responsable de indicador',
             estado: item.status,
             avance: `${item.percentage}%`,

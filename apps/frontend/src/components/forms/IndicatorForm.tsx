@@ -419,7 +419,7 @@ export const IndicatorForm = ({
         </Button>
         {/* Bloquear el botón de envío si el formulario contiene errores */}
         <Button type="submit" variant="primary" className="text-xs py-1.5 px-4" disabled={!isValid || isBusy}>
-          Enviar a revision
+          Enviar a revisión
         </Button>
       </div>
     </form>

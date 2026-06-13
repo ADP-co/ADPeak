@@ -175,7 +175,7 @@ export function sessionFromHeaders(headers: Record<string, string | string[] | u
   const role = normalizeRole(rawRole);
 
   if (!role) {
-    throw new SigiAuthError("La sesion no incluye un rol valido.");
+    throw new SigiAuthError("La sesión no incluye un rol válido.");
   }
 
   const userId = headerValue(headers["x-user-id"]) || defaultUserIdForRole(role);
@@ -280,7 +280,7 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
   requireDirector(session);
 
   if (!input.code?.trim() || !input.name?.trim()) {
-    throw new SigiValidationError("El indicador debe incluir codigo y nombre.");
+    throw new SigiValidationError("El indicador debe incluir código y nombre.");
   }
 
   const existing = input.id ? indicators.get(Number(input.id)) : getIndicatorByCode(input.code);
@@ -385,7 +385,7 @@ export function validateCapturePayload(indicator: SigiIndicator, payload: Captur
   );
 
   if (requireJustification && missingValues && !payload.justificacion?.trim()) {
-    throw new SigiValidationError("Agrega una justificacion cuando existan datos pendientes.");
+    throw new SigiValidationError("Agrega una justificación cuando existan datos pendientes.");
   }
 }
 
@@ -804,7 +804,7 @@ function persistCatalogState() {
 
 function requireDirector(session: SigiSession) {
   if (session.role !== "director") {
-    throw new SigiForbiddenError("Solo direccion puede administrar este recurso.");
+    throw new SigiForbiddenError("Solo dirección puede administrar este recurso.");
   }
 }
 
@@ -848,12 +848,12 @@ function titulationTemplate(indicator: SigiIndicator): IndicatorTemplate {
     indicatorName: indicator.name,
     groups: [
       { label: "Contexto Escolar", colspan: 3 },
-      { label: "Egresados titulados en el ano 2025", colspan: 3 },
-      { label: "Matricula de primer ingreso (agosto 2022)", colspan: 3 },
+      { label: "Egresados titulados en el año 2025", colspan: 3 },
+      { label: "Matrícula de primer ingreso (agosto 2022)", colspan: 3 },
       { label: "Resultados", colspan: 1 }
     ],
     columns: [
-      { key: "delegacion", label: "Delegacion", type: "readonly" },
+      { key: "delegacion", label: "Delegación", type: "readonly" },
       { key: "plantel", label: "Plantel", type: "readonly" },
       { key: "programa", label: "Programa Educativo", type: "readonly" },
       { key: "egresados_mujeres", label: "Mujeres", type: "number" },
@@ -862,22 +862,22 @@ function titulationTemplate(indicator: SigiIndicator): IndicatorTemplate {
       { key: "matricula_mujeres", label: "Mujeres", type: "number" },
       { key: "matricula_hombres", label: "Hombres", type: "number" },
       { key: "matricula_total", label: "Total", type: "calculated", calculation: { type: "sum", sourceKeys: ["matricula_mujeres", "matricula_hombres"] } },
-      { key: "porcentaje_titulacion", label: "% de titulacion", type: "calculated", calculation: { type: "percentage", numeratorKey: "egresados_total", denominatorKey: "matricula_total", decimals: 2 } }
+      { key: "porcentaje_titulacion", label: "% de titulación", type: "calculated", calculation: { type: "percentage", numeratorKey: "egresados_total", denominatorKey: "matricula_total", decimals: 2 } }
     ],
     initialRows: [
       {
-        delegacion: "Villa de Alvarez",
+        delegacion: "Villa de Álvarez",
         plantel: "Bachillerato 16",
-        programa: "Tecnico Analista Programador",
+        programa: "Técnico Analista Programador",
         egresados_mujeres: "",
         egresados_hombres: "",
         matricula_mujeres: "",
         matricula_hombres: ""
       },
       {
-        delegacion: "Villa de Alvarez",
+        delegacion: "Villa de Álvarez",
         plantel: "Bachillerato 16",
-        programa: "Tecnico Analista Quimico",
+        programa: "Técnico Analista Químico",
         egresados_mujeres: "",
         egresados_hombres: "",
         matricula_mujeres: "",

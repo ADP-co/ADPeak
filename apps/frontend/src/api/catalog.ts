@@ -247,12 +247,12 @@ function templateForIndicator(indicator: CatalogIndicator): IndicatorTemplateRes
       indicatorName: indicator.name,
       groups: [
         { label: 'Contexto Escolar', colspan: 3 },
-        { label: 'Egresados titulados en el ano 2025', colspan: 3 },
-        { label: 'Matricula de primer ingreso (agosto 2022)', colspan: 3 },
+        { label: 'Egresados titulados en el año 2025', colspan: 3 },
+        { label: 'Matrícula de primer ingreso (agosto 2022)', colspan: 3 },
         { label: 'Resultados', colspan: 1 },
       ],
       columns: [
-        { key: 'delegacion', label: 'Delegacion', type: 'readonly' },
+        { key: 'delegacion', label: 'Delegación', type: 'readonly' },
         { key: 'plantel', label: 'Plantel', type: 'readonly' },
         { key: 'programa', label: 'Programa Educativo', type: 'readonly' },
         { key: 'egresados_mujeres', label: 'Mujeres', type: 'number' },
@@ -261,11 +261,11 @@ function templateForIndicator(indicator: CatalogIndicator): IndicatorTemplateRes
         { key: 'matricula_mujeres', label: 'Mujeres', type: 'number' },
         { key: 'matricula_hombres', label: 'Hombres', type: 'number' },
         { key: 'matricula_total', label: 'Total', type: 'calculated', calculation: { type: 'sum', sourceKeys: ['matricula_mujeres', 'matricula_hombres'] } },
-        { key: 'porcentaje_titulacion', label: '% de titulacion', type: 'calculated', calculation: { type: 'percentage', numeratorKey: 'egresados_total', denominatorKey: 'matricula_total', decimals: 2 } },
+        { key: 'porcentaje_titulacion', label: '% de titulación', type: 'calculated', calculation: { type: 'percentage', numeratorKey: 'egresados_total', denominatorKey: 'matricula_total', decimals: 2 } },
       ],
       initialRows: [
-        { delegacion: 'Villa de Alvarez', plantel: 'Bachillerato 16', programa: 'Tecnico Analista Programador', egresados_mujeres: '', egresados_hombres: '', matricula_mujeres: '', matricula_hombres: '' },
-        { delegacion: 'Villa de Alvarez', plantel: 'Bachillerato 16', programa: 'Tecnico Analista Quimico', egresados_mujeres: '', egresados_hombres: '', matricula_mujeres: '', matricula_hombres: '' },
+        { delegacion: 'Villa de Álvarez', plantel: 'Bachillerato 16', programa: 'Técnico Analista Programador', egresados_mujeres: '', egresados_hombres: '', matricula_mujeres: '', matricula_hombres: '' },
+        { delegacion: 'Villa de Álvarez', plantel: 'Bachillerato 16', programa: 'Técnico Analista Químico', egresados_mujeres: '', egresados_hombres: '', matricula_mujeres: '', matricula_hombres: '' },
       ],
     };
   }

@@ -261,7 +261,7 @@ export const UsersTable = () => {
     <div className="w-full max-w-[1250px] mx-auto pt-8 pb-10">
       <div className="flex flex-col gap-4 mb-6">
         <h1 className="font-title text-3xl font-bold text-brand-Gris_oscuro">
-          Gestion de Usuarios
+          Gestión de Usuarios
         </h1>
 
         <div className="flex flex-wrap items-center justify-between gap-4 w-full">

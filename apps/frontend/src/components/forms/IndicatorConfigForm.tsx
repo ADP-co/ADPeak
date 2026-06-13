@@ -28,7 +28,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
     isNew
       ? []
       : [
-          { id: '1', label: 'Delegacion', type: 'readonly' },
+          { id: '1', label: 'Delegación', type: 'readonly' },
           { id: '2', label: 'Plantel', type: 'readonly' },
           { id: '3', label: 'Programa Educativo', type: 'readonly' },
           { id: '4', label: 'Hombres', type: 'number' },
@@ -71,7 +71,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
         activities: columns.length > 0 ? ['Captura configurada'] : ['Actividad general'],
         active: true,
       });
-      toast.success('Configuracion guardada');
+      toast.success('Configuración guardada');
       handleBack();
     } catch {
       toast.error('No se pudo guardar');
@@ -83,7 +83,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
       <div className="flex items-start justify-between mb-8">
         <div>
           <span className="text-sm font-accent text-brand-Gris_oscuro/60 font-bold tracking-wider">
-            {isNew ? 'NUEVO INDICADOR' : 'CONFIGURACION DE INDICADOR'}
+            {isNew ? 'NUEVO INDICADOR' : 'CONFIGURACIÓN DE INDICADOR'}
           </span>
           <h1 className="font-title text-2xl font-bold text-brand-Gris_oscuro mt-1">
             {code}
@@ -104,7 +104,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
         <Input
           label="Nombre del indicador"
           value={indicatorName}
-          placeholder="Ej. Porcentaje de titulacion por cohorte..."
+          placeholder="Ej. Porcentaje de titulación por cohorte..."
           onChange={(event) => setIndicatorName(event.target.value)}
         />
 
@@ -238,7 +238,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
                   onChange={(event) => handleChangeColumn(column.id, 'type', event.target.value)}
                 >
                   <option value="readonly">Solo lectura</option>
-                  <option value="number">Numero</option>
+                  <option value="number">Número</option>
                   <option value="text">Texto</option>
                   <option value="calculated">Calculado</option>
                 </select>
@@ -263,7 +263,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
 
         <div className="flex justify-end pt-4 border-t border-brand-Gris_bajo/20">
           <Button type="button" variant="primary" onClick={handleSave} className="px-8">
-            Guardar configuracion
+            Guardar configuración
           </Button>
         </div>
       </div>

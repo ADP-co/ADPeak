@@ -62,7 +62,7 @@ export function getAppConfig(
   if (missing.length > 0) {
     throw new ConfigurationError(
       [
-        "Configuracion requerida incompleta.",
+        "Configuración requerida incompleta.",
         `Faltan variables: ${missing.join(", ")}.`,
         "Copia .env.example a .env y define valores locales sin secretos reales."
       ].join(" ")

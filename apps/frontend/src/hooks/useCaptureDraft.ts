@@ -80,11 +80,11 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
   const sendToReviewMutation = useMutation({
     mutationFn: async (payload: CapturePayload) => {
       const draft = captureId
-        ? await updateCaptureDraft(captureId, payload, 'envio a revision desde frontend')
+        ? await updateCaptureDraft(captureId, payload, 'envío a revisión desde frontend')
         : await createCaptureDraft({
             ...captureOptions,
             payload,
-            motivoCambio: 'borrador previo a envio a revision',
+            motivoCambio: 'borrador previo a envío a revisión',
           });
 
       persistCapture(draft);
@@ -103,7 +103,7 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
     }
 
     if (sendToReviewMutation.isSuccess) {
-      return 'Enviado a revision.';
+      return 'Enviado a revisión.';
     }
 
     if (saveDraftMutation.isPending) {

@@ -19,15 +19,15 @@ interface IndicatorsManagementTableProps {
 }
 
 const initialIndicators: IndicatorRecord[] = [
-  { id: '1', code: '1.0.0.0.2', name: 'Porcentaje de titulacion por cohorte de educacion media superior', responsable: 'Usuario08', contribuidor: 'Planteles', enabled: true },
-  { id: '2', code: '1.1.0.0.1', name: 'Porcentaje de cobertura en educacion media superior', responsable: 'Usuario08', contribuidor: 'Planteles', enabled: true },
-  { id: '3', code: '1.1.0.0.2', name: 'Porcentaje de cobertura en educacion media superior', responsable: 'Usuario08', contribuidor: 'Usuario08', enabled: true },
-  { id: '4', code: '1.1.1.0.1', name: 'Porcentaje de aceptacion en educacion media superior', responsable: 'Usuario08', contribuidor: 'Planteles', enabled: true },
-  { id: '5', code: '1.1.1.1.1', name: 'Porcentaje de programas educativos de educacion media superior nuevos', responsable: 'Usuario08', contribuidor: 'Planteles', enabled: true },
-  { id: '6', code: '1.1.2.0.1', name: 'Porcentaje retencion escolar de educacion media superior', responsable: 'Usuario08', contribuidor: 'Usuario08', enabled: true },
-  { id: '7', code: '1.1.2.0.3', name: 'Tasa de abandono escolar de educacion media superior', responsable: 'Usuario08', contribuidor: 'Planteles', enabled: true },
-  { id: '8', code: '1.1.2.1.1', name: 'Porcentaje de estudiantes de educacion media superior atendidos en el programa', responsable: 'Usuario08', contribuidor: 'Planteles', enabled: true },
-  { id: '9', code: '1.1.2.1.3', name: 'Porcentaje de estudiantes con participacion de padres o tutores', responsable: 'Usuario08', contribuidor: 'Planteles', enabled: true },
+  { id: '1', code: '1.0.0.0.2', name: 'Porcentaje de titulación por cohorte de educación media superior', responsable: 'Usuario08', contribuidor: 'Planteles', enabled: true },
+  { id: '2', code: '1.1.0.0.1', name: 'Porcentaje de cobertura en educación media superior', responsable: 'Usuario08', contribuidor: 'Planteles', enabled: true },
+  { id: '3', code: '1.1.0.0.2', name: 'Porcentaje de cobertura en educación media superior', responsable: 'Usuario08', contribuidor: 'Usuario08', enabled: true },
+  { id: '4', code: '1.1.1.0.1', name: 'Porcentaje de aceptación en educación media superior', responsable: 'Usuario08', contribuidor: 'Planteles', enabled: true },
+  { id: '5', code: '1.1.1.1.1', name: 'Porcentaje de programas educativos de educación media superior nuevos', responsable: 'Usuario08', contribuidor: 'Planteles', enabled: true },
+  { id: '6', code: '1.1.2.0.1', name: 'Porcentaje de retención escolar de educación media superior', responsable: 'Usuario08', contribuidor: 'Usuario08', enabled: true },
+  { id: '7', code: '1.1.2.0.3', name: 'Tasa de abandono escolar de educación media superior', responsable: 'Usuario08', contribuidor: 'Planteles', enabled: true },
+  { id: '8', code: '1.1.2.1.1', name: 'Porcentaje de estudiantes de educación media superior atendidos en el programa', responsable: 'Usuario08', contribuidor: 'Planteles', enabled: true },
+  { id: '9', code: '1.1.2.1.3', name: 'Porcentaje de estudiantes con participación de padres o tutores', responsable: 'Usuario08', contribuidor: 'Planteles', enabled: true },
   { id: '10', code: '1.1.2.1.4', name: 'Porcentaje de estudiantes atendidos en los servicios de salud', responsable: 'Usuario08', contribuidor: 'Usuario08', enabled: true },
   { id: '11', code: '1.1.2.2.1', name: 'Porcentaje de estudiantes atendidos en acciones de reforzamiento', responsable: 'Usuario08', contribuidor: 'Planteles', enabled: true },
 ];
@@ -153,15 +153,15 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
     <div className="w-full max-w-[1250px] mx-auto pt-8 pb-10">
       <div className="flex flex-col gap-4 mb-6">
         <h1 className="font-title text-3xl font-bold text-brand-Gris_oscuro">
-          Gestion de Indicadores
+          Gestión de Indicadores
         </h1>
 
         <div className="flex flex-wrap items-center justify-between gap-4 w-full">
           <div className="flex items-center gap-2 w-full max-w-xl">
             <input
               type="text"
-              aria-label="Filtro de indicadores por codigo, nombre, responsable, contribuidor o estado"
-              placeholder="Buscar por codigo, nombre, responsable, contribuidor o estado..."
+              aria-label="Filtro de indicadores por código, nombre, responsable, contribuidor o estado"
+              placeholder="Buscar por código, nombre, responsable, contribuidor o estado..."
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               onKeyDown={(event) => event.key === 'Enter' && setActiveSearch(searchTerm.trim())}
@@ -200,7 +200,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
           <table className="w-full min-w-[920px] border-collapse text-center">
             <thead>
               <tr className="bg-brand-Gris_bajo/35 text-brand-Gris_oscuro font-title font-bold text-sm select-none border-b border-brand-Gris_bajo/20">
-                <th className="py-4 px-6 w-[15%]">Codigo</th>
+                <th className="py-4 px-6 w-[15%]">Código</th>
                 <th className="py-4 px-6 w-[35%] text-left">Nombre</th>
                 <th className="py-4 px-6 w-[20%]">Contribuidor</th>
                 <th className="py-4 px-6 w-[15%]">Responsable</th>

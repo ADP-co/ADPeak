@@ -64,7 +64,7 @@ export const UserBanner = ({ role, name, description, onNavigate, currentView }:
         </button>
 
         {/* Lado Derecho: Enlaces Dinámicos */}
-        <nav className="flex flex-wrap items-center justify-end gap-x-5 gap-y-2 min-h-10" aria-label="Navegacion principal">
+        <nav className="flex flex-wrap items-center justify-end gap-x-5 gap-y-2 min-h-10" aria-label="Navegación principal">
           {currentLinks.map((link) => {
             const viewName = link.href.replace('/', '');
             let isActive = currentView === viewName;

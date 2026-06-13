@@ -94,7 +94,7 @@ export const demoUsers: DemoUser[] = [
     mainFlow: [
       "Capturar avance de indicador",
       "Adjuntar evidencia ficticia",
-      "Enviar a revision"
+      "Enviar a revisión"
     ]
   },
   {
@@ -106,7 +106,7 @@ export const demoUsers: DemoUser[] = [
     responsableId: "resp-egreso",
     mainFlow: [
       "Revisar avances enviados",
-      "Registrar observacion",
+      "Registrar observación",
       "Aprobar avance corregido"
     ]
   }
@@ -116,7 +116,7 @@ export const demoProgress: DemoIndicatorProgress[] = [
   {
     id: "avance-001",
     cycle: "POA 2026",
-    activity: "Seguimiento academico",
+    activity: "Seguimiento académico",
     indicador: "Eficiencia terminal",
     plantel: "Plantel Norte",
     plantelId: "plantel-norte",
@@ -164,8 +164,8 @@ export const demoProgress: DemoIndicatorProgress[] = [
   {
     id: "avance-004",
     cycle: "POA 2026",
-    activity: "Gestion administrativa",
-    indicador: "Actualizacion de expedientes",
+    activity: "Gestión administrativa",
+    indicador: "Actualización de expedientes",
     plantel: "Plantel Sur",
     plantelId: "plantel-sur",
     responsable: "Responsable Planeacion Demo",
@@ -180,7 +180,7 @@ export const demoProgress: DemoIndicatorProgress[] = [
   {
     id: "avance-005",
     cycle: "POA 2026",
-    activity: "Vinculacion",
+    activity: "Vinculación",
     indicador: "Convenios activos",
     plantel: "Plantel Norte",
     plantelId: "plantel-norte",
@@ -306,11 +306,11 @@ export function runDemoAction(role: DemoRole, action: DemoAction) {
 
   const messages: Record<DemoAction, string> = {
     capture_submit:
-      "Plantel capturo avance, adjunto evidencia ficticia y envio a revision.",
+      "Plantel capturó avance, adjuntó evidencia ficticia y envió a revisión.",
     request_correction:
-      "Responsable registro observacion y solicito correccion al plantel.",
+      "Responsable registró observación y solicitó corrección al plantel.",
     approve:
-      "Responsable/admin aprobo el avance dentro de su alcance demo."
+      "Responsable/admin aprobó el avance dentro de su alcance demo."
   };
 
   return {
