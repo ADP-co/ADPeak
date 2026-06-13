@@ -14,7 +14,7 @@ interface PasswordFieldProps {
 
 const PasswordField = ({
   label,
-  placeholder = '••••••••',
+  placeholder = 'Escribe aquí',
   value,
   onChange,
   autoComplete,
@@ -148,7 +148,7 @@ export const AccountProfile = ({ onBack }: AccountProfileProps) => {
             </label>
             <div className="w-full h-10 px-3 rounded-md bg-brand-Verde_principal/15 flex items-center">
               <span className="font-body text-sm font-bold text-brand-Verde_oscuro">
-                {user?.name || 'Nombre de Usuario'}
+                {user?.username || user?.name || 'Nombre de Usuario'}
               </span>
             </div>
           </div>
@@ -157,12 +157,14 @@ export const AccountProfile = ({ onBack }: AccountProfileProps) => {
           <div className="flex flex-col gap-5 mt-2">
             <PasswordField
               label="Contraseña"
+              placeholder="Escribe tu contraseña actual"
               value={currentPassword}
               onChange={setCurrentPassword}
               autoComplete="current-password"
             />
             <PasswordField
               label="Nueva Contraseña"
+              placeholder="Escribe la nueva contraseña"
               value={newPassword}
               onChange={setNewPassword}
               autoComplete="new-password"
@@ -170,6 +172,7 @@ export const AccountProfile = ({ onBack }: AccountProfileProps) => {
             />
             <PasswordField
               label="Confirmar Nueva Contraseña"
+              placeholder="Repite la nueva contraseña"
               value={confirmPassword}
               onChange={setConfirmPassword}
               autoComplete="new-password"

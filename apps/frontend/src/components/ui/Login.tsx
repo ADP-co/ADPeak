@@ -76,6 +76,7 @@ export const Login = () => {
 
     login({
       id: selectedProfile.userId,
+      username: username || 'prueba',
       name: username || 'Prueba',
       role,
       description: selectedProfile.description,

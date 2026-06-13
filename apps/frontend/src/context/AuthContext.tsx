@@ -3,6 +3,7 @@ import { AUTH_STORAGE_KEY } from '../api/client';
 
 export interface User {
   id: string;
+  username?: string;
   name: string;
   role: string;
   description: string;

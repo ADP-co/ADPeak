@@ -1,10 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, GripVertical, PlusCircle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import { saveIndicator } from '../../api/catalog';
+import {
+  fetchIndicators,
+  fetchIndicatorTemplate,
+  fetchUsers,
+  saveIndicator,
+  type CatalogIndicator,
+  type CatalogUser,
+} from '../../api/catalog';
 
 type ColumnType = 'readonly' | 'number' | 'text' | 'calculated';
 
@@ -14,26 +21,131 @@ interface ConfigColumn {
   type: ColumnType;
 }
 
-const mockUsers = ['Usuario08', 'Usuario4', 'Usuario5', 'Supervisor', 'Revisor 1', 'Revisor 2'];
+const fallbackUsers = ['Usuario08', 'Usuario4', 'Usuario5', 'Supervisor', 'Revisor 1', 'Revisor 2'];
+const defaultColumns: ConfigColumn[] = [
+  { id: 'delegacion', label: 'Delegación', type: 'readonly' },
+  { id: 'plantel', label: 'Plantel', type: 'readonly' },
+  { id: 'programa', label: 'Programa Educativo', type: 'readonly' },
+  { id: 'hombres', label: 'Hombres', type: 'number' },
+  { id: 'mujeres', label: 'Mujeres', type: 'number' },
+];
 
 export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
   const { code } = useParams();
   const navigate = useNavigate();
   const isNew = code?.startsWith('TMP-');
-  const [indicatorName, setIndicatorName] = useState(isNew ? '' : 'Nombre del indicador');
+  const [indicatorName, setIndicatorName] = useState('');
   const [responsables, setResponsables] = useState<string[]>(['']);
   const [contributorType, setContributorType] = useState<'planteles' | 'responsables'>('planteles');
   const [contributors, setContributors] = useState<string[]>(['']);
-  const [columns, setColumns] = useState<ConfigColumn[]>(
-    isNew
-      ? []
-      : [
-          { id: '1', label: 'Delegación', type: 'readonly' },
-          { id: '2', label: 'Plantel', type: 'readonly' },
-          { id: '3', label: 'Programa Educativo', type: 'readonly' },
-          { id: '4', label: 'Hombres', type: 'number' },
-          { id: '5', label: 'Mujeres', type: 'number' },
-        ]
+  const [columns, setColumns] = useState<ConfigColumn[]>(isNew ? [] : defaultColumns);
+  const [catalogUsers, setCatalogUsers] = useState<CatalogUser[]>([]);
+  const [editingIndicator, setEditingIndicator] = useState<CatalogIndicator | null>(null);
+  const [isLoading, setIsLoading] = useState(!isNew);
+  const [loadError, setLoadError] = useState('');
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadCurrentValues() {
+      setIsLoading(true);
+      setLoadError('');
+
+      try {
+        const [users, indicators] = await Promise.all([fetchUsers(), fetchIndicators()]);
+
+        if (!isMounted) {
+          return;
+        }
+
+        setCatalogUsers(users);
+
+        if (isNew) {
+          setEditingIndicator(null);
+          setIndicatorName('');
+          setResponsables(['']);
+          setContributorType('planteles');
+          setContributors(['']);
+          setColumns([]);
+          return;
+        }
+
+        const currentIndicator = indicators.find(
+          (indicator) => indicator.code === code || String(indicator.id) === code
+        );
+
+        if (!currentIndicator) {
+          setIndicatorName(code ?? '');
+          setResponsables(['']);
+          setContributorType('planteles');
+          setContributors(['']);
+          setColumns(defaultColumns);
+          setLoadError('No se encontró el indicador; revisa el código antes de guardar.');
+          return;
+        }
+
+        setEditingIndicator(currentIndicator);
+        setIndicatorName(currentIndicator.name);
+        setResponsables(nonEmptyList(currentIndicator.responsibleNames, ['']));
+
+        const currentContributors = nonEmptyList(currentIndicator.contributorNames, ['Planteles']);
+        if (isPlantelContributor(currentContributors)) {
+          setContributorType('planteles');
+          setContributors(['']);
+        } else {
+          setContributorType('responsables');
+          setContributors(currentContributors);
+        }
+
+        const template = await fetchIndicatorTemplate(currentIndicator.code);
+
+        if (isMounted) {
+          setColumns(
+            template.columns.length > 0
+              ? template.columns.map((column, index) => ({
+                  id: column.key || `column-${index}`,
+                  label: column.label,
+                  type: column.type,
+                }))
+              : defaultColumns
+          );
+        }
+      } catch {
+        if (isMounted) {
+          setLoadError('No se pudieron cargar los datos actuales del indicador.');
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void loadCurrentValues();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [code, isNew]);
+
+  const responsibleOptions = useMemo(
+    () =>
+      uniqueOptions([
+        ...catalogUsers.filter((user) => user.active && user.role !== 'plantel').map((user) => user.name),
+        ...fallbackUsers,
+        ...responsables,
+      ]),
+    [catalogUsers, responsables]
+  );
+
+  const contributorOptions = useMemo(
+    () =>
+      uniqueOptions([
+        ...catalogUsers.filter((user) => user.active && user.role !== 'plantel').map((user) => user.name),
+        ...fallbackUsers,
+        ...contributors,
+      ]),
+    [catalogUsers, contributors]
   );
 
   const handleBack = () => {
@@ -61,15 +173,50 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
   };
 
   const handleSave = async () => {
+    const cleanedName = indicatorName.trim();
+    const cleanedResponsables = normalizeList(responsables);
+    const cleanedContributors = contributorType === 'planteles' ? ['Planteles'] : normalizeList(contributors);
+
+    if (!cleanedName) {
+      toast.error('Agrega el nombre del indicador');
+      return;
+    }
+
+    if (cleanedResponsables.length === 0) {
+      toast.error('Selecciona al menos un responsable');
+      return;
+    }
+
+    if (contributorType === 'responsables' && cleanedContributors.length === 0) {
+      toast.error('Selecciona al menos un contribuidor');
+      return;
+    }
+
+    const responsibleIds = idsForUserNames(cleanedResponsables, catalogUsers);
+    const canSendResponsibleIds = responsibleIds.length === cleanedResponsables.length;
+
     try {
       await saveIndicator({
-        code: isNew ? undefined : code,
-        name: indicatorName,
-        description: indicatorName,
-        responsibleNames: responsables.filter(Boolean),
-        contributorNames: contributorType === 'planteles' ? ['Planteles'] : contributors.filter(Boolean),
-        activities: columns.length > 0 ? ['Captura configurada'] : ['Actividad general'],
-        active: true,
+        id: editingIndicator?.id,
+        code: isNew ? undefined : editingIndicator?.code ?? code,
+        name: cleanedName,
+        description:
+          editingIndicator?.description && editingIndicator.description !== editingIndicator.name
+            ? editingIndicator.description
+            : cleanedName,
+        dataType: editingIndicator?.dataType ?? 'number',
+        period: editingIndicator?.period ?? '2026',
+        active: editingIndicator?.active ?? true,
+        primaryResponsibleId: canSendResponsibleIds ? responsibleIds[0] : undefined,
+        responsibleIds: canSendResponsibleIds ? responsibleIds : undefined,
+        responsibleNames: cleanedResponsables,
+        contributorNames: cleanedContributors,
+        activities: editingIndicator?.activities?.length
+          ? editingIndicator.activities
+          : columns.length > 0
+            ? ['Captura configurada']
+            : ['Actividad general'],
+        plantelIds: editingIndicator?.plantelIds,
       });
       toast.success('Configuración guardada');
       handleBack();
@@ -106,7 +253,18 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
           value={indicatorName}
           placeholder="Ej. Porcentaje de titulación por cohorte..."
           onChange={(event) => setIndicatorName(event.target.value)}
+          disabled={isLoading}
         />
+        {isLoading && (
+          <p className="text-sm font-body font-semibold text-brand-Verde_oscuro" role="status">
+            Cargando datos actuales del indicador...
+          </p>
+        )}
+        {loadError && (
+          <p className="text-sm font-body font-semibold text-brand-Status_rojo" role="alert">
+            {loadError}
+          </p>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 border border-brand-Gris_bajo/40 rounded-lg bg-brand-Gris_bajo/5">
           <div>
@@ -128,7 +286,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
                     className="w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro font-body bg-brand-Blanco outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal"
                   >
                     <option value="">Seleccione un usuario...</option>
-                    {mockUsers.map((user) => (
+                    {responsibleOptions.map((user) => (
                       <option key={user} value={user}>{user}</option>
                     ))}
                   </select>
@@ -166,7 +324,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
               className="w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro font-body bg-brand-Blanco outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal"
             >
               <option value="planteles">Planteles</option>
-              <option value="responsables">Responsables especificos</option>
+              <option value="responsables">Responsables específicos</option>
             </select>
 
             {contributorType === 'responsables' && (
@@ -184,7 +342,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
                       className="w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro font-body bg-brand-Blanco outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal"
                     >
                       <option value="">Seleccione un usuario...</option>
-                      {mockUsers.map((user) => (
+                      {contributorOptions.map((user) => (
                         <option key={user} value={user}>{user}</option>
                       ))}
                     </select>
@@ -262,7 +420,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
         </div>
 
         <div className="flex justify-end pt-4 border-t border-brand-Gris_bajo/20">
-          <Button type="button" variant="primary" onClick={handleSave} className="px-8">
+          <Button type="button" variant="primary" onClick={handleSave} className="px-8" disabled={isLoading}>
             Guardar configuración
           </Button>
         </div>
@@ -270,3 +428,33 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
     </div>
   );
 };
+
+function normalizeList(values: string[]) {
+  return values.map((value) => value.trim()).filter(Boolean);
+}
+
+function nonEmptyList(values: string[] | undefined, fallback: string[]) {
+  const normalized = normalizeList(values ?? []);
+  return normalized.length > 0 ? normalized : fallback;
+}
+
+function uniqueOptions(values: string[]) {
+  return Array.from(new Set(normalizeList(values))).sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
+}
+
+function isPlantelContributor(contributors: string[]) {
+  return contributors.length === 0 || contributors.some((contributor) => normalizeText(contributor).includes('plantel'));
+}
+
+function idsForUserNames(names: string[], users: CatalogUser[]) {
+  return names
+    .map((name) => users.find((user) => user.name === name)?.responsableId)
+    .filter((id): id is number => Number.isInteger(id));
+}
+
+function normalizeText(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}

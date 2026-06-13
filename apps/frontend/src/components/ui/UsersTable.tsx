@@ -11,10 +11,26 @@ export interface UserRecord {
   role: SystemRole;
   plantel: string;
   indicadores: string;
+  plantelId?: number;
+  responsableId?: number;
   isBlocked?: boolean;
 }
 
-const MOCK_PLANTELES = ['-', ...Array.from({ length: 37 }, (_, index) => `Bach. ${index + 1}`)];
+const KNOWN_PLANTELES = [
+  { id: 1, label: 'Bach. 16' },
+  { id: 2, label: 'Bach. 4' },
+  { id: 3, label: 'Bach. 1' },
+  { id: 4, label: 'Bach. 33' },
+];
+const MOCK_PLANTELES = [
+  '-',
+  ...Array.from(
+    new Set([
+      ...KNOWN_PLANTELES.map((plantel) => plantel.label),
+      ...Array.from({ length: 37 }, (_, index) => `Bach. ${index + 1}`),
+    ])
+  ),
+];
 const MOCK_INDICADORES = [
   '1.0.0.0.2',
   '1.1.0.0.1',
@@ -84,13 +100,46 @@ function roleToCatalog(role: SystemRole): CatalogUser['role'] {
   return 'plantel';
 }
 
+function plantelLabelFromId(id?: number) {
+  if (!id) {
+    return '-';
+  }
+
+  return KNOWN_PLANTELES.find((plantel) => plantel.id === id)?.label ?? `Bach. ${id}`;
+}
+
+function plantelIdFromLabel(label: string) {
+  if (!label || label === '-') {
+    return undefined;
+  }
+
+  const knownPlantel = KNOWN_PLANTELES.find((plantel) => plantel.label === label);
+  if (knownPlantel) {
+    return knownPlantel.id;
+  }
+
+  const numericId = Number(label.match(/\d+/)?.[0]);
+  return Number.isInteger(numericId) && numericId > 0 ? numericId : undefined;
+}
+
+function plantelDisplayNameFromLabel(label: string) {
+  if (!label || label === '-') {
+    return '';
+  }
+
+  const numericName = label.match(/\d+/)?.[0];
+  return numericName ? `Bachillerato ${numericName}` : label;
+}
+
 function fromCatalogUser(user: CatalogUser): UserRecord {
   return {
     id: user.id,
     name: user.name,
     role: roleFromCatalog(user.role),
-    plantel: user.plantelId ? `Bach. ${user.plantelId === 1 ? 16 : user.plantelId}` : '-',
+    plantel: plantelLabelFromId(user.plantelId),
     indicadores: user.indicatorCodes.length > 0 ? user.indicatorCodes.join(', ') : '-',
+    plantelId: user.plantelId,
+    responsableId: user.responsableId,
     isBlocked: !user.active,
   };
 }
@@ -127,6 +176,7 @@ export const UsersTable = () => {
       role: 'Plantel',
       plantel: '-',
       indicadores: '-',
+      plantelId: undefined,
     });
     setStatusMessage('');
   };
@@ -148,8 +198,9 @@ export const UsersTable = () => {
 
     const normalizedUser: UserRecord = {
       ...editingUser,
-      name: editingUser.role === 'Plantel' ? editingUser.plantel : editingUser.name.trim(),
+      name: editingUser.role === 'Plantel' ? plantelDisplayNameFromLabel(editingUser.plantel) : editingUser.name.trim(),
       plantel: editingUser.role === 'Plantel' ? editingUser.plantel : '-',
+      plantelId: editingUser.role === 'Plantel' ? plantelIdFromLabel(editingUser.plantel) : undefined,
       indicadores: editingUser.role === 'Responsable' ? editingUser.indicadores : '-',
     };
 
@@ -164,8 +215,8 @@ export const UsersTable = () => {
         id: normalizedUser.id.startsWith('local-') ? undefined : normalizedUser.id,
         name: normalizedUser.name,
         role: roleToCatalog(normalizedUser.role),
-        plantelId: normalizedUser.role === 'Plantel' ? 1 : undefined,
-        responsableId: normalizedUser.role === 'Responsable' ? 1 : undefined,
+        plantelId: normalizedUser.role === 'Plantel' ? normalizedUser.plantelId : undefined,
+        responsableId: normalizedUser.role === 'Responsable' ? normalizedUser.responsableId ?? 1 : undefined,
         indicatorCodes: splitIndicators(normalizedUser.indicadores),
         active: !normalizedUser.isBlocked,
       });
@@ -213,6 +264,8 @@ export const UsersTable = () => {
           id: userToToggleBlock.id,
           name: userToToggleBlock.name,
           role: roleToCatalog(userToToggleBlock.role),
+          plantelId: userToToggleBlock.role === 'Plantel' ? plantelIdFromLabel(userToToggleBlock.plantel) : undefined,
+          responsableId: userToToggleBlock.role === 'Responsable' ? userToToggleBlock.responsableId ?? 1 : undefined,
           indicatorCodes: splitIndicators(userToToggleBlock.indicadores),
           active: true,
         });
@@ -437,8 +490,10 @@ export const UsersTable = () => {
                       ...editingUser,
                       role,
                       plantel: role === 'Plantel' ? editingUser.plantel : '-',
+                      plantelId: role === 'Plantel' ? plantelIdFromLabel(editingUser.plantel) : undefined,
+                      responsableId: role === 'Responsable' ? editingUser.responsableId : undefined,
                       indicadores: role === 'Responsable' ? editingUser.indicadores : '-',
-                      name: role === 'Plantel' ? (editingUser.plantel === '-' ? '' : editingUser.plantel) : editingUser.name,
+                      name: role === 'Plantel' ? plantelDisplayNameFromLabel(editingUser.plantel) : editingUser.name,
                     });
                   }}
                   className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco"
@@ -462,7 +517,8 @@ export const UsersTable = () => {
                       setEditingUser({
                         ...editingUser,
                         plantel,
-                        name: plantel === '-' ? '' : plantel,
+                        plantelId: plantelIdFromLabel(plantel),
+                        name: plantelDisplayNameFromLabel(plantel),
                       });
                     }}
                     className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco"
