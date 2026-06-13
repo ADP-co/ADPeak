@@ -2,11 +2,13 @@ export const AUTH_STORAGE_KEY = 'adpeak.session.user';
 const API_URL_STORAGE_KEY = 'adpeak.runtime.apiUrl';
 
 const runtimeApiUrl = readRuntimeApiUrl();
+const envApiBaseUrl = safePublishedApiUrl(import.meta.env.VITE_API_BASE_URL);
+const envApiUrl = safePublishedApiUrl(import.meta.env.VITE_API_URL);
 const configuredApiUrl =
   runtimeApiUrl
     ? `${runtimeApiUrl}/api/v1`
-    : import.meta.env.VITE_API_BASE_URL ??
-      (import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api/v1` : undefined);
+    : envApiBaseUrl ??
+      (envApiUrl ? `${envApiUrl}/api/v1` : undefined);
 const apiRequestsDisabled = import.meta.env.VITE_API_DISABLED === 'true';
 
 export const API_BASE_URL = (configuredApiUrl ?? '/api/v1').replace(/\/$/, '');
@@ -103,6 +105,25 @@ function normalizeApiUrl(value?: string | null) {
   } catch {
     return undefined;
   }
+}
+
+function safePublishedApiUrl(value?: string | null) {
+  const normalizedApiUrl = normalizeApiUrl(value);
+
+  if (!normalizedApiUrl || typeof window === 'undefined') {
+    return normalizedApiUrl;
+  }
+
+  if (isLocalHostname(window.location.hostname)) {
+    return normalizedApiUrl;
+  }
+
+  const targetHostname = new URL(normalizedApiUrl).hostname;
+  return isLocalHostname(targetHostname) ? undefined : normalizedApiUrl;
+}
+
+function isLocalHostname(hostname: string) {
+  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
 }
 
 function defaultUserId(role: string) {
