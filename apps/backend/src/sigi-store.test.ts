@@ -46,8 +46,32 @@ describe("SIGI store and RBAC", () => {
       role: "plantel",
       plantelId: 1
     });
+    expect(authenticateUser("bach35", "Plantel2026!")).toMatchObject({
+      role: "plantel"
+    });
+    expect(authenticateUser("bachlinea", "Plantel2026!")).toMatchObject({
+      role: "plantel"
+    });
+    expect(authenticateUser("iuba", "Plantel2026!")).toMatchObject({
+      role: "plantel"
+    });
     expect(authenticateUser("director", "incorrecta")).toBeUndefined();
     expect(users.some((user) => "passwordHash" in user)).toBe(false);
+  });
+
+  it("seeds every Universidad de Colima bachillerato account", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const users = listUsers(director);
+    const plantelUsers = users.filter((user) => user.role === "plantel");
+
+    expect(plantelUsers).toHaveLength(37);
+    expect(plantelUsers.map((user) => user.name)).toEqual(expect.arrayContaining([
+      "Bachillerato 1",
+      "Bachillerato 16",
+      "Bachillerato 35",
+      "Bachillerato en línea",
+      "IUBA Bachillerato"
+    ]));
   });
 
   it("keeps exactly one administrator user", () => {
@@ -62,12 +86,25 @@ describe("SIGI store and RBAC", () => {
     ).toThrow(SigiValidationError);
     expect(() =>
       saveUser(director, {
+        name: "Bachillerato temporal",
+        role: "plantel",
+        plantelId: 5
+      })
+    ).toThrow(SigiValidationError);
+    expect(() =>
+      saveUser(director, {
         id: "director-1",
         name: "Director DGEMS",
         role: "responsable"
       })
     ).toThrow(SigiValidationError);
     expect(() => deactivateUser(director, "director-1")).toThrow(SigiValidationError);
+    expect(saveUser(director, {
+      name: "Responsable QA",
+      role: "responsable",
+      responsableId: 99,
+      indicatorCodes: []
+    })).toMatchObject({ role: "responsable" });
   });
 
   it("scopes indicators for responsible users", () => {
@@ -153,5 +190,18 @@ describe("SIGI store and RBAC", () => {
         "draft"
       )
     ).toThrow(SigiValidationError);
+  });
+
+  it("uses the active plantel session when building capture templates", () => {
+    const plantel = sessionFromHeaders({
+      "x-role": "plantel",
+      "x-plantel-id": "2"
+    });
+    const indicator = getIndicatorByCode("1.1.0.0.1");
+
+    expect(indicator).toBeDefined();
+    expect(templateForIndicator(indicator!, plantel).initialRows[0]).toMatchObject({
+      plantel: "Bachillerato 4"
+    });
   });
 });

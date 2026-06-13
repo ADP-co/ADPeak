@@ -14,11 +14,11 @@ import { Dashboard } from './components/ui/Dashboard';
 import { ReportsDashboard } from './components/ui/ReportsDashboard';
 import { AccountProfile } from './components/ui/AccountProfile';
 import MediaSuperiorLogo from './assets/MediaSuperiorLogo.png';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider, useAuth, type User } from './context/AuthContext';
 import { Login } from './components/ui/Login';
 import { Toaster, toast } from 'sonner';
 import { useCaptureDraft } from './hooks/useCaptureDraft';
-import { fetchIndicatorTemplate, fetchIndicators, type CatalogIndicator } from './api/catalog';
+import { catalogPlanteles, fetchIndicatorTemplate, fetchIndicators, type CatalogIndicator } from './api/catalog';
 
 const plantelIndicatorScope: Pick<Indicator, 'plantel' | 'supervisor' | 'responsable' | 'contribuidor'> = {
   plantel: 'Bachillerato 16',
@@ -138,17 +138,40 @@ function getIndicatorIdByCode(code: string) {
   return index >= 0 ? index + 1 : 1;
 }
 
-function catalogToIndicator(indicator: CatalogIndicator): Indicator {
+function plantelNameFromId(id?: number) {
+  if (!id) {
+    return 'Planteles';
+  }
+
+  return catalogPlanteles.find((plantel) => plantel.id === id)?.name ?? `Bachillerato ${id}`;
+}
+
+function applySessionScope(indicator: Indicator, user?: User | null): Indicator {
+  if (user?.role !== 'plantel') {
+    return indicator;
+  }
+
+  const plantelName = plantelNameFromId(user.plantelId);
+
+  return {
+    ...indicator,
+    plantel: plantelName,
+    contribuidor: plantelName,
+  };
+}
+
+function catalogToIndicator(indicator: CatalogIndicator, user?: User | null): Indicator {
   const scope = indicator.responsibleNames.join(', ') || 'Supervisor DGEMS';
+  const plantelScope = user?.role === 'plantel' ? plantelNameFromId(user.plantelId) : 'Planteles';
 
   return {
     code: indicator.code,
     name: indicator.name,
     status: indicator.active ? 'Pendiente' : 'Corregir',
-    plantel: 'Bachillerato 16',
+    plantel: plantelScope,
     supervisor: scope,
     responsable: scope,
-    contribuidor: indicator.contributorNames.join(', ') || 'Planteles',
+    contribuidor: user?.role === 'plantel' ? plantelScope : indicator.contributorNames.join(', ') || 'Planteles',
   };
 }
 
@@ -212,11 +235,14 @@ interface IndicatorFormWrapperProps {
 }
 
 function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [] }: IndicatorFormWrapperProps) {
+  const { user } = useAuth();
   const { code } = useParams();
   const navigate = useNavigate();
   const selectedCode = code ?? template1_0_0_0_2.indicatorCode;
   const selectedCatalogIndicator = catalogIndicators.find((indicator) => indicator.code === selectedCode);
-  const selectedIndicator = selectedCatalogIndicator ? catalogToIndicator(selectedCatalogIndicator) : mockupIndicators.find((indicator) => indicator.code === selectedCode);
+  const selectedIndicator = selectedCatalogIndicator
+    ? catalogToIndicator(selectedCatalogIndicator, user)
+    : applySessionScope(mockupIndicators.find((indicator) => indicator.code === selectedCode) ?? mockupIndicators[0], user);
   const fallbackTemplate = fallbackTemplateForIndicator(selectedCode, selectedIndicator, selectedCatalogIndicator);
   const [remoteTemplate, setRemoteTemplate] = useState<(IndicatorTemplate & { initialRows?: Record<string, unknown>[] }) | null>(null);
   const selectedTemplate = {
@@ -243,15 +269,19 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [] 
     return () => {
       isMounted = false;
     };
-  }, [selectedCode]);
+  }, [selectedCode, user?.id]);
 
+  const activePlantelId = user?.role === 'plantel' ? user.plantelId ?? 1 : 1;
+  const activeResponsableId = user?.role === 'responsable'
+    ? user.responsableId ?? 1
+    : selectedCatalogIndicator?.primaryResponsibleId ?? selectedCatalogIndicator?.responsibleIds[0] ?? 1;
   const captureDraft = useCaptureDraft({
-    plantelId: 1,
+    plantelId: activePlantelId,
     indicadorId: selectedCatalogIndicator?.id ?? getIndicatorIdByCode(selectedCode),
     periodoId: 1,
     actividadId: 1,
-    responsableId: 2,
-    storageScope: `plantel-1:${selectedCode}:periodo-1:actividad-1`,
+    responsableId: activeResponsableId,
+    storageScope: `plantel-${activePlantelId}:${selectedCode}:periodo-1:actividad-1`,
   });
 
   const formInitialData = captureDraft.capture?.payload.rows ?? remoteTemplate?.initialRows ?? fallbackTemplate.initialRows ?? mockInitialData;
@@ -377,11 +407,14 @@ function AppContent() {
 
   const indicators = useMemo(
     () =>
-      (catalogIndicators.length > 0 ? catalogIndicators.map(catalogToIndicator) : mockupIndicators).map((indicator) => ({
+      (catalogIndicators.length > 0
+        ? catalogIndicators.map((indicator) => catalogToIndicator(indicator, user))
+        : mockupIndicators.map((indicator) => applySessionScope(indicator, user))
+      ).map((indicator) => ({
         ...indicator,
         status: indicatorStatusOverrides[indicator.code] ?? indicator.status,
       })),
-    [catalogIndicators, indicatorStatusOverrides]
+    [catalogIndicators, indicatorStatusOverrides, user]
   );
   const completedIndicatorCount = useMemo(
     () => indicators.filter((indicator) => indicator.status === 'Aprobado' || indicator.status === 'En revisión').length,

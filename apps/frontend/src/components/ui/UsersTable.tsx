@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Lock, PlusCircle, Search, Trash2, Unlock, X } from 'lucide-react';
 import { ConfirmModal } from './ConfirmModal';
-import { deactivateUser, fetchUsers, saveUser, type CatalogUser } from '../../api/catalog';
+import { catalogPlanteles, deactivateUser, fetchUsers, saveUser, type CatalogUser } from '../../api/catalog';
 
 export type SystemRole = 'Administrador' | 'Responsable' | 'Plantel';
 
 export interface UserRecord {
   id: string;
+  username?: string;
   name: string;
   role: SystemRole;
   plantel: string;
@@ -16,21 +17,12 @@ export interface UserRecord {
   isBlocked?: boolean;
 }
 
-const KNOWN_PLANTELES = [
-  { id: 1, label: 'Bach. 16' },
-  { id: 2, label: 'Bach. 4' },
-  { id: 3, label: 'Bach. 1' },
-  { id: 4, label: 'Bach. 33' },
-];
-const MOCK_PLANTELES = [
-  '-',
-  ...Array.from(
-    new Set([
-      ...KNOWN_PLANTELES.map((plantel) => plantel.label),
-      ...Array.from({ length: 37 }, (_, index) => `Bach. ${index + 1}`),
-    ])
-  ),
-];
+const KNOWN_PLANTELES = catalogPlanteles.map((plantel) => ({
+  id: plantel.id,
+  label: shortPlantelLabel(plantel.name),
+  name: plantel.name,
+}));
+const MOCK_PLANTELES = ['-', ...KNOWN_PLANTELES.map((plantel) => plantel.label)];
 const MOCK_INDICADORES = [
   '1.0.0.0.2',
   '1.1.0.0.1',
@@ -58,6 +50,11 @@ function splitIndicators(value: string) {
   return value === '-' || !value
     ? []
     : value.split(',').map((indicator) => indicator.trim()).filter(Boolean);
+}
+
+function shortPlantelLabel(name: string) {
+  const numericName = name.match(/\d+/)?.[0];
+  return numericName ? `Bach. ${numericName}` : name;
 }
 
 const rolePriority: Record<SystemRole, number> = {
@@ -126,13 +123,13 @@ function plantelDisplayNameFromLabel(label: string) {
     return '';
   }
 
-  const numericName = label.match(/\d+/)?.[0];
-  return numericName ? `Bachillerato ${numericName}` : label;
+  return KNOWN_PLANTELES.find((plantel) => plantel.label === label)?.name ?? label;
 }
 
 function fromCatalogUser(user: CatalogUser): UserRecord {
   return {
     id: user.id,
+    username: user.username,
     name: user.name,
     role: roleFromCatalog(user.role),
     plantel: plantelLabelFromId(user.plantelId),
@@ -172,10 +169,10 @@ export const UsersTable = () => {
     setEditingUser({
       id: `local-${Date.now()}`,
       name: '',
-      role: 'Plantel',
+      role: 'Responsable',
       plantel: '-',
       indicadores: '-',
-      plantelId: undefined,
+      responsableId: undefined,
     });
     setStatusMessage('');
   };
@@ -301,6 +298,7 @@ export const UsersTable = () => {
 
       return [
         user.name,
+        user.username ?? '',
         user.role,
         user.plantel,
         user.indicadores,
@@ -384,7 +382,12 @@ export const UsersTable = () => {
                   }`}
                 >
                   <td className="py-4 px-6 font-medium leading-relaxed text-brand-Gris_oscuro">
-                    {user.name}
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span>{user.name}</span>
+                      {user.username && (
+                        <span className="text-xs font-mono text-brand-Gris_oscuro/60">{user.username}</span>
+                      )}
+                    </div>
                   </td>
                   <td className="py-4 px-6 font-medium leading-relaxed text-brand-Gris_oscuro/80">
                     {user.role}
@@ -484,40 +487,37 @@ export const UsersTable = () => {
                 />
               </div>
 
-              <div>
-                <label htmlFor="user-editor-role" className="block text-sm font-semibold text-brand-Gris_oscuro font-body">
-                  Rol
-                </label>
-                <select
-                  id="user-editor-role"
-                  value={editingUser.role}
-                  disabled={editingUser.role === 'Administrador'}
-                  onChange={(event) => {
-                    const role = event.target.value as SystemRole;
-                    setEditingUser({
-                      ...editingUser,
-                      role,
-                      plantel: role === 'Plantel' ? editingUser.plantel : '-',
-                      plantelId: role === 'Plantel' ? plantelIdFromLabel(editingUser.plantel) : undefined,
-                      responsableId: role === 'Responsable' ? editingUser.responsableId : undefined,
-                      indicadores: role === 'Responsable' ? editingUser.indicadores : '-',
-                      name: role === 'Plantel' ? plantelDisplayNameFromLabel(editingUser.plantel) : editingUser.name,
-                    });
-                  }}
-                  className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco disabled:bg-brand-Gris_bajo/10 disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                  {editingUser.role === 'Administrador' && (
-                    <option value="Administrador">Administrador</option>
-                  )}
-                  <option value="Responsable">Responsable</option>
-                  <option value="Plantel">Plantel</option>
-                </select>
-                {editingUser.role === 'Administrador' && (
-                  <p className="mt-1 text-xs text-brand-Gris_oscuro/70">
-                    El sistema conserva un solo administrador principal.
-                  </p>
-                )}
-              </div>
+              {!isCreatingUser && (
+                <div>
+                  <label htmlFor="user-editor-role" className="block text-sm font-semibold text-brand-Gris_oscuro font-body">
+                    Rol
+                  </label>
+                  <select
+                    id="user-editor-role"
+                    value={editingUser.role}
+                    disabled
+                    onChange={(event) => {
+                      const role = event.target.value as SystemRole;
+                      setEditingUser({
+                        ...editingUser,
+                        role,
+                        plantel: role === 'Plantel' ? editingUser.plantel : '-',
+                        plantelId: role === 'Plantel' ? plantelIdFromLabel(editingUser.plantel) : undefined,
+                        responsableId: role === 'Responsable' ? editingUser.responsableId : undefined,
+                        indicadores: role === 'Responsable' ? editingUser.indicadores : '-',
+                        name: role === 'Plantel' ? plantelDisplayNameFromLabel(editingUser.plantel) : editingUser.name,
+                      });
+                    }}
+                    className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco disabled:bg-brand-Gris_bajo/10 disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {editingUser.role === 'Administrador' && (
+                      <option value="Administrador">Administrador</option>
+                    )}
+                    <option value="Responsable">Responsable</option>
+                    <option value="Plantel">Plantel</option>
+                  </select>
+                </div>
+              )}
 
               {editingUser.role === 'Plantel' && (
                 <div>
@@ -527,6 +527,7 @@ export const UsersTable = () => {
                   <select
                     id="user-editor-campus"
                     value={editingUser.plantel}
+                    disabled
                     onChange={(event) => {
                       const plantel = event.target.value;
                       setEditingUser({
@@ -536,7 +537,7 @@ export const UsersTable = () => {
                         name: plantelDisplayNameFromLabel(plantel),
                       });
                     }}
-                    className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco"
+                    className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco disabled:bg-brand-Gris_bajo/10 disabled:opacity-70 disabled:cursor-not-allowed"
                   >
                     {MOCK_PLANTELES.map((plantel) => (
                       <option key={plantel} value={plantel}>{plantel === '-' ? 'Sin asignar' : plantel}</option>

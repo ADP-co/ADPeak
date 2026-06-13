@@ -62,6 +62,12 @@ export type SigiIndicator = {
   plantelIds: number[];
 };
 
+export type Plantel = {
+  id: number;
+  key: string;
+  name: string;
+};
+
 export type TemplateColumn = {
   key: string;
   label: string;
@@ -145,12 +151,31 @@ const roleAliases: Record<string, SystemRole> = {
   plantel: "plantel"
 };
 
-export const planteles = [
+const legacyPlanteles: Plantel[] = [
   { id: 1, key: "bach-16", name: "Bachillerato 16" },
   { id: 2, key: "bach-4", name: "Bachillerato 4" },
   { id: 3, key: "bach-1", name: "Bachillerato 1" },
   { id: 4, key: "bach-33", name: "Bachillerato 33" }
-] as const;
+];
+
+const legacyPlantelNumbers = new Set(
+  legacyPlanteles
+    .map((plantel) => Number(plantel.name.match(/\d+/)?.[0]))
+    .filter((value) => Number.isInteger(value))
+);
+
+export const planteles: Plantel[] = [
+  ...legacyPlanteles,
+  ...Array.from({ length: 35 }, (_, index) => index + 1)
+    .filter((number) => !legacyPlantelNumbers.has(number))
+    .map((number, index) => ({
+      id: legacyPlanteles.length + index + 1,
+      key: `bach-${number}`,
+      name: `Bachillerato ${number}`
+    })),
+  { id: 36, key: "bach-linea", name: "Bachillerato en línea" },
+  { id: 37, key: "iuba-bachillerato", name: "IUBA Bachillerato" }
+];
 
 const responsibleNames = Array.from(
   new Set(officialCatalogRows.map((row) => row.responsible).filter(Boolean))
@@ -163,11 +188,13 @@ const responsibleIdByName = new Map(
 const initialIndicators = buildIndicators();
 const persistedIndicators = readPersistedCollection<SigiIndicator>("indicators");
 const indicators = new Map<number, SigiIndicator>(
-  (persistedIndicators?.length ? persistedIndicators : initialIndicators).map((indicator) => [indicator.id, indicator])
+  (persistedIndicators?.length ? persistedIndicators : initialIndicators)
+    .map(normalizePersistedIndicator)
+    .map((indicator) => [indicator.id, indicator])
 );
 const persistedUsers = readPersistedCollection<SigiUser>("users");
 const users = new Map<string, SigiUser>(
-  (persistedUsers?.length ? persistedUsers : buildInitialUsers()).map((user) => {
+  mergeInitialUsers(persistedUsers).map((user) => {
     const normalizedUser = normalizePersistedUser(user);
     return [normalizedUser.id, normalizedUser];
   })
@@ -221,8 +248,16 @@ export function saveUser(session: SigiSession, input: Partial<SigiUser> & { pass
   const id = input.id || `user-${Date.now()}`;
   const existing = users.get(id);
 
+  if (!existing && role !== "responsable") {
+    throw new SigiValidationError("Solo se pueden crear cuentas de responsables.");
+  }
+
   if (existing?.role === "director" && role !== "director") {
     throw new SigiValidationError("El administrador principal no puede cambiar de rol.");
+  }
+
+  if (existing?.role === "plantel" && role !== "plantel") {
+    throw new SigiValidationError("Las cuentas de plantel no pueden cambiar de rol.");
   }
 
   if (role === "director") {
@@ -242,10 +277,10 @@ export function saveUser(session: SigiSession, input: Partial<SigiUser> & { pass
     username: input.username?.trim().toLowerCase() || existing?.username || usernameForUser(id, input.name, role),
     name: input.name.trim(),
     role,
-    plantelId: role === "plantel" ? input.plantelId ?? 1 : undefined,
-    responsableId: role === "responsable" ? input.responsableId ?? 1 : undefined,
-    indicatorCodes: role === "responsable" ? input.indicatorCodes ?? [] : [],
-    active: input.active ?? true,
+    plantelId: role === "plantel" ? input.plantelId ?? existing?.plantelId ?? 1 : undefined,
+    responsableId: role === "responsable" ? input.responsableId ?? existing?.responsableId ?? 1 : undefined,
+    indicatorCodes: role === "responsable" ? input.indicatorCodes ?? existing?.indicatorCodes ?? [] : [],
+    active: input.active ?? existing?.active ?? true,
     passwordHash: input.password ? hashPassword(input.password) : existing?.passwordHash ?? defaultPasswordHashForRole(role)
   };
 
@@ -346,12 +381,12 @@ export function deactivateIndicator(session: SigiSession, id: number) {
   return updated;
 }
 
-export function templateForIndicator(indicator: SigiIndicator): IndicatorTemplate {
+export function templateForIndicator(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
   if (indicator.code === "1.0.0.0.2") {
-    return titulationTemplate(indicator);
+    return titulationTemplate(indicator, session);
   }
 
-  return genericTemplate(indicator);
+  return genericTemplate(indicator, session);
 }
 
 export function assertCaptureAccess(
@@ -733,7 +768,7 @@ function buildInitialUsers(): SigiUser[] {
   });
   const plantelUsers = planteles.map((plantel) => ({
     id: `plantel-${plantel.id}`,
-    username: `bach${plantel.name.match(/\d+/)?.[0] ?? plantel.id}`,
+    username: usernameForPlantel(plantel),
     name: plantel.name,
     role: "plantel" as const,
     plantelId: plantel.id,
@@ -787,6 +822,58 @@ function normalizePersistedUser(user: SigiUser): SigiUser {
   };
 }
 
+function normalizePersistedIndicator(indicator: SigiIndicator): SigiIndicator {
+  const seededIndicator = initialIndicators.find((item) => item.code === indicator.code);
+  const shouldExpandPlantelScope = Boolean(seededIndicator) && (!indicator.plantelIds?.length || indicator.plantelIds.length <= legacyPlanteles.length);
+
+  return {
+    ...indicator,
+    plantelIds: shouldExpandPlantelScope ? planteles.map((plantel) => plantel.id) : indicator.plantelIds,
+    responsibleIds: indicator.responsibleIds?.length ? indicator.responsibleIds : seededIndicator?.responsibleIds ?? [1],
+    responsibleNames: indicator.responsibleNames?.length ? indicator.responsibleNames : seededIndicator?.responsibleNames ?? namesForResponsibleIds([1]),
+    contributorNames: indicator.contributorNames ?? seededIndicator?.contributorNames ?? [],
+    activities: indicator.activities?.length ? indicator.activities : seededIndicator?.activities ?? ["Actividad general"],
+    active: indicator.active ?? true
+  };
+}
+
+function mergeInitialUsers(persisted?: SigiUser[]) {
+  const byId = new Map(buildInitialUsers().map((user) => [user.id, user]));
+
+  for (const user of persisted ?? []) {
+    const normalizedUser = normalizePersistedUser(user);
+
+    if (normalizedUser.role === "director" && normalizedUser.id !== "director-1") {
+      continue;
+    }
+
+    byId.set(normalizedUser.id, {
+      ...byId.get(normalizedUser.id),
+      ...normalizedUser
+    });
+  }
+
+  return Array.from(byId.values());
+}
+
+function usernameForPlantel(plantel: Plantel) {
+  const numericName = plantel.name.match(/\d+/)?.[0];
+
+  if (numericName) {
+    return `bach${numericName}`;
+  }
+
+  if (normalizeKey(plantel.name).includes("linea")) {
+    return "bachlinea";
+  }
+
+  if (normalizeKey(plantel.name).includes("iuba")) {
+    return "iuba";
+  }
+
+  return plantel.key.replace(/-/g, "");
+}
+
 function usernameForUser(id: string, name: string | undefined, role: SystemRole) {
   if (role === "director") {
     return "director";
@@ -835,15 +922,20 @@ function requireDirector(session: SigiSession) {
 }
 
 function canReadIndicator(session: SigiSession, indicator: SigiIndicator) {
-  if (session.role === "director" || session.role === "plantel") {
+  if (session.role === "director") {
     return true;
+  }
+
+  if (session.role === "plantel") {
+    return indicator.plantelIds.includes(session.plantelId ?? -1);
   }
 
   return indicator.responsibleIds.includes(session.responsableId ?? -1);
 }
 
-function genericTemplate(indicator: SigiIndicator): IndicatorTemplate {
+function genericTemplate(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
   const activity = indicator.activities[0] ?? "Actividad general";
+  const plantel = plantelForTemplate(session);
   return {
     indicatorCode: indicator.code,
     indicatorName: indicator.name,
@@ -858,7 +950,7 @@ function genericTemplate(indicator: SigiIndicator): IndicatorTemplate {
       { key: "avance", label: "Avance", type: "number" },
       { key: "observaciones", label: "Observaciones", type: "text" }
     ],
-    initialRows: planteles.slice(0, 1).map((plantel) => ({
+    initialRows: [plantel].map((plantel) => ({
       plantel: plantel.name,
       actividad: activity,
       meta: "",
@@ -868,7 +960,8 @@ function genericTemplate(indicator: SigiIndicator): IndicatorTemplate {
   };
 }
 
-function titulationTemplate(indicator: SigiIndicator): IndicatorTemplate {
+function titulationTemplate(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
+  const plantel = plantelForTemplate(session);
   return {
     indicatorCode: indicator.code,
     indicatorName: indicator.name,
@@ -893,7 +986,7 @@ function titulationTemplate(indicator: SigiIndicator): IndicatorTemplate {
     initialRows: [
       {
         delegacion: "Villa de Álvarez",
-        plantel: "Bachillerato 16",
+        plantel: plantel.name,
         programa: "Técnico Analista Programador",
         egresados_mujeres: "",
         egresados_hombres: "",
@@ -902,7 +995,7 @@ function titulationTemplate(indicator: SigiIndicator): IndicatorTemplate {
       },
       {
         delegacion: "Villa de Álvarez",
-        plantel: "Bachillerato 16",
+        plantel: plantel.name,
         programa: "Técnico Analista Químico",
         egresados_mujeres: "",
         egresados_hombres: "",
@@ -911,6 +1004,14 @@ function titulationTemplate(indicator: SigiIndicator): IndicatorTemplate {
       }
     ]
   };
+}
+
+function plantelForTemplate(session?: SigiSession) {
+  if (session?.role === "plantel" && session.plantelId) {
+    return planteles.find((plantel) => plantel.id === session.plantelId) ?? planteles[0];
+  }
+
+  return planteles[0];
 }
 
 function normalizeResponsibleIds(ids?: number[], names?: string[]) {

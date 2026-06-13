@@ -6,6 +6,7 @@ export type CatalogRole = 'director' | 'responsable' | 'plantel';
 
 export type CatalogUser = {
   id: string;
+  username?: string;
   name: string;
   role: CatalogRole;
   plantelId?: number;
@@ -37,11 +38,28 @@ type IndicatorTemplateResponse = IndicatorTemplate & {
 const INDICATORS_STORAGE_KEY = 'adpeak.catalog.indicators';
 const USERS_STORAGE_KEY = 'adpeak.catalog.users';
 
-const planteles = [
+const legacyPlanteles = [
   { id: 1, name: 'Bachillerato 16' },
   { id: 2, name: 'Bachillerato 4' },
   { id: 3, name: 'Bachillerato 1' },
   { id: 4, name: 'Bachillerato 33' },
+];
+const legacyPlantelNumbers = new Set(
+  legacyPlanteles
+    .map((plantel) => Number(plantel.name.match(/\d+/)?.[0]))
+    .filter((value) => Number.isInteger(value))
+);
+
+export const catalogPlanteles = [
+  ...legacyPlanteles,
+  ...Array.from({ length: 35 }, (_, index) => index + 1)
+    .filter((number) => !legacyPlantelNumbers.has(number))
+    .map((number, index) => ({
+      id: legacyPlanteles.length + index + 1,
+      name: `Bachillerato ${number}`,
+    })),
+  { id: 36, name: 'Bachillerato en línea' },
+  { id: 37, name: 'IUBA Bachillerato' },
 ];
 
 const fallbackIndicators = buildFallbackIndicators();
@@ -128,10 +146,18 @@ export async function fetchUsers() {
 export async function saveUser(input: Partial<CatalogUser>) {
   const current = readStorage(USERS_STORAGE_KEY, fallbackUsers);
   const existing = current.find((user) => user.id === input.id);
-  const nextRole = input.role ?? existing?.role ?? 'plantel';
+  const nextRole = input.role ?? existing?.role ?? 'responsable';
+
+  if (!existing && nextRole !== 'responsable') {
+    throw new Error('responsable_creation_only');
+  }
 
   if (existing?.role === 'director' && nextRole !== 'director') {
     throw new Error('single_director_required');
+  }
+
+  if (existing?.role === 'plantel' && nextRole !== 'plantel') {
+    throw new Error('fixed_plantel_role');
   }
 
   if (nextRole === 'director') {
@@ -213,7 +239,7 @@ function buildFallbackIndicators(): CatalogIndicator[] {
       responsibleNames: [row.responsible],
       contributorNames: contributors,
       activities: [row.activity || 'Actividad general'],
-      plantelIds: planteles.map((plantel) => plantel.id),
+      plantelIds: catalogPlanteles.map((plantel) => plantel.id),
     });
   });
 
@@ -243,8 +269,9 @@ function buildFallbackUsers(indicators: CatalogIndicator[]): CatalogUser[] {
       active: true,
     };
   });
-  const plantelUsers = planteles.map((plantel) => ({
+  const plantelUsers = catalogPlanteles.map((plantel) => ({
     id: `plantel-${plantel.id}`,
+    username: usernameForPlantel(plantel),
     name: plantel.name,
     role: 'plantel' as const,
     plantelId: plantel.id,
@@ -299,7 +326,7 @@ function templateForIndicator(indicator: CatalogIndicator): IndicatorTemplateRes
       { key: 'avance', label: 'Avance', type: 'number' },
       { key: 'observaciones', label: 'Observaciones', type: 'text' },
     ],
-    initialRows: planteles.slice(0, 1).map((plantel) => ({
+    initialRows: catalogPlanteles.slice(0, 1).map((plantel) => ({
       plantel: plantel.name,
       actividad: indicator.activities[0] ?? 'Actividad general',
       meta: '',
@@ -361,8 +388,31 @@ function buildEmptyIndicator(current: CatalogIndicator[]): CatalogIndicator {
     responsibleNames: [],
     contributorNames: [],
     activities: [],
-    plantelIds: planteles.map((plantel) => plantel.id),
+    plantelIds: catalogPlanteles.map((plantel) => plantel.id),
   };
+}
+
+function usernameForPlantel(plantel: { key?: string; name: string }) {
+  const numericName = plantel.name.match(/\d+/)?.[0];
+
+  if (numericName) {
+    return `bach${numericName}`;
+  }
+
+  const normalizedName = plantel.name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+
+  if (normalizedName.includes('linea')) {
+    return 'bachlinea';
+  }
+
+  if (normalizedName.includes('iuba')) {
+    return 'iuba';
+  }
+
+  return (plantel.key ?? plantel.name).replace(/\W+/g, '').toLowerCase();
 }
 
 function nextId(indicators: CatalogIndicator[]) {

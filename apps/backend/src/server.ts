@@ -273,7 +273,7 @@ const server = createServer(async (request, response) => {
           return;
         }
 
-        sendJson(response, 200, templateForIndicator(indicator));
+        sendJson(response, 200, templateForIndicator(indicator, session));
         return;
       }
 

@@ -192,7 +192,7 @@ export async function handleIndicatorAction(request: RequestLike, response: any)
         return;
       }
 
-      sendJson(response, 200, sigi.templateForIndicator(indicator));
+      sendJson(response, 200, sigi.templateForIndicator(indicator, session));
       return;
     }
 
