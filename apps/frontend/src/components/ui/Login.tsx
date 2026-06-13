@@ -25,7 +25,7 @@ export const Login = () => {
       return;
     }
 
-    if (normalizedUsername.includes('responsable')) {
+    if (normalizedUsername.includes('responsable') || /^resp\d+/.test(normalizedUsername)) {
       setRole('responsable');
       return;
     }
