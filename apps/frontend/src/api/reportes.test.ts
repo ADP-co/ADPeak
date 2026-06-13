@@ -12,7 +12,7 @@ const sampleReport: ExportReport = {
   },
   indicadores: [
     {
-      nombre: 'Porcentaje de titulacion por cohorte del NMS',
+      nombre: 'Concursos AcadÃ©micos',
       descripcion: 'Texto interno que no debe dominar el resumen.',
       datos: [
         {
@@ -33,8 +33,11 @@ describe('report exports', () => {
   it('uses readable CSV headers for administrators', () => {
     const csv = reportToCsv(sampleReport);
 
-    expect(csv).toContain('"Periodo","Ciclo escolar","Fecha de generacion"');
+    expect(csv.startsWith('\uFEFF')).toBe(true);
+    expect(csv).toContain('"Periodo","Ciclo escolar","Fecha de generación"');
     expect(csv).toContain('"Captura de egresados titulados"');
+    expect(csv).toContain('"Concursos Académicos"');
+    expect(csv).not.toContain('AcadÃ');
     expect(csv).not.toContain('tipo_reporte');
     expect(csv).not.toContain('registro_id');
     expect(csv).not.toContain('identidad_');
@@ -45,6 +48,7 @@ describe('report exports', () => {
 
     expect(pdfText).toContain('(Resumen) Tj');
     expect(pdfText).toContain('Captura de egresados titulados');
+    expect(pdfText).not.toContain('AcadÃ');
     expect(pdfText).not.toContain('sin-id');
     expect(pdfText).not.toContain('registro_id');
     expect(pdfText).not.toContain('tipoReporte');

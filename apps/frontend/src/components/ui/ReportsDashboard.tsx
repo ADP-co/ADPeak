@@ -173,9 +173,6 @@ interface PlantelProgressRecord {
   periodos: string[];
   percentage: number;
   status: PlantelStatus;
-  officialEvidenceCount?: number;
-  officialWorkbookCount?: number;
-  officialRowCount?: number;
 }
 
 const periodOptions = [
@@ -224,9 +221,6 @@ export const ReportsDashboard = () => {
       periodos: ['2026-1', '2026-2'],
       percentage: 100,
       status: 'Completo',
-      officialEvidenceCount: officialSources.summary.nestedFiles,
-      officialWorkbookCount: officialSources.summary.workbookCount,
-      officialRowCount: officialSources.summary.worksheetNonEmptyRows,
     },
     { id: 'bach-4', plantel: 'Bachillerato 4', plantelId: '2', periodos: ['2026-1'], percentage: 80, status: 'Completo' },
     { id: 'bach-1', plantel: 'Bachillerato 1', plantelId: '3', periodos: ['2026-2'], percentage: 48, status: 'En Revisión' },
@@ -448,12 +442,7 @@ export const ReportsDashboard = () => {
 
                   {/* Nombre del Plantel */}
                   <td className="py-4 px-6 text-left font-medium text-brand-Gris_oscuro/90">
-                    <span className="block">{item.plantel}</span>
-                    {item.officialEvidenceCount && (
-                      <span className="block mt-1 text-xs font-accent text-brand-Gris_oscuro/60">
-                        {item.officialEvidenceCount} archivos, {item.officialWorkbookCount} libros, {item.officialRowCount} filas
-                      </span>
-                    )}
+                    {item.plantel}
                   </td>
 
                   {/* Barra Mágica */}

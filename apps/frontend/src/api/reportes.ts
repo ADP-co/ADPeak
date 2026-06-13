@@ -75,7 +75,7 @@ export function reportToCsv(report: ExportReport) {
   const headers = [
     'Periodo',
     'Ciclo escolar',
-    'Fecha de generacion',
+    'Fecha de generación',
     'Alcance',
     'Plantel',
     'Indicador',
@@ -103,9 +103,11 @@ export function reportToCsv(report: ExportReport) {
     ])
   );
 
-  return [headers, ...rows]
-    .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+  const csvBody = [headers, ...rows]
+    .map((row) => row.map((cell) => `"${cleanExportText(String(cell)).replace(/"/g, '""')}"`).join(','))
     .join('\n');
+
+  return `\uFEFF${csvBody}`;
 }
 
 type PdfStream = {
@@ -128,7 +130,7 @@ export async function reportToPdfBlob(report: ExportReport) {
   const objects: PdfObject[] = [
     '<< /Type /Catalog /Pages 2 0 R >>',
     '',
-    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>',
   ];
   let headerImageObjectNumber: number | undefined;
 
@@ -211,7 +213,7 @@ function buildPdfLines(report: ExportReport) {
     `Generado: ${formatReportDate(report.fechaGeneracion)}`,
     '',
     `Registros revisados: ${statusSummary.total}`,
-    `Aprobados: ${statusSummary.approved} | En revision: ${statusSummary.inReview} | Observados: ${statusSummary.observed}`,
+    `Aprobados: ${statusSummary.approved} | En revisión: ${statusSummary.inReview} | Observados: ${statusSummary.observed}`,
     `Pendientes: ${statusSummary.pending} | Atrasados: ${statusSummary.late}`,
     '',
     'Indicadores',
@@ -239,36 +241,49 @@ function buildPdfLines(report: ExportReport) {
 
 function renderPdfPage(lines: string[], pageNumber: number, pageCount: number, hasHeaderImage: boolean) {
   const titleY = hasHeaderImage ? 705 : 750;
-  const commands = [
-    ...(hasHeaderImage
-      ? ['q', '520 0 0 72 46 712 cm', '/HeaderLogos Do', 'Q']
-      : [
-          'q',
-          '0.32 0.46 0.19 rg',
-          '50 772 120 4 re f',
-          '1 0.56 0 rg',
-          '458 770 8 8 re f',
-          '0.78 0 0.5 rg',
-          '472 770 8 8 re f',
-          '0.32 0.15 0.51 rg',
-          '486 770 8 8 re f',
-          '0 0.64 0.89 rg',
-          '500 770 8 8 re f',
-          '0.76 0.85 0.18 rg',
-          '514 770 8 8 re f',
-          'Q',
-        ]),
-    'BT',
-    '/F1 16 Tf',
-    `50 ${titleY} Td`,
-    `(${escapePdfText(lines[0] ?? '')}) Tj`,
-    '/F1 10 Tf'
-  ];
+  const content = new PdfContentBuilder();
+
+  if (hasHeaderImage) {
+    content.line('q');
+    content.line('520 0 0 72 46 712 cm');
+    content.line('/HeaderLogos Do');
+    content.line('Q');
+  } else {
+    [
+      'q',
+      '0.32 0.46 0.19 rg',
+      '50 772 120 4 re f',
+      '1 0.56 0 rg',
+      '458 770 8 8 re f',
+      '0.78 0 0.5 rg',
+      '472 770 8 8 re f',
+      '0.32 0.15 0.51 rg',
+      '486 770 8 8 re f',
+      '0 0.64 0.89 rg',
+      '500 770 8 8 re f',
+      '0.76 0.85 0.18 rg',
+      '514 770 8 8 re f',
+      'Q',
+    ].forEach((command) => content.line(command));
+  }
+
+  content.line('BT');
+  content.line('/F1 16 Tf');
+  content.line(`50 ${titleY} Td`);
+  content.text(lines[0] ?? '');
+  content.line('/F1 10 Tf');
+
   lines.slice(1).forEach((line) => {
-    commands.push('0 -15 Td', `(${escapePdfText(line)}) Tj`);
+    content.line('0 -15 Td');
+    content.text(line);
   });
-  commands.push('/F1 9 Tf', '0 -24 Td', `(${escapePdfText(`Pagina ${pageNumber} de ${pageCount}`)}) Tj`, 'ET');
-  return commands.join('\n');
+
+  content.line('/F1 9 Tf');
+  content.line('0 -24 Td');
+  content.text(`Página ${pageNumber} de ${pageCount}`);
+  content.line('ET');
+
+  return content.toBytes();
 }
 
 async function createHeaderImage(): Promise<PdfHeaderImage | undefined> {
@@ -366,6 +381,136 @@ function toBlobPart(part: string | Uint8Array): BlobPart {
   return bytes.buffer;
 }
 
+class PdfContentBuilder {
+  private readonly bytes: number[] = [];
+
+  line(command: string) {
+    this.bytes.push(...asciiBytes(command), 0x0a);
+  }
+
+  text(value: string) {
+    this.bytes.push(...pdfTextLiteralBytes(value), 0x20, 0x54, 0x6a, 0x0a);
+  }
+
+  toBytes() {
+    return new Uint8Array(this.bytes);
+  }
+}
+
+function asciiBytes(value: string) {
+  return Array.from(value).map((character) => {
+    const code = character.codePointAt(0) ?? 0x20;
+    return code <= 0x7f ? code : 0x20;
+  });
+}
+
+function pdfTextLiteralBytes(value: string) {
+  const output = [0x28];
+
+  winAnsiBytes(value).forEach((byte) => {
+    if (byte === 0x28 || byte === 0x29 || byte === 0x5c) {
+      output.push(0x5c, byte);
+      return;
+    }
+
+    output.push(byte);
+  });
+
+  output.push(0x29);
+  return output;
+}
+
+const cp1252SpecialBytes = new Map<string, number>([
+  ['€', 0x80],
+  ['‚', 0x82],
+  ['ƒ', 0x83],
+  ['„', 0x84],
+  ['…', 0x85],
+  ['†', 0x86],
+  ['‡', 0x87],
+  ['ˆ', 0x88],
+  ['‰', 0x89],
+  ['Š', 0x8a],
+  ['‹', 0x8b],
+  ['Œ', 0x8c],
+  ['Ž', 0x8e],
+  ['‘', 0x91],
+  ['’', 0x92],
+  ['“', 0x93],
+  ['”', 0x94],
+  ['•', 0x95],
+  ['–', 0x96],
+  ['—', 0x97],
+  ['˜', 0x98],
+  ['™', 0x99],
+  ['š', 0x9a],
+  ['›', 0x9b],
+  ['œ', 0x9c],
+  ['ž', 0x9e],
+  ['Ÿ', 0x9f],
+]);
+
+function winAnsiBytes(value: string) {
+  const normalizedValue = cleanExportText(value);
+  const output: number[] = [];
+
+  for (const character of Array.from(normalizedValue)) {
+    const code = character.codePointAt(0) ?? 0x20;
+
+    if (code === 0x0a || code === 0x0d || code === 0x09) {
+      output.push(0x20);
+    } else if ((code >= 0x20 && code <= 0x7e) || (code >= 0xa0 && code <= 0xff)) {
+      output.push(code);
+    } else if (cp1252SpecialBytes.has(character)) {
+      output.push(cp1252SpecialBytes.get(character)!);
+    } else {
+      const replacement = asciiBytes(stripDiacritics(character));
+      output.push(...(replacement.length ? replacement : [0x20]));
+    }
+  }
+
+  return output;
+}
+
+function cleanExportText(value: string) {
+  return repairMojibake(value)
+    .normalize('NFC')
+    .replace(/\u00a0/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function repairMojibake(value: string) {
+  if (!/[ÃÂâ�]/.test(value)) {
+    return value;
+  }
+
+  const bytes: number[] = [];
+
+  for (const character of Array.from(value)) {
+    const code = character.codePointAt(0) ?? 0x20;
+
+    if (code <= 0xff) {
+      bytes.push(code);
+    } else if (cp1252SpecialBytes.has(character)) {
+      bytes.push(cp1252SpecialBytes.get(character)!);
+    } else {
+      return value;
+    }
+  }
+
+  const decoded = new TextDecoder('utf-8').decode(new Uint8Array(bytes));
+  return mojibakeScore(decoded) < mojibakeScore(value) ? decoded : value;
+}
+
+function mojibakeScore(value: string) {
+  return (value.match(/[ÃÂâ�]/g) ?? []).length;
+}
+
+function stripDiacritics(value: string) {
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
 function wrapPdfLine(line: string, maxLength = 92) {
   const normalizedLine = normalizePdfText(line);
 
@@ -407,15 +552,11 @@ function chunkLines(lines: string[], size: number) {
 }
 
 function normalizePdfText(value: string) {
-  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\x20-\x7E]/g, '');
-}
-
-function escapePdfText(value: string) {
-  return normalizePdfText(value).replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
+  return cleanExportText(value);
 }
 
 function normalizeStatus(value: string) {
-  return normalizePdfText(value).toLowerCase().replace(/_/g, ' ').trim();
+  return stripDiacritics(cleanExportText(value)).toLowerCase().replace(/_/g, ' ').trim();
 }
 
 function formatStatusLabel(value: string) {
@@ -426,7 +567,7 @@ function formatStatusLabel(value: string) {
   }
 
   if (status.includes('revision') || status.includes('enviado')) {
-    return 'En revision';
+    return 'En revisión';
   }
 
   if (status.includes('observado') || status.includes('corregir')) {
@@ -490,7 +631,7 @@ function summarizeReport(report: ExportReport) {
 
       if (status === 'Aprobado') {
         summary.approved += 1;
-      } else if (status === 'En revision') {
+      } else if (status === 'En revisión') {
         summary.inReview += 1;
       } else if (status === 'Observado') {
         summary.observed += 1;

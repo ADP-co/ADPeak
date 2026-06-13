@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from './Button';
+import { Input } from './Input';
 import { Select } from './Select';
 import { useAuth } from '../../context/AuthContext';
 
@@ -26,6 +27,7 @@ interface IndicatorsTableProps {
 export const IndicatorsTable = ({ indicators, onSelectIndicator, showScopeColumns = true }: IndicatorsTableProps) => {
 
   const [filter, setFilter] = useState<string>('todos');
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Estados para simular la carga del periodo
   const [dateOptions, setDateOptions] = useState<{value: string, label: string}[]>([{ value: '', label: 'Cargando...' }]);
@@ -96,6 +98,23 @@ export const IndicatorsTable = ({ indicators, onSelectIndicator, showScopeColumn
       if (filter === 'corregir') return indicator.status === 'Corregir';
       return true;
     })
+    .filter((indicator) => {
+      const normalizedSearch = normalizeIndicatorText(searchTerm);
+
+      if (!normalizedSearch) {
+        return true;
+      }
+
+      return [
+        indicator.code,
+        indicator.name,
+        indicator.status,
+        indicator.plantel,
+        indicator.supervisor,
+        indicator.responsable,
+        indicator.contribuidor,
+      ].some((value) => normalizeIndicatorText(value ?? '').includes(normalizedSearch));
+    })
     .sort((a, b) => {
       if (filter === 'todos') {
         return statusPriority[a.status] - statusPriority[b.status];
@@ -108,25 +127,35 @@ export const IndicatorsTable = ({ indicators, onSelectIndicator, showScopeColumn
     <div className="w-full max-w-[1250px] mx-auto mb-10">
 
       {/* Controles de Filtro */}
-        <div className="flex items-center justify-between gap-4 pb-4 pt-8">
+        <div className="flex flex-col gap-4 pb-4 pt-8 md:flex-row md:items-end md:justify-between">
           <h1 className="font-title text-3xl font-bold text-brand-Gris_oscuro shrink-0 select-none">
             Indicadores
           </h1>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-brand-Gris_oscuro font-bold font-accent whitespace-nowrap">Filtrar por</span>
-            <Select
-              options={[
-                { value: 'todos', label: 'Todos' },
-                { value: 'aprobado', label: 'Aprobado' },
-                { value: 'revision', label: 'En revisión' },
-                { value: 'pendiente', label: 'Pendiente' },
-                { value: 'corregir', label: 'Corregir' }
-              ]}
-              variant="outline"
-              containerClassName="w-40"
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-end">
+            <Input
+              id="indicators-search"
+              label="Buscar"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="Código, nombre, plantel o responsable..."
+              className="h-9 sm:w-80"
             />
+            <div className="flex items-end gap-2">
+              <span className="pb-2 text-xs text-brand-Gris_oscuro font-bold font-accent whitespace-nowrap">Filtrar por</span>
+              <Select
+                options={[
+                  { value: 'todos', label: 'Todos' },
+                  { value: 'aprobado', label: 'Aprobado' },
+                  { value: 'revision', label: 'En revisión' },
+                  { value: 'pendiente', label: 'Pendiente' },
+                  { value: 'corregir', label: 'Corregir' }
+                ]}
+                variant="outline"
+                containerClassName="w-40"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+              />
+            </div>
           </div>
         </div>
 
@@ -199,6 +228,16 @@ export const IndicatorsTable = ({ indicators, onSelectIndicator, showScopeColumn
                   </td>
                 </tr>
               ))}
+              {filteredIndicators.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={showScopeColumns ? 6 : 4}
+                    className="py-8 px-6 text-center text-brand-Gris_oscuro/60"
+                  >
+                    No se encontraron indicadores.
+                  </td>
+                </tr>
+              )}
             </tbody>
 
           </table>
@@ -214,3 +253,11 @@ export const IndicatorsTable = ({ indicators, onSelectIndicator, showScopeColumn
     </div>
   );
 };
+
+function normalizeIndicatorText(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}

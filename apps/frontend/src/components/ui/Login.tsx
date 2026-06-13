@@ -108,12 +108,14 @@ export const Login = () => {
             label="Usuario"
             placeholder="Ingrese su usuario..."
             value={username}
+            autoComplete="username"
             onChange={(e) => setUsername(e.target.value)}
           />
           <Input
             label="Contraseña"
             type="password"
             placeholder="Ingrese su contraseña..."
+            autoComplete="current-password"
           />
           <Button type="submit" className="w-full mt-4">
             Ingresar
