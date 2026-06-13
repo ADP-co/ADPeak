@@ -83,15 +83,24 @@ function readRuntimeApiUrl() {
   const apiFromQuery = new URLSearchParams(window.location.search).get('api');
 
   if (apiFromQuery) {
-    const normalizedApiUrl = normalizeApiUrl(apiFromQuery);
+    const normalizedApiUrl = safePublishedApiUrl(apiFromQuery);
 
     if (normalizedApiUrl) {
       window.localStorage.setItem(API_URL_STORAGE_KEY, normalizedApiUrl);
       return normalizedApiUrl;
     }
+
+    window.localStorage.removeItem(API_URL_STORAGE_KEY);
+    return undefined;
   }
 
-  return normalizeApiUrl(window.localStorage.getItem(API_URL_STORAGE_KEY) ?? undefined);
+  const storedApiUrl = safePublishedApiUrl(window.localStorage.getItem(API_URL_STORAGE_KEY) ?? undefined);
+
+  if (!storedApiUrl) {
+    window.localStorage.removeItem(API_URL_STORAGE_KEY);
+  }
+
+  return storedApiUrl;
 }
 
 function normalizeApiUrl(value?: string | null) {
