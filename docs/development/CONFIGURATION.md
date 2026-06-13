@@ -46,9 +46,14 @@ variables faltantes y pide copiar `.env.example` a `.env`.
 | `FILE_STORAGE_DRIVER` | Driver de archivos; por ahora `local`. |
 | `FILE_STORAGE_PATH` | Ruta local para archivos cargados. |
 | `EVIDENCE_MAX_FILE_MB` | Limite local de tamano para evidencias. |
+| `SIGI_DATA_FILE` | Archivo JSON persistente del backend para usuarios, indicadores y capturas. |
 | `CORS_ORIGIN` | Origen permitido para llamadas desde frontend. |
 | `VITE_API_URL` | URL publica del backend para el frontend. |
 | `VITE_API_BASE_URL` | URL base de API versionada para clientes frontend. |
+
+El frontend tambien acepta `?api=https://host-del-backend` en la URL. Ese
+valor se guarda en `localStorage` y permite apuntar GitHub Pages a un backend
+publico sin recompilar la aplicacion.
 
 ## Manejo de secretos y evidencias
 
@@ -60,3 +65,5 @@ variables faltantes y pide copiar `.env.example` a `.env`.
   evidencias reales ni datos personales.
 - En produccion, `AUTH_SECRET` no puede usar valores de ejemplo como
   `local`, `example`, `placeholder` o `change-me`.
+- `SIGI_DATA_FILE` debe apuntar a una ruta escribible del servidor. La carpeta
+  `data/` esta ignorada por Git para no versionar estado operativo.

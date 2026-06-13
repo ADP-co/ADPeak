@@ -1,12 +1,16 @@
 export const AUTH_STORAGE_KEY = 'adpeak.session.user';
+const API_URL_STORAGE_KEY = 'adpeak.runtime.apiUrl';
 
+const runtimeApiUrl = readRuntimeApiUrl();
 const configuredApiUrl =
-  import.meta.env.VITE_API_BASE_URL ??
-  (import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api/v1` : undefined);
+  runtimeApiUrl
+    ? `${runtimeApiUrl}/api/v1`
+    : import.meta.env.VITE_API_BASE_URL ??
+      (import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api/v1` : undefined);
 const apiRequestsDisabled = import.meta.env.VITE_API_DISABLED === 'true';
 
 export const API_BASE_URL = (configuredApiUrl ?? '/api/v1').replace(/\/$/, '');
-export const API_ORIGIN = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
+export const API_ORIGIN = (runtimeApiUrl ?? import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
 export const API_REQUESTS_ENABLED = !apiRequestsDisabled && (Boolean(configuredApiUrl) || !isStaticPublishedHost());
 
 type StoredSession = {
@@ -67,6 +71,38 @@ function isStaticPublishedHost() {
   }
 
   return window.location.hostname.endsWith('github.io');
+}
+
+function readRuntimeApiUrl() {
+  if (typeof window === 'undefined') {
+    return undefined;
+  }
+
+  const apiFromQuery = new URLSearchParams(window.location.search).get('api');
+
+  if (apiFromQuery) {
+    const normalizedApiUrl = normalizeApiUrl(apiFromQuery);
+
+    if (normalizedApiUrl) {
+      window.localStorage.setItem(API_URL_STORAGE_KEY, normalizedApiUrl);
+      return normalizedApiUrl;
+    }
+  }
+
+  return normalizeApiUrl(window.localStorage.getItem(API_URL_STORAGE_KEY) ?? undefined);
+}
+
+function normalizeApiUrl(value?: string | null) {
+  if (!value) {
+    return undefined;
+  }
+
+  try {
+    const url = new URL(value);
+    return ['http:', 'https:'].includes(url.protocol) ? url.toString().replace(/\/$/, '') : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function defaultUserId(role: string) {

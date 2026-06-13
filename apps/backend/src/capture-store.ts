@@ -1,3 +1,9 @@
+import {
+  persistState,
+  readPersistedCollection,
+  readPersistedValue
+} from "./state-store.js";
+
 export type CapturePayload = {
   rows: Record<string, unknown>[];
   justificacion?: string;
@@ -34,8 +40,12 @@ export type CaptureDraftRequest = {
   motivoCambio?: string;
 };
 
-const captureDrafts = new Map<number, CaptureDraft>();
-let nextCaptureId = 1;
+const persistedCaptureDrafts = readPersistedCollection<CaptureDraft>("captureDrafts");
+const captureDrafts = new Map<number, CaptureDraft>(
+  (persistedCaptureDrafts ?? []).map((capture) => [capture.id, capture])
+);
+let nextCaptureId = readPersistedValue<number>("nextCaptureId") ??
+  Math.max(0, ...Array.from(captureDrafts.keys())) + 1;
 
 function nowIso() {
   return new Date().toISOString();
@@ -73,6 +83,24 @@ export function resetCaptureDraftsForTest() {
 }
 
 export function createCaptureDraft(request: CaptureDraftRequest): CaptureDraft {
+  const existingDraft = findCaptureDraftByScope(request);
+
+  if (existingDraft) {
+    const updatedDraft: CaptureDraft = {
+      ...existingDraft,
+      estado: existingDraft.estado === "cerrado" ? "borrador" : existingDraft.estado,
+      payload: request.payload,
+      responsableId: request.responsableId ?? existingDraft.responsableId,
+      observacion: null,
+      versionActual: existingDraft.versionActual + 1,
+      actualizadoEn: nowIso()
+    };
+
+    captureDrafts.set(updatedDraft.id, updatedDraft);
+    persistCaptureState();
+    return updatedDraft;
+  }
+
   const timestamp = nowIso();
   const draft: CaptureDraft = {
     id: nextCaptureId,
@@ -92,11 +120,34 @@ export function createCaptureDraft(request: CaptureDraftRequest): CaptureDraft {
 
   nextCaptureId += 1;
   captureDrafts.set(draft.id, draft);
+  persistCaptureState();
   return draft;
 }
 
 export function getCaptureDraft(captureId: number) {
   return captureDrafts.get(captureId);
+}
+
+export function findCaptureDraftByScope(scope: {
+  plantelId: number;
+  indicadorId: number;
+  actividadId: number;
+  periodoId: number;
+}) {
+  return Array.from(captureDrafts.values())
+    .filter((draft) =>
+      draft.plantelId === scope.plantelId &&
+      draft.indicadorId === scope.indicadorId &&
+      draft.actividadId === scope.actividadId &&
+      draft.periodoId === scope.periodoId &&
+      draft.estado !== "cerrado"
+    )
+    .sort((a, b) => b.actualizadoEn.localeCompare(a.actualizadoEn))[0];
+}
+
+export function listCaptureDrafts() {
+  return Array.from(captureDrafts.values())
+    .sort((a, b) => a.id - b.id);
 }
 
 export function updateCaptureDraft(captureId: number, payload: CapturePayload) {
@@ -115,6 +166,7 @@ export function updateCaptureDraft(captureId: number, payload: CapturePayload) {
   };
 
   captureDrafts.set(captureId, updatedDraft);
+  persistCaptureState();
   return updatedDraft;
 }
 
@@ -133,6 +185,7 @@ export function sendCaptureToReview(captureId: number) {
   };
 
   captureDrafts.set(captureId, updatedDraft);
+  persistCaptureState();
   return updatedDraft;
 }
 
@@ -152,6 +205,7 @@ export function requestCaptureCorrection(captureId: number, observacion: string)
   };
 
   captureDrafts.set(captureId, updatedDraft);
+  persistCaptureState();
   return updatedDraft;
 }
 
@@ -171,5 +225,13 @@ export function approveCapture(captureId: number) {
   };
 
   captureDrafts.set(captureId, updatedDraft);
+  persistCaptureState();
   return updatedDraft;
+}
+
+function persistCaptureState() {
+  persistState({
+    captureDrafts: Array.from(captureDrafts.values()),
+    nextCaptureId
+  });
 }

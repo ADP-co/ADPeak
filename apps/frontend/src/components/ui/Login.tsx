@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { loginWithCredentials } from '../../api/auth';
 import { Button } from './Button';
 import { Input } from './Input';
 import UDCBanner from '../../assets/Ucol_Banner.jpg';
@@ -11,7 +12,10 @@ export const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [role, setRole] = useState<'admin' | 'plantel' | 'responsable'>('admin');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loginError, setLoginError] = useState('');
 
   useEffect(() => {
     const normalizedUsername = username.trim().toLowerCase();
@@ -50,8 +54,24 @@ export const Login = () => {
       responsableId: 1,
     },
   } as const;
-  const handleLogin = (e: FormEvent) => {
+  const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setLoginError('');
+
+    try {
+      const authenticatedUser = await loginWithCredentials(username, password);
+      login(authenticatedUser);
+      navigate(roleProfiles[authenticatedUser.role as keyof typeof roleProfiles]?.redirectTo ?? '/indicadores');
+      return;
+    } catch (error) {
+      if (!canUseLocalFallback(error)) {
+        setLoginError('Usuario o contraseña incorrectos.');
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
     const selectedProfile = roleProfiles[role];
 
     login({
@@ -63,6 +83,7 @@ export const Login = () => {
       responsableId: 'responsableId' in selectedProfile ? selectedProfile.responsableId : undefined,
     });
     navigate(selectedProfile.redirectTo);
+    setIsSubmitting(false);
   };
 
   return (
@@ -115,10 +136,17 @@ export const Login = () => {
             label="Contraseña"
             type="password"
             placeholder="Ingrese su contraseña..."
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
           />
-          <Button type="submit" className="w-full mt-4">
-            Ingresar
+          {loginError && (
+            <p className="text-sm font-semibold text-brand-Status_rojo">
+              {loginError}
+            </p>
+          )}
+          <Button type="submit" className="w-full mt-4" disabled={isSubmitting}>
+            {isSubmitting ? 'Ingresando...' : 'Ingresar'}
           </Button>
         </form>
       </div>
@@ -126,3 +154,11 @@ export const Login = () => {
     </div>
   );
 };
+
+function canUseLocalFallback(error: unknown) {
+  if (error instanceof TypeError) {
+    return true;
+  }
+
+  return error instanceof Error && error.message === 'api_unavailable';
+}

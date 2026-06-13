@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   assertCaptureAccess,
+  authenticateUser,
   buildReportPayload,
   deactivateIndicator,
   getIndicatorByCode,
@@ -25,6 +26,26 @@ describe("SIGI store and RBAC", () => {
       active: true
     });
     expect(listUsers(director).some((user) => user.role === "responsable" && user.indicatorCodes.length > 1)).toBe(true);
+  });
+
+  it("authenticates delivery users without exposing password hashes", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const users = listUsers(director);
+
+    expect(authenticateUser("director", "Director2026!")).toMatchObject({
+      id: "director-1",
+      role: "admin"
+    });
+    expect(authenticateUser("resp01", "Resp2026!")).toMatchObject({
+      role: "responsable",
+      responsableId: 1
+    });
+    expect(authenticateUser("bach16", "Plantel2026!")).toMatchObject({
+      role: "plantel",
+      plantelId: 1
+    });
+    expect(authenticateUser("director", "incorrecta")).toBeUndefined();
+    expect(users.some((user) => "passwordHash" in user)).toBe(false);
   });
 
   it("scopes indicators for responsible users", () => {

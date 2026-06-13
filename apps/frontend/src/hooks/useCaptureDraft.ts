@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createCaptureDraft,
+  findCaptureDraft,
   getCaptureDraft,
   sendCaptureToReview,
   updateCaptureDraft,
@@ -49,6 +50,18 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
     queryClient.setQueryData(['capture-draft', storageKey, capture.id], capture);
   };
 
+  const scopedCaptureQuery = useQuery({
+    queryKey: ['capture-draft-scope', storageKey],
+    queryFn: () => findCaptureDraft(captureOptions),
+    enabled: !captureId,
+  });
+
+  useEffect(() => {
+    if (scopedCaptureQuery.data) {
+      persistCapture(scopedCaptureQuery.data);
+    }
+  }, [scopedCaptureQuery.data]);
+
   const saveDraftMutation = useMutation({
     mutationFn: async (payload: CapturePayload) => {
       if (captureId) {
@@ -81,7 +94,7 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
   });
 
   const statusMessage = useMemo(() => {
-    if (captureQuery.isLoading) {
+    if (captureQuery.isLoading || scopedCaptureQuery.isLoading) {
       return 'Cargando borrador...';
     }
 
@@ -101,7 +114,7 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
       return 'Borrador guardado.';
     }
 
-    if (captureQuery.data) {
+    if (captureQuery.data || scopedCaptureQuery.data) {
       return 'Borrador disponible.';
     }
 
@@ -109,6 +122,8 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
   }, [
     captureQuery.data,
     captureQuery.isLoading,
+    scopedCaptureQuery.data,
+    scopedCaptureQuery.isLoading,
     saveDraftMutation.isPending,
     saveDraftMutation.isSuccess,
     sendToReviewMutation.isPending,
@@ -116,11 +131,13 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
   ]);
 
   return {
-    capture: captureQuery.data,
+    capture: captureQuery.data ?? scopedCaptureQuery.data,
     statusMessage,
     errorMessage:
       captureQuery.error instanceof Error
         ? captureQuery.error.message
+        : scopedCaptureQuery.error instanceof Error
+          ? scopedCaptureQuery.error.message
         : saveDraftMutation.error instanceof Error
           ? saveDraftMutation.error.message
           : sendToReviewMutation.error instanceof Error
@@ -128,6 +145,6 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
             : undefined,
     saveDraft: saveDraftMutation.mutate,
     sendToReview: sendToReviewMutation.mutate,
-    isBusy: captureQuery.isLoading || saveDraftMutation.isPending || sendToReviewMutation.isPending,
+    isBusy: captureQuery.isLoading || scopedCaptureQuery.isLoading || saveDraftMutation.isPending || sendToReviewMutation.isPending,
   };
 }

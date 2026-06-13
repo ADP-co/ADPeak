@@ -197,8 +197,7 @@ export const IndicatorForm = ({
     register,
     control,
     handleSubmit,
-    getValues,
-    formState: { errors, isValid },
+    formState: { errors, isDirty, isValid },
     reset,
   } = useForm<FormData>({
     resolver: zodResolver(dynamicSchema),
@@ -218,8 +217,12 @@ export const IndicatorForm = ({
   const justificacionInputId = `justificacion-${template.indicatorCode.replace(/[^a-zA-Z0-9]+/g, '-')}`;
 
   useEffect(() => {
+    if (isDirty) {
+      return;
+    }
+
     reset({ rows: initialData });
-  }, [initialData, reset]);
+  }, [initialData, isDirty, reset]);
 
   const toSubmission = (data: FormData): FormSubmission => ({
     rows: data.rows.map((row) =>
@@ -229,7 +232,7 @@ export const IndicatorForm = ({
     evidencia: data.evidencia,
   });
 
-  const handleSaveDraft = () => onSaveDraft(toSubmission(getValues() as FormData));
+  const handleSaveDraft = handleSubmit((data) => onSaveDraft(toSubmission(data)));
   const handleValidSubmit = (data: FormData) => onSendReview(toSubmission(data));
 
   return (

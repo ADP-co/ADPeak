@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import {
   createCaptureDraft,
   approveCapture,
+  findCaptureDraftByScope,
   getCaptureDraft,
   isCaptureDraftRequest,
   requestCaptureCorrection,
@@ -93,5 +94,31 @@ describe("capture store", () => {
         payload: { rows: [] }
       })
     ).toBe(false);
+  });
+
+  it("reuses the same draft for the same plantel indicator period and activity", () => {
+    const firstDraft = createCaptureDraft({
+      plantelId: 1,
+      indicadorId: 1,
+      actividadId: 1,
+      periodoId: 1,
+      payload: { rows: [{ avance: 25 }] }
+    });
+    const secondDraft = createCaptureDraft({
+      plantelId: 1,
+      indicadorId: 1,
+      actividadId: 1,
+      periodoId: 1,
+      payload: { rows: [{ avance: 80 }] }
+    });
+
+    expect(secondDraft.id).toBe(firstDraft.id);
+    expect(secondDraft.versionActual).toBe(2);
+    expect(findCaptureDraftByScope({
+      plantelId: 1,
+      indicadorId: 1,
+      actividadId: 1,
+      periodoId: 1
+    })?.payload.rows).toEqual([{ avance: 80 }]);
   });
 });

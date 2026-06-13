@@ -8,6 +8,7 @@ import {
 import {
   approveCapture,
   createCaptureDraft,
+  findCaptureDraftByScope,
   getCaptureDraft,
   isCaptureDraftRequest,
   isCapturePayload,
@@ -17,6 +18,7 @@ import {
 } from "./capture-store.js";
 import {
   assertCaptureAccess,
+  authenticateUser,
   buildReportPayload,
   deactivateIndicator,
   deactivateUser,
@@ -134,6 +136,40 @@ const server = createServer(async (request, response) => {
   if (request.method === "GET" && url.pathname === "/health") {
     sendJson(response, 200, healthPayload());
     return;
+  }
+
+  if (request.method === "POST" && url.pathname === "/api/v1/auth/login") {
+    try {
+      const payload = await readJsonBody(request);
+      const username = typeof payload.username === "string"
+        ? payload.username
+        : typeof payload.usuario === "string"
+          ? payload.usuario
+          : "";
+      const password = typeof payload.password === "string"
+        ? payload.password
+        : typeof payload.contrasena === "string"
+          ? payload.contrasena
+          : "";
+      const user = authenticateUser(username, password);
+
+      if (!user) {
+        sendJson(response, 401, {
+          error: "invalid_credentials",
+          message: "Usuario o contraseña incorrectos."
+        });
+        return;
+      }
+
+      sendJson(response, 200, { user });
+      return;
+    } catch {
+      sendJson(response, 400, {
+        error: "invalid_json",
+        message: "El cuerpo de la solicitud debe ser JSON valido."
+      });
+      return;
+    }
   }
 
   if (url.pathname === "/api/v1/usuarios") {
@@ -288,6 +324,31 @@ const server = createServer(async (request, response) => {
   if (request.method === "GET" && url.pathname === "/api/v1/fuentes-oficiales") {
     try {
       sendJson(response, 200, officialSourcesPayload(sessionFromHeaders(request.headers)));
+      return;
+    } catch (error) {
+      if (sendError(response, error)) {
+        return;
+      }
+
+      throw error;
+    }
+  }
+
+  if (request.method === "GET" && url.pathname === "/api/v1/capturas/borradores") {
+    try {
+      const session = sessionFromHeaders(request.headers);
+      const scope = captureScopeFromUrl(url);
+
+      if (!scope) {
+        sendJson(response, 400, {
+          error: "invalid_capture_scope",
+          message: "La consulta debe incluir plantelId, indicadorId, actividadId y periodoId."
+        });
+        return;
+      }
+
+      assertCaptureAccess(session, scope, "read");
+      sendJson(response, 200, { capture: findCaptureDraftByScope(scope) ?? null });
       return;
     } catch (error) {
       if (sendError(response, error)) {
@@ -580,4 +641,27 @@ function reportFiltersFromUrl(url: URL) {
     plantel: url.searchParams.get("plantel") ?? undefined,
     plantelId: url.searchParams.get("plantelId") ?? undefined
   };
+}
+
+function captureScopeFromUrl(url: URL) {
+  const plantelId = positiveIntegerParam(url, "plantelId");
+  const indicadorId = positiveIntegerParam(url, "indicadorId");
+  const actividadId = positiveIntegerParam(url, "actividadId");
+  const periodoId = positiveIntegerParam(url, "periodoId");
+
+  if (!plantelId || !indicadorId || !actividadId || !periodoId) {
+    return undefined;
+  }
+
+  return {
+    plantelId,
+    indicadorId,
+    actividadId,
+    periodoId
+  };
+}
+
+function positiveIntegerParam(url: URL, key: string) {
+  const value = Number(url.searchParams.get(key));
+  return Number.isInteger(value) && value > 0 ? value : undefined;
 }

@@ -168,6 +168,25 @@ export async function createCaptureDraft(request: CaptureDraftRequest) {
   }
 }
 
+export async function findCaptureDraft(request: Omit<CaptureDraftRequest, 'payload' | 'motivoCambio'>) {
+  try {
+    const params = new URLSearchParams({
+      plantelId: String(request.plantelId),
+      indicadorId: String(request.indicadorId),
+      actividadId: String(request.actividadId),
+      periodoId: String(request.periodoId),
+    });
+    const response = await api.get<{ capture: CaptureDraft | null }>(`/capturas/borradores?${params.toString()}`);
+    return response.data.capture;
+  } catch (error) {
+    if (shouldUseStaticFallback(error)) {
+      return undefined;
+    }
+
+    throw error;
+  }
+}
+
 export async function updateCaptureDraft(
   captureId: number,
   payload: CapturePayload,

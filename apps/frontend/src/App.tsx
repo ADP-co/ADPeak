@@ -168,6 +168,44 @@ function buildCapturePayload(data: FormSubmission) {
   };
 }
 
+function fallbackTemplateForIndicator(
+  selectedCode: string,
+  selectedIndicator?: Indicator,
+  selectedCatalogIndicator?: CatalogIndicator
+): IndicatorTemplate & { initialRows?: Record<string, unknown>[] } {
+  if (selectedCode === template1_0_0_0_2.indicatorCode) {
+    return {
+      ...template1_0_0_0_2,
+      initialRows: mockInitialData,
+    };
+  }
+
+  return {
+    indicatorCode: selectedCode,
+    indicatorName: selectedIndicator?.name ?? 'Indicador',
+    groups: [
+      { label: 'Contexto', colspan: 2 },
+      { label: 'Seguimiento', colspan: 3 },
+    ],
+    columns: [
+      { key: 'plantel', label: 'Plantel', type: 'readonly' },
+      { key: 'actividad', label: 'Actividad', type: 'readonly' },
+      { key: 'meta', label: 'Meta', type: 'number' },
+      { key: 'avance', label: 'Avance', type: 'number' },
+      { key: 'observaciones', label: 'Observaciones', type: 'text' },
+    ],
+    initialRows: [
+      {
+        plantel: selectedIndicator?.plantel ?? 'Bachillerato 16',
+        actividad: selectedCatalogIndicator?.activities[0] ?? 'Actividad general',
+        meta: '',
+        avance: '',
+        observaciones: '',
+      },
+    ],
+  };
+}
+
 interface IndicatorFormWrapperProps {
   onIndicatorStatusChange?: (code: string, status: Indicator['status']) => void;
   catalogIndicators?: CatalogIndicator[];
@@ -179,11 +217,12 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [] 
   const selectedCode = code ?? template1_0_0_0_2.indicatorCode;
   const selectedCatalogIndicator = catalogIndicators.find((indicator) => indicator.code === selectedCode);
   const selectedIndicator = selectedCatalogIndicator ? catalogToIndicator(selectedCatalogIndicator) : mockupIndicators.find((indicator) => indicator.code === selectedCode);
+  const fallbackTemplate = fallbackTemplateForIndicator(selectedCode, selectedIndicator, selectedCatalogIndicator);
   const [remoteTemplate, setRemoteTemplate] = useState<(IndicatorTemplate & { initialRows?: Record<string, unknown>[] }) | null>(null);
   const selectedTemplate = {
-    ...(remoteTemplate ?? template1_0_0_0_2),
+    ...(remoteTemplate ?? fallbackTemplate),
     indicatorCode: selectedCode,
-    indicatorName: remoteTemplate?.indicatorName ?? selectedIndicator?.name ?? template1_0_0_0_2.indicatorName,
+    indicatorName: remoteTemplate?.indicatorName ?? selectedIndicator?.name ?? fallbackTemplate.indicatorName,
   };
 
   useEffect(() => {
@@ -215,7 +254,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [] 
     storageScope: `plantel-1:${selectedCode}:periodo-1:actividad-1`,
   });
 
-  const formInitialData = captureDraft.capture?.payload.rows ?? remoteTemplate?.initialRows ?? mockInitialData;
+  const formInitialData = captureDraft.capture?.payload.rows ?? remoteTemplate?.initialRows ?? fallbackTemplate.initialRows ?? mockInitialData;
 
   const handleSaveDraft = (data: FormSubmission) => {
     captureDraft.saveDraft(buildCapturePayload(data), {

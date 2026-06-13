@@ -1,10 +1,15 @@
+import { createHash } from "node:crypto";
 import { officialCatalogRows } from "./official-catalog.generated.js";
 import {
   officialDataSummary,
   officialEvidenceGroups,
   officialWorkbookSummaries
 } from "./official-data.generated.js";
-import type { CapturePayload } from "./capture-store.js";
+import { listCaptureDrafts, type CaptureDraft, type CapturePayload } from "./capture-store.js";
+import {
+  persistState,
+  readPersistedCollection
+} from "./state-store.js";
 
 export type SystemRole = "director" | "responsable" | "plantel";
 
@@ -17,12 +22,26 @@ export type SigiSession = {
 
 export type SigiUser = {
   id: string;
+  username: string;
   name: string;
   role: SystemRole;
   plantelId?: number;
   responsableId?: number;
   indicatorCodes: string[];
   active: boolean;
+  passwordHash: string;
+};
+
+export type PublicSigiUser = Omit<SigiUser, "passwordHash">;
+
+export type AuthenticatedSigiUser = {
+  id: string;
+  username: string;
+  name: string;
+  role: "admin" | "responsable" | "plantel";
+  description: string;
+  plantelId?: number;
+  responsableId?: number;
 };
 
 export type SigiIndicator = {
@@ -139,8 +158,17 @@ const responsibleIdByName = new Map(
 );
 
 const initialIndicators = buildIndicators();
-const users = new Map<string, SigiUser>(buildInitialUsers().map((user) => [user.id, user]));
-const indicators = new Map<number, SigiIndicator>(initialIndicators.map((indicator) => [indicator.id, indicator]));
+const persistedIndicators = readPersistedCollection<SigiIndicator>("indicators");
+const indicators = new Map<number, SigiIndicator>(
+  (persistedIndicators?.length ? persistedIndicators : initialIndicators).map((indicator) => [indicator.id, indicator])
+);
+const persistedUsers = readPersistedCollection<SigiUser>("users");
+const users = new Map<string, SigiUser>(
+  (persistedUsers?.length ? persistedUsers : buildInitialUsers()).map((user) => {
+    const normalizedUser = normalizePersistedUser(user);
+    return [normalizedUser.id, normalizedUser];
+  })
+);
 
 export function sessionFromHeaders(headers: Record<string, string | string[] | undefined>): SigiSession {
   const rawRole = headerValue(headers["x-role"]);
@@ -172,13 +200,13 @@ export function normalizeRole(value?: string) {
 
 export function listUsers(session: SigiSession) {
   if (session.role === "director") {
-    return Array.from(users.values()).sort(sortUsers);
+    return Array.from(users.values()).sort(sortUsers).map(publicUser);
   }
 
-  return Array.from(users.values()).filter((user) => user.id === session.userId);
+  return Array.from(users.values()).filter((user) => user.id === session.userId).map(publicUser);
 }
 
-export function saveUser(session: SigiSession, input: Partial<SigiUser>) {
+export function saveUser(session: SigiSession, input: Partial<SigiUser> & { password?: string }) {
   requireDirector(session);
 
   const role = normalizeRole(input.role);
@@ -188,18 +216,22 @@ export function saveUser(session: SigiSession, input: Partial<SigiUser>) {
   }
 
   const id = input.id || `user-${Date.now()}`;
+  const existing = users.get(id);
   const user: SigiUser = {
     id,
+    username: input.username?.trim().toLowerCase() || existing?.username || usernameForUser(id, input.name, role),
     name: input.name.trim(),
     role,
     plantelId: role === "plantel" ? input.plantelId ?? 1 : undefined,
     responsableId: role === "responsable" ? input.responsableId ?? 1 : undefined,
     indicatorCodes: role === "responsable" ? input.indicatorCodes ?? [] : [],
-    active: input.active ?? true
+    active: input.active ?? true,
+    passwordHash: input.password ? hashPassword(input.password) : existing?.passwordHash ?? defaultPasswordHashForRole(role)
   };
 
   users.set(id, user);
-  return user;
+  persistCatalogState();
+  return publicUser(user);
 }
 
 export function deactivateUser(session: SigiSession, id: string) {
@@ -212,7 +244,21 @@ export function deactivateUser(session: SigiSession, id: string) {
 
   const updated = { ...user, active: false };
   users.set(id, updated);
-  return updated;
+  persistCatalogState();
+  return publicUser(updated);
+}
+
+export function authenticateUser(username: string, password: string): AuthenticatedSigiUser | undefined {
+  const normalizedUsername = normalizeUsername(username);
+  const user = Array.from(users.values()).find((candidate) =>
+    candidate.active && candidate.username === normalizedUsername
+  );
+
+  if (!user || user.passwordHash !== hashPassword(password)) {
+    return undefined;
+  }
+
+  return authenticatedUser(user);
 }
 
 export function listIndicators(session: SigiSession, options: { includeInactive?: boolean } = {}) {
@@ -258,6 +304,7 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
   };
 
   indicators.set(id, indicator);
+  persistCatalogState();
   return indicator;
 }
 
@@ -271,6 +318,7 @@ export function deactivateIndicator(session: SigiSession, id: number) {
 
   const updated = { ...indicator, active: false };
   indicators.set(id, updated);
+  persistCatalogState();
   return updated;
 }
 
@@ -372,9 +420,24 @@ export function buildReportPayload(
     ? planteles.filter((plantel) => plantel.id === plantelId)
     : planteles;
   const scopedIndicators = listIndicators(session);
+  const captureDrafts = listCaptureDrafts();
   const grouped = scopedIndicators.map((indicator) => {
     const rows = scopedPlanteles.flatMap((plantel) =>
-      indicator.activities.map((activity, activityIndex) => {
+      indicator.activities.flatMap((activity, activityIndex) => {
+        const capturedRows = rowsFromCaptureDrafts({
+          captureDrafts,
+          indicator,
+          plantel,
+          activity,
+          activityIndex,
+          periodo,
+          cicloEscolar
+        });
+
+        if (capturedRows.length > 0) {
+          return capturedRows;
+        }
+
         const status = deterministicStatus(indicator.id + plantel.id + activityIndex);
         return {
           id: `${indicator.code}-${plantel.id}-${activityIndex + 1}`,
@@ -417,6 +480,100 @@ export function buildReportPayload(
     },
     indicadores: officialSourcesReport ? [...grouped, officialSourcesReport] : grouped
   };
+}
+
+function rowsFromCaptureDrafts({
+  captureDrafts,
+  indicator,
+  plantel,
+  activity,
+  activityIndex,
+  periodo,
+  cicloEscolar
+}: {
+  captureDrafts: CaptureDraft[];
+  indicator: SigiIndicator;
+  plantel: (typeof planteles)[number];
+  activity: string;
+  activityIndex: number;
+  periodo: string;
+  cicloEscolar: string;
+}): SigiReportPayload["indicadores"][number]["datos"] {
+  return captureDrafts
+    .filter((draft) =>
+      draft.indicadorId === indicator.id &&
+      draft.plantelId === plantel.id &&
+      draft.actividadId === activityIndex + 1
+    )
+    .flatMap((draft) => {
+      const rows = draft.payload.rows.length > 0 ? draft.payload.rows : [{}];
+
+      return rows.map((row, rowIndex) => ({
+        id: `captura-${draft.id}-${rowIndex + 1}`,
+        actividad: readableValue(row.actividad) || activity || "Actividad general",
+        responsable: indicator.responsibleNames.join(", "),
+        estado: reportStatusForCapture(draft.estado),
+        avance: progressForCapturedRow(row, draft.estado),
+        plantel: readableValue(row.plantel) || plantel.name,
+        plantelId: String(plantel.id),
+        periodo,
+        ciclo: cicloEscolar,
+        meta: numberValue(row.meta) ?? 100,
+        evidencias: draft.payload.evidencia ? 1 : 0,
+        vencimiento: draft.estado === "borrador" ? "atrasado" as const : "en_tiempo" as const
+      }));
+    });
+}
+
+function reportStatusForCapture(status: CaptureDraft["estado"]): SigiReportPayload["indicadores"][number]["datos"][number]["estado"] {
+  if (status === "aprobado" || status === "cerrado") {
+    return "Aprobado";
+  }
+
+  if (status === "correccion_solicitada") {
+    return "Observado";
+  }
+
+  if (status === "en_revision") {
+    return "Enviado";
+  }
+
+  return "Borrador";
+}
+
+function progressForCapturedRow(row: Record<string, unknown>, status: CaptureDraft["estado"]) {
+  const explicitProgress = numberValue(row.avance) ?? numberValue(row.porcentaje_titulacion);
+
+  if (explicitProgress !== undefined) {
+    return `${Math.max(0, Math.min(100, explicitProgress))}%`;
+  }
+
+  if (status === "aprobado" || status === "cerrado") {
+    return "100%";
+  }
+
+  if (status === "borrador") {
+    return "0%";
+  }
+
+  return "75%";
+}
+
+function readableValue(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function numberValue(value: unknown) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === "string" && value.trim()) {
+    const numeric = Number(value.replace("%", ""));
+    return Number.isFinite(numeric) ? numeric : undefined;
+  }
+
+  return undefined;
 }
 
 function officialSourcesReportRows(
@@ -526,34 +683,123 @@ function buildIndicators() {
 function buildInitialUsers(): SigiUser[] {
   const director: SigiUser = {
     id: "director-1",
+    username: "director",
     name: "Director DGEMS",
     role: "director",
     indicatorCodes: [],
-    active: true
+    active: true,
+    passwordHash: defaultPasswordHashForRole("director")
   };
   const responsibleUsers = responsibleNames.map((name) => {
     const responsableId = responsibleIdByName.get(name) ?? 1;
     return {
       id: `responsable-${responsableId}`,
+      username: `resp${String(responsableId).padStart(2, "0")}`,
       name,
       role: "responsable" as const,
       responsableId,
       indicatorCodes: initialIndicators
         .filter((indicator) => indicator.responsibleIds.includes(responsableId))
         .map((indicator) => indicator.code),
-      active: true
+      active: true,
+      passwordHash: defaultPasswordHashForRole("responsable")
     };
   });
   const plantelUsers = planteles.map((plantel) => ({
     id: `plantel-${plantel.id}`,
+    username: `bach${plantel.name.match(/\d+/)?.[0] ?? plantel.id}`,
     name: plantel.name,
     role: "plantel" as const,
     plantelId: plantel.id,
     indicatorCodes: [],
-    active: true
+    active: true,
+    passwordHash: defaultPasswordHashForRole("plantel")
   }));
 
   return [director, ...responsibleUsers, ...plantelUsers];
+}
+
+function publicUser(user: SigiUser): PublicSigiUser {
+  const { passwordHash: _passwordHash, ...publicFields } = user;
+  return publicFields;
+}
+
+function authenticatedUser(user: SigiUser): AuthenticatedSigiUser {
+  return {
+    id: user.id,
+    username: user.username,
+    name: user.name,
+    role: user.role === "director" ? "admin" : user.role,
+    description: roleDescription(user.role),
+    plantelId: user.plantelId,
+    responsableId: user.responsableId
+  };
+}
+
+function roleDescription(role: SystemRole) {
+  if (role === "director") {
+    return "Administrador";
+  }
+
+  if (role === "responsable") {
+    return "Responsable de indicador";
+  }
+
+  return "Plantel";
+}
+
+function normalizePersistedUser(user: SigiUser): SigiUser {
+  const role = normalizeRole(user.role) ?? "plantel";
+
+  return {
+    ...user,
+    role,
+    username: normalizeUsername(user.username || usernameForUser(user.id, user.name, role)),
+    passwordHash: user.passwordHash || defaultPasswordHashForRole(role),
+    indicatorCodes: user.indicatorCodes ?? [],
+    active: user.active ?? true
+  };
+}
+
+function usernameForUser(id: string, name: string | undefined, role: SystemRole) {
+  if (role === "director") {
+    return "director";
+  }
+
+  if (role === "plantel") {
+    const plantelNumber = name?.match(/\d+/)?.[0] || id.match(/\d+/)?.[0] || "1";
+    return `bach${plantelNumber}`;
+  }
+
+  const responsableNumber = id.match(/\d+/)?.[0] || "1";
+  return `resp${String(Number(responsableNumber)).padStart(2, "0")}`;
+}
+
+function defaultPasswordHashForRole(role: SystemRole) {
+  if (role === "director") {
+    return hashPassword("Director2026!");
+  }
+
+  if (role === "responsable") {
+    return hashPassword("Resp2026!");
+  }
+
+  return hashPassword("Plantel2026!");
+}
+
+function hashPassword(password: string) {
+  return createHash("sha256").update(`adpeak:${password}`).digest("hex");
+}
+
+function normalizeUsername(value: string) {
+  return normalizeKey(value).replace(/\s+/g, "");
+}
+
+function persistCatalogState() {
+  persistState({
+    users: Array.from(users.values()),
+    indicators: Array.from(indicators.values())
+  });
 }
 
 function requireDirector(session: SigiSession) {
