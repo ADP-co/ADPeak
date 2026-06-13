@@ -90,6 +90,8 @@ describe("SIGI store and RBAC", () => {
     const officialSources = report.indicadores.find((indicator) => indicator.nombre === "Fuentes oficiales cargadas");
 
     expect(officialSources).toBeDefined();
+    expect(report.indicadores.every((indicator) => Boolean(indicator.id))).toBe(true);
+    expect(report.indicadores.flatMap((indicator) => indicator.datos).every((row) => Boolean(row.registro_id))).toBe(true);
     expect(officialSources?.datos).toHaveLength(18);
     expect(officialSources?.datos.reduce((total, row) => total + row.evidencias, 0)).toBe(981);
   });

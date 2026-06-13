@@ -4,6 +4,7 @@ import { API_BASE_URL, API_REQUESTS_ENABLED, sessionHeaders } from './client';
 
 export type ReportDataRow = {
   id?: string;
+  registro_id?: string | number;
   actividad: string;
   responsable: string;
   estado: string;
@@ -18,6 +19,7 @@ export type ReportDataRow = {
 };
 
 export type ReportIndicator = {
+  id?: string;
   nombre: string;
   descripcion?: string;
   datos: ReportDataRow[];
@@ -72,17 +74,19 @@ export async function fetchExportReport(request: ReportRequest) {
 }
 
 export function reportToCsv(report: ExportReport) {
+  const includePlantelColumn = shouldShowPlantelColumn(report);
   const headers = [
     'Periodo',
     'Ciclo escolar',
     'Fecha de generación',
     'Alcance',
-    'Plantel',
+    ...(includePlantelColumn ? ['Plantel'] : []),
     'Indicador',
     'Actividad',
     'Responsable',
     'Estado',
     'Avance',
+    'Meta',
     'Evidencias',
     'Vencimiento',
   ];
@@ -92,12 +96,13 @@ export function reportToCsv(report: ExportReport) {
       report.cicloEscolar,
       formatReportDate(report.fechaGeneracion),
       report.identidadReporte.nombre,
-      dataRow.plantel ?? report.identidadReporte.nombre,
+      ...(includePlantelColumn ? [dataRow.plantel ?? report.identidadReporte.nombre] : []),
       indicator.nombre,
       dataRow.actividad,
       dataRow.responsable,
       formatStatusLabel(dataRow.estado),
       dataRow.avance,
+      dataRow.meta?.toString() ?? '',
       dataRow.evidencias?.toString() ?? '',
       formatDeadline(dataRow.vencimiento),
     ])
@@ -229,6 +234,19 @@ export async function reportToPdfBlob(report: ExportReport) {
 
 export function countReportRows(report: ExportReport) {
   return report.indicadores.reduce((total, indicator) => total + indicator.datos.length, 0);
+}
+
+function shouldShowPlantelColumn(report: ExportReport) {
+  const reportType = normalizeStatus(report.identidadReporte.tipo);
+
+  if (reportType !== 'plantel') {
+    return true;
+  }
+
+  const identityName = normalizeStatus(report.identidadReporte.nombre);
+  return report.indicadores
+    .flatMap((indicator) => indicator.datos)
+    .some((row) => row.plantel && normalizeStatus(row.plantel) !== identityName);
 }
 
 function renderPdfReport(report: ExportReport, hasHeaderImage: boolean) {
@@ -392,15 +410,26 @@ function drawIndicatorTable(
   hasHeaderImage: boolean,
   pages: PdfContentBuilder[]
 ) {
-  const columns: PdfTableColumn[] = [
-    { label: 'Actividad', width: 136, value: (row) => row.actividad },
-    { label: 'Responsable', width: 92, value: (row) => row.responsable },
-    { label: 'Plantel', width: 82, value: (row, currentReport) => row.plantel ?? currentReport.identidadReporte.nombre },
-    { label: 'Estado', width: 68, align: 'center', value: (row) => formatStatusLabel(row.estado) },
-    { label: 'Avance', width: 50, align: 'center', value: (row) => row.avance },
-    { label: 'Evid.', width: 42, align: 'center', value: (row) => (typeof row.evidencias === 'number' ? String(row.evidencias) : '') },
-    { label: 'Vence', width: 58, align: 'center', value: (row) => formatDeadline(row.vencimiento) },
-  ];
+  const includePlantelColumn = shouldShowPlantelColumn(report);
+  const columns: PdfTableColumn[] = includePlantelColumn
+    ? [
+        { label: 'Actividad', width: 136, value: (row) => row.actividad },
+        { label: 'Responsable', width: 92, value: (row) => row.responsable },
+        { label: 'Plantel', width: 82, value: (row, currentReport) => row.plantel ?? currentReport.identidadReporte.nombre },
+        { label: 'Estado', width: 68, align: 'center', value: (row) => formatStatusLabel(row.estado) },
+        { label: 'Avance', width: 50, align: 'center', value: (row) => row.avance },
+        { label: 'Evid.', width: 42, align: 'center', value: (row) => (typeof row.evidencias === 'number' ? String(row.evidencias) : '') },
+        { label: 'Vence', width: 58, align: 'center', value: (row) => formatDeadline(row.vencimiento) },
+      ]
+    : [
+        { label: 'Actividad', width: 158, value: (row) => row.actividad },
+        { label: 'Responsable', width: 112, value: (row) => row.responsable },
+        { label: 'Estado', width: 68, align: 'center', value: (row) => formatStatusLabel(row.estado) },
+        { label: 'Avance', width: 50, align: 'center', value: (row) => row.avance },
+        { label: 'Meta', width: 42, align: 'center', value: (row) => (typeof row.meta === 'number' ? String(row.meta) : '') },
+        { label: 'Evid.', width: 40, align: 'center', value: (row) => (typeof row.evidencias === 'number' ? String(row.evidencias) : '') },
+        { label: 'Vence', width: 58, align: 'center', value: (row) => formatDeadline(row.vencimiento) },
+      ];
 
   const drawHeader = () => {
     ensureSpace(24);
@@ -778,6 +807,22 @@ function cleanExportText(value: string) {
 }
 
 function repairMojibake(value: string) {
+  let currentValue = value;
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const decodedValue = repairMojibakeOnce(currentValue);
+
+    if (decodedValue === currentValue) {
+      return currentValue;
+    }
+
+    currentValue = decodedValue;
+  }
+
+  return currentValue;
+}
+
+function repairMojibakeOnce(value: string) {
   if (!/[ÃÂâ�]/.test(value)) {
     return value;
   }

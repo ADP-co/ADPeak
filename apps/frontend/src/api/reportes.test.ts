@@ -12,15 +12,18 @@ const sampleReport: ExportReport = {
   },
   indicadores: [
     {
-      nombre: 'Concursos AcadÃ©micos',
+      id: 'concursos-academicos',
+      nombre: 'Concursos AcadÃƒÂ©micos',
       descripcion: 'Texto interno que no debe dominar el resumen.',
       datos: [
         {
+          registro_id: 'registro-1',
           actividad: 'Captura de egresados titulados',
           responsable: 'Responsable academico',
           estado: 'Aprobado',
           avance: '100%',
           plantel: 'Bachillerato 16',
+          meta: 100,
           evidencias: 2,
           vencimiento: 'en_tiempo',
         },
@@ -32,12 +35,15 @@ const sampleReport: ExportReport = {
 describe('report exports', () => {
   it('uses readable CSV headers for administrators', () => {
     const csv = reportToCsv(sampleReport);
+    const header = csv.split('\n')[0];
 
     expect(csv.startsWith('\uFEFF')).toBe(true);
     expect(csv).toContain('"Periodo","Ciclo escolar","Fecha de generación"');
+    expect(header).not.toContain('"Plantel"');
+    expect(header).toContain('"Meta"');
     expect(csv).toContain('"Captura de egresados titulados"');
     expect(csv).toContain('"Concursos Académicos"');
-    expect(csv).not.toContain('AcadÃ');
+    expect(csv).not.toContain('AcadÃƒ');
     expect(csv).not.toContain('tipo_reporte');
     expect(csv).not.toContain('registro_id');
     expect(csv).not.toContain('identidad_');
@@ -48,7 +54,7 @@ describe('report exports', () => {
 
     expect(pdfText).toContain('(Resumen) Tj');
     expect(pdfText).toContain('Captura de egresados titulados');
-    expect(pdfText).not.toContain('AcadÃ');
+    expect(pdfText).not.toContain('AcadÃƒ');
     expect(pdfText).not.toContain('sin-id');
     expect(pdfText).not.toContain('registro_id');
     expect(pdfText).not.toContain('tipoReporte');

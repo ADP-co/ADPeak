@@ -74,10 +74,11 @@ function buildFallbackReport(
   const fechaGeneracion = new Date().toISOString().slice(0, 10);
   const officialIndicator = item.plantelId === '1'
     ? {
+        id: 'fuentes-oficiales-cargadas',
         nombre: 'Fuentes oficiales cargadas',
         descripcion: 'Inventario agregado del paquete oficial recibido.',
         datos: officialSources.evidenceGroups.map((group, index) => ({
-          id: `fuente-oficial-${index + 1}`,
+          registro_id: `fuente-oficial-${index + 1}`,
           actividad: group.category,
           responsable: officialSources.summary.plantel,
           estado: 'Aprobado',
@@ -104,11 +105,12 @@ function buildFallbackReport(
     },
     indicadores: [
       {
+        id: 'porcentaje-titulacion-cohorte-nms',
         nombre: 'Porcentaje de titulación por cohorte del NMS',
         descripcion: 'Registros capturados por programa educativo del plantel.',
         datos: [
           {
-            id: `${item.id}-titulacion-ap`,
+            registro_id: `${item.id}-titulacion-ap`,
             actividad: 'Captura de egresados titulados',
             responsable: 'Responsable académico',
             estado: item.status,
@@ -121,7 +123,7 @@ function buildFallbackReport(
             vencimiento: item.status === 'Rezagado' ? 'atrasado' : 'en_tiempo',
           },
           {
-            id: `${item.id}-matricula-ap`,
+            registro_id: `${item.id}-matricula-ap`,
             actividad: 'Validación de matrícula de primer ingreso',
             responsable: 'Coordinación de planeación',
             estado: item.status,
@@ -136,11 +138,12 @@ function buildFallbackReport(
         ],
       },
       {
+        id: 'seguimiento-evidencias-poa',
         nombre: 'Seguimiento de evidencias POA',
         descripcion: 'Detalle de evidencias asociadas al avance reportado.',
         datos: [
           {
-            id: `${item.id}-evidencia-poa`,
+            registro_id: `${item.id}-evidencia-poa`,
             actividad: 'Revisión documental de evidencias',
             responsable: 'Responsable de indicador',
             estado: item.status,

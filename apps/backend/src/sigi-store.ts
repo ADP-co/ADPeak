@@ -88,10 +88,11 @@ export type SigiReportPayload = {
     nombre: string;
   };
   indicadores: Array<{
+    id: string;
     nombre: string;
     descripcion: string;
     datos: Array<{
-      id: string;
+      registro_id: string;
       actividad: string;
       responsable: string;
       estado: "Borrador" | "Enviado" | "Observado" | "Aprobado";
@@ -440,7 +441,7 @@ export function buildReportPayload(
 
         const status = deterministicStatus(indicator.id + plantel.id + activityIndex);
         return {
-          id: `${indicator.code}-${plantel.id}-${activityIndex + 1}`,
+          registro_id: `${indicator.code}-${plantel.id}-${activityIndex + 1}`,
           actividad: activity || "Actividad general",
           responsable: indicator.responsibleNames.join(", "),
           estado: status,
@@ -457,6 +458,7 @@ export function buildReportPayload(
     );
 
     return {
+      id: indicator.code,
       nombre: indicator.name,
       descripcion: indicator.description,
       datos: rows
@@ -509,7 +511,7 @@ function rowsFromCaptureDrafts({
       const rows = draft.payload.rows.length > 0 ? draft.payload.rows : [{}];
 
       return rows.map((row, rowIndex) => ({
-        id: `captura-${draft.id}-${rowIndex + 1}`,
+        registro_id: `captura-${draft.id}-${rowIndex + 1}`,
         actividad: readableValue(row.actividad) || activity || "Actividad general",
         responsable: indicator.responsibleNames.join(", "),
         estado: reportStatusForCapture(draft.estado),
@@ -586,10 +588,11 @@ function officialSourcesReportRows(
   }
 
   return {
+    id: "fuentes-oficiales-cargadas",
     nombre: "Fuentes oficiales cargadas",
     descripcion: "Inventario agregado del paquete oficial recibido.",
     datos: officialEvidenceGroups.map((group, index) => ({
-      id: `fuente-oficial-${index + 1}`,
+      registro_id: `fuente-oficial-${index + 1}`,
       actividad: group.category,
       responsable: officialDataSummary.plantel,
       estado: "Aprobado",

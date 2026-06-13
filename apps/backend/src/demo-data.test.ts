@@ -113,10 +113,12 @@ describe("demo data", () => {
       }
     });
     expect(report.indicadores.length).toBeGreaterThan(0);
+    expect(report.indicadores.every((indicator) => Boolean(indicator.id))).toBe(true);
     expect(report.indicadores.every((indicator) => indicator.datos.length > 0)).toBe(true);
     expect(report.indicadores.flatMap((indicator) => indicator.datos)).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
+          registro_id: "avance-001",
           actividad: "Seguimiento académico",
           avance: "84%",
           estado: "Enviado",

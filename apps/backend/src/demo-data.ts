@@ -31,7 +31,7 @@ export type DemoIndicatorProgress = {
 export type DemoAction = "capture_submit" | "request_correction" | "approve";
 
 export type DemoReportRecord = {
-  id: string;
+  registro_id: string;
   actividad: string;
   responsable: string;
   estado: "Borrador" | "Enviado" | "Observado" | "Aprobado";
@@ -46,6 +46,7 @@ export type DemoReportRecord = {
 };
 
 export type DemoReportIndicator = {
+  id: string;
   nombre: string;
   descripcion: string;
   datos: DemoReportRecord[];
@@ -392,7 +393,7 @@ export function demoReportCsv(filters: DemoReportFilters = {}) {
       report.identidadReporte.nombre,
       indicador.nombre,
       indicador.descripcion,
-      dato.id,
+      dato.registro_id,
       dato.ciclo,
       dato.periodo,
       dato.plantel,
@@ -419,13 +420,14 @@ function groupReportIndicators(
 
   for (const item of progress) {
     const current = indicators.get(item.indicador) ?? {
+      id: indicatorReportId(item.indicador),
       nombre: item.indicador,
       descripcion: `Registros capturados para ${item.indicador} en el ciclo escolar ${cicloEscolar}.`,
       datos: []
     };
 
     current.datos.push({
-      id: item.id,
+      registro_id: item.id,
       actividad: item.activity,
       responsable: item.responsable,
       estado: reportStatusLabel(item.estado),
@@ -444,6 +446,15 @@ function groupReportIndicators(
   return Array.from(indicators.values()).sort((a, b) =>
     a.nombre.localeCompare(b.nombre, "es")
   );
+}
+
+function indicatorReportId(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "") || "indicador";
 }
 
 function reportStatusLabel(status: DemoIndicatorProgress["estado"]): DemoReportRecord["estado"] {
