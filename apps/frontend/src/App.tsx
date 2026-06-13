@@ -411,7 +411,7 @@ function AppContent() {
         <Route
           path="/indicadores/captura/:code"
           element={
-            role === 'admin' || role === 'plantel'
+            role === 'admin' || role === 'plantel' || role === 'responsable'
               ? <IndicatorFormWrapper onIndicatorStatusChange={handleIndicatorStatusChange} catalogIndicators={catalogIndicators} />
               : <Navigate to="/revision" replace />
           }

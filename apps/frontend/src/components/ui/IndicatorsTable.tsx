@@ -75,11 +75,6 @@ export const IndicatorsTable = ({ indicators, onSelectIndicator, showScopeColumn
   const getPlantelLabel = (indicator: Indicator) => indicator.plantel ?? indicator.contribuidor ?? 'Sin asignar';
   const getSupervisorLabel = (indicator: Indicator) => indicator.supervisor ?? indicator.responsable ?? 'Sin asignar';
 
-  const isActionDisabled = (status: IndicatorStatus) => {
-    const isRestrictedRole = user?.role === 'admin' || user?.role === 'responsable';
-    return isRestrictedRole && (status === 'Corregir' || status === 'Pendiente');
-  };
-
   // Mapeo de prioridad para ordenar por estatus cuando el filtro es "todos"
   const statusPriority: Record<IndicatorStatus, number> = {
     'Corregir': 1,
@@ -221,7 +216,7 @@ export const IndicatorsTable = ({ indicators, onSelectIndicator, showScopeColumn
                     <Button
                       variant="secondary"
                       onClick={() => onSelectIndicator && onSelectIndicator(indicator.code)}
-                      disabled={isActionDisabled(indicator.status)}
+                      disabled={!onSelectIndicator}
                       className="w-[135px] text-xs py-1.5 px-4 disabled:opacity-50 disabled:cursor-not-allowed">
                       {getActionLabel(indicator.status)}
                     </Button>
