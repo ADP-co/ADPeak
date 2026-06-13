@@ -144,7 +144,6 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
         indicator.name,
         indicator.responsable,
         indicator.contribuidor,
-        indicator.enabled === false ? 'deshabilitado' : 'habilitado',
       ].some((value) => normalizeSearch(value).includes(normalizedSearch));
     })
     .sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }));
@@ -160,8 +159,8 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
           <div className="flex items-center gap-2 w-full max-w-xl">
             <input
               type="text"
-              aria-label="Filtro de indicadores por código, nombre, responsable, contribuidor o estado"
-              placeholder="Buscar por código, nombre, responsable, contribuidor o estado..."
+              aria-label="Filtro de indicadores por código, nombre, responsable o contribuidor"
+              placeholder="Buscar por código, nombre, responsable o contribuidor..."
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               onKeyDown={(event) => event.key === 'Enter' && setActiveSearch(searchTerm.trim())}
