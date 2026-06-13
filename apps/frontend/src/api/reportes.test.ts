@@ -60,4 +60,22 @@ describe('report exports', () => {
     expect(pdfText).not.toContain('tipoReporte');
     expect(pdfText).not.toContain('indicadores[].datos[]');
   });
+
+  it('wraps long PDF indicator titles instead of drawing them as one overflowing line', async () => {
+    const longTitle = 'Indicador de seguimiento academico institucional para evaluar permanencia y acompanamiento integral de estudiantes de media superior';
+    const pdfText = await (await reportToPdfBlob({
+      ...sampleReport,
+      indicadores: [
+        {
+          ...sampleReport.indicadores[0],
+          nombre: longTitle,
+          descripcion: longTitle,
+        },
+      ],
+    })).text();
+
+    expect(pdfText).not.toContain(`(${longTitle}) Tj`);
+    expect(pdfText).toContain('(Indicador de seguimiento academico institucional para evaluar permanencia y) Tj');
+    expect(pdfText).toContain('(acompanamiento integral de estudiantes de media superior) Tj');
+  });
 });

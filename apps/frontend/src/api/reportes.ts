@@ -268,6 +268,40 @@ function renderPdfReport(report: ExportReport, hasHeaderImage: boolean) {
     current.y -= 34;
   };
 
+  const drawIndicatorHeader = (indicator: ExportReport['indicadores'][number]) => {
+    const titleLines = wrapPdfLine(indicator.nombre, 84).slice(0, 4);
+    const descriptionLines = indicator.descripcion
+      ? wrapPdfLine(indicator.descripcion, 102).slice(0, 3)
+      : [];
+    const summaryLines = wrapPdfLine(
+      `${indicator.datos.length} registros | Avance promedio ${averageProgress(indicator.datos)} | Estado principal ${dominantStatus(indicator.datos)}`,
+      102
+    );
+    const titleHeight = titleLines.length * 13 + 16;
+    const contentHeight = descriptionLines.length * 11 + summaryLines.length * 11 + 8;
+    const tableStartHeight = indicator.datos.length > 0 ? 92 : 22;
+
+    ensureSpace(titleHeight + contentHeight + tableStartHeight);
+
+    current.content.fillRect(PDF_MARGIN_X, current.y - titleHeight, PDF_CONTENT_WIDTH, titleHeight, PDF_LIGHT_GRAY);
+    titleLines.forEach((line, index) => {
+      current.content.textAt(line, PDF_MARGIN_X + 10, current.y - 15 - index * 13, 10.5, 'F2', PDF_GREEN);
+    });
+    current.y -= titleHeight + 8;
+
+    descriptionLines.forEach((line) => {
+      current.content.textAt(line, PDF_MARGIN_X, current.y, 8.5, 'F1', PDF_MUTED);
+      current.y -= 11;
+    });
+
+    summaryLines.forEach((line) => {
+      current.content.textAt(line, PDF_MARGIN_X, current.y, 8.5, 'F1', PDF_MUTED);
+      current.y -= 11;
+    });
+
+    current.y -= 3;
+  };
+
   current.content.textAt('Resumen', PDF_MARGIN_X, current.y, 20, 'F2', PDF_DARK_GREEN);
   current.y -= 24;
   current.content.textAt(
@@ -310,29 +344,7 @@ function renderPdfReport(report: ExportReport, hasHeaderImage: boolean) {
   }
 
   report.indicadores.forEach((indicator) => {
-    ensureSpace(84);
-    current.content.fillRect(PDF_MARGIN_X, current.y - 24, PDF_CONTENT_WIDTH, 24, PDF_LIGHT_GRAY);
-    current.content.textAt(cleanExportText(indicator.nombre), PDF_MARGIN_X + 10, current.y - 16, 10.5, 'F2', PDF_GREEN);
-    current.y -= 32;
-
-    const description = cleanExportText(indicator.descripcion ?? '');
-    if (description) {
-      wrapPdfLine(description, 118).slice(0, 2).forEach((line) => {
-        current.content.textAt(line, PDF_MARGIN_X, current.y, 8.5, 'F1', PDF_MUTED);
-        current.y -= 11;
-      });
-      current.y -= 2;
-    }
-
-    current.content.textAt(
-      `${indicator.datos.length} registros | Avance promedio ${averageProgress(indicator.datos)} | Estado principal ${dominantStatus(indicator.datos)}`,
-      PDF_MARGIN_X,
-      current.y,
-      8.5,
-      'F1',
-      PDF_MUTED
-    );
-    current.y -= 14;
+    drawIndicatorHeader(indicator);
 
     if (indicator.datos.length === 0) {
       current.content.textAt('Sin registros capturados para este indicador.', PDF_MARGIN_X, current.y, 9, 'F1', PDF_MUTED);
@@ -413,26 +425,26 @@ function drawIndicatorTable(
   const includePlantelColumn = shouldShowPlantelColumn(report);
   const columns: PdfTableColumn[] = includePlantelColumn
     ? [
-        { label: 'Actividad', width: 136, value: (row) => row.actividad },
-        { label: 'Responsable', width: 92, value: (row) => row.responsable },
-        { label: 'Plantel', width: 82, value: (row, currentReport) => row.plantel ?? currentReport.identidadReporte.nombre },
-        { label: 'Estado', width: 68, align: 'center', value: (row) => formatStatusLabel(row.estado) },
-        { label: 'Avance', width: 50, align: 'center', value: (row) => row.avance },
-        { label: 'Evid.', width: 42, align: 'center', value: (row) => (typeof row.evidencias === 'number' ? String(row.evidencias) : '') },
-        { label: 'Vence', width: 58, align: 'center', value: (row) => formatDeadline(row.vencimiento) },
+        { label: 'Actividad', width: 132, value: (row) => row.actividad },
+        { label: 'Responsable', width: 88, value: (row) => row.responsable },
+        { label: 'Plantel', width: 78, value: (row, currentReport) => row.plantel ?? currentReport.identidadReporte.nombre },
+        { label: 'Estado', width: 62, align: 'center', value: (row) => formatStatusLabel(row.estado) },
+        { label: 'Avance', width: 48, align: 'center', value: (row) => row.avance },
+        { label: 'Evid.', width: 35, align: 'center', value: (row) => (typeof row.evidencias === 'number' ? String(row.evidencias) : '') },
+        { label: 'Vence', width: 68, align: 'center', value: (row) => formatDeadline(row.vencimiento) },
       ]
     : [
-        { label: 'Actividad', width: 158, value: (row) => row.actividad },
-        { label: 'Responsable', width: 112, value: (row) => row.responsable },
-        { label: 'Estado', width: 68, align: 'center', value: (row) => formatStatusLabel(row.estado) },
-        { label: 'Avance', width: 50, align: 'center', value: (row) => row.avance },
-        { label: 'Meta', width: 42, align: 'center', value: (row) => (typeof row.meta === 'number' ? String(row.meta) : '') },
-        { label: 'Evid.', width: 40, align: 'center', value: (row) => (typeof row.evidencias === 'number' ? String(row.evidencias) : '') },
-        { label: 'Vence', width: 58, align: 'center', value: (row) => formatDeadline(row.vencimiento) },
+        { label: 'Actividad', width: 166, value: (row) => row.actividad },
+        { label: 'Responsable', width: 116, value: (row) => row.responsable },
+        { label: 'Estado', width: 62, align: 'center', value: (row) => formatStatusLabel(row.estado) },
+        { label: 'Avance', width: 48, align: 'center', value: (row) => row.avance },
+        { label: 'Meta', width: 38, align: 'center', value: (row) => (typeof row.meta === 'number' ? String(row.meta) : '') },
+        { label: 'Evid.', width: 35, align: 'center', value: (row) => (typeof row.evidencias === 'number' ? String(row.evidencias) : '') },
+        { label: 'Vence', width: 46, align: 'center', value: (row) => formatDeadline(row.vencimiento) },
       ];
 
   const drawHeader = () => {
-    ensureSpace(24);
+    ensureSpace(92);
     const page = getCurrentPage();
     let x = PDF_MARGIN_X;
 
