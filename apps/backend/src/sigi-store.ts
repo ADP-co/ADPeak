@@ -84,6 +84,16 @@ export type IndicatorTemplate = {
   groups: { label: string; colspan: number }[];
   columns: TemplateColumn[];
   initialRows: Record<string, unknown>[];
+  headerRows?: Array<Array<{ label: string; colspan?: number; rowspan?: number }>>;
+  infoBlocks?: Array<{ label?: string; text: string; tone?: "default" | "highlight" }>;
+  footerNote?: string;
+  showTotals?: boolean;
+  allowAddRows?: boolean;
+  addRowLabel?: string;
+  emptyRow?: Record<string, unknown>;
+  analysisHeading?: string;
+  analysisLabel?: string;
+  analysisPlaceholder?: string;
 };
 
 export type SigiReportPayload = {
@@ -101,6 +111,8 @@ export type SigiReportPayload = {
     descripcion: string;
     datos: Array<{
       registro_id: string;
+      captureId?: number;
+      actividadId?: number;
       actividad: string;
       responsable: string;
       estado: "Borrador" | "Enviado" | "Observado" | "Aprobado";
@@ -108,6 +120,7 @@ export type SigiReportPayload = {
       plantel: string;
       plantelId: string;
       periodo: string;
+      periodoId?: number;
       ciclo: string;
       meta: number;
       evidencias: number;
@@ -176,6 +189,8 @@ export const planteles: Plantel[] = [
   { id: 36, key: "bach-linea", name: "Bachillerato en línea" },
   { id: 37, key: "iuba-bachillerato", name: "IUBA Bachillerato" }
 ];
+
+const officialSourcePlantelIds = [1];
 
 const responsibleNames = Array.from(
   new Set(officialCatalogRows.map((row) => row.responsible).filter(Boolean))
@@ -346,6 +361,8 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
   const id = existing?.id ?? nextIndicatorId();
   const responsibleIds = normalizeResponsibleIds(input.responsibleIds, input.responsibleNames);
   const primaryResponsibleId = input.primaryResponsibleId ?? responsibleIds[0] ?? 1;
+  const isNewIndicator = !existing;
+  const nextContributorNames = input.contributorNames ?? existing?.contributorNames ?? [];
   const indicator: SigiIndicator = {
     id,
     code: input.code.trim(),
@@ -357,9 +374,13 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
     primaryResponsibleId,
     responsibleIds,
     responsibleNames: namesForResponsibleIds(responsibleIds),
-    contributorNames: input.contributorNames ?? existing?.contributorNames ?? [],
+    contributorNames: nextContributorNames,
     activities: input.activities?.filter(Boolean) ?? existing?.activities ?? ["Actividad general"],
-    plantelIds: input.plantelIds?.length ? input.plantelIds : planteles.map((plantel) => plantel.id)
+    plantelIds: normalizePlantelScope(
+      input.plantelIds ??
+        existing?.plantelIds ??
+        (isNewIndicator && targetsPlanteles(nextContributorNames) ? allPlantelIds() : officialSourcePlantelIds)
+    )
   };
 
   indicators.set(id, indicator);
@@ -381,9 +402,82 @@ export function deactivateIndicator(session: SigiSession, id: number) {
   return updated;
 }
 
+const studentPeriodMatrixCodes = new Set([
+  "1.1.2.1.1",
+  "1.1.2.1.3",
+  "1.1.2.2.1",
+  "1.1.2.2.8",
+  "1.1.2.2.9",
+  "1.1.2.2.10",
+  "1.1.2.2.11",
+  "1.1.2.4.1"
+]);
+
+const integralDevelopmentCodes = new Set(["1.1.2.3.1"]);
+
+const staffTrainingCodes = new Set([
+  "1.1.2.5.5",
+  "1.1.2.5.6",
+  "1.1.2.5.7",
+  "1.1.2.5.8",
+  "1.1.2.5.9",
+  "1.1.2.5.10",
+  "4.1.4.3.3"
+]);
+
+const staffProfileCodes = new Set(["1.1.2.5.1", "1.1.2.5.3"]);
+
+const participantActionCodes = new Set([
+  "2.1.4.1.1",
+  "2.1.4.1.2",
+  "2.1.4.1.3",
+  "3.1.0.0.1",
+  "3.1.1.2.2",
+  "3.1.1.3.6",
+  "4.1.5.3.3"
+]);
+
+const infrastructureCodes = new Set(["4.1.2.1.3", "4.1.2.1.6", "4.1.2.2.1"]);
+
 export function templateForIndicator(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
+  if (indicator.code === "1.0.0.0.1") {
+    return terminalEfficiencyTemplate(indicator, session);
+  }
+
   if (indicator.code === "1.0.0.0.2") {
     return titulationTemplate(indicator, session);
+  }
+
+  if (indicator.code === "1.1.2.1.4") {
+    return healthIntegralTemplate(indicator, session);
+  }
+
+  if (integralDevelopmentCodes.has(indicator.code)) {
+    return integralDevelopmentTemplate(indicator, session);
+  }
+
+  if (studentPeriodMatrixCodes.has(indicator.code)) {
+    return studentPeriodMatrixTemplate(indicator, session);
+  }
+
+  if (staffTrainingCodes.has(indicator.code)) {
+    return staffTrainingTemplate(indicator, session);
+  }
+
+  if (staffProfileCodes.has(indicator.code)) {
+    return staffProfileTemplate(indicator, session);
+  }
+
+  if (participantActionCodes.has(indicator.code)) {
+    return participantActionTemplate(indicator, session);
+  }
+
+  if (infrastructureCodes.has(indicator.code)) {
+    return infrastructureTemplate(indicator, session);
+  }
+
+  if (indicator.dataType === "number") {
+    return participantActionTemplate(indicator, session);
   }
 
   return genericTemplate(indicator, session);
@@ -402,6 +496,10 @@ export function assertCaptureAccess(
 
   if (session.role === "plantel" && request.plantelId !== session.plantelId) {
     throw new SigiForbiddenError("El plantel solo puede operar su propio alcance.");
+  }
+
+  if (!indicator.plantelIds.includes(request.plantelId)) {
+    throw new SigiForbiddenError("El indicador no esta asignado a este plantel.");
   }
 
   if (session.role === "responsable" && !indicator.responsibleIds.includes(session.responsableId ?? -1)) {
@@ -423,6 +521,12 @@ export function validateCapturePayload(indicator: SigiIndicator, payload: Captur
   }
 
   const template = templateForIndicator(indicator);
+  const minimumRows = template.initialRows.length;
+
+  if (payload.rows.length === 0 || (requireJustification && !template.allowAddRows && payload.rows.length < minimumRows)) {
+    throw new SigiValidationError("La captura está incompleta. Vuelve a abrir el indicador y conserva todas las filas oficiales.");
+  }
+
   const columnKeys = new Set(template.columns.map((column) => column.key));
   const unknownKeys = payload.rows.flatMap((row) =>
     Object.keys(row).filter((key) => !columnKeys.has(key))
@@ -482,7 +586,8 @@ export function buildReportPayload(
   const scopedIndicators = listIndicators(session);
   const captureDrafts = listCaptureDrafts();
   const grouped = scopedIndicators.map((indicator) => {
-    const rows = scopedPlanteles.flatMap((plantel) =>
+    const indicatorPlanteles = scopedPlanteles.filter((plantel) => indicator.plantelIds.includes(plantel.id));
+    const rows = indicatorPlanteles.flatMap((plantel) =>
       indicator.activities.flatMap((activity, activityIndex) => {
         const capturedRows = rowsFromCaptureDrafts({
           captureDrafts,
@@ -574,6 +679,8 @@ function rowsFromCaptureDrafts({
 
       return rows.map((row, rowIndex) => ({
         registro_id: `captura-${draft.id}-${rowIndex + 1}`,
+        captureId: draft.id,
+        actividadId: draft.actividadId,
         actividad: readableValue(row.actividad) || activity || "Actividad general",
         responsable: indicator.responsibleNames.join(", "),
         estado: reportStatusForCapture(draft.estado),
@@ -581,6 +688,7 @@ function rowsFromCaptureDrafts({
         plantel: readableValue(row.plantel) || plantel.name,
         plantelId: String(plantel.id),
         periodo,
+        periodoId: draft.periodoId,
         ciclo: cicloEscolar,
         meta: numberValue(row.meta) ?? 100,
         evidencias: draft.payload.evidencia ? 1 : 0,
@@ -738,7 +846,7 @@ function buildIndicators() {
       responsibleNames: [row.responsible],
       contributorNames: contributors,
       activities: [row.activity || "Actividad general"],
-      plantelIds: planteles.map((plantel) => plantel.id)
+      plantelIds: officialSourcePlantelIds
     });
   }
 
@@ -828,17 +936,42 @@ function normalizePersistedUser(user: SigiUser): SigiUser {
 
 function normalizePersistedIndicator(indicator: SigiIndicator): SigiIndicator {
   const seededIndicator = initialIndicators.find((item) => item.code === indicator.code);
-  const shouldExpandPlantelScope = Boolean(seededIndicator) && (!indicator.plantelIds?.length || indicator.plantelIds.length <= legacyPlanteles.length);
+  const plantelIds = normalizePlantelScope(indicator.plantelIds ?? []);
+  const shouldUseSeededPlantelScope = Boolean(seededIndicator) && (!plantelIds.length || isLegacyDefaultPlantelScope(plantelIds));
 
   return {
     ...indicator,
-    plantelIds: shouldExpandPlantelScope ? planteles.map((plantel) => plantel.id) : indicator.plantelIds,
+    plantelIds: shouldUseSeededPlantelScope ? seededIndicator!.plantelIds : plantelIds,
     responsibleIds: indicator.responsibleIds?.length ? indicator.responsibleIds : seededIndicator?.responsibleIds ?? [1],
     responsibleNames: indicator.responsibleNames?.length ? indicator.responsibleNames : seededIndicator?.responsibleNames ?? namesForResponsibleIds([1]),
     contributorNames: indicator.contributorNames ?? seededIndicator?.contributorNames ?? [],
     activities: indicator.activities?.length ? indicator.activities : seededIndicator?.activities ?? ["Actividad general"],
     active: indicator.active ?? true
   };
+}
+
+function normalizePlantelScope(ids: number[]) {
+  const validIds = new Set(planteles.map((plantel) => plantel.id));
+  return uniqueNumbers(ids.filter((id) => Number.isInteger(id) && validIds.has(id)));
+}
+
+function allPlantelIds() {
+  return planteles.map((plantel) => plantel.id);
+}
+
+function targetsPlanteles(names: string[]) {
+  return names.length === 0 || names.some((name) => normalizeKey(name).includes("plantel"));
+}
+
+function isLegacyDefaultPlantelScope(ids: number[]) {
+  return sameNumberSet(ids, planteles.map((plantel) => plantel.id)) ||
+    sameNumberSet(ids, legacyPlanteles.map((plantel) => plantel.id));
+}
+
+function sameNumberSet(a: number[], b: number[]) {
+  const left = uniqueNumbers(a);
+  const right = uniqueNumbers(b);
+  return left.length === right.length && left.every((value, index) => value === right[index]);
 }
 
 function mergeInitialUsers(persisted?: SigiUser[]) {
@@ -937,30 +1070,502 @@ function canReadIndicator(session: SigiSession, indicator: SigiIndicator) {
   return indicator.responsibleIds.includes(session.responsableId ?? -1);
 }
 
-function genericTemplate(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
-  const activity = indicator.activities[0] ?? "Actividad general";
+function activitiesForTemplate(indicator: SigiIndicator) {
+  return indicator.activities.length > 0 ? indicator.activities : ["Actividad general"];
+}
+
+function rowsFromActivities(
+  indicator: SigiIndicator,
+  session: SigiSession | undefined,
+  rowFactory: (activity: string, index: number, plantel: Plantel) => Record<string, unknown>
+) {
   const plantel = plantelForTemplate(session);
+  return activitiesForTemplate(indicator).map((activity, index) => rowFactory(activity, index, plantel));
+}
+
+function baseInfoBlocks(indicator: SigiIndicator, activityLabel = "Actividades oficiales") {
+  return [
+    {
+      label: "INDICADOR",
+      text: `Código ${indicator.code} ${indicator.name}.`,
+      tone: "highlight" as const
+    },
+    {
+      label: activityLabel,
+      text: activitiesForTemplate(indicator).join("; ")
+    }
+  ];
+}
+
+function genericTemplate(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
   return {
     indicatorCode: indicator.code,
     indicatorName: indicator.name,
     groups: [
       { label: "Contexto", colspan: 2 },
-      { label: "Seguimiento", colspan: 3 }
+      { label: "Seguimiento", colspan: 4 }
     ],
     columns: [
       { key: "plantel", label: "Plantel", type: "readonly" },
       { key: "actividad", label: "Actividad", type: "readonly" },
       { key: "meta", label: "Meta", type: "number" },
       { key: "avance", label: "Avance", type: "number" },
+      { key: "cumplimiento", label: "% cumplimiento", type: "calculated", calculation: { type: "percentage", numeratorKey: "avance", denominatorKey: "meta", decimals: 2 } },
       { key: "observaciones", label: "Observaciones", type: "text" }
     ],
-    initialRows: [plantel].map((plantel) => ({
+    initialRows: rowsFromActivities(indicator, session, (activity, _index, plantel) => ({
       plantel: plantel.name,
       actividad: activity,
       meta: "",
       avance: "",
       observaciones: ""
-    }))
+    })),
+    showTotals: true
+  };
+}
+
+function studentPeriodMatrixTemplate(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
+  return {
+    indicatorCode: indicator.code,
+    indicatorName: indicator.name,
+    groups: [],
+    infoBlocks: baseInfoBlocks(indicator),
+    headerRows: [
+      [
+        { label: "Plantel", rowspan: 2 },
+        { label: "Actividad", rowspan: 2 },
+        { label: "Meta anual", rowspan: 2 },
+        { label: "Febrero-Agosto 2026", colspan: 3 },
+        { label: "Agosto-Enero 2027", colspan: 3 },
+        { label: "Resultado", colspan: 2 }
+      ],
+      [
+        { label: "M" },
+        { label: "H" },
+        { label: "T" },
+        { label: "M" },
+        { label: "H" },
+        { label: "T" },
+        { label: "Total anual" },
+        { label: "Observaciones" }
+      ]
+    ],
+    columns: [
+      { key: "plantel", label: "Plantel", type: "readonly" },
+      { key: "actividad", label: "Actividad", type: "readonly" },
+      { key: "meta", label: "Meta anual", type: "number" },
+      { key: "feb_ago_mujeres", label: "M", type: "number" },
+      { key: "feb_ago_hombres", label: "H", type: "number" },
+      { key: "feb_ago_total", label: "T", type: "calculated", calculation: { type: "sum", sourceKeys: ["feb_ago_mujeres", "feb_ago_hombres"] } },
+      { key: "ago_ene_mujeres", label: "M", type: "number" },
+      { key: "ago_ene_hombres", label: "H", type: "number" },
+      { key: "ago_ene_total", label: "T", type: "calculated", calculation: { type: "sum", sourceKeys: ["ago_ene_mujeres", "ago_ene_hombres"] } },
+      { key: "total_anual", label: "Total anual", type: "calculated", calculation: { type: "sum", sourceKeys: ["feb_ago_total", "ago_ene_total"] } },
+      { key: "observaciones", label: "Observaciones", type: "text" }
+    ],
+    initialRows: rowsFromActivities(indicator, session, (activity, _index, plantel) => ({
+      plantel: plantel.name,
+      actividad: activity,
+      meta: "",
+      feb_ago_mujeres: "",
+      feb_ago_hombres: "",
+      ago_ene_mujeres: "",
+      ago_ene_hombres: "",
+      observaciones: ""
+    })),
+    showTotals: true,
+    footerNote: "Use los totales calculados para evitar capturar manualmente sumas que se deducen de mujeres y hombres."
+  };
+}
+
+function integralDevelopmentTemplate(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
+  return {
+    indicatorCode: indicator.code,
+    indicatorName: indicator.name,
+    groups: [],
+    infoBlocks: baseInfoBlocks(indicator, "Actividades de desarrollo y formación integral"),
+    headerRows: [
+      [
+        { label: "Actividad", rowspan: 3 },
+        { label: "Total de actividades", colspan: 2 },
+        { label: "Matrícula total", colspan: 3 },
+        { label: "Incorporación de estudiantes", colspan: 6 },
+        { label: "Descripción", rowspan: 3 }
+      ],
+      [
+        { label: "Desarrollo", rowspan: 2 },
+        { label: "Formación integral", rowspan: 2 },
+        { label: "Mujer", rowspan: 2 },
+        { label: "Hombre", rowspan: 2 },
+        { label: "Total", rowspan: 2 },
+        { label: "Mujer", colspan: 2 },
+        { label: "Hombre", colspan: 2 },
+        { label: "Total", colspan: 2 }
+      ],
+      [
+        { label: "No." },
+        { label: "%" },
+        { label: "No." },
+        { label: "%" },
+        { label: "No." },
+        { label: "%" }
+      ]
+    ],
+    columns: [
+      { key: "actividad", label: "Actividad", type: "readonly" },
+      { key: "actividades_desarrollo", label: "Desarrollo", type: "number" },
+      { key: "actividades_formacion", label: "Formación integral", type: "number" },
+      { key: "matricula_mujeres", label: "Mujer", type: "number" },
+      { key: "matricula_hombres", label: "Hombre", type: "number" },
+      { key: "matricula_total", label: "Total", type: "calculated", calculation: { type: "sum", sourceKeys: ["matricula_mujeres", "matricula_hombres"] } },
+      { key: "incorporacion_mujeres_num", label: "No.", type: "number" },
+      { key: "incorporacion_mujeres_pct", label: "%", type: "calculated", calculation: { type: "percentage", numeratorKey: "incorporacion_mujeres_num", denominatorKey: "matricula_mujeres", decimals: 2 } },
+      { key: "incorporacion_hombres_num", label: "No.", type: "number" },
+      { key: "incorporacion_hombres_pct", label: "%", type: "calculated", calculation: { type: "percentage", numeratorKey: "incorporacion_hombres_num", denominatorKey: "matricula_hombres", decimals: 2 } },
+      { key: "incorporacion_total_num", label: "No.", type: "calculated", calculation: { type: "sum", sourceKeys: ["incorporacion_mujeres_num", "incorporacion_hombres_num"] } },
+      { key: "incorporacion_total_pct", label: "%", type: "calculated", calculation: { type: "percentage", numeratorKey: "incorporacion_total_num", denominatorKey: "matricula_total", decimals: 2 } },
+      { key: "descripcion", label: "Descripción", type: "text" }
+    ],
+    initialRows: rowsFromActivities(indicator, session, (activity) => ({
+      actividad: activity,
+      actividades_desarrollo: "",
+      actividades_formacion: "",
+      matricula_mujeres: "",
+      matricula_hombres: "",
+      incorporacion_mujeres_num: "",
+      incorporacion_hombres_num: "",
+      descripcion: ""
+    })),
+    showTotals: true,
+    footerNote: "Describa las actividades realizadas y deje que el sistema calcule matrícula total, participación total y porcentajes."
+  };
+}
+
+function staffTrainingTemplate(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
+  const plantel = plantelForTemplate(session);
+  const emptyRow = {
+    plantel: plantel.name,
+    actividad: "",
+    tipo_evento: "",
+    nombre_evento: "",
+    duracion_horas: "",
+    modalidad: "",
+    competencias: "",
+    organizado_por: "",
+    participantes_hombres: "",
+    participantes_mujeres: "",
+    evidencias: "",
+    observaciones: ""
+  };
+
+  return {
+    indicatorCode: indicator.code,
+    indicatorName: indicator.name,
+    groups: [],
+    infoBlocks: baseInfoBlocks(indicator, "Actividades de formación o capacitación"),
+    headerRows: [
+      [
+        { label: "Contexto", colspan: 2 },
+        { label: "Datos del evento", colspan: 6 },
+        { label: "Participantes", colspan: 3 },
+        { label: "Seguimiento", colspan: 2 }
+      ],
+      [
+        { label: "Plantel" },
+        { label: "Actividad" },
+        { label: "Tipo" },
+        { label: "Nombre" },
+        { label: "Duración" },
+        { label: "Modalidad" },
+        { label: "Competencias" },
+        { label: "Organizado por" },
+        { label: "H" },
+        { label: "M" },
+        { label: "Total" },
+        { label: "Evid." },
+        { label: "Observaciones" }
+      ]
+    ],
+    columns: [
+      { key: "plantel", label: "Plantel", type: "readonly" },
+      { key: "actividad", label: "Actividad", type: "readonly" },
+      { key: "tipo_evento", label: "Tipo", type: "text" },
+      { key: "nombre_evento", label: "Nombre", type: "text" },
+      { key: "duracion_horas", label: "Duración", type: "number" },
+      { key: "modalidad", label: "Modalidad", type: "text" },
+      { key: "competencias", label: "Competencias", type: "text" },
+      { key: "organizado_por", label: "Organizado por", type: "text" },
+      { key: "participantes_hombres", label: "H", type: "number" },
+      { key: "participantes_mujeres", label: "M", type: "number" },
+      { key: "participantes_total", label: "Total", type: "calculated", calculation: { type: "sum", sourceKeys: ["participantes_hombres", "participantes_mujeres"] } },
+      { key: "evidencias", label: "Evid.", type: "number" },
+      { key: "observaciones", label: "Observaciones", type: "text" }
+    ],
+    initialRows: rowsFromActivities(indicator, session, (activity, _index, plantel) => ({
+      ...emptyRow,
+      plantel: plantel.name,
+      actividad: activity
+    })),
+    allowAddRows: true,
+    addRowLabel: "Agregar evento",
+    emptyRow,
+    showTotals: true
+  };
+}
+
+function staffProfileTemplate(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
+  return {
+    indicatorCode: indicator.code,
+    indicatorName: indicator.name,
+    groups: [],
+    infoBlocks: baseInfoBlocks(indicator),
+    headerRows: [
+      [
+        { label: "Plantel", rowspan: 2 },
+        { label: "Actividad", rowspan: 2 },
+        { label: "Personal registrado", colspan: 3 },
+        { label: "Meta", rowspan: 2 },
+        { label: "Cumplimiento", rowspan: 2 },
+        { label: "Observaciones", rowspan: 2 }
+      ],
+      [
+        { label: "H" },
+        { label: "M" },
+        { label: "Total" }
+      ]
+    ],
+    columns: [
+      { key: "plantel", label: "Plantel", type: "readonly" },
+      { key: "actividad", label: "Actividad", type: "readonly" },
+      { key: "personal_hombres", label: "H", type: "number" },
+      { key: "personal_mujeres", label: "M", type: "number" },
+      { key: "personal_total", label: "Total", type: "calculated", calculation: { type: "sum", sourceKeys: ["personal_hombres", "personal_mujeres"] } },
+      { key: "meta", label: "Meta", type: "number" },
+      { key: "cumplimiento", label: "%", type: "calculated", calculation: { type: "percentage", numeratorKey: "personal_total", denominatorKey: "meta", decimals: 2 } },
+      { key: "observaciones", label: "Observaciones", type: "text" }
+    ],
+    initialRows: rowsFromActivities(indicator, session, (activity, _index, plantel) => ({
+      plantel: plantel.name,
+      actividad: activity,
+      personal_hombres: "",
+      personal_mujeres: "",
+      meta: "",
+      observaciones: ""
+    })),
+    showTotals: true
+  };
+}
+
+function participantActionTemplate(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
+  const plantel = plantelForTemplate(session);
+  const emptyRow = {
+    plantel: plantel.name,
+    actividad: "",
+    nombre_accion: "",
+    docentes: "",
+    administrativos: "",
+    coordinadores: "",
+    asesores: "",
+    otro_personal: "",
+    estudiantes_hombres: "",
+    estudiantes_mujeres: "",
+    evidencias: "",
+    observaciones: ""
+  };
+
+  return {
+    indicatorCode: indicator.code,
+    indicatorName: indicator.name,
+    groups: [],
+    infoBlocks: baseInfoBlocks(indicator, "Acciones oficiales"),
+    headerRows: [
+      [
+        { label: "Contexto", colspan: 3 },
+        { label: "Participantes internos", colspan: 5 },
+        { label: "Estudiantado", colspan: 3 },
+        { label: "Seguimiento", colspan: 2 }
+      ],
+      [
+        { label: "Plantel" },
+        { label: "Actividad" },
+        { label: "Nombre de la acción" },
+        { label: "Docentes" },
+        { label: "Administrativos" },
+        { label: "Coord." },
+        { label: "Asesores" },
+        { label: "Otro" },
+        { label: "H" },
+        { label: "M" },
+        { label: "Total" },
+        { label: "Evid." },
+        { label: "Observaciones" }
+      ]
+    ],
+    columns: [
+      { key: "plantel", label: "Plantel", type: "readonly" },
+      { key: "actividad", label: "Actividad", type: "readonly" },
+      { key: "nombre_accion", label: "Nombre de la acción", type: "text" },
+      { key: "docentes", label: "Docentes", type: "number" },
+      { key: "administrativos", label: "Administrativos", type: "number" },
+      { key: "coordinadores", label: "Coord.", type: "number" },
+      { key: "asesores", label: "Asesores", type: "number" },
+      { key: "otro_personal", label: "Otro", type: "number" },
+      { key: "estudiantes_hombres", label: "H", type: "number" },
+      { key: "estudiantes_mujeres", label: "M", type: "number" },
+      { key: "estudiantes_total", label: "Total", type: "calculated", calculation: { type: "sum", sourceKeys: ["estudiantes_hombres", "estudiantes_mujeres"] } },
+      { key: "evidencias", label: "Evid.", type: "number" },
+      { key: "observaciones", label: "Observaciones", type: "text" }
+    ],
+    initialRows: rowsFromActivities(indicator, session, (activity, _index, plantel) => ({
+      ...emptyRow,
+      plantel: plantel.name,
+      actividad: activity
+    })),
+    allowAddRows: true,
+    addRowLabel: "Agregar acción",
+    emptyRow,
+    showTotals: true
+  };
+}
+
+function infrastructureTemplate(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
+  const plantel = plantelForTemplate(session);
+  const emptyRow = {
+    plantel: plantel.name,
+    actividad: "",
+    rubro: "",
+    descripcion: "",
+    cantidad_actual: "",
+    cantidad_solicitada: "",
+    estado: "",
+    observaciones: ""
+  };
+
+  return {
+    indicatorCode: indicator.code,
+    indicatorName: indicator.name,
+    groups: [],
+    infoBlocks: baseInfoBlocks(indicator, "Rubro de infraestructura o equipamiento"),
+    headerRows: [
+      [
+        { label: "Contexto", colspan: 4 },
+        { label: "Cantidad", colspan: 3 },
+        { label: "Seguimiento", colspan: 2 }
+      ],
+      [
+        { label: "Plantel" },
+        { label: "Actividad" },
+        { label: "Rubro" },
+        { label: "Descripción" },
+        { label: "Actual" },
+        { label: "Solicitada" },
+        { label: "Total" },
+        { label: "Estado" },
+        { label: "Observaciones" }
+      ]
+    ],
+    columns: [
+      { key: "plantel", label: "Plantel", type: "readonly" },
+      { key: "actividad", label: "Actividad", type: "readonly" },
+      { key: "rubro", label: "Rubro", type: "text" },
+      { key: "descripcion", label: "Descripción", type: "text" },
+      { key: "cantidad_actual", label: "Actual", type: "number" },
+      { key: "cantidad_solicitada", label: "Solicitada", type: "number" },
+      { key: "cantidad_total", label: "Total", type: "calculated", calculation: { type: "sum", sourceKeys: ["cantidad_actual", "cantidad_solicitada"] } },
+      { key: "estado", label: "Estado", type: "text" },
+      { key: "observaciones", label: "Observaciones", type: "text" }
+    ],
+    initialRows: rowsFromActivities(indicator, session, (activity, _index, plantel) => ({
+      ...emptyRow,
+      plantel: plantel.name,
+      actividad: activity
+    })),
+    allowAddRows: true,
+    addRowLabel: "Agregar rubro",
+    emptyRow,
+    showTotals: true
+  };
+}
+
+function healthIntegralTemplate(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
+  const plantel = plantelForTemplate(session);
+  const activities = indicator.activities.length > 0 ? indicator.activities : ["Promocion de la salud"];
+
+  return {
+    indicatorCode: indicator.code,
+    indicatorName: indicator.name,
+    groups: [],
+    infoBlocks: [
+      {
+        label: "Actividades POA 2026",
+        text: ""
+      },
+      {
+        label: "ACCIÓN 1.1.2.1",
+        text: "Ofrecer servicios y programas de apoyo integral a estudiantes universitarios, con enfoque interseccional e intercultural, que promuevan la equidad, el bienestar emocional y la mejora de condiciones educativas. Participar en acciones de promoción en los servicios médicos, nutricionales y psicológicos a través de las Unidades de Salud Integral y el CUAP."
+      },
+      {
+        label: "INDICADOR",
+        text: `Código ${indicator.code} ${indicator.name}.`,
+        tone: "highlight"
+      },
+      {
+        label: "ACTIVIDADES",
+        text: "PROMOCIÓN DE LA SALUD"
+      }
+    ],
+    headerRows: [
+      [
+        { label: "Plantel", rowspan: 3 },
+        { label: "Nota: anotar solo la actividad desarrollada.", colspan: 4 },
+        { label: "Febrero-Agosto 2026", colspan: 3 },
+        { label: "Agosto-Enero 2027", colspan: 3 }
+      ],
+      [
+        { label: "Actividad", rowspan: 2 },
+        { label: "Unidades de salud integral", colspan: 3 },
+        { label: "M", rowspan: 2 },
+        { label: "H", rowspan: 2 },
+        { label: "T", rowspan: 2 },
+        { label: "M", rowspan: 2 },
+        { label: "H", rowspan: 2 },
+        { label: "T", rowspan: 2 }
+      ],
+      [
+        { label: "SERVICIOS MÉDICOS" },
+        { label: "DGDI" },
+        { label: "CUAP" }
+      ]
+    ],
+    columns: [
+      { key: "plantel", label: "Plantel", type: "readonly" },
+      { key: "actividad", label: "Actividad", type: "readonly" },
+      { key: "servicios_medicos", label: "Servicios Médicos", type: "number" },
+      { key: "dgdi", label: "DGDI", type: "number" },
+      { key: "cuap", label: "CUAP", type: "number" },
+      { key: "feb_ago_mujeres", label: "M", type: "number" },
+      { key: "feb_ago_hombres", label: "H", type: "number" },
+      { key: "feb_ago_total", label: "T", type: "calculated", calculation: { type: "sum", sourceKeys: ["feb_ago_mujeres", "feb_ago_hombres"] } },
+      { key: "ago_ene_mujeres", label: "M", type: "number" },
+      { key: "ago_ene_hombres", label: "H", type: "number" },
+      { key: "ago_ene_total", label: "T", type: "calculated", calculation: { type: "sum", sourceKeys: ["ago_ene_mujeres", "ago_ene_hombres"] } }
+    ],
+    initialRows: activities.map((activity) => ({
+      plantel: plantel.name,
+      actividad: activity,
+      servicios_medicos: "",
+      dgdi: "",
+      cuap: "",
+      feb_ago_mujeres: "",
+      feb_ago_hombres: "",
+      ago_ene_mujeres: "",
+      ago_ene_hombres: ""
+    })),
+    showTotals: true,
+    footerNote: "NOTA: En la parte de abajo, realice una breve descripción y análisis de las acciones y actividades que lleva a cabo el plantel respecto al tema de servicios y programas de apoyo integral a estudiantes universitarios.",
+    analysisHeading: "Descripción y análisis",
+    analysisLabel: "Descripción de acciones y actividades",
+    analysisPlaceholder: "Describa brevemente las acciones realizadas por el plantel..."
   };
 }
 
@@ -1007,6 +1612,62 @@ function titulationTemplate(indicator: SigiIndicator, session?: SigiSession): In
         matricula_hombres: ""
       }
     ]
+  };
+}
+
+function terminalEfficiencyTemplate(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
+  const plantel = plantelForTemplate(session);
+  return {
+    indicatorCode: indicator.code,
+    indicatorName: indicator.name,
+    groups: [
+      { label: "Contexto Escolar", colspan: 3 },
+      { label: "Egreso de la cohorte", colspan: 3 },
+      { label: "Matrícula de primer ingreso", colspan: 3 },
+      { label: "Resultado", colspan: 1 }
+    ],
+    columns: [
+      { key: "delegacion", label: "Delegación", type: "readonly" },
+      { key: "plantel", label: "Plantel", type: "readonly" },
+      { key: "programa", label: "Programa Educativo", type: "readonly" },
+      { key: "egreso_mujeres", label: "Mujeres", type: "number" },
+      { key: "egreso_hombres", label: "Hombres", type: "number" },
+      { key: "egreso_total", label: "Total", type: "calculated", calculation: { type: "sum", sourceKeys: ["egreso_mujeres", "egreso_hombres"] } },
+      { key: "ingreso_mujeres", label: "Mujeres", type: "number" },
+      { key: "ingreso_hombres", label: "Hombres", type: "number" },
+      { key: "ingreso_total", label: "Total", type: "calculated", calculation: { type: "sum", sourceKeys: ["ingreso_mujeres", "ingreso_hombres"] } },
+      { key: "eficiencia_terminal", label: "% eficiencia", type: "calculated", calculation: { type: "percentage", numeratorKey: "egreso_total", denominatorKey: "ingreso_total", decimals: 2 } }
+    ],
+    initialRows: [
+      {
+        delegacion: "Villa de Álvarez",
+        plantel: plantel.name,
+        programa: "Bachillerato General",
+        egreso_mujeres: "",
+        egreso_hombres: "",
+        ingreso_mujeres: "",
+        ingreso_hombres: ""
+      },
+      {
+        delegacion: "Villa de Álvarez",
+        plantel: plantel.name,
+        programa: "Técnico Analista Programador",
+        egreso_mujeres: "",
+        egreso_hombres: "",
+        ingreso_mujeres: "",
+        ingreso_hombres: ""
+      },
+      {
+        delegacion: "Villa de Álvarez",
+        plantel: plantel.name,
+        programa: "Técnico Analista Químico",
+        egreso_mujeres: "",
+        egreso_hombres: "",
+        ingreso_mujeres: "",
+        ingreso_hombres: ""
+      }
+    ],
+    showTotals: true
   };
 }
 

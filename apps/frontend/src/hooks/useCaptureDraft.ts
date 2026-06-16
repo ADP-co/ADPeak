@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  approveCapture,
+  CaptureRequestError,
   createCaptureDraft,
   findCaptureDraft,
   getCaptureDraft,
+  requestCaptureCorrection,
   sendCaptureToReview,
   updateCaptureDraft,
   type CaptureDraft,
@@ -48,6 +51,7 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
     setCaptureId(capture.id);
     window.localStorage.setItem(storageKey, String(capture.id));
     queryClient.setQueryData(['capture-draft', storageKey, capture.id], capture);
+    queryClient.setQueryData(['capture-draft-scope', storageKey], capture);
   };
 
   const scopedCaptureQuery = useQuery({
@@ -61,6 +65,16 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
       persistCapture(scopedCaptureQuery.data);
     }
   }, [scopedCaptureQuery.data]);
+
+  useEffect(() => {
+    if (
+      captureQuery.error instanceof CaptureRequestError &&
+      captureQuery.error.code === 'capture_not_found'
+    ) {
+      window.localStorage.removeItem(storageKey);
+      setCaptureId(undefined);
+    }
+  }, [captureQuery.error, storageKey]);
 
   const saveDraftMutation = useMutation({
     mutationFn: async (payload: CapturePayload) => {
@@ -89,6 +103,32 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
 
       persistCapture(draft);
       return sendCaptureToReview(draft.id);
+    },
+    onSuccess: persistCapture,
+  });
+
+  const requestCorrectionMutation = useMutation({
+    mutationFn: async (observacion: string) => {
+      const draftId = captureId ?? scopedCaptureQuery.data?.id;
+
+      if (!draftId) {
+        throw new CaptureRequestError('Primero debe existir una captura enviada a revisión.');
+      }
+
+      return requestCaptureCorrection(draftId, observacion);
+    },
+    onSuccess: persistCapture,
+  });
+
+  const approveMutation = useMutation({
+    mutationFn: async () => {
+      const draftId = captureId ?? scopedCaptureQuery.data?.id;
+
+      if (!draftId) {
+        throw new CaptureRequestError('Primero debe existir una captura enviada a revisión.');
+      }
+
+      return approveCapture(draftId);
     },
     onSuccess: persistCapture,
   });
@@ -142,9 +182,21 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
           ? saveDraftMutation.error.message
           : sendToReviewMutation.error instanceof Error
             ? sendToReviewMutation.error.message
+            : requestCorrectionMutation.error instanceof Error
+              ? requestCorrectionMutation.error.message
+              : approveMutation.error instanceof Error
+                ? approveMutation.error.message
             : undefined,
     saveDraft: saveDraftMutation.mutate,
     sendToReview: sendToReviewMutation.mutate,
-    isBusy: captureQuery.isLoading || scopedCaptureQuery.isLoading || saveDraftMutation.isPending || sendToReviewMutation.isPending,
+    requestCorrection: requestCorrectionMutation.mutate,
+    approve: approveMutation.mutate,
+    isBusy:
+      captureQuery.isLoading ||
+      scopedCaptureQuery.isLoading ||
+      saveDraftMutation.isPending ||
+      sendToReviewMutation.isPending ||
+      requestCorrectionMutation.isPending ||
+      approveMutation.isPending,
   };
 }

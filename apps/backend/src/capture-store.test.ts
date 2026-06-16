@@ -65,12 +65,20 @@ describe("capture store", () => {
       versionActual: 4
     });
 
+    expect(approveCapture(1)).toBeUndefined();
+
+    const reviewedAgain = sendCaptureToReview(1);
+    expect(reviewedAgain).toMatchObject({
+      estado: "en_revision",
+      versionActual: 5
+    });
+
     const approved = approveCapture(1);
 
     expect(approved).toMatchObject({
       estado: "aprobado",
       observacion: null,
-      versionActual: 5
+      versionActual: 6
     });
   });
 
@@ -120,5 +128,29 @@ describe("capture store", () => {
       actividadId: 1,
       periodoId: 1
     })?.payload.rows).toEqual([{ avance: 80 }]);
+  });
+
+  it("does not modify a capture while it is under review", () => {
+    const draft = createCaptureDraft({
+      plantelId: 1,
+      indicadorId: 1,
+      actividadId: 1,
+      periodoId: 1,
+      payload: { rows: [{ avance: 25 }] }
+    });
+
+    sendCaptureToReview(draft.id);
+
+    expect(updateCaptureDraft(draft.id, { rows: [{ avance: 99 }] })).toBeUndefined();
+    const repeatedCreate = createCaptureDraft({
+      plantelId: 1,
+      indicadorId: 1,
+      actividadId: 1,
+      periodoId: 1,
+      payload: { rows: [{ avance: 100 }] }
+    });
+
+    expect(repeatedCreate.payload.rows).toEqual([{ avance: 25 }]);
+    expect(getCaptureDraft(draft.id)?.payload.rows).toEqual([{ avance: 25 }]);
   });
 });

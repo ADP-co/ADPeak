@@ -11,6 +11,7 @@ export type CapturePayload = {
     nombre: string;
     tipo: string;
     tamanoBytes: number;
+    contenidoBase64?: string;
   };
 };
 
@@ -86,6 +87,10 @@ export function createCaptureDraft(request: CaptureDraftRequest): CaptureDraft {
   const existingDraft = findCaptureDraftByScope(request);
 
   if (existingDraft) {
+    if (!isEditableDraft(existingDraft)) {
+      return existingDraft;
+    }
+
     const updatedDraft: CaptureDraft = {
       ...existingDraft,
       estado: existingDraft.estado === "cerrado" ? "borrador" : existingDraft.estado,
@@ -157,6 +162,10 @@ export function updateCaptureDraft(captureId: number, payload: CapturePayload) {
     return undefined;
   }
 
+  if (!isEditableDraft(draft)) {
+    return undefined;
+  }
+
   const updatedDraft: CaptureDraft = {
     ...draft,
     payload,
@@ -177,6 +186,10 @@ export function sendCaptureToReview(captureId: number) {
     return undefined;
   }
 
+  if (!isEditableDraft(draft)) {
+    return undefined;
+  }
+
   const updatedDraft: CaptureDraft = {
     ...draft,
     estado: "en_revision",
@@ -193,6 +206,10 @@ export function requestCaptureCorrection(captureId: number, observacion: string)
   const draft = captureDrafts.get(captureId);
 
   if (!draft) {
+    return undefined;
+  }
+
+  if (draft.estado !== "en_revision") {
     return undefined;
   }
 
@@ -216,6 +233,10 @@ export function approveCapture(captureId: number) {
     return undefined;
   }
 
+  if (draft.estado !== "en_revision") {
+    return undefined;
+  }
+
   const updatedDraft: CaptureDraft = {
     ...draft,
     estado: "aprobado",
@@ -234,4 +255,8 @@ function persistCaptureState() {
     captureDrafts: Array.from(captureDrafts.values()),
     nextCaptureId
   });
+}
+
+function isEditableDraft(draft: CaptureDraft) {
+  return draft.estado === "borrador" || draft.estado === "correccion_solicitada";
 }

@@ -7,6 +7,7 @@ import {
   reportToCsv,
   reportToPdfBlob,
   type ExportReport,
+  type ReportDataRow,
 } from '../../api/reportes';
 import {
   fallbackOfficialSources,
@@ -179,16 +180,80 @@ interface PlantelProgressRecord {
 }
 
 const periodOptions = [
-  { value: '2026-2', label: '2026-2' },
-  { value: '2026-1', label: '2026-1' },
+  { value: '2026-2', label: '2026-2', cicloEscolar: '2025-2026' },
+  { value: '2026-1', label: '2026-1', cicloEscolar: '2025-2026' },
+  { value: '2025-2', label: '2025-2', cicloEscolar: '2024-2025' },
 ];
+
+function buildPlantelProgress(report: ExportReport, selectedPeriod: string): PlantelProgressRecord[] {
+  const grouped = new Map<string, ReportDataRow[]>();
+
+  report.indicadores.forEach((indicator) => {
+    indicator.datos.forEach((row) => {
+      const plantel = row.plantel ?? report.identidadReporte.nombre;
+      const plantelId = row.plantelId ?? plantel;
+      const key = `${plantelId}:${plantel}`;
+      grouped.set(key, [...(grouped.get(key) ?? []), row]);
+    });
+  });
+
+  return Array.from(grouped.entries()).map(([key, rows]) => {
+    const [, plantel] = key.split(':');
+    const plantelId = rows.find((row) => row.plantelId)?.plantelId ?? key;
+    const percentage = Math.round(
+      rows.reduce((total, row) => total + parseProgress(row.avance), 0) / Math.max(rows.length, 1)
+    );
+
+    return {
+      id: `plantel-${plantelId}`,
+      plantel,
+      plantelId: String(plantelId),
+      periodos: [selectedPeriod],
+      percentage,
+      status: statusForRows(rows, percentage),
+    };
+  });
+}
+
+function parseProgress(value: string) {
+  const number = Number(String(value).replace('%', '').trim());
+  return Number.isFinite(number) ? Math.max(0, Math.min(100, number)) : 0;
+}
+
+function statusForRows(rows: ReportDataRow[], percentage: number): PlantelStatus {
+  const statuses = rows.map((row) => normalizeStatus(row.estado));
+
+  if (statuses.length > 0 && statuses.every((status) => status === 'aprobado')) {
+    return 'Completo';
+  }
+
+  if (statuses.some((status) => status === 'observado') || rows.some((row) => normalizeStatus(row.vencimiento ?? '') === 'atrasado')) {
+    return 'Rezagado';
+  }
+
+  if (statuses.some((status) => status.includes('enviado') || status.includes('revision'))) {
+    return 'En Revisión';
+  }
+
+  return percentage > 0 ? 'En Progreso' : 'Rezagado';
+}
+
+function normalizeStatus(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
 
 // Pantalla Principal de Reportes
 export const ReportsDashboard = () => {
 
   // Estados para simular la carga del backend
-  const [dateOptions, setDateOptions] = useState<{value: string, label: string}[]>(periodOptions);
+  const [dateOptions] = useState(periodOptions);
   const [selectedDate, setSelectedDate] = useState(periodOptions[0].value);
+  const [report, setReport] = useState<ExportReport | null>(null);
+  const [isLoadingReport, setIsLoadingReport] = useState(false);
+  const [loadError, setLoadError] = useState('');
 
   // Estado para el filtrado
   const [filterBy, setFilterBy] = useState('todos');
@@ -197,26 +262,43 @@ export const ReportsDashboard = () => {
   const [officialSources, setOfficialSources] = useState<OfficialSourcesPayload>(fallbackOfficialSources);
 
   useEffect(() => {
-    const fetchFilters = async () => {
-      try {
-        await new Promise(resolve => setTimeout(resolve, 600));
-        const mockDates = periodOptions;
-        // Ordenar fechas de la más actual a la más antigua
-        setDateOptions(mockDates);
-        setSelectedDate((current) => current || mockDates[0].value);
-      } catch (error) {
-        console.error("Error al cargar los filtros:", error);
-      }
-    };
-    fetchFilters();
-  }, []);
-
-  useEffect(() => {
     fetchOfficialSources().then(setOfficialSources);
   }, []);
 
-  // Datos de avance disponibles para la entrega actual.
-  const mockPlanteles: PlantelProgressRecord[] = [
+  useEffect(() => {
+    let isMounted = true;
+    const selectedOption = dateOptions.find((option) => option.value === selectedDate) ?? dateOptions[0];
+
+    setIsLoadingReport(true);
+    setLoadError('');
+
+    fetchExportReport({
+      cicloEscolar: selectedOption.cicloEscolar,
+      periodo: selectedOption.value,
+    })
+      .then((nextReport) => {
+        if (isMounted) {
+          setReport(nextReport);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setReport(null);
+          setLoadError('No se pudo cargar la información de reportes. Se muestran datos disponibles.');
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoadingReport(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [dateOptions, selectedDate]);
+
+  const fallbackPlanteles: PlantelProgressRecord[] = [
     {
       id: 'bach-16',
       plantel: officialSources.summary.plantel,
@@ -225,18 +307,16 @@ export const ReportsDashboard = () => {
       percentage: 100,
       status: 'Completo',
     },
-    { id: 'bach-4', plantel: 'Bachillerato 4', plantelId: '2', periodos: ['2026-1'], percentage: 80, status: 'Completo' },
-    { id: 'bach-1', plantel: 'Bachillerato 1', plantelId: '3', periodos: ['2026-2'], percentage: 48, status: 'En Revisión' },
-    { id: 'bach-33', plantel: 'Bachillerato 33', plantelId: '4', periodos: ['2026-2'], percentage: 20, status: 'Rezagado' },
   ];
 
   const loadReport = async (item: PlantelProgressRecord): Promise<ExportReport> => {
     setReportMessage(`Preparando ${item.plantel}...`);
+    const selectedOption = dateOptions.find((option) => option.value === selectedDate) ?? dateOptions[0];
 
     try {
       const report = await fetchExportReport({
-        cicloEscolar: '2025-2026',
-        periodo: selectedDate,
+        cicloEscolar: selectedOption.cicloEscolar,
+        periodo: selectedOption.value,
         plantelId: item.plantelId,
       });
 
@@ -286,8 +366,11 @@ export const ReportsDashboard = () => {
     setReportMessage(`Listo: ${recordCount} registros de ${item.plantel}.`);
   };
 
+  const plantelesFromReport = report ? buildPlantelProgress(report, selectedDate) : [];
+  const plantelRows = plantelesFromReport.length > 0 ? plantelesFromReport : fallbackPlanteles;
+
   // Filtramos por progreso y siempre ordenamos alfabéticamente/numéricamente por plantel
-  const visiblePlanteles = mockPlanteles.filter((item) => !selectedDate || item.periodos.includes(selectedDate));
+  const visiblePlanteles = plantelRows.filter((item) => !selectedDate || item.periodos.includes(selectedDate));
   const processedPlanteles = visiblePlanteles
     .filter((item) => filterBy === 'todos' || item.status === filterBy)
     .sort((a, b) => a.plantel.localeCompare(b.plantel, undefined, { numeric: true }));
@@ -428,6 +511,18 @@ export const ReportsDashboard = () => {
           </p>
         )}
 
+        {loadError && (
+          <p className="mb-4 text-sm font-body font-semibold text-brand-Status_rojo" role="alert">
+            {loadError}
+          </p>
+        )}
+
+        {isLoadingReport && (
+          <p className="mb-4 text-sm font-body font-semibold text-brand-Gris_oscuro/70">
+            Actualizando reportes...
+          </p>
+        )}
+
         <div className="bg-brand-Blanco rounded-lg shadow-md border border-brand-Gris_bajo/20 overflow-x-auto">
           <table className="w-full min-w-[720px] border-collapse text-center">
 
@@ -479,6 +574,13 @@ export const ReportsDashboard = () => {
 
                 </tr>
               ))}
+              {processedPlanteles.length === 0 && (
+                <tr>
+                  <td colSpan={3} className="py-8 px-6 text-center text-brand-Gris_oscuro/60">
+                    No hay planteles para el periodo seleccionado.
+                  </td>
+                </tr>
+              )}
             </tbody>
 
           </table>

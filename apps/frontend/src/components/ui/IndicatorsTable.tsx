@@ -11,6 +11,10 @@ export type IndicatorStatus = 'Corregir' | 'Pendiente' | 'En revisión' | 'Aprob
 export interface Indicator {
   code: string;
   name: string;
+  plantelId?: number;
+  captureId?: number;
+  actividadId?: number;
+  periodoId?: number;
   plantel?: string;
   supervisor?: string;
   responsable?: string;
@@ -20,7 +24,7 @@ export interface Indicator {
 
 interface IndicatorsTableProps {
   indicators: Indicator[];
-  onSelectIndicator?: (code: string) => void;
+  onSelectIndicator?: (indicator: Indicator) => void;
   showScopeColumns?: boolean;
   periodLabel?: string;
 }
@@ -199,7 +203,7 @@ export const IndicatorsTable = ({
                   <td className="py-4 px-6 text-center whitespace-nowrap">
                     <Button
                       variant="secondary"
-                      onClick={() => onSelectIndicator && onSelectIndicator(indicator.code)}
+                      onClick={() => onSelectIndicator && onSelectIndicator(indicator)}
                       disabled={!onSelectIndicator}
                       className="w-[135px] text-xs py-1.5 px-4 disabled:opacity-50 disabled:cursor-not-allowed">
                       {getActionLabel(indicator.status)}

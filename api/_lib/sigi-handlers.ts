@@ -280,7 +280,10 @@ export async function handleCaptureDrafts(request: RequestLike, response: any) {
       const scope = captureScopeFromQuery(request.query ?? {});
 
       if (!scope) {
-        sendJson(response, 400, { error: "invalid_capture_scope" });
+        sendJson(response, 400, {
+          error: "invalid_capture_scope",
+          message: "La consulta debe incluir plantel, indicador, actividad y periodo."
+        });
         return;
       }
 
@@ -293,11 +296,24 @@ export async function handleCaptureDrafts(request: RequestLike, response: any) {
       const body = await readJsonBody(request);
 
       if (!captures.isCaptureDraftRequest(body)) {
-        sendJson(response, 400, { error: "invalid_capture_payload" });
+        sendJson(response, 400, {
+          error: "invalid_capture_payload",
+          message: "La captura debe incluir identificadores válidos y filas de captura."
+        });
         return;
       }
 
       sigi.assertCaptureAccess(session, body, "draft");
+      const existingDraft = captures.findCaptureDraftByScope(body);
+
+      if (existingDraft && !isEditableCaptureStatus(existingDraft.estado)) {
+        sendJson(response, 409, {
+          error: "capture_not_editable",
+          message: "La captura ya fue enviada y no puede modificarse hasta que se solicite corrección."
+        });
+        return;
+      }
+
       sendJson(response, 201, captures.createCaptureDraft(body));
       return;
     }
@@ -306,7 +322,7 @@ export async function handleCaptureDrafts(request: RequestLike, response: any) {
       return;
     }
 
-    sendJson(response, 400, { error: "invalid_json_body" });
+    sendJson(response, 400, { error: "invalid_json_body", message: "El cuerpo de la solicitud debe ser JSON válido." });
     return;
   }
 
@@ -324,7 +340,7 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
   const action = queryValue(request.query?.action);
 
   if (!Number.isInteger(id) || id <= 0) {
-    sendJson(response, 400, { error: "invalid_capture_id" });
+    sendJson(response, 400, { error: "invalid_capture_id", message: "El identificador de la captura no es válido." });
     return;
   }
 
@@ -349,24 +365,54 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
       const body = await readJsonBody(request);
 
       if (!captures.isCapturePayload(body.payload)) {
-        sendJson(response, 400, { error: "invalid_capture_payload" });
+        sendJson(response, 400, { error: "invalid_capture_payload", message: "La actualización debe incluir filas de captura." });
         return;
       }
 
       sigi.assertCaptureAccess(session, { ...draft, payload: body.payload }, "draft");
-      sendJson(response, 200, captures.updateCaptureDraft(id, body.payload));
+      const updatedDraft = captures.updateCaptureDraft(id, body.payload);
+
+      if (!updatedDraft) {
+        sendJson(response, 409, {
+          error: "capture_not_editable",
+          message: "La captura ya fue enviada y no puede modificarse hasta que se solicite corrección."
+        });
+        return;
+      }
+
+      sendJson(response, 200, updatedDraft);
       return;
     }
 
     if (request.method === "POST" && action === "enviar-revision") {
       sigi.assertCaptureAccess(session, draft, "submit");
-      sendJson(response, 200, captures.sendCaptureToReview(id));
+      const updatedDraft = captures.sendCaptureToReview(id);
+
+      if (!updatedDraft) {
+        sendJson(response, 409, {
+          error: "invalid_capture_status",
+          message: "No se pudo enviar esta captura a revisión."
+        });
+        return;
+      }
+
+      sendJson(response, 200, updatedDraft);
       return;
     }
 
     if (request.method === "POST" && action === "aprobar") {
       sigi.assertCaptureAccess(session, draft, "review");
-      sendJson(response, 200, captures.approveCapture(id));
+      const updatedDraft = captures.approveCapture(id);
+
+      if (!updatedDraft) {
+        sendJson(response, 409, {
+          error: "invalid_capture_status",
+          message: "La captura debe estar en revisión para aprobarse."
+        });
+        return;
+      }
+
+      sendJson(response, 200, updatedDraft);
       return;
     }
 
@@ -376,11 +422,21 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
       const observacion = typeof body.observacion === "string" ? body.observacion.trim() : "";
 
       if (!observacion) {
-        sendJson(response, 400, { error: "observation_required", message: "Agrega una observacion para solicitar correccion." });
+        sendJson(response, 400, { error: "observation_required", message: "Agrega una observación para solicitar corrección." });
         return;
       }
 
-      sendJson(response, 200, captures.requestCaptureCorrection(id, observacion));
+      const updatedDraft = captures.requestCaptureCorrection(id, observacion);
+
+      if (!updatedDraft) {
+        sendJson(response, 409, {
+          error: "invalid_capture_status",
+          message: "La captura debe estar en revisión para solicitar corrección."
+        });
+        return;
+      }
+
+      sendJson(response, 200, updatedDraft);
       return;
     }
   } catch (error) {
@@ -427,6 +483,10 @@ function positiveNumber(value: unknown) {
   const candidate = Array.isArray(value) ? value[0] : value;
   const numericValue = Number(candidate);
   return positiveInteger(numericValue) ? numericValue : undefined;
+}
+
+function isEditableCaptureStatus(status: string) {
+  return status === "borrador" || status === "correccion_solicitada";
 }
 
 function filtersFromRequest(request: RequestLike) {

@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 import type { ColumnConfig, IndicatorTemplate } from './formConfig';
@@ -11,9 +11,16 @@ import type { ColumnConfig, IndicatorTemplate } from './formConfig';
 interface IndicatorFormProps {
   template: IndicatorTemplate;
   initialData: Record<string, unknown>[];
+  initialJustificacion?: string;
+  existingEvidenceName?: string;
+  canReview?: boolean;
+  captureStatus?: string;
+  isReadOnly?: boolean;
   onBack?: () => void;
   onSaveDraft: (data: FormSubmission) => void;
   onSendReview: (data: FormSubmission) => void;
+  onApprove?: () => void;
+  onRequestCorrection?: (observacion: string) => void;
   isBusy?: boolean;
   statusMessage?: string;
   errorMessage?: string;
@@ -179,11 +186,42 @@ const enrichRowWithCalculatedValues = (row: Record<string, unknown>, columns: Co
   return enrichedRow;
 };
 
+const totalForColumn = (rows: Record<string, unknown>[] | undefined, column: ColumnConfig, columns: ColumnConfig[]) => {
+  if (column.type !== 'number' && column.type !== 'calculated') {
+    return '';
+  }
+
+  const enrichedRows = (rows ?? []).map((row) => enrichRowWithCalculatedValues(row, columns));
+
+  if (column.calculation?.type === 'percentage') {
+    const calculation = column.calculation;
+    const numerator = enrichedRows.reduce((sum, row) => sum + toNumber(row[calculation.numeratorKey]), 0);
+    const denominator = enrichedRows.reduce((sum, row) => sum + toNumber(row[calculation.denominatorKey]), 0);
+
+    if (denominator === 0) {
+      return '0';
+    }
+
+    return formatCalculatedValue((numerator / denominator) * 100);
+  }
+
+  const total = enrichedRows.reduce((sum, row) => sum + toNumber(row[column.key]), 0);
+
+  return formatCalculatedValue(total);
+};
+
 export const IndicatorForm = ({
   template,
   initialData,
+  initialJustificacion,
+  existingEvidenceName,
+  canReview = false,
+  captureStatus,
+  isReadOnly = false,
   onSaveDraft,
   onSendReview,
+  onApprove,
+  onRequestCorrection,
   isBusy = false,
   statusMessage,
   errorMessage,
@@ -201,12 +239,12 @@ export const IndicatorForm = ({
     reset,
   } = useForm<FormData>({
     resolver: zodResolver(dynamicSchema),
-    defaultValues: { rows: initialData },
+    defaultValues: { rows: initialData, justificacion: initialJustificacion ?? '' },
     // Ejecutar validación en tiempo real mientras el usuario escribe
     mode: 'onChange',
   });
 
-  const { fields } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control,
     name: 'rows',
   });
@@ -221,8 +259,8 @@ export const IndicatorForm = ({
       return;
     }
 
-    reset({ rows: initialData });
-  }, [initialData, isDirty, reset]);
+    reset({ rows: initialData, justificacion: initialJustificacion ?? '' });
+  }, [initialData, initialJustificacion, isDirty, reset]);
 
   const toSubmission = (data: FormData): FormSubmission => ({
     rows: data.rows.map((row) =>
@@ -232,8 +270,34 @@ export const IndicatorForm = ({
     evidencia: data.evidencia,
   });
 
+  const createEmptyRow = () => {
+    const source = template.emptyRow ?? initialData[0] ?? {};
+    const row: Record<string, unknown> = {};
+
+    template.columns.forEach((column) => {
+      if (column.type === 'calculated') {
+        return;
+      }
+
+      row[column.key] = column.type === 'readonly' ? source[column.key] ?? '' : '';
+    });
+
+    return row;
+  };
+
   const handleSaveDraft = handleSubmit((data) => onSaveDraft(toSubmission(data)));
   const handleValidSubmit = (data: FormData) => onSendReview(toSubmission(data));
+  const persistedEvidenceLabel = watchedEvidencia && watchedEvidencia.length > 0
+    ? watchedEvidencia[0].name
+    : existingEvidenceName;
+  const canReviewCurrentCapture = canReview && captureStatus === 'en_revision';
+  const handleRequestCorrection = () => {
+    const observacion = window.prompt('Observación para el plantel');
+
+    if (observacion?.trim()) {
+      onRequestCorrection?.(observacion.trim());
+    }
+  };
 
   return (
     <form
@@ -250,6 +314,29 @@ export const IndicatorForm = ({
             {template.indicatorName}
           </h1>
         </div>
+        {false ? (
+          <>
+            <Button
+              type="button"
+              variant="secondary"
+              className="text-xs py-1.5 px-4"
+              disabled={isBusy}
+              onClick={handleRequestCorrection}
+            >
+              Solicitar corrección
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              className="text-xs py-1.5 px-4"
+              disabled={isBusy}
+              onClick={onApprove}
+            >
+              Aprobar indicador
+            </Button>
+          </>
+        ) : (
+          <>
         <Button
           type="button"
           variant="secondary"
@@ -259,32 +346,70 @@ export const IndicatorForm = ({
           <ArrowLeft size={18} strokeWidth={2.5} />
           Volver
         </Button>
+          </>
+        )}
       </div>
 
       <div className="w-full overflow-x-auto border border-brand-Gris_bajo/40 rounded-lg">
-        <table className="w-full border-collapse text-center text-sm font-body">
+        {template.infoBlocks && template.infoBlocks.length > 0 && (
+          <div className="min-w-[980px] border-b border-brand-Gris_bajo/30 text-left">
+            {template.infoBlocks.map((block, index) => (
+              <p
+                key={`${block.label ?? 'info'}-${index}`}
+                className={`px-3 py-1.5 text-sm leading-snug ${
+                  block.tone === 'highlight'
+                    ? 'bg-emerald-600 text-white font-semibold'
+                    : 'bg-brand-Blanco text-brand-Gris_oscuro'
+                }`}
+              >
+                {block.label && <span className="font-bold">{block.label}{block.text ? ': ' : ''}</span>}
+                {block.text}
+              </p>
+            ))}
+          </div>
+        )}
+        <table className="w-full min-w-[980px] border-collapse text-center text-sm font-body">
           <thead className="bg-brand-Verde_oscuro text-brand-Blanco">
-            <tr>
-              {template.groups.map((group) => (
-                <th
-                  key={group.label}
-                  colSpan={group.colspan}
-                  className="border border-brand-Blanco/20 py-2 px-4 font-bold"
-                >
-                  {group.label}
-                </th>
-              ))}
-            </tr>
-            <tr className="bg-brand-Verde_principal/90">
-              {template.columns.map((column) => (
-                <th
-                  key={column.key}
-                  className="border border-brand-Blanco/20 py-2 px-2 text-xs font-semibold"
-                >
-                  {column.label}
-                </th>
-              ))}
-            </tr>
+            {template.headerRows ? (
+              template.headerRows.map((row, rowIndex) => (
+                <tr key={`header-row-${rowIndex}`} className={rowIndex === 0 ? undefined : 'bg-brand-Verde_principal/90'}>
+                  {row.map((cell, cellIndex) => (
+                    <th
+                      key={`${cell.label}-${rowIndex}-${cellIndex}`}
+                      colSpan={cell.colspan ?? 1}
+                      rowSpan={cell.rowspan ?? 1}
+                      className="border border-brand-Blanco/20 py-2 px-2 text-xs font-semibold whitespace-pre-line"
+                    >
+                      {cell.label}
+                    </th>
+                  ))}
+                </tr>
+              ))
+            ) : (
+              <>
+                <tr>
+                  {template.groups.map((group) => (
+                    <th
+                      key={group.label}
+                      colSpan={group.colspan}
+                      className="border border-brand-Blanco/20 py-2 px-4 font-bold"
+                    >
+                      {group.label}
+                    </th>
+                  ))}
+                </tr>
+                <tr className="bg-brand-Verde_principal/90">
+                  {template.columns.map((column) => (
+                    <th
+                      key={column.key}
+                      className="border border-brand-Blanco/20 py-2 px-2 text-xs font-semibold"
+                    >
+                      {column.label}
+                    </th>
+                  ))}
+                </tr>
+              </>
+            )}
           </thead>
 
           <tbody>
@@ -314,6 +439,7 @@ export const IndicatorForm = ({
                             className="w-full min-w-[80px] text-center !p-1 h-8"
                             label=""
                             aria-label={`${column.label}, fila ${rowIndex + 1}`}
+                            disabled={isReadOnly}
                             {...register(`rows.${rowIndex}.${column.key}` as const)}
                             error={error}
                           />
@@ -325,6 +451,7 @@ export const IndicatorForm = ({
                             className="w-full min-w-[160px] !p-1 h-8"
                             label=""
                             aria-label={`${column.label}, fila ${rowIndex + 1}`}
+                            disabled={isReadOnly}
                             {...register(`rows.${rowIndex}.${column.key}` as const)}
                             error={error}
                           />
@@ -342,23 +469,65 @@ export const IndicatorForm = ({
               );
             })}
           </tbody>
+          {template.showTotals && (
+            <tfoot>
+              <tr className="bg-brand-Gris_bajo/25 font-bold text-brand-Gris_oscuro">
+                {template.columns.map((column, index) => (
+                  <td key={`total-${column.key}`} className="border border-brand-Gris_bajo/30 p-2">
+                    {index === 0 ? 'TOTALES' : totalForColumn(watchedRows as Record<string, unknown>[] | undefined, column, template.columns)}
+                  </td>
+                ))}
+              </tr>
+            </tfoot>
+          )}
         </table>
+        {template.allowAddRows && (
+          <div className="min-w-[980px] flex flex-wrap justify-end gap-3 border-t border-brand-Gris_bajo/30 bg-brand-Blanco px-3 py-3">
+            {fields.length > 1 && (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => remove(fields.length - 1)}
+                disabled={isReadOnly}
+                className="flex items-center gap-2 text-xs py-1.5 px-4"
+              >
+                <Trash2 size={15} />
+                Quitar última fila
+              </Button>
+            )}
+            <Button
+              type="button"
+              onClick={() => append(createEmptyRow() as FormData['rows'][number])}
+              disabled={isReadOnly}
+              className="flex items-center gap-2 text-xs py-1.5 px-4"
+            >
+              <Plus size={15} />
+              {template.addRowLabel ?? 'Agregar fila'}
+            </Button>
+          </div>
+        )}
+        {template.footerNote && (
+          <p className="min-w-[980px] border-t border-brand-Gris_bajo/30 px-3 py-2 text-left text-sm leading-snug text-blue-700 bg-brand-Blanco">
+            {template.footerNote}
+          </p>
+        )}
       </div>
 
       {/* Apartado de Justificación y Evidencia */}
       <div className="mt-8 bg-brand-Gris_bajo/5 p-6 rounded-lg border border-brand-Gris_bajo/20">
         <h3 className="font-title text-lg font-bold text-brand-Gris_oscuro mb-4">
-          Justificación y Evidencia
+          {template.analysisHeading ?? 'Justificación y Evidencia'}
         </h3>
         <div className="flex flex-col md:flex-row gap-6">
           <div className="flex-1">
             <label htmlFor={justificacionInputId} className="block text-sm font-bold font-accent text-brand-Gris_oscuro mb-2">
-              Justificación
+              {template.analysisLabel ?? 'Justificación'}
             </label>
             <textarea
               id={justificacionInputId}
               className="w-full border border-brand-Gris_bajo/40 p-3 rounded-md font-body text-sm outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal min-h-[100px] resize-y"
-              placeholder="Ingrese la justificación correspondiente..."
+              placeholder={template.analysisPlaceholder ?? 'Ingrese la justificación correspondiente...'}
+              disabled={isReadOnly}
               {...register('justificacion')}
             ></textarea>
           </div>
@@ -378,11 +547,12 @@ export const IndicatorForm = ({
                   accept=".pdf"
                   className="sr-only"
                   aria-label="Seleccionar evidencia en PDF"
+                  disabled={isReadOnly}
                   {...register('evidencia')}
                 />
               </label>
-              <span className="text-sm font-body text-brand-Gris_oscuro truncate px-4" title={watchedEvidencia && watchedEvidencia.length > 0 ? watchedEvidencia[0].name : 'Ningún archivo seleccionado'}>
-                {watchedEvidencia && watchedEvidencia.length > 0 ? watchedEvidencia[0].name : 'Ningún archivo seleccionado'}
+              <span className="text-sm font-body text-brand-Gris_oscuro truncate px-4" title={persistedEvidenceLabel ?? 'Ningún archivo seleccionado'}>
+                {persistedEvidenceLabel ?? 'Ningún archivo seleccionado'}
               </span>
             </div>
             {/* Mostrar error de validación de archivo si existe */}
@@ -408,19 +578,44 @@ export const IndicatorForm = ({
             </p>
           )}
         </div>
+        {canReview ? (canReviewCurrentCapture ? (
+          <>
+            <Button
+              type="button"
+              variant="secondary"
+              className="text-xs py-1.5 px-4"
+              disabled={isBusy}
+              onClick={handleRequestCorrection}
+            >
+              Solicitar corrección
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              className="text-xs py-1.5 px-4"
+              disabled={isBusy}
+              onClick={onApprove}
+            >
+              Aprobar indicador
+            </Button>
+          </>
+        ) : null) : (
+          <>
         <Button
           type="button"
           variant="secondary"
           className="text-xs py-1.5 px-4"
-          disabled={isBusy}
+          disabled={isBusy || isReadOnly}
           onClick={() => void handleSaveDraft()}
         >
           Guardar borrador
         </Button>
         {/* Bloquear el botón de envío si el formulario contiene errores */}
-        <Button type="submit" variant="primary" className="text-xs py-1.5 px-4" disabled={!isValid || isBusy}>
+        <Button type="submit" variant="primary" className="text-xs py-1.5 px-4" disabled={!isValid || isBusy || isReadOnly}>
           Enviar a revisión
         </Button>
+          </>
+        )}
       </div>
     </form>
   );

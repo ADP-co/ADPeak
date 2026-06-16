@@ -5,6 +5,8 @@ import { API_BASE_URL, API_REQUESTS_ENABLED, sessionHeaders } from './client';
 export type ReportDataRow = {
   id?: string;
   registro_id?: string | number;
+  captureId?: number;
+  actividadId?: number;
   actividad: string;
   responsable: string;
   estado: string;
@@ -12,6 +14,7 @@ export type ReportDataRow = {
   plantel?: string;
   plantelId?: string;
   periodo?: string;
+  periodoId?: number;
   ciclo?: string;
   meta?: number;
   evidencias?: number;

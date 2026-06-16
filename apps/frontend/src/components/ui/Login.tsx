@@ -88,7 +88,7 @@ export const Login = () => {
   };
 
   return (
-    <div
+    <main
       className="min-h-screen flex flex-col p-6 md:p-10 relative"
       style={{
         backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${UDCBanner})`,
@@ -102,7 +102,7 @@ export const Login = () => {
         <div className="w-full flex items-center justify-between">
           <img
             src={LogoUdec}
-            alt="Logo UdeC"
+            alt="Universidad de Colima"
             className="h-14 md:h-18 w-auto drop-shadow-md shrink-0"
           />
           <img
@@ -152,7 +152,7 @@ export const Login = () => {
         </form>
       </div>
     </div>
-    </div>
+    </main>
   );
 };
 

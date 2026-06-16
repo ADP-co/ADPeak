@@ -25,7 +25,8 @@ describe("SIGI store and RBAC", () => {
     expect(indicators.length).toBeGreaterThanOrEqual(48);
     expect(getIndicatorByCode("1.0.0.0.2")).toMatchObject({
       name: expect.stringContaining("titul"),
-      active: true
+      active: true,
+      plantelIds: [1]
     });
     expect(listUsers(director).some((user) => user.role === "responsable" && user.indicatorCodes.length > 1)).toBe(true);
   });
@@ -137,17 +138,17 @@ describe("SIGI store and RBAC", () => {
   it("changes report progress when cycle and plantel filters change", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const currentCycle = buildReportPayload(director, {
-      plantelId: "3",
+      plantelId: "1",
       cicloEscolar: "2025-2026",
       periodo: "2026-2"
     });
     const previousCycle = buildReportPayload(director, {
-      plantelId: "3",
+      plantelId: "1",
       cicloEscolar: "2024-2025",
       periodo: "2025-2"
     });
     const anotherPlantel = buildReportPayload(director, {
-      plantelId: "4",
+      plantelId: "2",
       cicloEscolar: "2025-2026",
       periodo: "2026-2"
     });
@@ -159,7 +160,18 @@ describe("SIGI store and RBAC", () => {
         .join("|");
 
     expect(signature(currentCycle)).not.toBe(signature(previousCycle));
-    expect(signature(currentCycle)).not.toBe(signature(anotherPlantel));
+    expect(signature(currentCycle)).not.toBe("");
+    expect(signature(anotherPlantel)).toBe("");
+  });
+
+  it("does not expose official indicators to planteles outside the imported source scope", () => {
+    const bachillerato16 = sessionFromHeaders({ "x-role": "plantel", "x-plantel-id": "1" });
+    const bachillerato4 = sessionFromHeaders({ "x-role": "plantel", "x-plantel-id": "2" });
+    const indicator = getIndicatorByCode("1.0.0.0.2");
+
+    expect(indicator?.plantelIds).toEqual([1]);
+    expect(listIndicators(bachillerato16).length).toBeGreaterThan(0);
+    expect(listIndicators(bachillerato4)).toHaveLength(0);
   });
 
   it("prevents plantel users from reading institutional reports", () => {
@@ -234,6 +246,251 @@ describe("SIGI store and RBAC", () => {
         "draft"
       )
     ).toThrow(SigiValidationError);
+  });
+
+  it("builds the official health integral matrix for indicator 1.1.2.1.4", () => {
+    const plantel = sessionFromHeaders({
+      "x-role": "plantel",
+      "x-plantel-id": "1"
+    });
+    const indicator = getIndicatorByCode("1.1.2.1.4");
+
+    expect(indicator).toBeDefined();
+    expect(indicator?.activities).toEqual(expect.arrayContaining([
+      "Promoción de la salud",
+      "Clínica Universitaria de Atención Psicológica",
+      "Número de servicios y acciones de Desarrollo Integral dirigidos al estudiantado"
+    ]));
+
+    const template = templateForIndicator(indicator!, plantel);
+
+    expect(template.headerRows).toBeDefined();
+    expect(template.showTotals).toBe(true);
+    expect(template.columns.map((column) => [column.key, column.type])).toEqual([
+      ["plantel", "readonly"],
+      ["actividad", "readonly"],
+      ["servicios_medicos", "number"],
+      ["dgdi", "number"],
+      ["cuap", "number"],
+      ["feb_ago_mujeres", "number"],
+      ["feb_ago_hombres", "number"],
+      ["feb_ago_total", "calculated"],
+      ["ago_ene_mujeres", "number"],
+      ["ago_ene_hombres", "number"],
+      ["ago_ene_total", "calculated"]
+    ]);
+    expect(template.initialRows.map((row) => row.actividad)).toEqual(indicator!.activities);
+    expect(template.initialRows.every((row) => row.plantel === "Bachillerato 16")).toBe(true);
+
+    expect(() =>
+      assertCaptureAccess(
+        plantel,
+        {
+          plantelId: 1,
+          indicadorId: indicator!.id,
+          payload: {
+            rows: [{
+              ...template.initialRows[0],
+              servicios_medicos: 1,
+              dgdi: 2,
+              cuap: 3,
+              feb_ago_mujeres: 4,
+              feb_ago_hombres: 5,
+              ago_ene_mujeres: 6,
+              ago_ene_hombres: 7
+            }]
+          }
+        },
+        "draft"
+      )
+    ).not.toThrow();
+
+    expect(() =>
+      assertCaptureAccess(
+        plantel,
+        {
+          plantelId: 1,
+          indicadorId: indicator!.id,
+          payload: { rows: [{ ...template.initialRows[0], columna_invalida: 1 }] }
+        },
+        "draft"
+      )
+    ).toThrow(SigiValidationError);
+  });
+
+  it("rejects truncated capture rows when sending to review", () => {
+    const plantel = sessionFromHeaders({
+      "x-role": "plantel",
+      "x-plantel-id": "1"
+    });
+    const indicator = getIndicatorByCode("1.1.2.1.4");
+    const template = templateForIndicator(indicator!, plantel);
+
+    expect(template.initialRows.length).toBeGreaterThan(1);
+    expect(() =>
+      assertCaptureAccess(
+        plantel,
+        {
+          plantelId: 1,
+          indicadorId: indicator!.id,
+          payload: { rows: [template.initialRows[0]], justificacion: "Captura parcial" }
+        },
+        "submit"
+      )
+    ).toThrow(SigiValidationError);
+  });
+
+  it("builds source-based templates for the main official spreadsheet families", () => {
+    const plantel = sessionFromHeaders({
+      "x-role": "plantel",
+      "x-plantel-id": "1"
+    });
+
+    const cases = [
+      {
+        code: "1.1.2.1.1",
+        expectedKeys: ["feb_ago_mujeres", "feb_ago_hombres", "feb_ago_total", "ago_ene_total", "total_anual"],
+        sampleValues: {
+          meta: 100,
+          feb_ago_mujeres: 7,
+          feb_ago_hombres: 8,
+          ago_ene_mujeres: 5,
+          ago_ene_hombres: 6
+        }
+      },
+      {
+        code: "1.1.2.3.1",
+        expectedKeys: ["actividades_desarrollo", "matricula_total", "incorporacion_total_num", "incorporacion_total_pct"],
+        sampleValues: {
+          actividades_desarrollo: 2,
+          actividades_formacion: 1,
+          matricula_mujeres: 30,
+          matricula_hombres: 20,
+          incorporacion_mujeres_num: 15,
+          incorporacion_hombres_num: 10,
+          descripcion: "Actividades realizadas"
+        }
+      },
+      {
+        code: "1.1.2.5.5",
+        expectedKeys: ["tipo_evento", "nombre_evento", "participantes_hombres", "participantes_mujeres", "participantes_total"],
+        sampleValues: {
+          tipo_evento: "Curso",
+          nombre_evento: "Capacitación docente",
+          duracion_horas: 12,
+          modalidad: "Presencial",
+          competencias: "Didácticas",
+          organizado_por: "DGEMS",
+          participantes_hombres: 4,
+          participantes_mujeres: 6,
+          evidencias: 1
+        }
+      },
+      {
+        code: "4.1.2.1.6",
+        expectedKeys: ["rubro", "cantidad_actual", "cantidad_solicitada", "cantidad_total"],
+        sampleValues: {
+          rubro: "Equipo",
+          descripcion: "Videoproyector",
+          cantidad_actual: 1,
+          cantidad_solicitada: 2,
+          estado: "Solicitado"
+        }
+      }
+    ];
+
+    cases.forEach(({ code, expectedKeys, sampleValues }) => {
+      const indicator = getIndicatorByCode(code);
+      expect(indicator).toBeDefined();
+
+      const template = templateForIndicator(indicator!, plantel);
+      const keys = template.columns.map((column) => column.key);
+
+      expectedKeys.forEach((key) => expect(keys).toContain(key));
+      expect(template.initialRows.length).toBe(indicator!.activities.length);
+
+      expect(() =>
+        assertCaptureAccess(
+          plantel,
+          {
+            plantelId: 1,
+            indicadorId: indicator!.id,
+            payload: {
+              rows: [{
+                ...template.initialRows[0],
+                ...sampleValues
+              }]
+            }
+          },
+          "draft"
+        )
+      ).not.toThrow();
+
+      expect(() =>
+        assertCaptureAccess(
+          plantel,
+          {
+            plantelId: 1,
+            indicadorId: indicator!.id,
+            payload: { rows: [{ ...template.initialRows[0], columna_inventada: 1 }] }
+          },
+          "draft"
+        )
+      ).toThrow(SigiValidationError);
+    });
+  });
+
+  it("generates a usable capture template for every official indicator", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const plantel = sessionFromHeaders({
+      "x-role": "plantel",
+      "x-plantel-id": "1"
+    });
+
+    listIndicators(director).forEach((indicator) => {
+      const template = templateForIndicator(indicator, plantel);
+
+      expect(template.columns.length, indicator.code).toBeGreaterThan(0);
+      expect(template.initialRows.length, indicator.code).toBeGreaterThan(0);
+      expect(template.initialRows.length, indicator.code).toBeGreaterThanOrEqual(
+        indicator.activities.length > 0 && !["1.0.0.0.1", "1.0.0.0.2"].includes(indicator.code)
+          ? indicator.activities.length
+          : 1
+      );
+
+      expect(() =>
+        assertCaptureAccess(
+          plantel,
+          {
+            plantelId: 1,
+            indicadorId: indicator.id,
+            payload: { rows: [template.initialRows[0]] }
+          },
+          "draft"
+        )
+      ).not.toThrow();
+    });
+  });
+
+  it("blocks captures for indicators that are not assigned to the requested plantel", () => {
+    const plantel = sessionFromHeaders({
+      "x-role": "plantel",
+      "x-plantel-id": "2"
+    });
+    const indicator = getIndicatorByCode("1.0.0.0.2");
+
+    expect(indicator).toBeDefined();
+    expect(() =>
+      assertCaptureAccess(
+        plantel,
+        {
+          plantelId: 2,
+          indicadorId: indicator!.id,
+          payload: { rows: [{ egresados_mujeres: 1, egresados_hombres: 1, matricula_mujeres: 1, matricula_hombres: 1 }] }
+        },
+        "draft"
+      )
+    ).toThrow(SigiForbiddenError);
   });
 
   it("uses the active plantel session when building capture templates", () => {

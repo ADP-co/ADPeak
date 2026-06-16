@@ -373,6 +373,16 @@ const server = createServer(async (request, response) => {
       }
 
       assertCaptureAccess(session, payload, "draft");
+      const existingDraft = findCaptureDraftByScope(payload);
+
+      if (existingDraft && !isEditableCaptureStatus(existingDraft.estado)) {
+        sendJson(response, 409, {
+          error: "capture_not_editable",
+          message: "La captura ya fue enviada y no puede modificarse hasta que se solicite corrección."
+        });
+        return;
+      }
+
       sendJson(response, 201, createCaptureDraft(payload));
       return;
     } catch (error) {
@@ -449,6 +459,15 @@ const server = createServer(async (request, response) => {
 
         assertCaptureAccess(session, { ...draft, payload }, "draft");
         const updatedDraft = updateCaptureDraft(captureId, payload);
+
+        if (!updatedDraft) {
+          sendJson(response, 409, {
+            error: "capture_not_editable",
+            message: "La captura ya fue enviada y no puede modificarse hasta que se solicite corrección."
+          });
+          return;
+        }
+
         sendJson(response, 200, updatedDraft);
         return;
       } catch (error) {
@@ -465,21 +484,41 @@ const server = createServer(async (request, response) => {
     }
 
     if (request.method === "POST" && action === "enviar-revision") {
-      const draft = getCaptureDraft(captureId);
+      try {
+        const draft = getCaptureDraft(captureId);
 
-      if (!draft) {
-        sendJson(response, 404, {
-          error: "capture_not_found",
-          message: "No existe una captura con ese ID."
+        if (!draft) {
+          sendJson(response, 404, {
+            error: "capture_not_found",
+            message: "No existe una captura con ese ID."
+          });
+          return;
+        }
+
+        assertCaptureAccess(session, { ...draft, payload: draft.payload }, "submit");
+        const updatedDraft = sendCaptureToReview(captureId);
+
+        if (!updatedDraft) {
+          sendJson(response, 409, {
+            error: "invalid_capture_status",
+            message: "No se pudo enviar esta captura a revisión."
+          });
+          return;
+        }
+
+        sendJson(response, 200, updatedDraft);
+        return;
+      } catch (error) {
+        if (sendError(response, error)) {
+          return;
+        }
+
+        sendJson(response, 400, {
+          error: "invalid_capture",
+          message: "No se pudo enviar esta captura a revisión."
         });
         return;
       }
-
-      assertCaptureAccess(session, { ...draft, payload: draft.payload }, "submit");
-      const updatedDraft = sendCaptureToReview(captureId);
-
-      sendJson(response, 200, updatedDraft);
-      return;
     }
 
     if (request.method === "POST" && action === "observar") {
@@ -506,7 +545,17 @@ const server = createServer(async (request, response) => {
           return;
         }
 
-        sendJson(response, 200, requestCaptureCorrection(captureId, observacion));
+        const updatedDraft = requestCaptureCorrection(captureId, observacion);
+
+        if (!updatedDraft) {
+          sendJson(response, 409, {
+            error: "invalid_capture_status",
+            message: "La captura debe estar en revisión para solicitar corrección."
+          });
+          return;
+        }
+
+        sendJson(response, 200, updatedDraft);
         return;
       } catch (error) {
         if (sendError(response, error)) {
@@ -533,7 +582,17 @@ const server = createServer(async (request, response) => {
       }
 
       assertCaptureAccess(session, draft, "review");
-      sendJson(response, 200, approveCapture(captureId));
+      const updatedDraft = approveCapture(captureId);
+
+      if (!updatedDraft) {
+        sendJson(response, 409, {
+          error: "invalid_capture_status",
+          message: "La captura debe estar en revisión para aprobarse."
+        });
+        return;
+      }
+
+      sendJson(response, 200, updatedDraft);
       return;
     }
   }
@@ -664,4 +723,8 @@ function captureScopeFromUrl(url: URL) {
 function positiveIntegerParam(url: URL, key: string) {
   const value = Number(url.searchParams.get(key));
   return Number.isInteger(value) && value > 0 ? value : undefined;
+}
+
+function isEditableCaptureStatus(status: string) {
+  return status === "borrador" || status === "correccion_solicitada";
 }

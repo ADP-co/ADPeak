@@ -14,6 +14,17 @@ api.interceptors.request.use((config) => {
 
 const FALLBACK_STORAGE_KEY = 'adpeak.static.captures';
 
+export class CaptureRequestError extends Error {
+  constructor(
+    message: string,
+    public readonly code?: string,
+    public readonly status?: number,
+  ) {
+    super(message);
+    this.name = 'CaptureRequestError';
+  }
+}
+
 export type CapturePayload = {
   rows: Record<string, unknown>[];
   justificacion?: string;
@@ -21,6 +32,7 @@ export type CapturePayload = {
     nombre: string;
     tipo: string;
     tamanoBytes: number;
+    contenidoBase64?: string;
   };
 };
 
@@ -44,6 +56,7 @@ export type CaptureDraft = {
   estado: 'borrador' | 'en_revision' | 'correccion_solicitada' | 'aprobado' | 'cerrado';
   versionActual: number;
   payload: CapturePayload;
+  observacion?: string | null;
   cerradoEn: string | null;
   creadoEn: string;
   actualizadoEn: string;
@@ -54,7 +67,74 @@ function shouldUseStaticFallback(error: unknown) {
     return false;
   }
 
-  return !error.response || [404, 405].includes(error.response.status);
+  if (!error.response) {
+    return !isAbsoluteApiBaseUrl();
+  }
+
+  if (error.response.status === 405) {
+    return true;
+  }
+
+  if (error.response.status !== 404) {
+    return false;
+  }
+
+  const data = error.response.data;
+  if (!data || typeof data !== 'object') {
+    return true;
+  }
+
+  const errorCode = 'error' in data ? data.error : undefined;
+  return errorCode === 'not_found';
+}
+
+function isAbsoluteApiBaseUrl() {
+  return /^https?:\/\//i.test(API_BASE_URL);
+}
+
+function captureError(error: unknown, fallbackMessage: string) {
+  if (!axios.isAxiosError(error)) {
+    return new CaptureRequestError(fallbackMessage);
+  }
+
+  const status = error.response?.status;
+  const data = error.response?.data;
+  const code = data && typeof data === 'object' && 'error' in data && typeof data.error === 'string'
+    ? data.error
+    : undefined;
+
+  if (!error.response) {
+    return new CaptureRequestError('No se pudo conectar con el sistema. Intenta de nuevo.', 'network_error');
+  }
+
+  if (code === 'capture_not_found') {
+    return new CaptureRequestError('No se encontró el borrador guardado. Se buscará la captura vigente.', code, status);
+  }
+
+  if (status === 403) {
+    return new CaptureRequestError('No tienes permiso para realizar esta acción.', code, status);
+  }
+
+  if (status === 400 && data && typeof data === 'object' && 'message' in data && typeof data.message === 'string') {
+    return new CaptureRequestError(cleanServerMessage(data.message), code, status);
+  }
+
+  if (data && typeof data === 'object' && 'message' in data && typeof data.message === 'string') {
+    return new CaptureRequestError(cleanServerMessage(data.message), code, status);
+  }
+
+  return new CaptureRequestError(fallbackMessage, code, status);
+}
+
+function cleanServerMessage(message: string) {
+  return message
+    .replace(/actualizacion/g, 'actualización')
+    .replace(/valido/g, 'válido')
+    .replace(/validas/g, 'válidas')
+    .replace(/accion/g, 'acción')
+    .replace(/revision/g, 'revisión')
+    .replace(/observacion/g, 'observación')
+    .replace(/esta/g, 'está');
 }
 
 function readFallbackCaptures() {
@@ -122,6 +202,11 @@ function createFallbackDraft(request: CaptureDraftRequest) {
 function updateFallbackDraft(captureId: number, payload: CapturePayload) {
   const captures = readFallbackCaptures();
   const currentCapture = captures.get(captureId);
+
+  if (currentCapture && !isEditableFallbackStatus(currentCapture.estado)) {
+    throw new CaptureRequestError('La captura ya fue enviada y no puede modificarse hasta que se solicite corrección.', 'capture_not_editable', 409);
+  }
+
   const updatedCapture = {
     ...buildFallbackCapture({ id: captureId, payload }),
     ...currentCapture,
@@ -136,12 +221,27 @@ function updateFallbackDraft(captureId: number, payload: CapturePayload) {
 }
 
 function getFallbackDraft(captureId: number) {
-  return readFallbackCaptures().get(captureId) ?? buildFallbackCapture({ id: captureId });
+  const draft = readFallbackCaptures().get(captureId);
+
+  if (!draft) {
+    throw new CaptureRequestError('No se encontró el borrador guardado. Se buscará la captura vigente.', 'capture_not_found', 404);
+  }
+
+  return draft;
 }
 
 function sendFallbackDraftToReview(captureId: number) {
   const captures = readFallbackCaptures();
   const currentCapture = captures.get(captureId);
+
+  if (!currentCapture || currentCapture.payload.rows.length === 0) {
+    throw new CaptureRequestError('La captura está incompleta. Vuelve a abrir el indicador y conserva todas las filas oficiales.', 'invalid_capture_payload', 400);
+  }
+
+  if (!isEditableFallbackStatus(currentCapture.estado)) {
+    throw new CaptureRequestError('No se pudo enviar esta captura a revisión.', 'invalid_capture_status', 409);
+  }
+
   const updatedCapture = {
     ...buildFallbackCapture({ id: captureId }),
     ...currentCapture,
@@ -155,6 +255,54 @@ function sendFallbackDraftToReview(captureId: number) {
   return updatedCapture;
 }
 
+function requestFallbackCorrection(captureId: number, observacion: string) {
+  const captures = readFallbackCaptures();
+  const currentCapture = captures.get(captureId);
+
+  if (currentCapture?.estado !== 'en_revision') {
+    throw new CaptureRequestError('La captura debe estar en revisión para solicitar corrección.', 'invalid_capture_status', 409);
+  }
+
+  const updatedCapture = {
+    ...buildFallbackCapture({ id: captureId }),
+    ...currentCapture,
+    estado: 'correccion_solicitada' as const,
+    observacion,
+    versionActual: (currentCapture?.versionActual ?? 1) + 1,
+    actualizadoEn: new Date().toISOString(),
+  };
+
+  captures.set(captureId, updatedCapture);
+  writeFallbackCaptures(captures);
+  return updatedCapture;
+}
+
+function approveFallbackDraft(captureId: number) {
+  const captures = readFallbackCaptures();
+  const currentCapture = captures.get(captureId);
+
+  if (currentCapture?.estado !== 'en_revision') {
+    throw new CaptureRequestError('La captura debe estar en revisión para aprobarse.', 'invalid_capture_status', 409);
+  }
+
+  const updatedCapture = {
+    ...buildFallbackCapture({ id: captureId }),
+    ...currentCapture,
+    estado: 'aprobado' as const,
+    observacion: null,
+    versionActual: (currentCapture?.versionActual ?? 1) + 1,
+    actualizadoEn: new Date().toISOString(),
+  };
+
+  captures.set(captureId, updatedCapture);
+  writeFallbackCaptures(captures);
+  return updatedCapture;
+}
+
+function isEditableFallbackStatus(status: CaptureDraft['estado']) {
+  return status === 'borrador' || status === 'correccion_solicitada';
+}
+
 export async function createCaptureDraft(request: CaptureDraftRequest) {
   try {
     const response = await api.post<CaptureDraft>('/capturas/borradores', request);
@@ -164,7 +312,7 @@ export async function createCaptureDraft(request: CaptureDraftRequest) {
       return createFallbackDraft(request);
     }
 
-    throw error;
+    throw captureError(error, 'No se pudo guardar el borrador.');
   }
 }
 
@@ -183,14 +331,14 @@ export async function findCaptureDraft(request: Omit<CaptureDraftRequest, 'paylo
       return undefined;
     }
 
-    throw error;
+    throw captureError(error, 'No se pudo consultar la captura.');
   }
 }
 
 export async function updateCaptureDraft(
   captureId: number,
   payload: CapturePayload,
-  motivoCambio = 'actualizacion desde frontend',
+  motivoCambio = 'actualización desde frontend',
 ) {
   try {
     const response = await api.put<CaptureDraft>(`/capturas/${captureId}`, {
@@ -203,7 +351,7 @@ export async function updateCaptureDraft(
       return updateFallbackDraft(captureId, payload);
     }
 
-    throw error;
+    throw captureError(error, 'No se pudo actualizar el borrador.');
   }
 }
 
@@ -216,7 +364,7 @@ export async function getCaptureDraft(captureId: number) {
       return getFallbackDraft(captureId);
     }
 
-    throw error;
+    throw captureError(error, 'No se pudo cargar el borrador.');
   }
 }
 
@@ -229,6 +377,32 @@ export async function sendCaptureToReview(captureId: number) {
       return sendFallbackDraftToReview(captureId);
     }
 
-    throw error;
+    throw captureError(error, 'No se pudo enviar a revisión.');
+  }
+}
+
+export async function requestCaptureCorrection(captureId: number, observacion: string) {
+  try {
+    const response = await api.post<CaptureDraft>(`/capturas/${captureId}/observar`, { observacion });
+    return response.data;
+  } catch (error) {
+    if (shouldUseStaticFallback(error)) {
+      return requestFallbackCorrection(captureId, observacion);
+    }
+
+    throw captureError(error, 'No se pudo solicitar la corrección.');
+  }
+}
+
+export async function approveCapture(captureId: number) {
+  try {
+    const response = await api.post<CaptureDraft>(`/capturas/${captureId}/aprobar`);
+    return response.data;
+  } catch (error) {
+    if (shouldUseStaticFallback(error)) {
+      return approveFallbackDraft(captureId);
+    }
+
+    throw captureError(error, 'No se pudo aprobar el indicador.');
   }
 }

@@ -67,7 +67,7 @@ const DonutCard = ({ title, percentage, colorClass, strokeColor }: DonutCardProp
 };
 
 interface DashboardProps {
-  onSelectIndicator?: (code: string) => void;
+  onSelectIndicator?: (indicator: Indicator) => void;
 }
 
 export const Dashboard = ({ onSelectIndicator }: DashboardProps) => {
@@ -225,12 +225,17 @@ function reportToIndicators(report: ExportReport | null): Indicator[] {
     .filter((indicator) => indicator.id !== 'fuentes-oficiales-cargadas')
     .map((indicator) => {
       const rows = indicator.datos;
+      const bestRow = rows.find((row) => normalizeStatus(row.estado) === 'En revisión') ?? rows[0];
       const planteles = uniqueLabels(rows.map((row) => row.plantel).filter(Boolean));
       const responsables = uniqueLabels(rows.map((row) => row.responsable).filter(Boolean));
 
       return {
         code: indicator.id ?? slugCode(indicator.nombre),
         name: indicator.nombre,
+        plantelId: bestRow?.plantelId ? Number(bestRow.plantelId) : undefined,
+        captureId: bestRow?.captureId,
+        actividadId: bestRow?.actividadId,
+        periodoId: bestRow?.periodoId,
         status: statusFromRows(rows),
         plantel: summarizeLabels(planteles, 'planteles'),
         supervisor: summarizeLabels(responsables, 'responsables'),

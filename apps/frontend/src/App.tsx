@@ -18,7 +18,7 @@ import { AuthProvider, useAuth, type User } from './context/AuthContext';
 import { Login } from './components/ui/Login';
 import { Toaster, toast } from 'sonner';
 import { useCaptureDraft } from './hooks/useCaptureDraft';
-import { catalogPlanteles, fetchIndicatorTemplate, fetchIndicators, type CatalogIndicator } from './api/catalog';
+import { buildHealthIntegralTemplate, buildTemplateForCatalogIndicator, catalogPlanteles, fetchIndicatorTemplate, fetchIndicators, type CatalogIndicator } from './api/catalog';
 
 const plantelIndicatorScope: Pick<Indicator, 'plantel' | 'supervisor' | 'responsable' | 'contribuidor'> = {
   plantel: 'Bachillerato 16',
@@ -146,6 +146,33 @@ function plantelNameFromId(id?: number) {
   return catalogPlanteles.find((plantel) => plantel.id === id)?.name ?? `Bachillerato ${id}`;
 }
 
+function plantelScopeLabelFromIds(ids?: number[]) {
+  if (!ids?.length) {
+    return 'Alcance pendiente';
+  }
+
+  const labels = ids.map((id) => plantelNameFromId(id));
+
+  if (labels.length === 1) {
+    return labels[0];
+  }
+
+  if (labels.length === catalogPlanteles.length) {
+    return 'Todos los planteles';
+  }
+
+  return `${labels.length} planteles`;
+}
+
+function positiveQueryParam(params: URLSearchParams, key: string) {
+  const value = Number(params.get(key));
+  return Number.isInteger(value) && value > 0 ? value : undefined;
+}
+
+function isEditableCaptureStatus(status?: string) {
+  return !status || status === 'borrador' || status === 'correccion_solicitada';
+}
+
 function applySessionScope(indicator: Indicator, user?: User | null): Indicator {
   if (user?.role !== 'plantel') {
     return indicator;
@@ -162,7 +189,7 @@ function applySessionScope(indicator: Indicator, user?: User | null): Indicator 
 
 function catalogToIndicator(indicator: CatalogIndicator, user?: User | null): Indicator {
   const scope = indicator.responsibleNames.join(', ') || 'Supervisor DGEMS';
-  const plantelScope = user?.role === 'plantel' ? plantelNameFromId(user.plantelId) : 'Planteles';
+  const plantelScope = user?.role === 'plantel' ? plantelNameFromId(user.plantelId) : plantelScopeLabelFromIds(indicator.plantelIds);
 
   return {
     code: indicator.code,
@@ -171,24 +198,98 @@ function catalogToIndicator(indicator: CatalogIndicator, user?: User | null): In
     plantel: plantelScope,
     supervisor: scope,
     responsable: scope,
-    contribuidor: user?.role === 'plantel' ? plantelScope : indicator.contributorNames.join(', ') || 'Planteles',
+    contribuidor: user?.role === 'plantel' ? plantelScope : indicator.contributorNames.join(', ') || plantelScope,
   };
 }
 
-function buildCapturePayload(data: FormSubmission) {
+function canDisplayCatalogIndicatorForUser(indicator: CatalogIndicator, user?: User | null) {
+  if (!user || user.role === 'admin') {
+    return true;
+  }
+
+  if (user.role === 'plantel') {
+    return indicator.plantelIds.includes(user.plantelId ?? -1);
+  }
+
+  return indicator.responsibleIds.includes(user.responsableId ?? -1);
+}
+
+const MAX_INLINE_EVIDENCE_BYTES = 2 * 1024 * 1024;
+
+async function buildCapturePayload(data: FormSubmission, existingPayload?: {
+  evidencia?: { nombre: string; tipo: string; tamanoBytes: number; contenidoBase64?: string };
+}) {
   const evidenceFile = data.evidencia?.[0];
 
   return {
     rows: data.rows,
     justificacion: data.justificacion?.trim() || undefined,
     evidencia: evidenceFile
-      ? {
-          nombre: evidenceFile.name,
-          tipo: evidenceFile.type,
-          tamanoBytes: evidenceFile.size,
-        }
-      : undefined,
+      ? await evidenceFileToPayload(evidenceFile)
+      : existingPayload?.evidencia,
   };
+}
+
+async function evidenceFileToPayload(file: File) {
+  if (file.size > MAX_INLINE_EVIDENCE_BYTES) {
+    throw new Error('La evidencia debe pesar máximo 2 MB para esta versión.');
+  }
+
+  return {
+    nombre: file.name,
+    tipo: file.type || 'application/octet-stream',
+    tamanoBytes: file.size,
+    contenidoBase64: await fileToBase64(file),
+  };
+}
+
+async function fileToBase64(file: File) {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  let binary = '';
+  const chunkSize = 0x8000;
+
+  for (let index = 0; index < bytes.length; index += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(index, index + chunkSize));
+  }
+
+  return window.btoa(binary);
+}
+
+function mergeRowsWithTemplate(
+  template: IndicatorTemplate,
+  templateRows: Record<string, unknown>[],
+  savedRows?: Record<string, unknown>[]
+) {
+  const rowsToRestore = savedRows && savedRows.length > 0 ? savedRows : [];
+
+  if (rowsToRestore.length === 0) {
+    return templateRows;
+  }
+
+  const rowCount = template.allowAddRows
+    ? Math.max(templateRows.length, rowsToRestore.length)
+    : Math.max(templateRows.length, 1);
+
+  return Array.from({ length: rowCount }, (_, index) => {
+    const baseRow = templateRows[index] ?? template.emptyRow ?? templateRows[0] ?? {};
+    const savedRow = rowsToRestore[index] ?? {};
+    const mergedRow: Record<string, unknown> = {};
+
+    template.columns.forEach((column) => {
+      if (column.type === 'calculated') {
+        return;
+      }
+
+      if (column.type === 'readonly') {
+        mergedRow[column.key] = baseRow[column.key] ?? savedRow[column.key] ?? '';
+        return;
+      }
+
+      mergedRow[column.key] = savedRow[column.key] ?? baseRow[column.key] ?? '';
+    });
+
+    return mergedRow;
+  });
 }
 
 function fallbackTemplateForIndicator(
@@ -196,11 +297,23 @@ function fallbackTemplateForIndicator(
   selectedIndicator?: Indicator,
   selectedCatalogIndicator?: CatalogIndicator
 ): IndicatorTemplate & { initialRows?: Record<string, unknown>[] } {
+  if (selectedCatalogIndicator) {
+    return buildTemplateForCatalogIndicator(selectedCatalogIndicator, selectedIndicator?.plantel ?? 'Bachillerato 16');
+  }
+
   if (selectedCode === template1_0_0_0_2.indicatorCode) {
     return {
       ...template1_0_0_0_2,
       initialRows: mockInitialData,
     };
+  }
+
+  if (selectedCode === '1.1.2.1.4') {
+    return buildHealthIntegralTemplate({
+      code: selectedCode,
+      name: selectedIndicator?.name ?? 'Porcentaje de estudiantes de educación media superior y superior atendidos en los servicios de salud integral',
+      activities: ['Promoción de la salud'],
+    }, selectedIndicator?.plantel ?? 'Bachillerato 16');
   }
 
   return {
@@ -220,7 +333,7 @@ function fallbackTemplateForIndicator(
     initialRows: [
       {
         plantel: selectedIndicator?.plantel ?? 'Bachillerato 16',
-        actividad: selectedCatalogIndicator?.activities[0] ?? 'Actividad general',
+        actividad: 'Actividad general',
         meta: '',
         avance: '',
         observaciones: '',
@@ -238,6 +351,11 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [] 
   const { user } = useAuth();
   const { code } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const requestedPlantelId = positiveQueryParam(queryParams, 'plantelId');
+  const requestedActividadId = positiveQueryParam(queryParams, 'actividadId');
+  const requestedPeriodoId = positiveQueryParam(queryParams, 'periodoId');
   const selectedCode = code ?? template1_0_0_0_2.indicatorCode;
   const selectedCatalogIndicator = catalogIndicators.find((indicator) => indicator.code === selectedCode);
   const selectedIndicator = selectedCatalogIndicator
@@ -253,6 +371,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [] 
 
   useEffect(() => {
     let isMounted = true;
+    setRemoteTemplate(null);
 
     fetchIndicatorTemplate(selectedCode)
       .then((template) => {
@@ -271,40 +390,80 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [] 
     };
   }, [selectedCode, user?.id]);
 
-  const activePlantelId = user?.role === 'plantel' ? user.plantelId ?? 1 : 1;
+  const activePlantelId = user?.role === 'plantel' ? user.plantelId ?? 1 : requestedPlantelId ?? 1;
+  const activeActividadId = requestedActividadId ?? 1;
+  const activePeriodoId = requestedPeriodoId ?? 1;
   const activeResponsableId = user?.role === 'responsable'
     ? user.responsableId ?? 1
     : selectedCatalogIndicator?.primaryResponsibleId ?? selectedCatalogIndicator?.responsibleIds[0] ?? 1;
   const captureDraft = useCaptureDraft({
     plantelId: activePlantelId,
     indicadorId: selectedCatalogIndicator?.id ?? getIndicatorIdByCode(selectedCode),
-    periodoId: 1,
-    actividadId: 1,
+    periodoId: activePeriodoId,
+    actividadId: activeActividadId,
     responsableId: activeResponsableId,
-    storageScope: `plantel-${activePlantelId}:${selectedCode}:periodo-1:actividad-1`,
+    storageScope: `plantel-${activePlantelId}:${selectedCode}:periodo-${activePeriodoId}:actividad-${activeActividadId}`,
   });
 
-  const formInitialData = captureDraft.capture?.payload.rows ?? remoteTemplate?.initialRows ?? fallbackTemplate.initialRows ?? mockInitialData;
+  const templateInitialRows = remoteTemplate?.initialRows ?? fallbackTemplate.initialRows ?? mockInitialData;
+  const formInitialData = useMemo(
+    () => mergeRowsWithTemplate(selectedTemplate, templateInitialRows, captureDraft.capture?.payload.rows),
+    [captureDraft.capture?.payload.rows, selectedTemplate, templateInitialRows]
+  );
 
-  const handleSaveDraft = (data: FormSubmission) => {
-    captureDraft.saveDraft(buildCapturePayload(data), {
+  const handleSaveDraft = async (data: FormSubmission) => {
+    try {
+      const payload = await buildCapturePayload(data, captureDraft.capture?.payload);
+      captureDraft.saveDraft(payload, {
+        onSuccess: () => {
+          toast.success('Cambios guardados');
+        },
+        onError: (error) => {
+          toast.error(error instanceof Error ? error.message : 'No se pudo guardar');
+        },
+      });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'No se pudo guardar');
+    }
+  };
+
+  const handleSendReview = async (data: FormSubmission) => {
+    try {
+      const payload = await buildCapturePayload(data, captureDraft.capture?.payload);
+      captureDraft.sendToReview(payload, {
+        onSuccess: () => {
+          onIndicatorStatusChange?.(selectedCode, 'En revisión');
+          toast.success('Enviado a revisión');
+        },
+        onError: (error) => {
+          toast.error(error instanceof Error ? error.message : 'No se pudo enviar');
+        },
+      });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'No se pudo enviar');
+    }
+  };
+
+  const handleApprove = () => {
+    captureDraft.approve(undefined, {
       onSuccess: () => {
-        toast.success('Cambios guardados');
+        onIndicatorStatusChange?.(selectedCode, 'Aprobado');
+        toast.success('Indicador aprobado');
       },
-      onError: () => {
-        toast.error('No se pudo guardar el borrador');
+      onError: (error) => {
+        toast.error(error instanceof Error ? error.message : 'No se pudo aprobar');
       },
     });
   };
 
-  const handleSendReview = (data: FormSubmission) => {
-    captureDraft.sendToReview(buildCapturePayload(data), {
+  const handleRequestCorrection = (observacion: string) => {
+    captureDraft.requestCorrection(observacion, {
       onSuccess: () => {
-        onIndicatorStatusChange?.(selectedCode, 'En revisión');
-        toast.success('Enviado a revisión');
+        onIndicatorStatusChange?.(selectedCode, 'Corregir');
+        toast.success('Corrección solicitada');
       },
-      onError: () => {
-        toast.error('No se pudo enviar a revisión');
+      onError: (error) => {
+        toast.error(error instanceof Error ? error.message : 'No se pudo solicitar corrección');
       },
     });
   };
@@ -312,9 +471,17 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [] 
   return (
     <IndicatorForm
       template={selectedTemplate}
+      key={`${selectedCode}:${selectedTemplate.columns.map((column) => column.key).join('|')}`}
       initialData={formInitialData}
+      initialJustificacion={captureDraft.capture?.payload.justificacion}
+      existingEvidenceName={captureDraft.capture?.payload.evidencia?.nombre}
+      canReview={user?.role === 'responsable'}
+      captureStatus={captureDraft.capture?.estado}
+      isReadOnly={user?.role === 'plantel' && !isEditableCaptureStatus(captureDraft.capture?.estado)}
       onSaveDraft={handleSaveDraft}
       onSendReview={handleSendReview}
+      onApprove={handleApprove}
+      onRequestCorrection={handleRequestCorrection}
       isBusy={captureDraft.isBusy}
       statusMessage={captureDraft.statusMessage}
       errorMessage={captureDraft.errorMessage}
@@ -353,7 +520,7 @@ function ProtectedLayout() {
         />
       )}
 
-      <main className="flex-1 px-6 pt-10">
+      <main className="flex-1 px-6 pt-10 pb-10 min-h-[calc(100vh-8rem)]">
         {/* Outlet renderizará las sub-rutas dinámicamente aquí */}
         <Outlet />
       </main>
@@ -408,7 +575,9 @@ function AppContent() {
   const indicators = useMemo(
     () =>
       (catalogIndicators.length > 0
-        ? catalogIndicators.map((indicator) => catalogToIndicator(indicator, user))
+        ? catalogIndicators
+            .filter((indicator) => canDisplayCatalogIndicatorForUser(indicator, user))
+            .map((indicator) => catalogToIndicator(indicator, user))
         : mockupIndicators.map((indicator) => applySessionScope(indicator, user))
       ).map((indicator) => ({
         ...indicator,
@@ -421,8 +590,16 @@ function AppContent() {
     [indicators]
   );
 
-  const handleSelectIndicator = (code: string) => {
-    navigate(`/indicadores/captura/${code}`);
+  const handleSelectIndicator = (indicator: Indicator) => {
+    const params = new URLSearchParams();
+
+    if (indicator.plantelId) params.set('plantelId', String(indicator.plantelId));
+    if (indicator.actividadId) params.set('actividadId', String(indicator.actividadId));
+    if (indicator.periodoId) params.set('periodoId', String(indicator.periodoId));
+    if (indicator.captureId) params.set('captureId', String(indicator.captureId));
+
+    const query = params.toString();
+    navigate(`/indicadores/captura/${indicator.code}${query ? `?${query}` : ''}`);
   };
 
   const handleConfigureIndicator = (code: string) => {
