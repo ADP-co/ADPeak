@@ -18,20 +18,6 @@ interface IndicatorsManagementTableProps {
   onEditIndicator?: (code: string) => void;
 }
 
-const initialIndicators: IndicatorRecord[] = [
-  { id: '1', code: '1.0.0.0.2', name: 'Porcentaje de titulación por cohorte de educación media superior', responsable: 'Usuario08', contribuidor: 'Planteles', enabled: true },
-  { id: '2', code: '1.1.0.0.1', name: 'Porcentaje de cobertura en educación media superior', responsable: 'Usuario08', contribuidor: 'Planteles', enabled: true },
-  { id: '3', code: '1.1.0.0.2', name: 'Porcentaje de cobertura en educación media superior', responsable: 'Usuario08', contribuidor: 'Usuario08', enabled: true },
-  { id: '4', code: '1.1.1.0.1', name: 'Porcentaje de aceptación en educación media superior', responsable: 'Usuario08', contribuidor: 'Planteles', enabled: true },
-  { id: '5', code: '1.1.1.1.1', name: 'Porcentaje de programas educativos de educación media superior nuevos', responsable: 'Usuario08', contribuidor: 'Planteles', enabled: true },
-  { id: '6', code: '1.1.2.0.1', name: 'Porcentaje de retención escolar de educación media superior', responsable: 'Usuario08', contribuidor: 'Usuario08', enabled: true },
-  { id: '7', code: '1.1.2.0.3', name: 'Tasa de abandono escolar de educación media superior', responsable: 'Usuario08', contribuidor: 'Planteles', enabled: true },
-  { id: '8', code: '1.1.2.1.1', name: 'Porcentaje de estudiantes de educación media superior atendidos en el programa', responsable: 'Usuario08', contribuidor: 'Planteles', enabled: true },
-  { id: '9', code: '1.1.2.1.3', name: 'Porcentaje de estudiantes con participación de padres o tutores', responsable: 'Usuario08', contribuidor: 'Planteles', enabled: true },
-  { id: '10', code: '1.1.2.1.4', name: 'Porcentaje de estudiantes atendidos en los servicios de salud', responsable: 'Usuario08', contribuidor: 'Usuario08', enabled: true },
-  { id: '11', code: '1.1.2.2.1', name: 'Porcentaje de estudiantes atendidos en acciones de reforzamiento', responsable: 'Usuario08', contribuidor: 'Planteles', enabled: true },
-];
-
 function fromCatalogIndicator(indicator: CatalogIndicator): IndicatorRecord {
   return {
     id: String(indicator.id),
@@ -52,7 +38,7 @@ function normalizeSearch(value: string) {
 }
 
 export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagementTableProps) => {
-  const [indicators, setIndicators] = useState<IndicatorRecord[]>(initialIndicators);
+  const [indicators, setIndicators] = useState<IndicatorRecord[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeSearch, setActiveSearch] = useState('');
   const [statusMessage, setStatusMessage] = useState('');

@@ -22,8 +22,8 @@ import { buildHealthIntegralTemplate, buildTemplateForCatalogIndicator, catalogP
 
 const plantelIndicatorScope: Pick<Indicator, 'plantel' | 'supervisor' | 'responsable' | 'contribuidor'> = {
   plantel: 'Bachillerato 16',
-  supervisor: 'Supervisor DGEMS',
-  responsable: 'Usuario08',
+  supervisor: 'Liliana Yunuen Rojas Maciel',
+  responsable: 'Liliana Yunuen Rojas Maciel',
   contribuidor: 'Bachillerato 16',
 };
 
@@ -188,7 +188,7 @@ function applySessionScope(indicator: Indicator, user?: User | null): Indicator 
 }
 
 function catalogToIndicator(indicator: CatalogIndicator, user?: User | null): Indicator {
-  const scope = indicator.responsibleNames.join(', ') || 'Supervisor DGEMS';
+  const scope = indicator.responsibleNames.join(', ') || 'Responsable DGEMS';
   const plantelScope = user?.role === 'plantel' ? plantelNameFromId(user.plantelId) : plantelScopeLabelFromIds(indicator.plantelIds);
 
   return {

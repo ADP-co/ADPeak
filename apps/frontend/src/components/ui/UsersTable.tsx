@@ -63,15 +63,6 @@ const rolePriority: Record<SystemRole, number> = {
   Plantel: 3,
 };
 
-const initialUsers: UserRecord[] = [
-  { id: '1', name: 'Director', role: 'Administrador', plantel: '-', indicadores: '-' },
-  { id: '3', name: 'Angel Ordonez', role: 'Responsable', plantel: '-', indicadores: '1.1.0.0.1' },
-  { id: '4', name: 'Usuario responsable', role: 'Responsable', plantel: '-', indicadores: '1.0.0.0.2, 1.1.2.0.1' },
-  { id: '5', name: 'Planeacion', role: 'Responsable', plantel: '-', indicadores: '1.1.2.0.1' },
-  { id: '6', name: 'Bach. 16', role: 'Plantel', plantel: 'Bach. 16', indicadores: '-' },
-  { id: '7', name: 'Bach. 33', role: 'Plantel', plantel: 'Bach. 33', indicadores: '-' },
-];
-
 function roleFromCatalog(role: CatalogUser['role']): SystemRole {
   if (role === 'director') {
     return 'Administrador';
@@ -141,7 +132,7 @@ function fromCatalogUser(user: CatalogUser): UserRecord {
 }
 
 export const UsersTable = () => {
-  const [users, setUsers] = useState<UserRecord[]>(initialUsers);
+  const [users, setUsers] = useState<UserRecord[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeSearch, setActiveSearch] = useState('');
   const [statusMessage, setStatusMessage] = useState('');

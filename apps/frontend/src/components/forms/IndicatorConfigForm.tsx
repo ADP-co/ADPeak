@@ -21,7 +21,6 @@ interface ConfigColumn {
   type: ColumnType;
 }
 
-const fallbackUsers = ['Usuario08', 'Usuario4', 'Usuario5', 'Supervisor', 'Revisor 1', 'Revisor 2'];
 const defaultColumns: ConfigColumn[] = [
   { id: 'delegacion', label: 'Delegación', type: 'readonly' },
   { id: 'plantel', label: 'Plantel', type: 'readonly' },
@@ -59,6 +58,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
         }
 
         setCatalogUsers(users);
+        const currentResponsibleNames = (names: string[]) => cleanResponsibleNames(names, users);
 
         if (isNew) {
           setEditingIndicator(null);
@@ -86,15 +86,16 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
 
         setEditingIndicator(currentIndicator);
         setIndicatorName(currentIndicator.name);
-        setResponsables(nonEmptyList(currentIndicator.responsibleNames, ['']));
+        setResponsables(nonEmptyList(currentResponsibleNames(currentIndicator.responsibleNames), ['']));
 
         const currentContributors = nonEmptyList(currentIndicator.contributorNames, ['Planteles']);
         if (isPlantelContributor(currentContributors)) {
           setContributorType('planteles');
           setContributors(['']);
         } else {
-          setContributorType('responsables');
-          setContributors(currentContributors);
+          const responsibleContributors = currentResponsibleNames(currentContributors);
+          setContributorType(responsibleContributors.length > 0 ? 'responsables' : 'planteles');
+          setContributors(nonEmptyList(responsibleContributors, ['']));
         }
 
         const template = await fetchIndicatorTemplate(currentIndicator.code);
@@ -131,9 +132,8 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
   const responsibleOptions = useMemo(
     () =>
       uniqueOptions([
-        ...catalogUsers.filter((user) => user.active && user.role !== 'plantel').map((user) => user.name),
-        ...fallbackUsers,
-        ...responsables,
+        ...responsibleUserNames(catalogUsers),
+        ...cleanResponsibleNames(responsables, catalogUsers),
       ]),
     [catalogUsers, responsables]
   );
@@ -141,9 +141,8 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
   const contributorOptions = useMemo(
     () =>
       uniqueOptions([
-        ...catalogUsers.filter((user) => user.active && user.role !== 'plantel').map((user) => user.name),
-        ...fallbackUsers,
-        ...contributors,
+        ...responsibleUserNames(catalogUsers),
+        ...cleanResponsibleNames(contributors, catalogUsers),
       ]),
     [catalogUsers, contributors]
   );
@@ -442,13 +441,33 @@ function uniqueOptions(values: string[]) {
   return Array.from(new Set(normalizeList(values))).sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
 }
 
+function responsibleUserNames(users: CatalogUser[]) {
+  return users
+    .filter((user) => user.active && user.role === 'responsable')
+    .map((user) => user.name);
+}
+
+function cleanResponsibleNames(names: string[], users: CatalogUser[]) {
+  const validNames = new Set(responsibleUserNames(users));
+  return normalizeList(names).filter((name) => validNames.has(name) && !isGhostUserName(name));
+}
+
+function isGhostUserName(name: string) {
+  const normalized = normalizeText(name);
+  return /^usuario\d*$/.test(normalized) ||
+    /^revisor\s*\d*$/.test(normalized) ||
+    normalized === 'supervisor' ||
+    normalized.includes('demo') ||
+    normalized === 'director dgems';
+}
+
 function isPlantelContributor(contributors: string[]) {
   return contributors.length === 0 || contributors.some((contributor) => normalizeText(contributor).includes('plantel'));
 }
 
 function idsForUserNames(names: string[], users: CatalogUser[]) {
   return names
-    .map((name) => users.find((user) => user.name === name)?.responsableId)
+    .map((name) => users.find((user) => user.role === 'responsable' && user.name === name)?.responsableId)
     .filter((id): id is number => Number.isInteger(id));
 }
 
