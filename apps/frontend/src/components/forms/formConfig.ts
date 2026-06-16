@@ -7,6 +7,11 @@ export type CalculationConfig =
       numeratorKey: string;
       denominatorKey: string;
       decimals?: number;
+    }
+  | {
+      type: 'formula';
+      expression: string;
+      decimals?: number;
     };
 
 export interface ColumnConfig {

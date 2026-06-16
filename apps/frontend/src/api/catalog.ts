@@ -1,6 +1,6 @@
 import { apiJson } from './client';
 import { officialCatalogRows } from '../catalog/officialCatalog.generated';
-import type { IndicatorTemplate } from '../components/forms/formConfig';
+import type { ColumnConfig, IndicatorTemplate } from '../components/forms/formConfig';
 
 export type CatalogRole = 'director' | 'responsable' | 'plantel';
 
@@ -29,6 +29,7 @@ export type CatalogIndicator = {
   contributorNames: string[];
   activities: string[];
   plantelIds: number[];
+  templateColumns?: ColumnConfig[];
 };
 
 type IndicatorTemplateResponse = IndicatorTemplate & {
@@ -104,6 +105,7 @@ export async function saveIndicator(input: Partial<CatalogIndicator>) {
       responsibleNames: input.responsibleNames?.length ? input.responsibleNames : existing?.responsibleNames ?? ['Responsable sin asignar'],
       contributorNames: input.contributorNames?.length ? input.contributorNames : existing?.contributorNames ?? ['Planteles'],
       activities: input.activities?.length ? input.activities : existing?.activities ?? ['Actividad general'],
+      templateColumns: input.templateColumns ?? existing?.templateColumns,
     };
 
     writeStorage(
@@ -344,6 +346,10 @@ const rowsFromActivities = (
 }));
 
 export function buildTemplateForCatalogIndicator(indicator: CatalogIndicator, plantelName = UNASSIGNED_PLANTEL_LABEL): IndicatorTemplateResponse {
+  if (indicator.templateColumns?.length) {
+    return buildConfiguredTemplate(indicator, plantelName);
+  }
+
   if (indicator.code === '1.0.0.0.1') {
     return buildTerminalEfficiencyTemplate(indicator, plantelName);
   }
@@ -441,6 +447,50 @@ function templateForIndicator(indicator: CatalogIndicator): IndicatorTemplateRes
       observaciones: '',
     })),
   };
+}
+
+function buildConfiguredTemplate(indicator: CatalogIndicator, plantelName: string): IndicatorTemplateResponse {
+  const columns = indicator.templateColumns ?? [];
+  const initialRows = activitiesForTemplate(indicator).map((activity) =>
+    rowForConfiguredColumns(columns, plantelName, activity)
+  );
+
+  return {
+    indicatorCode: indicator.code,
+    indicatorName: indicator.name,
+    groups: [{ label: 'Captura configurada', colspan: Math.max(columns.length, 1) }],
+    columns,
+    initialRows,
+    allowAddRows: true,
+    addRowLabel: 'Agregar fila',
+    emptyRow: rowForConfiguredColumns(columns, plantelName, ''),
+    showTotals: columns.some((column) => column.type === 'number' || column.type === 'calculated'),
+  };
+}
+
+function rowForConfiguredColumns(columns: ColumnConfig[], plantelName: string, activity: string) {
+  const row: Record<string, unknown> = {};
+
+  columns.forEach((column) => {
+    if (column.type === 'calculated') {
+      return;
+    }
+
+    const normalizedLabel = normalizeText(column.label);
+    if (normalizedLabel.includes('plantel')) {
+      row[column.key] = plantelName;
+      return;
+    }
+
+    if (normalizedLabel.includes('actividad')) {
+      row[column.key] = activity;
+      return;
+    }
+
+    row[column.key] = '';
+  });
+
+  return row;
 }
 
 export function buildHealthIntegralTemplate(indicator: Pick<CatalogIndicator, 'code' | 'name' | 'activities'>, plantelName = UNASSIGNED_PLANTEL_LABEL): IndicatorTemplateResponse {
@@ -1067,4 +1117,11 @@ function inferDataType(name: string): CatalogIndicator['dataType'] {
   }
 
   return 'number';
+}
+
+function normalizeText(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
 }

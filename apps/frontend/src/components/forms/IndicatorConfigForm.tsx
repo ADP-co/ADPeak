@@ -4,6 +4,8 @@ import { ArrowLeft, GripVertical, PlusCircle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import type { ColumnConfig } from './formConfig';
+import { validateFormulaExpression } from './formula';
 import {
   fetchIndicators,
   fetchIndicatorTemplate,
@@ -19,6 +21,7 @@ interface ConfigColumn {
   id: string;
   label: string;
   type: ColumnType;
+  formula?: string;
 }
 
 const defaultColumns: ConfigColumn[] = [
@@ -107,6 +110,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
                   id: column.key || `column-${index}`,
                   label: column.label,
                   type: column.type,
+                  formula: formulaFromCalculation(column, template.columns),
                 }))
               : defaultColumns
           );
@@ -159,14 +163,24 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
   const handleAddColumn = () => {
     setColumns((current) => [
       ...current,
-      { id: `local-${Date.now()}`, label: 'Nueva columna', type: 'number' },
+      { id: `local-${Date.now()}`, label: '', type: 'number' },
     ]);
   };
 
   const handleChangeColumn = (id: string, field: keyof ConfigColumn, value: string) => {
     setColumns((current) =>
       current.map((column) =>
-        column.id === id ? { ...column, [field]: value as ConfigColumn[keyof ConfigColumn] } : column
+        column.id === id
+          ? {
+              ...column,
+              [field]: value as ConfigColumn[keyof ConfigColumn],
+              formula: field === 'formula'
+                ? value
+                : field === 'type' && value !== 'calculated'
+                  ? undefined
+                  : column.formula,
+            }
+          : column
       )
     );
   };
@@ -191,6 +205,13 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
       return;
     }
 
+    const configuredTemplateColumns = buildTemplateColumns(columns);
+
+    if (configuredTemplateColumns.error) {
+      toast.error(configuredTemplateColumns.error);
+      return;
+    }
+
     const responsibleIds = idsForUserNames(cleanedResponsables, catalogUsers);
     const canSendResponsibleIds = responsibleIds.length === cleanedResponsables.length;
 
@@ -212,10 +233,11 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
         contributorNames: cleanedContributors,
         activities: editingIndicator?.activities?.length
           ? editingIndicator.activities
-          : columns.length > 0
+          : configuredTemplateColumns.columns.length > 0
             ? ['Captura configurada']
             : ['Actividad general'],
         plantelIds: editingIndicator?.plantelIds,
+        templateColumns: configuredTemplateColumns.columns,
       });
       toast.success('Configuración guardada');
       handleBack();
@@ -385,6 +407,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
                 <Input
                   label="Nombre de columna"
                   value={column.label}
+                  placeholder="Ej. Mujeres"
                   onChange={(event) => handleChangeColumn(column.id, 'label', event.target.value)}
                   className="h-10"
                 />
@@ -397,7 +420,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
                   <option value="readonly">Solo lectura</option>
                   <option value="number">Número</option>
                   <option value="text">Texto</option>
-                  <option value="calculated">Calculado</option>
+                  <option value="calculated">Calculado con fórmula</option>
                 </select>
                 <button
                   type="button"
@@ -407,6 +430,20 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
                 >
                   <Trash2 size={18} />
                 </button>
+                {column.type === 'calculated' && (
+                  <div className="w-full md:basis-full md:pl-9">
+                    <Input
+                      label="Fórmula"
+                      value={column.formula ?? ''}
+                      placeholder="Ej. =Mujeres + Hombres"
+                      onChange={(event) => handleChangeColumn(column.id, 'formula', event.target.value)}
+                      className="h-10"
+                    />
+                    <p className="mt-1 text-xs text-brand-Gris_oscuro/60">
+                      Usa columnas, + - * /, paréntesis y SUMA(). Para nombres largos usa corchetes.
+                    </p>
+                  </div>
+                )}
               </div>
             ))}
 
@@ -427,6 +464,87 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
     </div>
   );
 };
+
+function buildTemplateColumns(columns: ConfigColumn[]) {
+  const seenKeys = new Set<string>();
+  const templateColumns: ColumnConfig[] = columns
+    .filter((column) => column.label.trim())
+    .map((column) => {
+      const key = stableColumnKey(column, seenKeys);
+      const templateColumn: ColumnConfig = {
+        key,
+        label: column.label.trim(),
+        type: column.type,
+      };
+
+      if (column.type === 'calculated') {
+        templateColumn.calculation = {
+          type: 'formula',
+          expression: column.formula?.trim() ?? '',
+          decimals: 2,
+        };
+      }
+
+      return templateColumn;
+    });
+
+  for (const column of templateColumns) {
+    if (column.type !== 'calculated') {
+      continue;
+    }
+
+    const error = validateFormulaExpression(
+      column.calculation?.type === 'formula' ? column.calculation.expression : '',
+      templateColumns,
+      column.key
+    );
+
+    if (error) {
+      return { columns: templateColumns, error: `${column.label}: ${error}` };
+    }
+  }
+
+  return { columns: templateColumns, error: '' };
+}
+
+function stableColumnKey(column: ConfigColumn, seenKeys: Set<string>) {
+  const rawKey = column.id && !column.id.startsWith('local-') ? column.id : column.label;
+  const baseKey = normalizeKey(rawKey) || 'campo';
+  let key = baseKey;
+  let counter = 2;
+
+  while (seenKeys.has(key)) {
+    key = `${baseKey}_${counter}`;
+    counter += 1;
+  }
+
+  seenKeys.add(key);
+  return key;
+}
+
+function formulaFromCalculation(column: ColumnConfig, columns: ColumnConfig[]) {
+  if (!column.calculation) {
+    return '';
+  }
+
+  if (column.calculation.type === 'formula') {
+    return column.calculation.expression;
+  }
+
+  if (column.calculation.type === 'sum') {
+    return `=${column.calculation.sourceKeys.map((key) => formulaReference(labelForColumnKey(key, columns))).join(' + ')}`;
+  }
+
+  return `=${formulaReference(labelForColumnKey(column.calculation.numeratorKey, columns))} / ${formulaReference(labelForColumnKey(column.calculation.denominatorKey, columns))} * 100`;
+}
+
+function labelForColumnKey(key: string, columns: ColumnConfig[]) {
+  return columns.find((column) => column.key === key)?.label ?? key;
+}
+
+function formulaReference(label: string) {
+  return /[^a-zA-Z0-9_]/.test(label) ? `[${label}]` : label;
+}
 
 function normalizeList(values: string[]) {
   return values.map((value) => value.trim()).filter(Boolean);
@@ -476,4 +594,11 @@ function normalizeText(value: string) {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
+}
+
+function normalizeKey(value: string) {
+  return normalizeText(value)
+    .trim()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
 }

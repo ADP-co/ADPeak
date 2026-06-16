@@ -61,6 +61,7 @@ export type SigiIndicator = {
   activities: string[];
   plantelIds: number[];
   plantelScopeSource?: "official-import" | "manual";
+  templateColumns?: TemplateColumn[];
 };
 
 export type Plantel = {
@@ -76,7 +77,8 @@ export type TemplateColumn = {
   required?: boolean;
   calculation?:
     | { type: "sum"; sourceKeys: string[] }
-    | { type: "percentage"; numeratorKey: string; denominatorKey: string; decimals?: number };
+    | { type: "percentage"; numeratorKey: string; denominatorKey: string; decimals?: number }
+    | { type: "formula"; expression: string; decimals?: number };
 };
 
 export type IndicatorTemplate = {
@@ -394,7 +396,8 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
     contributorNames: nextContributorNames,
     activities: input.activities?.filter(Boolean) ?? existing?.activities ?? ["Actividad general"],
     plantelIds: nextPlantelIds,
-    plantelScopeSource: inputHasPlantelIds ? "manual" : existing?.plantelScopeSource ?? "manual"
+    plantelScopeSource: inputHasPlantelIds ? "manual" : existing?.plantelScopeSource ?? "manual",
+    templateColumns: sanitizeTemplateColumns(input.templateColumns ?? existing?.templateColumns)
   };
 
   indicators.set(id, indicator);
@@ -454,6 +457,10 @@ const participantActionCodes = new Set([
 const infrastructureCodes = new Set(["4.1.2.1.3", "4.1.2.1.6", "4.1.2.2.1"]);
 
 export function templateForIndicator(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
+  if (indicator.templateColumns?.length) {
+    return configuredTemplate(indicator, session);
+  }
+
   if (indicator.code === "1.0.0.0.1") {
     return terminalEfficiencyTemplate(indicator, session);
   }
@@ -976,8 +983,78 @@ function normalizePersistedIndicator(indicator: SigiIndicator): SigiIndicator {
     responsibleNames: indicator.responsibleNames?.length ? indicator.responsibleNames : seededIndicator?.responsibleNames ?? namesForResponsibleIds([1]),
     contributorNames: indicator.contributorNames ?? seededIndicator?.contributorNames ?? [],
     activities: indicator.activities?.length ? indicator.activities : seededIndicator?.activities ?? ["Actividad general"],
+    templateColumns: sanitizeTemplateColumns(indicator.templateColumns ?? seededIndicator?.templateColumns),
     active: indicator.active ?? true
   };
+}
+
+function sanitizeTemplateColumns(columns?: TemplateColumn[]) {
+  const seenKeys = new Set<string>();
+
+  return (columns ?? [])
+    .map((column, index) => {
+      const label = typeof column.label === "string" ? column.label.trim() : "";
+      const key = uniqueTemplateKey(
+        typeof column.key === "string" && column.key.trim()
+          ? column.key.trim()
+          : label || `campo_${index + 1}`,
+        seenKeys
+      );
+      const type = ["readonly", "number", "text", "calculated"].includes(column.type)
+        ? column.type
+        : "text";
+
+      return {
+        key,
+        label: label || `Campo ${index + 1}`,
+        type,
+        required: Boolean(column.required),
+        calculation: type === "calculated" ? sanitizeCalculation(column.calculation) : undefined
+      } satisfies TemplateColumn;
+    })
+    .filter((column) => column.label.trim());
+}
+
+function sanitizeCalculation(calculation: TemplateColumn["calculation"]) {
+  if (!calculation) {
+    return undefined;
+  }
+
+  if (calculation.type === "sum") {
+    return { type: "sum" as const, sourceKeys: uniqueStrings(calculation.sourceKeys ?? []) };
+  }
+
+  if (calculation.type === "percentage") {
+    return {
+      type: "percentage" as const,
+      numeratorKey: calculation.numeratorKey,
+      denominatorKey: calculation.denominatorKey,
+      decimals: Number.isInteger(calculation.decimals) ? calculation.decimals : 2
+    };
+  }
+
+  const expression = typeof calculation.expression === "string" ? calculation.expression.trim() : "";
+  return expression
+    ? {
+        type: "formula" as const,
+        expression,
+        decimals: Number.isInteger(calculation.decimals) ? calculation.decimals : 2
+      }
+    : undefined;
+}
+
+function uniqueTemplateKey(value: string, seenKeys: Set<string>) {
+  const baseKey = normalizeKey(value).replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "") || "campo";
+  let key = baseKey;
+  let counter = 2;
+
+  while (seenKeys.has(key)) {
+    key = `${baseKey}_${counter}`;
+    counter += 1;
+  }
+
+  seenKeys.add(key);
+  return key;
 }
 
 function normalizePlantelScope(ids: number[]) {
@@ -1106,6 +1183,51 @@ function canReadIndicator(session: SigiSession, indicator: SigiIndicator) {
 
 function activitiesForTemplate(indicator: SigiIndicator) {
   return indicator.activities.length > 0 ? indicator.activities : ["Actividad general"];
+}
+
+function configuredTemplate(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
+  const columns = sanitizeTemplateColumns(indicator.templateColumns);
+  const plantel = plantelForTemplate(session, indicator);
+  const initialRows = activitiesForTemplate(indicator).map((activity) =>
+    rowForConfiguredColumns(columns, plantel, activity)
+  );
+
+  return {
+    indicatorCode: indicator.code,
+    indicatorName: indicator.name,
+    groups: [{ label: "Captura configurada", colspan: Math.max(columns.length, 1) }],
+    columns,
+    initialRows,
+    allowAddRows: true,
+    addRowLabel: "Agregar fila",
+    emptyRow: rowForConfiguredColumns(columns, plantel, ""),
+    showTotals: columns.some((column) => column.type === "number" || column.type === "calculated")
+  };
+}
+
+function rowForConfiguredColumns(columns: TemplateColumn[], plantel: Plantel, activity: string) {
+  const row: Record<string, unknown> = {};
+
+  columns.forEach((column) => {
+    if (column.type === "calculated") {
+      return;
+    }
+
+    const normalizedLabel = normalizeKey(column.label);
+    if (normalizedLabel.includes("plantel")) {
+      row[column.key] = plantel.name;
+      return;
+    }
+
+    if (normalizedLabel.includes("actividad")) {
+      row[column.key] = activity;
+      return;
+    }
+
+    row[column.key] = "";
+  });
+
+  return row;
 }
 
 function rowsFromActivities(

@@ -264,6 +264,43 @@ describe("SIGI store and RBAC", () => {
     ).toThrow(SigiValidationError);
   });
 
+  it("persists manual template columns with formula calculations", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const indicator = saveIndicator(director, {
+      code: "TMP-FORMULA",
+      name: "Indicador con formula configurable",
+      dataType: "number",
+      responsibleNames: ["Liliana Yunuen Rojas Maciel"],
+      contributorNames: ["Planteles"],
+      activities: ["Actividad con formula"],
+      plantelIds: [1],
+      templateColumns: [
+        { key: "plantel", label: "Plantel", type: "readonly" },
+        { key: "mujeres", label: "Mujeres", type: "number" },
+        { key: "hombres", label: "Hombres", type: "number" },
+        {
+          key: "total",
+          label: "Total",
+          type: "calculated",
+          calculation: { type: "formula", expression: "=Mujeres + Hombres", decimals: 2 }
+        }
+      ]
+    });
+    const template = templateForIndicator(indicator, director);
+
+    expect(template.columns.map((column) => [column.key, column.type])).toEqual([
+      ["plantel", "readonly"],
+      ["mujeres", "number"],
+      ["hombres", "number"],
+      ["total", "calculated"]
+    ]);
+    expect(template.columns[3].calculation).toMatchObject({
+      type: "formula",
+      expression: "=Mujeres + Hombres"
+    });
+    expect(template.initialRows[0]).toMatchObject({ plantel: "Bachillerato 16" });
+  });
+
   it("builds the official health integral matrix for indicator 1.1.2.1.4", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const plantel = sessionFromHeaders({

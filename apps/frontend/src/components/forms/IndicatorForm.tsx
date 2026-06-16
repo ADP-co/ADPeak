@@ -7,6 +7,7 @@ import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 import type { ColumnConfig, IndicatorTemplate } from './formConfig';
+import { evaluateFormula } from './formula';
 
 interface IndicatorFormProps {
   template: IndicatorTemplate;
@@ -153,13 +154,19 @@ const formatCalculatedValue = (value: number) => {
   return Number.isInteger(value) ? String(value) : value.toFixed(2);
 };
 
-const calculateColumnValue = (row: Record<string, unknown>, column: ColumnConfig) => {
+const calculateColumnValue = (row: Record<string, unknown>, column: ColumnConfig, columns: ColumnConfig[]) => {
   if (!column.calculation) {
     return 0;
   }
 
   if (column.calculation.type === 'sum') {
     return column.calculation.sourceKeys.reduce((total, sourceKey) => total + toNumber(row[sourceKey]), 0);
+  }
+
+  if (column.calculation.type === 'formula') {
+    const value = evaluateFormula(column.calculation.expression, row, columns);
+    const decimals = column.calculation.decimals ?? 2;
+    return Number(value.toFixed(decimals));
   }
 
   const numerator = toNumber(row[column.calculation.numeratorKey]);
@@ -179,7 +186,7 @@ const enrichRowWithCalculatedValues = (row: Record<string, unknown>, columns: Co
 
   columns.forEach((column) => {
     if (column.type === 'calculated') {
-      enrichedRow[column.key] = calculateColumnValue(enrichedRow, column);
+      enrichedRow[column.key] = calculateColumnValue(enrichedRow, column, columns);
     }
   });
 
