@@ -62,7 +62,8 @@ export const catalogPlanteles = [
   { id: 37, name: 'IUBA Bachillerato' },
 ];
 
-const officialSourcePlantelIds = [1];
+const UNASSIGNED_PLANTEL_LABEL = 'Sin plantel asignado';
+const officialSourcePlantelIds: number[] = [];
 const allPlantelIds = () => catalogPlanteles.map((plantel) => plantel.id);
 
 const fallbackIndicators = buildFallbackIndicators();
@@ -242,7 +243,7 @@ function buildFallbackIndicators(): CatalogIndicator[] {
       responsibleNames: [row.responsible],
       contributorNames: contributors,
       activities: [row.activity || 'Actividad general'],
-      plantelIds: officialSourcePlantelIds,
+      plantelIds: [...officialSourcePlantelIds],
     });
   });
 
@@ -342,7 +343,7 @@ const rowsFromActivities = (
   ...rowFactory(activity, index),
 }));
 
-export function buildTemplateForCatalogIndicator(indicator: CatalogIndicator, plantelName = 'Bachillerato 16'): IndicatorTemplateResponse {
+export function buildTemplateForCatalogIndicator(indicator: CatalogIndicator, plantelName = UNASSIGNED_PLANTEL_LABEL): IndicatorTemplateResponse {
   if (indicator.code === '1.0.0.0.1') {
     return buildTerminalEfficiencyTemplate(indicator, plantelName);
   }
@@ -408,8 +409,8 @@ function templateForIndicator(indicator: CatalogIndicator): IndicatorTemplateRes
         { key: 'porcentaje_titulacion', label: '% de titulación', type: 'calculated', calculation: { type: 'percentage', numeratorKey: 'egresados_total', denominatorKey: 'matricula_total', decimals: 2 } },
       ],
       initialRows: [
-        { delegacion: 'Villa de Álvarez', plantel: 'Bachillerato 16', programa: 'Técnico Analista Programador', egresados_mujeres: '', egresados_hombres: '', matricula_mujeres: '', matricula_hombres: '' },
-        { delegacion: 'Villa de Álvarez', plantel: 'Bachillerato 16', programa: 'Técnico Analista Químico', egresados_mujeres: '', egresados_hombres: '', matricula_mujeres: '', matricula_hombres: '' },
+        { delegacion: 'Villa de Álvarez', plantel: UNASSIGNED_PLANTEL_LABEL, programa: 'Técnico Analista Programador', egresados_mujeres: '', egresados_hombres: '', matricula_mujeres: '', matricula_hombres: '' },
+        { delegacion: 'Villa de Álvarez', plantel: UNASSIGNED_PLANTEL_LABEL, programa: 'Técnico Analista Químico', egresados_mujeres: '', egresados_hombres: '', matricula_mujeres: '', matricula_hombres: '' },
       ],
     };
   }
@@ -442,7 +443,7 @@ function templateForIndicator(indicator: CatalogIndicator): IndicatorTemplateRes
   };
 }
 
-export function buildHealthIntegralTemplate(indicator: Pick<CatalogIndicator, 'code' | 'name' | 'activities'>, plantelName = 'Bachillerato 16'): IndicatorTemplateResponse {
+export function buildHealthIntegralTemplate(indicator: Pick<CatalogIndicator, 'code' | 'name' | 'activities'>, plantelName = UNASSIGNED_PLANTEL_LABEL): IndicatorTemplateResponse {
   const activities = indicator.activities.length > 0 ? indicator.activities : ['Promoción de la salud'];
 
   return {

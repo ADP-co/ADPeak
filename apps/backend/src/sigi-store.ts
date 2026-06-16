@@ -60,6 +60,7 @@ export type SigiIndicator = {
   contributorNames: string[];
   activities: string[];
   plantelIds: number[];
+  plantelScopeSource?: "official-import" | "manual";
 };
 
 export type Plantel = {
@@ -190,7 +191,8 @@ export const planteles: Plantel[] = [
   { id: 37, key: "iuba-bachillerato", name: "IUBA Bachillerato" }
 ];
 
-const officialSourcePlantelIds = [1];
+const unassignedPlantel: Plantel = { id: 0, key: "sin-plantel", name: "Sin plantel asignado" };
+const officialSourcePlantelIds: number[] = [];
 
 const responsibleNames = Array.from(
   new Set(officialCatalogRows.map((row) => row.responsible).filter(Boolean))
@@ -363,6 +365,21 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
   const primaryResponsibleId = input.primaryResponsibleId ?? responsibleIds[0] ?? 1;
   const isNewIndicator = !existing;
   const nextContributorNames = input.contributorNames ?? existing?.contributorNames ?? [];
+  const inputHasPlantelIds = Object.prototype.hasOwnProperty.call(input, "plantelIds");
+  const isOfficialImportedIndicator = Boolean(
+    initialIndicators.find((indicator) => indicator.code === input.code && indicator.plantelScopeSource === "official-import")
+  );
+  const nextPlantelIds = normalizePlantelScope(
+    inputHasPlantelIds
+      ? input.plantelIds ?? []
+      : existing?.plantelIds ??
+        (isNewIndicator && targetsPlanteles(nextContributorNames) ? allPlantelIds() : officialSourcePlantelIds)
+  );
+
+  if (nextPlantelIds.length === 0 && !isOfficialImportedIndicator) {
+    throw new SigiValidationError("Asigna al menos un plantel para habilitar captura.");
+  }
+
   const indicator: SigiIndicator = {
     id,
     code: input.code.trim(),
@@ -376,11 +393,8 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
     responsibleNames: namesForResponsibleIds(responsibleIds),
     contributorNames: nextContributorNames,
     activities: input.activities?.filter(Boolean) ?? existing?.activities ?? ["Actividad general"],
-    plantelIds: normalizePlantelScope(
-      input.plantelIds ??
-        existing?.plantelIds ??
-        (isNewIndicator && targetsPlanteles(nextContributorNames) ? allPlantelIds() : officialSourcePlantelIds)
-    )
+    plantelIds: nextPlantelIds,
+    plantelScopeSource: inputHasPlantelIds ? "manual" : existing?.plantelScopeSource ?? "manual"
   };
 
   indicators.set(id, indicator);
@@ -586,7 +600,7 @@ export function buildReportPayload(
   const scopedIndicators = listIndicators(session);
   const captureDrafts = listCaptureDrafts();
   const grouped = scopedIndicators.map((indicator) => {
-    const indicatorPlanteles = scopedPlanteles.filter((plantel) => indicator.plantelIds.includes(plantel.id));
+    const indicatorPlanteles = plantelesForReport(indicator, scopedPlanteles, Boolean(plantelId));
     const rows = indicatorPlanteles.flatMap((plantel) =>
       indicator.activities.flatMap((activity, activityIndex) => {
         const capturedRows = rowsFromCaptureDrafts({
@@ -649,6 +663,14 @@ export function buildReportPayload(
     },
     indicadores: officialSourcesReport ? [...grouped, officialSourcesReport] : grouped
   };
+}
+
+function plantelesForReport(indicator: SigiIndicator, scopedPlanteles: Plantel[], hasPlantelFilter: boolean) {
+  if (indicator.plantelIds.length === 0) {
+    return hasPlantelFilter ? [] : [unassignedPlantel];
+  }
+
+  return scopedPlanteles.filter((plantel) => indicator.plantelIds.includes(plantel.id));
 }
 
 function rowsFromCaptureDrafts({
@@ -846,7 +868,8 @@ function buildIndicators() {
       responsibleNames: [row.responsible],
       contributorNames: contributors,
       activities: [row.activity || "Actividad general"],
-      plantelIds: officialSourcePlantelIds
+      plantelIds: [...officialSourcePlantelIds],
+      plantelScopeSource: "official-import"
     });
   }
 
@@ -937,11 +960,18 @@ function normalizePersistedUser(user: SigiUser): SigiUser {
 function normalizePersistedIndicator(indicator: SigiIndicator): SigiIndicator {
   const seededIndicator = initialIndicators.find((item) => item.code === indicator.code);
   const plantelIds = normalizePlantelScope(indicator.plantelIds ?? []);
-  const shouldUseSeededPlantelScope = Boolean(seededIndicator) && (!plantelIds.length || isLegacyDefaultPlantelScope(plantelIds));
+  const shouldResetLegacyOfficialScope =
+    seededIndicator?.plantelScopeSource === "official-import" &&
+    indicator.plantelScopeSource !== "manual" &&
+    isLegacyImportedPlantelScope(plantelIds);
+  const shouldUseSeededPlantelScope =
+    Boolean(seededIndicator) &&
+    ((plantelIds.length === 0 && indicator.plantelScopeSource !== "manual") || shouldResetLegacyOfficialScope);
 
   return {
     ...indicator,
     plantelIds: shouldUseSeededPlantelScope ? seededIndicator!.plantelIds : plantelIds,
+    plantelScopeSource: indicator.plantelScopeSource ?? seededIndicator?.plantelScopeSource ?? "manual",
     responsibleIds: indicator.responsibleIds?.length ? indicator.responsibleIds : seededIndicator?.responsibleIds ?? [1],
     responsibleNames: indicator.responsibleNames?.length ? indicator.responsibleNames : seededIndicator?.responsibleNames ?? namesForResponsibleIds([1]),
     contributorNames: indicator.contributorNames ?? seededIndicator?.contributorNames ?? [],
@@ -966,6 +996,10 @@ function targetsPlanteles(names: string[]) {
 function isLegacyDefaultPlantelScope(ids: number[]) {
   return sameNumberSet(ids, planteles.map((plantel) => plantel.id)) ||
     sameNumberSet(ids, legacyPlanteles.map((plantel) => plantel.id));
+}
+
+function isLegacyImportedPlantelScope(ids: number[]) {
+  return sameNumberSet(ids, [1]) || isLegacyDefaultPlantelScope(ids);
 }
 
 function sameNumberSet(a: number[], b: number[]) {
@@ -1079,7 +1113,7 @@ function rowsFromActivities(
   session: SigiSession | undefined,
   rowFactory: (activity: string, index: number, plantel: Plantel) => Record<string, unknown>
 ) {
-  const plantel = plantelForTemplate(session);
+  const plantel = plantelForTemplate(session, indicator);
   return activitiesForTemplate(indicator).map((activity, index) => rowFactory(activity, index, plantel));
 }
 
@@ -1242,7 +1276,7 @@ function integralDevelopmentTemplate(indicator: SigiIndicator, session?: SigiSes
 }
 
 function staffTrainingTemplate(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
-  const plantel = plantelForTemplate(session);
+  const plantel = plantelForTemplate(session, indicator);
   const emptyRow = {
     plantel: plantel.name,
     actividad: "",
@@ -1357,7 +1391,7 @@ function staffProfileTemplate(indicator: SigiIndicator, session?: SigiSession): 
 }
 
 function participantActionTemplate(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
-  const plantel = plantelForTemplate(session);
+  const plantel = plantelForTemplate(session, indicator);
   const emptyRow = {
     plantel: plantel.name,
     actividad: "",
@@ -1429,7 +1463,7 @@ function participantActionTemplate(indicator: SigiIndicator, session?: SigiSessi
 }
 
 function infrastructureTemplate(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
-  const plantel = plantelForTemplate(session);
+  const plantel = plantelForTemplate(session, indicator);
   const emptyRow = {
     plantel: plantel.name,
     actividad: "",
@@ -1488,7 +1522,7 @@ function infrastructureTemplate(indicator: SigiIndicator, session?: SigiSession)
 }
 
 function healthIntegralTemplate(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
-  const plantel = plantelForTemplate(session);
+  const plantel = plantelForTemplate(session, indicator);
   const activities = indicator.activities.length > 0 ? indicator.activities : ["Promocion de la salud"];
 
   return {
@@ -1570,7 +1604,7 @@ function healthIntegralTemplate(indicator: SigiIndicator, session?: SigiSession)
 }
 
 function titulationTemplate(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
-  const plantel = plantelForTemplate(session);
+  const plantel = plantelForTemplate(session, indicator);
   return {
     indicatorCode: indicator.code,
     indicatorName: indicator.name,
@@ -1616,7 +1650,7 @@ function titulationTemplate(indicator: SigiIndicator, session?: SigiSession): In
 }
 
 function terminalEfficiencyTemplate(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
-  const plantel = plantelForTemplate(session);
+  const plantel = plantelForTemplate(session, indicator);
   return {
     indicatorCode: indicator.code,
     indicatorName: indicator.name,
@@ -1671,9 +1705,17 @@ function terminalEfficiencyTemplate(indicator: SigiIndicator, session?: SigiSess
   };
 }
 
-function plantelForTemplate(session?: SigiSession) {
+function plantelForTemplate(session?: SigiSession, indicator?: SigiIndicator) {
   if (session?.role === "plantel" && session.plantelId) {
     return planteles.find((plantel) => plantel.id === session.plantelId) ?? planteles[0];
+  }
+
+  if (indicator?.plantelIds.length === 0) {
+    return unassignedPlantel;
+  }
+
+  if (indicator?.plantelIds.length === 1) {
+    return planteles.find((plantel) => plantel.id === indicator.plantelIds[0]) ?? planteles[0];
   }
 
   return planteles[0];

@@ -26,7 +26,8 @@ describe("SIGI store and RBAC", () => {
     expect(getIndicatorByCode("1.0.0.0.2")).toMatchObject({
       name: expect.stringContaining("titul"),
       active: true,
-      plantelIds: [1]
+      plantelIds: [],
+      plantelScopeSource: "official-import"
     });
     expect(listUsers(director).some((user) => user.role === "responsable" && user.indicatorCodes.length > 1)).toBe(true);
   });
@@ -135,20 +136,18 @@ describe("SIGI store and RBAC", () => {
     expect(report.indicadores.every((indicator) => assignedCodes.includes(indicator.id))).toBe(true);
   });
 
-  it("changes report progress when cycle and plantel filters change", () => {
+  it("changes report progress by cycle and excludes unassigned official indicators from plantel filters", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const currentCycle = buildReportPayload(director, {
-      plantelId: "1",
       cicloEscolar: "2025-2026",
       periodo: "2026-2"
     });
     const previousCycle = buildReportPayload(director, {
-      plantelId: "1",
       cicloEscolar: "2024-2025",
       periodo: "2025-2"
     });
-    const anotherPlantel = buildReportPayload(director, {
-      plantelId: "2",
+    const bachillerato16 = buildReportPayload(director, {
+      plantelId: "1",
       cicloEscolar: "2025-2026",
       periodo: "2026-2"
     });
@@ -161,17 +160,25 @@ describe("SIGI store and RBAC", () => {
 
     expect(signature(currentCycle)).not.toBe(signature(previousCycle));
     expect(signature(currentCycle)).not.toBe("");
-    expect(signature(anotherPlantel)).toBe("");
+    expect(currentCycle.indicadores.flatMap((indicator) => indicator.datos).some((row) => row.plantel === "Sin plantel asignado")).toBe(true);
+    expect(bachillerato16.indicadores.some((indicator) => indicator.id === "1.0.0.0.2")).toBe(false);
   });
 
-  it("does not expose official indicators to planteles outside the imported source scope", () => {
+  it("does not expose unassigned official indicators to planteles until a scope is assigned", () => {
     const bachillerato16 = sessionFromHeaders({ "x-role": "plantel", "x-plantel-id": "1" });
     const bachillerato4 = sessionFromHeaders({ "x-role": "plantel", "x-plantel-id": "2" });
     const indicator = getIndicatorByCode("1.0.0.0.2");
 
-    expect(indicator?.plantelIds).toEqual([1]);
-    expect(listIndicators(bachillerato16).length).toBeGreaterThan(0);
-    expect(listIndicators(bachillerato4)).toHaveLength(0);
+    expect(indicator?.plantelIds).toEqual([]);
+    expect(listIndicators(bachillerato16).some((item) => item.code === "1.0.0.0.2")).toBe(false);
+    expect(listIndicators(bachillerato4).some((item) => item.code === "1.0.0.0.2")).toBe(false);
+    expect(() =>
+      assertCaptureAccess(
+        bachillerato16,
+        { plantelId: 1, indicadorId: indicator!.id },
+        "read"
+      )
+    ).toThrow(SigiForbiddenError);
   });
 
   it("prevents plantel users from reading institutional reports", () => {
@@ -225,22 +232,31 @@ describe("SIGI store and RBAC", () => {
   });
 
   it("validates capture columns against the indicator template", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
     const plantel = sessionFromHeaders({
       "x-role": "plantel",
       "x-plantel-id": "1"
     });
-    const indicator = getIndicatorByCode("1.0.0.0.2");
+    const indicator = saveIndicator(director, {
+      code: "TMP-CAPTURE-COLUMNS",
+      name: "Indicador temporal para validar columnas",
+      dataType: "text",
+      responsibleNames: ["Liliana Yunuen Rojas Maciel"],
+      contributorNames: ["Planteles"],
+      activities: ["Actividad QA"],
+      plantelIds: [1]
+    });
 
     expect(indicator).toBeDefined();
-    const template = templateForIndicator(indicator!);
-    expect(template.columns.map((column) => column.key)).toContain("egresados_mujeres");
+    const template = templateForIndicator(indicator);
+    expect(template.columns.map((column) => column.key)).toContain("avance");
 
     expect(() =>
       assertCaptureAccess(
         plantel,
         {
           plantelId: 1,
-          indicadorId: indicator!.id,
+          indicadorId: indicator.id,
           payload: { rows: [{ columna_invalida: 1 }] }
         },
         "draft"
@@ -249,6 +265,7 @@ describe("SIGI store and RBAC", () => {
   });
 
   it("builds the official health integral matrix for indicator 1.1.2.1.4", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
     const plantel = sessionFromHeaders({
       "x-role": "plantel",
       "x-plantel-id": "1"
@@ -262,7 +279,7 @@ describe("SIGI store and RBAC", () => {
       "Número de servicios y acciones de Desarrollo Integral dirigidos al estudiantado"
     ]));
 
-    const template = templateForIndicator(indicator!, plantel);
+    const template = templateForIndicator(indicator!, director);
 
     expect(template.headerRows).toBeDefined();
     expect(template.showTotals).toBe(true);
@@ -280,7 +297,7 @@ describe("SIGI store and RBAC", () => {
       ["ago_ene_total", "calculated"]
     ]);
     expect(template.initialRows.map((row) => row.actividad)).toEqual(indicator!.activities);
-    expect(template.initialRows.every((row) => row.plantel === "Bachillerato 16")).toBe(true);
+    expect(template.initialRows.every((row) => row.plantel === "Sin plantel asignado")).toBe(true);
 
     expect(() =>
       assertCaptureAccess(
@@ -303,7 +320,7 @@ describe("SIGI store and RBAC", () => {
         },
         "draft"
       )
-    ).not.toThrow();
+    ).toThrow(SigiForbiddenError);
 
     expect(() =>
       assertCaptureAccess(
@@ -315,32 +332,42 @@ describe("SIGI store and RBAC", () => {
         },
         "draft"
       )
-    ).toThrow(SigiValidationError);
+    ).toThrow(SigiForbiddenError);
   });
 
   it("rejects truncated capture rows when sending to review", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
     const plantel = sessionFromHeaders({
       "x-role": "plantel",
       "x-plantel-id": "1"
     });
-    const indicator = getIndicatorByCode("1.1.2.1.4");
-    const template = templateForIndicator(indicator!, plantel);
+    const indicator = saveIndicator(director, {
+      code: "TMP-TRUNCATED-CAPTURE",
+      name: "Indicador temporal con filas obligatorias",
+      dataType: "text",
+      responsibleNames: ["Liliana Yunuen Rojas Maciel"],
+      contributorNames: ["Planteles"],
+      activities: ["Actividad uno", "Actividad dos"],
+      plantelIds: [1]
+    });
+    const template = templateForIndicator(indicator, plantel);
 
     expect(template.initialRows.length).toBeGreaterThan(1);
     expect(() =>
       assertCaptureAccess(
         plantel,
-        {
-          plantelId: 1,
-          indicadorId: indicator!.id,
-          payload: { rows: [template.initialRows[0]], justificacion: "Captura parcial" }
-        },
+          {
+            plantelId: 1,
+            indicadorId: indicator.id,
+            payload: { rows: [template.initialRows[0]], justificacion: "Captura parcial" }
+          },
         "submit"
       )
     ).toThrow(SigiValidationError);
   });
 
   it("builds source-based templates for the main official spreadsheet families", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
     const plantel = sessionFromHeaders({
       "x-role": "plantel",
       "x-plantel-id": "1"
@@ -403,7 +430,7 @@ describe("SIGI store and RBAC", () => {
       const indicator = getIndicatorByCode(code);
       expect(indicator).toBeDefined();
 
-      const template = templateForIndicator(indicator!, plantel);
+      const template = templateForIndicator(indicator!, director);
       const keys = template.columns.map((column) => column.key);
 
       expectedKeys.forEach((key) => expect(keys).toContain(key));
@@ -424,7 +451,7 @@ describe("SIGI store and RBAC", () => {
           },
           "draft"
         )
-      ).not.toThrow();
+      ).toThrow(SigiForbiddenError);
 
       expect(() =>
         assertCaptureAccess(
@@ -436,19 +463,21 @@ describe("SIGI store and RBAC", () => {
           },
           "draft"
         )
-      ).toThrow(SigiValidationError);
+      ).toThrow(SigiForbiddenError);
     });
   });
 
-  it("generates a usable capture template for every official indicator", () => {
+  it("generates a readable unassigned template for every official indicator", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const plantel = sessionFromHeaders({
       "x-role": "plantel",
       "x-plantel-id": "1"
     });
 
-    listIndicators(director).forEach((indicator) => {
-      const template = templateForIndicator(indicator, plantel);
+    listIndicators(director)
+      .filter((indicator) => indicator.plantelScopeSource === "official-import")
+      .forEach((indicator) => {
+      const template = templateForIndicator(indicator, director);
 
       expect(template.columns.length, indicator.code).toBeGreaterThan(0);
       expect(template.initialRows.length, indicator.code).toBeGreaterThan(0);
@@ -457,6 +486,9 @@ describe("SIGI store and RBAC", () => {
           ? indicator.activities.length
           : 1
       );
+      if (template.columns.some((column) => column.key === "plantel")) {
+        expect(template.initialRows.every((row) => row.plantel === "Sin plantel asignado"), indicator.code).toBe(true);
+      }
 
       expect(() =>
         assertCaptureAccess(
@@ -468,7 +500,7 @@ describe("SIGI store and RBAC", () => {
           },
           "draft"
         )
-      ).not.toThrow();
+      ).toThrow(SigiForbiddenError);
     });
   });
 
@@ -494,14 +526,23 @@ describe("SIGI store and RBAC", () => {
   });
 
   it("uses the active plantel session when building capture templates", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
     const plantel = sessionFromHeaders({
       "x-role": "plantel",
       "x-plantel-id": "2"
     });
-    const indicator = getIndicatorByCode("1.1.0.0.1");
+    const indicator = saveIndicator(director, {
+      code: "TMP-PLANTEL-SESSION",
+      name: "Indicador temporal con alcance de plantel",
+      dataType: "text",
+      responsibleNames: ["Liliana Yunuen Rojas Maciel"],
+      contributorNames: ["Planteles"],
+      activities: ["Actividad del plantel"],
+      plantelIds: [2]
+    });
 
     expect(indicator).toBeDefined();
-    expect(templateForIndicator(indicator!, plantel).initialRows[0]).toMatchObject({
+    expect(templateForIndicator(indicator, plantel).initialRows[0]).toMatchObject({
       plantel: "Bachillerato 4"
     });
   });

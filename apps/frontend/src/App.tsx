@@ -20,11 +20,13 @@ import { Toaster, toast } from 'sonner';
 import { useCaptureDraft } from './hooks/useCaptureDraft';
 import { buildHealthIntegralTemplate, buildTemplateForCatalogIndicator, catalogPlanteles, fetchIndicatorTemplate, fetchIndicators, type CatalogIndicator } from './api/catalog';
 
+const UNASSIGNED_PLANTEL_LABEL = 'Sin plantel asignado';
+
 const plantelIndicatorScope: Pick<Indicator, 'plantel' | 'supervisor' | 'responsable' | 'contribuidor'> = {
-  plantel: 'Bachillerato 16',
+  plantel: UNASSIGNED_PLANTEL_LABEL,
   supervisor: 'Liliana Yunuen Rojas Maciel',
   responsable: 'Liliana Yunuen Rojas Maciel',
-  contribuidor: 'Bachillerato 16',
+  contribuidor: UNASSIGNED_PLANTEL_LABEL,
 };
 
 const mockupIndicatorsBase: Indicator[] = [
@@ -93,7 +95,7 @@ const mockupIndicators: Indicator[] = mockupIndicatorsBase.map((indicator) => ({
   const mockInitialData = [
     {
       delegacion: 'Villa de Álvarez',
-      plantel: 'Bachillerato 16',
+      plantel: UNASSIGNED_PLANTEL_LABEL,
       programa: 'Técnico Analista Programador',
       egresados_mujeres: '',
       egresados_hombres: '',
@@ -102,7 +104,7 @@ const mockupIndicators: Indicator[] = mockupIndicatorsBase.map((indicator) => ({
     },
     {
       delegacion: 'Villa de Álvarez',
-      plantel: 'Bachillerato 16',
+      plantel: UNASSIGNED_PLANTEL_LABEL,
       programa: 'Técnico Analista Químico',
       egresados_mujeres: '',
       egresados_hombres: '',
@@ -148,7 +150,7 @@ function plantelNameFromId(id?: number) {
 
 function plantelScopeLabelFromIds(ids?: number[]) {
   if (!ids?.length) {
-    return 'Alcance pendiente';
+    return UNASSIGNED_PLANTEL_LABEL;
   }
 
   const labels = ids.map((id) => plantelNameFromId(id));
@@ -298,7 +300,7 @@ function fallbackTemplateForIndicator(
   selectedCatalogIndicator?: CatalogIndicator
 ): IndicatorTemplate & { initialRows?: Record<string, unknown>[] } {
   if (selectedCatalogIndicator) {
-    return buildTemplateForCatalogIndicator(selectedCatalogIndicator, selectedIndicator?.plantel ?? 'Bachillerato 16');
+    return buildTemplateForCatalogIndicator(selectedCatalogIndicator, selectedIndicator?.plantel ?? UNASSIGNED_PLANTEL_LABEL);
   }
 
   if (selectedCode === template1_0_0_0_2.indicatorCode) {
@@ -313,7 +315,7 @@ function fallbackTemplateForIndicator(
       code: selectedCode,
       name: selectedIndicator?.name ?? 'Porcentaje de estudiantes de educación media superior y superior atendidos en los servicios de salud integral',
       activities: ['Promoción de la salud'],
-    }, selectedIndicator?.plantel ?? 'Bachillerato 16');
+    }, selectedIndicator?.plantel ?? UNASSIGNED_PLANTEL_LABEL);
   }
 
   return {
@@ -332,7 +334,7 @@ function fallbackTemplateForIndicator(
     ],
     initialRows: [
       {
-        plantel: selectedIndicator?.plantel ?? 'Bachillerato 16',
+        plantel: selectedIndicator?.plantel ?? UNASSIGNED_PLANTEL_LABEL,
         actividad: 'Actividad general',
         meta: '',
         avance: '',
