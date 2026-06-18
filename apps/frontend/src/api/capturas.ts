@@ -1,5 +1,5 @@
 import axios, { AxiosHeaders } from 'axios';
-import { API_BASE_URL, sessionHeaders } from './client';
+import { API_BASE_URL, API_REQUESTS_ENABLED, sessionHeaders } from './client';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -304,19 +304,23 @@ function isEditableFallbackStatus(status: CaptureDraft['estado']) {
 }
 
 export async function createCaptureDraft(request: CaptureDraftRequest) {
+  if (!API_REQUESTS_ENABLED) {
+    return createFallbackDraft(request);
+  }
+
   try {
     const response = await api.post<CaptureDraft>('/capturas/borradores', request);
     return response.data;
   } catch (error) {
-    if (shouldUseStaticFallback(error)) {
-      return createFallbackDraft(request);
-    }
-
     throw captureError(error, 'No se pudo guardar el borrador.');
   }
 }
 
 export async function findCaptureDraft(request: Omit<CaptureDraftRequest, 'payload' | 'motivoCambio'>) {
+  if (!API_REQUESTS_ENABLED) {
+    return undefined;
+  }
+
   try {
     const params = new URLSearchParams({
       plantelId: String(request.plantelId),
@@ -340,6 +344,10 @@ export async function updateCaptureDraft(
   payload: CapturePayload,
   motivoCambio = 'actualización desde frontend',
 ) {
+  if (!API_REQUESTS_ENABLED) {
+    return updateFallbackDraft(captureId, payload);
+  }
+
   try {
     const response = await api.put<CaptureDraft>(`/capturas/${captureId}`, {
       payload,
@@ -347,15 +355,15 @@ export async function updateCaptureDraft(
     }, { headers: sessionHeaders() });
     return response.data;
   } catch (error) {
-    if (shouldUseStaticFallback(error)) {
-      return updateFallbackDraft(captureId, payload);
-    }
-
     throw captureError(error, 'No se pudo actualizar el borrador.');
   }
 }
 
 export async function getCaptureDraft(captureId: number) {
+  if (!API_REQUESTS_ENABLED) {
+    return getFallbackDraft(captureId);
+  }
+
   try {
     const response = await api.get<CaptureDraft>(`/capturas/${captureId}`);
     return response.data;
@@ -369,40 +377,40 @@ export async function getCaptureDraft(captureId: number) {
 }
 
 export async function sendCaptureToReview(captureId: number) {
+  if (!API_REQUESTS_ENABLED) {
+    return sendFallbackDraftToReview(captureId);
+  }
+
   try {
     const response = await api.post<CaptureDraft>(`/capturas/${captureId}/enviar-revision`);
     return response.data;
   } catch (error) {
-    if (shouldUseStaticFallback(error)) {
-      return sendFallbackDraftToReview(captureId);
-    }
-
     throw captureError(error, 'No se pudo enviar a revisión.');
   }
 }
 
 export async function requestCaptureCorrection(captureId: number, observacion: string) {
+  if (!API_REQUESTS_ENABLED) {
+    return requestFallbackCorrection(captureId, observacion);
+  }
+
   try {
     const response = await api.post<CaptureDraft>(`/capturas/${captureId}/observar`, { observacion });
     return response.data;
   } catch (error) {
-    if (shouldUseStaticFallback(error)) {
-      return requestFallbackCorrection(captureId, observacion);
-    }
-
     throw captureError(error, 'No se pudo solicitar la corrección.');
   }
 }
 
 export async function approveCapture(captureId: number) {
+  if (!API_REQUESTS_ENABLED) {
+    return approveFallbackDraft(captureId);
+  }
+
   try {
     const response = await api.post<CaptureDraft>(`/capturas/${captureId}/aprobar`);
     return response.data;
   } catch (error) {
-    if (shouldUseStaticFallback(error)) {
-      return approveFallbackDraft(captureId);
-    }
-
     throw captureError(error, 'No se pudo aprobar el indicador.');
   }
 }

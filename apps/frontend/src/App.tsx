@@ -358,6 +358,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [] 
   const requestedPlantelId = positiveQueryParam(queryParams, 'plantelId');
   const requestedActividadId = positiveQueryParam(queryParams, 'actividadId');
   const requestedPeriodoId = positiveQueryParam(queryParams, 'periodoId');
+  const requestedCaptureId = positiveQueryParam(queryParams, 'captureId');
   const selectedCode = code ?? template1_0_0_0_2.indicatorCode;
   const selectedCatalogIndicator = catalogIndicators.find((indicator) => indicator.code === selectedCode);
   const selectedIndicator = selectedCatalogIndicator
@@ -399,6 +400,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [] 
     ? user.responsableId ?? 1
     : selectedCatalogIndicator?.primaryResponsibleId ?? selectedCatalogIndicator?.responsibleIds[0] ?? 1;
   const captureDraft = useCaptureDraft({
+    requestedCaptureId,
     plantelId: activePlantelId,
     indicadorId: selectedCatalogIndicator?.id ?? getIndicatorIdByCode(selectedCode),
     periodoId: activePeriodoId,

@@ -9,15 +9,34 @@ type RequestLike = {
 
 let sigiModulePromise: Promise<any> | undefined;
 let captureModulePromise: Promise<any> | undefined;
+let stateModulePromise: Promise<any> | undefined;
 
-function loadSigi() {
-  sigiModulePromise ??= import("../../apps/backend/src/sigi-store.js");
-  return sigiModulePromise;
+async function hydrateRuntimeState() {
+  stateModulePromise ??= import("../../apps/backend/src/state-store.js");
+  const state = await stateModulePromise;
+  await state.hydrateState?.({ force: true });
+  return state;
 }
 
-function loadCaptures() {
+async function flushRuntimeState() {
+  const state = await hydrateRuntimeState();
+  await state.flushPersistedState?.();
+}
+
+async function loadSigi() {
+  await hydrateRuntimeState();
+  sigiModulePromise ??= import("../../apps/backend/src/sigi-store.js");
+  const sigi = await sigiModulePromise;
+  sigi.reloadSigiStateFromPersistence?.();
+  return sigi;
+}
+
+async function loadCaptures() {
+  await hydrateRuntimeState();
   captureModulePromise ??= import("../../apps/backend/src/capture-store.js");
-  return captureModulePromise;
+  const captures = await captureModulePromise;
+  captures.reloadCaptureDraftsFromState?.();
+  return captures;
 }
 
 export async function handleLogin(request: RequestLike, response: any) {
@@ -70,7 +89,9 @@ export async function handleUsers(request: RequestLike, response: any) {
     }
 
     if (request.method === "POST") {
-      sendJson(response, 201, sigi.saveUser(session, await readJsonBody(request)));
+      const saved = sigi.saveUser(session, await readJsonBody(request));
+      await flushRuntimeState();
+      sendJson(response, 201, saved);
       return;
     }
   } catch (error) {
@@ -104,7 +125,9 @@ export async function handleUserAction(request: RequestLike, response: any) {
     }
 
     if (request.method === "PUT" && !action) {
-      sendJson(response, 200, sigi.saveUser(session, { ...(await readJsonBody(request)), id: userId }));
+      const saved = sigi.saveUser(session, { ...(await readJsonBody(request)), id: userId });
+      await flushRuntimeState();
+      sendJson(response, 200, saved);
       return;
     }
 
@@ -116,6 +139,7 @@ export async function handleUserAction(request: RequestLike, response: any) {
         return;
       }
 
+      await flushRuntimeState();
       sendJson(response, 200, updated);
       return;
     }
@@ -150,7 +174,9 @@ export async function handleIndicators(request: RequestLike, response: any) {
     }
 
     if (request.method === "POST") {
-      sendJson(response, 201, sigi.saveIndicator(session, await readJsonBody(request)));
+      const saved = sigi.saveIndicator(session, await readJsonBody(request));
+      await flushRuntimeState();
+      sendJson(response, 201, saved);
       return;
     }
   } catch (error) {
@@ -197,7 +223,9 @@ export async function handleIndicatorAction(request: RequestLike, response: any)
     }
 
     if (request.method === "PUT" && !action) {
-      sendJson(response, 200, sigi.saveIndicator(session, { ...(await readJsonBody(request)), id: indicator?.id ?? indicatorId }));
+      const saved = sigi.saveIndicator(session, { ...(await readJsonBody(request)), id: indicator?.id ?? indicatorId });
+      await flushRuntimeState();
+      sendJson(response, 200, saved);
       return;
     }
 
@@ -214,6 +242,7 @@ export async function handleIndicatorAction(request: RequestLike, response: any)
         return;
       }
 
+      await flushRuntimeState();
       sendJson(response, 200, updated);
       return;
     }
@@ -314,7 +343,9 @@ export async function handleCaptureDrafts(request: RequestLike, response: any) {
         return;
       }
 
-      sendJson(response, 201, captures.createCaptureDraft(body));
+      const created = captures.createCaptureDraft(body);
+      await flushRuntimeState();
+      sendJson(response, 201, created);
       return;
     }
   } catch (error) {
@@ -380,6 +411,7 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
         return;
       }
 
+      await flushRuntimeState();
       sendJson(response, 200, updatedDraft);
       return;
     }
@@ -396,6 +428,7 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
         return;
       }
 
+      await flushRuntimeState();
       sendJson(response, 200, updatedDraft);
       return;
     }
@@ -412,6 +445,7 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
         return;
       }
 
+      await flushRuntimeState();
       sendJson(response, 200, updatedDraft);
       return;
     }
@@ -436,6 +470,7 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
         return;
       }
 
+      await flushRuntimeState();
       sendJson(response, 200, updatedDraft);
       return;
     }

@@ -3,23 +3,41 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { Pool } from "pg";
+import { loadLocalEnv } from "./config.js";
 
 type PersistedState = Record<string, unknown>;
 
-const isTestRun = process.env.NODE_ENV === "test" || process.env.VITEST === "true";
+const isTestRun =
+  process.env.NODE_ENV === "test" ||
+  process.env.VITEST === "true" ||
+  process.env.VITEST_WORKER_ID !== undefined ||
+  process.env.npm_lifecycle_event === "test";
+
+if (!isTestRun) {
+  loadLocalEnv();
+}
+
+const databaseUrl = !isTestRun ? process.env.DATABASE_URL : undefined;
 const configuredStateFile = process.env.SIGI_DATA_FILE || process.env.ADPEAK_DATA_FILE;
 const stateFilePath = configuredStateFile
   ? path.resolve(configuredStateFile)
   : isTestRun
     ? ""
+    : databaseUrl
+      ? ""
     : process.env.VERCEL
       ? path.join(os.tmpdir(), "adpeak", "sigi-state.json")
       : path.resolve(process.cwd(), "data", "sigi-state.json");
 
 let cachedState: PersistedState = loadStateFromDisk();
+let pool: Pool | undefined;
+let hydratedFromDatabase = false;
+let hydratePromise: Promise<void> | undefined;
+let pendingDatabaseWrite: Promise<void> | undefined;
 
 export function isPersistenceEnabled() {
-  return Boolean(stateFilePath);
+  return Boolean(stateFilePath || databaseUrl);
 }
 
 export function readPersistedCollection<T>(key: string): T[] | undefined {
@@ -32,12 +50,22 @@ export function readPersistedValue<T>(key: string): T | undefined {
 }
 
 export function persistState(patch: PersistedState) {
+  cachedState = { ...cachedState, ...patch, updatedAt: new Date().toISOString() };
+
+  if (databaseUrl) {
+    pendingDatabaseWrite = writeStateToDatabase(cachedState).catch((error) => {
+      console.error("state_store_database_write_error", safeErrorMessage(error));
+
+      if (!stateFilePath) {
+        throw error;
+      }
+    });
+  }
+
   if (!stateFilePath) {
-    cachedState = { ...cachedState, ...patch };
     return;
   }
 
-  cachedState = { ...cachedState, ...patch, updatedAt: new Date().toISOString() };
   const directory = path.dirname(stateFilePath);
   mkdirSync(directory, { recursive: true });
   const temporaryPath = `${stateFilePath}.tmp`;
@@ -46,8 +74,41 @@ export function persistState(patch: PersistedState) {
   renameSync(temporaryPath, stateFilePath);
 }
 
+export async function hydrateState(options: { force?: boolean } = {}) {
+  if (!databaseUrl || (hydratedFromDatabase && !options.force)) {
+    return;
+  }
+
+  if (!options.force && hydratePromise) {
+    await hydratePromise;
+    return;
+  }
+
+  const nextHydration = readStateFromDatabase()
+    .then((state) => {
+      cachedState = { ...cachedState, ...state };
+      hydratedFromDatabase = true;
+    })
+    .catch((error) => {
+      console.error("state_store_hydration_error", safeErrorMessage(error));
+      hydratedFromDatabase = true;
+    });
+
+  if (!options.force) {
+    hydratePromise = nextHydration;
+  }
+
+  await nextHydration;
+}
+
+export async function flushPersistedState() {
+  if (pendingDatabaseWrite) {
+    await pendingDatabaseWrite;
+  }
+}
+
 export function stateFileLocation() {
-  return stateFilePath || "memory-only";
+  return databaseUrl ? "postgres:app_state" : stateFilePath || "memory-only";
 }
 
 function loadStateFromDisk(): PersistedState {
@@ -60,4 +121,60 @@ function loadStateFromDisk(): PersistedState {
   } catch {
     return {};
   }
+}
+
+async function readStateFromDatabase(): Promise<PersistedState> {
+  const client = getPool();
+  await ensureStateTable(client);
+  const result = await client.query<{ key: string; value: unknown }>(
+    "select key, value from app_state"
+  );
+
+  return Object.fromEntries(result.rows.map((row) => [row.key, row.value]));
+}
+
+async function writeStateToDatabase(state: PersistedState) {
+  const client = getPool();
+  await ensureStateTable(client);
+  await Promise.all(
+    Object.entries(state).map(([key, value]) =>
+      client.query(
+        `insert into app_state (key, value, updated_at)
+         values ($1, $2::jsonb, now())
+         on conflict (key) do update set value = excluded.value, updated_at = now()`,
+        [key, JSON.stringify(value)]
+      )
+    )
+  );
+}
+
+async function ensureStateTable(client: Pool) {
+  await client.query(`
+    create table if not exists app_state (
+      key text primary key,
+      value jsonb not null,
+      updated_at timestamptz not null default now()
+    )
+  `);
+}
+
+function getPool() {
+  if (!databaseUrl) {
+    throw new Error("DATABASE_URL is not configured.");
+  }
+
+  pool ??= new Pool({
+    connectionString: databaseUrl,
+    ssl: shouldUseSsl(databaseUrl) ? { rejectUnauthorized: false } : undefined
+  });
+
+  return pool;
+}
+
+function shouldUseSsl(url: string) {
+  return !/localhost|127\.0\.0\.1/i.test(url);
+}
+
+function safeErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "unknown";
 }

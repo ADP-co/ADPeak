@@ -1,7 +1,10 @@
 /// <reference types="node" />
 
 import { createHash } from "node:crypto";
-import { officialCatalogRows } from "./official-catalog.generated.js";
+import {
+  officialCatalogRows,
+  officialIndicatorPlantelScopes
+} from "./official-catalog.generated.js";
 import {
   officialDataSummary,
   officialEvidenceGroups,
@@ -205,19 +208,10 @@ const responsibleIdByName = new Map(
 );
 
 const initialIndicators = buildIndicators();
-const persistedIndicators = readPersistedCollection<SigiIndicator>("indicators");
-const indicators = new Map<number, SigiIndicator>(
-  (persistedIndicators?.length ? persistedIndicators : initialIndicators)
-    .map(normalizePersistedIndicator)
-    .map((indicator) => [indicator.id, indicator])
-);
-const persistedUsers = readPersistedCollection<SigiUser>("users");
-const users = new Map<string, SigiUser>(
-  mergeInitialUsers(persistedUsers).map((user) => {
-    const normalizedUser = normalizePersistedUser(user);
-    return [normalizedUser.id, normalizedUser];
-  })
-);
+const indicators = new Map<number, SigiIndicator>();
+const users = new Map<string, SigiUser>();
+
+reloadSigiStateFromPersistence();
 
 export function sessionFromHeaders(headers: Record<string, string | string[] | undefined>): SigiSession {
   const rawRole = headerValue(headers["x-role"]);
@@ -237,6 +231,22 @@ export function sessionFromHeaders(headers: Record<string, string | string[] | u
     plantelId: role === "plantel" ? plantelId ?? 1 : plantelId,
     responsableId: role === "responsable" ? responsableId ?? 1 : responsableId
   };
+}
+
+export function reloadSigiStateFromPersistence() {
+  const persistedIndicators = readPersistedCollection<SigiIndicator>("indicators");
+  const persistedUsers = readPersistedCollection<SigiUser>("users");
+
+  indicators.clear();
+  for (const indicator of (persistedIndicators?.length ? persistedIndicators : initialIndicators).map(normalizePersistedIndicator)) {
+    indicators.set(indicator.id, indicator);
+  }
+
+  users.clear();
+  for (const user of mergeInitialUsers(persistedUsers)) {
+    const normalizedUser = normalizePersistedUser(user);
+    users.set(normalizedUser.id, normalizedUser);
+  }
 }
 
 export function normalizeRole(value?: string) {
@@ -377,8 +387,11 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
       : existing?.plantelIds ??
         (isNewIndicator && targetsPlanteles(nextContributorNames) ? allPlantelIds() : officialSourcePlantelIds)
   );
+  const preservesOfficialImportedScope =
+    isOfficialImportedIndicator &&
+    nextPlantelIds.length === 0;
 
-  if (nextPlantelIds.length === 0 && !isOfficialImportedIndicator) {
+  if (nextPlantelIds.length === 0 && !preservesOfficialImportedScope) {
     throw new SigiValidationError("Asigna al menos un plantel para habilitar captura.");
   }
 
@@ -396,7 +409,9 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
     contributorNames: nextContributorNames,
     activities: input.activities?.filter(Boolean) ?? existing?.activities ?? ["Actividad general"],
     plantelIds: nextPlantelIds,
-    plantelScopeSource: inputHasPlantelIds ? "manual" : existing?.plantelScopeSource ?? "manual",
+    plantelScopeSource: preservesOfficialImportedScope
+      ? "official-import"
+      : inputHasPlantelIds ? "manual" : existing?.plantelScopeSource ?? "manual",
     templateColumns: sanitizeTemplateColumns(input.templateColumns ?? existing?.templateColumns)
   };
 
@@ -519,7 +534,7 @@ export function assertCaptureAccess(
     throw new SigiForbiddenError("El plantel solo puede operar su propio alcance.");
   }
 
-  if (!indicator.plantelIds.includes(request.plantelId)) {
+  if (!canUseIndicatorForPlantel(indicator, request.plantelId)) {
     throw new SigiForbiddenError("El indicador no esta asignado a este plantel.");
   }
 
@@ -673,11 +688,13 @@ export function buildReportPayload(
 }
 
 function plantelesForReport(indicator: SigiIndicator, scopedPlanteles: Plantel[], hasPlantelFilter: boolean) {
-  if (indicator.plantelIds.length === 0) {
+  const effectivePlantelIds = effectivePlantelIdsForIndicator(indicator);
+
+  if (effectivePlantelIds.length === 0) {
     return hasPlantelFilter ? [] : [unassignedPlantel];
   }
 
-  return scopedPlanteles.filter((plantel) => indicator.plantelIds.includes(plantel.id));
+  return scopedPlanteles.filter((plantel) => effectivePlantelIds.includes(plantel.id));
 }
 
 function rowsFromCaptureDrafts({
@@ -1175,10 +1192,34 @@ function canReadIndicator(session: SigiSession, indicator: SigiIndicator) {
   }
 
   if (session.role === "plantel") {
-    return indicator.plantelIds.includes(session.plantelId ?? -1);
+    return canUseIndicatorForPlantel(indicator, session.plantelId ?? -1);
   }
 
   return indicator.responsibleIds.includes(session.responsableId ?? -1);
+}
+
+function canUseIndicatorForPlantel(indicator: SigiIndicator, plantelId: number) {
+  return effectivePlantelIdsForIndicator(indicator).includes(plantelId);
+}
+
+function effectivePlantelIdsForIndicator(indicator: SigiIndicator) {
+  if (indicator.plantelIds.length > 0) {
+    return indicator.plantelIds;
+  }
+
+  if (indicator.plantelScopeSource === "official-import") {
+    return officialImportEvidencePlantelIds(indicator.code);
+  }
+
+  return [];
+}
+
+function officialImportEvidencePlantelIds(code?: string) {
+  if (code && officialIndicatorPlantelScopes[code]?.length) {
+    return normalizePlantelScope(officialIndicatorPlantelScopes[code]);
+  }
+
+  return [];
 }
 
 function activitiesForTemplate(indicator: SigiIndicator) {
@@ -1828,16 +1869,22 @@ function terminalEfficiencyTemplate(indicator: SigiIndicator, session?: SigiSess
 }
 
 function plantelForTemplate(session?: SigiSession, indicator?: SigiIndicator) {
-  if (session?.role === "plantel" && session.plantelId) {
+  if (
+    session?.role === "plantel" &&
+    session.plantelId &&
+    (!indicator || canUseIndicatorForPlantel(indicator, session.plantelId))
+  ) {
     return planteles.find((plantel) => plantel.id === session.plantelId) ?? planteles[0];
   }
 
-  if (indicator?.plantelIds.length === 0) {
+  const effectivePlantelIds = indicator ? effectivePlantelIdsForIndicator(indicator) : [];
+
+  if (effectivePlantelIds.length === 0) {
     return unassignedPlantel;
   }
 
-  if (indicator?.plantelIds.length === 1) {
-    return planteles.find((plantel) => plantel.id === indicator.plantelIds[0]) ?? planteles[0];
+  if (effectivePlantelIds.length === 1) {
+    return planteles.find((plantel) => plantel.id === effectivePlantelIds[0]) ?? planteles[0];
   }
 
   return planteles[0];

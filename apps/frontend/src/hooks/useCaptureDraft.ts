@@ -17,6 +17,7 @@ import {
 const STORAGE_KEY_PREFIX = 'sigi-poa:capture-draft-id';
 
 type UseCaptureDraftOptions = Omit<CaptureDraftRequest, 'payload' | 'motivoCambio'> & {
+  requestedCaptureId?: number;
   storageScope?: string;
 };
 
@@ -28,18 +29,19 @@ function initialCaptureId(storageKey: string) {
 
 export function useCaptureDraft(options: UseCaptureDraftOptions) {
   const queryClient = useQueryClient();
-  const { storageScope, ...captureOptions } = options;
+  const { requestedCaptureId, storageScope, ...captureOptions } = options;
+  const hasRequestedCapture = Boolean(requestedCaptureId);
   const storageKey = `${STORAGE_KEY_PREFIX}:${storageScope ?? [
     options.plantelId,
     options.indicadorId,
     options.periodoId,
     options.actividadId,
   ].join(':')}`;
-  const [captureId, setCaptureId] = useState<number | undefined>(() => initialCaptureId(storageKey));
+  const [captureId, setCaptureId] = useState<number | undefined>(() => requestedCaptureId ?? initialCaptureId(storageKey));
 
   useEffect(() => {
-    setCaptureId(initialCaptureId(storageKey));
-  }, [storageKey]);
+    setCaptureId(requestedCaptureId ?? initialCaptureId(storageKey));
+  }, [requestedCaptureId, storageKey]);
 
   const captureQuery = useQuery({
     queryKey: ['capture-draft', storageKey, captureId],
@@ -51,30 +53,34 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
     setCaptureId(capture.id);
     window.localStorage.setItem(storageKey, String(capture.id));
     queryClient.setQueryData(['capture-draft', storageKey, capture.id], capture);
-    queryClient.setQueryData(['capture-draft-scope', storageKey], capture);
+    if (!hasRequestedCapture) {
+      queryClient.setQueryData(['capture-draft-scope', storageKey], capture);
+    }
   };
 
   const scopedCaptureQuery = useQuery({
     queryKey: ['capture-draft-scope', storageKey],
     queryFn: () => findCaptureDraft(captureOptions),
-    enabled: !captureId,
+    enabled: !captureId && !hasRequestedCapture,
   });
+  const scopedCapture = hasRequestedCapture ? undefined : scopedCaptureQuery.data;
 
   useEffect(() => {
-    if (scopedCaptureQuery.data) {
+    if (!hasRequestedCapture && scopedCaptureQuery.data) {
       persistCapture(scopedCaptureQuery.data);
     }
-  }, [scopedCaptureQuery.data]);
+  }, [hasRequestedCapture, scopedCaptureQuery.data]);
 
   useEffect(() => {
     if (
+      !hasRequestedCapture &&
       captureQuery.error instanceof CaptureRequestError &&
       captureQuery.error.code === 'capture_not_found'
     ) {
       window.localStorage.removeItem(storageKey);
       setCaptureId(undefined);
     }
-  }, [captureQuery.error, storageKey]);
+  }, [captureQuery.error, hasRequestedCapture, storageKey]);
 
   const saveDraftMutation = useMutation({
     mutationFn: async (payload: CapturePayload) => {
@@ -109,7 +115,7 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
 
   const requestCorrectionMutation = useMutation({
     mutationFn: async (observacion: string) => {
-      const draftId = captureId ?? scopedCaptureQuery.data?.id;
+      const draftId = captureId ?? scopedCapture?.id;
 
       if (!draftId) {
         throw new CaptureRequestError('Primero debe existir una captura enviada a revisión.');
@@ -122,7 +128,7 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
 
   const approveMutation = useMutation({
     mutationFn: async () => {
-      const draftId = captureId ?? scopedCaptureQuery.data?.id;
+      const draftId = captureId ?? scopedCapture?.id;
 
       if (!draftId) {
         throw new CaptureRequestError('Primero debe existir una captura enviada a revisión.');
@@ -134,7 +140,7 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
   });
 
   const statusMessage = useMemo(() => {
-    if (captureQuery.isLoading || scopedCaptureQuery.isLoading) {
+    if (captureQuery.isLoading || (!hasRequestedCapture && scopedCaptureQuery.isLoading)) {
       return 'Cargando borrador...';
     }
 
@@ -154,7 +160,7 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
       return 'Borrador guardado.';
     }
 
-    if (captureQuery.data || scopedCaptureQuery.data) {
+    if (captureQuery.data || scopedCapture) {
       return 'Borrador disponible.';
     }
 
@@ -162,8 +168,9 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
   }, [
     captureQuery.data,
     captureQuery.isLoading,
-    scopedCaptureQuery.data,
+    scopedCapture,
     scopedCaptureQuery.isLoading,
+    hasRequestedCapture,
     saveDraftMutation.isPending,
     saveDraftMutation.isSuccess,
     sendToReviewMutation.isPending,
@@ -171,12 +178,12 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
   ]);
 
   return {
-    capture: captureQuery.data ?? scopedCaptureQuery.data,
+    capture: captureQuery.data ?? scopedCapture,
     statusMessage,
     errorMessage:
       captureQuery.error instanceof Error
         ? captureQuery.error.message
-        : scopedCaptureQuery.error instanceof Error
+        : !hasRequestedCapture && scopedCaptureQuery.error instanceof Error
           ? scopedCaptureQuery.error.message
         : saveDraftMutation.error instanceof Error
           ? saveDraftMutation.error.message
@@ -193,7 +200,7 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
     approve: approveMutation.mutate,
     isBusy:
       captureQuery.isLoading ||
-      scopedCaptureQuery.isLoading ||
+      (!hasRequestedCapture && scopedCaptureQuery.isLoading) ||
       saveDraftMutation.isPending ||
       sendToReviewMutation.isPending ||
       requestCorrectionMutation.isPending ||

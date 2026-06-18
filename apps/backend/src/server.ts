@@ -13,6 +13,7 @@ import {
   isCaptureDraftRequest,
   isCapturePayload,
   requestCaptureCorrection,
+  reloadCaptureDraftsFromState,
   sendCaptureToReview,
   updateCaptureDraft
 } from "./capture-store.js";
@@ -27,6 +28,7 @@ import {
   listIndicators,
   listUsers,
   officialSourcesPayload,
+  reloadSigiStateFromPersistence,
   saveIndicator,
   saveUser,
   sessionFromHeaders,
@@ -48,6 +50,7 @@ import {
   type DemoRole
 } from "./demo-data.js";
 import { healthPayload } from "./health.js";
+import { flushPersistedState, hydrateState } from "./state-store.js";
 
 loadLocalEnv();
 
@@ -65,6 +68,12 @@ try {
 }
 
 const port = appConfig.backendPort;
+
+async function prepareRuntimeState() {
+  await hydrateState({ force: true });
+  reloadSigiStateFromPersistence();
+  reloadCaptureDraftsFromState();
+}
 
 function sendJson(
   response: ServerResponse,
@@ -138,6 +147,8 @@ const server = createServer(async (request, response) => {
     return;
   }
 
+  await prepareRuntimeState();
+
   if (request.method === "POST" && url.pathname === "/api/v1/auth/login") {
     try {
       const payload = await readJsonBody(request);
@@ -182,7 +193,9 @@ const server = createServer(async (request, response) => {
       }
 
       if (request.method === "POST") {
-        sendJson(response, 201, saveUser(session, await readJsonBody(request)));
+        const saved = saveUser(session, await readJsonBody(request));
+        await flushPersistedState();
+        sendJson(response, 201, saved);
         return;
       }
     } catch (error) {
@@ -207,7 +220,9 @@ const server = createServer(async (request, response) => {
       const action = userMatch[2];
 
       if (request.method === "PUT" && !action) {
-        sendJson(response, 200, saveUser(session, { ...(await readJsonBody(request)), id: userId }));
+        const saved = saveUser(session, { ...(await readJsonBody(request)), id: userId });
+        await flushPersistedState();
+        sendJson(response, 200, saved);
         return;
       }
 
@@ -219,6 +234,7 @@ const server = createServer(async (request, response) => {
           return;
         }
 
+        await flushPersistedState();
         sendJson(response, 200, updated);
         return;
       }
@@ -242,7 +258,9 @@ const server = createServer(async (request, response) => {
       }
 
       if (request.method === "POST") {
-        sendJson(response, 201, saveIndicator(session, await readJsonBody(request)));
+        const saved = saveIndicator(session, await readJsonBody(request));
+        await flushPersistedState();
+        sendJson(response, 201, saved);
         return;
       }
     } catch (error) {
@@ -278,7 +296,9 @@ const server = createServer(async (request, response) => {
       }
 
       if (request.method === "PUT" && !action) {
-        sendJson(response, 200, saveIndicator(session, { ...(await readJsonBody(request)), id: indicator?.id ?? indicatorId }));
+        const saved = saveIndicator(session, { ...(await readJsonBody(request)), id: indicator?.id ?? indicatorId });
+        await flushPersistedState();
+        sendJson(response, 200, saved);
         return;
       }
 
@@ -295,6 +315,7 @@ const server = createServer(async (request, response) => {
           return;
         }
 
+        await flushPersistedState();
         sendJson(response, 200, updated);
         return;
       }
@@ -383,7 +404,9 @@ const server = createServer(async (request, response) => {
         return;
       }
 
-      sendJson(response, 201, createCaptureDraft(payload));
+      const created = createCaptureDraft(payload);
+      await flushPersistedState();
+      sendJson(response, 201, created);
       return;
     } catch (error) {
       if (sendError(response, error)) {
@@ -468,6 +491,7 @@ const server = createServer(async (request, response) => {
           return;
         }
 
+        await flushPersistedState();
         sendJson(response, 200, updatedDraft);
         return;
       } catch (error) {
@@ -506,6 +530,7 @@ const server = createServer(async (request, response) => {
           return;
         }
 
+        await flushPersistedState();
         sendJson(response, 200, updatedDraft);
         return;
       } catch (error) {
@@ -555,6 +580,7 @@ const server = createServer(async (request, response) => {
           return;
         }
 
+        await flushPersistedState();
         sendJson(response, 200, updatedDraft);
         return;
       } catch (error) {
@@ -592,6 +618,7 @@ const server = createServer(async (request, response) => {
         return;
       }
 
+      await flushPersistedState();
       sendJson(response, 200, updatedDraft);
       return;
     }

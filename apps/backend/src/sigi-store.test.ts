@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
   assertCaptureAccess,
   authenticateUser,
@@ -9,6 +9,7 @@ import {
   listIndicators,
   listUsers,
   officialSourcesPayload,
+  reloadSigiStateFromPersistence,
   saveIndicator,
   saveUser,
   sessionFromHeaders,
@@ -18,6 +19,10 @@ import {
 } from "./sigi-store.js";
 
 describe("SIGI store and RBAC", () => {
+  beforeEach(() => {
+    reloadSigiStateFromPersistence();
+  });
+
   it("loads official indicators and responsible assignments from the imported catalog", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const indicators = listIndicators(director);
@@ -136,7 +141,7 @@ describe("SIGI store and RBAC", () => {
     expect(report.indicadores.every((indicator) => assignedCodes.includes(indicator.id))).toBe(true);
   });
 
-  it("changes report progress by cycle and excludes unassigned official indicators from plantel filters", () => {
+  it("changes report progress by cycle and leaves imported official indicators unassigned until configured", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const currentCycle = buildReportPayload(director, {
       cicloEscolar: "2025-2026",
@@ -151,6 +156,11 @@ describe("SIGI store and RBAC", () => {
       cicloEscolar: "2025-2026",
       periodo: "2026-2"
     });
+    const bachillerato4 = buildReportPayload(director, {
+      plantelId: "2",
+      cicloEscolar: "2025-2026",
+      periodo: "2026-2"
+    });
     const signature = (report: ReturnType<typeof buildReportPayload>) =>
       report.indicadores
         .flatMap((indicator) => indicator.datos)
@@ -162,23 +172,103 @@ describe("SIGI store and RBAC", () => {
     expect(signature(currentCycle)).not.toBe("");
     expect(currentCycle.indicadores.flatMap((indicator) => indicator.datos).some((row) => row.plantel === "Sin plantel asignado")).toBe(true);
     expect(bachillerato16.indicadores.some((indicator) => indicator.id === "1.0.0.0.2")).toBe(false);
+    expect(bachillerato4.indicadores.some((indicator) => indicator.id === "1.0.0.0.2")).toBe(false);
   });
 
-  it("does not expose unassigned official indicators to planteles until a scope is assigned", () => {
+  it("keeps imported official indicators unassigned and exposes them only after director assignment", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
     const bachillerato16 = sessionFromHeaders({ "x-role": "plantel", "x-plantel-id": "1" });
     const bachillerato4 = sessionFromHeaders({ "x-role": "plantel", "x-plantel-id": "2" });
     const indicator = getIndicatorByCode("1.0.0.0.2");
+    const unassigned = saveIndicator(director, {
+      ...indicator!,
+      plantelIds: []
+    });
 
     expect(indicator?.plantelIds).toEqual([]);
+    expect(unassigned.plantelScopeSource).toBe("official-import");
     expect(listIndicators(bachillerato16).some((item) => item.code === "1.0.0.0.2")).toBe(false);
+    expect(templateForIndicator(unassigned, director).initialRows.every((row) => row.plantel === "Sin plantel asignado")).toBe(true);
+
+    const saved = saveIndicator(director, {
+      ...unassigned,
+      plantelIds: [1]
+    });
+
+    expect(saved.plantelScopeSource).toBe("manual");
+    expect(listIndicators(bachillerato16).some((item) => item.code === "1.0.0.0.2")).toBe(true);
     expect(listIndicators(bachillerato4).some((item) => item.code === "1.0.0.0.2")).toBe(false);
+    const template = templateForIndicator(saved, bachillerato16);
+
+    expect(template.initialRows.every((row) => row.plantel === "Bachillerato 16")).toBe(true);
     expect(() =>
       assertCaptureAccess(
         bachillerato16,
-        { plantelId: 1, indicadorId: indicator!.id },
+        {
+          plantelId: 1,
+          indicadorId: saved.id,
+          payload: { rows: template.initialRows, justificacion: "Captura con fuente oficial" }
+        },
+        "submit"
+      )
+    ).not.toThrow();
+    expect(() =>
+      assertCaptureAccess(
+        bachillerato4,
+        { plantelId: 2, indicadorId: saved.id },
         "read"
       )
     ).toThrow(SigiForbiddenError);
+  });
+
+  it("allows director and assigned responsable review only inside official plantel scope", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const indicator = saveIndicator(director, {
+      ...getIndicatorByCode("1.0.0.0.2")!,
+      plantelIds: [1]
+    });
+    const assignedResponsable = sessionFromHeaders({
+      "x-role": "responsable",
+      "x-responsable-id": String(indicator.responsibleIds[0])
+    });
+    const unassignedResponsableId = Array.from({ length: 99 }, (_, index) => index + 1)
+      .find((id) => !indicator.responsibleIds.includes(id))!;
+    const unassignedResponsable = sessionFromHeaders({
+      "x-role": "responsable",
+      "x-responsable-id": String(unassignedResponsableId)
+    });
+
+    expect(() =>
+      assertCaptureAccess(director, { plantelId: 1, indicadorId: indicator.id }, "review")
+    ).not.toThrow();
+    expect(() =>
+      assertCaptureAccess(director, { plantelId: 2, indicadorId: indicator.id }, "review")
+    ).toThrow(SigiForbiddenError);
+    expect(() =>
+      assertCaptureAccess(assignedResponsable, { plantelId: 1, indicadorId: indicator.id }, "review")
+    ).not.toThrow();
+    expect(() =>
+      assertCaptureAccess(assignedResponsable, { plantelId: 2, indicadorId: indicator.id }, "review")
+    ).toThrow(SigiForbiddenError);
+    expect(() =>
+      assertCaptureAccess(unassignedResponsable, { plantelId: 1, indicadorId: indicator.id }, "review")
+    ).toThrow(SigiForbiddenError);
+  });
+
+  it("does not treat manual empty plantel scope as global access", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+
+    expect(() =>
+      saveIndicator(director, {
+        code: "TMP-EMPTY-SCOPE",
+        name: "Indicador temporal sin plantel",
+        dataType: "text",
+        responsibleNames: ["Liliana Yunuen Rojas Maciel"],
+        contributorNames: ["Planteles"],
+        activities: ["Actividad sin plantel"],
+        plantelIds: []
+      })
+    ).toThrow(SigiValidationError);
   });
 
   it("prevents plantel users from reading institutional reports", () => {
@@ -201,20 +291,20 @@ describe("SIGI store and RBAC", () => {
       workbookCount: 39,
       worksheetCount: 53
     });
-    expect(sources.summary.worksheetNonEmptyRows).toBeGreaterThan(2000);
-    expect(sources.evidenceGroups).toHaveLength(18);
+    expect(sources.summary.worksheetNonEmptyRows).toBe(1313);
+    expect(sources.evidenceGroups).toHaveLength(70);
     expect(sources.workbookSummaries).toHaveLength(39);
   });
 
   it("includes official evidence groups in Bachillerato 16 report exports", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const report = buildReportPayload(director, { plantelId: "1", now: new Date("2026-06-12T00:00:00.000Z") });
-    const officialSources = report.indicadores.find((indicator) => indicator.nombre === "Fuentes oficiales cargadas");
+    const officialSources = report.indicadores.find((indicator) => indicator.id === "fuentes-oficiales-cargadas");
 
     expect(officialSources).toBeDefined();
     expect(report.indicadores.every((indicator) => Boolean(indicator.id))).toBe(true);
     expect(report.indicadores.flatMap((indicator) => indicator.datos).every((row) => Boolean(row.registro_id))).toBe(true);
-    expect(officialSources?.datos).toHaveLength(18);
+    expect(officialSources?.datos).toHaveLength(70);
     expect(officialSources?.datos.reduce((total, row) => total + row.evidencias, 0)).toBe(981);
   });
 
@@ -307,16 +397,19 @@ describe("SIGI store and RBAC", () => {
       "x-role": "plantel",
       "x-plantel-id": "1"
     });
-    const indicator = getIndicatorByCode("1.1.2.1.4");
+    const indicator = saveIndicator(director, {
+      ...getIndicatorByCode("1.1.2.1.4")!,
+      plantelIds: [1]
+    });
 
     expect(indicator).toBeDefined();
-    expect(indicator?.activities).toEqual(expect.arrayContaining([
+    expect(indicator.activities).toEqual(expect.arrayContaining([
       "Promoción de la salud",
       "Clínica Universitaria de Atención Psicológica",
       "Número de servicios y acciones de Desarrollo Integral dirigidos al estudiantado"
     ]));
 
-    const template = templateForIndicator(indicator!, director);
+    const template = templateForIndicator(indicator, director);
 
     expect(template.headerRows).toBeDefined();
     expect(template.showTotals).toBe(true);
@@ -333,15 +426,15 @@ describe("SIGI store and RBAC", () => {
       ["ago_ene_hombres", "number"],
       ["ago_ene_total", "calculated"]
     ]);
-    expect(template.initialRows.map((row) => row.actividad)).toEqual(indicator!.activities);
-    expect(template.initialRows.every((row) => row.plantel === "Sin plantel asignado")).toBe(true);
+    expect(template.initialRows.map((row) => row.actividad)).toEqual(indicator.activities);
+    expect(template.initialRows.every((row) => row.plantel === "Bachillerato 16")).toBe(true);
 
     expect(() =>
       assertCaptureAccess(
         plantel,
         {
           plantelId: 1,
-          indicadorId: indicator!.id,
+          indicadorId: indicator.id,
           payload: {
             rows: [{
               ...template.initialRows[0],
@@ -357,19 +450,19 @@ describe("SIGI store and RBAC", () => {
         },
         "draft"
       )
-    ).toThrow(SigiForbiddenError);
+    ).not.toThrow();
 
     expect(() =>
       assertCaptureAccess(
         plantel,
         {
           plantelId: 1,
-          indicadorId: indicator!.id,
+          indicadorId: indicator.id,
           payload: { rows: [{ ...template.initialRows[0], columna_invalida: 1 }] }
         },
         "draft"
       )
-    ).toThrow(SigiForbiddenError);
+    ).toThrow(SigiValidationError);
   });
 
   it("rejects truncated capture rows when sending to review", () => {
@@ -464,21 +557,24 @@ describe("SIGI store and RBAC", () => {
     ];
 
     cases.forEach(({ code, expectedKeys, sampleValues }) => {
-      const indicator = getIndicatorByCode(code);
+      const indicator = saveIndicator(director, {
+        ...getIndicatorByCode(code)!,
+        plantelIds: [1]
+      });
       expect(indicator).toBeDefined();
 
-      const template = templateForIndicator(indicator!, director);
+      const template = templateForIndicator(indicator, director);
       const keys = template.columns.map((column) => column.key);
 
       expectedKeys.forEach((key) => expect(keys).toContain(key));
-      expect(template.initialRows.length).toBe(indicator!.activities.length);
+      expect(template.initialRows.length).toBe(indicator.activities.length);
 
       expect(() =>
         assertCaptureAccess(
           plantel,
           {
             plantelId: 1,
-            indicadorId: indicator!.id,
+            indicadorId: indicator.id,
             payload: {
               rows: [{
                 ...template.initialRows[0],
@@ -488,23 +584,23 @@ describe("SIGI store and RBAC", () => {
           },
           "draft"
         )
-      ).toThrow(SigiForbiddenError);
+      ).not.toThrow();
 
       expect(() =>
         assertCaptureAccess(
           plantel,
           {
             plantelId: 1,
-            indicadorId: indicator!.id,
+            indicadorId: indicator.id,
             payload: { rows: [{ ...template.initialRows[0], columna_inventada: 1 }] }
           },
           "draft"
         )
-      ).toThrow(SigiForbiddenError);
+      ).toThrow(SigiValidationError);
     });
   });
 
-  it("generates a readable unassigned template for every official indicator", () => {
+  it("generates a readable unassigned template and enables capture after explicit plantel assignment", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const plantel = sessionFromHeaders({
       "x-role": "plantel",
@@ -538,6 +634,28 @@ describe("SIGI store and RBAC", () => {
           "draft"
         )
       ).toThrow(SigiForbiddenError);
+
+      const assigned = saveIndicator(director, {
+        ...indicator,
+        plantelIds: [1]
+      });
+      const assignedTemplate = templateForIndicator(assigned, plantel);
+
+      if (assignedTemplate.columns.some((column) => column.key === "plantel")) {
+        expect(assignedTemplate.initialRows.every((row) => row.plantel === "Bachillerato 16"), indicator.code).toBe(true);
+      }
+
+      expect(() =>
+        assertCaptureAccess(
+          plantel,
+          {
+            plantelId: 1,
+            indicadorId: assigned.id,
+            payload: { rows: [assignedTemplate.initialRows[0]] }
+          },
+          "draft"
+        )
+      ).not.toThrow();
     });
   });
 

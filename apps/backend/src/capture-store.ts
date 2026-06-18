@@ -41,12 +41,10 @@ export type CaptureDraftRequest = {
   motivoCambio?: string;
 };
 
-const persistedCaptureDrafts = readPersistedCollection<CaptureDraft>("captureDrafts");
-const captureDrafts = new Map<number, CaptureDraft>(
-  (persistedCaptureDrafts ?? []).map((capture) => [capture.id, capture])
-);
-let nextCaptureId = readPersistedValue<number>("nextCaptureId") ??
-  Math.max(0, ...Array.from(captureDrafts.keys())) + 1;
+const captureDrafts = new Map<number, CaptureDraft>();
+let nextCaptureId = 1;
+
+reloadCaptureDraftsFromState();
 
 function nowIso() {
   return new Date().toISOString();
@@ -81,6 +79,18 @@ export function isCapturePayload(value: unknown): value is CapturePayload {
 export function resetCaptureDraftsForTest() {
   captureDrafts.clear();
   nextCaptureId = 1;
+}
+
+export function reloadCaptureDraftsFromState() {
+  const persistedCaptureDrafts = readPersistedCollection<CaptureDraft>("captureDrafts") ?? [];
+  captureDrafts.clear();
+
+  for (const capture of persistedCaptureDrafts) {
+    captureDrafts.set(capture.id, capture);
+  }
+
+  nextCaptureId = readPersistedValue<number>("nextCaptureId") ??
+    Math.max(0, ...Array.from(captureDrafts.keys())) + 1;
 }
 
 export function createCaptureDraft(request: CaptureDraftRequest): CaptureDraft {

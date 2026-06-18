@@ -1,5 +1,8 @@
 import { apiJson } from './client';
-import { officialCatalogRows } from '../catalog/officialCatalog.generated';
+import {
+  officialCatalogRows,
+  officialIndicatorPlantelScopes,
+} from '../catalog/officialCatalog.generated';
 import type { ColumnConfig, IndicatorTemplate } from '../components/forms/formConfig';
 
 export type CatalogRole = 'director' | 'responsable' | 'plantel';
@@ -90,7 +93,11 @@ export async function saveIndicator(input: Partial<CatalogIndicator>) {
     });
     mergeIndicator(response);
     return response;
-  } catch {
+  } catch (error) {
+    if (!shouldUseLocalWriteFallback(error)) {
+      throw catalogWriteError(error, 'No se pudo guardar el indicador.');
+    }
+
     const current = readStorage(INDICATORS_STORAGE_KEY, fallbackIndicators);
     const existing = current.find((indicator) => indicator.id === input.id || indicator.code === input.code);
     const next: CatalogIndicator = {
@@ -121,7 +128,11 @@ export async function deactivateIndicator(id: number) {
     const response = await apiJson<CatalogIndicator>(`/indicadores/${id}/desactivar`, { method: 'PATCH' });
     mergeIndicator(response);
     return response;
-  } catch {
+  } catch (error) {
+    if (!shouldUseLocalWriteFallback(error)) {
+      throw catalogWriteError(error, 'No se pudo desactivar el indicador.');
+    }
+
     const current = readStorage(INDICATORS_STORAGE_KEY, fallbackIndicators);
     const updated = current.map((indicator) => (indicator.id === id ? { ...indicator, active: false } : indicator));
     writeStorage(INDICATORS_STORAGE_KEY, updated);
@@ -184,7 +195,11 @@ export async function saveUser(input: Partial<CatalogUser>) {
     });
     mergeUser(response);
     return response;
-  } catch {
+  } catch (error) {
+    if (!shouldUseLocalWriteFallback(error)) {
+      throw catalogWriteError(error, 'No se pudo guardar el usuario.');
+    }
+
     const next: CatalogUser = {
       id: existing?.id ?? input.id ?? `user-${Date.now()}`,
       name: input.name?.trim() || existing?.name || 'Usuario',
@@ -205,7 +220,11 @@ export async function deactivateUser(id: string) {
     const response = await apiJson<CatalogUser>(`/usuarios/${encodeURIComponent(id)}/desactivar`, { method: 'PATCH' });
     mergeUser(response);
     return response;
-  } catch {
+  } catch (error) {
+    if (!shouldUseLocalWriteFallback(error)) {
+      throw catalogWriteError(error, 'No se pudo desactivar el usuario.');
+    }
+
     const current = readStorage(USERS_STORAGE_KEY, fallbackUsers);
     const updated = current.map((user) => (user.id === id ? { ...user, active: false } : user));
     writeStorage(USERS_STORAGE_KEY, updated);
@@ -245,7 +264,7 @@ function buildFallbackIndicators(): CatalogIndicator[] {
       responsibleNames: [row.responsible],
       contributorNames: contributors,
       activities: [row.activity || 'Actividad general'],
-      plantelIds: [...officialSourcePlantelIds],
+      plantelIds: officialIndicatorPlantelScopes[row.code] ?? [...officialSourcePlantelIds],
     });
   });
 
@@ -1017,6 +1036,18 @@ function readStorage<T>(key: string, fallback: T) {
   } catch {
     return fallback;
   }
+}
+
+function shouldUseLocalWriteFallback(error: unknown) {
+  return error instanceof Error && error.message === 'api_unavailable';
+}
+
+function catalogWriteError(error: unknown, fallbackMessage: string) {
+  if (error instanceof Error && error.message.startsWith('api_error_')) {
+    return new Error(`${fallbackMessage} Codigo ${error.message.replace('api_error_', '')}.`);
+  }
+
+  return error instanceof Error ? error : new Error(fallbackMessage);
 }
 
 function writeStorage<T>(key: string, value: T) {
