@@ -3,7 +3,6 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { Pool } from "pg";
 import { loadLocalEnv } from "./config.js";
 
 type PersistedState = Record<string, unknown>;
@@ -31,7 +30,7 @@ const stateFilePath = configuredStateFile
       : path.resolve(process.cwd(), "data", "sigi-state.json");
 
 let cachedState: PersistedState = loadStateFromDisk();
-let pool: Pool | undefined;
+let pool: import("pg").Pool | undefined;
 let hydratedFromDatabase = false;
 let hydratePromise: Promise<void> | undefined;
 let pendingDatabaseWrite: Promise<void> | undefined;
@@ -124,7 +123,7 @@ function loadStateFromDisk(): PersistedState {
 }
 
 async function readStateFromDatabase(): Promise<PersistedState> {
-  const client = getPool();
+  const client = await getPool();
   await ensureStateTable(client);
   const result = await client.query<{ key: string; value: unknown }>(
     "select key, value from app_state"
@@ -134,7 +133,7 @@ async function readStateFromDatabase(): Promise<PersistedState> {
 }
 
 async function writeStateToDatabase(state: PersistedState) {
-  const client = getPool();
+  const client = await getPool();
   await ensureStateTable(client);
   await Promise.all(
     Object.entries(state).map(([key, value]) =>
@@ -148,7 +147,7 @@ async function writeStateToDatabase(state: PersistedState) {
   );
 }
 
-async function ensureStateTable(client: Pool) {
+async function ensureStateTable(client: import("pg").Pool) {
   await client.query(`
     create table if not exists app_state (
       key text primary key,
@@ -158,11 +157,12 @@ async function ensureStateTable(client: Pool) {
   `);
 }
 
-function getPool() {
+async function getPool() {
   if (!databaseUrl) {
     throw new Error("DATABASE_URL is not configured.");
   }
 
+  const { Pool } = await import("pg");
   pool ??= new Pool({
     connectionString: databaseUrl,
     ssl: shouldUseSsl(databaseUrl) ? { rejectUnauthorized: false } : undefined
