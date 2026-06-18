@@ -1,5 +1,4 @@
-import { useMemo } from 'react';
-import { useEffect } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -217,6 +216,22 @@ const totalForColumn = (rows: Record<string, unknown>[] | undefined, column: Col
   return formatCalculatedValue(total);
 };
 
+function hasTouchedFields(value: unknown): boolean {
+  if (value === true) {
+    return true;
+  }
+
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  if (Array.isArray(value)) {
+    return value.some(hasTouchedFields);
+  }
+
+  return Object.values(value).some(hasTouchedFields);
+}
+
 export const IndicatorForm = ({
   template,
   initialData,
@@ -242,7 +257,7 @@ export const IndicatorForm = ({
     register,
     control,
     handleSubmit,
-    formState: { errors, isDirty, isValid },
+    formState: { errors, isValid, touchedFields },
     reset,
   } = useForm<FormData>({
     resolver: zodResolver(dynamicSchema),
@@ -260,14 +275,21 @@ export const IndicatorForm = ({
   const watchedEvidencia = useWatch({ control, name: 'evidencia' }) as FileList | undefined;
   const evidenciaInputId = `evidencia-${template.indicatorCode.replace(/[^a-zA-Z0-9]+/g, '-')}`;
   const justificacionInputId = `justificacion-${template.indicatorCode.replace(/[^a-zA-Z0-9]+/g, '-')}`;
+  const initialDataSignature = useMemo(
+    () => JSON.stringify({ rows: initialData, justificacion: initialJustificacion ?? '' }),
+    [initialData, initialJustificacion]
+  );
+  const lastAppliedInitialDataSignature = useRef<string | undefined>(undefined);
+  const hasUserTouchedFields = hasTouchedFields(touchedFields);
 
   useEffect(() => {
-    if (isDirty) {
+    if (lastAppliedInitialDataSignature.current === initialDataSignature || hasUserTouchedFields) {
       return;
     }
 
     reset({ rows: initialData, justificacion: initialJustificacion ?? '' });
-  }, [initialData, initialJustificacion, isDirty, reset]);
+    lastAppliedInitialDataSignature.current = initialDataSignature;
+  }, [hasUserTouchedFields, initialData, initialDataSignature, initialJustificacion, reset]);
 
   const toSubmission = (data: FormData): FormSubmission => ({
     rows: data.rows.map((row) =>
