@@ -20,6 +20,7 @@ type StoredSession = {
   role?: string;
   plantelId?: number;
   responsableId?: number;
+  sessionToken?: string;
 };
 
 function readStoredSession(): StoredSession {
@@ -37,8 +38,15 @@ function readStoredSession(): StoredSession {
 export function sessionHeaders() {
   const session = readStoredSession();
   const role = session.role ?? import.meta.env.VITE_ROLE ?? 'plantel';
+  const headers: Record<string, string> = {};
+
+  if (session.sessionToken) {
+    headers.Authorization = `Bearer ${session.sessionToken}`;
+    headers['x-session-token'] = session.sessionToken;
+  }
 
   return {
+    ...headers,
     'x-user-id': session.id ?? import.meta.env.VITE_USER_ID ?? defaultUserId(role),
     'x-role': role,
     'x-plantel-id': String(session.plantelId ?? import.meta.env.VITE_PLANTEL_ID ?? 1),

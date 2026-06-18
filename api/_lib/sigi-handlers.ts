@@ -64,7 +64,7 @@ export async function handleLogin(request: RequestLike, response: any) {
       return;
     }
 
-    sendJson(response, 200, { user });
+    sendJson(response, 200, { user, sessionToken: sigi.createSessionToken(user) });
   } catch (error) {
     if (!sendKnownError(response, error)) {
       sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON valido." });

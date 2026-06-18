@@ -26,6 +26,8 @@ FRONTEND_DATA_TARGET = REPO_ROOT / "apps/frontend/src/catalog/officialData.gener
 
 CODE_RE = re.compile(r"\b\d+(?:\.\d+){3,}\b")
 PLANTEL_RE = re.compile(r"\bBACH(?:ILLERATO)?\s*\.?\s*(\d+)\b|\bBachillerato\s+(\d+)\b", re.I)
+EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+", re.I)
+CONTACT_RE = re.compile(r"\b(?:ext\.?|extension|tel(?:efono)?\.?|celular|correo)\b", re.I)
 MOJIBAKE_MARKERS = ("\u00c3", "\u00c2", "\u00e2", "\ufffd")
 HEADER_TOKENS = {
     "accion",
@@ -55,6 +57,43 @@ HEADER_TOKENS = {
     "seguimiento",
     "semestre",
     "total",
+}
+
+READONLY_TOKENS = {
+    "actividad",
+    "delegacion",
+    "plantel",
+    "programa",
+    "semestre",
+    "turno",
+}
+
+NUMBER_TOKENS = {
+    "alumna",
+    "alumno",
+    "avance",
+    "cantidad",
+    "hombre",
+    "meta",
+    "mujer",
+    "numero",
+    "participante",
+    "porcentaje",
+    "total",
+}
+
+PRIVATE_TOKENS = {
+    "correo",
+    "curp",
+    "cuenta",
+    "director",
+    "email",
+    "extension",
+    "nombre",
+    "profesor",
+    "responsable",
+    "telefono",
+    "trabajador",
 }
 
 
@@ -135,6 +174,64 @@ def catalog_rows() -> tuple[list[dict[str, Any]], dict[str, Any]]:
     return rows, stats
 
 
+def extend_rows_with_workbook_indicators(
+    rows: list[dict[str, Any]],
+    workbook_templates: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
+    existing_codes = {row["code"] for row in rows if row["code"]}
+    next_source_row = max((row["sourceRow"] for row in rows), default=1) + 1
+    extended = list(rows)
+
+    for code, template in sorted(workbook_templates.items(), key=lambda item: normalize_key(item[0])):
+        if code in existing_codes:
+            continue
+
+        name = clean_text(template.get("indicatorName")) or f"Indicador oficial {code}"
+        activity = clean_text(template.get("sourceLabel")) or "Actividad oficial importada"
+        dedupe_key = "\u241f".join((code, name, "Pendiente de asignar", "Planteles", activity))
+        extended.append(
+            {
+                "sourceRow": next_source_row,
+                "code": code,
+                "name": name,
+                "responsible": "Pendiente de asignar",
+                "contributors": "Planteles",
+                "activity": activity,
+                "dedupeKey": hashlib.sha256(dedupe_key.encode("utf-8")).hexdigest()[:16],
+                "isDuplicate": False,
+                "duplicateOfSourceRow": None,
+                "dataQuality": ["workbook_only_indicator"],
+            }
+        )
+        next_source_row += 1
+
+    return extended
+
+
+def catalog_stats(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    contributors = sorted(
+        {
+            person.strip()
+            for row in rows
+            for person in row["contributors"].split(",")
+            if person.strip()
+        },
+        key=lambda item: item.casefold(),
+    )
+
+    return {
+        "sourceRows": len(rows),
+        "uniqueRows": len({row["dedupeKey"] for row in rows}),
+        "duplicateRows": sum(1 for row in rows if row["isDuplicate"]),
+        "uniqueIndicators": len({row["code"] for row in rows if row["code"]}),
+        "uniqueResponsibles": len({row["responsible"] for row in rows if row["responsible"]}),
+        "uniqueContributors": len(contributors),
+        "uniqueActivities": len({row["activity"] for row in rows if row["activity"]}),
+        "blankActivities": sum(1 for row in rows if not row["activity"]),
+        "workbookOnlyIndicators": sum(1 for row in rows if "workbook_only_indicator" in row["dataQuality"]),
+    }
+
+
 def frontend_catalog_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     aliases = person_aliases(rows)
     sanitized = []
@@ -182,11 +279,18 @@ def catalog_plantel_scopes(rows: list[dict[str, Any]], detected_scopes: dict[str
     }
 
 
-def workbook_summaries() -> tuple[list[dict[str, Any]], dict[str, list[int]], list[dict[str, Any]], list[dict[str, Any]]]:
+def workbook_summaries() -> tuple[
+    list[dict[str, Any]],
+    dict[str, list[int]],
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+    dict[str, dict[str, Any]],
+]:
     summaries: list[dict[str, Any]] = []
     evidence_groups: dict[str, dict[str, Any]] = {}
     scopes: dict[str, set[int]] = defaultdict(set)
     template_candidates: list[dict[str, Any]] = []
+    workbook_templates: dict[str, dict[str, Any]] = {}
 
     if not NESTED_ZIP.exists():
         return summaries, {}, [], []
@@ -236,6 +340,9 @@ def workbook_summaries() -> tuple[list[dict[str, Any]], dict[str, list[int]], li
                         "headerRows": first_header_rows(sheets),
                     }
                 )
+                table_template = template_from_workbook_sheets(code, sheets, info.filename)
+                if table_template and code not in workbook_templates:
+                    workbook_templates[code] = table_template
 
             summaries.append(
                 {
@@ -270,6 +377,7 @@ def workbook_summaries() -> tuple[list[dict[str, Any]], dict[str, list[int]], li
         {code: sorted(ids) for code, ids in scopes.items()},
         sorted(groups, key=lambda item: item["category"].casefold()),
         template_candidates,
+        workbook_templates,
     )
 
 
@@ -281,12 +389,14 @@ def summarize_sheet(sheet: Any) -> dict[str, Any]:
     text_cells = 0
     formula_cells = 0
     header_rows: list[list[str]] = []
+    non_empty_rows: list[dict[str, Any]] = []
+    code_descriptions: list[str] = []
     columns_observed = 0
 
     max_row = min(sheet.max_row or 80, 120)
     max_col = min(sheet.max_column or 30, 30)
 
-    for row in sheet.iter_rows(min_row=1, max_row=max_row, max_col=max_col, values_only=False):
+    for row_number, row in enumerate(sheet.iter_rows(min_row=1, max_row=max_row, max_col=max_col, values_only=False), start=1):
         values = [clean_text(cell.value) for cell in row]
         non_empty = [value for value in values if value]
         if not non_empty:
@@ -296,7 +406,11 @@ def summarize_sheet(sheet: Any) -> dict[str, Any]:
             if value:
                 columns_observed = max(columns_observed, column_index)
         row_text = " ".join(non_empty)
-        codes.update(CODE_RE.findall(row_text))
+        non_empty_rows.append({"row": row_number, "values": trim_trailing_blanks(values)})
+        row_codes = CODE_RE.findall(row_text)
+        codes.update(row_codes)
+        if row_codes and len(code_descriptions) < 5:
+            code_descriptions.append(row_text)
         for match in PLANTEL_RE.finditer(row_text):
             number = match.group(1) or match.group(2)
             if number:
@@ -323,9 +437,119 @@ def summarize_sheet(sheet: Any) -> dict[str, Any]:
         "numericCells": numeric_cells,
         "textCells": text_cells,
         "formulaCells": formula_cells,
+        "table": extract_table_from_rows(non_empty_rows),
+        "codeDescriptions": code_descriptions,
         "codes": codes,
         "planteles": planteles,
     }
+
+
+def trim_trailing_blanks(values: list[str]) -> list[str]:
+    trimmed = list(values)
+    while trimmed and not trimmed[-1]:
+        trimmed.pop()
+    return trimmed
+
+
+def extract_table_from_rows(rows: list[dict[str, Any]]) -> dict[str, Any] | None:
+    if not rows:
+        return None
+
+    best_index = -1
+    best_score = 0
+    for index, row in enumerate(rows):
+        values = row["values"]
+        normalized = " ".join(normalize_key(value) for value in values if value)
+        token_score = sum(1 for token in HEADER_TOKENS if token in normalized)
+        width_score = min(4, len([value for value in values if value]))
+        score = token_score * 3 + width_score
+        if score > best_score and token_score >= 1 and width_score >= 2:
+            best_index = index
+            best_score = score
+
+    if best_index < 0:
+        return None
+
+    header_values = rows[best_index]["values"]
+    width = len(header_values)
+    columns = []
+    seen_keys: set[str] = set()
+    for index, label in enumerate(header_values):
+        if not label:
+            label = f"Columna {index + 1}"
+        columns.append(column_from_label(label, seen_keys))
+
+    initial_rows = []
+    for row in rows[best_index + 1:]:
+        values = row["values"][:width]
+        if not any(values):
+            continue
+        normalized = normalize_key(" ".join(values))
+        if "nota" in normalized and len(values) <= 2:
+            continue
+
+        row_object: dict[str, Any] = {}
+        for column, value in zip(columns, values + [""] * (width - len(values))):
+            row_object[column["key"]] = value_for_column(column, value)
+        if any(value not in ("", None) for value in row_object.values()):
+            initial_rows.append(row_object)
+        if len(initial_rows) >= 60:
+            break
+
+    if not initial_rows:
+        initial_rows = [{column["key"]: "" for column in columns}]
+
+    return {
+        "headerRow": rows[best_index]["row"],
+        "columns": columns,
+        "initialRows": initial_rows,
+    }
+
+
+def column_from_label(label: str, seen_keys: set[str]) -> dict[str, Any]:
+    normalized = normalize_key(label)
+    key = normalized.replace(" ", "_")[:48] or "columna"
+    counter = 2
+    base_key = key
+    while key in seen_keys:
+        key = f"{base_key}_{counter}"
+        counter += 1
+    seen_keys.add(key)
+
+    if any(token in normalized for token in READONLY_TOKENS):
+        column_type = "readonly"
+    elif any(token in normalized for token in NUMBER_TOKENS):
+        column_type = "number"
+    else:
+        column_type = "text"
+
+    return {
+        "key": key,
+        "label": label,
+        "type": column_type,
+        "private": any(token in normalized for token in PRIVATE_TOKENS),
+    }
+
+
+def value_for_column(column: dict[str, Any], value: str) -> Any:
+    if column.get("private"):
+        return ""
+
+    if is_private_cell_value(value):
+        return ""
+
+    if column["type"] == "number":
+        normalized = value.replace(",", "").replace("%", "").strip()
+        try:
+            return float(normalized) if normalized else ""
+        except ValueError:
+            return ""
+
+    return value
+
+
+def is_private_cell_value(value: str) -> bool:
+    return bool(EMAIL_RE.search(value) or CONTACT_RE.search(value))
 
 
 def sanitize_header_row(values: list[str]) -> list[str]:
@@ -381,6 +605,82 @@ def frontend_template_candidates(candidates: list[dict[str, Any]]) -> list[dict[
     ]
 
 
+def template_from_workbook_sheets(code: str, sheets: list[dict[str, Any]], source_path: str) -> dict[str, Any] | None:
+    table_sheets = [sheet for sheet in sheets if sheet.get("table")]
+    if not table_sheets:
+        return None
+
+    selected = max(
+        table_sheets,
+        key=lambda sheet: (
+            len(sheet["table"]["initialRows"]),
+            len(sheet["table"]["columns"]),
+            sheet.get("formulaCells", 0),
+        ),
+    )
+    table = selected["table"]
+    columns = [
+        {key: value for key, value in column.items() if key != "private"}
+        for column in table["columns"]
+    ]
+    source_label = unicodedata.normalize("NFC", Path(source_path).name)
+
+    return {
+        "indicatorCode": code,
+        "indicatorName": indicator_name_from_sources(code, sheets, source_label),
+        "sourceLabel": source_label,
+        "sourcePath": unicodedata.normalize("NFC", source_path),
+        "sheetName": selected["name"],
+        "groups": [
+            {
+                "label": "Formato oficial importado",
+                "colspan": max(len(columns), 1),
+            }
+        ],
+        "columns": columns,
+        "initialRows": table["initialRows"],
+        "showTotals": any(column["type"] == "number" for column in columns),
+        "allowAddRows": True,
+        "addRowLabel": "Agregar fila",
+        "emptyRow": empty_row_for_columns(columns),
+        "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+        "quality": [
+            "source_workbook_template",
+            "private_fields_blank",
+        ],
+    }
+
+
+def indicator_name_from_sources(code: str, sheets: list[dict[str, Any]], fallback: str) -> str:
+    for sheet in sheets:
+        for description in sheet.get("codeDescriptions", []):
+            if code not in description:
+                continue
+            cleaned = re.sub(r"(?i)^.*indicador\s*:?\s*", "", description).strip()
+            cleaned = cleaned.replace(code, "").strip(" .:-")
+            if cleaned:
+                return cleaned[:180]
+
+    return re.sub(r"\.xlsx$", "", fallback, flags=re.I)
+
+
+def empty_row_for_columns(columns: list[dict[str, Any]]) -> dict[str, Any]:
+    return {
+        column["key"]: ""
+        for column in columns
+    }
+
+
+def frontend_workbook_templates(templates: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    sanitized: dict[str, dict[str, Any]] = {}
+    for code, template in templates.items():
+        next_template = dict(template)
+        next_template["sourcePath"] = "private-workbook"
+        next_template["sourceLabel"] = f"Formato oficial {code}"
+        sanitized[code] = next_template
+    return sanitized
+
+
 def classify_workbook(sheets: list[dict[str, Any]]) -> str:
     text = normalize_key(" ".join(" ".join(row) for sheet in sheets for row in sheet.get("headerRows", [])))
     if "mujer" in text and "hombre" in text and "total" in text:
@@ -430,6 +730,7 @@ def generate_data_file(
     summaries: list[dict[str, Any]],
     evidence_groups: list[dict[str, Any]],
     template_candidates: list[dict[str, Any]],
+    workbook_templates: dict[str, dict[str, Any]],
     *,
     frontend: bool = False,
 ) -> str:
@@ -471,6 +772,17 @@ export type OfficialWorkbookSheetSummary = {{
   numericCells: number;
   textCells: number;
   formulaCells: number;
+  table?: {{
+    headerRow: number;
+    columns: Array<{{
+      key: string;
+      label: string;
+      type: "readonly" | "number" | "text";
+      private?: boolean;
+    }}>;
+    initialRows: Array<Record<string, unknown>>;
+  }} | null;
+  codeDescriptions: string[];
 }};
 
 export type OfficialWorkbookSummary = {{
@@ -495,6 +807,27 @@ export type OfficialTemplateCandidate = {{
   headerRows: string[][];
 }};
 
+export type OfficialWorkbookTemplate = {{
+  indicatorCode: string;
+  indicatorName: string;
+  sourceLabel: string;
+  sourcePath: string;
+  sheetName: string;
+  groups: Array<{{ label: string; colspan: number }}>;
+  columns: Array<{{
+    key: string;
+    label: string;
+    type: "readonly" | "number" | "text";
+  }}>;
+  initialRows: Array<Record<string, unknown>>;
+  showTotals: boolean;
+  allowAddRows: boolean;
+  addRowLabel: string;
+  emptyRow: Record<string, unknown>;
+  footerNote: string;
+  quality: string[];
+}};
+
 export type OfficialDataSummary = {{
   sourcePackage: string;
   plantel: string;
@@ -514,6 +847,8 @@ export const officialEvidenceGroups: OfficialEvidenceGroup[] = {json_ts(evidence
 
 export const officialTemplateCandidates: OfficialTemplateCandidate[] = {json_ts(template_candidates)};
 
+export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate> = {json_ts(workbook_templates)};
+
 export const officialWorkbookSummaries: OfficialWorkbookSummary[] = {json_ts(summaries)};
 """
 
@@ -521,17 +856,20 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = {json_ts(sum
 def main() -> None:
     if not CATALOG_XLSX.exists():
         raise FileNotFoundError(CATALOG_XLSX)
-    rows, stats = catalog_rows()
-    summaries, detected_scopes, evidence_groups, template_candidates = workbook_summaries()
+    rows, _stats = catalog_rows()
+    summaries, detected_scopes, evidence_groups, template_candidates, workbook_templates = workbook_summaries()
+    rows = extend_rows_with_workbook_indicators(rows, workbook_templates)
+    stats = catalog_stats(rows)
     scopes = catalog_plantel_scopes(rows, detected_scopes)
 
     backend_catalog_text = generate_catalog_file(rows, stats, scopes)
     frontend_catalog_text = generate_catalog_file(frontend_catalog_rows(rows), stats, scopes)
-    backend_data_text = generate_data_file(summaries, evidence_groups, template_candidates)
+    backend_data_text = generate_data_file(summaries, evidence_groups, template_candidates, workbook_templates)
     frontend_data_text = generate_data_file(
         frontend_workbook_summaries(summaries),
         evidence_groups,
         frontend_template_candidates(template_candidates),
+        frontend_workbook_templates(workbook_templates),
         frontend=True,
     )
 
@@ -540,7 +878,12 @@ def main() -> None:
     write_text(BACKEND_DATA_TARGET, backend_data_text)
     write_text(FRONTEND_DATA_TARGET, frontend_data_text)
 
-    print(json.dumps({"catalog": stats, "workbooks": len(summaries), "scopedIndicators": len(scopes)}, ensure_ascii=False))
+    print(json.dumps({
+        "catalog": stats,
+        "workbooks": len(summaries),
+        "scopedIndicators": len(scopes),
+        "workbookTemplates": len(workbook_templates),
+    }, ensure_ascii=False))
 
 
 if __name__ == "__main__":

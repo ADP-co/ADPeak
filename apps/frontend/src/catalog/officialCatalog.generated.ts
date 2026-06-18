@@ -15,17 +15,40 @@ export type OfficialCatalogRow = {
 };
 
 export const officialCatalogStats = {
-  "sourceRows": 99,
-  "uniqueRows": 88,
+  "sourceRows": 106,
+  "uniqueRows": 95,
   "duplicateRows": 11,
-  "uniqueIndicators": 48,
-  "uniqueResponsibles": 18,
-  "uniqueContributors": 22,
-  "uniqueActivities": 68,
-  "blankActivities": 3
+  "uniqueIndicators": 55,
+  "uniqueResponsibles": 19,
+  "uniqueContributors": 23,
+  "uniqueActivities": 73,
+  "blankActivities": 3,
+  "workbookOnlyIndicators": 7
 } as const;
 
-export const officialIndicatorPlantelScopes: Record<string, number[]> = {};
+export const officialIndicatorPlantelScopes: Record<string, number[]> = {
+  "1.1.1.3.2": [
+    1
+  ],
+  "1.1.1.3.3": [
+    1
+  ],
+  "1.1.1.5.1": [
+    1
+  ],
+  "1.1.1.5.2": [
+    1
+  ],
+  "1.1.2.1.8": [
+    1
+  ],
+  "1.1.3.0.3": [
+    1
+  ],
+  "1.1.4.4.4": [
+    1
+  ]
+};
 
 export const officialCatalogRows: OfficialCatalogRow[] = [
   {
@@ -284,8 +307,8 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     "sourceRow": 23,
     "code": "1.1.2.2.1",
     "name": "Porcentaje de estudiantes de educación media superior atendidos en acciones de reforzamiento, asesoría y nivelación académica.",
-    "responsible": "Responsable 23",
-    "contributors": "Responsable 23",
+    "responsible": "Responsable 25",
+    "contributors": "Responsable 25",
     "activity": "Concursos de conocimientos",
     "dedupeKey": "b158086091e10615",
     "isDuplicate": false,
@@ -816,8 +839,8 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     "sourceRow": 67,
     "code": "2.1.4.1.3",
     "name": "Porcentaje del estudiantado que participa en programas que fomentan el desarrollo de vocaciones científicas y tecnológicas",
-    "responsible": "Responsable 23",
-    "contributors": "Responsable 23",
+    "responsible": "Responsable 25",
+    "contributors": "Responsable 25",
     "activity": "Semana de Vinculación Académica para las Juventudes de Educación Media Superior, Expo ciencia del NMS en las áreas de ciencias experimentales",
     "dedupeKey": "7ee11271c8f3ae4c",
     "isDuplicate": false,
@@ -1118,8 +1141,8 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     "sourceRow": 92,
     "code": "4.1.3.2.4",
     "name": "Porcentaje de cobertura institucional de gestión del riesgo y atención de emergencias",
-    "responsible": "Responsable 23",
-    "contributors": "Responsable 23",
+    "responsible": "Responsable 25",
+    "contributors": "Responsable 25",
     "activity": "Programa Interno de Protección Civil",
     "dedupeKey": "7a2fa9ce7f3aa080",
     "isDuplicate": false,
@@ -1131,7 +1154,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     "code": "4.1.3.2.4",
     "name": "Porcentaje de cobertura institucional de gestión del riesgo y atención de emergencias",
     "responsible": "Responsable 10",
-    "contributors": "Responsable 10, Responsable 23",
+    "contributors": "Responsable 10, Responsable 25",
     "activity": "Programa Interno de Protección Civil",
     "dedupeKey": "cd597eeaa6e02109",
     "isDuplicate": false,
@@ -1142,8 +1165,8 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     "sourceRow": 94,
     "code": "4.1.3.2.4",
     "name": "Porcentaje de cobertura institucional de gestión del riesgo y atención de emergencias",
-    "responsible": "Responsable 23",
-    "contributors": "Responsable 23",
+    "responsible": "Responsable 25",
+    "contributors": "Responsable 25",
     "activity": "Programa Interno de Protección Civil",
     "dedupeKey": "7a2fa9ce7f3aa080",
     "isDuplicate": true,
@@ -1221,5 +1244,103 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": []
+  },
+  {
+    "sourceRow": 101,
+    "code": "1.1.1.3.2",
+    "name": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS: Número de personal de apoyo académico de NMS y NS que reciben ca",
+    "responsible": "Responsable 23",
+    "contributors": "Responsable 24",
+    "activity": "Formación_docente.xlsx",
+    "dedupeKey": "a8ece0d92de58e16",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 102,
+    "code": "1.1.1.3.3",
+    "name": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS: 1.1.1.3.2 Número de personal de apoyo académico de NMS y NS que r",
+    "responsible": "Responsable 23",
+    "contributors": "Responsable 24",
+    "activity": "Formación_docente.xlsx",
+    "dedupeKey": "4f0fbc05782bea00",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 103,
+    "code": "1.1.1.5.1",
+    "name": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS: 1.1.1.3.2 Número de personal de apoyo académico de NMS y NS que r",
+    "responsible": "Responsable 23",
+    "contributors": "Responsable 24",
+    "activity": "Formación_docente.xlsx",
+    "dedupeKey": "75cffa4f46eeb4fe",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 104,
+    "code": "1.1.1.5.2",
+    "name": "La tabla anterior incide en la siguiente línea de acción del informe de labores de la DGEMS y planteles de NMS: Número de personal de apoyo académico de NMS y NS que recibe capaci",
+    "responsible": "Responsable 23",
+    "contributors": "Responsable 24",
+    "activity": "Formación_apoyo académico.xlsx",
+    "dedupeKey": "976af2ab99f3a025",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 105,
+    "code": "1.1.2.1.8",
+    "name": "Porcentaje de titulación por cohorte del NMS",
+    "responsible": "Responsable 23",
+    "contributors": "Responsable 24",
+    "activity": "INDICADOR DE TITULACION 2025.xlsx",
+    "dedupeKey": "9ea3441ebc9ed980",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 106,
+    "code": "1.1.3.0.3",
+    "name": "Porcentaje de estudiantes de NMS participantes en las actividades de desarrollo y formación integral",
+    "responsible": "Responsable 23",
+    "contributors": "Responsable 24",
+    "activity": "JORNADA POR LA PAZ Y CONTRA LAS ADICCIONES FEB-AGO25.xlsx",
+    "dedupeKey": "a36722d0322ae214",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 107,
+    "code": "1.1.4.4.4",
+    "name": "Número de estudiantes de NMS y NS participando en acciones de internacionalización",
+    "responsible": "Responsable 23",
+    "contributors": "Responsable 24",
+    "activity": "Formato_Indicador de internacionalización.xlsx",
+    "dedupeKey": "b9405a3b39c8515d",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "workbook_only_indicator"
+    ]
   }
 ];

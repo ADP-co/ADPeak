@@ -838,7 +838,7 @@ function repairMojibake(value: string) {
 }
 
 function repairMojibakeOnce(value: string) {
-  if (!/[ÃÂâ�]/.test(value)) {
+  if (!/[\u00c3\u00c2\u00e2\ufffd]/.test(value)) {
     return value;
   }
 
@@ -861,7 +861,7 @@ function repairMojibakeOnce(value: string) {
 }
 
 function mojibakeScore(value: string) {
-  return (value.match(/[ÃÂâ�]/g) ?? []).length;
+  return (value.match(/[\u00c3\u00c2\u00e2\ufffd]/g) ?? []).length;
 }
 
 function stripDiacritics(value: string) {

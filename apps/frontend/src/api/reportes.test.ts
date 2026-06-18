@@ -13,7 +13,7 @@ const sampleReport: ExportReport = {
   indicadores: [
     {
       id: 'concursos-academicos',
-      nombre: 'Concursos AcadÃƒÂ©micos',
+      nombre: 'Concursos Acad\u00c3\u0192\u00c2\u00a9micos',
       descripcion: 'Texto interno que no debe dominar el resumen.',
       datos: [
         {
@@ -43,7 +43,7 @@ describe('report exports', () => {
     expect(header).toContain('"Meta"');
     expect(csv).toContain('"Captura de egresados titulados"');
     expect(csv).toContain('"Concursos Académicos"');
-    expect(csv).not.toContain('AcadÃƒ');
+    expect(csv).not.toContain('Acad\u00c3\u0192');
     expect(csv).not.toContain('tipo_reporte');
     expect(csv).not.toContain('registro_id');
     expect(csv).not.toContain('identidad_');
@@ -54,7 +54,7 @@ describe('report exports', () => {
 
     expect(pdfText).toContain('(Resumen) Tj');
     expect(pdfText).toContain('Captura de egresados titulados');
-    expect(pdfText).not.toContain('AcadÃƒ');
+    expect(pdfText).not.toContain('Acad\u00c3\u0192');
     expect(pdfText).not.toContain('sin-id');
     expect(pdfText).not.toContain('registro_id');
     expect(pdfText).not.toContain('tipoReporte');

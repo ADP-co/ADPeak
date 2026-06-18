@@ -21,6 +21,7 @@ import {
   assertCaptureAccess,
   authenticateUser,
   buildReportPayload,
+  createSessionToken,
   deactivateIndicator,
   deactivateUser,
   getIndicatorByCode,
@@ -134,7 +135,7 @@ const server = createServer(async (request, response) => {
 
   if (request.method === "OPTIONS") {
     response.writeHead(204, {
-      "Access-Control-Allow-Headers": "Content-Type, x-user-id, x-role, x-plantel-id, x-responsable-id",
+      "Access-Control-Allow-Headers": "Authorization, Content-Type, x-session-token, x-user-id, x-role, x-plantel-id, x-responsable-id",
       "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,OPTIONS",
       "Access-Control-Allow-Origin": "*"
     });
@@ -172,7 +173,7 @@ const server = createServer(async (request, response) => {
         return;
       }
 
-      sendJson(response, 200, { user });
+      sendJson(response, 200, { user, sessionToken: createSessionToken(user) });
       return;
     } catch {
       sendJson(response, 400, {

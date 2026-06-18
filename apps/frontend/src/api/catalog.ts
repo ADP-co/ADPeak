@@ -3,6 +3,7 @@ import {
   officialCatalogRows,
   officialIndicatorPlantelScopes,
 } from '../catalog/officialCatalog.generated';
+import { officialWorkbookTemplates } from '../catalog/officialData.generated';
 import type { ColumnConfig, IndicatorTemplate } from '../components/forms/formConfig';
 
 export type CatalogRole = 'director' | 'responsable' | 'plantel';
@@ -365,6 +366,10 @@ const rowsFromActivities = (
 }));
 
 export function buildTemplateForCatalogIndicator(indicator: CatalogIndicator, plantelName = UNASSIGNED_PLANTEL_LABEL): IndicatorTemplateResponse {
+  if (officialWorkbookTemplates[indicator.code]) {
+    return buildOfficialWorkbookTemplate(indicator, plantelName);
+  }
+
   if (indicator.templateColumns?.length) {
     return buildConfiguredTemplate(indicator, plantelName);
   }
@@ -406,6 +411,57 @@ export function buildTemplateForCatalogIndicator(indicator: CatalogIndicator, pl
   }
 
   return buildGenericTemplate(indicator, plantelName);
+}
+
+function buildOfficialWorkbookTemplate(indicator: CatalogIndicator, plantelName: string): IndicatorTemplateResponse {
+  const imported = officialWorkbookTemplates[indicator.code];
+  const columns = imported.columns;
+  const applyPlantel = (sourceRow: Record<string, unknown>) => {
+    const row: Record<string, unknown> = {};
+
+    columns.forEach((column) => {
+      if (normalizeText(column.label).includes('plantel')) {
+        row[column.key] = plantelName === UNASSIGNED_PLANTEL_LABEL ? '' : plantelName;
+        return;
+      }
+
+      row[column.key] = sourceRow[column.key] ?? '';
+    });
+
+    return row;
+  };
+  const initialRows = imported.initialRows.length > 0
+    ? imported.initialRows.map(applyPlantel)
+    : [applyPlantel(imported.emptyRow)];
+
+  return {
+    indicatorCode: indicator.code,
+    indicatorName: indicator.name,
+    groups: imported.groups.length > 0
+      ? imported.groups
+      : [{ label: 'Formato oficial importado', colspan: Math.max(columns.length, 1) }],
+    columns,
+    initialRows,
+    infoBlocks: [
+      {
+        label: 'INDICADOR',
+        text: `Código ${indicator.code} ${indicator.name}.`,
+        tone: 'highlight',
+      },
+      {
+        label: 'FUENTE',
+        text: `${imported.sourceLabel} · ${imported.sheetName}`,
+      },
+    ],
+    footerNote: imported.footerNote,
+    showTotals: imported.showTotals,
+    allowAddRows: imported.allowAddRows,
+    addRowLabel: imported.addRowLabel,
+    emptyRow: applyPlantel(imported.emptyRow),
+    analysisHeading: 'Análisis',
+    analysisLabel: 'Descripción y observaciones',
+    analysisPlaceholder: 'Describe brevemente el avance, pendientes o comentarios del formato oficial.',
+  };
 }
 
 function templateForIndicator(indicator: CatalogIndicator): IndicatorTemplateResponse {

@@ -7,6 +7,7 @@ export interface User {
   name: string;
   role: string;
   description: string;
+  sessionToken?: string;
   plantelId?: number;
   responsableId?: number;
 }
@@ -26,7 +27,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(() => {
     try {
       const storedUser = window.localStorage.getItem(AUTH_STORAGE_KEY);
-      return storedUser ? JSON.parse(storedUser) as User : null;
+      const parsedUser = storedUser ? JSON.parse(storedUser) as User : null;
+
+      if (parsedUser && !parsedUser.sessionToken) {
+        window.localStorage.removeItem(AUTH_STORAGE_KEY);
+        return null;
+      }
+
+      return parsedUser;
     } catch {
       return null;
     }
@@ -54,7 +62,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       try {
-        setUser(JSON.parse(event.newValue) as User);
+        const parsedUser = JSON.parse(event.newValue) as User;
+        setUser(parsedUser.sessionToken ? parsedUser : null);
       } catch {
         setUser(null);
       }

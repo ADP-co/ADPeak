@@ -141,7 +141,7 @@ describe("SIGI store and RBAC", () => {
     expect(report.indicadores.every((indicator) => assignedCodes.includes(indicator.id))).toBe(true);
   });
 
-  it("changes report progress by cycle and leaves imported official indicators unassigned until configured", () => {
+  it("keeps report filters explicit and leaves imported official indicators unassigned until configured", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const currentCycle = buildReportPayload(director, {
       cicloEscolar: "2025-2026",
@@ -168,8 +168,12 @@ describe("SIGI store and RBAC", () => {
         .map((row) => `${row.estado}:${row.avance}:${row.plantel}`)
         .join("|");
 
-    expect(signature(currentCycle)).not.toBe(signature(previousCycle));
     expect(signature(currentCycle)).not.toBe("");
+    expect(currentCycle.periodo).toBe("2026-2");
+    expect(currentCycle.cicloEscolar).toBe("2025-2026");
+    expect(previousCycle.periodo).toBe("2025-2");
+    expect(previousCycle.cicloEscolar).toBe("2024-2025");
+    expect(currentCycle.indicadores.flatMap((indicator) => indicator.datos).every((row) => row.estado === "Borrador" || row.estado === "Aprobado")).toBe(true);
     expect(currentCycle.indicadores.flatMap((indicator) => indicator.datos).some((row) => row.plantel === "Sin plantel asignado")).toBe(true);
     expect(bachillerato16.indicadores.some((indicator) => indicator.id === "1.0.0.0.2")).toBe(false);
     expect(bachillerato4.indicadores.some((indicator) => indicator.id === "1.0.0.0.2")).toBe(false);
@@ -619,11 +623,13 @@ describe("SIGI store and RBAC", () => {
           ? indicator.activities.length
           : 1
       );
+      const isAlreadyScopedToPlantel = listIndicators(plantel).some((item) => item.code === indicator.code);
       if (template.columns.some((column) => column.key === "plantel")) {
-        expect(template.initialRows.every((row) => row.plantel === "Sin plantel asignado"), indicator.code).toBe(true);
+        const expectedPlantel = isAlreadyScopedToPlantel ? "Bachillerato 16" : "Sin plantel asignado";
+        expect(template.initialRows.every((row) => row.plantel === expectedPlantel), indicator.code).toBe(true);
       }
 
-      expect(() =>
+      const draftAttempt = () =>
         assertCaptureAccess(
           plantel,
           {
@@ -632,8 +638,13 @@ describe("SIGI store and RBAC", () => {
             payload: { rows: [template.initialRows[0]] }
           },
           "draft"
-        )
-      ).toThrow(SigiForbiddenError);
+        );
+
+      if (isAlreadyScopedToPlantel) {
+        expect(draftAttempt).not.toThrow();
+      } else {
+        expect(draftAttempt).toThrow(SigiForbiddenError);
+      }
 
       const assigned = saveIndicator(director, {
         ...indicator,

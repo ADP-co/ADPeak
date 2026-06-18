@@ -5,6 +5,7 @@ type LoginResponse = {
   user: User & {
     username?: string;
   };
+  sessionToken: string;
 };
 
 export async function loginWithCredentials(username: string, password: string) {
@@ -16,5 +17,8 @@ export async function loginWithCredentials(username: string, password: string) {
     }),
   });
 
-  return response.user;
+  return {
+    ...response.user,
+    sessionToken: response.sessionToken,
+  };
 }

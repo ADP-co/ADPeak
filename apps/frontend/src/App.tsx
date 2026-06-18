@@ -19,6 +19,7 @@ import { Login } from './components/ui/Login';
 import { Toaster, toast } from 'sonner';
 import { useCaptureDraft } from './hooks/useCaptureDraft';
 import { buildHealthIntegralTemplate, buildTemplateForCatalogIndicator, catalogPlanteles, fetchIndicatorTemplate, fetchIndicators, type CatalogIndicator } from './api/catalog';
+import { officialIndicatorPlantelScopes } from './catalog/officialCatalog.generated';
 
 const UNASSIGNED_PLANTEL_LABEL = 'Sin plantel asignado';
 
@@ -191,7 +192,8 @@ function applySessionScope(indicator: Indicator, user?: User | null): Indicator 
 
 function catalogToIndicator(indicator: CatalogIndicator, user?: User | null): Indicator {
   const scope = indicator.responsibleNames.join(', ') || 'Responsable DGEMS';
-  const plantelScope = user?.role === 'plantel' ? plantelNameFromId(user.plantelId) : plantelScopeLabelFromIds(indicator.plantelIds);
+  const effectivePlantelIds = effectivePlantelIdsForCatalogIndicator(indicator);
+  const plantelScope = user?.role === 'plantel' ? plantelNameFromId(user.plantelId) : plantelScopeLabelFromIds(effectivePlantelIds);
 
   return {
     code: indicator.code,
@@ -210,10 +212,16 @@ function canDisplayCatalogIndicatorForUser(indicator: CatalogIndicator, user?: U
   }
 
   if (user.role === 'plantel') {
-    return indicator.plantelIds.includes(user.plantelId ?? -1);
+    return effectivePlantelIdsForCatalogIndicator(indicator).includes(user.plantelId ?? -1);
   }
 
   return indicator.responsibleIds.includes(user.responsableId ?? -1);
+}
+
+function effectivePlantelIdsForCatalogIndicator(indicator: CatalogIndicator) {
+  return indicator.plantelIds.length > 0
+    ? indicator.plantelIds
+    : officialIndicatorPlantelScopes[indicator.code] ?? [];
 }
 
 const MAX_INLINE_EVIDENCE_BYTES = 2 * 1024 * 1024;
@@ -557,6 +565,11 @@ function AppContent() {
   );
 
   useEffect(() => {
+    if (!user) {
+      setCatalogIndicators([]);
+      return undefined;
+    }
+
     let isMounted = true;
 
     fetchIndicators()
@@ -574,7 +587,7 @@ function AppContent() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [user]);
 
   const indicators = useMemo(
     () =>

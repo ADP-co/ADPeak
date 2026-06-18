@@ -1,6 +1,6 @@
 /// <reference types="node" />
 
-import { createHash } from "node:crypto";
+import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import {
   officialCatalogRows,
   officialIndicatorPlantelScopes
@@ -8,12 +8,14 @@ import {
 import {
   officialDataSummary,
   officialEvidenceGroups,
-  officialWorkbookSummaries
+  officialWorkbookSummaries,
+  officialWorkbookTemplates
 } from "./official-data.generated.js";
 import { listCaptureDrafts, type CaptureDraft, type CapturePayload } from "./capture-store.js";
 import {
   persistState,
-  readPersistedCollection
+  readPersistedCollection,
+  readPersistedValue
 } from "./state-store.js";
 
 export type SystemRole = "director" | "responsable" | "plantel";
@@ -47,6 +49,14 @@ export type AuthenticatedSigiUser = {
   description: string;
   plantelId?: number;
   responsableId?: number;
+};
+
+type SessionTokenPayload = {
+  sub: string;
+  role: SystemRole;
+  plantelId?: number;
+  responsableId?: number;
+  exp: number;
 };
 
 export type SigiIndicator = {
@@ -198,6 +208,7 @@ export const planteles: Plantel[] = [
 
 const unassignedPlantel: Plantel = { id: 0, key: "sin-plantel", name: "Sin plantel asignado" };
 const officialSourcePlantelIds: number[] = [];
+const officialCatalogImportVersion = "2026-06-18-official-workbook-templates-v3";
 
 const responsibleNames = Array.from(
   new Set(officialCatalogRows.map((row) => row.responsible).filter(Boolean))
@@ -214,6 +225,16 @@ const users = new Map<string, SigiUser>();
 reloadSigiStateFromPersistence();
 
 export function sessionFromHeaders(headers: Record<string, string | string[] | undefined>): SigiSession {
+  const token = bearerTokenFromHeaders(headers);
+
+  if (token) {
+    return sessionFromToken(token);
+  }
+
+  if (!allowUnsafeHeaderSessions()) {
+    throw new SigiAuthError("La sesión requiere autenticación.");
+  }
+
   const rawRole = headerValue(headers["x-role"]);
   const role = normalizeRole(rawRole);
 
@@ -221,9 +242,9 @@ export function sessionFromHeaders(headers: Record<string, string | string[] | u
     throw new SigiAuthError("La sesión no incluye un rol válido.");
   }
 
-  const userId = headerValue(headers["x-user-id"]) || defaultUserIdForRole(role);
   const plantelId = numberHeader(headers["x-plantel-id"]);
   const responsableId = numberHeader(headers["x-responsable-id"]);
+  const userId = headerValue(headers["x-user-id"]) || defaultUserIdForSession(role, plantelId, responsableId);
 
   return {
     userId,
@@ -236,9 +257,10 @@ export function sessionFromHeaders(headers: Record<string, string | string[] | u
 export function reloadSigiStateFromPersistence() {
   const persistedIndicators = readPersistedCollection<SigiIndicator>("indicators");
   const persistedUsers = readPersistedCollection<SigiUser>("users");
+  const needsCatalogMigration = readPersistedValue<string>("catalogImportVersion") !== officialCatalogImportVersion;
 
   indicators.clear();
-  for (const indicator of (persistedIndicators?.length ? persistedIndicators : initialIndicators).map(normalizePersistedIndicator)) {
+  for (const indicator of mergeInitialIndicators(persistedIndicators, needsCatalogMigration)) {
     indicators.set(indicator.id, indicator);
   }
 
@@ -246,6 +268,14 @@ export function reloadSigiStateFromPersistence() {
   for (const user of mergeInitialUsers(persistedUsers)) {
     const normalizedUser = normalizePersistedUser(user);
     users.set(normalizedUser.id, normalizedUser);
+  }
+
+  if (needsCatalogMigration) {
+    persistState({
+      indicators: Array.from(indicators.values()),
+      users: Array.from(users.values()),
+      catalogImportVersion: officialCatalogImportVersion
+    });
   }
 }
 
@@ -347,6 +377,21 @@ export function authenticateUser(username: string, password: string): Authentica
   }
 
   return authenticatedUser(user);
+}
+
+export function createSessionToken(user: AuthenticatedSigiUser | SigiUser) {
+  const role = normalizeRole(user.role) ?? "plantel";
+  const payload: SessionTokenPayload = {
+    sub: user.id,
+    role,
+    plantelId: user.plantelId,
+    responsableId: user.responsableId,
+    exp: Math.floor(Date.now() / 1000) + sessionTtlSeconds()
+  };
+  const encodedPayload = base64UrlEncode(JSON.stringify(payload));
+  const signature = signPayload(encodedPayload);
+
+  return `${encodedPayload}.${signature}`;
 }
 
 export function listIndicators(session: SigiSession, options: { includeInactive?: boolean } = {}) {
@@ -472,6 +517,10 @@ const participantActionCodes = new Set([
 const infrastructureCodes = new Set(["4.1.2.1.3", "4.1.2.1.6", "4.1.2.2.1"]);
 
 export function templateForIndicator(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
+  if (officialWorkbookTemplates[indicator.code]) {
+    return officialWorkbookTemplate(indicator, session);
+  }
+
   if (indicator.templateColumns?.length) {
     return configuredTemplate(indicator, session);
   }
@@ -538,7 +587,7 @@ export function assertCaptureAccess(
     throw new SigiForbiddenError("El indicador no esta asignado a este plantel.");
   }
 
-  if (session.role === "responsable" && !indicator.responsibleIds.includes(session.responsableId ?? -1)) {
+  if (session.role === "responsable" && !isResponsibleAssigned(session, indicator)) {
     throw new SigiForbiddenError("El responsable no tiene asignado este indicador.");
   }
 
@@ -614,7 +663,7 @@ export function buildReportPayload(
 
   const cicloEscolar = filters.cicloEscolar ?? "2025-2026";
   const periodo = filters.periodo ?? "2026-A";
-  const temporalSeed = temporalFilterSeed(periodo, cicloEscolar);
+  const requestedPeriodoId = periodIdFromReportPeriod(periodo);
   const plantelId = resolvePlantelId(filters.plantelId ?? filters.plantel);
   const scopedPlanteles = plantelId
     ? planteles.filter((plantel) => plantel.id === plantelId)
@@ -631,6 +680,7 @@ export function buildReportPayload(
           plantel,
           activity,
           activityIndex,
+          periodoId: requestedPeriodoId,
           periodo,
           cicloEscolar
         });
@@ -639,21 +689,19 @@ export function buildReportPayload(
           return capturedRows;
         }
 
-        const statusSeed = indicator.id * 13 + plantel.id * 7 + activityIndex * 3 + temporalSeed;
-        const status = deterministicStatus(statusSeed);
         return {
           registro_id: `${indicator.code}-${plantel.id}-${activityIndex + 1}`,
           actividad: activity || "Actividad general",
           responsable: indicator.responsibleNames.join(", "),
-          estado: status,
-          avance: `${deterministicProgress(status, statusSeed, activityIndex)}%`,
+          estado: "Borrador" as const,
+          avance: "0%",
           plantel: plantel.name,
           plantelId: String(plantel.id),
           periodo,
           ciclo: cicloEscolar,
           meta: 100,
-          evidencias: evidenceCountForReportRow(indicator, activity, status, plantel.id),
-          vencimiento: status === "Borrador" ? "atrasado" as const : "en_tiempo" as const
+          evidencias: 0,
+          vencimiento: "atrasado" as const
         };
       })
     );
@@ -703,6 +751,7 @@ function rowsFromCaptureDrafts({
   plantel,
   activity,
   activityIndex,
+  periodoId,
   periodo,
   cicloEscolar
 }: {
@@ -711,6 +760,7 @@ function rowsFromCaptureDrafts({
   plantel: (typeof planteles)[number];
   activity: string;
   activityIndex: number;
+  periodoId: number;
   periodo: string;
   cicloEscolar: string;
 }): SigiReportPayload["indicadores"][number]["datos"] {
@@ -718,7 +768,8 @@ function rowsFromCaptureDrafts({
     .filter((draft) =>
       draft.indicadorId === indicator.id &&
       draft.plantelId === plantel.id &&
-      draft.actividadId === activityIndex + 1
+      draft.actividadId === activityIndex + 1 &&
+      draft.periodoId === periodoId
     )
     .flatMap((draft) => {
       const rows = draft.payload.rows.length > 0 ? draft.payload.rows : [{}];
@@ -822,45 +873,6 @@ function officialSourcesReportRows(
       vencimiento: "en_tiempo"
     }))
   };
-}
-
-function evidenceCountForReportRow(
-  indicator: SigiIndicator,
-  activity: string,
-  status: SigiReportPayload["indicadores"][number]["datos"][number]["estado"],
-  plantelId: number
-) {
-  if (status === "Borrador") {
-    return 0;
-  }
-
-  if (plantelId !== 1) {
-    return 1;
-  }
-
-  const candidates = [indicator.name, indicator.description, activity].map(normalizeKey);
-  const matchedGroup = officialEvidenceGroups.find((group) => {
-    const category = normalizeKey(group.category);
-    return candidates.some((candidate) => areRelatedText(category, candidate));
-  });
-
-  return matchedGroup ? Math.max(1, matchedGroup.fileCount) : 1;
-}
-
-function areRelatedText(a: string, b: string) {
-  if (!a || !b) {
-    return false;
-  }
-
-  if (a.includes(b) || b.includes(a)) {
-    return true;
-  }
-
-  const aTokens = a.split(/\s+/).filter((token) => token.length > 4);
-  const bTokens = new Set(b.split(/\s+/).filter((token) => token.length > 4));
-  const overlap = aTokens.filter((token) => bTokens.has(token)).length;
-
-  return overlap >= 2 || (aTokens.length === 1 && bTokens.has(aTokens[0]));
 }
 
 function buildIndicators() {
@@ -1102,6 +1114,87 @@ function sameNumberSet(a: number[], b: number[]) {
   return left.length === right.length && left.every((value, index) => value === right[index]);
 }
 
+function mergeInitialIndicators(persisted?: SigiIndicator[], applyCatalogMigration = false) {
+  const byCode = new Map(initialIndicators.map((indicator) => [indicator.code, normalizePersistedIndicator(indicator)]));
+
+  for (const indicator of persisted ?? []) {
+    if (applyCatalogMigration && isKnownTestIndicator(indicator)) {
+      continue;
+    }
+
+    const normalizedIndicator = migratePersistedOfficialScope(
+      normalizePersistedIndicator(indicator),
+      applyCatalogMigration
+    );
+    const seededIndicator = byCode.get(normalizedIndicator.code);
+
+    byCode.set(normalizedIndicator.code, seededIndicator
+      ? {
+          ...seededIndicator,
+          ...normalizedIndicator
+        }
+      : normalizedIndicator
+    );
+  }
+
+  return ensureUniqueIndicatorIds(Array.from(byCode.values()));
+}
+
+function isKnownTestIndicator(indicator: Partial<SigiIndicator>) {
+  const code = typeof indicator.code === "string" ? indicator.code : "";
+  const name = typeof indicator.name === "string" ? normalizeKey(indicator.name) : "";
+
+  return code.startsWith("TMP-") && (
+    name.includes("temporal") ||
+    [
+      "TMP-CAPTURE-COLUMNS",
+      "TMP-FORMULA",
+      "TMP-PLANTEL-SESSION",
+      "TMP-TRUNCATED-CAPTURE"
+    ].includes(code)
+  );
+}
+
+function migratePersistedOfficialScope(indicator: SigiIndicator, applyCatalogMigration: boolean) {
+  if (!applyCatalogMigration) {
+    return indicator;
+  }
+
+  const seededIndicator = initialIndicators.find((item) => item.code === indicator.code);
+
+  if (
+    seededIndicator?.plantelScopeSource === "official-import" &&
+    !officialIndicatorPlantelScopes[indicator.code]?.length &&
+    isLegacyImportedPlantelScope(indicator.plantelIds)
+  ) {
+    return {
+      ...indicator,
+      plantelIds: [...seededIndicator.plantelIds],
+      plantelScopeSource: seededIndicator.plantelScopeSource
+    };
+  }
+
+  return indicator;
+}
+
+function ensureUniqueIndicatorIds(items: SigiIndicator[]) {
+  const usedIds = new Set<number>();
+  let nextId = Math.max(0, ...items.map((indicator) => indicator.id).filter(Number.isInteger));
+
+  return items
+    .sort((a, b) => a.id - b.id || a.code.localeCompare(b.code, "es", { numeric: true }))
+    .map((indicator) => {
+      if (Number.isInteger(indicator.id) && indicator.id > 0 && !usedIds.has(indicator.id)) {
+        usedIds.add(indicator.id);
+        return indicator;
+      }
+
+      nextId += 1;
+      usedIds.add(nextId);
+      return { ...indicator, id: nextId };
+    });
+}
+
 function mergeInitialUsers(persisted?: SigiUser[]) {
   const byId = new Map(buildInitialUsers().map((user) => [user.id, user]));
 
@@ -1169,6 +1262,82 @@ function hashPassword(password: string) {
   return createHash("sha256").update(`adpeak:${password}`).digest("hex");
 }
 
+function bearerTokenFromHeaders(headers: Record<string, string | string[] | undefined>) {
+  const authorization = headerValue(headers.authorization ?? headers.Authorization);
+  const sessionHeader = headerValue(headers["x-session-token"]);
+
+  if (authorization?.startsWith("Bearer ")) {
+    return authorization.slice("Bearer ".length).trim();
+  }
+
+  return sessionHeader?.trim();
+}
+
+function sessionFromToken(token: string): SigiSession {
+  const [encodedPayload, signature] = token.split(".");
+
+  if (!encodedPayload || !signature || !verifySignature(encodedPayload, signature)) {
+    throw new SigiAuthError("La sesión no es válida.");
+  }
+
+  let payload: SessionTokenPayload;
+
+  try {
+    payload = JSON.parse(Buffer.from(encodedPayload, "base64url").toString("utf8")) as SessionTokenPayload;
+  } catch {
+    throw new SigiAuthError("La sesión no es válida.");
+  }
+
+  if (!payload.sub || payload.exp < Math.floor(Date.now() / 1000)) {
+    throw new SigiAuthError("La sesión expiró.");
+  }
+
+  const user = users.get(payload.sub);
+
+  if (!user?.active) {
+    throw new SigiAuthError("La sesión no pertenece a un usuario activo.");
+  }
+
+  return {
+    userId: user.id,
+    role: user.role,
+    plantelId: user.role === "plantel" ? user.plantelId : user.plantelId ?? payload.plantelId,
+    responsableId: user.role === "responsable" ? user.responsableId : user.responsableId ?? payload.responsableId
+  };
+}
+
+function allowUnsafeHeaderSessions() {
+  return (
+    process.env.NODE_ENV === "test" ||
+    process.env.VITEST === "true" ||
+    process.env.ADPEAK_ALLOW_UNSAFE_HEADERS === "true"
+  );
+}
+
+function sessionTtlSeconds() {
+  const minutes = Number(process.env.AUTH_TOKEN_TTL_MINUTES ?? 480);
+  const boundedMinutes = Number.isFinite(minutes) ? Math.max(15, Math.min(1440, minutes)) : 480;
+  return boundedMinutes * 60;
+}
+
+function sessionSecret() {
+  return process.env.AUTH_SECRET || process.env.SIGI_AUTH_SECRET || "adpeak-local-session-secret-change-me";
+}
+
+function base64UrlEncode(value: string) {
+  return Buffer.from(value, "utf8").toString("base64url");
+}
+
+function signPayload(encodedPayload: string) {
+  return createHmac("sha256", sessionSecret()).update(encodedPayload).digest("base64url");
+}
+
+function verifySignature(encodedPayload: string, signature: string) {
+  const expected = Buffer.from(signPayload(encodedPayload), "utf8");
+  const received = Buffer.from(signature, "utf8");
+  return expected.length === received.length && timingSafeEqual(expected, received);
+}
+
 function normalizeUsername(value: string) {
   return normalizeKey(value).replace(/\s+/g, "");
 }
@@ -1195,7 +1364,18 @@ function canReadIndicator(session: SigiSession, indicator: SigiIndicator) {
     return canUseIndicatorForPlantel(indicator, session.plantelId ?? -1);
   }
 
-  return indicator.responsibleIds.includes(session.responsableId ?? -1);
+  return isResponsibleAssigned(session, indicator);
+}
+
+function isResponsibleAssigned(session: SigiSession, indicator: SigiIndicator) {
+  const responsableId = session.responsableId ?? -1;
+
+  if (indicator.responsibleIds.includes(responsableId)) {
+    return true;
+  }
+
+  const user = users.get(session.userId);
+  return Boolean(user?.indicatorCodes.includes(indicator.code));
 }
 
 function canUseIndicatorForPlantel(indicator: SigiIndicator, plantelId: number) {
@@ -1244,6 +1424,66 @@ function configuredTemplate(indicator: SigiIndicator, session?: SigiSession): In
     emptyRow: rowForConfiguredColumns(columns, plantel, ""),
     showTotals: columns.some((column) => column.type === "number" || column.type === "calculated")
   };
+}
+
+function officialWorkbookTemplate(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
+  const imported = officialWorkbookTemplates[indicator.code];
+  const plantel = plantelForTemplate(session, indicator);
+  const columns = sanitizeTemplateColumns(imported.columns);
+  const rows = imported.initialRows.length > 0
+    ? imported.initialRows.map((row) => rowForOfficialWorkbookColumns(columns, row, plantel))
+    : [rowForOfficialWorkbookColumns(columns, imported.emptyRow, plantel)];
+
+  return {
+    indicatorCode: indicator.code,
+    indicatorName: indicator.name,
+    groups: imported.groups.length > 0
+      ? imported.groups
+      : [{ label: "Formato oficial importado", colspan: Math.max(columns.length, 1) }],
+    columns,
+    initialRows: rows,
+    infoBlocks: [
+      {
+        label: "INDICADOR",
+        text: `Código ${indicator.code} ${indicator.name}.`,
+        tone: "highlight"
+      },
+      {
+        label: "FUENTE",
+        text: `${imported.sourceLabel} · ${imported.sheetName}`
+      }
+    ],
+    footerNote: imported.footerNote,
+    showTotals: imported.showTotals,
+    allowAddRows: imported.allowAddRows,
+    addRowLabel: imported.addRowLabel,
+    emptyRow: rowForOfficialWorkbookColumns(columns, imported.emptyRow, plantel),
+    analysisHeading: "Análisis",
+    analysisLabel: "Descripción y observaciones",
+    analysisPlaceholder: "Describe brevemente el avance, pendientes o comentarios del formato oficial."
+  };
+}
+
+function rowForOfficialWorkbookColumns(
+  columns: TemplateColumn[],
+  sourceRow: Record<string, unknown>,
+  plantel: Plantel
+) {
+  const row: Record<string, unknown> = {};
+
+  for (const column of columns) {
+    const normalizedLabel = normalizeKey(column.label);
+    const sourceValue = sourceRow[column.key];
+
+    if (normalizedLabel.includes("plantel")) {
+      row[column.key] = plantel.id === unassignedPlantel.id ? "" : plantel.name;
+      continue;
+    }
+
+    row[column.key] = sourceValue ?? "";
+  }
+
+  return row;
 }
 
 function rowForConfiguredColumns(columns: TemplateColumn[], plantel: Plantel, activity: string) {
@@ -1941,36 +2181,11 @@ function inferDataType(name: string): SigiIndicator["dataType"] {
   return "number";
 }
 
-function deterministicStatus(seed: number): SigiReportPayload["indicadores"][number]["datos"][number]["estado"] {
-  const statuses: Array<SigiReportPayload["indicadores"][number]["datos"][number]["estado"]> = [
-    "Aprobado",
-    "Enviado",
-    "Observado",
-    "Borrador"
-  ];
-  return statuses[seed % statuses.length];
-}
-
-function deterministicProgress(
-  status: SigiReportPayload["indicadores"][number]["datos"][number]["estado"],
-  seed: number,
-  activityIndex: number
-) {
-  if (status === "Aprobado") {
-    return 100;
-  }
-
-  if (status === "Borrador") {
-    return 0;
-  }
-
-  return 45 + ((seed + activityIndex) % 45);
-}
-
-function temporalFilterSeed(periodo: string, cicloEscolar: string) {
-  return `${periodo}:${cicloEscolar}`
-    .split("")
-    .reduce((total, character) => total + character.charCodeAt(0), 0);
+function periodIdFromReportPeriod(_periodo: string) {
+  // El sprint actual opera con un periodo activo de captura. El texto del
+  // reporte se conserva para filtros visuales, pero el ID real se mantiene
+  // estable hasta que exista un catalogo de periodos en backend.
+  return 1;
 }
 
 function resolvePlantelId(value?: string) {
@@ -1989,16 +2204,16 @@ function resolvePlantelId(value?: string) {
   )?.id;
 }
 
-function defaultUserIdForRole(role: SystemRole) {
+function defaultUserIdForSession(role: SystemRole, plantelId?: number, responsableId?: number) {
   if (role === "director") {
     return "director-1";
   }
 
   if (role === "responsable") {
-    return "responsable-1";
+    return `responsable-${responsableId ?? 1}`;
   }
 
-  return "plantel-1";
+  return `plantel-${plantelId ?? 1}`;
 }
 
 function headerValue(value: string | string[] | undefined) {
