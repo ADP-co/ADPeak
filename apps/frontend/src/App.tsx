@@ -13,6 +13,7 @@ import { UsersTable } from './components/ui/UsersTable';
 import { Dashboard } from './components/ui/Dashboard';
 import { ReportsDashboard } from './components/ui/ReportsDashboard';
 import { AccountProfile } from './components/ui/AccountProfile';
+import { Button } from './components/ui/Button';
 import MediaSuperiorLogo from './assets/MediaSuperiorLogo.png';
 import { AuthProvider, useAuth, type User } from './context/AuthContext';
 import { Login } from './components/ui/Login';
@@ -302,6 +303,21 @@ function mergeRowsWithTemplate(
   });
 }
 
+function hasBlankEditableCells(rows: Record<string, unknown>[], template: IndicatorTemplate) {
+  const editableColumns = template.columns.filter((column) => column.type === 'number' || column.type === 'text');
+
+  if (editableColumns.length === 0) {
+    return false;
+  }
+
+  return rows.some((row) =>
+    editableColumns.some((column) => {
+      const value = row[column.key];
+      return value === null || value === undefined || String(value).trim() === '';
+    })
+  );
+}
+
 function fallbackTemplateForIndicator(
   selectedCode: string,
   selectedIndicator?: Indicator,
@@ -355,9 +371,10 @@ function fallbackTemplateForIndicator(
 interface IndicatorFormWrapperProps {
   onIndicatorStatusChange?: (code: string, status: Indicator['status']) => void;
   catalogIndicators?: CatalogIndicator[];
+  catalogLoaded?: boolean;
 }
 
-function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [] }: IndicatorFormWrapperProps) {
+function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [], catalogLoaded = false }: IndicatorFormWrapperProps) {
   const { user } = useAuth();
   const { code } = useParams();
   const navigate = useNavigate();
@@ -368,15 +385,19 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [] 
   const requestedPeriodoId = positiveQueryParam(queryParams, 'periodoId');
   const requestedCaptureId = positiveQueryParam(queryParams, 'captureId');
   const selectedCode = code ?? template1_0_0_0_2.indicatorCode;
+  const selectedMockupIndicator = mockupIndicators.find((indicator) => indicator.code === selectedCode);
   const selectedCatalogIndicator = catalogIndicators.find((indicator) => indicator.code === selectedCode);
   const selectedIndicator = selectedCatalogIndicator
     ? catalogToIndicator(selectedCatalogIndicator, user)
-    : applySessionScope(mockupIndicators.find((indicator) => indicator.code === selectedCode) ?? mockupIndicators[0], user);
+    : applySessionScope(selectedMockupIndicator ?? mockupIndicators[0], user);
+  const isWaitingForCatalogIndicator = !selectedCatalogIndicator && !selectedMockupIndicator && !catalogLoaded;
+  const isUnknownIndicator = !selectedCatalogIndicator && !selectedMockupIndicator && catalogLoaded;
+  const resolvedIndicatorId = selectedCatalogIndicator?.id ?? (selectedMockupIndicator ? getIndicatorIdByCode(selectedCode) : 0);
   const fallbackTemplate = fallbackTemplateForIndicator(selectedCode, selectedIndicator, selectedCatalogIndicator);
   const [remoteTemplate, setRemoteTemplate] = useState<(IndicatorTemplate & { initialRows?: Record<string, unknown>[] }) | null>(null);
   const selectedTemplate = {
     ...(remoteTemplate ?? fallbackTemplate),
-    indicatorCode: selectedCode,
+    indicatorCode: remoteTemplate?.indicatorCode ?? selectedCode,
     indicatorName: remoteTemplate?.indicatorName ?? selectedIndicator?.name ?? fallbackTemplate.indicatorName,
   };
 
@@ -410,11 +431,12 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [] 
   const captureDraft = useCaptureDraft({
     requestedCaptureId,
     plantelId: activePlantelId,
-    indicadorId: selectedCatalogIndicator?.id ?? getIndicatorIdByCode(selectedCode),
+    indicadorId: resolvedIndicatorId,
     periodoId: activePeriodoId,
     actividadId: activeActividadId,
     responsableId: activeResponsableId,
     storageScope: `plantel-${activePlantelId}:${selectedCode}:periodo-${activePeriodoId}:actividad-${activeActividadId}`,
+    enabled: resolvedIndicatorId > 0 && !isWaitingForCatalogIndicator && !isUnknownIndicator,
   });
 
   const templateInitialRows = remoteTemplate?.initialRows ?? fallbackTemplate.initialRows ?? mockInitialData;
@@ -422,6 +444,26 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [] 
     () => mergeRowsWithTemplate(selectedTemplate, templateInitialRows, captureDraft.capture?.payload.rows),
     [captureDraft.capture?.payload.rows, selectedTemplate, templateInitialRows]
   );
+
+  if (isWaitingForCatalogIndicator) {
+    return (
+      <section className="w-full max-w-[1250px] mx-auto bg-brand-Blanco rounded-lg shadow-md border border-brand-Gris_bajo/20 p-8">
+        <p className="font-body text-sm text-brand-Gris_oscuro">Cargando indicador...</p>
+      </section>
+    );
+  }
+
+  if (isUnknownIndicator) {
+    return (
+      <section className="w-full max-w-[1250px] mx-auto bg-brand-Blanco rounded-lg shadow-md border border-brand-Gris_bajo/20 p-8">
+        <h1 className="font-title text-xl font-bold text-brand-Gris_oscuro mb-2">Indicador no disponible</h1>
+        <p className="font-body text-sm text-brand-Gris_oscuro">No tienes acceso a este indicador o no existe en el catálogo cargado.</p>
+        <Button type="button" className="mt-5 text-xs py-1.5 px-4" onClick={() => navigate('/indicadores')}>
+          Volver
+        </Button>
+      </section>
+    );
+  }
 
   const handleSaveDraft = async (data: FormSubmission) => {
     try {
@@ -441,6 +483,11 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [] 
 
   const handleSendReview = async (data: FormSubmission) => {
     try {
+      if (!data.justificacion?.trim() && hasBlankEditableCells(data.rows, selectedTemplate)) {
+        toast.error('Agrega una justificación antes de enviar.');
+        return;
+      }
+
       const payload = await buildCapturePayload(data, captureDraft.capture?.payload);
       captureDraft.sendToReview(payload, {
         onSuccess: () => {
@@ -560,6 +607,7 @@ function AppContent() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [catalogIndicators, setCatalogIndicators] = useState<CatalogIndicator[]>([]);
+  const [catalogLoaded, setCatalogLoaded] = useState(false);
   const [indicatorStatusOverrides, setIndicatorStatusOverrides] = useState<Record<string, Indicator['status']>>(
     () => readIndicatorStatusOverrides()
   );
@@ -567,20 +615,24 @@ function AppContent() {
   useEffect(() => {
     if (!user) {
       setCatalogIndicators([]);
+      setCatalogLoaded(false);
       return undefined;
     }
 
     let isMounted = true;
+    setCatalogLoaded(false);
 
     fetchIndicators()
       .then((items) => {
         if (isMounted) {
           setCatalogIndicators(items);
+          setCatalogLoaded(true);
         }
       })
       .catch(() => {
         if (isMounted) {
           setCatalogIndicators([]);
+          setCatalogLoaded(true);
         }
       });
 
@@ -595,12 +647,14 @@ function AppContent() {
         ? catalogIndicators
             .filter((indicator) => canDisplayCatalogIndicatorForUser(indicator, user))
             .map((indicator) => catalogToIndicator(indicator, user))
-        : mockupIndicators.map((indicator) => applySessionScope(indicator, user))
+        : catalogLoaded
+          ? []
+          : mockupIndicators.map((indicator) => applySessionScope(indicator, user))
       ).map((indicator) => ({
         ...indicator,
         status: indicatorStatusOverrides[indicator.code] ?? indicator.status,
       })),
-    [catalogIndicators, indicatorStatusOverrides, user]
+    [catalogIndicators, catalogLoaded, indicatorStatusOverrides, user]
   );
   const completedIndicatorCount = useMemo(
     () => indicators.filter((indicator) => indicator.status === 'Aprobado' || indicator.status === 'En revisión').length,
@@ -678,7 +732,7 @@ function AppContent() {
           path="/indicadores/captura/:code"
           element={
             role === 'admin' || role === 'plantel' || role === 'responsable'
-              ? <IndicatorFormWrapper onIndicatorStatusChange={handleIndicatorStatusChange} catalogIndicators={catalogIndicators} />
+              ? <IndicatorFormWrapper onIndicatorStatusChange={handleIndicatorStatusChange} catalogIndicators={catalogIndicators} catalogLoaded={catalogLoaded} />
               : <Navigate to="/revision" replace />
           }
         />

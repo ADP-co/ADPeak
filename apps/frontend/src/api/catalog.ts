@@ -416,6 +416,12 @@ export function buildTemplateForCatalogIndicator(indicator: CatalogIndicator, pl
 function buildOfficialWorkbookTemplate(indicator: CatalogIndicator, plantelName: string): IndicatorTemplateResponse {
   const imported = officialWorkbookTemplates[indicator.code];
   const columns = imported.columns;
+  const displayCode = imported.officialCode || (indicator.code.startsWith('B16-FMT-') ? 'Pendiente de mapeo' : indicator.code);
+  const indicatorInfoText = imported.officialCode && imported.officialCode !== indicator.code
+    ? `Código oficial ${imported.officialCode}. Formato diferenciado por fuente oficial.`
+    : imported.officialCode
+      ? `Código ${imported.officialCode} ${indicator.name}.`
+      : `${indicator.name}.`;
   const applyPlantel = (sourceRow: Record<string, unknown>) => {
     const row: Record<string, unknown> = {};
 
@@ -435,7 +441,7 @@ function buildOfficialWorkbookTemplate(indicator: CatalogIndicator, plantelName:
     : [applyPlantel(imported.emptyRow)];
 
   return {
-    indicatorCode: indicator.code,
+    indicatorCode: displayCode,
     indicatorName: indicator.name,
     groups: imported.groups.length > 0
       ? imported.groups
@@ -445,7 +451,7 @@ function buildOfficialWorkbookTemplate(indicator: CatalogIndicator, plantelName:
     infoBlocks: [
       {
         label: 'INDICADOR',
-        text: `Código ${indicator.code} ${indicator.name}.`,
+        text: indicatorInfoText,
         tone: 'highlight',
       },
       {

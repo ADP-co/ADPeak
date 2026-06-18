@@ -46,6 +46,7 @@ export type OfficialWorkbookSummary = {
 
 export type OfficialTemplateCandidate = {
   indicatorCode: string;
+  officialCode?: string | null;
   sourcePath: string;
   planteles: string[];
   classification: string;
@@ -55,6 +56,7 @@ export type OfficialTemplateCandidate = {
 
 export type OfficialWorkbookTemplate = {
   indicatorCode: string;
+  officialCode?: string | null;
   indicatorName: string;
   sourceLabel: string;
   sourcePath: string;
@@ -895,7 +897,75 @@ export const officialEvidenceGroups: OfficialEvidenceGroup[] = [
 
 export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
+    "indicatorCode": "B16-FMT-01-73CBDE41-bach-16-terminaron",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/CONSTANCIAS SEMANA DE VINCULACIÓN ACADEMICA/BACH 16 TERMINARON.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "private_roster",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "NOMBRE",
+        "CORREO"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "B16-FMT-01-12F38BB9-formato-media-superior",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Mobiliario/formato media superior.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "official_table",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "PLANTEL",
+        "UBICACIÓN EN EL PLANTEL"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "B16-FMT-01-1D310056-seguimiento-capacitacion",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Sensibilidad en Materia de Género/Seguimiento capacitación en materia de género planteles.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "official_table",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "PLANTEL",
+        "NOMBRE DE LA CAPACITACIÓN",
+        "NÚMERO DE ALUMNOS PARTICIPANTES"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "1.1.1.3.2",
+    "officialCode": "1.1.1.3.2",
+    "sourcePath": "Bachillerato 16/Formación Docente y Apoyo Académico/Formación_docente.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "official_table",
+    "confidence": "detected-code",
+    "headerRows": [
+      [
+        "Nombre del evento",
+        "Modalidad",
+        "Competencias desarrolladas",
+        "Población docente NMS"
+      ]
+    ]
+  },
+  {
     "indicatorCode": "1.1.1.3.3",
+    "officialCode": "1.1.1.3.3",
     "sourcePath": "Bachillerato 16/Formación Docente y Apoyo Académico/Formación_docente.xlsx",
     "planteles": [
       "Bachillerato 16"
@@ -913,6 +983,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   },
   {
     "indicatorCode": "1.1.1.5.1",
+    "officialCode": "1.1.1.5.1",
     "sourcePath": "Bachillerato 16/Formación Docente y Apoyo Académico/Formación_docente.xlsx",
     "planteles": [
       "Bachillerato 16"
@@ -929,24 +1000,28 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
     ]
   },
   {
-    "indicatorCode": "1.1.1.3.2",
-    "sourcePath": "Bachillerato 16/Formación Docente y Apoyo Académico/Formación_docente.xlsx",
+    "indicatorCode": "B16-FMT-01-9CE2F116-datos-planteles-y-buzon",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Proceso de Admisión 2025/DATOS  PLANTELES Y BUZÓN UCOL.xlsx",
     "planteles": [
       "Bachillerato 16"
     ],
-    "classification": "official_table",
-    "confidence": "detected-code",
+    "classification": "private_roster",
+    "confidence": "source-table-pending-code",
     "headerRows": [
       [
-        "Nombre del evento",
-        "Modalidad",
-        "Competencias desarrolladas",
-        "Población docente NMS"
+        "PLANTEL",
+        "CORREO ELECTRÓNICO",
+        "NOMBRE DEL/LA DIRECTOR/A",
+        "NOMBRE DE RESPONSABLE DE BUZÓN UCOL",
+        "NO. DE TRABAJADOR DE RESPONSABLE DE BUZÓN UCOL",
+        "CORREO DE RESPONSABLE DE BUZÓN UCOL"
       ]
     ]
   },
   {
     "indicatorCode": "1.1.3.0.3",
+    "officialCode": "1.1.3.0.3",
     "sourcePath": "Bachillerato 16/Programas Interinstitucionales/Estrategia en el aula, prevención de adicciones/JORNADA POR LA PAZ Y CONTRA LAS ADICCIONES FEB-AGO25.xlsx",
     "planteles": [
       "Bachillerato 16"
@@ -962,7 +1037,63 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
     ]
   },
   {
-    "indicatorCode": "1.1.3.0.3",
+    "indicatorCode": "B16-FMT-01-D2B34193-enlaces-unidades-de-aten",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Programas Interinstitucionales/Espacio común EMS/Enlaces Unidades de atención y redes de apoyo.xlsx",
+    "planteles": [
+      "Bachillerato 1",
+      "Bachillerato 10",
+      "Bachillerato 11",
+      "Bachillerato 12",
+      "Bachillerato 13",
+      "Bachillerato 14",
+      "Bachillerato 15",
+      "Bachillerato 16",
+      "Bachillerato 17",
+      "Bachillerato 18",
+      "Bachillerato 19",
+      "Bachillerato 2",
+      "Bachillerato 20",
+      "Bachillerato 21",
+      "Bachillerato 22",
+      "Bachillerato 23",
+      "Bachillerato 24",
+      "Bachillerato 25",
+      "Bachillerato 26",
+      "Bachillerato 27",
+      "Bachillerato 28",
+      "Bachillerato 29",
+      "Bachillerato 3",
+      "Bachillerato 30",
+      "Bachillerato 31",
+      "Bachillerato 32",
+      "Bachillerato 33",
+      "Bachillerato 34",
+      "Bachillerato 35",
+      "Bachillerato 4",
+      "Bachillerato 5",
+      "Bachillerato 6",
+      "Bachillerato 7",
+      "Bachillerato 8",
+      "Bachillerato 9"
+    ],
+    "classification": "private_roster",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "PLANTEL",
+        "NOMBRE COMPLETO",
+        "CORREO ELECTRÓNICO"
+      ],
+      [
+        "Bachillerato 7",
+        "becario /actividades académicas"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "1.1.3.0.3-FMT-7E91E4DB",
+    "officialCode": "1.1.3.0.3",
     "sourcePath": "Bachillerato 16/Programas Interinstitucionales/MUNCOL/MUNCOL.xlsx",
     "planteles": [
       "Bachillerato 16"
@@ -983,7 +1114,8 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
     ]
   },
   {
-    "indicatorCode": "1.1.3.0.3",
+    "indicatorCode": "1.1.3.0.3-FMT-74E3FB42",
+    "officialCode": "1.1.3.0.3",
     "sourcePath": "Bachillerato 16/Programas Interinstitucionales/Programa de Alfabetización MONAE/Proyecto SEMS Alfabetización y Educación Validación de alumnos.xlsx",
     "planteles": [
       "Bachillerato 16"
@@ -999,6 +1131,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   },
   {
     "indicatorCode": "1.1.1.5.2",
+    "officialCode": "1.1.1.5.2",
     "sourcePath": "Bachillerato 16/Formación Docente y Apoyo Académico/Formación_apoyo académico.xlsx",
     "planteles": [
       "Bachillerato 16"
@@ -1014,7 +1147,25 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
     ]
   },
   {
-    "indicatorCode": "1.1.3.0.3",
+    "indicatorCode": "B16-FMT-01-E8EFB8C0-seguimiento-a-proyectos",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Seguimiento a Proyectos de Investigación/Seguimiento a proyectos de investigación en planteles.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "official_table",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "PLANTEL",
+        "NOMBRE DE PROYECTOS DE INVESTIGACIÓN",
+        "NÚMERO DE ALUMNOS PARTICIPANTES"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "1.1.3.0.3-FMT-6B682267",
+    "officialCode": "1.1.3.0.3",
     "sourcePath": "Bachillerato 16/Viajes de Estudio/VIAJES DE ESTUDIO-EDUCACIÓN PERTINENTE Y DE CALIDAD.xlsx",
     "planteles": [
       "Bachillerato 16"
@@ -1036,7 +1187,63 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
     ]
   },
   {
-    "indicatorCode": "1.1.3.0.3",
+    "indicatorCode": "B16-FMT-01-55725D79-personal-plantel-2025",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Personal del Plantel/PERSONAL PLANTEL_2025.xlsx",
+    "planteles": [
+      "Bachillerato 1",
+      "Bachillerato 10",
+      "Bachillerato 11",
+      "Bachillerato 12",
+      "Bachillerato 13",
+      "Bachillerato 14",
+      "Bachillerato 15",
+      "Bachillerato 16",
+      "Bachillerato 17",
+      "Bachillerato 18",
+      "Bachillerato 19",
+      "Bachillerato 2",
+      "Bachillerato 20",
+      "Bachillerato 21",
+      "Bachillerato 22",
+      "Bachillerato 23",
+      "Bachillerato 24",
+      "Bachillerato 25",
+      "Bachillerato 26",
+      "Bachillerato 27",
+      "Bachillerato 28",
+      "Bachillerato 29",
+      "Bachillerato 3",
+      "Bachillerato 30",
+      "Bachillerato 31",
+      "Bachillerato 32",
+      "Bachillerato 33",
+      "Bachillerato 34",
+      "Bachillerato 35",
+      "Bachillerato 4",
+      "Bachillerato 5",
+      "Bachillerato 6",
+      "Bachillerato 7",
+      "Bachillerato 8",
+      "Bachillerato 9"
+    ],
+    "classification": "official_table",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "PLANTEL",
+        "NOMBRE",
+        "ACTIVIDAD QUE DESEMPEÑA EN PLANTEL",
+        "LICENCIATURA (Anotar el nombre de la licenciatura)",
+        "MAESTRÍA (Anotar el nombre de la Maestría)",
+        "DOCTORADO (Anotar el nombre del Doctorado)",
+        "PLANTEL"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "1.1.3.0.3-FMT-26A4E4BB",
+    "officialCode": "1.1.3.0.3",
     "sourcePath": "Bachillerato 16/Programas Interinstitucionales/Convocatoria SEMS/Convocatorias SEMS.xlsx",
     "planteles": [
       "Bachillerato 16"
@@ -1058,7 +1265,8 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
     ]
   },
   {
-    "indicatorCode": "1.1.3.0.3",
+    "indicatorCode": "1.1.3.0.3-FMT-6EBA7CE9",
+    "officialCode": "1.1.3.0.3",
     "sourcePath": "Bachillerato 16/Actividades de Desarrollo y Formación Integral/DESARROLLO Y FORMACION INTEGRAL -PARTICIPANTES EN ACTIVIDADES DE DESARROLLO Y FORMACIÓN INTEGRAL.xlsx",
     "planteles": [
       "Bachillerato 16"
@@ -1086,7 +1294,66 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
     ]
   },
   {
+    "indicatorCode": "B16-FMT-01-85FF7F0A-estrategias-para-combati",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Seguimiento Académico del Estudiantado/Estrategias para combatir el abandono escolar.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "matrix_gender_totals",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "PLANTEL",
+        "CANTIDAD DE ALUMNOS"
+      ],
+      [
+        "MUJERES",
+        "HOMBRES",
+        "TOTAL"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "B16-FMT-01-0A31F882-bachillerato-16-febrero",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Promoción de la Ciencia/Prácticas de Laboratorios/Bachillerato 16 FEBRERO - JULIO 2026.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "official_table",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "PLANTEL",
+        "TOTAL GRUPOS"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "B16-FMT-01-C7B22BC5-cronograma-del-para-la-p",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Internacionalización e Interculturalidad/Acciones de internacionalización e interculturalidad/Cronograma del para la promoción del aprendizaje intercultural, internacional y-o globa.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "official_table",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "Plantel:",
+        "Bachillerato 16"
+      ],
+      [
+        "Nombre de la actividad",
+        "Descripción",
+        "Modalidad"
+      ]
+    ]
+  },
+  {
     "indicatorCode": "1.1.4.4.4",
+    "officialCode": "1.1.4.4.4",
     "sourcePath": "Bachillerato 16/Internacionalización e Interculturalidad/Acciones de internacionalización e interculturalidad/Formato_Indicador de internacionalización.xlsx",
     "planteles": [
       "Bachillerato 16"
@@ -1115,6 +1382,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   },
   {
     "indicatorCode": "1.1.2.1.8",
+    "officialCode": "1.1.2.1.8",
     "sourcePath": "Bachillerato 16/Titulación/INDICADOR DE TITULACION 2025.xlsx",
     "planteles": [
       "Bachillerato 16"
@@ -1136,84 +1404,488 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
         "Total"
       ]
     ]
+  },
+  {
+    "indicatorCode": "B16-FMT-01-55EF8C78-la-ciencia-en-los-bachil",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Promoción de la Ciencia/La ciencia en los bachilleratos universitarios/LA CIENCIA EN LOS BACHILLERATOS UNIVERSITARIOS.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "matrix_gender_totals",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "BACHILLERATO",
+        "NOMBRE DEL EVENTO"
+      ],
+      [
+        "MUJERES",
+        "HOMBRES",
+        "TOTAL",
+        "MUJERES",
+        "HOMBRES",
+        "TOTAL"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "B16-FMT-01-9129D9B3-concursos-academicos",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Promoción de la Ciencia/Concursos Académicos (ciencias, matemáticas, robótica, entre otras)./CONCURSOS ACADEMICOS.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "matrix_gender_totals",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "BACHILLERATO",
+        "NOMBRE DEL EVENTO"
+      ],
+      [
+        "MUJERES",
+        "HOMBRES",
+        "TOTAL",
+        "MUJERES",
+        "HOMBRES",
+        "TOTAL"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "B16-FMT-01-628F230D-nivelacion-academica-jun",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Nivelación Academica/NIVELACION ACADEMICA_junio- agosto 2025.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "official_table",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "PLANTEL",
+        "MATRICULA",
+        "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar)",
+        "No. ASIGNATURAS CON ALUMNOS EN ORDINARIO",
+        "CANTIDAD ESTUDIANTES QUE ASISTIERON"
+      ],
+      [
+        "PLANTEL",
+        "MATRICULA",
+        "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar)",
+        "No. ASIGNATURAS CON ALUMNOS EN ORDINARIO",
+        "CANTIDAD ESTUDIANTES QUE ASISTIERON"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "B16-FMT-01-CC792A5F-concentrado-abandono-esc",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Seguimiento Académico del Estudiantado/CONCENTRADO_ABANDONO ESCOLAR _SEP 2025.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "official_table",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "PLANTEL",
+        "PROGRAMA EDUCATIVO",
+        "NO. DE ESTUDIANTES POR TIPO DE BAJA ACADÉMICA (Separación del programa en el que el estudiante se encuentre inscrito. Art. 37)"
+      ],
+      [
+        "SUSPENSIÓN DEFINITIVA DEL PLANTEL O INSTITUCIÓN",
+        "SUBTOTAL"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "B16-FMT-01-CE2296AB-red-de-apoyo-academico",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Seguimiento Académico del Estudiantado/Red de apoyo académico.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "official_table",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "Nombre de la actividad",
+        "Responsable",
+        "Cantidad de participantes",
+        "Periodo de realización"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "B16-FMT-01-19F01A78-nivelacion-academica-dic",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Nivelación Academica/NIVELACION ACADEMICA_DICIEMBRE 2024- ENERO 2025.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "official_table",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "PLANTEL",
+        "MATRICULA",
+        "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar)",
+        "No. ASIGNATURAS CON ALUMNOS EN ORDINARIO",
+        "CANTIDAD ESTUDIANTES QUE ASISTIERON"
+      ],
+      [
+        "PLANTEL",
+        "MATRICULA",
+        "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar)",
+        "No. ASIGNATURAS CON ALUMNOS EN ORDINARIO",
+        "CANTIDAD ESTUDIANTES QUE ASISTIERON"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "B16-FMT-01-0CE86D23-alumnos-que-realizaron-e",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Titulación/Exámenes aprobados para titulación /Alumnos que realizaron examen de conocImientos para titulación.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "official_table",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "NOMBRE",
+        "GRUPO"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "B16-FMT-01-1E107D9F-personal-plantel-2026",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Personal del Plantel/2026_Personal/PERSONAL _PLANTEL_2026.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "official_table",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "PLANTEL",
+        "NOMBRE",
+        "ACTIVIDAD QUE DESEMPEÑA EN PLANTEL",
+        "LICENCIATURA (Anotar el nombre de la licenciatura)",
+        "MAESTRÍA (Anotar el nombre de la Maestría)",
+        "DOCTORADO (Anotar el nombre del Doctorado)",
+        "PLANTEL",
+        "PROGRAMA EDUCATIVO"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "B16-FMT-01-F40AA656-4-bachillerato-16-agosto",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Promoción de la Ciencia/Prácticas de Laboratorios/ARCHIVO Bachillerato 16/4) Bachillerato 16 AGOSTO 2025 -ENERO 2026.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "official_table",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "PLANTEL",
+        "TOTAL GRUPOS"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "B16-FMT-01-33E7A579-1-bachillerato-16-febrer",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Promoción de la Ciencia/Prácticas de Laboratorios/ARCHIVO Bachillerato 16/1) Bachillerato 16 FEBRERO- AGOSTO 2024.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "official_table",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "PLANTEL",
+        "TOTAL GRUPOS"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "B16-FMT-01-697E06CF-academia-de-programa-tec",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Academias/Academia de programa técnico AQ15-Campo disciplinar..xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "private_roster",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "Nombre del docente",
+        "Correo electrónico institucional"
+      ],
+      [
+        "Nombre",
+        "Correo electrónico institucional"
+      ],
+      [
+        "Nombre",
+        "Correo electrónico institucional"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "B16-FMT-01-BD626F5D-academia-de-programa-tec",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Academias/Academia de programa técnico AP13-Campo disciplinar..xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "private_roster",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "Nombre del docente",
+        "Correo electrónico institucional"
+      ],
+      [
+        "Nombre",
+        "Correo electrónico institucional"
+      ],
+      [
+        "Nombre",
+        "Correo electrónico institucional"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "B16-FMT-01-6BB983C1-3-bachillerato-16-febrer",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Promoción de la Ciencia/Prácticas de Laboratorios/ARCHIVO Bachillerato 16/3) Bachillerato 16 FEBRERO - JULIO 2025.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "official_table",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "PLANTEL",
+        "TOTAL GRUPOS"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "B16-FMT-01-E3FE144D-academias-bg24-campo-dis",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Academias/Academias BG24_Campo disciplinar_v4.0.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "private_roster",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "Nombre del docente",
+        "Correo electrónico institucional"
+      ],
+      [
+        "Nombre",
+        "Correo electrónico institucional"
+      ],
+      [
+        "Nombre",
+        "Correo electrónico institucional"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "B16-FMT-01-D98834ED-formato-de-cronograma-de",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Academias/Formato de cronograma de academia de plantel.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "official_table",
+    "confidence": "source-table-pending-code",
+    "headerRows": []
+  },
+  {
+    "indicatorCode": "B16-FMT-01-B53F23A1-2-bachillerato-16-agosto",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Promoción de la Ciencia/Prácticas de Laboratorios/ARCHIVO Bachillerato 16/2) Bachillerato 16 AGOSTO 2024 -ENERO 2025.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "official_table",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "PLANTEL",
+        "TOTAL GRUPOS"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "B16-FMT-01-AC736017-idiomas",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Academias/Idiomas.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "private_roster",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "Nombre",
+        "Correo electrónico institucional"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "B16-FMT-01-76B62473-formato-conformacion-de",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Academias/Formato conformación de academias por plantel.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "official_table",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "PLANTEL",
+        "NOMBRE DEL PROGRAMA",
+        "No. DE ACADEMIAS POR PLANTEL",
+        "ACTIVIDADES DE TRABAJO REALIZADAS",
+        "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS",
+        "TOTAL"
+      ]
+    ]
+  },
+  {
+    "indicatorCode": "B16-FMT-01-CF8AE174-registro-interesados-man",
+    "officialCode": null,
+    "sourcePath": "Bachillerato 16/Academias/Registro interesados manuales inglés.xlsx",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "private_roster",
+    "confidence": "source-table-pending-code",
+    "headerRows": [
+      [
+        "Plantel donde labora",
+        "Nombre",
+        "Correo"
+      ]
+    ]
   }
 ];
 
 export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate> = {
-  "1.1.1.3.3": {
-    "indicatorCode": "1.1.1.3.3",
-    "indicatorName": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS: 1.1.1.3.2 Número de personal de apoyo académico de NMS y NS que r",
-    "sourceLabel": "Formación_docente.xlsx",
-    "sourcePath": "Bachillerato 16/Formación Docente y Apoyo Académico/Formación_docente.xlsx",
-    "sheetName": "DOCENTES",
+  "B16-FMT-01-73CBDE41-bach-16-terminaron": {
+    "indicatorCode": "B16-FMT-01-73CBDE41-bach-16-terminaron",
+    "officialCode": null,
+    "indicatorName": "BACH 16 TERMINARON",
+    "sourceLabel": "BACH 16 TERMINARON.xlsx",
+    "sourcePath": "Bachillerato 16/CONSTANCIAS SEMANA DE VINCULACIÓN ACADEMICA/BACH 16 TERMINARON.xlsx",
+    "sheetName": "Hoja1",
     "groups": [
       {
         "label": "Formato oficial importado",
-        "colspan": 8
+        "colspan": 4
       }
     ],
     "columns": [
       {
         "key": "no",
-        "label": "No.",
+        "label": "NO.",
         "type": "text"
       },
       {
-        "key": "tipo_de_evento",
-        "label": "Tipo de evento",
+        "key": "nombre",
+        "label": "NOMBRE",
         "type": "text"
       },
       {
-        "key": "nombre_del_evento",
-        "label": "Nombre del evento",
+        "key": "correo",
+        "label": "CORREO",
         "type": "text"
       },
       {
-        "key": "duracion_en_horas",
-        "label": "Duración en horas",
-        "type": "text"
-      },
-      {
-        "key": "modalidad",
-        "label": "Modalidad",
-        "type": "text"
-      },
-      {
-        "key": "competencias_desarrolladas",
-        "label": "Competencias desarrolladas",
-        "type": "text"
-      },
-      {
-        "key": "evento_organizado_por",
-        "label": "Evento organizado por:",
-        "type": "text"
-      },
-      {
-        "key": "poblacion_docente_nms",
-        "label": "Población docente NMS",
+        "key": "facultad",
+        "label": "FACULTAD",
         "type": "text"
       }
     ],
     "initialRows": [
       {
-        "no": "",
-        "tipo_de_evento": "",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms": "H"
+        "no": "1",
+        "nombre": "",
+        "correo": "",
+        "facultad": "FIME"
       },
       {
-        "no": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS: 1.1.1.3.2 Número de personal de apoyo académico de NMS y NS que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocional, inclusión, investigación, arte, cultura, e innovación, género y desarrollo sostenible del medio ambientales 1.1.1.3.3 Número de docentes del NMS y NS con capacitación en diseño curricular y estrategias didácticas para el aprendizaje en ambientes virtuales (PE en línea) 1.1.1.5.1 Número de docentes de NMS y NS que recibe capacitación disciplinar pertinente en su área de desempeño",
-        "tipo_de_evento": "",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms": ""
+        "no": "2",
+        "nombre": "",
+        "correo": "",
+        "facultad": "FAC CIVIL"
+      },
+      {
+        "no": "3",
+        "nombre": "",
+        "correo": "",
+        "facultad": "FAC QUIM"
+      },
+      {
+        "no": "4",
+        "nombre": "",
+        "correo": "",
+        "facultad": ""
+      },
+      {
+        "no": "5",
+        "nombre": "",
+        "correo": "",
+        "facultad": ""
+      },
+      {
+        "no": "6",
+        "nombre": "",
+        "correo": "",
+        "facultad": ""
+      },
+      {
+        "no": "7",
+        "nombre": "",
+        "correo": "",
+        "facultad": ""
+      },
+      {
+        "no": "8",
+        "nombre": "",
+        "correo": "",
+        "facultad": ""
+      },
+      {
+        "no": "9",
+        "nombre": "",
+        "correo": "",
+        "facultad": ""
+      },
+      {
+        "no": "10",
+        "nombre": "",
+        "correo": "",
+        "facultad": ""
+      },
+      {
+        "no": "11",
+        "nombre": "",
+        "correo": "",
+        "facultad": ""
       }
     ],
     "showTotals": false,
@@ -1221,117 +1893,418 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "addRowLabel": "Agregar fila",
     "emptyRow": {
       "no": "",
-      "tipo_de_evento": "",
-      "nombre_del_evento": "",
-      "duracion_en_horas": "",
-      "modalidad": "",
-      "competencias_desarrolladas": "",
-      "evento_organizado_por": "",
-      "poblacion_docente_nms": ""
+      "nombre": "",
+      "correo": "",
+      "facultad": ""
     },
     "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
     "quality": [
       "source_workbook_template",
-      "private_fields_blank"
+      "private_fields_blank",
+      "pending_indicator_code"
     ]
   },
-  "1.1.1.5.1": {
-    "indicatorCode": "1.1.1.5.1",
-    "indicatorName": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS: 1.1.1.3.2 Número de personal de apoyo académico de NMS y NS que r",
-    "sourceLabel": "Formación_docente.xlsx",
-    "sourcePath": "Bachillerato 16/Formación Docente y Apoyo Académico/Formación_docente.xlsx",
-    "sheetName": "DOCENTES",
+  "B16-FMT-01-12F38BB9-formato-media-superior": {
+    "indicatorCode": "B16-FMT-01-12F38BB9-formato-media-superior",
+    "officialCode": null,
+    "indicatorName": "formato media superior",
+    "sourceLabel": "formato media superior.xlsx",
+    "sourcePath": "Bachillerato 16/Mobiliario/formato media superior.xlsx",
+    "sheetName": "Hoja1",
     "groups": [
       {
         "label": "Formato oficial importado",
-        "colspan": 8
+        "colspan": 10
       }
     ],
     "columns": [
       {
-        "key": "no",
-        "label": "No.",
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "n_equipos_funcionales",
+        "label": "N° EQUIPOS FUNCIONALES",
         "type": "text"
       },
       {
-        "key": "tipo_de_evento",
-        "label": "Tipo de evento",
+        "key": "n_inventario",
+        "label": "N° INVENTARIO",
         "type": "text"
       },
       {
-        "key": "nombre_del_evento",
-        "label": "Nombre del evento",
+        "key": "modelo",
+        "label": "MODELO",
         "type": "text"
       },
       {
-        "key": "duracion_en_horas",
-        "label": "Duración en horas",
+        "key": "ubicacion_en_el_plantel",
+        "label": "UBICACIÓN EN EL PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "comparte_custodio",
+        "label": "COMPARTE CUSTODIO",
         "type": "text"
       },
       {
-        "key": "modalidad",
-        "label": "Modalidad",
+        "key": "n_de_necesidad_de_equipos_nuevos",
+        "label": "N° DE NECESIDAD DE EQUIPOS NUEVOS",
         "type": "text"
       },
       {
-        "key": "competencias_desarrolladas",
-        "label": "Competencias desarrolladas",
+        "key": "equipo_por_sustitucion",
+        "label": "EQUIPO POR SUSTITUCIÓN",
         "type": "text"
       },
       {
-        "key": "evento_organizado_por",
-        "label": "Evento organizado por:",
+        "key": "n_inventario_de_los_equipos_a_sustituir",
+        "label": "N° INVENTARIO DE LOS EQUIPOS A SUSTITUIR",
         "type": "text"
       },
       {
-        "key": "poblacion_docente_nms",
-        "label": "Población docente NMS",
+        "key": "equipo_por_espacio_nuevo",
+        "label": "EQUIPO POR ESPACIO NUEVO",
         "type": "text"
       }
     ],
     "initialRows": [
       {
-        "no": "",
-        "tipo_de_evento": "",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms": "H"
+        "plantel": "EJEMPLO",
+        "n_equipos_funcionales": "",
+        "n_inventario": "",
+        "modelo": "",
+        "ubicacion_en_el_plantel": "",
+        "comparte_custodio": "",
+        "n_de_necesidad_de_equipos_nuevos": "",
+        "equipo_por_sustitucion": "",
+        "n_inventario_de_los_equipos_a_sustituir": "",
+        "equipo_por_espacio_nuevo": ""
       },
       {
-        "no": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS: 1.1.1.3.2 Número de personal de apoyo académico de NMS y NS que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocional, inclusión, investigación, arte, cultura, e innovación, género y desarrollo sostenible del medio ambientales 1.1.1.3.3 Número de docentes del NMS y NS con capacitación en diseño curricular y estrategias didácticas para el aprendizaje en ambientes virtuales (PE en línea) 1.1.1.5.1 Número de docentes de NMS y NS que recibe capacitación disciplinar pertinente en su área de desempeño",
-        "tipo_de_evento": "",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms": ""
+        "plantel": "BACHILLERATO 16",
+        "n_equipos_funcionales": "18.0",
+        "n_inventario": "163252.0",
+        "modelo": "BENQ",
+        "ubicacion_en_el_plantel": "CENTRO DE COMPUTO",
+        "comparte_custodio": "SI",
+        "n_de_necesidad_de_equipos_nuevos": "9.0",
+        "equipo_por_sustitucion": "8.0",
+        "n_inventario_de_los_equipos_a_sustituir": "",
+        "equipo_por_espacio_nuevo": "1 DIRECCIÓN"
+      },
+      {
+        "plantel": "",
+        "n_equipos_funcionales": "",
+        "n_inventario": "155951.0",
+        "modelo": "NEC",
+        "ubicacion_en_el_plantel": "CENTRO DE COMPUTO",
+        "comparte_custodio": "SI",
+        "n_de_necesidad_de_equipos_nuevos": "",
+        "equipo_por_sustitucion": "",
+        "n_inventario_de_los_equipos_a_sustituir": "",
+        "equipo_por_espacio_nuevo": ""
+      },
+      {
+        "plantel": "",
+        "n_equipos_funcionales": "",
+        "n_inventario": "155950.0",
+        "modelo": "NEC",
+        "ubicacion_en_el_plantel": "AUDITORIO",
+        "comparte_custodio": "SI",
+        "n_de_necesidad_de_equipos_nuevos": "",
+        "equipo_por_sustitucion": "",
+        "n_inventario_de_los_equipos_a_sustituir": "",
+        "equipo_por_espacio_nuevo": ""
+      },
+      {
+        "plantel": "",
+        "n_equipos_funcionales": "",
+        "n_inventario": "161056.0",
+        "modelo": "EPSON",
+        "ubicacion_en_el_plantel": "AULA 19",
+        "comparte_custodio": "SI",
+        "n_de_necesidad_de_equipos_nuevos": "",
+        "equipo_por_sustitucion": "",
+        "n_inventario_de_los_equipos_a_sustituir": "",
+        "equipo_por_espacio_nuevo": ""
+      },
+      {
+        "plantel": "",
+        "n_equipos_funcionales": "",
+        "n_inventario": "161057.0",
+        "modelo": "EPSON",
+        "ubicacion_en_el_plantel": "AULA 18",
+        "comparte_custodio": "SI",
+        "n_de_necesidad_de_equipos_nuevos": "",
+        "equipo_por_sustitucion": "",
+        "n_inventario_de_los_equipos_a_sustituir": "",
+        "equipo_por_espacio_nuevo": ""
+      },
+      {
+        "plantel": "",
+        "n_equipos_funcionales": "",
+        "n_inventario": "160677.0",
+        "modelo": "NEC",
+        "ubicacion_en_el_plantel": "AULA 17",
+        "comparte_custodio": "SI",
+        "n_de_necesidad_de_equipos_nuevos": "",
+        "equipo_por_sustitucion": "",
+        "n_inventario_de_los_equipos_a_sustituir": "160677.0",
+        "equipo_por_espacio_nuevo": ""
+      },
+      {
+        "plantel": "",
+        "n_equipos_funcionales": "",
+        "n_inventario": "161055.0",
+        "modelo": "EPSON",
+        "ubicacion_en_el_plantel": "AULA 16",
+        "comparte_custodio": "SI",
+        "n_de_necesidad_de_equipos_nuevos": "",
+        "equipo_por_sustitucion": "",
+        "n_inventario_de_los_equipos_a_sustituir": "",
+        "equipo_por_espacio_nuevo": ""
+      },
+      {
+        "plantel": "",
+        "n_equipos_funcionales": "",
+        "n_inventario": "C5890",
+        "modelo": "INFOCUS",
+        "ubicacion_en_el_plantel": "AULA 15",
+        "comparte_custodio": "SI",
+        "n_de_necesidad_de_equipos_nuevos": "",
+        "equipo_por_sustitucion": "",
+        "n_inventario_de_los_equipos_a_sustituir": "C5890",
+        "equipo_por_espacio_nuevo": ""
+      },
+      {
+        "plantel": "",
+        "n_equipos_funcionales": "",
+        "n_inventario": "C5901",
+        "modelo": "INFOCUS",
+        "ubicacion_en_el_plantel": "AULA 14",
+        "comparte_custodio": "SI",
+        "n_de_necesidad_de_equipos_nuevos": "",
+        "equipo_por_sustitucion": "",
+        "n_inventario_de_los_equipos_a_sustituir": "C5901",
+        "equipo_por_espacio_nuevo": ""
+      },
+      {
+        "plantel": "",
+        "n_equipos_funcionales": "",
+        "n_inventario": "C5899",
+        "modelo": "INFOCUS",
+        "ubicacion_en_el_plantel": "AULA 13",
+        "comparte_custodio": "SI",
+        "n_de_necesidad_de_equipos_nuevos": "",
+        "equipo_por_sustitucion": "",
+        "n_inventario_de_los_equipos_a_sustituir": "C5899",
+        "equipo_por_espacio_nuevo": ""
+      },
+      {
+        "plantel": "",
+        "n_equipos_funcionales": "",
+        "n_inventario": "C5893",
+        "modelo": "OPTOMA",
+        "ubicacion_en_el_plantel": "AULA 11",
+        "comparte_custodio": "SI",
+        "n_de_necesidad_de_equipos_nuevos": "",
+        "equipo_por_sustitucion": "",
+        "n_inventario_de_los_equipos_a_sustituir": "C5893",
+        "equipo_por_espacio_nuevo": ""
+      },
+      {
+        "plantel": "",
+        "n_equipos_funcionales": "",
+        "n_inventario": "C5891",
+        "modelo": "INFOCUS",
+        "ubicacion_en_el_plantel": "AULA 10",
+        "comparte_custodio": "SI",
+        "n_de_necesidad_de_equipos_nuevos": "",
+        "equipo_por_sustitucion": "",
+        "n_inventario_de_los_equipos_a_sustituir": "C5891",
+        "equipo_por_espacio_nuevo": ""
+      },
+      {
+        "plantel": "",
+        "n_equipos_funcionales": "",
+        "n_inventario": "143738.0",
+        "modelo": "VIEWSONIC",
+        "ubicacion_en_el_plantel": "AULA 9",
+        "comparte_custodio": "SI",
+        "n_de_necesidad_de_equipos_nuevos": "",
+        "equipo_por_sustitucion": "",
+        "n_inventario_de_los_equipos_a_sustituir": "",
+        "equipo_por_espacio_nuevo": ""
+      },
+      {
+        "plantel": "",
+        "n_equipos_funcionales": "",
+        "n_inventario": "150998.0",
+        "modelo": "OPTOMA",
+        "ubicacion_en_el_plantel": "AULA 8",
+        "comparte_custodio": "SI",
+        "n_de_necesidad_de_equipos_nuevos": "",
+        "equipo_por_sustitucion": "",
+        "n_inventario_de_los_equipos_a_sustituir": "150988.0",
+        "equipo_por_espacio_nuevo": ""
+      },
+      {
+        "plantel": "",
+        "n_equipos_funcionales": "",
+        "n_inventario": "137988.0",
+        "modelo": "NEC",
+        "ubicacion_en_el_plantel": "AULA 7",
+        "comparte_custodio": "SI",
+        "n_de_necesidad_de_equipos_nuevos": "",
+        "equipo_por_sustitucion": "",
+        "n_inventario_de_los_equipos_a_sustituir": "",
+        "equipo_por_espacio_nuevo": ""
+      },
+      {
+        "plantel": "",
+        "n_equipos_funcionales": "",
+        "n_inventario": "150999.0",
+        "modelo": "OPTOMA",
+        "ubicacion_en_el_plantel": "AULA 6",
+        "comparte_custodio": "SI",
+        "n_de_necesidad_de_equipos_nuevos": "",
+        "equipo_por_sustitucion": "",
+        "n_inventario_de_los_equipos_a_sustituir": "150999.0",
+        "equipo_por_espacio_nuevo": ""
+      },
+      {
+        "plantel": "",
+        "n_equipos_funcionales": "",
+        "n_inventario": "160675.0",
+        "modelo": "NEC",
+        "ubicacion_en_el_plantel": "AULA 5",
+        "comparte_custodio": "SI",
+        "n_de_necesidad_de_equipos_nuevos": "",
+        "equipo_por_sustitucion": "",
+        "n_inventario_de_los_equipos_a_sustituir": "",
+        "equipo_por_espacio_nuevo": ""
+      },
+      {
+        "plantel": "",
+        "n_equipos_funcionales": "",
+        "n_inventario": "143737.0",
+        "modelo": "VIEWSONIC",
+        "ubicacion_en_el_plantel": "AULA 4",
+        "comparte_custodio": "SI",
+        "n_de_necesidad_de_equipos_nuevos": "",
+        "equipo_por_sustitucion": "",
+        "n_inventario_de_los_equipos_a_sustituir": "",
+        "equipo_por_espacio_nuevo": ""
       }
     ],
     "showTotals": false,
     "allowAddRows": true,
     "addRowLabel": "Agregar fila",
     "emptyRow": {
-      "no": "",
-      "tipo_de_evento": "",
-      "nombre_del_evento": "",
-      "duracion_en_horas": "",
-      "modalidad": "",
-      "competencias_desarrolladas": "",
-      "evento_organizado_por": "",
-      "poblacion_docente_nms": ""
+      "plantel": "",
+      "n_equipos_funcionales": "",
+      "n_inventario": "",
+      "modelo": "",
+      "ubicacion_en_el_plantel": "",
+      "comparte_custodio": "",
+      "n_de_necesidad_de_equipos_nuevos": "",
+      "equipo_por_sustitucion": "",
+      "n_inventario_de_los_equipos_a_sustituir": "",
+      "equipo_por_espacio_nuevo": ""
     },
     "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
     "quality": [
       "source_workbook_template",
-      "private_fields_blank"
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "B16-FMT-01-1D310056-seguimiento-capacitacion": {
+    "indicatorCode": "B16-FMT-01-1D310056-seguimiento-capacitacion",
+    "officialCode": null,
+    "indicatorName": "Seguimiento capacitación en materia de género planteles",
+    "sourceLabel": "Seguimiento capacitación en materia de género planteles.xlsx",
+    "sourcePath": "Bachillerato 16/Sensibilidad en Materia de Género/Seguimiento capacitación en materia de género planteles.xlsx",
+    "sheetName": "Hoja1",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 6
+      }
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "columna_2",
+        "label": "Columna 2",
+        "type": "text"
+      },
+      {
+        "key": "nombre_de_la_capacitacion",
+        "label": "NOMBRE DE LA CAPACITACIÓN",
+        "type": "text"
+      },
+      {
+        "key": "numero_de_alumnas_participantes",
+        "label": "NÚMERO DE ALUMNAS PARTICIPANTES",
+        "type": "number"
+      },
+      {
+        "key": "numero_de_alumnos_participantes",
+        "label": "NÚMERO DE ALUMNOS PARTICIPANTES",
+        "type": "number"
+      },
+      {
+        "key": "temas_que_se_abordaron",
+        "label": "TEMAS QUE SE ABORDARON",
+        "type": "text"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "Bachillerato 16",
+        "columna_2": "",
+        "nombre_de_la_capacitacion": "",
+        "numero_de_alumnas_participantes": 36.0,
+        "numero_de_alumnos_participantes": 16.0,
+        "temas_que_se_abordaron": "Prevención y sensibilización en comunidades educativas"
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "nombre_de_la_capacitacion": "",
+        "numero_de_alumnas_participantes": 29.0,
+        "numero_de_alumnos_participantes": 20.0,
+        "temas_que_se_abordaron": "La trata de personas facilitada por internet"
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "columna_2": "",
+      "nombre_de_la_capacitacion": "",
+      "numero_de_alumnas_participantes": "",
+      "numero_de_alumnos_participantes": "",
+      "temas_que_se_abordaron": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
     ]
   },
   "1.1.1.3.2": {
     "indicatorCode": "1.1.1.3.2",
+    "officialCode": "1.1.1.3.2",
     "indicatorName": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS:  Número de personal de apoyo académico de NMS y NS que reciben ca",
     "sourceLabel": "Formación_docente.xlsx",
     "sourcePath": "Bachillerato 16/Formación Docente y Apoyo Académico/Formación_docente.xlsx",
@@ -1422,11 +2395,357 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
     "quality": [
       "source_workbook_template",
-      "private_fields_blank"
+      "private_fields_blank",
+      "official_code_detected"
+    ]
+  },
+  "1.1.1.3.3": {
+    "indicatorCode": "1.1.1.3.3",
+    "officialCode": "1.1.1.3.3",
+    "indicatorName": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS: 1.1.1.3.2 Número de personal de apoyo académico de NMS y NS que r",
+    "sourceLabel": "Formación_docente.xlsx",
+    "sourcePath": "Bachillerato 16/Formación Docente y Apoyo Académico/Formación_docente.xlsx",
+    "sheetName": "DOCENTES",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 8
+      }
+    ],
+    "columns": [
+      {
+        "key": "no",
+        "label": "No.",
+        "type": "text"
+      },
+      {
+        "key": "tipo_de_evento",
+        "label": "Tipo de evento",
+        "type": "text"
+      },
+      {
+        "key": "nombre_del_evento",
+        "label": "Nombre del evento",
+        "type": "text"
+      },
+      {
+        "key": "duracion_en_horas",
+        "label": "Duración en horas",
+        "type": "text"
+      },
+      {
+        "key": "modalidad",
+        "label": "Modalidad",
+        "type": "text"
+      },
+      {
+        "key": "competencias_desarrolladas",
+        "label": "Competencias desarrolladas",
+        "type": "text"
+      },
+      {
+        "key": "evento_organizado_por",
+        "label": "Evento organizado por:",
+        "type": "text"
+      },
+      {
+        "key": "poblacion_docente_nms",
+        "label": "Población docente NMS",
+        "type": "text"
+      }
+    ],
+    "initialRows": [
+      {
+        "no": "",
+        "tipo_de_evento": "",
+        "nombre_del_evento": "",
+        "duracion_en_horas": "",
+        "modalidad": "",
+        "competencias_desarrolladas": "",
+        "evento_organizado_por": "",
+        "poblacion_docente_nms": "H"
+      },
+      {
+        "no": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS: 1.1.1.3.2 Número de personal de apoyo académico de NMS y NS que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocional, inclusión, investigación, arte, cultura, e innovación, género y desarrollo sostenible del medio ambientales 1.1.1.3.3 Número de docentes del NMS y NS con capacitación en diseño curricular y estrategias didácticas para el aprendizaje en ambientes virtuales (PE en línea) 1.1.1.5.1 Número de docentes de NMS y NS que recibe capacitación disciplinar pertinente en su área de desempeño",
+        "tipo_de_evento": "",
+        "nombre_del_evento": "",
+        "duracion_en_horas": "",
+        "modalidad": "",
+        "competencias_desarrolladas": "",
+        "evento_organizado_por": "",
+        "poblacion_docente_nms": ""
+      }
+    ],
+    "showTotals": false,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "no": "",
+      "tipo_de_evento": "",
+      "nombre_del_evento": "",
+      "duracion_en_horas": "",
+      "modalidad": "",
+      "competencias_desarrolladas": "",
+      "evento_organizado_por": "",
+      "poblacion_docente_nms": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "official_code_detected"
+    ]
+  },
+  "1.1.1.5.1": {
+    "indicatorCode": "1.1.1.5.1",
+    "officialCode": "1.1.1.5.1",
+    "indicatorName": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS: 1.1.1.3.2 Número de personal de apoyo académico de NMS y NS que r",
+    "sourceLabel": "Formación_docente.xlsx",
+    "sourcePath": "Bachillerato 16/Formación Docente y Apoyo Académico/Formación_docente.xlsx",
+    "sheetName": "DOCENTES",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 8
+      }
+    ],
+    "columns": [
+      {
+        "key": "no",
+        "label": "No.",
+        "type": "text"
+      },
+      {
+        "key": "tipo_de_evento",
+        "label": "Tipo de evento",
+        "type": "text"
+      },
+      {
+        "key": "nombre_del_evento",
+        "label": "Nombre del evento",
+        "type": "text"
+      },
+      {
+        "key": "duracion_en_horas",
+        "label": "Duración en horas",
+        "type": "text"
+      },
+      {
+        "key": "modalidad",
+        "label": "Modalidad",
+        "type": "text"
+      },
+      {
+        "key": "competencias_desarrolladas",
+        "label": "Competencias desarrolladas",
+        "type": "text"
+      },
+      {
+        "key": "evento_organizado_por",
+        "label": "Evento organizado por:",
+        "type": "text"
+      },
+      {
+        "key": "poblacion_docente_nms",
+        "label": "Población docente NMS",
+        "type": "text"
+      }
+    ],
+    "initialRows": [
+      {
+        "no": "",
+        "tipo_de_evento": "",
+        "nombre_del_evento": "",
+        "duracion_en_horas": "",
+        "modalidad": "",
+        "competencias_desarrolladas": "",
+        "evento_organizado_por": "",
+        "poblacion_docente_nms": "H"
+      },
+      {
+        "no": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS: 1.1.1.3.2 Número de personal de apoyo académico de NMS y NS que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocional, inclusión, investigación, arte, cultura, e innovación, género y desarrollo sostenible del medio ambientales 1.1.1.3.3 Número de docentes del NMS y NS con capacitación en diseño curricular y estrategias didácticas para el aprendizaje en ambientes virtuales (PE en línea) 1.1.1.5.1 Número de docentes de NMS y NS que recibe capacitación disciplinar pertinente en su área de desempeño",
+        "tipo_de_evento": "",
+        "nombre_del_evento": "",
+        "duracion_en_horas": "",
+        "modalidad": "",
+        "competencias_desarrolladas": "",
+        "evento_organizado_por": "",
+        "poblacion_docente_nms": ""
+      }
+    ],
+    "showTotals": false,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "no": "",
+      "tipo_de_evento": "",
+      "nombre_del_evento": "",
+      "duracion_en_horas": "",
+      "modalidad": "",
+      "competencias_desarrolladas": "",
+      "evento_organizado_por": "",
+      "poblacion_docente_nms": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "official_code_detected"
+    ]
+  },
+  "B16-FMT-01-9CE2F116-datos-planteles-y-buzon": {
+    "indicatorCode": "B16-FMT-01-9CE2F116-datos-planteles-y-buzon",
+    "officialCode": null,
+    "indicatorName": "DATOS  PLANTELES Y BUZÓN UCOL",
+    "sourceLabel": "DATOS  PLANTELES Y BUZÓN UCOL.xlsx",
+    "sourcePath": "Bachillerato 16/Proceso de Admisión 2025/DATOS  PLANTELES Y BUZÓN UCOL.xlsx",
+    "sheetName": "Hoja1",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 17
+      }
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "calle",
+        "label": "CALLE",
+        "type": "text"
+      },
+      {
+        "key": "no_exterior_interior",
+        "label": "No. EXTERIOR - INTERIOR",
+        "type": "text"
+      },
+      {
+        "key": "colonia",
+        "label": "COLONIA",
+        "type": "text"
+      },
+      {
+        "key": "c_p",
+        "label": "C. P.",
+        "type": "text"
+      },
+      {
+        "key": "entidad",
+        "label": "ENTIDAD",
+        "type": "text"
+      },
+      {
+        "key": "municipio",
+        "label": "MUNICIPIO",
+        "type": "text"
+      },
+      {
+        "key": "turno",
+        "label": "TURNO",
+        "type": "readonly"
+      },
+      {
+        "key": "horario_no_de_clases",
+        "label": "HORARIO (NO DE CLASES)",
+        "type": "text"
+      },
+      {
+        "key": "numero_telefonico",
+        "label": "NÚMERO TELEFÓNICO",
+        "type": "number"
+      },
+      {
+        "key": "extension",
+        "label": "EXTENSIÓN",
+        "type": "text"
+      },
+      {
+        "key": "correo_electronico",
+        "label": "CORREO ELECTRÓNICO",
+        "type": "text"
+      },
+      {
+        "key": "nombre_del_la_director_a",
+        "label": "NOMBRE DEL/LA DIRECTOR/A",
+        "type": "text"
+      },
+      {
+        "key": "no_de_trabajador_de_director_a",
+        "label": "NO. DE TRABAJADOR DE DIRECTOR/A",
+        "type": "text"
+      },
+      {
+        "key": "nombre_de_responsable_de_buzon_ucol",
+        "label": "NOMBRE DE RESPONSABLE DE BUZÓN UCOL",
+        "type": "text"
+      },
+      {
+        "key": "no_de_trabajador_de_responsable_de_buzon_ucol",
+        "label": "NO. DE TRABAJADOR DE RESPONSABLE DE BUZÓN UCOL",
+        "type": "text"
+      },
+      {
+        "key": "correo_de_responsable_de_buzon_ucol",
+        "label": "CORREO DE RESPONSABLE DE BUZÓN UCOL",
+        "type": "text"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "BACHILLERATO 16",
+        "calle": "AV. JOSEFA ORTIZ DE DOMINGUEZ",
+        "no_exterior_interior": "64.0",
+        "colonia": "LA HACIENDITA",
+        "c_p": "28970.0",
+        "entidad": "COLIMA",
+        "municipio": "VILLA DE ALVAREZ",
+        "turno": "VESPERTINO",
+        "horario_no_de_clases": "12:30 -8:30",
+        "numero_telefonico": 3123161189.0,
+        "extension": "",
+        "correo_electronico": "",
+        "nombre_del_la_director_a": "",
+        "no_de_trabajador_de_director_a": "",
+        "nombre_de_responsable_de_buzon_ucol": "",
+        "no_de_trabajador_de_responsable_de_buzon_ucol": "",
+        "correo_de_responsable_de_buzon_ucol": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "calle": "",
+      "no_exterior_interior": "",
+      "colonia": "",
+      "c_p": "",
+      "entidad": "",
+      "municipio": "",
+      "turno": "",
+      "horario_no_de_clases": "",
+      "numero_telefonico": "",
+      "extension": "",
+      "correo_electronico": "",
+      "nombre_del_la_director_a": "",
+      "no_de_trabajador_de_director_a": "",
+      "nombre_de_responsable_de_buzon_ucol": "",
+      "no_de_trabajador_de_responsable_de_buzon_ucol": "",
+      "correo_de_responsable_de_buzon_ucol": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
     ]
   },
   "1.1.3.0.3": {
     "indicatorCode": "1.1.3.0.3",
+    "officialCode": "1.1.3.0.3",
     "indicatorName": "Porcentaje de estudiantes de NMS participantes en las actividades de desarrollo y formación integral",
     "sourceLabel": "JORNADA POR LA PAZ Y CONTRA LAS ADICCIONES FEB-AGO25.xlsx",
     "sourcePath": "Bachillerato 16/Programas Interinstitucionales/Estrategia en el aula, prevención de adicciones/JORNADA POR LA PAZ Y CONTRA LAS ADICCIONES FEB-AGO25.xlsx",
@@ -1472,11 +2791,1050 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
     "quality": [
       "source_workbook_template",
-      "private_fields_blank"
+      "private_fields_blank",
+      "official_code_detected"
+    ]
+  },
+  "B16-FMT-01-D2B34193-enlaces-unidades-de-aten": {
+    "indicatorCode": "B16-FMT-01-D2B34193-enlaces-unidades-de-aten",
+    "officialCode": null,
+    "indicatorName": "Enlaces Unidades de atención y redes de apoyo",
+    "sourceLabel": "Enlaces Unidades de atención y redes de apoyo.xlsx",
+    "sourcePath": "Bachillerato 16/Programas Interinstitucionales/Espacio común EMS/Enlaces Unidades de atención y redes de apoyo.xlsx",
+    "sheetName": "Hoja1",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 17
+      }
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "columna_2",
+        "label": "Columna 2",
+        "type": "text"
+      },
+      {
+        "key": "columna_3",
+        "label": "Columna 3",
+        "type": "text"
+      },
+      {
+        "key": "nombre_completo",
+        "label": "NOMBRE COMPLETO",
+        "type": "text"
+      },
+      {
+        "key": "columna_5",
+        "label": "Columna 5",
+        "type": "text"
+      },
+      {
+        "key": "columna_6",
+        "label": "Columna 6",
+        "type": "text"
+      },
+      {
+        "key": "columna_7",
+        "label": "Columna 7",
+        "type": "text"
+      },
+      {
+        "key": "columna_8",
+        "label": "Columna 8",
+        "type": "text"
+      },
+      {
+        "key": "funcion_que_desempena",
+        "label": "FUNCIÓN QUE DESEMPEÑA",
+        "type": "text"
+      },
+      {
+        "key": "columna_10",
+        "label": "Columna 10",
+        "type": "text"
+      },
+      {
+        "key": "columna_11",
+        "label": "Columna 11",
+        "type": "text"
+      },
+      {
+        "key": "columna_12",
+        "label": "Columna 12",
+        "type": "text"
+      },
+      {
+        "key": "correo_electronico",
+        "label": "CORREO ELECTRÓNICO",
+        "type": "text"
+      },
+      {
+        "key": "columna_14",
+        "label": "Columna 14",
+        "type": "text"
+      },
+      {
+        "key": "columna_15",
+        "label": "Columna 15",
+        "type": "text"
+      },
+      {
+        "key": "columna_16",
+        "label": "Columna 16",
+        "type": "text"
+      },
+      {
+        "key": "telefono_de_contacto",
+        "label": "TELÉFONO DE CONTACTO",
+        "type": "text"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "Bachillerato 1",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Coordinadora Académica",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 2",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "PTC",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 3",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Apoyo académico",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 4",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Asesora pedagógica",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 5",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Coordinador Academico",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 6",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Coordinador Academico",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 7",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "becario /actividades académicas",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 8",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Coordinadora Académica",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 9",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Coordinador Académico",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 10",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Asesora pedagógica",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 11",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Coordinadora académica",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 12",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Coordinadora académica",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 13",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Coordinadora académica",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 14",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Coordinadora acádemica",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 15",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Coordinadora académica",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 16",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "COORDINADORA ACADEMICA",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 17",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Coordinador académico",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 18",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Apoyo académico",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 19",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "COORDINADORA ACADÉMICA",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 20",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Coordinadora académica",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 21",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Coordinadora Académica",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 22",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Coordinadora Académica",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 23",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Coordinadora Académica",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 24",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Coordinador académico",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 25",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Coordinador Académico",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 26",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Coordinador Académico",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 27",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Asesora pedagógica",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 28",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Asesor pedagógico",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 29",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "profesora por horas",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 30",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Coordinadora académica",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 31",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Coordinadora académica",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 32",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Apoyo académico",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 33",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "PTC",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 34",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Coordinadora académica",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "Bachillerato 35",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Coordinadora académica",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "IUBA",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Jefa de Carrera",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      },
+      {
+        "plantel": "ETE",
+        "columna_2": "",
+        "columna_3": "",
+        "nombre_completo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "funcion_que_desempena": "Coordinadora académica",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "correo_electronico": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "telefono_de_contacto": ""
+      }
+    ],
+    "showTotals": false,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "columna_2": "",
+      "columna_3": "",
+      "nombre_completo": "",
+      "columna_5": "",
+      "columna_6": "",
+      "columna_7": "",
+      "columna_8": "",
+      "funcion_que_desempena": "",
+      "columna_10": "",
+      "columna_11": "",
+      "columna_12": "",
+      "correo_electronico": "",
+      "columna_14": "",
+      "columna_15": "",
+      "columna_16": "",
+      "telefono_de_contacto": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "1.1.3.0.3-FMT-7E91E4DB": {
+    "indicatorCode": "1.1.3.0.3-FMT-7E91E4DB",
+    "officialCode": "1.1.3.0.3",
+    "indicatorName": "Porcentaje de estudiantes de NMS participantes en las actividades de desarrollo y formación integral",
+    "sourceLabel": "MUNCOL.xlsx",
+    "sourcePath": "Bachillerato 16/Programas Interinstitucionales/MUNCOL/MUNCOL.xlsx",
+    "sheetName": "Hoja1",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 7
+      }
+    ],
+    "columns": [
+      {
+        "key": "columna_1",
+        "label": "Columna 1",
+        "type": "text"
+      },
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "nombre_del_alumnado_participante",
+        "label": "NOMBRE DEL ALUMNADO PARTICIPANTE",
+        "type": "number"
+      },
+      {
+        "key": "numero_de_cuenta",
+        "label": "NÚMERO DE CUENTA",
+        "type": "number"
+      },
+      {
+        "key": "nombre_del_profesorado_acompanante",
+        "label": "NOMBRE DEL PROFESORADO ACOMPAÑANTE",
+        "type": "text"
+      },
+      {
+        "key": "columna_6",
+        "label": "Columna 6",
+        "type": "text"
+      },
+      {
+        "key": "cantidad_de_alumnos_participantes",
+        "label": "CANTIDAD DE ALUMNOS PARTICIPANTES",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "columna_1": "",
+        "plantel": "Bachillerato 16",
+        "nombre_del_alumnado_participante": "",
+        "numero_de_cuenta": "",
+        "nombre_del_profesorado_acompanante": "",
+        "columna_6": "",
+        "cantidad_de_alumnos_participantes": 3.0
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "columna_1": "",
+      "plantel": "",
+      "nombre_del_alumnado_participante": "",
+      "numero_de_cuenta": "",
+      "nombre_del_profesorado_acompanante": "",
+      "columna_6": "",
+      "cantidad_de_alumnos_participantes": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "official_code_detected",
+      "shared_official_code_split_by_source"
+    ]
+  },
+  "1.1.3.0.3-FMT-74E3FB42": {
+    "indicatorCode": "1.1.3.0.3-FMT-74E3FB42",
+    "officialCode": "1.1.3.0.3",
+    "indicatorName": "Porcentaje de estudiantes de NMS participantes en las actividades de desarrollo y formación integral",
+    "sourceLabel": "Proyecto SEMS Alfabetización y Educación Validación de alumnos.xlsx",
+    "sourcePath": "Bachillerato 16/Programas Interinstitucionales/Programa de Alfabetización MONAE/Proyecto SEMS Alfabetización y Educación Validación de alumnos.xlsx",
+    "sheetName": "Hoja1",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 11
+      }
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "nombre_del_alumno",
+        "label": "NOMBRE DEL ALUMNO",
+        "type": "number"
+      },
+      {
+        "key": "numero_de_cuenta",
+        "label": "NÚMERO DE CUENTA",
+        "type": "number"
+      },
+      {
+        "key": "ssu",
+        "label": "SSU",
+        "type": "text"
+      },
+      {
+        "key": "ssc",
+        "label": "SSC",
+        "type": "text"
+      },
+      {
+        "key": "el_la_educanda_recibio_certificado",
+        "label": "EL/LA EDUCANDA RECIBIÓ CERTIFICADO",
+        "type": "text"
+      },
+      {
+        "key": "columna_7",
+        "label": "Columna 7",
+        "type": "text"
+      },
+      {
+        "key": "columna_8",
+        "label": "Columna 8",
+        "type": "text"
+      },
+      {
+        "key": "primaria",
+        "label": "PRIMARIA",
+        "type": "text"
+      },
+      {
+        "key": "secundaria",
+        "label": "SECUNDARIA",
+        "type": "text"
+      },
+      {
+        "key": "validar_si_no",
+        "label": "VALIDAR SÍ/NO",
+        "type": "text"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "",
+        "nombre_del_alumno": "",
+        "numero_de_cuenta": "",
+        "ssu": "",
+        "ssc": "",
+        "el_la_educanda_recibio_certificado": "SÍ",
+        "columna_7": "NO",
+        "columna_8": "EN TRÁMITE",
+        "primaria": "",
+        "secundaria": "",
+        "validar_si_no": ""
+      },
+      {
+        "plantel": "Bachillerato: _________",
+        "nombre_del_alumno": "",
+        "numero_de_cuenta": "",
+        "ssu": "",
+        "ssc": "",
+        "el_la_educanda_recibio_certificado": "",
+        "columna_7": "",
+        "columna_8": "",
+        "primaria": "",
+        "secundaria": "",
+        "validar_si_no": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "nombre_del_alumno": "",
+      "numero_de_cuenta": "",
+      "ssu": "",
+      "ssc": "",
+      "el_la_educanda_recibio_certificado": "",
+      "columna_7": "",
+      "columna_8": "",
+      "primaria": "",
+      "secundaria": "",
+      "validar_si_no": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "official_code_detected",
+      "shared_official_code_split_by_source"
     ]
   },
   "1.1.1.5.2": {
     "indicatorCode": "1.1.1.5.2",
+    "officialCode": "1.1.1.5.2",
     "indicatorName": "La tabla anterior incide en la siguiente línea de acción del informe de labores de la DGEMS y planteles de NMS:  Número de personal de apoyo académico de NMS y NS que recibe capaci",
     "sourceLabel": "Formación_apoyo académico.xlsx",
     "sourcePath": "Bachillerato 16/Formación Docente y Apoyo Académico/Formación_apoyo académico.xlsx",
@@ -1567,11 +3925,2734 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
     "quality": [
       "source_workbook_template",
-      "private_fields_blank"
+      "private_fields_blank",
+      "official_code_detected"
+    ]
+  },
+  "B16-FMT-01-E8EFB8C0-seguimiento-a-proyectos": {
+    "indicatorCode": "B16-FMT-01-E8EFB8C0-seguimiento-a-proyectos",
+    "officialCode": null,
+    "indicatorName": "Seguimiento a proyectos de investigación en planteles",
+    "sourceLabel": "Seguimiento a proyectos de investigación en planteles.xlsx",
+    "sourcePath": "Bachillerato 16/Seguimiento a Proyectos de Investigación/Seguimiento a proyectos de investigación en planteles.xlsx",
+    "sheetName": "Hoja1",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 12
+      }
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "columna_2",
+        "label": "Columna 2",
+        "type": "text"
+      },
+      {
+        "key": "nombre_de_proyectos_de_investigacion",
+        "label": "NOMBRE DE PROYECTOS DE INVESTIGACIÓN",
+        "type": "text"
+      },
+      {
+        "key": "columna_4",
+        "label": "Columna 4",
+        "type": "text"
+      },
+      {
+        "key": "columna_5",
+        "label": "Columna 5",
+        "type": "text"
+      },
+      {
+        "key": "columna_6",
+        "label": "Columna 6",
+        "type": "text"
+      },
+      {
+        "key": "columna_7",
+        "label": "Columna 7",
+        "type": "text"
+      },
+      {
+        "key": "columna_8",
+        "label": "Columna 8",
+        "type": "text"
+      },
+      {
+        "key": "numero_de_alumnos_participantes",
+        "label": "NÚMERO DE ALUMNOS PARTICIPANTES",
+        "type": "number"
+      },
+      {
+        "key": "columna_10",
+        "label": "Columna 10",
+        "type": "text"
+      },
+      {
+        "key": "columna_11",
+        "label": "Columna 11",
+        "type": "text"
+      },
+      {
+        "key": "temas_que_se_abordaron",
+        "label": "TEMAS QUE SE ABORDARON",
+        "type": "text"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "Bachillerato 16",
+        "columna_2": "",
+        "nombre_de_proyectos_de_investigacion": "",
+        "columna_4": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "numero_de_alumnos_participantes": "",
+        "columna_10": "",
+        "columna_11": "",
+        "temas_que_se_abordaron": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "columna_2": "",
+      "nombre_de_proyectos_de_investigacion": "",
+      "columna_4": "",
+      "columna_5": "",
+      "columna_6": "",
+      "columna_7": "",
+      "columna_8": "",
+      "numero_de_alumnos_participantes": "",
+      "columna_10": "",
+      "columna_11": "",
+      "temas_que_se_abordaron": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "1.1.3.0.3-FMT-6B682267": {
+    "indicatorCode": "1.1.3.0.3-FMT-6B682267",
+    "officialCode": "1.1.3.0.3",
+    "indicatorName": "EDUCACIÓN PERTINENTE Y DE CALIDAD  Porcentaje de estudiantes de NMS y NS participantes en las actividades de desarrollo y formación integral",
+    "sourceLabel": "VIAJES DE ESTUDIO-EDUCACIÓN PERTINENTE Y DE CALIDAD.xlsx",
+    "sourcePath": "Bachillerato 16/Viajes de Estudio/VIAJES DE ESTUDIO-EDUCACIÓN PERTINENTE Y DE CALIDAD.xlsx",
+    "sheetName": "Table 1",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 6
+      }
+    ],
+    "columns": [
+      {
+        "key": "estudiantes",
+        "label": "Estudiantes",
+        "type": "text"
+      },
+      {
+        "key": "columna_2",
+        "label": "Columna 2",
+        "type": "text"
+      },
+      {
+        "key": "docentes",
+        "label": "Docentes",
+        "type": "text"
+      },
+      {
+        "key": "columna_4",
+        "label": "Columna 4",
+        "type": "text"
+      },
+      {
+        "key": "nombre_del_lugar_visitado",
+        "label": "Nombre del lugar visitado:",
+        "type": "text"
+      },
+      {
+        "key": "descripcion_del_impacto_academico",
+        "label": "Descripción del impacto académico",
+        "type": "text"
+      }
+    ],
+    "initialRows": [
+      {
+        "estudiantes": "",
+        "columna_2": "",
+        "docentes": "",
+        "columna_4": "",
+        "nombre_del_lugar_visitado": "",
+        "descripcion_del_impacto_academico": "del viaje en la formación del"
+      },
+      {
+        "estudiantes": "Mujer",
+        "columna_2": "Hombre",
+        "docentes": "Mujer",
+        "columna_4": "Hombre",
+        "nombre_del_lugar_visitado": "",
+        "descripcion_del_impacto_academico": "estudiante."
+      },
+      {
+        "estudiantes": "Realice una descripción acerca de los estudiantes que realizaron viaje de estudios, incluyendo información respecto al lugar de procedencia, nombre de la institución, cantidad de estudiantes que participaron, así como los beneficios que trajo consigo el viaje de estudio.",
+        "columna_2": "",
+        "docentes": "",
+        "columna_4": "",
+        "nombre_del_lugar_visitado": "",
+        "descripcion_del_impacto_academico": ""
+      }
+    ],
+    "showTotals": false,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "estudiantes": "",
+      "columna_2": "",
+      "docentes": "",
+      "columna_4": "",
+      "nombre_del_lugar_visitado": "",
+      "descripcion_del_impacto_academico": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "official_code_detected",
+      "shared_official_code_split_by_source"
+    ]
+  },
+  "B16-FMT-01-55725D79-personal-plantel-2025": {
+    "indicatorCode": "B16-FMT-01-55725D79-personal-plantel-2025",
+    "officialCode": null,
+    "indicatorName": "PERSONAL PLANTEL_2025",
+    "sourceLabel": "PERSONAL PLANTEL_2025.xlsx",
+    "sourcePath": "Bachillerato 16/Personal del Plantel/PERSONAL PLANTEL_2025.xlsx",
+    "sheetName": "PERSONAL DOCENTE AGO-23_ENE-24",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 15
+      }
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "nombre_del_docente",
+        "label": "NOMBRE DEL DOCENTE",
+        "type": "text"
+      },
+      {
+        "key": "no_trab",
+        "label": "No. TRAB.",
+        "type": "text"
+      },
+      {
+        "key": "antiguedad",
+        "label": "ANTIGÜEDAD",
+        "type": "text"
+      },
+      {
+        "key": "tipo_de_contratacion_ptc_ph",
+        "label": "TIPO DE CONTRATACIÓN (PTC / PH)",
+        "type": "text"
+      },
+      {
+        "key": "licenciatura_anotar_el_nombre_de_la_licenciatura",
+        "label": "LICENCIATURA (Anotar el nombre de la licenciatura)",
+        "type": "text"
+      },
+      {
+        "key": "titulado_de_licenciatura",
+        "label": "¿TITULADO DE LICENCIATURA?",
+        "type": "text"
+      },
+      {
+        "key": "maestria_anotar_el_nombre_de_la_maestria",
+        "label": "MAESTRÍA (Anotar el nombre de la Maestría)",
+        "type": "text"
+      },
+      {
+        "key": "titulado_de_maestria",
+        "label": "¿TITULADO DE MAESTRÍA?",
+        "type": "text"
+      },
+      {
+        "key": "doctorado_anotar_el_nombre_del_doctorado",
+        "label": "DOCTORADO (Anotar el nombre del Doctorado)",
+        "type": "text"
+      },
+      {
+        "key": "titulado_del_doctorado",
+        "label": "¿TITULADO DEL DOCTORADO?",
+        "type": "text"
+      },
+      {
+        "key": "asignaturas_que_imparte_llenar_una_asignatura_en",
+        "label": "ASIGNATURAS QUE IMPARTE (LLENAR UNA ASIGNATURA EN CADA FILA)",
+        "type": "text"
+      },
+      {
+        "key": "cantidad_de_horas_por_asignatura",
+        "label": "CANTIDAD DE HORAS POR ASIGNATURA",
+        "type": "number"
+      },
+      {
+        "key": "semestre_en_que_se_imparte",
+        "label": "SEMESTRE EN QUE SE IMPARTE",
+        "type": "readonly"
+      },
+      {
+        "key": "programa_educativo",
+        "label": "PROGRAMA EDUCATIVO",
+        "type": "readonly"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "4895.0",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "PH",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "SI",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "TECNOLOGIAS DE INFORMACION I",
+        "cantidad_de_horas_por_asignatura": 8.0,
+        "semestre_en_que_se_imparte": "1°",
+        "programa_educativo": "TEC. ANALISTA QUIMICO"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "TECNOLOGIAS DE INFORMACION I",
+        "cantidad_de_horas_por_asignatura": 4.0,
+        "semestre_en_que_se_imparte": "1°",
+        "programa_educativo": "TEC. ANALISTA PROGRAMADOR"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "TECNOLOGIAS DE INFORMACION I",
+        "cantidad_de_horas_por_asignatura": 16.0,
+        "semestre_en_que_se_imparte": "1°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "OPTATIVA BÁSICA: MANEJO DE INTERNET",
+        "cantidad_de_horas_por_asignatura": 4.0,
+        "semestre_en_que_se_imparte": "3°",
+        "programa_educativo": "TEC. ANALISTA PROGRAMADOR"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "OPTATIVA BÁSICA III: ESTADÍSTICA APLICADA A LA EDUCACIÓN",
+        "cantidad_de_horas_por_asignatura": 8.0,
+        "semestre_en_que_se_imparte": "5°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "7373.0",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "PH",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "SI",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "SI",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "OPTATIVA II: HISTORIA UNIVERSAL",
+        "cantidad_de_horas_por_asignatura": 8.0,
+        "semestre_en_que_se_imparte": "5°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "FILOSOFÍA",
+        "cantidad_de_horas_por_asignatura": 8.0,
+        "semestre_en_que_se_imparte": "5°",
+        "programa_educativo": "TEC. ANALISTA QUIMICO"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "FILOSOFÍA",
+        "cantidad_de_horas_por_asignatura": 4.0,
+        "semestre_en_que_se_imparte": "5°",
+        "programa_educativo": "TEC. ANALISTA PROGRAMADOR"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "6640.0",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "PH",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "SI",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "INTRODUCCIÓN A LAS CIENCIAS SOCIALES",
+        "cantidad_de_horas_por_asignatura": 4.0,
+        "semestre_en_que_se_imparte": "1°",
+        "programa_educativo": "TEC. ANALISTA PROGRAMADOR"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "INTRODUCCIÓN A LAS CIENCIAS SOCIALES",
+        "cantidad_de_horas_por_asignatura": 16.0,
+        "semestre_en_que_se_imparte": "1°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "TALLER DE EXPRESIÓN ORAL Y ESCRITA",
+        "cantidad_de_horas_por_asignatura": 4.0,
+        "semestre_en_que_se_imparte": "3°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "9145.0",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "PH",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "SI",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "OPTATIVA III: ESTADÍSTICA APLICADA A LA EDUCACIÓN",
+        "cantidad_de_horas_por_asignatura": 8.0,
+        "semestre_en_que_se_imparte": "5°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "4538.0",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "PH",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "FÍSICA I",
+        "cantidad_de_horas_por_asignatura": 15.0,
+        "semestre_en_que_se_imparte": "3°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "TÉCNICA INSTRUMENTAL",
+        "cantidad_de_horas_por_asignatura": 10.0,
+        "semestre_en_que_se_imparte": "3°",
+        "programa_educativo": "TEC. ANALISTA QUIMICO"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "LABORATORIO DE ANALISIS QUIMICO CUALITATIVO",
+        "cantidad_de_horas_por_asignatura": 6.0,
+        "semestre_en_que_se_imparte": "3°",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "LABORATORIO DE HEMATOLOGIA",
+        "cantidad_de_horas_por_asignatura": 6.0,
+        "semestre_en_que_se_imparte": "5°",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "LABORATORIO DE MICROBIOLOGIA",
+        "cantidad_de_horas_por_asignatura": 2.0,
+        "semestre_en_que_se_imparte": "5°",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "4227.0",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "PH",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "SI",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "ANÁLISIS QUÍMICO INDUSTRIAL",
+        "cantidad_de_horas_por_asignatura": 10.0,
+        "semestre_en_que_se_imparte": "5°",
+        "programa_educativo": "TEC. ANALISTA QUIMICO"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "LABORATORIO DE FISICA I",
+        "cantidad_de_horas_por_asignatura": 4.0,
+        "semestre_en_que_se_imparte": "3°",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "LABORATORIO DE FISICA III",
+        "cantidad_de_horas_por_asignatura": 2.0,
+        "semestre_en_que_se_imparte": "5°",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "8140.0",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "PH",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "OPTATIVA I: INTRODUCCIÓN AL DERECHO",
+        "cantidad_de_horas_por_asignatura": 12.0,
+        "semestre_en_que_se_imparte": "5°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "5720.0",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "PH",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "SI",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "GEOGRAFÍA",
+        "cantidad_de_horas_por_asignatura": 8.0,
+        "semestre_en_que_se_imparte": "1°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "TALLER DE LECTURA Y REDACCIÓN I",
+        "cantidad_de_horas_por_asignatura": 8.0,
+        "semestre_en_que_se_imparte": "1°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "TALLER DE LECTURA Y REDACCIÓN I",
+        "cantidad_de_horas_por_asignatura": 4.0,
+        "semestre_en_que_se_imparte": "1°",
+        "programa_educativo": "TEC. ANALISTA PROGRAMADOR"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "GEOGRAFÍA",
+        "cantidad_de_horas_por_asignatura": 4.0,
+        "semestre_en_que_se_imparte": "1°",
+        "programa_educativo": "TEC. ANALISTA QUIMICO"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "GESTIÓN DE PROYECTOS II",
+        "cantidad_de_horas_por_asignatura": 16.0,
+        "semestre_en_que_se_imparte": "5°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "8260.0",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "PH",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "SI",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "OPTATIVA II: HISTORIA UNIVERSAL",
+        "cantidad_de_horas_por_asignatura": 4.0,
+        "semestre_en_que_se_imparte": "5°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "3945.0",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "PH",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "MATEMÁTICAS V",
+        "cantidad_de_horas_por_asignatura": 5.0,
+        "semestre_en_que_se_imparte": "5°",
+        "programa_educativo": "TEC. ANALISTA PROGRAMADOR"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "MATEMÁTICAS V",
+        "cantidad_de_horas_por_asignatura": 5.0,
+        "semestre_en_que_se_imparte": "5°",
+        "programa_educativo": "TEC. ANALISTA QUIMICO"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "7874.0",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "PH",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "GEOGRAFÍA",
+        "cantidad_de_horas_por_asignatura": 4.0,
+        "semestre_en_que_se_imparte": "1°",
+        "programa_educativo": "TEC. ANALISTA PROGRAMADOR"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "GEOGRAFÍA",
+        "cantidad_de_horas_por_asignatura": 4.0,
+        "semestre_en_que_se_imparte": "1°",
+        "programa_educativo": "TEC. ANALISTA QUIMICO"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "GEOGRAFÍA",
+        "cantidad_de_horas_por_asignatura": 4.0,
+        "semestre_en_que_se_imparte": "1°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "OPTATIVA BÁSICA: TALLER DE CRECIMIENTO PERSONAL",
+        "cantidad_de_horas_por_asignatura": 4.0,
+        "semestre_en_que_se_imparte": "3°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "OPTATIVA I: LÓGICA",
+        "cantidad_de_horas_por_asignatura": 4.0,
+        "semestre_en_que_se_imparte": "5°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "8329.0",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "PH",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "QUÍMICA ORGÁNICA",
+        "cantidad_de_horas_por_asignatura": 10.0,
+        "semestre_en_que_se_imparte": "3°",
+        "programa_educativo": "TEC. ANALISTA QUIMICO"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "FÍSICA I",
+        "cantidad_de_horas_por_asignatura": 10.0,
+        "semestre_en_que_se_imparte": "3°",
+        "programa_educativo": "TEC. ANALISTA QUIMICO"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "FÍSICA I",
+        "cantidad_de_horas_por_asignatura": 5.0,
+        "semestre_en_que_se_imparte": "3°",
+        "programa_educativo": "TEC. ANALISTA PROGRAMADOR"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "MEDIO AMBIENTE Y SOCIEDAD",
+        "cantidad_de_horas_por_asignatura": 8.0,
+        "semestre_en_que_se_imparte": "3°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "FÍSICA I",
+        "cantidad_de_horas_por_asignatura": 5.0,
+        "semestre_en_que_se_imparte": "3°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "LABORATORIO DE QUÍMICA I",
+        "cantidad_de_horas_por_asignatura": 2.0,
+        "semestre_en_que_se_imparte": "1°",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "7489.0",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "PH",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "LABORATORIO DE TECNICA INSTRUMENTAL",
+        "cantidad_de_horas_por_asignatura": 6.0,
+        "semestre_en_que_se_imparte": "3°",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "LABORATORIO DE FISICA III",
+        "cantidad_de_horas_por_asignatura": 4.0,
+        "semestre_en_que_se_imparte": "5°",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "5986.0",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "PH",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "GEOGRAFÍA",
+        "cantidad_de_horas_por_asignatura": 4.0,
+        "semestre_en_que_se_imparte": "1°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "5400.0",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "PH",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "INGLÉS I",
+        "cantidad_de_horas_por_asignatura": 8.0,
+        "semestre_en_que_se_imparte": "3°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "INGLÉS I",
+        "cantidad_de_horas_por_asignatura": 4.0,
+        "semestre_en_que_se_imparte": "3°",
+        "programa_educativo": "TEC. ANALISTA PROGRAMADOR"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "INGLÉS I",
+        "cantidad_de_horas_por_asignatura": 8.0,
+        "semestre_en_que_se_imparte": "3°",
+        "programa_educativo": "TEC. ANALISTA QUIMICO"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "4420.0",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "PH",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "SI",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "TALLER DE LECTURA Y REDACCIÓN I",
+        "cantidad_de_horas_por_asignatura": 4.0,
+        "semestre_en_que_se_imparte": "1°",
+        "programa_educativo": "TEC. ANALISTA QUIMICO"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "OPTATIVA II: HISTORIA UNIVERSAL",
+        "cantidad_de_horas_por_asignatura": 4.0,
+        "semestre_en_que_se_imparte": "5°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "4820.0",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "PH",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "QUÍMICA I",
+        "cantidad_de_horas_por_asignatura": 10.0,
+        "semestre_en_que_se_imparte": "1°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "QUÍMICA I",
+        "cantidad_de_horas_por_asignatura": 5.0,
+        "semestre_en_que_se_imparte": "1°",
+        "programa_educativo": "TEC. ANALISTA PROGRAMADOR"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "LABORATORIO DE QUÍMICA I",
+        "cantidad_de_horas_por_asignatura": 6.0,
+        "semestre_en_que_se_imparte": "1°",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "LABORATORIO DE FÍSICA I",
+        "cantidad_de_horas_por_asignatura": 4.0,
+        "semestre_en_que_se_imparte": "3°",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "LABORATORIO DE QUÍMICA ORGANICA",
+        "cantidad_de_horas_por_asignatura": 4.0,
+        "semestre_en_que_se_imparte": "3°",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "501026.0",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "PH",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "MATEMÁTICAS I",
+        "cantidad_de_horas_por_asignatura": 5.0,
+        "semestre_en_que_se_imparte": "1°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "LÓGICA MATEMÁTICA",
+        "cantidad_de_horas_por_asignatura": 4.0,
+        "semestre_en_que_se_imparte": "3°",
+        "programa_educativo": "TEC. ANALISTA PROGRAMADOR"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "6274.0",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "PH",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "HABILIDADES PARA EL APRENDIZAJE",
+        "cantidad_de_horas_por_asignatura": 8.0,
+        "semestre_en_que_se_imparte": "1°",
+        "programa_educativo": "TEC. ANALISTA QUIMICO"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "HABILIDADES PARA EL APRENDIZAJE",
+        "cantidad_de_horas_por_asignatura": 16.0,
+        "semestre_en_que_se_imparte": "1°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "HABILIDADES PARA EL APRENDIZAJE",
+        "cantidad_de_horas_por_asignatura": 4.0,
+        "semestre_en_que_se_imparte": "1°",
+        "programa_educativo": "TEC. ANALISTA PROGRAMADOR"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "3426.0",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "PH",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "OPTATIVA BÁSICA: EDUCACIÓN PARA LA SALUD",
+        "cantidad_de_horas_por_asignatura": 12.0,
+        "semestre_en_que_se_imparte": "3°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      },
+      {
+        "plantel": "",
+        "nombre_del_docente": "",
+        "no_trab": "",
+        "antiguedad": "",
+        "tipo_de_contratacion_ptc_ph": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "asignaturas_que_imparte_llenar_una_asignatura_en": "MEDIO AMBIENTE Y SOCIEDAD",
+        "cantidad_de_horas_por_asignatura": 8.0,
+        "semestre_en_que_se_imparte": "3°",
+        "programa_educativo": "BACHILLERATO GENERAL"
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "nombre_del_docente": "",
+      "no_trab": "",
+      "antiguedad": "",
+      "tipo_de_contratacion_ptc_ph": "",
+      "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+      "titulado_de_licenciatura": "",
+      "maestria_anotar_el_nombre_de_la_maestria": "",
+      "titulado_de_maestria": "",
+      "doctorado_anotar_el_nombre_del_doctorado": "",
+      "titulado_del_doctorado": "",
+      "asignaturas_que_imparte_llenar_una_asignatura_en": "",
+      "cantidad_de_horas_por_asignatura": "",
+      "semestre_en_que_se_imparte": "",
+      "programa_educativo": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "1.1.3.0.3-FMT-26A4E4BB": {
+    "indicatorCode": "1.1.3.0.3-FMT-26A4E4BB",
+    "officialCode": "1.1.3.0.3",
+    "indicatorName": "Porcentaje de estudiantes de NMS participantes en las actividades de desarrollo y formación integral",
+    "sourceLabel": "Convocatorias SEMS.xlsx",
+    "sourcePath": "Bachillerato 16/Programas Interinstitucionales/Convocatoria SEMS/Convocatorias SEMS.xlsx",
+    "sheetName": "Hoja1",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 10
+      }
+    ],
+    "columns": [
+      {
+        "key": "columna_1",
+        "label": "Columna 1",
+        "type": "text"
+      },
+      {
+        "key": "columna_2",
+        "label": "Columna 2",
+        "type": "text"
+      },
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "nombre_de_la_convocatoria_realizada",
+        "label": "NOMBRE DE LA CONVOCATORIA REALIZADA",
+        "type": "text"
+      },
+      {
+        "key": "cantidad_de_participantes",
+        "label": "CANTIDAD DE PARTICIPANTES",
+        "type": "number"
+      },
+      {
+        "key": "columna_6",
+        "label": "Columna 6",
+        "type": "text"
+      },
+      {
+        "key": "columna_7",
+        "label": "Columna 7",
+        "type": "text"
+      },
+      {
+        "key": "columna_8",
+        "label": "Columna 8",
+        "type": "text"
+      },
+      {
+        "key": "columna_9",
+        "label": "Columna 9",
+        "type": "text"
+      },
+      {
+        "key": "cantidad_de_alumnos_participantes",
+        "label": "CANTIDAD DE ALUMNOS PARTICIPANTES",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "plantel": "",
+        "nombre_de_la_convocatoria_realizada": "",
+        "cantidad_de_participantes": "",
+        "columna_6": "ADMINISTRATIVOS",
+        "columna_7": "COORDINADORES ACADÉMICOS",
+        "columna_8": "ASESORES PEDAGÓGICOS",
+        "columna_9": "OTRO PERSONAL",
+        "cantidad_de_alumnos_participantes": ""
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "plantel": "Bachillerato _______",
+        "nombre_de_la_convocatoria_realizada": "",
+        "cantidad_de_participantes": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "columna_9": "",
+        "cantidad_de_alumnos_participantes": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "columna_1": "",
+      "columna_2": "",
+      "plantel": "",
+      "nombre_de_la_convocatoria_realizada": "",
+      "cantidad_de_participantes": "",
+      "columna_6": "",
+      "columna_7": "",
+      "columna_8": "",
+      "columna_9": "",
+      "cantidad_de_alumnos_participantes": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "official_code_detected",
+      "shared_official_code_split_by_source"
+    ]
+  },
+  "1.1.3.0.3-FMT-6EBA7CE9": {
+    "indicatorCode": "1.1.3.0.3-FMT-6EBA7CE9",
+    "officialCode": "1.1.3.0.3",
+    "indicatorName": "Porcentaje de estudiantes de NMS y NS participantes en las actividades de desarrollo y formación integral",
+    "sourceLabel": "DESARROLLO Y FORMACION INTEGRAL -PARTICIPANTES EN ACTIVIDADES DE DESARROLLO Y FORMACIÓN INTEGRAL.xlsx",
+    "sourcePath": "Bachillerato 16/Actividades de Desarrollo y Formación Integral/DESARROLLO Y FORMACION INTEGRAL -PARTICIPANTES EN ACTIVIDADES DE DESARROLLO Y FORMACIÓN INTEGRAL.xlsx",
+    "sheetName": "Table 1",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 7
+      }
+    ],
+    "columns": [
+      {
+        "key": "nombre_de_la_actividad",
+        "label": "Nombre de la Actividad",
+        "type": "readonly"
+      },
+      {
+        "key": "total_de_actividades",
+        "label": "Total de actividades",
+        "type": "readonly"
+      },
+      {
+        "key": "columna_3",
+        "label": "Columna 3",
+        "type": "text"
+      },
+      {
+        "key": "matricula_total",
+        "label": "Matrícula total",
+        "type": "number"
+      },
+      {
+        "key": "columna_5",
+        "label": "Columna 5",
+        "type": "text"
+      },
+      {
+        "key": "columna_6",
+        "label": "Columna 6",
+        "type": "text"
+      },
+      {
+        "key": "incorporacion_de_estudiantes",
+        "label": "Incorporación de estudiantes",
+        "type": "text"
+      }
+    ],
+    "initialRows": [
+      {
+        "nombre_de_la_actividad": "",
+        "total_de_actividades": "Actividades de desarrollo",
+        "columna_3": "Actividades de formación integral",
+        "matricula_total": "",
+        "columna_5": "",
+        "columna_6": "",
+        "incorporacion_de_estudiantes": "Mujer"
+      },
+      {
+        "nombre_de_la_actividad": "",
+        "total_de_actividades": "",
+        "columna_3": "",
+        "matricula_total": "",
+        "columna_5": "Hombre",
+        "columna_6": "Total",
+        "incorporacion_de_estudiantes": "No."
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "nombre_de_la_actividad": "",
+      "total_de_actividades": "",
+      "columna_3": "",
+      "matricula_total": "",
+      "columna_5": "",
+      "columna_6": "",
+      "incorporacion_de_estudiantes": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "official_code_detected",
+      "shared_official_code_split_by_source"
+    ]
+  },
+  "B16-FMT-01-85FF7F0A-estrategias-para-combati": {
+    "indicatorCode": "B16-FMT-01-85FF7F0A-estrategias-para-combati",
+    "officialCode": null,
+    "indicatorName": "Estrategias para combatir el abandono escolar",
+    "sourceLabel": "Estrategias para combatir el abandono escolar.xlsx",
+    "sourcePath": "Bachillerato 16/Seguimiento Académico del Estudiantado/Estrategias para combatir el abandono escolar.xlsx",
+    "sheetName": "Estrategias para combatir el ab",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 3
+      }
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "estrategias_para_combatir_el_abandono_escolar",
+        "label": "ESTRATEGIAS PARA COMBATIR EL ABANDONO ESCOLAR",
+        "type": "text"
+      },
+      {
+        "key": "cantidad_de_alumnos",
+        "label": "CANTIDAD DE ALUMNOS",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "Bachillerato 16",
+        "estrategias_para_combatir_el_abandono_escolar": "Tutoria de pares",
+        "cantidad_de_alumnos": 95.0
+      },
+      {
+        "plantel": "",
+        "estrategias_para_combatir_el_abandono_escolar": "Reforzamiento de inglés",
+        "cantidad_de_alumnos": 104.0
+      },
+      {
+        "plantel": "",
+        "estrategias_para_combatir_el_abandono_escolar": "Reforzamiento de programación",
+        "cantidad_de_alumnos": 22.0
+      },
+      {
+        "plantel": "",
+        "estrategias_para_combatir_el_abandono_escolar": "Reforzamiento de matemáticas",
+        "cantidad_de_alumnos": 8.0
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "estrategias_para_combatir_el_abandono_escolar": "",
+      "cantidad_de_alumnos": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "B16-FMT-01-0A31F882-bachillerato-16-febrero": {
+    "indicatorCode": "B16-FMT-01-0A31F882-bachillerato-16-febrero",
+    "officialCode": null,
+    "indicatorName": "Bachillerato 16 FEBRERO - JULIO 2026",
+    "sourceLabel": "Bachillerato 16 FEBRERO - JULIO 2026.xlsx",
+    "sourcePath": "Bachillerato 16/Promoción de la Ciencia/Prácticas de Laboratorios/Bachillerato 16 FEBRERO - JULIO 2026.xlsx",
+    "sheetName": "Hoja1",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 14
+      }
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "columna_2",
+        "label": "Columna 2",
+        "type": "text"
+      },
+      {
+        "key": "area",
+        "label": "AREA",
+        "type": "text"
+      },
+      {
+        "key": "segundo",
+        "label": "SEGUNDO",
+        "type": "text"
+      },
+      {
+        "key": "columna_5",
+        "label": "Columna 5",
+        "type": "text"
+      },
+      {
+        "key": "columna_6",
+        "label": "Columna 6",
+        "type": "text"
+      },
+      {
+        "key": "columna_7",
+        "label": "Columna 7",
+        "type": "text"
+      },
+      {
+        "key": "cuarto",
+        "label": "CUARTO",
+        "type": "text"
+      },
+      {
+        "key": "columna_9",
+        "label": "Columna 9",
+        "type": "text"
+      },
+      {
+        "key": "columna_10",
+        "label": "Columna 10",
+        "type": "text"
+      },
+      {
+        "key": "sexto",
+        "label": "SEXTO",
+        "type": "text"
+      },
+      {
+        "key": "columna_12",
+        "label": "Columna 12",
+        "type": "text"
+      },
+      {
+        "key": "columna_13",
+        "label": "Columna 13",
+        "type": "text"
+      },
+      {
+        "key": "total_grupos",
+        "label": "TOTAL GRUPOS",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "BACHILLERATO 16",
+        "columna_2": "",
+        "area": "TÉCNICO ANALISTA QUIMICO",
+        "segundo": "2.0",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "2.0",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "2.0",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "TÉCNICO ANALISTA PROGRAMADOR",
+        "segundo": "1.0",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "1.0",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "1.0",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "BACHILLERATO GENERAL",
+        "segundo": "4.0",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "4.0",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "4.0",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "TURNO",
+        "columna_2": "V",
+        "area": "TOTAL DE GRUPOS",
+        "segundo": "=SUM(D3:G5)",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "=SUM(H3:J5)",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "=SUM(K3:M5)",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "PRACTICAS REALIZADAS EN SEGUNDO SEMESTRE",
+        "columna_2": "",
+        "area": "",
+        "segundo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "GRUPO",
+        "columna_2": "PLAN DE ESTUDIO",
+        "area": "MATERIA",
+        "segundo": "No. PRACTICA",
+        "columna_5": "FECHA",
+        "columna_6": "REALIZADA",
+        "columna_7": "No. PRACTICA",
+        "cuarto": "FECHA",
+        "columna_9": "REALIZADA",
+        "columna_10": "No. PRACTICA",
+        "sexto": "FECHA",
+        "columna_12": "REALIZADA",
+        "columna_13": "No. PRACTICA",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "A",
+        "columna_2": "AQ15",
+        "area": "TECNOLOGIAS DE LA INFORMACIÓN II",
+        "segundo": "1.0",
+        "columna_5": "2026-02-04 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-11 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-18 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "BIOLOGÍA",
+        "segundo": "1.0",
+        "columna_5": "2026-02-09 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-16 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-03-02 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "QUIMICA II",
+        "segundo": "1.0",
+        "columna_5": "2026-02-05 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-12 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-19 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "B",
+        "columna_2": "AP13",
+        "area": "TECNOLOGIAS DE LA INFORMACIÓN II",
+        "segundo": "1.0",
+        "columna_5": "2026-02-04 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-11 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-18 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "BIOLOGÍA",
+        "segundo": "1.0",
+        "columna_5": "2026-02-04 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-11 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-18 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "QUIMICA II",
+        "segundo": "1.0",
+        "columna_5": "2026-02-04 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-11 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-18 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "C",
+        "columna_2": "BG24",
+        "area": "PENSAMIENTO DIGITAL E INTERNET DE LAS COSAS",
+        "segundo": "1.0",
+        "columna_5": "2026-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "1.0",
+        "cuarto": "2026-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ECOSISTEMAS: INTERACCIONES , ENERGÍA Y DINÁMICA",
+        "segundo": "1.0",
+        "columna_5": "2026-02-09 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-16 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-03-02 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "REACCIONES QUIMICAS: CONSERVACIÓN DE LA MATERÍA EN LA FORMACIÓN DE NUEVAS SUSTANCIAS",
+        "segundo": "1.0",
+        "columna_5": "2026-02-04 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-11 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-18 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "D",
+        "columna_2": "BG24",
+        "area": "PENSAMIENTO DIGITAL E INTERNET DE LAS COSAS",
+        "segundo": "1.0",
+        "columna_5": "2026-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "1.0",
+        "cuarto": "2026-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ECOSISTEMAS: INTERACCIONES , ENERGÍA Y DINÁMICA",
+        "segundo": "1.0",
+        "columna_5": "2026-02-09 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-09 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-16 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "REACCIONES QUIMICAS: CONSERVACIÓN DE LA MATERÍA EN LA FORMACIÓN DE NUEVAS SUSTANCIAS",
+        "segundo": "1.0",
+        "columna_5": "2026-02-04 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-04 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-18 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "E",
+        "columna_2": "AQ15",
+        "area": "TECNOLOGIAS DE LA INFORMACIÓN II",
+        "segundo": "1.0",
+        "columna_5": "2026-02-03 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-10 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-17 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "BIOLOGÍA",
+        "segundo": "1.0",
+        "columna_5": "2026-02-05 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-12 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-19 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "QUIMICA II",
+        "segundo": "1.0",
+        "columna_5": "2026-02-04 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-11 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-18 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "F",
+        "columna_2": "BG24",
+        "area": "PENSAMIENTO DIGITAL E INTERNET DE LAS COSAS",
+        "segundo": "1.0",
+        "columna_5": "2026-02-04 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-11 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-18 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ECOSISTEMAS: INTERACCIONES , ENERGÍA Y DINÁMICA",
+        "segundo": "1.0",
+        "columna_5": "2026-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "1.0",
+        "cuarto": "2026-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "REACCIONES QUIMICAS: CONSERVACIÓN DE LA MATERÍA EN LA FORMACIÓN DE NUEVAS SUSTANCIAS",
+        "segundo": "1.0",
+        "columna_5": "2026-02-09 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-09 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-16 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "G",
+        "columna_2": "BG24",
+        "area": "PENSAMIENTO DIGITAL E INTERNET DE LAS COSAS",
+        "segundo": "1.0",
+        "columna_5": "2026-02-05 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-12 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-19 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ECOSISTEMAS: INTERACCIONES , ENERGÍA Y DINÁMICA",
+        "segundo": "1.0",
+        "columna_5": "2026-02-03 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-10 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-17 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "REACCIONES QUIMICAS: CONSERVACIÓN DE LA MATERÍA EN LA FORMACIÓN DE NUEVAS SUSTANCIAS",
+        "segundo": "1.0",
+        "columna_5": "2026-02-05 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-12 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-19 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "TOTAL",
+        "columna_2": "",
+        "area": "",
+        "segundo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "PRACTICAS REALIZADAS EN CUARTO SEMESTRE",
+        "columna_2": "",
+        "area": "",
+        "segundo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "GRUPO",
+        "columna_2": "PLAN DE ESTUDIO",
+        "area": "MATERIA",
+        "segundo": "No. PRACTICA",
+        "columna_5": "FECHA",
+        "columna_6": "REALIZADA",
+        "columna_7": "No. PRACTICA",
+        "cuarto": "FECHA",
+        "columna_9": "REALIZADA",
+        "columna_10": "No. PRACTICA",
+        "sexto": "FECHA",
+        "columna_12": "REALIZADA",
+        "columna_13": "No. PRACTICA",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "A",
+        "columna_2": "AQ15",
+        "area": "FISÍCA II",
+        "segundo": "1.0",
+        "columna_5": "2026-02-05 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-12 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-19 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "TEMAS SELECTOS DE QUIMICA ORGANICA",
+        "segundo": "1.0",
+        "columna_5": "2026-02-09 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-09 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-16 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ANALISIS QUIMICO CUANTITATIVO",
+        "segundo": "1.0",
+        "columna_5": "2026-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "B",
+        "columna_2": "AP13",
+        "area": "FISÍCA II",
+        "segundo": "1.0",
+        "columna_5": "2026-02-04 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-11 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-18 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "PROGRAMACIÓN II",
+        "segundo": "1.0",
+        "columna_5": "2026-02-04 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-11 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-18 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "C",
+        "columna_2": "BG24",
+        "area": "LA ENERGIA EN LOS PROCESOS DE LA VIDA DIARIA",
+        "segundo": "1.0",
+        "columna_5": "2026-02-03 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-10 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-17 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "D",
+        "columna_2": "BG24",
+        "area": "LA ENERGIA EN LOS PROCESOS DE LA VIDA DIARIA",
+        "segundo": "1.0",
+        "columna_5": "2026-02-03 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-10 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-17 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "E",
+        "columna_2": "AQ15",
+        "area": "TEMAS SELECTOS DE QUIMICA ORGANICA",
+        "segundo": "1.0",
+        "columna_5": "2026-02-05 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-12 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-19 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ANALISIS QUIMICO CUANTITATIVO",
+        "segundo": "1.0",
+        "columna_5": "2026-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "FISÍCA II",
+        "segundo": "1.0",
+        "columna_5": "2026-02-03 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-10 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-17 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "F",
+        "columna_2": "BG24",
+        "area": "LA ENERGIA EN LOS PROCESOS DE LA VIDA DIARIA",
+        "segundo": "1.0",
+        "columna_5": "2026-02-09 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-16 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "G",
+        "columna_2": "BG24",
+        "area": "LA ENERGIA EN LOS PROCESOS DE LA VIDA DIARIA",
+        "segundo": "1.0",
+        "columna_5": "2026-02-09 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-16 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "TOTAL",
+        "columna_2": "",
+        "area": "",
+        "segundo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "PRACTICAS REALIZADAS EN SEXTO SEMESTRE",
+        "columna_2": "",
+        "area": "",
+        "segundo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "GRUPO",
+        "columna_2": "PLAN DE ESTUDIO",
+        "area": "MATERIA",
+        "segundo": "No. PRACTICA",
+        "columna_5": "FECHA",
+        "columna_6": "REALIZADA",
+        "columna_7": "No. PRACTICA",
+        "cuarto": "FECHA",
+        "columna_9": "REALIZADA",
+        "columna_10": "No. PRACTICA",
+        "sexto": "FECHA",
+        "columna_12": "REALIZADA",
+        "columna_13": "No. PRACTICA",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "A",
+        "columna_2": "AQ15",
+        "area": "BIOCLINICA CLINICA",
+        "segundo": "1.0",
+        "columna_5": "2026-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "MICROBIOLOGIA CLINICA",
+        "segundo": "1.0",
+        "columna_5": "2026-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ANALISIS DE PROCESOS INDUSTRIALES",
+        "segundo": "1.0",
+        "columna_5": "2026-02-03 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-10 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-17 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "B",
+        "columna_2": "AP13",
+        "area": "ANALISIS Y DISEÑO DE SISTEMAS",
+        "segundo": "1.0",
+        "columna_5": "2026-02-05 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-12 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-19 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "PROGRAMACION EN INTERNET II",
+        "segundo": "1.0",
+        "columna_5": "2026-02-03 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-10 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-17 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "PROGRAMACIÓN I",
+        "segundo": "1.0",
+        "columna_5": "2026-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "FISÍCA IV",
+        "segundo": "1.0",
+        "columna_5": "2026-02-04 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-18 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-25 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "C",
+        "columna_2": "AQ15",
+        "area": "BIOCLINICA CLINICA",
+        "segundo": "1.0",
+        "columna_5": "2026-02-05 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-12 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-19 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "MICROBIOLOGIA CLINICA",
+        "segundo": "1.0",
+        "columna_5": "2026-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ANALISIS DE PROCESOS INDUSTRIALES",
+        "segundo": "1.0",
+        "columna_5": "2026-02-03 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2026-02-10 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2026-02-17 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "TOTAL",
+        "columna_2": "",
+        "area": "",
+        "segundo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "columna_2": "",
+      "area": "",
+      "segundo": "",
+      "columna_5": "",
+      "columna_6": "",
+      "columna_7": "",
+      "cuarto": "",
+      "columna_9": "",
+      "columna_10": "",
+      "sexto": "",
+      "columna_12": "",
+      "columna_13": "",
+      "total_grupos": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "B16-FMT-01-C7B22BC5-cronograma-del-para-la-p": {
+    "indicatorCode": "B16-FMT-01-C7B22BC5-cronograma-del-para-la-p",
+    "officialCode": null,
+    "indicatorName": "Cronograma del para la promoción del aprendizaje intercultural, internacional y-o globa",
+    "sourceLabel": "Cronograma del para la promoción del aprendizaje intercultural, internacional y-o globa.xlsx",
+    "sourcePath": "Bachillerato 16/Internacionalización e Interculturalidad/Acciones de internacionalización e interculturalidad/Cronograma del para la promoción del aprendizaje intercultural, internacional y-o globa.xlsx",
+    "sheetName": "AGOSTO 2024 – ENERO 2025",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 6
+      }
+    ],
+    "columns": [
+      {
+        "key": "tema",
+        "label": "Tema",
+        "type": "text"
+      },
+      {
+        "key": "objetivo",
+        "label": "Objetivo",
+        "type": "text"
+      },
+      {
+        "key": "nombre_de_la_actividad",
+        "label": "Nombre de la actividad",
+        "type": "readonly"
+      },
+      {
+        "key": "descripcion",
+        "label": "Descripción",
+        "type": "text"
+      },
+      {
+        "key": "fecha_de_realizacion_o_expedicinon",
+        "label": "Fecha de realización o expediciñon",
+        "type": "text"
+      },
+      {
+        "key": "modalidad",
+        "label": "Modalidad",
+        "type": "text"
+      }
+    ],
+    "initialRows": [
+      {
+        "tema": "Liderazgo, Salud mental, Medio Ambiente.",
+        "objetivo": "Proporcionar a los estudiantes herramientas prácticas que les permitan desarrollar habilidades clave para enfrentar los desafíos de la vida cotidiana y profesional.",
+        "nombre_de_la_actividad": "",
+        "descripcion": "Programación de actividades para el estudiantado, en las cuales le permitan adquirir herramientas que las pueda implementar en su día a día.",
+        "fecha_de_realizacion_o_expedicinon": "2024-08-12 00:00:00",
+        "modalidad": "Presencial"
+      },
+      {
+        "tema": "Inglés",
+        "objetivo": "Implementar un programa de reforzamiento de inglés para los estudiantes del Bachillerato 16, en colaboración con el Centro Especializado de Idiomas, con el objetivo de potenciar sus habilidades lingüísticas y competencia en el idioma.",
+        "nombre_de_la_actividad": "",
+        "descripcion": "Gestión con CEI para el apoyo de estudiantes que apyen en la regularización de estudiantes que no dominen la materia de inglés.",
+        "fecha_de_realizacion_o_expedicinon": "2024-08-12 00:00:00",
+        "modalidad": "presencial"
+      },
+      {
+        "tema": "Inglés",
+        "objetivo": "Fortalecer las habilidades básicas de inglés a través de actividades simples y divertidas.",
+        "nombre_de_la_actividad": "",
+        "descripcion": "Clubes de reforzamiento de inglés para aquellos estudiantes que no dominen la materia.",
+        "fecha_de_realizacion_o_expedicinon": "2024-08-24 00:00:00",
+        "modalidad": "presencial"
+      },
+      {
+        "tema": "Inglés",
+        "objetivo": "Celebrar la alegría de la Navidad organizando un Festival Navideño que reúna a toda la comunidad del Bachillerato 16 y sus familias, a través de presentaciones de baile realizadas por los estudiantes y una convivencia festiva que fomente la unidad y el espíritu navideño.",
+        "nombre_de_la_actividad": "",
+        "descripcion": "Festejos navideños por parte del estudiantado a travez del baile.",
+        "fecha_de_realizacion_o_expedicinon": "",
+        "modalidad": "presencial"
+      }
+    ],
+    "showTotals": false,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "tema": "",
+      "objetivo": "",
+      "nombre_de_la_actividad": "",
+      "descripcion": "",
+      "fecha_de_realizacion_o_expedicinon": "",
+      "modalidad": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
     ]
   },
   "1.1.4.4.4": {
     "indicatorCode": "1.1.4.4.4",
+    "officialCode": "1.1.4.4.4",
     "indicatorName": "Número de estudiantes de NMS y NS participando en acciones de internacionalización",
     "sourceLabel": "Formato_Indicador de internacionalización.xlsx",
     "sourcePath": "Bachillerato 16/Internacionalización e Interculturalidad/Acciones de internacionalización e interculturalidad/Formato_Indicador de internacionalización.xlsx",
@@ -1852,11 +6933,13 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
     "quality": [
       "source_workbook_template",
-      "private_fields_blank"
+      "private_fields_blank",
+      "official_code_detected"
     ]
   },
   "1.1.2.1.8": {
     "indicatorCode": "1.1.2.1.8",
+    "officialCode": "1.1.2.1.8",
     "indicatorName": "Porcentaje de titulación por cohorte del NMS",
     "sourceLabel": "INDICADOR DE TITULACION 2025.xlsx",
     "sourcePath": "Bachillerato 16/Titulación/INDICADOR DE TITULACION 2025.xlsx",
@@ -1984,7 +7067,8032 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
     "quality": [
       "source_workbook_template",
-      "private_fields_blank"
+      "private_fields_blank",
+      "official_code_detected"
+    ]
+  },
+  "B16-FMT-01-55EF8C78-la-ciencia-en-los-bachil": {
+    "indicatorCode": "B16-FMT-01-55EF8C78-la-ciencia-en-los-bachil",
+    "officialCode": null,
+    "indicatorName": "LA CIENCIA EN LOS BACHILLERATOS UNIVERSITARIOS",
+    "sourceLabel": "LA CIENCIA EN LOS BACHILLERATOS UNIVERSITARIOS.xlsx",
+    "sourcePath": "Bachillerato 16/Promoción de la Ciencia/La ciencia en los bachilleratos universitarios/LA CIENCIA EN LOS BACHILLERATOS UNIVERSITARIOS.xlsx",
+    "sheetName": "Hoja1",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 8
+      }
+    ],
+    "columns": [
+      {
+        "key": "columna_1",
+        "label": "Columna 1",
+        "type": "text"
+      },
+      {
+        "key": "columna_2",
+        "label": "Columna 2",
+        "type": "text"
+      },
+      {
+        "key": "mujeres",
+        "label": "MUJERES",
+        "type": "number"
+      },
+      {
+        "key": "hombres",
+        "label": "HOMBRES",
+        "type": "number"
+      },
+      {
+        "key": "total",
+        "label": "TOTAL",
+        "type": "number"
+      },
+      {
+        "key": "mujeres_2",
+        "label": "MUJERES",
+        "type": "number"
+      },
+      {
+        "key": "hombres_2",
+        "label": "HOMBRES",
+        "type": "number"
+      },
+      {
+        "key": "total_2",
+        "label": "TOTAL",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "mujeres": "",
+        "hombres": "",
+        "total": "",
+        "mujeres_2": "",
+        "hombres_2": "",
+        "total_2": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "columna_1": "",
+      "columna_2": "",
+      "mujeres": "",
+      "hombres": "",
+      "total": "",
+      "mujeres_2": "",
+      "hombres_2": "",
+      "total_2": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "B16-FMT-01-9129D9B3-concursos-academicos": {
+    "indicatorCode": "B16-FMT-01-9129D9B3-concursos-academicos",
+    "officialCode": null,
+    "indicatorName": "CONCURSOS ACADEMICOS",
+    "sourceLabel": "CONCURSOS ACADEMICOS.xlsx",
+    "sourcePath": "Bachillerato 16/Promoción de la Ciencia/Concursos Académicos (ciencias, matemáticas, robótica, entre otras)./CONCURSOS ACADEMICOS.xlsx",
+    "sheetName": "Hoja1",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 11
+      }
+    ],
+    "columns": [
+      {
+        "key": "columna_1",
+        "label": "Columna 1",
+        "type": "text"
+      },
+      {
+        "key": "columna_2",
+        "label": "Columna 2",
+        "type": "text"
+      },
+      {
+        "key": "columna_3",
+        "label": "Columna 3",
+        "type": "text"
+      },
+      {
+        "key": "columna_4",
+        "label": "Columna 4",
+        "type": "text"
+      },
+      {
+        "key": "columna_5",
+        "label": "Columna 5",
+        "type": "text"
+      },
+      {
+        "key": "mujeres",
+        "label": "MUJERES",
+        "type": "number"
+      },
+      {
+        "key": "hombres",
+        "label": "HOMBRES",
+        "type": "number"
+      },
+      {
+        "key": "total",
+        "label": "TOTAL",
+        "type": "number"
+      },
+      {
+        "key": "mujeres_2",
+        "label": "MUJERES",
+        "type": "number"
+      },
+      {
+        "key": "hombres_2",
+        "label": "HOMBRES",
+        "type": "number"
+      },
+      {
+        "key": "total_2",
+        "label": "TOTAL",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "",
+        "columna_4": "",
+        "columna_5": "",
+        "mujeres": "",
+        "hombres": "",
+        "total": "",
+        "mujeres_2": "",
+        "hombres_2": "",
+        "total_2": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "columna_1": "",
+      "columna_2": "",
+      "columna_3": "",
+      "columna_4": "",
+      "columna_5": "",
+      "mujeres": "",
+      "hombres": "",
+      "total": "",
+      "mujeres_2": "",
+      "hombres_2": "",
+      "total_2": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "B16-FMT-01-628F230D-nivelacion-academica-jun": {
+    "indicatorCode": "B16-FMT-01-628F230D-nivelacion-academica-jun",
+    "officialCode": null,
+    "indicatorName": "NIVELACION ACADEMICA_junio- agosto 2025",
+    "sourceLabel": "NIVELACION ACADEMICA_junio- agosto 2025.xlsx",
+    "sourcePath": "Bachillerato 16/Nivelación Academica/NIVELACION ACADEMICA_junio- agosto 2025.xlsx",
+    "sheetName": "ORDINARIO",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 19
+      }
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "grado",
+        "label": "GRADO",
+        "type": "text"
+      },
+      {
+        "key": "matricula",
+        "label": "MATRICULA",
+        "type": "text"
+      },
+      {
+        "key": "columna_4",
+        "label": "Columna 4",
+        "type": "text"
+      },
+      {
+        "key": "columna_5",
+        "label": "Columna 5",
+        "type": "text"
+      },
+      {
+        "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi",
+        "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar)",
+        "type": "number"
+      },
+      {
+        "key": "columna_7",
+        "label": "Columna 7",
+        "type": "text"
+      },
+      {
+        "key": "columna_8",
+        "label": "Columna 8",
+        "type": "text"
+      },
+      {
+        "key": "columna_9",
+        "label": "Columna 9",
+        "type": "text"
+      },
+      {
+        "key": "columna_10",
+        "label": "Columna 10",
+        "type": "text"
+      },
+      {
+        "key": "columna_11",
+        "label": "Columna 11",
+        "type": "text"
+      },
+      {
+        "key": "columna_12",
+        "label": "Columna 12",
+        "type": "text"
+      },
+      {
+        "key": "columna_13",
+        "label": "Columna 13",
+        "type": "text"
+      },
+      {
+        "key": "no_asignaturas_con_alumnos_en_ordinario",
+        "label": "No. ASIGNATURAS CON ALUMNOS EN ORDINARIO",
+        "type": "number"
+      },
+      {
+        "key": "no_asignaturas_que_dieron_nivelacion_academica",
+        "label": "No.ASIGNATURAS QUE DIERON NIVELACIÓN ACADÉMICA",
+        "type": "text"
+      },
+      {
+        "key": "cantidad_estudiantes_que_asistieron",
+        "label": "CANTIDAD ESTUDIANTES QUE ASISTIERON",
+        "type": "number"
+      },
+      {
+        "key": "columna_17",
+        "label": "Columna 17",
+        "type": "text"
+      },
+      {
+        "key": "columna_18",
+        "label": "Columna 18",
+        "type": "text"
+      },
+      {
+        "key": "atencion",
+        "label": "% ATENCIÓN",
+        "type": "text"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "",
+        "grado": "",
+        "matricula": "H",
+        "columna_4": "M",
+        "columna_5": "T",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": "",
+        "columna_7": "B",
+        "columna_8": "C",
+        "columna_9": "D",
+        "columna_10": "E",
+        "columna_11": "F",
+        "columna_12": "G",
+        "columna_13": "H",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "",
+        "cantidad_estudiantes_que_asistieron": "",
+        "columna_17": "M",
+        "columna_18": "T",
+        "atencion": ""
+      },
+      {
+        "plantel": "",
+        "grado": "2°",
+        "matricula": "29.0",
+        "columna_4": "45.0",
+        "columna_5": "74.0",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": 16.0,
+        "columna_7": "12.0",
+        "columna_8": "12.0",
+        "columna_9": "9.0",
+        "columna_10": "8.0",
+        "columna_11": "12.0",
+        "columna_12": "5.0",
+        "columna_13": "",
+        "no_asignaturas_con_alumnos_en_ordinario": 6.0,
+        "no_asignaturas_que_dieron_nivelacion_academica": "6.0",
+        "cantidad_estudiantes_que_asistieron": 29.0,
+        "columna_17": "45.0",
+        "columna_18": "=SUM(P9:Q9)",
+        "atencion": "=(R9*100)/E9"
+      },
+      {
+        "plantel": "",
+        "grado": "4°",
+        "matricula": "31.0",
+        "columna_4": "39.0",
+        "columna_5": "70.0",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": 12.0,
+        "columna_7": "17.0",
+        "columna_8": "5.0",
+        "columna_9": "14.0",
+        "columna_10": "10.0",
+        "columna_11": "5.0",
+        "columna_12": "7.0",
+        "columna_13": "",
+        "no_asignaturas_con_alumnos_en_ordinario": 7.0,
+        "no_asignaturas_que_dieron_nivelacion_academica": "7.0",
+        "cantidad_estudiantes_que_asistieron": 31.0,
+        "columna_17": "39.0",
+        "columna_18": "=SUM(P10:Q10)",
+        "atencion": "=(R10*100)/E10"
+      },
+      {
+        "plantel": "",
+        "grado": "6°",
+        "matricula": "19.0",
+        "columna_4": "14.0",
+        "columna_5": "33.0",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": 8.0,
+        "columna_7": "4.0",
+        "columna_8": "4.0",
+        "columna_9": "6.0",
+        "columna_10": "9.0",
+        "columna_11": "2.0",
+        "columna_12": "4.0",
+        "columna_13": "",
+        "no_asignaturas_con_alumnos_en_ordinario": 8.0,
+        "no_asignaturas_que_dieron_nivelacion_academica": "8.0",
+        "cantidad_estudiantes_que_asistieron": 19.0,
+        "columna_17": "14.0",
+        "columna_18": "=SUM(P11:Q11)",
+        "atencion": "=(R11*100)/E11"
+      },
+      {
+        "plantel": "SEMIESCOLARIZADO",
+        "grado": "",
+        "matricula": "",
+        "columna_4": "",
+        "columna_5": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": "",
+        "columna_7": "",
+        "columna_8": "",
+        "columna_9": "",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "columna_13": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "",
+        "cantidad_estudiantes_que_asistieron": "",
+        "columna_17": "",
+        "columna_18": "",
+        "atencion": ""
+      },
+      {
+        "plantel": "PLANTEL",
+        "grado": "GRADO",
+        "matricula": "MATRICULA",
+        "columna_4": "",
+        "columna_5": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": "",
+        "columna_7": "",
+        "columna_8": "",
+        "columna_9": "",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "columna_13": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "No.ASIGNATURAS QUE DIERON NIVELACIÓN ACADÉMICA",
+        "cantidad_estudiantes_que_asistieron": "",
+        "columna_17": "",
+        "columna_18": "",
+        "atencion": "% ATENCIÓN"
+      },
+      {
+        "plantel": "",
+        "grado": "",
+        "matricula": "H",
+        "columna_4": "M",
+        "columna_5": "T",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": "",
+        "columna_7": "",
+        "columna_8": "",
+        "columna_9": "",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "columna_13": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "",
+        "cantidad_estudiantes_que_asistieron": "",
+        "columna_17": "M",
+        "columna_18": "T",
+        "atencion": ""
+      },
+      {
+        "plantel": "",
+        "grado": "2°",
+        "matricula": "0.0",
+        "columna_4": "0.0",
+        "columna_5": "=SUM(C16:D16)",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": "",
+        "columna_7": "",
+        "columna_8": "",
+        "columna_9": "",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "columna_13": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "",
+        "cantidad_estudiantes_que_asistieron": 0.0,
+        "columna_17": "0.0",
+        "columna_18": "=SUM(P16:Q16)",
+        "atencion": "=(R16*100)/E16"
+      },
+      {
+        "plantel": "",
+        "grado": "4°",
+        "matricula": "0.0",
+        "columna_4": "0.0",
+        "columna_5": "=SUM(C17:D17)",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": "",
+        "columna_7": "",
+        "columna_8": "",
+        "columna_9": "",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "columna_13": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "",
+        "cantidad_estudiantes_que_asistieron": 0.0,
+        "columna_17": "0.0",
+        "columna_18": "=SUM(P17:Q17)",
+        "atencion": "=(R17*100)/E17"
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "grado": "",
+      "matricula": "",
+      "columna_4": "",
+      "columna_5": "",
+      "no_estudiantes_en_ordinario_por_grupo_se_contabi": "",
+      "columna_7": "",
+      "columna_8": "",
+      "columna_9": "",
+      "columna_10": "",
+      "columna_11": "",
+      "columna_12": "",
+      "columna_13": "",
+      "no_asignaturas_con_alumnos_en_ordinario": "",
+      "no_asignaturas_que_dieron_nivelacion_academica": "",
+      "cantidad_estudiantes_que_asistieron": "",
+      "columna_17": "",
+      "columna_18": "",
+      "atencion": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "B16-FMT-01-CC792A5F-concentrado-abandono-esc": {
+    "indicatorCode": "B16-FMT-01-CC792A5F-concentrado-abandono-esc",
+    "officialCode": null,
+    "indicatorName": "CONCENTRADO_ABANDONO ESCOLAR _SEP 2025",
+    "sourceLabel": "CONCENTRADO_ABANDONO ESCOLAR _SEP 2025.xlsx",
+    "sourcePath": "Bachillerato 16/Seguimiento Académico del Estudiantado/CONCENTRADO_ABANDONO ESCOLAR _SEP 2025.xlsx",
+    "sheetName": "REPORTE ENERO 2025",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 29
+      }
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "programa_educativo",
+        "label": "PROGRAMA EDUCATIVO",
+        "type": "readonly"
+      },
+      {
+        "key": "grado",
+        "label": "GRADO",
+        "type": "text"
+      },
+      {
+        "key": "no_de_estudiantes_por_tipo_de_baja_academica_sep",
+        "label": "NO. DE ESTUDIANTES POR TIPO DE BAJA ACADÉMICA (Separación del programa en el que el estudiante se encuentre inscrito. Art. 37)",
+        "type": "readonly"
+      },
+      {
+        "key": "columna_5",
+        "label": "Columna 5",
+        "type": "text"
+      },
+      {
+        "key": "columna_6",
+        "label": "Columna 6",
+        "type": "text"
+      },
+      {
+        "key": "columna_7",
+        "label": "Columna 7",
+        "type": "text"
+      },
+      {
+        "key": "columna_8",
+        "label": "Columna 8",
+        "type": "text"
+      },
+      {
+        "key": "columna_9",
+        "label": "Columna 9",
+        "type": "text"
+      },
+      {
+        "key": "columna_10",
+        "label": "Columna 10",
+        "type": "text"
+      },
+      {
+        "key": "columna_11",
+        "label": "Columna 11",
+        "type": "text"
+      },
+      {
+        "key": "columna_12",
+        "label": "Columna 12",
+        "type": "text"
+      },
+      {
+        "key": "columna_13",
+        "label": "Columna 13",
+        "type": "text"
+      },
+      {
+        "key": "columna_14",
+        "label": "Columna 14",
+        "type": "text"
+      },
+      {
+        "key": "columna_15",
+        "label": "Columna 15",
+        "type": "text"
+      },
+      {
+        "key": "columna_16",
+        "label": "Columna 16",
+        "type": "text"
+      },
+      {
+        "key": "columna_17",
+        "label": "Columna 17",
+        "type": "text"
+      },
+      {
+        "key": "columna_18",
+        "label": "Columna 18",
+        "type": "text"
+      },
+      {
+        "key": "columna_19",
+        "label": "Columna 19",
+        "type": "text"
+      },
+      {
+        "key": "columna_20",
+        "label": "Columna 20",
+        "type": "text"
+      },
+      {
+        "key": "columna_21",
+        "label": "Columna 21",
+        "type": "text"
+      },
+      {
+        "key": "columna_22",
+        "label": "Columna 22",
+        "type": "text"
+      },
+      {
+        "key": "columna_23",
+        "label": "Columna 23",
+        "type": "text"
+      },
+      {
+        "key": "columna_24",
+        "label": "Columna 24",
+        "type": "text"
+      },
+      {
+        "key": "columna_25",
+        "label": "Columna 25",
+        "type": "text"
+      },
+      {
+        "key": "columna_26",
+        "label": "Columna 26",
+        "type": "text"
+      },
+      {
+        "key": "columna_27",
+        "label": "Columna 27",
+        "type": "text"
+      },
+      {
+        "key": "columna_28",
+        "label": "Columna 28",
+        "type": "text"
+      },
+      {
+        "key": "dejaron_de_asistir_sin_avisar",
+        "label": "DEJARON DE ASISTIR SIN AVISAR",
+        "type": "text"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "",
+        "programa_educativo": "",
+        "grado": "",
+        "no_de_estudiantes_por_tipo_de_baja_academica_sep": "BAJA TEMPORAL (A solicitud del estudiantado antes de transcurrido el 50% del periodo académico).",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "columna_9": "",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "columna_13": "",
+        "columna_14": "BAJA DEFINITIVA",
+        "columna_15": "",
+        "columna_16": "",
+        "columna_17": "",
+        "columna_18": "",
+        "columna_19": "",
+        "columna_20": "",
+        "columna_21": "",
+        "columna_22": "",
+        "columna_23": "",
+        "columna_24": "",
+        "columna_25": "",
+        "columna_26": "",
+        "columna_27": "",
+        "columna_28": "",
+        "dejaron_de_asistir_sin_avisar": "H"
+      },
+      {
+        "plantel": "",
+        "programa_educativo": "",
+        "grado": "",
+        "no_de_estudiantes_por_tipo_de_baja_academica_sep": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "columna_9": "",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "columna_13": "",
+        "columna_14": "REPROBACIÓN (MÁS DE 4 EXTRAORDINARIOS)",
+        "columna_15": "",
+        "columna_16": "SOLICITUD EXPRESA DEL ESTUDIANTADO",
+        "columna_17": "",
+        "columna_18": "",
+        "columna_19": "",
+        "columna_20": "",
+        "columna_21": "",
+        "columna_22": "",
+        "columna_23": "",
+        "columna_24": "SUSPENSIÓN DEFINITIVA DEL PLANTEL O INSTITUCIÓN",
+        "columna_25": "",
+        "columna_26": "SUBTOTAL",
+        "columna_27": "",
+        "columna_28": "",
+        "dejaron_de_asistir_sin_avisar": ""
+      },
+      {
+        "plantel": "",
+        "programa_educativo": "",
+        "grado": "",
+        "no_de_estudiantes_por_tipo_de_baja_academica_sep": "ENFERMEDAD",
+        "columna_5": "",
+        "columna_6": "PROBLEMAS PERSONALES",
+        "columna_7": "",
+        "columna_8": "PROBLEMAS ECONÓMICOS",
+        "columna_9": "",
+        "columna_10": "OTRA (Especificar)",
+        "columna_11": "",
+        "columna_12": "SUBTOTAL",
+        "columna_13": "",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "ENFERMEDAD",
+        "columna_17": "",
+        "columna_18": "PROBLEMAS PERSONALES",
+        "columna_19": "",
+        "columna_20": "PROBLEMAS ECONÓMICOS",
+        "columna_21": "",
+        "columna_22": "NO ESPECIFICÓ",
+        "columna_23": "",
+        "columna_24": "",
+        "columna_25": "",
+        "columna_26": "",
+        "columna_27": "",
+        "columna_28": "",
+        "dejaron_de_asistir_sin_avisar": ""
+      },
+      {
+        "plantel": "",
+        "programa_educativo": "",
+        "grado": "",
+        "no_de_estudiantes_por_tipo_de_baja_academica_sep": "H",
+        "columna_5": "M",
+        "columna_6": "H",
+        "columna_7": "M",
+        "columna_8": "H",
+        "columna_9": "M",
+        "columna_10": "H",
+        "columna_11": "M",
+        "columna_12": "H",
+        "columna_13": "M",
+        "columna_14": "H",
+        "columna_15": "M",
+        "columna_16": "H",
+        "columna_17": "M",
+        "columna_18": "H",
+        "columna_19": "M",
+        "columna_20": "H",
+        "columna_21": "M",
+        "columna_22": "H",
+        "columna_23": "M",
+        "columna_24": "H",
+        "columna_25": "M",
+        "columna_26": "H",
+        "columna_27": "M",
+        "columna_28": "",
+        "dejaron_de_asistir_sin_avisar": ""
+      },
+      {
+        "plantel": "Bachillerato 16",
+        "programa_educativo": "BG24",
+        "grado": "1°",
+        "no_de_estudiantes_por_tipo_de_baja_academica_sep": "",
+        "columna_5": "1.0",
+        "columna_6": "2.0",
+        "columna_7": "",
+        "columna_8": "",
+        "columna_9": "",
+        "columna_10": "1.0",
+        "columna_11": "",
+        "columna_12": "=SUM(D14,F14,H14,J14)",
+        "columna_13": "=SUM(E14,G14,I14,K14)",
+        "columna_14": "4.0",
+        "columna_15": "1.0",
+        "columna_16": "",
+        "columna_17": "",
+        "columna_18": "",
+        "columna_19": "",
+        "columna_20": "",
+        "columna_21": "",
+        "columna_22": "",
+        "columna_23": "",
+        "columna_24": "",
+        "columna_25": "",
+        "columna_26": "=SUM(N14,P14,R14,T14,V14,X14)",
+        "columna_27": "=SUM(O14,Q14,S14,U14,W14,Y14)",
+        "columna_28": "",
+        "dejaron_de_asistir_sin_avisar": ""
+      },
+      {
+        "plantel": "",
+        "programa_educativo": "",
+        "grado": "3°",
+        "no_de_estudiantes_por_tipo_de_baja_academica_sep": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "columna_9": "",
+        "columna_10": "",
+        "columna_11": "1.0",
+        "columna_12": "=SUM(D15,F15,H15,J15)",
+        "columna_13": "=SUM(E15,G15,I15,K15)",
+        "columna_14": "2.0",
+        "columna_15": "",
+        "columna_16": "",
+        "columna_17": "",
+        "columna_18": "",
+        "columna_19": "",
+        "columna_20": "",
+        "columna_21": "",
+        "columna_22": "",
+        "columna_23": "",
+        "columna_24": "",
+        "columna_25": "",
+        "columna_26": "=SUM(N15,P15,R15,T15,V15,X15)",
+        "columna_27": "=SUM(O15,Q15,S15,U15,W15,Y15)",
+        "columna_28": "",
+        "dejaron_de_asistir_sin_avisar": ""
+      },
+      {
+        "plantel": "",
+        "programa_educativo": "",
+        "grado": "5°",
+        "no_de_estudiantes_por_tipo_de_baja_academica_sep": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "columna_8": "",
+        "columna_9": "",
+        "columna_10": "",
+        "columna_11": "1.0",
+        "columna_12": "=SUM(D16,F16,H16,J16)",
+        "columna_13": "=SUM(E16,G16,I16,K16)",
+        "columna_14": "",
+        "columna_15": "",
+        "columna_16": "",
+        "columna_17": "",
+        "columna_18": "",
+        "columna_19": "",
+        "columna_20": "",
+        "columna_21": "",
+        "columna_22": "",
+        "columna_23": "",
+        "columna_24": "",
+        "columna_25": "",
+        "columna_26": "=SUM(N16,P16,R16,T16,V16,X16)",
+        "columna_27": "=SUM(O16,Q16,S16,U16,W16,Y16)",
+        "columna_28": "",
+        "dejaron_de_asistir_sin_avisar": ""
+      },
+      {
+        "plantel": "TOTAL",
+        "programa_educativo": "",
+        "grado": "",
+        "no_de_estudiantes_por_tipo_de_baja_academica_sep": "=SUM(D14-D16)",
+        "columna_5": "=SUM(E14-E16)",
+        "columna_6": "=SUM(F14-F16)",
+        "columna_7": "=SUM(G14-G16)",
+        "columna_8": "=SUM(H14-H16)",
+        "columna_9": "=SUM(I14-I16)",
+        "columna_10": "=SUM(J14-J16)",
+        "columna_11": "=SUM(K14-K16)",
+        "columna_12": "=SUM(L14-L16)",
+        "columna_13": "=SUM(M14-M16)",
+        "columna_14": "=SUM(N14-N16)",
+        "columna_15": "=SUM(O14-O16)",
+        "columna_16": "=SUM(P14-P16)",
+        "columna_17": "=SUM(Q14-Q16)",
+        "columna_18": "=SUM(R14-R16)",
+        "columna_19": "=SUM(S14-S16)",
+        "columna_20": "=SUM(T14-T16)",
+        "columna_21": "=SUM(U14-U16)",
+        "columna_22": "=SUM(V14-V16)",
+        "columna_23": "=SUM(W14-W16)",
+        "columna_24": "=SUM(X14-X16)",
+        "columna_25": "=SUM(Y14-Y16)",
+        "columna_26": "=SUM(Z14-Z16)",
+        "columna_27": "=SUM(AA14-AA16)",
+        "columna_28": "",
+        "dejaron_de_asistir_sin_avisar": "=SUM(AC14-AC16)"
+      }
+    ],
+    "showTotals": false,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "programa_educativo": "",
+      "grado": "",
+      "no_de_estudiantes_por_tipo_de_baja_academica_sep": "",
+      "columna_5": "",
+      "columna_6": "",
+      "columna_7": "",
+      "columna_8": "",
+      "columna_9": "",
+      "columna_10": "",
+      "columna_11": "",
+      "columna_12": "",
+      "columna_13": "",
+      "columna_14": "",
+      "columna_15": "",
+      "columna_16": "",
+      "columna_17": "",
+      "columna_18": "",
+      "columna_19": "",
+      "columna_20": "",
+      "columna_21": "",
+      "columna_22": "",
+      "columna_23": "",
+      "columna_24": "",
+      "columna_25": "",
+      "columna_26": "",
+      "columna_27": "",
+      "columna_28": "",
+      "dejaron_de_asistir_sin_avisar": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "B16-FMT-01-CE2296AB-red-de-apoyo-academico": {
+    "indicatorCode": "B16-FMT-01-CE2296AB-red-de-apoyo-academico",
+    "officialCode": null,
+    "indicatorName": "Red de apoyo académico",
+    "sourceLabel": "Red de apoyo académico.xlsx",
+    "sourcePath": "Bachillerato 16/Seguimiento Académico del Estudiantado/Red de apoyo académico.xlsx",
+    "sheetName": "Hoja1",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 7
+      }
+    ],
+    "columns": [
+      {
+        "key": "nombre_de_la_actividad",
+        "label": "Nombre de la actividad",
+        "type": "readonly"
+      },
+      {
+        "key": "responsable",
+        "label": "Responsable",
+        "type": "text"
+      },
+      {
+        "key": "cantidad_de_participantes",
+        "label": "Cantidad de participantes",
+        "type": "number"
+      },
+      {
+        "key": "columna_4",
+        "label": "Columna 4",
+        "type": "text"
+      },
+      {
+        "key": "columna_5",
+        "label": "Columna 5",
+        "type": "text"
+      },
+      {
+        "key": "columna_6",
+        "label": "Columna 6",
+        "type": "text"
+      },
+      {
+        "key": "periodo_de_realizacion",
+        "label": "Periodo de realización",
+        "type": "text"
+      }
+    ],
+    "initialRows": [
+      {
+        "nombre_de_la_actividad": "",
+        "responsable": "",
+        "cantidad_de_participantes": "",
+        "columna_4": "",
+        "columna_5": "Padres, madres y/o tutores",
+        "columna_6": "",
+        "periodo_de_realizacion": ""
+      },
+      {
+        "nombre_de_la_actividad": "",
+        "responsable": "",
+        "cantidad_de_participantes": "",
+        "columna_4": "H",
+        "columna_5": "M",
+        "columna_6": "H",
+        "periodo_de_realizacion": ""
+      },
+      {
+        "nombre_de_la_actividad": "",
+        "responsable": "",
+        "cantidad_de_participantes": 86.0,
+        "columna_4": "72.0",
+        "columna_5": "",
+        "columna_6": "",
+        "periodo_de_realizacion": "febrero - agosto 2026"
+      },
+      {
+        "nombre_de_la_actividad": "",
+        "responsable": "",
+        "cantidad_de_participantes": 48.0,
+        "columna_4": "35.0",
+        "columna_5": "",
+        "columna_6": "",
+        "periodo_de_realizacion": "febrero - agosto 2026"
+      },
+      {
+        "nombre_de_la_actividad": "",
+        "responsable": "",
+        "cantidad_de_participantes": 9.0,
+        "columna_4": "3.0",
+        "columna_5": "",
+        "columna_6": "",
+        "periodo_de_realizacion": "febrero - agosto 2026"
+      },
+      {
+        "nombre_de_la_actividad": "",
+        "responsable": "",
+        "cantidad_de_participantes": 9.0,
+        "columna_4": "11.0",
+        "columna_5": "",
+        "columna_6": "",
+        "periodo_de_realizacion": "febrero - agosto 2026"
+      },
+      {
+        "nombre_de_la_actividad": "",
+        "responsable": "",
+        "cantidad_de_participantes": 21.0,
+        "columna_4": "18.0",
+        "columna_5": "",
+        "columna_6": "",
+        "periodo_de_realizacion": "febrero - agosto 2026"
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "nombre_de_la_actividad": "",
+      "responsable": "",
+      "cantidad_de_participantes": "",
+      "columna_4": "",
+      "columna_5": "",
+      "columna_6": "",
+      "periodo_de_realizacion": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "B16-FMT-01-19F01A78-nivelacion-academica-dic": {
+    "indicatorCode": "B16-FMT-01-19F01A78-nivelacion-academica-dic",
+    "officialCode": null,
+    "indicatorName": "NIVELACION ACADEMICA_DICIEMBRE 2024- ENERO 2025",
+    "sourceLabel": "NIVELACION ACADEMICA_DICIEMBRE 2024- ENERO 2025.xlsx",
+    "sourcePath": "Bachillerato 16/Nivelación Academica/NIVELACION ACADEMICA_DICIEMBRE 2024- ENERO 2025.xlsx",
+    "sheetName": "ORDINARIO",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 19
+      }
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "grado",
+        "label": "GRADO",
+        "type": "text"
+      },
+      {
+        "key": "matricula",
+        "label": "MATRICULA",
+        "type": "text"
+      },
+      {
+        "key": "columna_4",
+        "label": "Columna 4",
+        "type": "text"
+      },
+      {
+        "key": "columna_5",
+        "label": "Columna 5",
+        "type": "text"
+      },
+      {
+        "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi",
+        "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar)",
+        "type": "number"
+      },
+      {
+        "key": "columna_7",
+        "label": "Columna 7",
+        "type": "text"
+      },
+      {
+        "key": "columna_8",
+        "label": "Columna 8",
+        "type": "text"
+      },
+      {
+        "key": "columna_9",
+        "label": "Columna 9",
+        "type": "text"
+      },
+      {
+        "key": "columna_10",
+        "label": "Columna 10",
+        "type": "text"
+      },
+      {
+        "key": "columna_11",
+        "label": "Columna 11",
+        "type": "text"
+      },
+      {
+        "key": "columna_12",
+        "label": "Columna 12",
+        "type": "text"
+      },
+      {
+        "key": "columna_13",
+        "label": "Columna 13",
+        "type": "text"
+      },
+      {
+        "key": "no_asignaturas_con_alumnos_en_ordinario",
+        "label": "No. ASIGNATURAS CON ALUMNOS EN ORDINARIO",
+        "type": "number"
+      },
+      {
+        "key": "no_asignaturas_que_dieron_nivelacion_academica",
+        "label": "No.ASIGNATURAS QUE DIERON NIVELACIÓN ACADÉMICA",
+        "type": "text"
+      },
+      {
+        "key": "cantidad_estudiantes_que_asistieron",
+        "label": "CANTIDAD ESTUDIANTES QUE ASISTIERON",
+        "type": "number"
+      },
+      {
+        "key": "columna_17",
+        "label": "Columna 17",
+        "type": "text"
+      },
+      {
+        "key": "columna_18",
+        "label": "Columna 18",
+        "type": "text"
+      },
+      {
+        "key": "atencion",
+        "label": "% ATENCIÓN",
+        "type": "text"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "",
+        "grado": "",
+        "matricula": "H",
+        "columna_4": "M",
+        "columna_5": "T",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": "",
+        "columna_7": "B",
+        "columna_8": "C",
+        "columna_9": "D",
+        "columna_10": "E",
+        "columna_11": "F",
+        "columna_12": "G",
+        "columna_13": "H",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "",
+        "cantidad_estudiantes_que_asistieron": "",
+        "columna_17": "M",
+        "columna_18": "T",
+        "atencion": ""
+      },
+      {
+        "plantel": "",
+        "grado": "1°",
+        "matricula": "27.0",
+        "columna_4": "22.0",
+        "columna_5": "=SUM(C9:D9)",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": 4.0,
+        "columna_7": "8.0",
+        "columna_8": "2.0",
+        "columna_9": "13.0",
+        "columna_10": "3.0",
+        "columna_11": "15.0",
+        "columna_12": "4.0",
+        "columna_13": "",
+        "no_asignaturas_con_alumnos_en_ordinario": 9.0,
+        "no_asignaturas_que_dieron_nivelacion_academica": "7.0",
+        "cantidad_estudiantes_que_asistieron": 23.0,
+        "columna_17": "20.0",
+        "columna_18": "=SUM(P9:Q9)",
+        "atencion": "=(R9*100)/E9"
+      },
+      {
+        "plantel": "",
+        "grado": "3°",
+        "matricula": "84.0",
+        "columna_4": "91.0",
+        "columna_5": "=SUM(C10:D10)",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": 21.0,
+        "columna_7": "28.0",
+        "columna_8": "18.0",
+        "columna_9": "21.0",
+        "columna_10": "24.0",
+        "columna_11": "38.0",
+        "columna_12": "25.0",
+        "columna_13": "",
+        "no_asignaturas_con_alumnos_en_ordinario": 15.0,
+        "no_asignaturas_que_dieron_nivelacion_academica": "13.0",
+        "cantidad_estudiantes_que_asistieron": 80.0,
+        "columna_17": "89.0",
+        "columna_18": "=SUM(P10:Q10)",
+        "atencion": "=(R10*100)/E10"
+      },
+      {
+        "plantel": "",
+        "grado": "5°",
+        "matricula": "23.0",
+        "columna_4": "27.0",
+        "columna_5": "=SUM(C11:D11)",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": 4.0,
+        "columna_7": "8.0",
+        "columna_8": "11.0",
+        "columna_9": "9.0",
+        "columna_10": "10.0",
+        "columna_11": "7.0",
+        "columna_12": "1.0",
+        "columna_13": "",
+        "no_asignaturas_con_alumnos_en_ordinario": 14.0,
+        "no_asignaturas_que_dieron_nivelacion_academica": "12.0",
+        "cantidad_estudiantes_que_asistieron": 22.0,
+        "columna_17": "27.0",
+        "columna_18": "=SUM(P11:Q11)",
+        "atencion": "=(R11*100)/E11"
+      },
+      {
+        "plantel": "SEMIESCOLARIZADO",
+        "grado": "",
+        "matricula": "",
+        "columna_4": "",
+        "columna_5": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": "",
+        "columna_7": "",
+        "columna_8": "",
+        "columna_9": "",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "columna_13": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "",
+        "cantidad_estudiantes_que_asistieron": "",
+        "columna_17": "",
+        "columna_18": "",
+        "atencion": ""
+      },
+      {
+        "plantel": "PLANTEL",
+        "grado": "GRADO",
+        "matricula": "MATRICULA",
+        "columna_4": "",
+        "columna_5": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": "",
+        "columna_7": "",
+        "columna_8": "",
+        "columna_9": "",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "columna_13": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "No.ASIGNATURAS QUE DIERON NIVELACIÓN ACADÉMICA",
+        "cantidad_estudiantes_que_asistieron": "",
+        "columna_17": "",
+        "columna_18": "",
+        "atencion": "% ATENCIÓN"
+      },
+      {
+        "plantel": "",
+        "grado": "",
+        "matricula": "H",
+        "columna_4": "M",
+        "columna_5": "T",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": "",
+        "columna_7": "",
+        "columna_8": "",
+        "columna_9": "",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "columna_13": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "",
+        "cantidad_estudiantes_que_asistieron": "",
+        "columna_17": "M",
+        "columna_18": "T",
+        "atencion": ""
+      },
+      {
+        "plantel": "",
+        "grado": "1°",
+        "matricula": "0.0",
+        "columna_4": "0.0",
+        "columna_5": "=SUM(C16:D16)",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": "",
+        "columna_7": "",
+        "columna_8": "",
+        "columna_9": "",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "columna_13": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "",
+        "cantidad_estudiantes_que_asistieron": 0.0,
+        "columna_17": "0.0",
+        "columna_18": "=SUM(P16:Q16)",
+        "atencion": "=(R16*100)/E16"
+      },
+      {
+        "plantel": "",
+        "grado": "3°",
+        "matricula": "0.0",
+        "columna_4": "0.0",
+        "columna_5": "=SUM(C17:D17)",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": "",
+        "columna_7": "",
+        "columna_8": "",
+        "columna_9": "",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "columna_13": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "",
+        "cantidad_estudiantes_que_asistieron": 0.0,
+        "columna_17": "0.0",
+        "columna_18": "=SUM(P17:Q17)",
+        "atencion": "=(R17*100)/E17"
+      },
+      {
+        "plantel": "",
+        "grado": "DENTRO DE LAS MATERIAS SE CONTABILIZÓ CULTUALES Y DEPORTIVAS Y SERVICIO SOCIAL",
+        "matricula": "",
+        "columna_4": "",
+        "columna_5": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": "",
+        "columna_7": "",
+        "columna_8": "",
+        "columna_9": "",
+        "columna_10": "",
+        "columna_11": "",
+        "columna_12": "",
+        "columna_13": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "",
+        "cantidad_estudiantes_que_asistieron": "",
+        "columna_17": "",
+        "columna_18": "",
+        "atencion": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "grado": "",
+      "matricula": "",
+      "columna_4": "",
+      "columna_5": "",
+      "no_estudiantes_en_ordinario_por_grupo_se_contabi": "",
+      "columna_7": "",
+      "columna_8": "",
+      "columna_9": "",
+      "columna_10": "",
+      "columna_11": "",
+      "columna_12": "",
+      "columna_13": "",
+      "no_asignaturas_con_alumnos_en_ordinario": "",
+      "no_asignaturas_que_dieron_nivelacion_academica": "",
+      "cantidad_estudiantes_que_asistieron": "",
+      "columna_17": "",
+      "columna_18": "",
+      "atencion": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "B16-FMT-01-0CE86D23-alumnos-que-realizaron-e": {
+    "indicatorCode": "B16-FMT-01-0CE86D23-alumnos-que-realizaron-e",
+    "officialCode": null,
+    "indicatorName": "Alumnos que realizaron examen de conocImientos para titulación",
+    "sourceLabel": "Alumnos que realizaron examen de conocImientos para titulación.xlsx",
+    "sourcePath": "Bachillerato 16/Titulación/Exámenes aprobados para titulación /Alumnos que realizaron examen de conocImientos para titulación.xlsx",
+    "sheetName": "Hoja1",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 7
+      }
+    ],
+    "columns": [
+      {
+        "key": "columna_1",
+        "label": "Columna 1",
+        "type": "text"
+      },
+      {
+        "key": "columna_2",
+        "label": "Columna 2",
+        "type": "text"
+      },
+      {
+        "key": "columna_3",
+        "label": "Columna 3",
+        "type": "text"
+      },
+      {
+        "key": "n_cuenta",
+        "label": "Nº CUENTA",
+        "type": "text"
+      },
+      {
+        "key": "nombre",
+        "label": "NOMBRE",
+        "type": "text"
+      },
+      {
+        "key": "plan",
+        "label": "PLAN",
+        "type": "text"
+      },
+      {
+        "key": "grupo",
+        "label": "GRUPO",
+        "type": "text"
+      }
+    ],
+    "initialRows": [
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "1",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "2",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "3",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "4",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "5",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "6",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "7",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "8",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "9",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "10",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "11",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "12",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "13",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "14",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "15",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "16",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "17",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "18",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "19",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "20",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "21",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "22",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "23",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "24",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "25",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "26",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "27",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "28",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "29",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "30",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "31",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "32",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "33",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "34",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "35",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "36",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "37",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "A"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "38",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "E"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "39",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "E"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "40",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "E"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "41",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "E"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "42",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "E"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "43",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "E"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "44",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "E"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "45",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "E"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "46",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "E"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "47",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "E"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "48",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "E"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "49",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "E"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "50",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "E"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "51",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "E"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "52",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "E"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "53",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "E"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "54",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "E"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "55",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "E"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "56",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "E"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "57",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "E"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "58",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "E"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "59",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "E"
+      },
+      {
+        "columna_1": "",
+        "columna_2": "",
+        "columna_3": "60",
+        "n_cuenta": "",
+        "nombre": "",
+        "plan": "AQ15",
+        "grupo": "E"
+      }
+    ],
+    "showTotals": false,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "columna_1": "",
+      "columna_2": "",
+      "columna_3": "",
+      "n_cuenta": "",
+      "nombre": "",
+      "plan": "",
+      "grupo": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "B16-FMT-01-1E107D9F-personal-plantel-2026": {
+    "indicatorCode": "B16-FMT-01-1E107D9F-personal-plantel-2026",
+    "officialCode": null,
+    "indicatorName": "PERSONAL _PLANTEL_2026",
+    "sourceLabel": "PERSONAL _PLANTEL_2026.xlsx",
+    "sourcePath": "Bachillerato 16/Personal del Plantel/2026_Personal/PERSONAL _PLANTEL_2026.xlsx",
+    "sheetName": "PERSONAL DE APOYO ACADÉMICO",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 16
+      }
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "nombre",
+        "label": "NOMBRE",
+        "type": "text"
+      },
+      {
+        "key": "no_trab",
+        "label": "No. TRAB.",
+        "type": "text"
+      },
+      {
+        "key": "actividad_que_desempena_en_plantel",
+        "label": "ACTIVIDAD QUE DESEMPEÑA EN PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "horario_laboral",
+        "label": "HORARIO LABORAL",
+        "type": "text"
+      },
+      {
+        "key": "licenciatura_anotar_el_nombre_de_la_licenciatura",
+        "label": "LICENCIATURA (Anotar el nombre de la licenciatura)",
+        "type": "text"
+      },
+      {
+        "key": "titulado_de_licenciatura",
+        "label": "¿TITULADO DE LICENCIATURA?",
+        "type": "text"
+      },
+      {
+        "key": "maestria_anotar_el_nombre_de_la_maestria",
+        "label": "MAESTRÍA (Anotar el nombre de la Maestría)",
+        "type": "text"
+      },
+      {
+        "key": "titulado_de_maestria",
+        "label": "¿TITULADO DE MAESTRÍA?",
+        "type": "text"
+      },
+      {
+        "key": "doctorado_anotar_el_nombre_del_doctorado",
+        "label": "DOCTORADO (Anotar el nombre del Doctorado)",
+        "type": "text"
+      },
+      {
+        "key": "titulado_del_doctorado",
+        "label": "¿TITULADO DEL DOCTORADO?",
+        "type": "text"
+      },
+      {
+        "key": "imparte_clases",
+        "label": "IMPARTE CLASES",
+        "type": "text"
+      },
+      {
+        "key": "plantel_2",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "horas_de_docencia",
+        "label": "HORAS DE DOCENCIA",
+        "type": "text"
+      },
+      {
+        "key": "asignatura",
+        "label": "ASIGNATURA",
+        "type": "text"
+      },
+      {
+        "key": "programa_educativo",
+        "label": "PROGRAMA EDUCATIVO",
+        "type": "readonly"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "BACHILLERATO 16",
+        "nombre": "",
+        "no_trab": "",
+        "actividad_que_desempena_en_plantel": "",
+        "horario_laboral": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "imparte_clases": "",
+        "plantel_2": "",
+        "horas_de_docencia": "",
+        "asignatura": "",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre": "",
+        "no_trab": "5230.0",
+        "actividad_que_desempena_en_plantel": "SERVICIO SOCIAL UNIVERSITARIO/ACTIVIDADES CULTURALES",
+        "horario_laboral": "13:00 A 21:00 HRS",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "imparte_clases": "",
+        "plantel_2": "",
+        "horas_de_docencia": "",
+        "asignatura": "",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre": "",
+        "no_trab": "4397.0",
+        "actividad_que_desempena_en_plantel": "ENCARGADO DEL MODULO DE COMPUTO",
+        "horario_laboral": "13:00 A 21:00 HRS",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "imparte_clases": "",
+        "plantel_2": "",
+        "horas_de_docencia": "",
+        "asignatura": "",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre": "",
+        "no_trab": "9078.0",
+        "actividad_que_desempena_en_plantel": "ACTIVIDADES EN EL SERVICIO SOCIAL CONSTITUCIONAL Y TITULACION",
+        "horario_laboral": "16:00 A 20:00 HRS",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "imparte_clases": "",
+        "plantel_2": "",
+        "horas_de_docencia": "",
+        "asignatura": "",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre": "",
+        "no_trab": "3503.0",
+        "actividad_que_desempena_en_plantel": "COORDINACIÓN ACADÉMICA",
+        "horario_laboral": "12:00 A 20:00 HRS",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "SI",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "imparte_clases": "",
+        "plantel_2": "",
+        "horas_de_docencia": "",
+        "asignatura": "",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre": "",
+        "no_trab": "6031.0",
+        "actividad_que_desempena_en_plantel": "COORDINACIÓN ACADÉMICA",
+        "horario_laboral": "12:00 A 20:00 HRS",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "SI",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "imparte_clases": "",
+        "plantel_2": "",
+        "horas_de_docencia": "",
+        "asignatura": "",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre": "",
+        "no_trab": "9121.0",
+        "actividad_que_desempena_en_plantel": "ACTIVIDADES DE ORIENTADOR",
+        "horario_laboral": "15:00 A 19:00 HRS / 14:00 A 19:00 HRS",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "imparte_clases": "",
+        "plantel_2": "",
+        "horas_de_docencia": "",
+        "asignatura": "",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre": "",
+        "no_trab": "9235.0",
+        "actividad_que_desempena_en_plantel": "ACTIVIDADES DE ORIENTADORA",
+        "horario_laboral": "15:00 A 20:00 HRS",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "SI",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "imparte_clases": "",
+        "plantel_2": "",
+        "horas_de_docencia": "",
+        "asignatura": "",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre": "",
+        "no_trab": "5809.0",
+        "actividad_que_desempena_en_plantel": "ACTIVIDADES DE ORIENTADOR",
+        "horario_laboral": "14:00 A 18:00 HRS",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "SI",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "SI",
+        "imparte_clases": "",
+        "plantel_2": "",
+        "horas_de_docencia": "",
+        "asignatura": "",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre": "",
+        "no_trab": "5063.0",
+        "actividad_que_desempena_en_plantel": "ACTIVIDADES DE ORIENTADOR",
+        "horario_laboral": "15:00 A 20:00 HRS.",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "imparte_clases": "",
+        "plantel_2": "",
+        "horas_de_docencia": "",
+        "asignatura": "",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre": "",
+        "no_trab": "8919.0",
+        "actividad_que_desempena_en_plantel": "BECAS Y APOYO ADMINISTRATIVO",
+        "horario_laboral": "12:00 A 20:00 HRS",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "SI",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "imparte_clases": "",
+        "plantel_2": "",
+        "horas_de_docencia": "",
+        "asignatura": "",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre": "",
+        "no_trab": "7535.0",
+        "actividad_que_desempena_en_plantel": "SECRETARIA",
+        "horario_laboral": "12:00 A 20:00 HRS",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "imparte_clases": "",
+        "plantel_2": "",
+        "horas_de_docencia": "",
+        "asignatura": "",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre": "",
+        "no_trab": "8575.0",
+        "actividad_que_desempena_en_plantel": "SECRETARIA",
+        "horario_laboral": "13:00 A 21:00 HRS",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "imparte_clases": "",
+        "plantel_2": "",
+        "horas_de_docencia": "",
+        "asignatura": "",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre": "",
+        "no_trab": "7020.0",
+        "actividad_que_desempena_en_plantel": "FUNCIONES CONTABLES Y ADMINISTRATIVAS",
+        "horario_laboral": "12:00 A 20:00 HRS",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "SI",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "imparte_clases": "",
+        "plantel_2": "",
+        "horas_de_docencia": "",
+        "asignatura": "",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre": "",
+        "no_trab": "5903.0",
+        "actividad_que_desempena_en_plantel": "PROMOTOR DEPORTIVO",
+        "horario_laboral": "16:00 A 20:00 HRS/7:00 AM A12:00 PM",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "SI",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "SI",
+        "imparte_clases": "",
+        "plantel_2": "",
+        "horas_de_docencia": "",
+        "asignatura": "",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre": "",
+        "no_trab": "9382.0",
+        "actividad_que_desempena_en_plantel": "FUNCIONES DE PREFECTO",
+        "horario_laboral": "12:00 A 20:00 HRS",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "imparte_clases": "",
+        "plantel_2": "",
+        "horas_de_docencia": "",
+        "asignatura": "",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre": "",
+        "no_trab": "9414.0",
+        "actividad_que_desempena_en_plantel": "FUNCIONES DE PREFECTO",
+        "horario_laboral": "13:00 A 21:00 HRS",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "imparte_clases": "",
+        "plantel_2": "",
+        "horas_de_docencia": "",
+        "asignatura": "",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre": "",
+        "no_trab": "9446.0",
+        "actividad_que_desempena_en_plantel": "FUNCIONES DE PREFECTO",
+        "horario_laboral": "13:00 A 21:00 HRS",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "imparte_clases": "",
+        "plantel_2": "",
+        "horas_de_docencia": "",
+        "asignatura": "",
+        "programa_educativo": ""
+      },
+      {
+        "plantel": "",
+        "nombre": "",
+        "no_trab": "501138.0",
+        "actividad_que_desempena_en_plantel": "INSTRUCTORA DE LA BANDA DE GUERRA",
+        "horario_laboral": "",
+        "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+        "titulado_de_licenciatura": "SI",
+        "maestria_anotar_el_nombre_de_la_maestria": "",
+        "titulado_de_maestria": "",
+        "doctorado_anotar_el_nombre_del_doctorado": "",
+        "titulado_del_doctorado": "",
+        "imparte_clases": "",
+        "plantel_2": "",
+        "horas_de_docencia": "",
+        "asignatura": "",
+        "programa_educativo": ""
+      }
+    ],
+    "showTotals": false,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "nombre": "",
+      "no_trab": "",
+      "actividad_que_desempena_en_plantel": "",
+      "horario_laboral": "",
+      "licenciatura_anotar_el_nombre_de_la_licenciatura": "",
+      "titulado_de_licenciatura": "",
+      "maestria_anotar_el_nombre_de_la_maestria": "",
+      "titulado_de_maestria": "",
+      "doctorado_anotar_el_nombre_del_doctorado": "",
+      "titulado_del_doctorado": "",
+      "imparte_clases": "",
+      "plantel_2": "",
+      "horas_de_docencia": "",
+      "asignatura": "",
+      "programa_educativo": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "B16-FMT-01-F40AA656-4-bachillerato-16-agosto": {
+    "indicatorCode": "B16-FMT-01-F40AA656-4-bachillerato-16-agosto",
+    "officialCode": null,
+    "indicatorName": "4) Bachillerato 16 AGOSTO 2025 -ENERO 2026",
+    "sourceLabel": "4) Bachillerato 16 AGOSTO 2025 -ENERO 2026.xlsx",
+    "sourcePath": "Bachillerato 16/Promoción de la Ciencia/Prácticas de Laboratorios/ARCHIVO Bachillerato 16/4) Bachillerato 16 AGOSTO 2025 -ENERO 2026.xlsx",
+    "sheetName": "Hoja1",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 14
+      }
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "columna_2",
+        "label": "Columna 2",
+        "type": "text"
+      },
+      {
+        "key": "area",
+        "label": "AREA",
+        "type": "text"
+      },
+      {
+        "key": "segundo",
+        "label": "SEGUNDO",
+        "type": "text"
+      },
+      {
+        "key": "columna_5",
+        "label": "Columna 5",
+        "type": "text"
+      },
+      {
+        "key": "columna_6",
+        "label": "Columna 6",
+        "type": "text"
+      },
+      {
+        "key": "columna_7",
+        "label": "Columna 7",
+        "type": "text"
+      },
+      {
+        "key": "cuarto",
+        "label": "CUARTO",
+        "type": "text"
+      },
+      {
+        "key": "columna_9",
+        "label": "Columna 9",
+        "type": "text"
+      },
+      {
+        "key": "columna_10",
+        "label": "Columna 10",
+        "type": "text"
+      },
+      {
+        "key": "sexto",
+        "label": "SEXTO",
+        "type": "text"
+      },
+      {
+        "key": "columna_12",
+        "label": "Columna 12",
+        "type": "text"
+      },
+      {
+        "key": "columna_13",
+        "label": "Columna 13",
+        "type": "text"
+      },
+      {
+        "key": "total_grupos",
+        "label": "TOTAL GRUPOS",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "BACHILLERATO 16",
+        "columna_2": "",
+        "area": "TÉCNICO ANALISTA QUIMICO",
+        "segundo": "2.0",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "2.0",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "2.0",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "TÉCNICO ANALISTA PROGRAMADOR",
+        "segundo": "1.0",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "1.0",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "1.0",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "BACHILLERATO GENERAL",
+        "segundo": "4.0",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "4.0",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "4.0",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "TURNO",
+        "columna_2": "V",
+        "area": "TOTAL DE GRUPOS",
+        "segundo": "=SUM(D3:G5)",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "=SUM(H3:J5)",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "=SUM(K3:M5)",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "PRACTICAS REALIZADAS EN PRIMER SEMESTRE",
+        "columna_2": "",
+        "area": "",
+        "segundo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "GRUPO",
+        "columna_2": "PLAN DE ESTUDIO",
+        "area": "MATERIA",
+        "segundo": "No. PRACTICA",
+        "columna_5": "FECHA",
+        "columna_6": "REALIZADA",
+        "columna_7": "No. PRACTICA",
+        "cuarto": "FECHA",
+        "columna_9": "REALIZADA",
+        "columna_10": "No. PRACTICA",
+        "sexto": "FECHA",
+        "columna_12": "REALIZADA",
+        "columna_13": "No. PRACTICA",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "A",
+        "columna_2": "AQ15",
+        "area": "TECNOLOGIA DE INFORMACIÓN I",
+        "segundo": "1.0",
+        "columna_5": "2025-08-19 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-26 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-01 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "QUIMICA I",
+        "segundo": "1.0",
+        "columna_5": "2025-08-22 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-29 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-05 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "B",
+        "columna_2": "AP13",
+        "area": "TECNOLOGIA DE INFORMACIÓN I",
+        "segundo": "1.0",
+        "columna_5": "2025-08-21 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-28 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-04 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "QUIMICA I",
+        "segundo": "1.0",
+        "columna_5": "2025-08-21 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-28 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-04 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "C",
+        "columna_2": "BG24",
+        "area": "CULTURA DIGITAL",
+        "segundo": "1.0",
+        "columna_5": "2025-08-19 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-26 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-01 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "LA MATERIA Y SUS INTERACCIONES",
+        "segundo": "1.0",
+        "columna_5": "2025-08-20 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-27 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-03 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "D",
+        "columna_2": "BG24",
+        "area": "CULTURA DIGITAL",
+        "segundo": "1.0",
+        "columna_5": "2025-08-20 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-27 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-03 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "LA MATERIA Y SUS INTERACCIONES",
+        "segundo": "1.0",
+        "columna_5": "2025-08-18 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-25 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-01 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "E",
+        "columna_2": "AQ15",
+        "area": "TECNOLOGIA DE INFORMACIÓN I",
+        "segundo": "1.0",
+        "columna_5": "2025-08-20 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-27 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-03 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "QUIMICA I",
+        "segundo": "1.0",
+        "columna_5": "2025-08-19 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-26 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-01 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "F",
+        "columna_2": "BG24",
+        "area": "CULTURA DIGITAL",
+        "segundo": "1.0",
+        "columna_5": "2025-08-22 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-29 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-05 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "LA MATERIA Y SUS INTERACCIONES",
+        "segundo": "1.0",
+        "columna_5": "2025-08-21 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-28 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-04 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "G",
+        "columna_2": "BG24",
+        "area": "CULTURA DIGITAL",
+        "segundo": "1.0",
+        "columna_5": "2025-08-19 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-26 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-01 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "LA MATERIA Y SUS INTERACCIONES",
+        "segundo": "1.0",
+        "columna_5": "2025-08-19 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-26 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-01 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "TOTAL",
+        "columna_2": "",
+        "area": "",
+        "segundo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "PRACTICAS REALIZADAS EN TERCER SEMESTRE",
+        "columna_2": "",
+        "area": "",
+        "segundo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "GRUPO",
+        "columna_2": "PLAN DE ESTUDIO",
+        "area": "MATERIA",
+        "segundo": "No. PRACTICA",
+        "columna_5": "FECHA",
+        "columna_6": "REALIZADA",
+        "columna_7": "No. PRACTICA",
+        "cuarto": "FECHA",
+        "columna_9": "REALIZADA",
+        "columna_10": "No. PRACTICA",
+        "sexto": "FECHA",
+        "columna_12": "REALIZADA",
+        "columna_13": "No. PRACTICA",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "A",
+        "columna_2": "AQ15",
+        "area": "FISÍCA I",
+        "segundo": "1.0",
+        "columna_5": "2025-08-22 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-29 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-05 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "QUIMICA ORGANICA",
+        "segundo": "1.0",
+        "columna_5": "2025-08-18 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-25 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-01 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ANALISIS QUIMICO CUALITATIVO",
+        "segundo": "1.0",
+        "columna_5": "2025-08-21 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-28 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-04 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "B",
+        "columna_2": "AP13",
+        "area": "FISÍCA I",
+        "segundo": "1.0",
+        "columna_5": "2025-08-21 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-28 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-04 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "PROGRAMACIÓN I",
+        "segundo": "1.0",
+        "columna_5": "2025-08-19 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-26 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-01 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "C",
+        "columna_2": "BG24",
+        "area": "CONSERVACIÓN DE LA ENERGÍA Y SUS INTERACCIONES CON LA MATERIA",
+        "segundo": "1.0",
+        "columna_5": "2025-08-19 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-26 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-01 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "D",
+        "columna_2": "BG24",
+        "area": "CONSERVACIÓN DE LA ENERGÍA Y SUS INTERACCIONES CON LA MATERIA",
+        "segundo": "1.0",
+        "columna_5": "2025-08-22 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-29 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-05 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "E",
+        "columna_2": "AQ15",
+        "area": "FISÍCA I",
+        "segundo": "1.0",
+        "columna_5": "2025-08-18 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-25 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-01 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "QUIMICA ORGANICA",
+        "segundo": "1.0",
+        "columna_5": "2025-08-20 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-27 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-03 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ANALISIS QUIMICO CUALITATIVO",
+        "segundo": "1.0",
+        "columna_5": "2025-08-20 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-27 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-03 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "F",
+        "columna_2": "BG24",
+        "area": "CONSERVACIÓN DE LA ENERGÍA Y SUS INTERACCIONES CON LA MATERIA",
+        "segundo": "1.0",
+        "columna_5": "2025-08-19 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-26 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-01 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "G",
+        "columna_2": "BG24",
+        "area": "CONSERVACIÓN DE LA ENERGÍA Y SUS INTERACCIONES CON LA MATERIA",
+        "segundo": "1.0",
+        "columna_5": "2025-08-22 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-29 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-05 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "TOTAL",
+        "columna_2": "",
+        "area": "",
+        "segundo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "PRACTICAS REALIZADAS EN QUINTO SEMESTRE",
+        "columna_2": "",
+        "area": "",
+        "segundo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "GRUPO",
+        "columna_2": "PLAN DE ESTUDIO",
+        "area": "MATERIA",
+        "segundo": "No. PRACTICA",
+        "columna_5": "FECHA",
+        "columna_6": "REALIZADA",
+        "columna_7": "No. PRACTICA",
+        "cuarto": "FECHA",
+        "columna_9": "REALIZADA",
+        "columna_10": "No. PRACTICA",
+        "sexto": "FECHA",
+        "columna_12": "REALIZADA",
+        "columna_13": "No. PRACTICA",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "A",
+        "columna_2": "AQ15",
+        "area": "FISICA III",
+        "segundo": "1.0",
+        "columna_5": "2025-08-20 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-27 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-03 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "FUNDAMENTOS DE MICROBIOLOGIA",
+        "segundo": "1.0",
+        "columna_5": "2025-08-22 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-29 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-05 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ANALISIS QUIMICOS INDUSTRIALES",
+        "segundo": "1.0",
+        "columna_5": "2025-08-22 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-29 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-05 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "B",
+        "columna_2": "AP13",
+        "area": "BASE DE DATOS",
+        "segundo": "1.0",
+        "columna_5": "2025-08-19 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-26 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-01 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "PROGRAMACION EN INTERNET I",
+        "segundo": "1.0",
+        "columna_5": "2025-08-21 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-28 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-04 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "PROGRAMACIÓN III",
+        "segundo": "1.0",
+        "columna_5": "2025-08-18 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-25 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-01 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "FISÍCA III",
+        "segundo": "1.0",
+        "columna_5": "2025-08-21 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-28 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-04 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "C",
+        "columna_2": "AQ15",
+        "area": "FISICA III",
+        "segundo": "1.0",
+        "columna_5": "2025-08-21 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-28 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-04 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "FUNDAMENTOS DE MICROBIOLOGIA",
+        "segundo": "1.0",
+        "columna_5": "2025-08-18 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-25 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-01 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ANALISIS QUIMICOS INDUSTRIALES",
+        "segundo": "1.0",
+        "columna_5": "2025-08-18 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-08-25 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-09-01 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "TOTAL",
+        "columna_2": "",
+        "area": "",
+        "segundo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "columna_2": "",
+      "area": "",
+      "segundo": "",
+      "columna_5": "",
+      "columna_6": "",
+      "columna_7": "",
+      "cuarto": "",
+      "columna_9": "",
+      "columna_10": "",
+      "sexto": "",
+      "columna_12": "",
+      "columna_13": "",
+      "total_grupos": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "B16-FMT-01-33E7A579-1-bachillerato-16-febrer": {
+    "indicatorCode": "B16-FMT-01-33E7A579-1-bachillerato-16-febrer",
+    "officialCode": null,
+    "indicatorName": "1) Bachillerato 16 FEBRERO- AGOSTO 2024",
+    "sourceLabel": "1) Bachillerato 16 FEBRERO- AGOSTO 2024.xlsx",
+    "sourcePath": "Bachillerato 16/Promoción de la Ciencia/Prácticas de Laboratorios/ARCHIVO Bachillerato 16/1) Bachillerato 16 FEBRERO- AGOSTO 2024.xlsx",
+    "sheetName": "Hoja1",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 14
+      }
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "columna_2",
+        "label": "Columna 2",
+        "type": "text"
+      },
+      {
+        "key": "area",
+        "label": "AREA",
+        "type": "text"
+      },
+      {
+        "key": "segundo",
+        "label": "SEGUNDO",
+        "type": "text"
+      },
+      {
+        "key": "columna_5",
+        "label": "Columna 5",
+        "type": "text"
+      },
+      {
+        "key": "columna_6",
+        "label": "Columna 6",
+        "type": "text"
+      },
+      {
+        "key": "columna_7",
+        "label": "Columna 7",
+        "type": "text"
+      },
+      {
+        "key": "cuarto",
+        "label": "CUARTO",
+        "type": "text"
+      },
+      {
+        "key": "columna_9",
+        "label": "Columna 9",
+        "type": "text"
+      },
+      {
+        "key": "columna_10",
+        "label": "Columna 10",
+        "type": "text"
+      },
+      {
+        "key": "sexto",
+        "label": "SEXTO",
+        "type": "text"
+      },
+      {
+        "key": "columna_12",
+        "label": "Columna 12",
+        "type": "text"
+      },
+      {
+        "key": "columna_13",
+        "label": "Columna 13",
+        "type": "text"
+      },
+      {
+        "key": "total_grupos",
+        "label": "TOTAL GRUPOS",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "BACHILLERATO 16",
+        "columna_2": "",
+        "area": "TÉCNICO ANALISTA QUIMICO",
+        "segundo": "2.0",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "2.0",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "2.0",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "TÉCNICO ANALISTA PROGRAMADOR",
+        "segundo": "1.0",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "1.0",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "1.0",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "BACHILLERATO GENERAL",
+        "segundo": "4.0",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "4.0",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "4.0",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "TURNO",
+        "columna_2": "V",
+        "area": "TOTAL DE GRUPOS",
+        "segundo": "=SUM(D3:G5)",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "=SUM(H3:J5)",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "=SUM(K3:M5)",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "PRACTICAS REALIZADAS EN SEGUNDO SEMESTRE",
+        "columna_2": "",
+        "area": "",
+        "segundo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "GRUPO",
+        "columna_2": "PLAN DE ESTUDIO",
+        "area": "MATERIA",
+        "segundo": "No. PRACTICA",
+        "columna_5": "FECHA",
+        "columna_6": "REALIZADA",
+        "columna_7": "No. PRACTICA",
+        "cuarto": "FECHA",
+        "columna_9": "REALIZADA",
+        "columna_10": "No. PRACTICA",
+        "sexto": "FECHA",
+        "columna_12": "REALIZADA",
+        "columna_13": "No. PRACTICA",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "A",
+        "columna_2": "AQ15",
+        "area": "TECNOLOGIAS DE LA INFORMACIÓN II",
+        "segundo": "1.0",
+        "columna_5": "2024-02-12 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-19 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-26 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "BIOLOGÍA",
+        "segundo": "1.0",
+        "columna_5": "2024-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "QUIMICA II",
+        "segundo": "1.0",
+        "columna_5": "2024-02-09 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-16 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-23 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "B",
+        "columna_2": "AP13",
+        "area": "TECNOLOGIAS DE LA INFORMACIÓN II",
+        "segundo": "1.0",
+        "columna_5": "2024-02-08 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-15 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-22 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "3.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "BIOLOGÍA",
+        "segundo": "1.0",
+        "columna_5": "2024-02-07 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-14 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-21 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "QUIMICA II",
+        "segundo": "1.0",
+        "columna_5": "2024-02-08 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-15 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-22 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "C",
+        "columna_2": "BG10",
+        "area": "TECNOLOGIAS DE LA INFORMACIÓN II",
+        "segundo": "1.0",
+        "columna_5": "2024-02-09 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-16 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-23 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "BIOLOGÍA",
+        "segundo": "1.0",
+        "columna_5": "2024-02-12 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-19 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-16 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "QUIMICA II",
+        "segundo": "1.0",
+        "columna_5": "2024-02-02 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-09 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-16 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "D",
+        "columna_2": "BG10",
+        "area": "TECNOLOGIAS DE LA INFORMACIÓN II",
+        "segundo": "1.0",
+        "columna_5": "2024-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "BIOLOGÍA",
+        "segundo": "1.0",
+        "columna_5": "2024-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "QUIMICA II",
+        "segundo": "1.0",
+        "columna_5": "2024-02-09 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-16 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-23 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "E",
+        "columna_2": "AQ15",
+        "area": "TECNOLOGIAS DE LA INFORMACIÓN II",
+        "segundo": "1.0",
+        "columna_5": "2024-02-12 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-19 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-26 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "BIOLOGÍA",
+        "segundo": "1.0",
+        "columna_5": "2024-02-05 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-12 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-19 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "QUIMICA II",
+        "segundo": "1.0",
+        "columna_5": "2024-02-02 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-09 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-16 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "F",
+        "columna_2": "BG10",
+        "area": "TECNOLOGIAS DE LA INFORMACIÓN II",
+        "segundo": "1.0",
+        "columna_5": "2024-02-12 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-19 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-26 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "BIOLOGÍA",
+        "segundo": "1.0",
+        "columna_5": "2024-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "QUIMICA II",
+        "segundo": "1.0",
+        "columna_5": "2024-02-07 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-14 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-21 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "G",
+        "columna_2": "BG10",
+        "area": "TECNOLOGIAS DE LA INFORMACIÓN II",
+        "segundo": "1.0",
+        "columna_5": "2024-02-09 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-16 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-23 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "BIOLOGÍA",
+        "segundo": "1.0",
+        "columna_5": "2024-02-12 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-19 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-26 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "QUIMICA II",
+        "segundo": "1.0",
+        "columna_5": "2024-02-12 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-19 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-26 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "TOTAL",
+        "columna_2": "",
+        "area": "",
+        "segundo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "PRACTICAS REALIZADAS EN CUARTO SEMESTRE",
+        "columna_2": "",
+        "area": "",
+        "segundo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "GRUPO",
+        "columna_2": "PLAN DE ESTUDIO",
+        "area": "MATERIA",
+        "segundo": "No. PRACTICA",
+        "columna_5": "FECHA",
+        "columna_6": "REALIZADA",
+        "columna_7": "No. PRACTICA",
+        "cuarto": "FECHA",
+        "columna_9": "REALIZADA",
+        "columna_10": "No. PRACTICA",
+        "sexto": "FECHA",
+        "columna_12": "REALIZADA",
+        "columna_13": "No. PRACTICA",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "A",
+        "columna_2": "AQ15",
+        "area": "FISÍCA II",
+        "segundo": "1.0",
+        "columna_5": "2024-02-07 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-14 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-21 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "TEMAS SELECTOS DE QUIMICA ORGANICA",
+        "segundo": "1.0",
+        "columna_5": "2024-02-07 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-14 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-21 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ANALISIS QUIMICO CUANTITATIVO",
+        "segundo": "1.0",
+        "columna_5": "2024-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "B",
+        "columna_2": "AP13",
+        "area": "FISÍCA II",
+        "segundo": "1.0",
+        "columna_5": "2024-02-07 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-14 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-21 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "PROGRAMACIÓN II",
+        "segundo": "1.0",
+        "columna_5": "2024-02-01 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-08 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-22 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "C",
+        "columna_2": "BG10",
+        "area": "FISÍCA II",
+        "segundo": "1.0",
+        "columna_5": "2024-02-01 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-08 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-15 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "D",
+        "columna_2": "BG10",
+        "area": "FISÍCA II",
+        "segundo": "1.0",
+        "columna_5": "2024-02-01 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-08 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-15 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "E",
+        "columna_2": "AQ15",
+        "area": "TEMAS SELECTOS DE QUIMICA ORGANICA",
+        "segundo": "1.0",
+        "columna_5": "2024-02-07 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-14 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-21 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ANALISIS QUIMICO CUANTITATIVO",
+        "segundo": "1.0",
+        "columna_5": "2024-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "FISÍCA II",
+        "segundo": "1.0",
+        "columna_5": "2024-02-05 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-12 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-19 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "F",
+        "columna_2": "BG10",
+        "area": "FISÍCA II",
+        "segundo": "1.0",
+        "columna_5": "2024-02-12 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-19 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-26 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "G",
+        "columna_2": "AQ15",
+        "area": "FISÍCA II",
+        "segundo": "1.0",
+        "columna_5": "2024-02-02 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-09 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-16 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "TOTAL",
+        "columna_2": "",
+        "area": "",
+        "segundo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "PRACTICAS REALIZADAS EN SEXTO SEMESTRE",
+        "columna_2": "",
+        "area": "",
+        "segundo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "GRUPO",
+        "columna_2": "PLAN DE ESTUDIO",
+        "area": "MATERIA",
+        "segundo": "No. PRACTICA",
+        "columna_5": "FECHA",
+        "columna_6": "REALIZADA",
+        "columna_7": "No. PRACTICA",
+        "cuarto": "FECHA",
+        "columna_9": "REALIZADA",
+        "columna_10": "No. PRACTICA",
+        "sexto": "FECHA",
+        "columna_12": "REALIZADA",
+        "columna_13": "No. PRACTICA",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "A",
+        "columna_2": "AQ15",
+        "area": "BIOCLINICA CLINICA",
+        "segundo": "1.0",
+        "columna_5": "2024-02-02 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-09 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-16 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "MICROBIOLOGIA CLINICA",
+        "segundo": "1.0",
+        "columna_5": "2024-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ANALISIS DE PROCESOS INDUSTRIALES",
+        "segundo": "1.0",
+        "columna_5": "2024-02-12 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-19 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-26 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "B",
+        "columna_2": "AP13",
+        "area": "ANALISIS Y DISEÑO DE SISTEMAS",
+        "segundo": "1.0",
+        "columna_5": "2024-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "PROGRAMACION EN INTERNET II",
+        "segundo": "1.0",
+        "columna_5": "2024-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "PROAMACIÓN I",
+        "segundo": "1.0",
+        "columna_5": "2024-02-07 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-14 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-21 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "FISÍCA IV",
+        "segundo": "1.0",
+        "columna_5": "2024-02-12 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-19 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-26 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "C",
+        "columna_2": "AQ15",
+        "area": "BIOCLINICA CLINICA",
+        "segundo": "1.0",
+        "columna_5": "2024-02-12 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-19 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-26 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "MICROBIOLOGIA CLINICA",
+        "segundo": "1.0",
+        "columna_5": "2024-02-07 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-14 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-21 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ANALISIS DE PROCESOS INDUSTRIALES",
+        "segundo": "1.0",
+        "columna_5": "2024-02-08 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2024-02-15 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2024-02-22 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "TOTAL",
+        "columna_2": "",
+        "area": "",
+        "segundo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "columna_2": "",
+      "area": "",
+      "segundo": "",
+      "columna_5": "",
+      "columna_6": "",
+      "columna_7": "",
+      "cuarto": "",
+      "columna_9": "",
+      "columna_10": "",
+      "sexto": "",
+      "columna_12": "",
+      "columna_13": "",
+      "total_grupos": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "B16-FMT-01-697E06CF-academia-de-programa-tec": {
+    "indicatorCode": "B16-FMT-01-697E06CF-academia-de-programa-tec",
+    "officialCode": null,
+    "indicatorName": "Academia de programa técnico AQ15-Campo disciplinar.",
+    "sourceLabel": "Academia de programa técnico AQ15-Campo disciplinar..xlsx",
+    "sourcePath": "Bachillerato 16/Academias/Academia de programa técnico AQ15-Campo disciplinar..xlsx",
+    "sheetName": "Hoja1",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 5
+      }
+    ],
+    "columns": [
+      {
+        "key": "nombre_del_docente",
+        "label": "Nombre del docente",
+        "type": "text"
+      },
+      {
+        "key": "asignaturas_que_imparte",
+        "label": "Asignaturas que imparte",
+        "type": "text"
+      },
+      {
+        "key": "numero_de_trabajador",
+        "label": "Número de trabajador",
+        "type": "number"
+      },
+      {
+        "key": "correo_electronico_institucional",
+        "label": "Correo electrónico institucional",
+        "type": "text"
+      },
+      {
+        "key": "numero_contacto",
+        "label": "Número contacto",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Probabilidad y Estadística",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121257000.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Probabilidad y Estadística",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121528431.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Matemáticas VI. Matemáticas V",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121350181.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Matemáticas III. Matemmáticas IV",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121064659.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Matemáticas VI. Matenáticas V. Matemáticas II. Matemáticas I.",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3122005428.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Matenáticas V",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121072518.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Química I. Química II Reacciones Químicas: Conservación de la materia en la formación de nuevas sustancias Análisis Químico Cuantitativo Microbiología Clínica. Introducción a la Hematología. Fundamentos de Microbiología.",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3123171493.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Temas Selectos de Química Orgánica. Análisis de Procesos Industriales. Control de calidad. Análisis Químico Industrial.",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121076243.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Bioquímica Clínica",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121249369.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Técnica Instrumental",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3123196528.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Química Orgánica",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121223637.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "La materia y sus interacciones",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121824451.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Análisis Químico Cualitativo",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121014383.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "FÍSICA II",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3123196528.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Física III",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121184813.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Física I",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121009980.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Física I",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121223637.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Tecnologías de Información I, Tecnonogias de Información II.",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121257000.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Inglés I. Inglés II",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121546321.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Inglés III. Inglés IV",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121321894.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Inglés III. Inglés IV",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121564988.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Taller de lectura y Redacción I. Taller de lectura y Redacción II",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121450845.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Filosofía",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121557890.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Geografía",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121223637.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Introducción a las Ciencias Sociales",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121210144.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Metodología de la Investigación",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121450845.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Desarrollo Humano. Habilidades para el aprendizaje",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121401358.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Historia de México. Etica y Valores",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121210144.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Biología",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121223637.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Educación para la salud",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121249369.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Metodología de la Investigación",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121450845.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Metodología de la Investigación",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3123011585.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "nombre_del_docente": "",
+      "asignaturas_que_imparte": "",
+      "numero_de_trabajador": "",
+      "correo_electronico_institucional": "",
+      "numero_contacto": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "B16-FMT-01-BD626F5D-academia-de-programa-tec": {
+    "indicatorCode": "B16-FMT-01-BD626F5D-academia-de-programa-tec",
+    "officialCode": null,
+    "indicatorName": "Academia de programa técnico AP13-Campo disciplinar.",
+    "sourceLabel": "Academia de programa técnico AP13-Campo disciplinar..xlsx",
+    "sourcePath": "Bachillerato 16/Academias/Academia de programa técnico AP13-Campo disciplinar..xlsx",
+    "sheetName": "Hoja1",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 5
+      }
+    ],
+    "columns": [
+      {
+        "key": "nombre_del_docente",
+        "label": "Nombre del docente",
+        "type": "text"
+      },
+      {
+        "key": "asignaturas_que_imparte",
+        "label": "Asignaturas que imparte",
+        "type": "text"
+      },
+      {
+        "key": "numero_de_trabajador",
+        "label": "Número de trabajador",
+        "type": "number"
+      },
+      {
+        "key": "correo_electronico_institucional",
+        "label": "Correo electrónico institucional",
+        "type": "text"
+      },
+      {
+        "key": "numero_contacto",
+        "label": "Número contacto",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Matemáticas V. Matemáticas VI",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121350181.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Matemáticas III. Matemáticas IV.",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121064659.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Matemáticas I. Matemáticas II.",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3122005428.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Probabilidad y Estadística",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121184813.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Química I. Química II.",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121824451.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Física I",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121223637.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Física II",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3123196528.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Física III",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121184813.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Fisica IV",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Tecnologías de Información I, Tecnonogias de Información II.",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121257000.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Sistemas Operativos. Programación de Internet I. Programación de Internet II. Bases de Datos. Análisis y Diseño de Sistemas. Redes de Cómputo",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121553377.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Programación I. Programación II. Programación III. Programación IV",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121184813.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Taller de Lectura y Redacción I",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3123099370.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Taller de Lectura y Redacción II",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121450845.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Introducción a las Ciencias Sociales",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3123392918.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Geografía",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121223637.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Filosofía",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121557890.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Habilidades para el aprendizaje. Desarrollo Humano",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121401358.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Historia de México. Etica y Valores.",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121210144.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Biología",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121223637.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Metodología de la Investigación",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121450845.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Inglés I",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3151094262.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Inglés II",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121546321.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Inglés III",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121564988.0
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "nombre_del_docente": "",
+      "asignaturas_que_imparte": "",
+      "numero_de_trabajador": "",
+      "correo_electronico_institucional": "",
+      "numero_contacto": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "B16-FMT-01-6BB983C1-3-bachillerato-16-febrer": {
+    "indicatorCode": "B16-FMT-01-6BB983C1-3-bachillerato-16-febrer",
+    "officialCode": null,
+    "indicatorName": "3) Bachillerato 16 FEBRERO - JULIO 2025",
+    "sourceLabel": "3) Bachillerato 16 FEBRERO - JULIO 2025.xlsx",
+    "sourcePath": "Bachillerato 16/Promoción de la Ciencia/Prácticas de Laboratorios/ARCHIVO Bachillerato 16/3) Bachillerato 16 FEBRERO - JULIO 2025.xlsx",
+    "sheetName": "Hoja1",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 14
+      }
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "columna_2",
+        "label": "Columna 2",
+        "type": "text"
+      },
+      {
+        "key": "area",
+        "label": "AREA",
+        "type": "text"
+      },
+      {
+        "key": "segundo",
+        "label": "SEGUNDO",
+        "type": "text"
+      },
+      {
+        "key": "columna_5",
+        "label": "Columna 5",
+        "type": "text"
+      },
+      {
+        "key": "columna_6",
+        "label": "Columna 6",
+        "type": "text"
+      },
+      {
+        "key": "columna_7",
+        "label": "Columna 7",
+        "type": "text"
+      },
+      {
+        "key": "cuarto",
+        "label": "CUARTO",
+        "type": "text"
+      },
+      {
+        "key": "columna_9",
+        "label": "Columna 9",
+        "type": "text"
+      },
+      {
+        "key": "columna_10",
+        "label": "Columna 10",
+        "type": "text"
+      },
+      {
+        "key": "sexto",
+        "label": "SEXTO",
+        "type": "text"
+      },
+      {
+        "key": "columna_12",
+        "label": "Columna 12",
+        "type": "text"
+      },
+      {
+        "key": "columna_13",
+        "label": "Columna 13",
+        "type": "text"
+      },
+      {
+        "key": "total_grupos",
+        "label": "TOTAL GRUPOS",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "BACHILLERATO 16",
+        "columna_2": "",
+        "area": "TÉCNICO ANALISTA QUIMICO",
+        "segundo": "2.0",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "2.0",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "2.0",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "TÉCNICO ANALISTA PROGRAMADOR",
+        "segundo": "1.0",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "1.0",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "1.0",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "BACHILLERATO GENERAL",
+        "segundo": "4.0",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "4.0",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "4.0",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "TURNO",
+        "columna_2": "V",
+        "area": "TOTAL DE GRUPOS",
+        "segundo": "=SUM(D3:G5)",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "=SUM(H3:J5)",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "=SUM(K3:M5)",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "PRACTICAS REALIZADAS EN SEGUNDO SEMESTRE",
+        "columna_2": "",
+        "area": "",
+        "segundo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "GRUPO",
+        "columna_2": "PLAN DE ESTUDIO",
+        "area": "MATERIA",
+        "segundo": "No. PRACTICA",
+        "columna_5": "FECHA",
+        "columna_6": "REALIZADA",
+        "columna_7": "No. PRACTICA",
+        "cuarto": "FECHA",
+        "columna_9": "REALIZADA",
+        "columna_10": "No. PRACTICA",
+        "sexto": "FECHA",
+        "columna_12": "REALIZADA",
+        "columna_13": "No. PRACTICA",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "A",
+        "columna_2": "AQ15",
+        "area": "TECNOLOGIAS DE LA INFORMACIÓN II",
+        "segundo": "1.0",
+        "columna_5": "2025-02-10 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-17 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-24 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "BIOLOGÍA",
+        "segundo": "1.0",
+        "columna_5": "2025-02-07 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-14 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-21 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "QUIMICA II",
+        "segundo": "1.0",
+        "columna_5": "2025-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "B",
+        "columna_2": "AP13",
+        "area": "TECNOLOGIAS DE LA INFORMACIÓN II",
+        "segundo": "1.0",
+        "columna_5": "2025-02-10 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-17 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-24 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "BIOLOGÍA",
+        "segundo": "1.0",
+        "columna_5": "2025-02-05 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-12 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-19 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "QUIMICA II",
+        "segundo": "1.0",
+        "columna_5": "2025-02-04 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-11 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-18 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "C",
+        "columna_2": "BG24",
+        "area": "PENSAMIENTO DIGITAL E INTERNET DE LAS COSAS",
+        "segundo": "1.0",
+        "columna_5": "2025-02-10 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-17 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-24 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ECOSISTEMAS",
+        "segundo": "1.0",
+        "columna_5": "2025-02-05 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-12 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-19 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "REACCIONES QUIMICAS",
+        "segundo": "1.0",
+        "columna_5": "2025-02-05 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-12 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-19 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "D",
+        "columna_2": "BG24",
+        "area": "PENSAMIENTO DIGITAL E INTERNET DE LAS COSAS",
+        "segundo": "1.0",
+        "columna_5": "2025-02-04 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-11 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-18 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ECOSISTEMAS",
+        "segundo": "1.0",
+        "columna_5": "2025-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "REACCIONES QUIMICAS",
+        "segundo": "1.0",
+        "columna_5": "2025-02-04 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-11 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-18 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "E",
+        "columna_2": "AQ15",
+        "area": "TECNOLOGIAS DE LA INFORMACIÓN II",
+        "segundo": "1.0",
+        "columna_5": "2025-02-10 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-17 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-24 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "BIOLOGÍA",
+        "segundo": "1.0",
+        "columna_5": "2025-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "QUIMICA II",
+        "segundo": "1.0",
+        "columna_5": "2025-02-04 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-11 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-18 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "F",
+        "columna_2": "BG24",
+        "area": "PENSAMIENTO DIGITAL E INTERNET DE LAS COSAS",
+        "segundo": "1.0",
+        "columna_5": "2025-02-07 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-14 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-21 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ECOSISTEMAS",
+        "segundo": "1.0",
+        "columna_5": "2025-02-05 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-12 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-19 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "REACCIONES QUIMICAS",
+        "segundo": "1.0",
+        "columna_5": "2025-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "G",
+        "columna_2": "BG24",
+        "area": "PENSAMIENTO DIGITAL E INTERNET DE LAS COSAS",
+        "segundo": "1.0",
+        "columna_5": "2025-02-07 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-14 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-21 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ECOSISTEMAS",
+        "segundo": "1.0",
+        "columna_5": "2025-02-04 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-11 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-18 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "REACCIONES QUIMICAS",
+        "segundo": "1.0",
+        "columna_5": "2025-02-07 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-14 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-21 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "TOTAL",
+        "columna_2": "",
+        "area": "",
+        "segundo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "PRACTICAS REALIZADAS EN CUARTO SEMESTRE",
+        "columna_2": "",
+        "area": "",
+        "segundo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "GRUPO",
+        "columna_2": "PLAN DE ESTUDIO",
+        "area": "MATERIA",
+        "segundo": "No. PRACTICA",
+        "columna_5": "FECHA",
+        "columna_6": "REALIZADA",
+        "columna_7": "No. PRACTICA",
+        "cuarto": "FECHA",
+        "columna_9": "REALIZADA",
+        "columna_10": "No. PRACTICA",
+        "sexto": "FECHA",
+        "columna_12": "REALIZADA",
+        "columna_13": "No. PRACTICA",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "A",
+        "columna_2": "AQ15",
+        "area": "FISÍCA II",
+        "segundo": "1.0",
+        "columna_5": "2025-02-07 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-14 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-21 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "TEMAS SELECTOS DE QUIMICA ORGANICA",
+        "segundo": "1.0",
+        "columna_5": "2025-02-10 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-17 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-24 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ANALISIS QUIMICO CUANTITATIVO",
+        "segundo": "1.0",
+        "columna_5": "2025-02-07 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-14 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-21 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "B",
+        "columna_2": "AP13",
+        "area": "FISÍCA II",
+        "segundo": "1.0",
+        "columna_5": "2025-02-07 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-14 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-21 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "PROGRAMACIÓN II",
+        "segundo": "1.0",
+        "columna_5": "2025-02-14 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-21 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-28 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "C",
+        "columna_2": "BG10",
+        "area": "FISÍCA II",
+        "segundo": "1.0",
+        "columna_5": "2025-02-05 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-12 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-19 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "D",
+        "columna_2": "BG10",
+        "area": "FISÍCA II",
+        "segundo": "1.0",
+        "columna_5": "2025-02-07 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-14 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-21 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "E",
+        "columna_2": "AQ15",
+        "area": "TEMAS SELECTOS DE QUIMICA ORGANICA",
+        "segundo": "1.0",
+        "columna_5": "2025-02-10 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-17 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-24 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ANALISIS QUIMICO CUANTITATIVO",
+        "segundo": "1.0",
+        "columna_5": "2025-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "FISÍCA II",
+        "segundo": "1.0",
+        "columna_5": "2025-02-10 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-17 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-24 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "F",
+        "columna_2": "BG10",
+        "area": "FISÍCA II",
+        "segundo": "1.0",
+        "columna_5": "2025-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "G",
+        "columna_2": "AQ15",
+        "area": "FISÍCA II",
+        "segundo": "1.0",
+        "columna_5": "2025-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "TOTAL",
+        "columna_2": "",
+        "area": "",
+        "segundo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "PRACTICAS REALIZADAS EN SEXTO SEMESTRE",
+        "columna_2": "",
+        "area": "",
+        "segundo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "GRUPO",
+        "columna_2": "PLAN DE ESTUDIO",
+        "area": "MATERIA",
+        "segundo": "No. PRACTICA",
+        "columna_5": "FECHA",
+        "columna_6": "REALIZADA",
+        "columna_7": "No. PRACTICA",
+        "cuarto": "FECHA",
+        "columna_9": "REALIZADA",
+        "columna_10": "No. PRACTICA",
+        "sexto": "FECHA",
+        "columna_12": "REALIZADA",
+        "columna_13": "No. PRACTICA",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "A",
+        "columna_2": "AQ15",
+        "area": "BIOCLINICA CLINICA",
+        "segundo": "1.0",
+        "columna_5": "2025-02-04 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-11 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-18 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "MICROBIOLOGIA CLINICA",
+        "segundo": "1.0",
+        "columna_5": "2025-02-10 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-17 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-24 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ANALISIS DE PROCESOS INDUSTRIALES",
+        "segundo": "1.0",
+        "columna_5": "2025-02-05 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-19 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-26 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "B",
+        "columna_2": "AP13",
+        "area": "ANALISIS Y DISEÑO DE SISTEMAS",
+        "segundo": "1.0",
+        "columna_5": "2025-02-04 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-11 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-18 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "PROGRAMACION EN INTERNET II",
+        "segundo": "1.0",
+        "columna_5": "2025-02-06 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-13 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-20 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "PROGRAMACIÓN IV",
+        "segundo": "1.0",
+        "columna_5": "2025-02-07 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-14 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-21 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "FISÍCA IV",
+        "segundo": "1.0",
+        "columna_5": "2025-02-07 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-14 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-21 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "C",
+        "columna_2": "AQ15",
+        "area": "BIOCLINICA CLINICA",
+        "segundo": "1.0",
+        "columna_5": "2025-02-04 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-11 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-18 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "MICROBIOLOGIA CLINICA",
+        "segundo": "1.0",
+        "columna_5": "2025-02-10 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-17 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-24 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ANALISIS DE PROCESOS INDUSTRIALES",
+        "segundo": "1.0",
+        "columna_5": "2025-02-05 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "cuarto": "2025-02-14 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "sexto": "2025-02-26 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "TOTAL",
+        "columna_2": "",
+        "area": "",
+        "segundo": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "cuarto": "",
+        "columna_9": "",
+        "columna_10": "",
+        "sexto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "columna_2": "",
+      "area": "",
+      "segundo": "",
+      "columna_5": "",
+      "columna_6": "",
+      "columna_7": "",
+      "cuarto": "",
+      "columna_9": "",
+      "columna_10": "",
+      "sexto": "",
+      "columna_12": "",
+      "columna_13": "",
+      "total_grupos": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "B16-FMT-01-E3FE144D-academias-bg24-campo-dis": {
+    "indicatorCode": "B16-FMT-01-E3FE144D-academias-bg24-campo-dis",
+    "officialCode": null,
+    "indicatorName": "Academias BG24_Campo disciplinar_v4.0",
+    "sourceLabel": "Academias BG24_Campo disciplinar_v4.0.xlsx",
+    "sourcePath": "Bachillerato 16/Academias/Academias BG24_Campo disciplinar_v4.0.xlsx",
+    "sheetName": "Hoja1",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 5
+      }
+    ],
+    "columns": [
+      {
+        "key": "nombre_del_docente",
+        "label": "Nombre del docente",
+        "type": "text"
+      },
+      {
+        "key": "asignaturas_que_imparte",
+        "label": "Asignaturas que imparte",
+        "type": "text"
+      },
+      {
+        "key": "numero_de_trabajador",
+        "label": "Número de trabajador",
+        "type": "number"
+      },
+      {
+        "key": "correo_electronico_institucional",
+        "label": "Correo electrónico institucional",
+        "type": "text"
+      },
+      {
+        "key": "numero_contacto",
+        "label": "Número contacto",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Pensamiento Matemático II, Matemáticas II, Matemáticas I",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3123602056.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Química II Reacciones Químicas: Conservación de la materia en la formación de nuevas sustancias Análisis Químico Cuantitativo Microbiología Clínica",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3123171493.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Físíca",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3123196528.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Tecnologías de Información I, Tecnologías de Información II Pensamiento Digital e Internet de las Cosas",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121257000.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Taller de Lectura, Expresión Oral y Escrita I",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121018207.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Geografía",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3123011585.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Habilidades para el aprendizaje, aprendizaje autogestivo",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121401358.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Ecosistemas: Interacciones, Energía y Dinámica Biología",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121223637.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Metodología de la Investigación",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121450845.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Asignaturas que imparte",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": ""
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Inglés I",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3151094262.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Inglés II",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121546321.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Inglés III",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121564988.0
+      },
+      {
+        "nombre_del_docente": "",
+        "asignaturas_que_imparte": "Inglés IV",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121321894.0
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "nombre_del_docente": "",
+      "asignaturas_que_imparte": "",
+      "numero_de_trabajador": "",
+      "correo_electronico_institucional": "",
+      "numero_contacto": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "B16-FMT-01-D98834ED-formato-de-cronograma-de": {
+    "indicatorCode": "B16-FMT-01-D98834ED-formato-de-cronograma-de",
+    "officialCode": null,
+    "indicatorName": "Formato de cronograma de academia de plantel",
+    "sourceLabel": "Formato de cronograma de academia de plantel.xlsx",
+    "sourcePath": "Bachillerato 16/Academias/Formato de cronograma de academia de plantel.xlsx",
+    "sheetName": "5, 3 y 1 semestre",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 6
+      }
+    ],
+    "columns": [
+      {
+        "key": "columna_1",
+        "label": "Columna 1",
+        "type": "text"
+      },
+      {
+        "key": "1",
+        "label": "1.-",
+        "type": "text"
+      },
+      {
+        "key": "2025_08_04_00_00_00",
+        "label": "2025-08-04 00:00:00",
+        "type": "text"
+      },
+      {
+        "key": "15_30_00",
+        "label": "15:30:00",
+        "type": "text"
+      },
+      {
+        "key": "auditorio_del_plantel",
+        "label": "Auditorio del plantel",
+        "type": "readonly"
+      },
+      {
+        "key": "1_0",
+        "label": "1.0",
+        "type": "text"
+      }
+    ],
+    "initialRows": [
+      {
+        "columna_1": "",
+        "1": "2.-",
+        "2025_08_04_00_00_00": "2025-08-26 00:00:00",
+        "15_30_00": "17:30:00",
+        "auditorio_del_plantel": "Sala de maestros",
+        "1_0": "2.0"
+      },
+      {
+        "columna_1": "",
+        "1": "3.-",
+        "2025_08_04_00_00_00": "2025-12-05 00:00:00",
+        "15_30_00": "17:30:00",
+        "auditorio_del_plantel": "Sala de maestros",
+        "1_0": "3.0"
+      },
+      {
+        "columna_1": "______________________Hugo César Ponce Suárez_____________ _______César Octavio Moreno Zúñiga_____________________________",
+        "1": "",
+        "2025_08_04_00_00_00": "",
+        "15_30_00": "",
+        "auditorio_del_plantel": "",
+        "1_0": ""
+      },
+      {
+        "columna_1": "Responsable de academia del plantel Presidente de academia",
+        "1": "",
+        "2025_08_04_00_00_00": "",
+        "15_30_00": "",
+        "auditorio_del_plantel": "",
+        "1_0": ""
+      },
+      {
+        "columna_1": "",
+        "1": "Universidad de Colima",
+        "2025_08_04_00_00_00": "",
+        "15_30_00": "",
+        "auditorio_del_plantel": "",
+        "1_0": ""
+      },
+      {
+        "columna_1": "",
+        "1": "Coordinación General de Docencia",
+        "2025_08_04_00_00_00": "",
+        "15_30_00": "",
+        "auditorio_del_plantel": "",
+        "1_0": ""
+      },
+      {
+        "columna_1": "",
+        "1": "Dirección General de Educación Media Superior",
+        "2025_08_04_00_00_00": "",
+        "15_30_00": "",
+        "auditorio_del_plantel": "",
+        "1_0": ""
+      },
+      {
+        "columna_1": "",
+        "1": "Cronograma de Reuniones de Academia de plantel",
+        "2025_08_04_00_00_00": "",
+        "15_30_00": "",
+        "auditorio_del_plantel": "",
+        "1_0": ""
+      },
+      {
+        "columna_1": "",
+        "1": "Nombre del Bachillerato: _Bachillerato 16________________________________________________________",
+        "2025_08_04_00_00_00": "",
+        "15_30_00": "",
+        "auditorio_del_plantel": "",
+        "1_0": ""
+      },
+      {
+        "columna_1": "",
+        "1": "Nombre de la academia: _3er. Semestre______________________________________________________________________",
+        "2025_08_04_00_00_00": "",
+        "15_30_00": "",
+        "auditorio_del_plantel": "",
+        "1_0": ""
+      },
+      {
+        "columna_1": "",
+        "1": "Periodo Semestral: _Febrero - Julio 2025___________________________________________________________________________",
+        "2025_08_04_00_00_00": "",
+        "15_30_00": "",
+        "auditorio_del_plantel": "",
+        "1_0": ""
+      },
+      {
+        "columna_1": "",
+        "1": "",
+        "2025_08_04_00_00_00": "No. de Reunión",
+        "15_30_00": "Fecha",
+        "auditorio_del_plantel": "Hora",
+        "1_0": "Lugar"
+      },
+      {
+        "columna_1": "",
+        "1": "",
+        "2025_08_04_00_00_00": "1.-",
+        "15_30_00": "2025-08-04 00:00:00",
+        "auditorio_del_plantel": "15:30:00",
+        "1_0": "Auditorio del plantel"
+      },
+      {
+        "columna_1": "",
+        "1": "",
+        "2025_08_04_00_00_00": "2.-",
+        "15_30_00": "2025-08-26 00:00:00",
+        "auditorio_del_plantel": "16:30:00",
+        "1_0": "Sala de maestros"
+      },
+      {
+        "columna_1": "",
+        "1": "",
+        "2025_08_04_00_00_00": "3.-",
+        "15_30_00": "2025-12-05 00:00:00",
+        "auditorio_del_plantel": "16:30:00",
+        "1_0": "Sala de maestros"
+      },
+      {
+        "columna_1": "",
+        "1": "_Hugo César Ponce Suárez _______Martha Patricia Hernández Solis__",
+        "2025_08_04_00_00_00": "",
+        "15_30_00": "",
+        "auditorio_del_plantel": "",
+        "1_0": ""
+      },
+      {
+        "columna_1": "",
+        "1": "Responsable de academia del plantel Presidente de academia",
+        "2025_08_04_00_00_00": "",
+        "15_30_00": "",
+        "auditorio_del_plantel": "",
+        "1_0": ""
+      },
+      {
+        "columna_1": "",
+        "1": "Universidad de Colima",
+        "2025_08_04_00_00_00": "",
+        "15_30_00": "",
+        "auditorio_del_plantel": "",
+        "1_0": ""
+      },
+      {
+        "columna_1": "",
+        "1": "Coordinación General de Docencia",
+        "2025_08_04_00_00_00": "",
+        "15_30_00": "",
+        "auditorio_del_plantel": "",
+        "1_0": ""
+      },
+      {
+        "columna_1": "",
+        "1": "Dirección General de Educación Media Superior",
+        "2025_08_04_00_00_00": "",
+        "15_30_00": "",
+        "auditorio_del_plantel": "",
+        "1_0": ""
+      },
+      {
+        "columna_1": "",
+        "1": "Cronograma de Reuniones de Academia de plantel",
+        "2025_08_04_00_00_00": "",
+        "15_30_00": "",
+        "auditorio_del_plantel": "",
+        "1_0": ""
+      },
+      {
+        "columna_1": "",
+        "1": "Nombre del Bachillerato: _Bachillerato 16________________________________________________________",
+        "2025_08_04_00_00_00": "",
+        "15_30_00": "",
+        "auditorio_del_plantel": "",
+        "1_0": ""
+      },
+      {
+        "columna_1": "",
+        "1": "Nombre de la academia: _1er. Semestre______________________________________________________________________",
+        "2025_08_04_00_00_00": "",
+        "15_30_00": "",
+        "auditorio_del_plantel": "",
+        "1_0": ""
+      },
+      {
+        "columna_1": "",
+        "1": "Periodo Semestral: _Febrero - Julio 2025___________________________________________________________________________",
+        "2025_08_04_00_00_00": "",
+        "15_30_00": "",
+        "auditorio_del_plantel": "",
+        "1_0": ""
+      },
+      {
+        "columna_1": "",
+        "1": "",
+        "2025_08_04_00_00_00": "No. de Reunión",
+        "15_30_00": "Fecha",
+        "auditorio_del_plantel": "Hora",
+        "1_0": "Lugar"
+      },
+      {
+        "columna_1": "",
+        "1": "",
+        "2025_08_04_00_00_00": "1.-",
+        "15_30_00": "2025-08-04 00:00:00",
+        "auditorio_del_plantel": "15:30:00",
+        "1_0": "Auditorio del plantel"
+      },
+      {
+        "columna_1": "",
+        "1": "",
+        "2025_08_04_00_00_00": "2.-",
+        "15_30_00": "2025-08-26 00:00:00",
+        "auditorio_del_plantel": "15:30:00",
+        "1_0": "Sala de maestros"
+      },
+      {
+        "columna_1": "",
+        "1": "",
+        "2025_08_04_00_00_00": "3.-",
+        "15_30_00": "2025-12-05 00:00:00",
+        "auditorio_del_plantel": "15:30:00",
+        "1_0": "Sala de maestros"
+      },
+      {
+        "columna_1": "",
+        "1": "",
+        "2025_08_04_00_00_00": "4.-",
+        "15_30_00": "",
+        "auditorio_del_plantel": "",
+        "1_0": ""
+      },
+      {
+        "columna_1": "",
+        "1": "",
+        "2025_08_04_00_00_00": "5.-",
+        "15_30_00": "",
+        "auditorio_del_plantel": "",
+        "1_0": ""
+      },
+      {
+        "columna_1": "",
+        "1": "",
+        "2025_08_04_00_00_00": "6.-",
+        "15_30_00": "",
+        "auditorio_del_plantel": "",
+        "1_0": ""
+      },
+      {
+        "columna_1": "",
+        "1": "_ Hugo César Ponce Suárez_ ____ ___Cristina del Rocio Barragán García__",
+        "2025_08_04_00_00_00": "",
+        "15_30_00": "",
+        "auditorio_del_plantel": "",
+        "1_0": ""
+      },
+      {
+        "columna_1": "",
+        "1": "Responsable de academia del plantel Presidente de academia",
+        "2025_08_04_00_00_00": "",
+        "15_30_00": "",
+        "auditorio_del_plantel": "",
+        "1_0": ""
+      }
+    ],
+    "showTotals": false,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "columna_1": "",
+      "1": "",
+      "2025_08_04_00_00_00": "",
+      "15_30_00": "",
+      "auditorio_del_plantel": "",
+      "1_0": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "B16-FMT-01-B53F23A1-2-bachillerato-16-agosto": {
+    "indicatorCode": "B16-FMT-01-B53F23A1-2-bachillerato-16-agosto",
+    "officialCode": null,
+    "indicatorName": "2) Bachillerato 16 AGOSTO 2024 -ENERO 2025",
+    "sourceLabel": "2) Bachillerato 16 AGOSTO 2024 -ENERO 2025.xlsx",
+    "sourcePath": "Bachillerato 16/Promoción de la Ciencia/Prácticas de Laboratorios/ARCHIVO Bachillerato 16/2) Bachillerato 16 AGOSTO 2024 -ENERO 2025.xlsx",
+    "sheetName": "Hoja1",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 14
+      }
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "columna_2",
+        "label": "Columna 2",
+        "type": "text"
+      },
+      {
+        "key": "area",
+        "label": "AREA",
+        "type": "text"
+      },
+      {
+        "key": "primero",
+        "label": "PRIMERO",
+        "type": "text"
+      },
+      {
+        "key": "columna_5",
+        "label": "Columna 5",
+        "type": "text"
+      },
+      {
+        "key": "columna_6",
+        "label": "Columna 6",
+        "type": "text"
+      },
+      {
+        "key": "columna_7",
+        "label": "Columna 7",
+        "type": "text"
+      },
+      {
+        "key": "tercero",
+        "label": "TERCERO",
+        "type": "text"
+      },
+      {
+        "key": "columna_9",
+        "label": "Columna 9",
+        "type": "text"
+      },
+      {
+        "key": "columna_10",
+        "label": "Columna 10",
+        "type": "text"
+      },
+      {
+        "key": "quinto",
+        "label": "QUINTO",
+        "type": "text"
+      },
+      {
+        "key": "columna_12",
+        "label": "Columna 12",
+        "type": "text"
+      },
+      {
+        "key": "columna_13",
+        "label": "Columna 13",
+        "type": "text"
+      },
+      {
+        "key": "total_grupos",
+        "label": "TOTAL GRUPOS",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "BACHILLERATO 16",
+        "columna_2": "",
+        "area": "TÉCNICO ANALISTA QUIMICO",
+        "primero": "2.0",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "tercero": "2.0",
+        "columna_9": "",
+        "columna_10": "",
+        "quinto": "2.0",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "TÉCNICO ANALISTA PROGRAMADOR",
+        "primero": "1.0",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "tercero": "1.0",
+        "columna_9": "",
+        "columna_10": "",
+        "quinto": "1.0",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "BACHILLERATO GENERAL",
+        "primero": "4.0",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "tercero": "4.0",
+        "columna_9": "",
+        "columna_10": "",
+        "quinto": "4.0",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "TURNO",
+        "columna_2": "V",
+        "area": "TOTAL DE GRUPOS",
+        "primero": "=SUM(D3:G5)",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "tercero": "=SUM(H3:J5)",
+        "columna_9": "",
+        "columna_10": "",
+        "quinto": "=SUM(K3:M5)",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "PRACTICAS REALIZADAS EN PRIMER SEMESTRE",
+        "columna_2": "",
+        "area": "",
+        "primero": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "tercero": "",
+        "columna_9": "",
+        "columna_10": "",
+        "quinto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "GRUPO",
+        "columna_2": "PLAN DE ESTUDIO",
+        "area": "MATERIA",
+        "primero": "No. PRACTICA",
+        "columna_5": "FECHA",
+        "columna_6": "REALIZADA",
+        "columna_7": "No. PRACTICA",
+        "tercero": "FECHA",
+        "columna_9": "REALIZADA",
+        "columna_10": "No. PRACTICA",
+        "quinto": "FECHA",
+        "columna_12": "REALIZADA",
+        "columna_13": "No. PRACTICA",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "A",
+        "columna_2": "AQ15",
+        "area": "TECNOLOGIA DE INFORMACIÓN I",
+        "primero": "1.0",
+        "columna_5": "2024-08-16 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-23 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-30 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "QUIMICA I",
+        "primero": "1.0",
+        "columna_5": "2024-08-12 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-19 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-26 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "B",
+        "columna_2": "AP13",
+        "area": "TECNOLOGIA DE INFORMACIÓN I",
+        "primero": "1.0",
+        "columna_5": "2024-08-14 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-21 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-28 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "QUIMICA I",
+        "primero": "1.0",
+        "columna_5": "2024-08-14 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-21 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-28 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "C",
+        "columna_2": "BG24",
+        "area": "CULTURA DIGITAL",
+        "primero": "1.0",
+        "columna_5": "2024-08-16 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-23 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-30 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "LA MATERIA Y SUS INTERACCIONES",
+        "primero": "1.0",
+        "columna_5": "2024-08-14 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-21 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-28 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "D",
+        "columna_2": "BG24",
+        "area": "CULTURA DIGITAL",
+        "primero": "1.0",
+        "columna_5": "2024-08-12 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-19 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-26 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "LA MATERIA Y SUS INTERACCIONES",
+        "primero": "1.0",
+        "columna_5": "2024-08-13 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-20 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-27 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "E",
+        "columna_2": "AQ15",
+        "area": "TECNOLOGIA DE INFORMACIÓN I",
+        "primero": "1.0",
+        "columna_5": "2024-08-16 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-23 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-30 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "QUIMICA I",
+        "primero": "1.0",
+        "columna_5": "2024-08-15 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-22 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-29 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "F",
+        "columna_2": "BG24",
+        "area": "CULTURA DIGITAL",
+        "primero": "1.0",
+        "columna_5": "2024-08-15 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-22 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-29 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "LA MATERIA Y SUS INTERACCIONES",
+        "primero": "1.0",
+        "columna_5": "2024-08-15 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-22 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-29 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "G",
+        "columna_2": "BG24",
+        "area": "CULTURA DIGITAL",
+        "primero": "1.0",
+        "columna_5": "2024-08-15 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-22 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-29 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "LA MATERIA Y SUS INTERACCIONES",
+        "primero": "1.0",
+        "columna_5": "2024-08-14 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-21 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-28 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "TOTAL",
+        "columna_2": "",
+        "area": "",
+        "primero": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "tercero": "",
+        "columna_9": "",
+        "columna_10": "",
+        "quinto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "PRACTICAS REALIZADAS EN TERCER SEMESTRE",
+        "columna_2": "",
+        "area": "",
+        "primero": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "tercero": "",
+        "columna_9": "",
+        "columna_10": "",
+        "quinto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "GRUPO",
+        "columna_2": "PLAN DE ESTUDIO",
+        "area": "MATERIA",
+        "primero": "No. PRACTICA",
+        "columna_5": "FECHA",
+        "columna_6": "REALIZADA",
+        "columna_7": "No. PRACTICA",
+        "tercero": "FECHA",
+        "columna_9": "REALIZADA",
+        "columna_10": "No. PRACTICA",
+        "quinto": "FECHA",
+        "columna_12": "REALIZADA",
+        "columna_13": "No. PRACTICA",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "A",
+        "columna_2": "AQ15",
+        "area": "FISÍCA I",
+        "primero": "1.0",
+        "columna_5": "2024-08-12 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-19 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-26 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "QUIMICA ORGANICA",
+        "primero": "1.0",
+        "columna_5": "2024-08-15 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-22 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-29 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ANALISIS QUIMICO CUALITATIVO",
+        "primero": "1.0",
+        "columna_5": "2024-08-16 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-23 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-30 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "B",
+        "columna_2": "AP13",
+        "area": "FISÍCA I",
+        "primero": "1.0",
+        "columna_5": "2024-08-13 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-20 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-27 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "PROGRAMACIÓN I",
+        "primero": "1.0",
+        "columna_5": "2024-08-12 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-19 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-26 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "C",
+        "columna_2": "BG10",
+        "area": "FISÍCA I",
+        "primero": "1.0",
+        "columna_5": "2024-08-15 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-22 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-29 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "D",
+        "columna_2": "BG10",
+        "area": "FISÍCA I",
+        "primero": "1.0",
+        "columna_5": "2024-08-16 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-23 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-30 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "E",
+        "columna_2": "AQ15",
+        "area": "FISÍCA I",
+        "primero": "1.0",
+        "columna_5": "2024-08-12 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-19 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-26 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "QUIMICA ORGANICA",
+        "primero": "1.0",
+        "columna_5": "2024-08-16 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-23 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-30 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ANALISIS QUIMICO CUALITATIVO",
+        "primero": "1.0",
+        "columna_5": "2024-08-12 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-19 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-26 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "F",
+        "columna_2": "BG10",
+        "area": "FISÍCA I",
+        "primero": "1.0",
+        "columna_5": "2024-08-14 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-21 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-28 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "G",
+        "columna_2": "BG10",
+        "area": "FISÍCA I",
+        "primero": "1.0",
+        "columna_5": "2024-08-12 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-19 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-26 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "TOTAL",
+        "columna_2": "",
+        "area": "",
+        "primero": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "tercero": "",
+        "columna_9": "",
+        "columna_10": "",
+        "quinto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "PRACTICAS REALIZADAS EN QUINTO SEMESTRE",
+        "columna_2": "",
+        "area": "",
+        "primero": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "tercero": "",
+        "columna_9": "",
+        "columna_10": "",
+        "quinto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "GRUPO",
+        "columna_2": "PLAN DE ESTUDIO",
+        "area": "MATERIA",
+        "primero": "No. PRACTICA",
+        "columna_5": "FECHA",
+        "columna_6": "REALIZADA",
+        "columna_7": "No. PRACTICA",
+        "tercero": "FECHA",
+        "columna_9": "REALIZADA",
+        "columna_10": "No. PRACTICA",
+        "quinto": "FECHA",
+        "columna_12": "REALIZADA",
+        "columna_13": "No. PRACTICA",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "A",
+        "columna_2": "AQ15",
+        "area": "FISICA III",
+        "primero": "1.0",
+        "columna_5": "2024-08-16 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-23 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-30 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "FUNDAMENTOS DE MICROBIOLOGIA",
+        "primero": "1.0",
+        "columna_5": "2024-08-14 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-21 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-28 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ANALISIS QUIMICOS INDUSTRIALES",
+        "primero": "1.0",
+        "columna_5": "2024-08-15 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-22 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-29 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "B",
+        "columna_2": "AP13",
+        "area": "BASE DE DATOS",
+        "primero": "1.0",
+        "columna_5": "2024-08-12 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-19 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-26 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "PROGRAMACION EN INTERNET I",
+        "primero": "1.0",
+        "columna_5": "2024-08-12 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-19 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-26 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "PROAMACIÓN III",
+        "primero": "1.0",
+        "columna_5": "2024-08-13 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-20 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-27 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "FISÍCA III",
+        "primero": "1.0",
+        "columna_5": "2024-08-12 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-19 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-26 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "C",
+        "columna_2": "AQ15",
+        "area": "FISICA III",
+        "primero": "1.0",
+        "columna_5": "2024-08-16 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-23 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-30 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "FUNDAMENTOS DE MICROBIOLOGIA",
+        "primero": "1.0",
+        "columna_5": "2024-08-14 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-21 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-28 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "",
+        "columna_2": "",
+        "area": "ANALISIS QUIMICOS INDUSTRIALES",
+        "primero": "1.0",
+        "columna_5": "2024-08-13 00:00:00",
+        "columna_6": "SI",
+        "columna_7": "2.0",
+        "tercero": "2024-08-20 00:00:00",
+        "columna_9": "SI",
+        "columna_10": "3.0",
+        "quinto": "2024-08-27 00:00:00",
+        "columna_12": "SI",
+        "columna_13": "4.0",
+        "total_grupos": ""
+      },
+      {
+        "plantel": "TOTAL",
+        "columna_2": "",
+        "area": "",
+        "primero": "",
+        "columna_5": "",
+        "columna_6": "",
+        "columna_7": "",
+        "tercero": "",
+        "columna_9": "",
+        "columna_10": "",
+        "quinto": "",
+        "columna_12": "",
+        "columna_13": "",
+        "total_grupos": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "columna_2": "",
+      "area": "",
+      "primero": "",
+      "columna_5": "",
+      "columna_6": "",
+      "columna_7": "",
+      "tercero": "",
+      "columna_9": "",
+      "columna_10": "",
+      "quinto": "",
+      "columna_12": "",
+      "columna_13": "",
+      "total_grupos": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "B16-FMT-01-AC736017-idiomas": {
+    "indicatorCode": "B16-FMT-01-AC736017-idiomas",
+    "officialCode": null,
+    "indicatorName": "Idiomas",
+    "sourceLabel": "Idiomas.xlsx",
+    "sourcePath": "Bachillerato 16/Academias/Idiomas.xlsx",
+    "sheetName": "Hoja1",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 5
+      }
+    ],
+    "columns": [
+      {
+        "key": "nombre",
+        "label": "Nombre",
+        "type": "text"
+      },
+      {
+        "key": "asignaturas_que_imparte",
+        "label": "Asignaturas que imparte",
+        "type": "text"
+      },
+      {
+        "key": "numero_de_trabajador",
+        "label": "Número de trabajador",
+        "type": "number"
+      },
+      {
+        "key": "correo_electronico_institucional",
+        "label": "Correo electrónico institucional",
+        "type": "text"
+      },
+      {
+        "key": "numero_contacto",
+        "label": "Número contacto",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "nombre": "",
+        "asignaturas_que_imparte": "Inglés I",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3151094262.0
+      },
+      {
+        "nombre": "",
+        "asignaturas_que_imparte": "Inglés II",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121546321.0
+      },
+      {
+        "nombre": "",
+        "asignaturas_que_imparte": "Inglés III",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121564988.0
+      },
+      {
+        "nombre": "",
+        "asignaturas_que_imparte": "Inglés IV",
+        "numero_de_trabajador": "",
+        "correo_electronico_institucional": "",
+        "numero_contacto": 3121321894.0
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "nombre": "",
+      "asignaturas_que_imparte": "",
+      "numero_de_trabajador": "",
+      "correo_electronico_institucional": "",
+      "numero_contacto": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "B16-FMT-01-76B62473-formato-conformacion-de": {
+    "indicatorCode": "B16-FMT-01-76B62473-formato-conformacion-de",
+    "officialCode": null,
+    "indicatorName": "Formato conformación de academias por plantel",
+    "sourceLabel": "Formato conformación de academias por plantel.xlsx",
+    "sourcePath": "Bachillerato 16/Academias/Formato conformación de academias por plantel.xlsx",
+    "sheetName": "INFORME SEMESTRAL FEBRERO",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 12
+      }
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "nombre_del_programa",
+        "label": "NOMBRE DEL PROGRAMA",
+        "type": "readonly"
+      },
+      {
+        "key": "no_de_academias_por_plantel",
+        "label": "No. DE ACADEMIAS POR PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "tipo_de_integracion_de_academias",
+        "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS",
+        "type": "text"
+      },
+      {
+        "key": "columna_5",
+        "label": "Columna 5",
+        "type": "text"
+      },
+      {
+        "key": "columna_6",
+        "label": "Columna 6",
+        "type": "text"
+      },
+      {
+        "key": "no_de_sesiones_ordinarias",
+        "label": "No. DE SESIONES ORDINARIAS",
+        "type": "text"
+      },
+      {
+        "key": "no_sesiones_extraordinarias",
+        "label": "No. SESIONES EXTRAORDINARIAS",
+        "type": "text"
+      },
+      {
+        "key": "actividades_de_trabajo_realizadas",
+        "label": "ACTIVIDADES DE TRABAJO REALIZADAS",
+        "type": "readonly"
+      },
+      {
+        "key": "docentes_que_participaron_en_las_academias",
+        "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS",
+        "type": "text"
+      },
+      {
+        "key": "columna_11",
+        "label": "Columna 11",
+        "type": "text"
+      },
+      {
+        "key": "total",
+        "label": "TOTAL",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "",
+        "nombre_del_programa": "",
+        "no_de_academias_por_plantel": "",
+        "tipo_de_integracion_de_academias": "ÁREA DE FORMACIÓN",
+        "columna_5": "SEMESTRE",
+        "columna_6": "CAMPO DISCIPLINAR",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
+        "actividades_de_trabajo_realizadas": "",
+        "docentes_que_participaron_en_las_academias": "H",
+        "columna_11": "M",
+        "total": ""
+      },
+      {
+        "plantel": "Bach 16",
+        "nombre_del_programa": "",
+        "no_de_academias_por_plantel": "1.0",
+        "tipo_de_integracion_de_academias": "Comunicación",
+        "columna_5": "2, 4 y 6",
+        "columna_6": "",
+        "no_de_sesiones_ordinarias": "3.0",
+        "no_sesiones_extraordinarias": "",
+        "actividades_de_trabajo_realizadas": "Análisis de resultados parciales, detección de alumnos en riesgo, revisión de indicadores académicos",
+        "docentes_que_participaron_en_las_academias": "6.0",
+        "columna_11": "4.0",
+        "total": 10.0
+      },
+      {
+        "plantel": "",
+        "nombre_del_programa": "",
+        "no_de_academias_por_plantel": "",
+        "tipo_de_integracion_de_academias": "Ciencias Sociales y Humanidades",
+        "columna_5": "2, 4 y 6",
+        "columna_6": "",
+        "no_de_sesiones_ordinarias": "3.0",
+        "no_sesiones_extraordinarias": "",
+        "actividades_de_trabajo_realizadas": "Análisis de resultados parciales, detección de alumnos en riesgo, revisión de indicadores académicos",
+        "docentes_que_participaron_en_las_academias": "3.0",
+        "columna_11": "5.0",
+        "total": 8.0
+      },
+      {
+        "plantel": "",
+        "nombre_del_programa": "",
+        "no_de_academias_por_plantel": "",
+        "tipo_de_integracion_de_academias": "Ciencias Experimentales",
+        "columna_5": "2, 4 y 6",
+        "columna_6": "",
+        "no_de_sesiones_ordinarias": "3.0",
+        "no_sesiones_extraordinarias": "",
+        "actividades_de_trabajo_realizadas": "Análisis de resultados parciales, detección de alumnos en riesgo, revisión de indicadores académicos",
+        "docentes_que_participaron_en_las_academias": "5.0",
+        "columna_11": "2.0",
+        "total": 7.0
+      },
+      {
+        "plantel": "",
+        "nombre_del_programa": "",
+        "no_de_academias_por_plantel": "",
+        "tipo_de_integracion_de_academias": "Matemáticas",
+        "columna_5": "2, 4 y 6",
+        "columna_6": "",
+        "no_de_sesiones_ordinarias": "3.0",
+        "no_sesiones_extraordinarias": "",
+        "actividades_de_trabajo_realizadas": "Análisis de resultados parciales, detección de alumnos en riesgo, revisión de indicadores académicos",
+        "docentes_que_participaron_en_las_academias": "5.0",
+        "columna_11": "1.0",
+        "total": 6.0
+      },
+      {
+        "plantel": "INDICACIONES PARA EL LLENADO DEL FORMATO DE CONCENTRADO DE ACADEMIAS POR PLANTEL",
+        "nombre_del_programa": "",
+        "no_de_academias_por_plantel": "",
+        "tipo_de_integracion_de_academias": "",
+        "columna_5": "",
+        "columna_6": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
+        "actividades_de_trabajo_realizadas": "",
+        "docentes_que_participaron_en_las_academias": "",
+        "columna_11": "",
+        "total": ""
+      },
+      {
+        "plantel": "DATOS DE IDENTIFICACIÓN DE ACADEMIAS",
+        "nombre_del_programa": "",
+        "no_de_academias_por_plantel": "",
+        "tipo_de_integracion_de_academias": "",
+        "columna_5": "",
+        "columna_6": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
+        "actividades_de_trabajo_realizadas": "",
+        "docentes_que_participaron_en_las_academias": "",
+        "columna_11": "",
+        "total": ""
+      },
+      {
+        "plantel": "Periodo escolar: Señalar el periodo y año en el que se ubica la academia",
+        "nombre_del_programa": "",
+        "no_de_academias_por_plantel": "",
+        "tipo_de_integracion_de_academias": "",
+        "columna_5": "",
+        "columna_6": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
+        "actividades_de_trabajo_realizadas": "",
+        "docentes_que_participaron_en_las_academias": "",
+        "columna_11": "",
+        "total": ""
+      },
+      {
+        "plantel": "Plantel: Escribir el nombre del plantel en el cual se encuentran conformadas las academias.",
+        "nombre_del_programa": "",
+        "no_de_academias_por_plantel": "",
+        "tipo_de_integracion_de_academias": "",
+        "columna_5": "",
+        "columna_6": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
+        "actividades_de_trabajo_realizadas": "",
+        "docentes_que_participaron_en_las_academias": "",
+        "columna_11": "",
+        "total": ""
+      },
+      {
+        "plantel": "Programa educativo: Escribir el nombre del plan de estudios correspondiente.",
+        "nombre_del_programa": "",
+        "no_de_academias_por_plantel": "",
+        "tipo_de_integracion_de_academias": "",
+        "columna_5": "",
+        "columna_6": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
+        "actividades_de_trabajo_realizadas": "",
+        "docentes_que_participaron_en_las_academias": "",
+        "columna_11": "",
+        "total": ""
+      },
+      {
+        "plantel": "Tipos de integración de academias: Marcar los tipos de academias implementadas en el plantel por programa educativo.",
+        "nombre_del_programa": "",
+        "no_de_academias_por_plantel": "",
+        "tipo_de_integracion_de_academias": "",
+        "columna_5": "",
+        "columna_6": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
+        "actividades_de_trabajo_realizadas": "",
+        "docentes_que_participaron_en_las_academias": "",
+        "columna_11": "",
+        "total": ""
+      },
+      {
+        "plantel": "Sesiones ordinarias: Escribir el número de sesiones realizadas durante el semestre de manera habitual.",
+        "nombre_del_programa": "",
+        "no_de_academias_por_plantel": "",
+        "tipo_de_integracion_de_academias": "",
+        "columna_5": "",
+        "columna_6": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
+        "actividades_de_trabajo_realizadas": "",
+        "docentes_que_participaron_en_las_academias": "",
+        "columna_11": "",
+        "total": ""
+      },
+      {
+        "plantel": "Sesiones extraordinarias: Escribir el número de sesiones realizadas para asuntos especiales o urgentes.",
+        "nombre_del_programa": "",
+        "no_de_academias_por_plantel": "",
+        "tipo_de_integracion_de_academias": "",
+        "columna_5": "",
+        "columna_6": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
+        "actividades_de_trabajo_realizadas": "",
+        "docentes_que_participaron_en_las_academias": "",
+        "columna_11": "",
+        "total": ""
+      },
+      {
+        "plantel": "Actividades de trabajo realizadas: Rde a cuerdo a las necesidades del plantel, registrar las actividades que se realizaron durante el semestre.",
+        "nombre_del_programa": "",
+        "no_de_academias_por_plantel": "",
+        "tipo_de_integracion_de_academias": "",
+        "columna_5": "",
+        "columna_6": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
+        "actividades_de_trabajo_realizadas": "",
+        "docentes_que_participaron_en_las_academias": "",
+        "columna_11": "",
+        "total": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "nombre_del_programa": "",
+      "no_de_academias_por_plantel": "",
+      "tipo_de_integracion_de_academias": "",
+      "columna_5": "",
+      "columna_6": "",
+      "no_de_sesiones_ordinarias": "",
+      "no_sesiones_extraordinarias": "",
+      "actividades_de_trabajo_realizadas": "",
+      "docentes_que_participaron_en_las_academias": "",
+      "columna_11": "",
+      "total": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "B16-FMT-01-CF8AE174-registro-interesados-man": {
+    "indicatorCode": "B16-FMT-01-CF8AE174-registro-interesados-man",
+    "officialCode": null,
+    "indicatorName": "Registro interesados manuales inglés",
+    "sourceLabel": "Registro interesados manuales inglés.xlsx",
+    "sourcePath": "Bachillerato 16/Academias/Registro interesados manuales inglés.xlsx",
+    "sheetName": "Registro Manuales",
+    "groups": [
+      {
+        "label": "Formato oficial importado",
+        "colspan": 8
+      }
+    ],
+    "columns": [
+      {
+        "key": "columna_1",
+        "label": "Columna 1",
+        "type": "text"
+      },
+      {
+        "key": "plantel_donde_labora",
+        "label": "Plantel donde labora",
+        "type": "readonly"
+      },
+      {
+        "key": "nombre",
+        "label": "Nombre",
+        "type": "text"
+      },
+      {
+        "key": "no_de_trabajador",
+        "label": "No. de trabajador",
+        "type": "text"
+      },
+      {
+        "key": "correo",
+        "label": "Correo",
+        "type": "text"
+      },
+      {
+        "key": "tipo_de_contratacion_profesor_por_horas_asimilad",
+        "label": "Tipo de contratación (profesor por horas, asimilado, becario)",
+        "type": "text"
+      },
+      {
+        "key": "asignatura_que_imparte",
+        "label": "Asignatura que imparte",
+        "type": "text"
+      },
+      {
+        "key": "manual_en_el_que_le_interesa_participar",
+        "label": "Manual en el que le interesa participar",
+        "type": "text"
+      }
+    ],
+    "initialRows": [
+      {
+        "columna_1": "",
+        "plantel_donde_labora": "BACHILLERATO 16",
+        "nombre": "",
+        "no_de_trabajador": "",
+        "correo": "",
+        "tipo_de_contratacion_profesor_por_horas_asimilad": "",
+        "asignatura_que_imparte": "Inglés II",
+        "manual_en_el_que_le_interesa_participar": "Inglés I"
+      },
+      {
+        "columna_1": "",
+        "plantel_donde_labora": "BACHILLERATO 16",
+        "nombre": "",
+        "no_de_trabajador": "",
+        "correo": "",
+        "tipo_de_contratacion_profesor_por_horas_asimilad": "",
+        "asignatura_que_imparte": "Inglés IV",
+        "manual_en_el_que_le_interesa_participar": "Inglés III"
+      },
+      {
+        "columna_1": "",
+        "plantel_donde_labora": "BACHILLERATO 16",
+        "nombre": "",
+        "no_de_trabajador": "",
+        "correo": "",
+        "tipo_de_contratacion_profesor_por_horas_asimilad": "",
+        "asignatura_que_imparte": "Inglés II",
+        "manual_en_el_que_le_interesa_participar": "Inglés I"
+      }
+    ],
+    "showTotals": false,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "columna_1": "",
+      "plantel_donde_labora": "",
+      "nombre": "",
+      "no_de_trabajador": "",
+      "correo": "",
+      "tipo_de_contratacion_profesor_por_horas_asimilad": "",
+      "asignatura_que_imparte": "",
+      "manual_en_el_que_le_interesa_participar": ""
+    },
+    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
     ]
   }
 };

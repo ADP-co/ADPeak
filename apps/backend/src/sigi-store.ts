@@ -208,7 +208,7 @@ export const planteles: Plantel[] = [
 
 const unassignedPlantel: Plantel = { id: 0, key: "sin-plantel", name: "Sin plantel asignado" };
 const officialSourcePlantelIds: number[] = [];
-const officialCatalogImportVersion = "2026-06-18-official-workbook-templates-v3";
+const officialCatalogImportVersion = "2026-06-18-official-workbook-templates-v4";
 
 const responsibleNames = Array.from(
   new Set(officialCatalogRows.map((row) => row.responsible).filter(Boolean))
@@ -1430,12 +1430,18 @@ function officialWorkbookTemplate(indicator: SigiIndicator, session?: SigiSessio
   const imported = officialWorkbookTemplates[indicator.code];
   const plantel = plantelForTemplate(session, indicator);
   const columns = sanitizeTemplateColumns(imported.columns);
+  const displayCode = imported.officialCode || (indicator.code.startsWith("B16-FMT-") ? "Pendiente de mapeo" : indicator.code);
+  const indicatorInfoText = imported.officialCode && imported.officialCode !== indicator.code
+    ? `Código oficial ${imported.officialCode}. Formato diferenciado por fuente oficial.`
+    : imported.officialCode
+      ? `Código ${imported.officialCode} ${indicator.name}.`
+      : `${indicator.name}.`;
   const rows = imported.initialRows.length > 0
     ? imported.initialRows.map((row) => rowForOfficialWorkbookColumns(columns, row, plantel))
     : [rowForOfficialWorkbookColumns(columns, imported.emptyRow, plantel)];
 
   return {
-    indicatorCode: indicator.code,
+    indicatorCode: displayCode,
     indicatorName: indicator.name,
     groups: imported.groups.length > 0
       ? imported.groups
@@ -1445,7 +1451,7 @@ function officialWorkbookTemplate(indicator: SigiIndicator, session?: SigiSessio
     infoBlocks: [
       {
         label: "INDICADOR",
-        text: `Código ${indicator.code} ${indicator.name}.`,
+        text: indicatorInfoText,
         tone: "highlight"
       },
       {

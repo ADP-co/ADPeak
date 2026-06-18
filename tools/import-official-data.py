@@ -179,6 +179,10 @@ def extend_rows_with_workbook_indicators(
     workbook_templates: dict[str, dict[str, Any]],
 ) -> list[dict[str, Any]]:
     existing_codes = {row["code"] for row in rows if row["code"]}
+    existing_rows_by_code: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        if row["code"] and row["code"] not in existing_rows_by_code:
+            existing_rows_by_code[row["code"]] = row
     next_source_row = max((row["sourceRow"] for row in rows), default=1) + 1
     extended = list(rows)
 
@@ -186,21 +190,30 @@ def extend_rows_with_workbook_indicators(
         if code in existing_codes:
             continue
 
+        original_code = clean_text(template.get("officialCode"))
+        original_row = existing_rows_by_code.get(original_code)
         name = clean_text(template.get("indicatorName")) or f"Indicador oficial {code}"
         activity = clean_text(template.get("sourceLabel")) or "Actividad oficial importada"
-        dedupe_key = "\u241f".join((code, name, "Pendiente de asignar", "Planteles", activity))
+        responsible = original_row["responsible"] if original_row else "Pendiente de asignar"
+        contributors = original_row["contributors"] if original_row else "Planteles"
+        data_quality = list(template.get("quality") or [])
+        if original_code and original_code != code:
+            data_quality.append("shared_official_code_split_by_source")
+        if not original_code:
+            data_quality.append("pending_indicator_code")
+        dedupe_key = "\u241f".join((code, name, responsible, contributors, activity))
         extended.append(
             {
                 "sourceRow": next_source_row,
                 "code": code,
                 "name": name,
-                "responsible": "Pendiente de asignar",
-                "contributors": "Planteles",
+                "responsible": responsible,
+                "contributors": contributors,
                 "activity": activity,
                 "dedupeKey": hashlib.sha256(dedupe_key.encode("utf-8")).hexdigest()[:16],
                 "isDuplicate": False,
                 "duplicateOfSourceRow": None,
-                "dataQuality": ["workbook_only_indicator"],
+                "dataQuality": sorted(set(data_quality + ["workbook_only_indicator"])),
             }
         )
         next_source_row += 1
@@ -293,7 +306,7 @@ def workbook_summaries() -> tuple[
     workbook_templates: dict[str, dict[str, Any]] = {}
 
     if not NESTED_ZIP.exists():
-        return summaries, {}, [], []
+        return summaries, {}, [], [], {}
 
     with zipfile.ZipFile(NESTED_ZIP) as archive:
         infos = [info for info in archive.infolist() if not info.is_dir()]
@@ -327,22 +340,40 @@ def workbook_summaries() -> tuple[
 
             if not planteles:
                 planteles.add("Bachillerato 16")
-            for code in codes:
+            table_sheets = [sheet for sheet in sheets if sheet.get("table")]
+            source_codes = sorted(codes, key=normalize_key)
+            template_codes = source_codes or (
+                [synthetic_workbook_code(info.filename, digest)] if table_sheets else []
+            )
+
+            for source_index, source_code in enumerate(template_codes, start=1):
+                original_code = source_code if source_code in source_codes else ""
+                template_code = source_code
+                if template_code in workbook_templates:
+                    template_code = synthetic_workbook_code(info.filename, digest, original_code or source_code, source_index)
+
                 if "Bachillerato 16" in planteles:
-                    scopes[code].add(1)
+                    scopes[template_code].add(1)
                 template_candidates.append(
                     {
-                        "indicatorCode": code,
+                        "indicatorCode": template_code,
+                        "officialCode": original_code or None,
                         "sourcePath": unicodedata.normalize("NFC", info.filename),
                         "planteles": sorted(planteles, key=str.casefold),
                         "classification": classify_workbook(sheets),
-                        "confidence": "detected-code",
+                        "confidence": "detected-code" if original_code else "source-table-pending-code",
                         "headerRows": first_header_rows(sheets),
                     }
                 )
-                table_template = template_from_workbook_sheets(code, sheets, info.filename)
-                if table_template and code not in workbook_templates:
-                    workbook_templates[code] = table_template
+                table_template = template_from_workbook_sheets(
+                    template_code,
+                    sheets,
+                    info.filename,
+                    official_code=original_code,
+                    source_index=source_index,
+                )
+                if table_template and template_code not in workbook_templates:
+                    workbook_templates[template_code] = table_template
 
             summaries.append(
                 {
@@ -605,7 +636,27 @@ def frontend_template_candidates(candidates: list[dict[str, Any]]) -> list[dict[
     ]
 
 
-def template_from_workbook_sheets(code: str, sheets: list[dict[str, Any]], source_path: str) -> dict[str, Any] | None:
+def synthetic_workbook_code(
+    source_path: str,
+    digest: str,
+    official_code: str = "",
+    source_index: int = 1,
+) -> str:
+    stem = normalize_key(Path(source_path).stem).replace(" ", "-")[:24].strip("-")
+    suffix = digest[:8].upper()
+    if official_code:
+        return f"{official_code}-FMT-{suffix}"
+    return f"B16-FMT-{source_index:02d}-{suffix}-{stem or 'oficial'}"
+
+
+def template_from_workbook_sheets(
+    code: str,
+    sheets: list[dict[str, Any]],
+    source_path: str,
+    *,
+    official_code: str = "",
+    source_index: int = 1,
+) -> dict[str, Any] | None:
     table_sheets = [sheet for sheet in sheets if sheet.get("table")]
     if not table_sheets:
         return None
@@ -627,7 +678,8 @@ def template_from_workbook_sheets(code: str, sheets: list[dict[str, Any]], sourc
 
     return {
         "indicatorCode": code,
-        "indicatorName": indicator_name_from_sources(code, sheets, source_label),
+        "officialCode": official_code or None,
+        "indicatorName": indicator_name_from_sources(official_code or code, sheets, source_label),
         "sourceLabel": source_label,
         "sourcePath": unicodedata.normalize("NFC", source_path),
         "sheetName": selected["name"],
@@ -645,8 +697,14 @@ def template_from_workbook_sheets(code: str, sheets: list[dict[str, Any]], sourc
         "emptyRow": empty_row_for_columns(columns),
         "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
         "quality": [
-            "source_workbook_template",
-            "private_fields_blank",
+            value
+            for value in [
+                "source_workbook_template",
+                "private_fields_blank",
+                "pending_indicator_code" if not official_code else "official_code_detected",
+                "shared_official_code_split_by_source" if official_code and official_code != code else "",
+            ]
+            if value
         ],
     }
 
@@ -800,6 +858,7 @@ export type OfficialWorkbookSummary = {{
 
 export type OfficialTemplateCandidate = {{
   indicatorCode: string;
+  officialCode?: string | null;
   sourcePath: string;
   planteles: string[];
   classification: string;
@@ -809,6 +868,7 @@ export type OfficialTemplateCandidate = {{
 
 export type OfficialWorkbookTemplate = {{
   indicatorCode: string;
+  officialCode?: string | null;
   indicatorName: string;
   sourceLabel: string;
   sourcePath: string;

@@ -19,6 +19,7 @@ const STORAGE_KEY_PREFIX = 'sigi-poa:capture-draft-id';
 type UseCaptureDraftOptions = Omit<CaptureDraftRequest, 'payload' | 'motivoCambio'> & {
   requestedCaptureId?: number;
   storageScope?: string;
+  enabled?: boolean;
 };
 
 function initialCaptureId(storageKey: string) {
@@ -29,7 +30,7 @@ function initialCaptureId(storageKey: string) {
 
 export function useCaptureDraft(options: UseCaptureDraftOptions) {
   const queryClient = useQueryClient();
-  const { requestedCaptureId, storageScope, ...captureOptions } = options;
+  const { requestedCaptureId, storageScope, enabled = true, ...captureOptions } = options;
   const hasRequestedCapture = Boolean(requestedCaptureId);
   const storageKey = `${STORAGE_KEY_PREFIX}:${storageScope ?? [
     options.plantelId,
@@ -46,7 +47,7 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
   const captureQuery = useQuery({
     queryKey: ['capture-draft', storageKey, captureId],
     queryFn: () => getCaptureDraft(captureId as number),
-    enabled: Boolean(captureId),
+    enabled: enabled && Boolean(captureId),
   });
 
   const persistCapture = (capture: CaptureDraft) => {
@@ -61,7 +62,7 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
   const scopedCaptureQuery = useQuery({
     queryKey: ['capture-draft-scope', storageKey],
     queryFn: () => findCaptureDraft(captureOptions),
-    enabled: !captureId && !hasRequestedCapture,
+    enabled: enabled && !captureId && !hasRequestedCapture,
   });
   const scopedCapture = hasRequestedCapture ? undefined : scopedCaptureQuery.data;
 

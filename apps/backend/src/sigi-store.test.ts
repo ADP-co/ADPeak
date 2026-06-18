@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { officialCatalogStats } from "./official-catalog.generated.js";
+import { officialDataSummary, officialWorkbookTemplates } from "./official-data.generated.js";
 import {
   assertCaptureAccess,
   authenticateUser,
@@ -27,7 +29,10 @@ describe("SIGI store and RBAC", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const indicators = listIndicators(director);
 
-    expect(indicators.length).toBeGreaterThanOrEqual(48);
+    expect(officialCatalogStats.uniqueIndicators).toBe(89);
+    expect(officialDataSummary.workbookCount).toBe(39);
+    expect(Object.keys(officialWorkbookTemplates)).toHaveLength(41);
+    expect(indicators.length).toBeGreaterThanOrEqual(89);
     expect(getIndicatorByCode("1.0.0.0.2")).toMatchObject({
       name: expect.stringContaining("titul"),
       active: true,
