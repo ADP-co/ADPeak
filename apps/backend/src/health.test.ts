@@ -8,6 +8,7 @@ describe("healthPayload", () => {
     expect(payload).toEqual({
       service: "sigi-poa-api",
       status: "ok",
+      persistence: "memory-only",
       timestamp: "2026-05-13T00:00:00.000Z"
     });
   });

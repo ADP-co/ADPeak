@@ -1,7 +1,7 @@
-# Configuracion de entorno
+# Configuración de entorno
 
 `SCRUM-59` define las variables de entorno necesarias para base de datos,
-autenticacion, archivos, entorno y URLs internas.
+autenticación, archivos, entorno y URLs internas.
 
 ## Archivo local
 
@@ -12,7 +12,7 @@ copy .env.example .env
 ```
 
 Los valores incluidos son placeholders de desarrollo local. No son secretos
-reales y no deben copiarse a produccion.
+reales y no deben copiarse a producción.
 
 Para demo local controlada, usar `.env.demo.example`:
 
@@ -21,9 +21,9 @@ copy .env.demo.example .env
 ```
 
 Esa plantilla usa `APP_ENV=demo`, base `sigi_poa_demo`, usuarios ficticios y
-codigos publicos de demo.
+códigos públicos de demo.
 
-## Validar configuracion
+## Validar configuración
 
 ```bash
 npm run env:check
@@ -36,34 +36,40 @@ variables faltantes y pide copiar `.env.example` a `.env`.
 
 | Variable | Uso |
 | --- | --- |
-| `APP_ENV` | Entorno de ejecucion: `development`, `test`, `demo` o `production`. |
+| `APP_ENV` | Entorno de ejecución: `development`, `test`, `demo` o `production`. |
 | `BACKEND_PORT` | Puerto HTTP del backend. |
-| `PUBLIC_APP_URL` | URL publica del frontend. |
-| `INTERNAL_API_URL` | URL interna usada para comunicacion entre servicios. |
-| `DATABASE_URL` | Conexion de base de datos. |
+| `PUBLIC_APP_URL` | URL pública del frontend. |
+| `INTERNAL_API_URL` | URL interna usada para comunicación entre servicios. |
+| `DATABASE_URL` | Conexión de base de datos. |
+| `POSTGRES_URL` | Conexión Postgres alternativa usada por Vercel/Neon si `DATABASE_URL` no existe. |
 | `AUTH_SECRET` | Secreto de firma para auth; usar solo placeholders en desarrollo. |
-| `AUTH_TOKEN_TTL_MINUTES` | Duracion de tokens de autenticacion en minutos. |
+| `AUTH_TOKEN_TTL_MINUTES` | Duración de tokens de autenticación en minutos. |
 | `FILE_STORAGE_DRIVER` | Driver de archivos; por ahora `local`. |
 | `FILE_STORAGE_PATH` | Ruta local para archivos cargados. |
-| `EVIDENCE_MAX_FILE_MB` | Limite local de tamano para evidencias. |
+| `EVIDENCE_MAX_FILE_MB` | Límite local de tamaño para evidencias. |
 | `SIGI_DATA_FILE` | Archivo JSON persistente del backend para usuarios, indicadores y capturas. |
 | `CORS_ORIGIN` | Origen permitido para llamadas desde frontend. |
-| `VITE_API_URL` | URL publica del backend para el frontend. |
+| `VITE_API_URL` | URL pública del backend para el frontend. |
 | `VITE_API_BASE_URL` | URL base de API versionada para clientes frontend. |
 
-El frontend tambien acepta `?api=https://host-del-backend` en la URL. Ese
+El frontend también acepta `?api=https://host-del-backend` en la URL. Ese
 valor se guarda en `localStorage` y permite apuntar GitHub Pages a un backend
-publico sin recompilar la aplicacion.
+público sin recompilar la aplicación.
+
+En despliegues Vercel con Neon, el backend usa `DATABASE_URL` cuando existe y,
+si no existe, toma `POSTGRES_URL`, `POSTGRES_PRISMA_URL` o
+`POSTGRES_URL_NON_POOLING`. `GET /health` muestra el tipo de persistencia sin
+exponer credenciales.
 
 ## Manejo de secretos y evidencias
 
-- `.env` y `.env.*` estan ignorados por Git, excepto `.env.example`.
-- `.env.demo.example` tambien esta permitido porque no contiene secretos reales.
+- `.env` y `.env.*` están ignorados por Git, excepto `.env.example`.
+- `.env.demo.example` también está permitido porque no contiene secretos reales.
 - `uploads/`, `evidence/`, `source-materials/`, `private/` y formatos de
-  evidencia/documentos fuente estan ignorados por Git.
+  evidencia/documentos fuente están ignorados por Git.
 - No se deben versionar credenciales, archivos fuente confidenciales,
   evidencias reales ni datos personales.
-- En produccion, `AUTH_SECRET` no puede usar valores de ejemplo como
+- En producción, `AUTH_SECRET` no puede usar valores de ejemplo como
   `local`, `example`, `placeholder` o `change-me`.
 - `SIGI_DATA_FILE` debe apuntar a una ruta escribible del servidor. La carpeta
-  `data/` esta ignorada por Git para no versionar estado operativo.
+  `data/` está ignorada por Git para no versionar estado operativo.

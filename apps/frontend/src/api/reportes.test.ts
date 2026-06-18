@@ -26,6 +26,10 @@ const sampleReport: ExportReport = {
           meta: 100,
           evidencias: 2,
           vencimiento: 'en_tiempo',
+          detalle: [
+            { campo: 'Mujeres', valor: '12' },
+            { campo: 'Observaciones', valor: 'Dato importado y editable' },
+          ],
         },
       ],
     },
@@ -41,7 +45,10 @@ describe('report exports', () => {
     expect(csv).toContain('"Periodo","Ciclo escolar","Fecha de generación"');
     expect(header).not.toContain('"Plantel"');
     expect(header).toContain('"Meta"');
+    expect(header).toContain('"Mujeres"');
+    expect(header).toContain('"Observaciones"');
     expect(csv).toContain('"Captura de egresados titulados"');
+    expect(csv).toContain('"Dato importado y editable"');
     expect(csv).toContain('"Concursos Académicos"');
     expect(csv).not.toContain('Acad\u00c3\u0192');
     expect(csv).not.toContain('tipo_reporte');
@@ -53,7 +60,10 @@ describe('report exports', () => {
     const pdfText = await (await reportToPdfBlob(sampleReport)).text();
 
     expect(pdfText).toContain('(Resumen) Tj');
-    expect(pdfText).toContain('Captura de egresados titulados');
+    expect(pdfText).toContain('Captura de egresados');
+    expect(pdfText).toContain('titulados');
+    expect(pdfText).toContain('Observaciones: Dato');
+    expect(pdfText).toContain('importado y editable');
     expect(pdfText).not.toContain('Acad\u00c3\u0192');
     expect(pdfText).not.toContain('sin-id');
     expect(pdfText).not.toContain('registro_id');

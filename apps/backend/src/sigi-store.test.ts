@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { officialCatalogStats } from "./official-catalog.generated.js";
 import { officialDataSummary, officialWorkbookTemplates } from "./official-data.generated.js";
+import { createCaptureDraft, resetCaptureDraftsForTest } from "./capture-store.js";
 import {
   assertCaptureAccess,
   authenticateUser,
@@ -22,6 +23,7 @@ import {
 
 describe("SIGI store and RBAC", () => {
   beforeEach(() => {
+    resetCaptureDraftsForTest();
     reloadSigiStateFromPersistence();
   });
 
@@ -398,6 +400,54 @@ describe("SIGI store and RBAC", () => {
       expression: "=Mujeres + Hombres"
     });
     expect(template.initialRows[0]).toMatchObject({ plantel: "Bachillerato 16" });
+  });
+
+  it("exports captured template details in report rows", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const indicator = saveIndicator(director, {
+      code: "TMP-REPORT-DETAIL",
+      name: "Indicador temporal para reporte completo",
+      dataType: "number",
+      responsibleNames: ["Liliana Yunuen Rojas Maciel"],
+      contributorNames: ["Planteles"],
+      activities: ["Actividad con detalle"],
+      plantelIds: [1],
+      templateColumns: [
+        { key: "plantel", label: "Plantel", type: "readonly" },
+        { key: "actividad", label: "Actividad", type: "readonly" },
+        { key: "mujeres", label: "Mujeres", type: "number" },
+        { key: "hombres", label: "Hombres", type: "number" },
+        { key: "observaciones", label: "Observaciones", type: "text" }
+      ]
+    });
+
+    createCaptureDraft({
+      plantelId: 1,
+      indicadorId: indicator.id,
+      actividadId: 1,
+      periodoId: 1,
+      responsableId: indicator.primaryResponsibleId,
+      payload: {
+        rows: [{
+          plantel: "Bachillerato 16",
+          actividad: "Actividad con detalle",
+          mujeres: 12,
+          hombres: 10,
+          observaciones: "Dato importado y editable"
+        }]
+      }
+    });
+
+    const report = buildReportPayload(director, { plantelId: "1", periodo: "2026-2" });
+    const reportRow = report.indicadores
+      .find((item) => item.id === "TMP-REPORT-DETAIL")
+      ?.datos[0];
+
+    expect(reportRow?.detalle).toEqual(expect.arrayContaining([
+      { campo: "Mujeres", valor: "12" },
+      { campo: "Hombres", valor: "10" },
+      { campo: "Observaciones", valor: "Dato importado y editable" }
+    ]));
   });
 
   it("builds the official health integral matrix for indicator 1.1.2.1.4", () => {

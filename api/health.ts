@@ -1,4 +1,5 @@
 import { applyCors, handleOptions, methodNotAllowed } from "./_lib/http";
+import { stateFileLocation } from "../apps/backend/src/state-store.js";
 
 export default function handler(request: any, response: any) {
   if (handleOptions(request, response)) {
@@ -16,6 +17,7 @@ export default function handler(request: any, response: any) {
     service: "sigi-poa-api",
     status: "ok",
     runtime: "vercel",
+    persistence: stateFileLocation(),
     timestamp: new Date().toISOString()
   });
 }

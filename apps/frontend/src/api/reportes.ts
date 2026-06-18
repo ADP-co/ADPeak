@@ -19,6 +19,7 @@ export type ReportDataRow = {
   meta?: number;
   evidencias?: number;
   vencimiento?: string;
+  detalle?: Array<{ campo: string; valor: string }>;
 };
 
 export type ReportIndicator = {
@@ -78,6 +79,7 @@ export async function fetchExportReport(request: ReportRequest) {
 
 export function reportToCsv(report: ExportReport) {
   const includePlantelColumn = shouldShowPlantelColumn(report);
+  const detailHeaders = reportDetailHeaders(report);
   const headers = [
     'Periodo',
     'Ciclo escolar',
@@ -92,6 +94,7 @@ export function reportToCsv(report: ExportReport) {
     'Meta',
     'Evidencias',
     'Vencimiento',
+    ...detailHeaders,
   ];
   const rows = report.indicadores.flatMap((indicator) =>
     indicator.datos.map((dataRow) => [
@@ -108,6 +111,7 @@ export function reportToCsv(report: ExportReport) {
       dataRow.meta?.toString() ?? '',
       dataRow.evidencias?.toString() ?? '',
       formatDeadline(dataRow.vencimiento),
+      ...detailHeaders.map((header) => detailValue(dataRow, header)),
     ])
   );
 
@@ -250,6 +254,47 @@ function shouldShowPlantelColumn(report: ExportReport) {
   return report.indicadores
     .flatMap((indicator) => indicator.datos)
     .some((row) => row.plantel && normalizeStatus(row.plantel) !== identityName);
+}
+
+function reportDetailHeaders(report: ExportReport) {
+  const headers: string[] = [];
+  const seen = new Set<string>();
+
+  report.indicadores.forEach((indicator) => {
+    indicator.datos.forEach((row) => {
+      row.detalle?.forEach((detail) => {
+        const header = cleanExportText(detail.campo);
+        const key = normalizeStatus(header);
+
+        if (!header || seen.has(key)) {
+          return;
+        }
+
+        seen.add(key);
+        headers.push(header);
+      });
+    });
+  });
+
+  return headers;
+}
+
+function detailValue(row: ReportDataRow, header: string) {
+  const headerKey = normalizeStatus(header);
+  const detail = row.detalle?.find((item) => normalizeStatus(item.campo) === headerKey);
+  return detail ? cleanExportText(detail.valor) : '';
+}
+
+function formatDetailSummary(row: ReportDataRow) {
+  const details = row.detalle
+    ?.map((detail) => `${cleanExportText(detail.campo)}: ${cleanExportText(detail.valor)}`)
+    .filter((detail) => detail.length > 2) ?? [];
+
+  if (details.length === 0) {
+    return '';
+  }
+
+  return details.slice(0, 4).join(' | ');
 }
 
 function renderPdfReport(report: ExportReport, hasHeaderImage: boolean) {
@@ -428,22 +473,22 @@ function drawIndicatorTable(
   const includePlantelColumn = shouldShowPlantelColumn(report);
   const columns: PdfTableColumn[] = includePlantelColumn
     ? [
-        { label: 'Actividad', width: 132, value: (row) => row.actividad },
-        { label: 'Responsable', width: 88, value: (row) => row.responsable },
-        { label: 'Plantel', width: 78, value: (row, currentReport) => row.plantel ?? currentReport.identidadReporte.nombre },
-        { label: 'Estado', width: 62, align: 'center', value: (row) => formatStatusLabel(row.estado) },
-        { label: 'Avance', width: 48, align: 'center', value: (row) => row.avance },
-        { label: 'Evid.', width: 35, align: 'center', value: (row) => (typeof row.evidencias === 'number' ? String(row.evidencias) : '') },
-        { label: 'Vence', width: 68, align: 'center', value: (row) => formatDeadline(row.vencimiento) },
+        { label: 'Actividad', width: 104, value: (row) => row.actividad },
+        { label: 'Responsable', width: 76, value: (row) => row.responsable },
+        { label: 'Plantel', width: 64, value: (row, currentReport) => row.plantel ?? currentReport.identidadReporte.nombre },
+        { label: 'Estado', width: 52, align: 'center', value: (row) => formatStatusLabel(row.estado) },
+        { label: 'Avance', width: 38, align: 'center', value: (row) => row.avance },
+        { label: 'Detalle', width: 154, value: (row) => formatDetailSummary(row) },
+        { label: 'Evid.', width: 40, align: 'center', value: (row) => (typeof row.evidencias === 'number' ? String(row.evidencias) : '') },
       ]
     : [
-        { label: 'Actividad', width: 166, value: (row) => row.actividad },
-        { label: 'Responsable', width: 116, value: (row) => row.responsable },
-        { label: 'Estado', width: 62, align: 'center', value: (row) => formatStatusLabel(row.estado) },
-        { label: 'Avance', width: 48, align: 'center', value: (row) => row.avance },
-        { label: 'Meta', width: 38, align: 'center', value: (row) => (typeof row.meta === 'number' ? String(row.meta) : '') },
-        { label: 'Evid.', width: 35, align: 'center', value: (row) => (typeof row.evidencias === 'number' ? String(row.evidencias) : '') },
-        { label: 'Vence', width: 46, align: 'center', value: (row) => formatDeadline(row.vencimiento) },
+        { label: 'Actividad', width: 120, value: (row) => row.actividad },
+        { label: 'Responsable', width: 88, value: (row) => row.responsable },
+        { label: 'Estado', width: 52, align: 'center', value: (row) => formatStatusLabel(row.estado) },
+        { label: 'Avance', width: 40, align: 'center', value: (row) => row.avance },
+        { label: 'Meta', width: 40, align: 'center', value: (row) => (typeof row.meta === 'number' ? String(row.meta) : '') },
+        { label: 'Detalle', width: 148, value: (row) => formatDetailSummary(row) },
+        { label: 'Evid.', width: 40, align: 'center', value: (row) => (typeof row.evidencias === 'number' ? String(row.evidencias) : '') },
       ];
 
   const drawHeader = () => {
@@ -1058,6 +1103,11 @@ function buildRecordLine(dataRow: ReportDataRow, report: ExportReport) {
 function buildRecordDetails(dataRow: ReportDataRow) {
   const details: string[] = [];
   const deadline = formatDeadline(dataRow.vencimiento);
+  const rowDetails = formatDetailSummary(dataRow);
+
+  if (rowDetails) {
+    details.push(rowDetails);
+  }
 
   if (typeof dataRow.evidencias === 'number' && dataRow.evidencias > 0) {
     details.push(`Evidencias: ${dataRow.evidencias}`);

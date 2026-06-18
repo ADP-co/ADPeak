@@ -141,6 +141,7 @@ export type SigiReportPayload = {
       meta: number;
       evidencias: number;
       vencimiento: "en_tiempo" | "atrasado";
+      detalle?: Array<{ campo: string; valor: string }>;
     }>;
   }>;
 };
@@ -789,7 +790,8 @@ function rowsFromCaptureDrafts({
         ciclo: cicloEscolar,
         meta: numberValue(row.meta) ?? 100,
         evidencias: draft.payload.evidencia ? 1 : 0,
-        vencimiento: draft.estado === "borrador" ? "atrasado" as const : "en_tiempo" as const
+        vencimiento: draft.estado === "borrador" ? "atrasado" as const : "en_tiempo" as const,
+        detalle: reportDetailsFromCapturedRow(row, indicator)
       }));
     });
 }
@@ -843,6 +845,94 @@ function numberValue(value: unknown) {
   }
 
   return undefined;
+}
+
+function reportDetailsFromCapturedRow(row: Record<string, unknown>, indicator: SigiIndicator) {
+  const details: Array<{ campo: string; valor: string }> = [];
+  const labelsByKey = new Map((indicator.templateColumns ?? []).map((column) => [column.key, column.label]));
+  const orderedKeys = uniqueStrings([
+    ...(indicator.templateColumns ?? []).map((column) => column.key),
+    ...Object.keys(row)
+  ]);
+  const seenLabels = new Set<string>();
+
+  for (const key of orderedKeys) {
+    if (isReservedReportDetailKey(key)) {
+      continue;
+    }
+
+    const value = reportDetailValue(row[key]);
+
+    if (!value) {
+      continue;
+    }
+
+    const label = labelsByKey.get(key) ?? readableReportDetailLabel(key);
+    const normalizedLabel = label.trim();
+    const dedupeKey = normalizedLabel.toLowerCase();
+
+    if (!normalizedLabel || seenLabels.has(dedupeKey)) {
+      continue;
+    }
+
+    seenLabels.add(dedupeKey);
+    details.push({ campo: normalizedLabel, valor: value });
+  }
+
+  return details;
+}
+
+function isReservedReportDetailKey(key: string) {
+  return new Set([
+    "id",
+    "registro_id",
+    "captureid",
+    "capture_id",
+    "actividadid",
+    "actividad_id",
+    "actividad",
+    "responsable",
+    "estado",
+    "avance",
+    "meta",
+    "plantel",
+    "plantelid",
+    "plantel_id",
+    "periodo",
+    "periodoid",
+    "periodo_id",
+    "ciclo",
+    "evidencias",
+    "vencimiento"
+  ]).has(key.toLowerCase());
+}
+
+function reportDetailValue(value: unknown): string {
+  if (value === undefined || value === null) {
+    return "";
+  }
+
+  if (typeof value === "string") {
+    return value.trim();
+  }
+
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(reportDetailValue).filter(Boolean).join(", ");
+  }
+
+  return "";
+}
+
+function readableReportDetailLabel(key: string) {
+  return key
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 function officialSourcesReportRows(

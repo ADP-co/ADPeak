@@ -17,7 +17,7 @@ if (!isTestRun) {
   loadLocalEnv();
 }
 
-const databaseUrl = !isTestRun ? process.env.DATABASE_URL : undefined;
+const databaseUrl = !isTestRun ? readDatabaseUrl() : undefined;
 const configuredStateFile = process.env.SIGI_DATA_FILE || process.env.ADPEAK_DATA_FILE;
 const stateFilePath = configuredStateFile
   ? path.resolve(configuredStateFile)
@@ -110,6 +110,15 @@ export function stateFileLocation() {
   return databaseUrl ? "postgres:app_state" : stateFilePath || "memory-only";
 }
 
+function readDatabaseUrl() {
+  return (
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.POSTGRES_PRISMA_URL ||
+    process.env.POSTGRES_URL_NON_POOLING
+  );
+}
+
 function loadStateFromDisk(): PersistedState {
   if (!stateFilePath || !existsSync(stateFilePath)) {
     return {};
@@ -159,7 +168,7 @@ async function ensureStateTable(client: import("pg").Pool) {
 
 async function getPool() {
   if (!databaseUrl) {
-    throw new Error("DATABASE_URL is not configured.");
+    throw new Error("Database URL is not configured.");
   }
 
   const { Pool } = await import("pg");
