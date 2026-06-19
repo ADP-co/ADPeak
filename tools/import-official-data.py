@@ -339,16 +339,18 @@ def workbook_summaries() -> tuple[
                 payload = archive.read(info)
                 digest = hashlib.sha256(payload).hexdigest()
                 workbook = load_workbook(io.BytesIO(payload), data_only=False, read_only=True)
-                codes: set[str] = set()
+                reference_codes: set[str] = set()
+                indicator_codes: set[str] = set()
                 planteles: set[str] = set()
                 sheets = []
                 formulas = 0
 
                 for sheet in workbook.worksheets:
                     sheet_summary = summarize_sheet(sheet)
-                    indicator_codes = sheet_summary.pop("indicatorCodes")
+                    reliable_sheet_codes = sheet_summary.pop("indicatorCodes")
                     sheet_codes = sheet_summary.pop("codes")
-                    codes.update(indicator_codes or sheet_codes)
+                    indicator_codes.update(reliable_sheet_codes)
+                    reference_codes.update(sheet_codes)
                     planteles.update(sheet_summary.pop("planteles"))
                     formulas += sheet_summary["formulaCells"]
                     sheets.append(sheet_summary)
@@ -356,7 +358,7 @@ def workbook_summaries() -> tuple[
                 if not planteles and source_scope:
                     planteles.add(source_scope)
                 table_sheets = [sheet for sheet in sheets if sheet.get("table")]
-                source_codes = sorted(codes, key=normalize_key)
+                source_codes = sorted(indicator_codes, key=normalize_key)
                 template_codes = source_codes or (
                     [synthetic_workbook_code(info.filename, digest)] if table_sheets else []
                 )
@@ -402,7 +404,8 @@ def workbook_summaries() -> tuple[
                         "sourcePathHash": digest,
                         "category": category_from_path(info.filename, source_prefix),
                         "sizeBytes": info.file_size,
-                        "detectedIndicatorCodes": sorted(codes),
+                        "detectedIndicatorCodes": sorted(indicator_codes),
+                        "detectedReferenceCodes": sorted(reference_codes - indicator_codes),
                         "detectedPlanteles": sorted(planteles, key=str.casefold),
                         "formulaCells": formulas,
                         "sheets": sheets,
@@ -583,7 +586,7 @@ def extract_table_from_rows(rows: list[dict[str, Any]]) -> dict[str, Any] | None
             continue
         normalized = normalize_key(" ".join(values))
         non_empty_values = [value for value in values if value]
-        if ("nota" in normalized or "totales" in normalized) and len(non_empty_values) <= 2:
+        if is_non_capture_row(normalized, non_empty_values):
             continue
 
         row_object: dict[str, Any] = {}
@@ -602,6 +605,25 @@ def extract_table_from_rows(rows: list[dict[str, Any]]) -> dict[str, Any] | None
         "columns": columns,
         "initialRows": initial_rows,
     }
+
+
+def is_non_capture_row(normalized: str, non_empty_values: list[str]) -> bool:
+    if not non_empty_values:
+        return True
+    if ("nota" in normalized or "totales" in normalized) and len(non_empty_values) <= 2:
+        return True
+    if len(non_empty_values) <= 2 and any(
+        marker in normalized
+        for marker in (
+            "la tabla anterior incide",
+            "linea de accion",
+            "lineas de accion",
+            "informe de labores",
+            "instrucciones para el llenado",
+        )
+    ):
+        return True
+    return False
 
 
 def combined_header_values(rows: list[dict[str, Any]], best_index: int) -> tuple[list[str], int]:
@@ -730,12 +752,14 @@ def frontend_workbook_summaries(summaries: list[dict[str, Any]]) -> list[dict[st
         next_summary = dict(summary)
         next_summary["sourceLabel"] = f"{summary['category']} / workbook {workbook_index:02d}"
         next_summary["privacy"] = "Frontend fallback exposes aggregate workbook structure only."
+        next_summary["detectedReferenceCodes"] = []
         next_summary["sheets"] = [
             {
                 **sheet,
                 "name": f"Sheet {sheet_index:02d}",
                 "sampleHeaders": [],
                 "headerRows": [],
+                "codeDescriptions": [],
             }
             for sheet_index, sheet in enumerate(summary["sheets"], start=1)
         ]
@@ -972,6 +996,7 @@ export type OfficialWorkbookSummary = {{
   category: string;
   sizeBytes: number;
   detectedIndicatorCodes: string[];
+  detectedReferenceCodes: string[];
   detectedPlanteles: string[];
   formulaCells: number;
   sheets: OfficialWorkbookSheetSummary[];

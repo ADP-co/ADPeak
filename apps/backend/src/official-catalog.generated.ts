@@ -15,30 +15,18 @@ export type OfficialCatalogRow = {
 };
 
 export const officialCatalogStats = {
-  "sourceRows": 148,
-  "uniqueRows": 137,
+  "sourceRows": 147,
+  "uniqueRows": 136,
   "duplicateRows": 11,
-  "uniqueIndicators": 97,
+  "uniqueIndicators": 96,
   "uniqueResponsibles": 19,
   "uniqueContributors": 23,
-  "uniqueActivities": 113,
+  "uniqueActivities": 116,
   "blankActivities": 3,
-  "workbookOnlyIndicators": 49
+  "workbookOnlyIndicators": 48
 } as const;
 
 export const officialIndicatorPlantelScopes: Record<string, number[]> = {
-  "1.1.1.3.2": [
-    1
-  ],
-  "1.1.1.3.3": [
-    1
-  ],
-  "1.1.1.5.1": [
-    1
-  ],
-  "1.1.1.5.2": [
-    1
-  ],
   "1.1.2.1.8": [
     1
   ],
@@ -48,22 +36,16 @@ export const officialIndicatorPlantelScopes: Record<string, number[]> = {
   "1.1.3.0.3-FMT-26A4E4BB": [
     1
   ],
-  "1.1.3.0.3-FMT-6B682267": [
-    1
-  ],
-  "1.1.3.0.3-FMT-6EBA7CE9": [
-    1
-  ],
   "1.1.3.0.3-FMT-74E3FB42": [
     1
   ],
   "1.1.3.0.3-FMT-7E91E4DB": [
     1
   ],
-  "1.1.4.4.4": [
+  "B16-FMT-01-0A31F882-bachillerato-16-febrero": [
     1
   ],
-  "B16-FMT-01-0A31F882-bachillerato-16-febrero": [
+  "B16-FMT-01-0C3E7CB6-formacion-apoyo-academic": [
     1
   ],
   "B16-FMT-01-0CE86D23-alumnos-que-realizaron-e": [
@@ -90,13 +72,22 @@ export const officialIndicatorPlantelScopes: Record<string, number[]> = {
   "B16-FMT-01-55EF8C78-la-ciencia-en-los-bachil": [
     1
   ],
+  "B16-FMT-01-62323922-formacion-docente": [
+    1
+  ],
   "B16-FMT-01-628F230D-nivelacion-academica-jun": [
     1
   ],
   "B16-FMT-01-697E06CF-academia-de-programa-tec": [
     1
   ],
+  "B16-FMT-01-6B682267-viajes-de-estudio-educac": [
+    1
+  ],
   "B16-FMT-01-6BB983C1-3-bachillerato-16-febrer": [
+    1
+  ],
+  "B16-FMT-01-6EBA7CE9-desarrollo-y-formacion-i": [
     1
   ],
   "B16-FMT-01-73CBDE41-bach-16-terminaron": [
@@ -112,6 +103,9 @@ export const officialIndicatorPlantelScopes: Record<string, number[]> = {
     1
   ],
   "B16-FMT-01-9CE2F116-datos-planteles-y-buzon": [
+    1
+  ],
+  "B16-FMT-01-A574F062-formato-indicador-de-int": [
     1
   ],
   "B16-FMT-01-AC736017-idiomas": [
@@ -1349,110 +1343,6 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   },
   {
     "sourceRow": 101,
-    "code": "1.1.1.3.2",
-    "name": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS: Número de personal de apoyo académico de NMS y NS que reciben ca",
-    "responsible": "Pendiente de asignar",
-    "contributors": "Planteles",
-    "activity": "Formación_docente.xlsx",
-    "dedupeKey": "a8ece0d92de58e16",
-    "isDuplicate": false,
-    "duplicateOfSourceRow": null,
-    "dataQuality": [
-      "official_code_detected",
-      "private_fields_blank",
-      "source_workbook_template",
-      "workbook_only_indicator"
-    ]
-  },
-  {
-    "sourceRow": 102,
-    "code": "1.1.1.3.3",
-    "name": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS: 1.1.1.3.2 Número de personal de apoyo académico de NMS y NS que r",
-    "responsible": "Pendiente de asignar",
-    "contributors": "Planteles",
-    "activity": "Formación_docente.xlsx",
-    "dedupeKey": "4f0fbc05782bea00",
-    "isDuplicate": false,
-    "duplicateOfSourceRow": null,
-    "dataQuality": [
-      "official_code_detected",
-      "private_fields_blank",
-      "source_workbook_template",
-      "workbook_only_indicator"
-    ]
-  },
-  {
-    "sourceRow": 103,
-    "code": "1.1.1.5.1",
-    "name": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS: 1.1.1.3.2 Número de personal de apoyo académico de NMS y NS que r",
-    "responsible": "Pendiente de asignar",
-    "contributors": "Planteles",
-    "activity": "Formación_docente.xlsx",
-    "dedupeKey": "75cffa4f46eeb4fe",
-    "isDuplicate": false,
-    "duplicateOfSourceRow": null,
-    "dataQuality": [
-      "official_code_detected",
-      "private_fields_blank",
-      "source_workbook_template",
-      "workbook_only_indicator"
-    ]
-  },
-  {
-    "sourceRow": 104,
-    "code": "1.1.1.5.2",
-    "name": "La tabla anterior incide en la siguiente línea de acción del informe de labores de la DGEMS y planteles de NMS: Número de personal de apoyo académico de NMS y NS que recibe capaci",
-    "responsible": "Pendiente de asignar",
-    "contributors": "Planteles",
-    "activity": "Formación_apoyo académico.xlsx",
-    "dedupeKey": "976af2ab99f3a025",
-    "isDuplicate": false,
-    "duplicateOfSourceRow": null,
-    "dataQuality": [
-      "official_code_detected",
-      "private_fields_blank",
-      "source_workbook_template",
-      "workbook_only_indicator"
-    ]
-  },
-  {
-    "sourceRow": 105,
-    "code": "1.1.2.0.1-FMT-4EB45B2E",
-    "name": "PORCENTAJE DE RETENCIÓN ESCOLAR DE EMS",
-    "responsible": "Liliana Yunuen Rojas Maciel",
-    "contributors": "Liliana Yunuen Rojas Maciel",
-    "activity": "1.1.2.0.1. porcentaje de retención escolar de EMS.xlsx",
-    "dedupeKey": "7091eac81c6702b3",
-    "isDuplicate": false,
-    "duplicateOfSourceRow": null,
-    "dataQuality": [
-      "official_code_detected",
-      "private_fields_blank",
-      "shared_official_code_split_by_source",
-      "source_workbook_template",
-      "workbook_only_indicator"
-    ]
-  },
-  {
-    "sourceRow": 106,
-    "code": "1.1.2.0.3-FMT-EDABD54D",
-    "name": "Tasa de abadono escolar de educación media superior",
-    "responsible": "Liliana Yunuen Rojas Maciel",
-    "contributors": "Liliana Yunuen Rojas Maciel, Daniela Nohemi Navarro Castillo",
-    "activity": "Indicador 1.1.2.0.3..xlsx",
-    "dedupeKey": "03f57bb268e59d3f",
-    "isDuplicate": false,
-    "duplicateOfSourceRow": null,
-    "dataQuality": [
-      "official_code_detected",
-      "private_fields_blank",
-      "shared_official_code_split_by_source",
-      "source_workbook_template",
-      "workbook_only_indicator"
-    ]
-  },
-  {
-    "sourceRow": 107,
     "code": "1.1.2.1.8",
     "name": "Porcentaje de titulación por cohorte del NMS",
     "responsible": "Pendiente de asignar",
@@ -1469,25 +1359,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 108,
-    "code": "1.1.2.3.1-FMT-2A7229AD",
-    "name": "PORCENTAJE DE ESTUDIANTES DE MEDIA SUPERIOR QUE PARTICIPAN EN ACTIVIDADES DE FORMACIÓN INTEGRAL",
-    "responsible": "Laura Gabriela Calvario",
-    "contributors": "Laura Gabriela Calvario",
-    "activity": "1.1.2.3.1.Convocatorias externas .xlsx",
-    "dedupeKey": "1ca6b1ca21afcc1b",
-    "isDuplicate": false,
-    "duplicateOfSourceRow": null,
-    "dataQuality": [
-      "official_code_detected",
-      "private_fields_blank",
-      "shared_official_code_split_by_source",
-      "source_workbook_template",
-      "workbook_only_indicator"
-    ]
-  },
-  {
-    "sourceRow": 109,
+    "sourceRow": 102,
     "code": "1.1.2.3.1-FMT-AD152691",
     "name": "Porcentaje de estudiantes de NMS y NS participantes en las actividades de desarrollo y formación integral",
     "responsible": "Laura Gabriela Calvario",
@@ -1505,79 +1377,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 110,
-    "code": "1.1.2.3.1-FMT-FBF5B718",
-    "name": "PORCENTAJE DE ESTUDIANTES DE MEDIA SUPERIOR QUE PARTICIPAN EN ACTIVIDADES DE FORMACIÓN INTEGRAL",
-    "responsible": "Laura Gabriela Calvario",
-    "contributors": "Laura Gabriela Calvario",
-    "activity": "1.1.2.3.1. Modelo de las Naciones Unidas.xlsx",
-    "dedupeKey": "c378057223e8c1c5",
-    "isDuplicate": false,
-    "duplicateOfSourceRow": null,
-    "dataQuality": [
-      "official_code_detected",
-      "private_fields_blank",
-      "shared_official_code_split_by_source",
-      "source_workbook_template",
-      "workbook_only_indicator"
-    ]
-  },
-  {
-    "sourceRow": 111,
-    "code": "1.1.2.5.1-FMT-D30B3A90",
-    "name": "Porcentaje de docentes de educación media superior y superior que cumple con perfil docente idóneo de acuerdo con el modelo educativo institucional",
-    "responsible": "Oscar Delgado Sánchez",
-    "contributors": "Oscar Delgado Sánchez",
-    "activity": "Formación_apoyo académico_2026.xlsx",
-    "dedupeKey": "9506d0491c4351f9",
-    "isDuplicate": false,
-    "duplicateOfSourceRow": null,
-    "dataQuality": [
-      "official_code_detected",
-      "private_fields_blank",
-      "shared_official_code_split_by_source",
-      "source_workbook_template",
-      "workbook_only_indicator"
-    ]
-  },
-  {
-    "sourceRow": 112,
-    "code": "1.1.2.5.5-FMT-D30B3A90",
-    "name": "Porcentaje de docentes de educación media superior y superior que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocionales, inclu",
-    "responsible": "Oscar Delgado Sánchez",
-    "contributors": "Oscar Delgado Sánchez",
-    "activity": "Formación_apoyo académico_2026.xlsx",
-    "dedupeKey": "b3a654e117daf271",
-    "isDuplicate": false,
-    "duplicateOfSourceRow": null,
-    "dataQuality": [
-      "official_code_detected",
-      "private_fields_blank",
-      "shared_official_code_split_by_source",
-      "source_workbook_template",
-      "workbook_only_indicator"
-    ]
-  },
-  {
-    "sourceRow": 113,
-    "code": "1.1.2.5.7-FMT-D30B3A90",
-    "name": "Porcentaje de docentes de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
-    "responsible": "Oscar Delgado Sánchez",
-    "contributors": "Oscar Delgado Sánchez",
-    "activity": "Formación_apoyo académico_2026.xlsx",
-    "dedupeKey": "7234ee88d6f3b6be",
-    "isDuplicate": false,
-    "duplicateOfSourceRow": null,
-    "dataQuality": [
-      "official_code_detected",
-      "private_fields_blank",
-      "shared_official_code_split_by_source",
-      "source_workbook_template",
-      "workbook_only_indicator"
-    ]
-  },
-  {
-    "sourceRow": 114,
+    "sourceRow": 103,
     "code": "1.1.3.0.3",
     "name": "Porcentaje de estudiantes de NMS participantes en las actividades de desarrollo y formación integral",
     "responsible": "Pendiente de asignar",
@@ -1594,7 +1394,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 115,
+    "sourceRow": 104,
     "code": "1.1.3.0.3-FMT-26A4E4BB",
     "name": "Porcentaje de estudiantes de NMS participantes en las actividades de desarrollo y formación integral",
     "responsible": "Pendiente de asignar",
@@ -1612,43 +1412,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 116,
-    "code": "1.1.3.0.3-FMT-6B682267",
-    "name": "EDUCACIÓN PERTINENTE Y DE CALIDAD Porcentaje de estudiantes de NMS y NS participantes en las actividades de desarrollo y formación integral",
-    "responsible": "Pendiente de asignar",
-    "contributors": "Planteles",
-    "activity": "VIAJES DE ESTUDIO-EDUCACIÓN PERTINENTE Y DE CALIDAD.xlsx",
-    "dedupeKey": "cb59044319212c22",
-    "isDuplicate": false,
-    "duplicateOfSourceRow": null,
-    "dataQuality": [
-      "official_code_detected",
-      "private_fields_blank",
-      "shared_official_code_split_by_source",
-      "source_workbook_template",
-      "workbook_only_indicator"
-    ]
-  },
-  {
-    "sourceRow": 117,
-    "code": "1.1.3.0.3-FMT-6EBA7CE9",
-    "name": "Porcentaje de estudiantes de NMS y NS participantes en las actividades de desarrollo y formación integral",
-    "responsible": "Pendiente de asignar",
-    "contributors": "Planteles",
-    "activity": "DESARROLLO Y FORMACION INTEGRAL -PARTICIPANTES EN ACTIVIDADES DE DESARROLLO Y FORMACIÓN INTEGRAL.xlsx",
-    "dedupeKey": "687de140d5102372",
-    "isDuplicate": false,
-    "duplicateOfSourceRow": null,
-    "dataQuality": [
-      "official_code_detected",
-      "private_fields_blank",
-      "shared_official_code_split_by_source",
-      "source_workbook_template",
-      "workbook_only_indicator"
-    ]
-  },
-  {
-    "sourceRow": 118,
+    "sourceRow": 105,
     "code": "1.1.3.0.3-FMT-74E3FB42",
     "name": "Porcentaje de estudiantes de NMS participantes en las actividades de desarrollo y formación integral",
     "responsible": "Pendiente de asignar",
@@ -1666,7 +1430,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 119,
+    "sourceRow": 106,
     "code": "1.1.3.0.3-FMT-7E91E4DB",
     "name": "Porcentaje de estudiantes de NMS participantes en las actividades de desarrollo y formación integral",
     "responsible": "Pendiente de asignar",
@@ -1684,24 +1448,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 120,
-    "code": "1.1.4.4.4",
-    "name": "Número de estudiantes de NMS y NS participando en acciones de internacionalización",
-    "responsible": "Pendiente de asignar",
-    "contributors": "Planteles",
-    "activity": "Formato_Indicador de internacionalización.xlsx",
-    "dedupeKey": "b9405a3b39c8515d",
-    "isDuplicate": false,
-    "duplicateOfSourceRow": null,
-    "dataQuality": [
-      "official_code_detected",
-      "private_fields_blank",
-      "source_workbook_template",
-      "workbook_only_indicator"
-    ]
-  },
-  {
-    "sourceRow": 121,
+    "sourceRow": 107,
     "code": "B16-FMT-01-0A31F882-bachillerato-16-febrero",
     "name": "Bachillerato 16 FEBRERO - JULIO 2026",
     "responsible": "Pendiente de asignar",
@@ -1718,7 +1465,24 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 122,
+    "sourceRow": 108,
+    "code": "B16-FMT-01-0C3E7CB6-formacion-apoyo-academic",
+    "name": "Formación_apoyo académico",
+    "responsible": "Pendiente de asignar",
+    "contributors": "Planteles",
+    "activity": "Formación_apoyo académico.xlsx",
+    "dedupeKey": "cec7562217528a26",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "pending_indicator_code",
+      "private_fields_blank",
+      "source_workbook_template",
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 109,
     "code": "B16-FMT-01-0CE86D23-alumnos-que-realizaron-e",
     "name": "Alumnos que realizaron examen de conocImientos para titulación",
     "responsible": "Pendiente de asignar",
@@ -1735,7 +1499,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 123,
+    "sourceRow": 110,
     "code": "B16-FMT-01-12F38BB9-formato-media-superior",
     "name": "formato media superior",
     "responsible": "Pendiente de asignar",
@@ -1752,7 +1516,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 124,
+    "sourceRow": 111,
     "code": "B16-FMT-01-19F01A78-nivelacion-academica-dic",
     "name": "NIVELACION ACADEMICA_DICIEMBRE 2024- ENERO 2025",
     "responsible": "Pendiente de asignar",
@@ -1769,7 +1533,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 125,
+    "sourceRow": 112,
     "code": "B16-FMT-01-1D310056-seguimiento-capacitacion",
     "name": "Seguimiento capacitación en materia de género planteles",
     "responsible": "Pendiente de asignar",
@@ -1786,7 +1550,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 126,
+    "sourceRow": 113,
     "code": "B16-FMT-01-1E107D9F-personal-plantel-2026",
     "name": "PERSONAL _PLANTEL_2026",
     "responsible": "Pendiente de asignar",
@@ -1803,7 +1567,24 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 127,
+    "sourceRow": 114,
+    "code": "B16-FMT-01-2A7229AD-1-1-2-3-1-convocatorias",
+    "name": "1.1.2.3.1.Convocatorias externas",
+    "responsible": "Pendiente de asignar",
+    "contributors": "Planteles",
+    "activity": "1.1.2.3.1.Convocatorias externas .xlsx",
+    "dedupeKey": "ea0c0078f855708d",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "pending_indicator_code",
+      "private_fields_blank",
+      "source_workbook_template",
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 115,
     "code": "B16-FMT-01-33E7A579-1-bachillerato-16-febrer",
     "name": "1) Bachillerato 16 FEBRERO- AGOSTO 2024",
     "responsible": "Pendiente de asignar",
@@ -1820,7 +1601,41 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 128,
+    "sourceRow": 116,
+    "code": "B16-FMT-01-43FE55CA-formacion-docente-2026",
+    "name": "Formación_docente_2026",
+    "responsible": "Pendiente de asignar",
+    "contributors": "Planteles",
+    "activity": "Formación_docente_2026.xlsx",
+    "dedupeKey": "cf9bb06c7fe79b6b",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "pending_indicator_code",
+      "private_fields_blank",
+      "source_workbook_template",
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 117,
+    "code": "B16-FMT-01-4EB45B2E-1-1-2-0-1-porcentaje-de",
+    "name": "1.1.2.0.1. porcentaje de retención escolar de EMS",
+    "responsible": "Pendiente de asignar",
+    "contributors": "Planteles",
+    "activity": "1.1.2.0.1. porcentaje de retención escolar de EMS.xlsx",
+    "dedupeKey": "8ac81e4910a0ed68",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "pending_indicator_code",
+      "private_fields_blank",
+      "source_workbook_template",
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 118,
     "code": "B16-FMT-01-55725D79-personal-plantel-2025",
     "name": "PERSONAL PLANTEL_2025",
     "responsible": "Pendiente de asignar",
@@ -1837,7 +1652,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 129,
+    "sourceRow": 119,
     "code": "B16-FMT-01-55EF8C78-la-ciencia-en-los-bachil",
     "name": "LA CIENCIA EN LOS BACHILLERATOS UNIVERSITARIOS",
     "responsible": "Pendiente de asignar",
@@ -1854,7 +1669,24 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 130,
+    "sourceRow": 120,
+    "code": "B16-FMT-01-62323922-formacion-docente",
+    "name": "Formación_docente",
+    "responsible": "Pendiente de asignar",
+    "contributors": "Planteles",
+    "activity": "Formación_docente.xlsx",
+    "dedupeKey": "0b0d337417871d51",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "pending_indicator_code",
+      "private_fields_blank",
+      "source_workbook_template",
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 121,
     "code": "B16-FMT-01-628F230D-nivelacion-academica-jun",
     "name": "NIVELACION ACADEMICA_junio- agosto 2025",
     "responsible": "Pendiente de asignar",
@@ -1871,7 +1703,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 131,
+    "sourceRow": 122,
     "code": "B16-FMT-01-697E06CF-academia-de-programa-tec",
     "name": "Academia de programa técnico AQ15-Campo disciplinar.",
     "responsible": "Pendiente de asignar",
@@ -1888,7 +1720,24 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 132,
+    "sourceRow": 123,
+    "code": "B16-FMT-01-6B682267-viajes-de-estudio-educac",
+    "name": "VIAJES DE ESTUDIO-EDUCACIÓN PERTINENTE Y DE CALIDAD",
+    "responsible": "Pendiente de asignar",
+    "contributors": "Planteles",
+    "activity": "VIAJES DE ESTUDIO-EDUCACIÓN PERTINENTE Y DE CALIDAD.xlsx",
+    "dedupeKey": "f7d322e8d42163a0",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "pending_indicator_code",
+      "private_fields_blank",
+      "source_workbook_template",
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 124,
     "code": "B16-FMT-01-6BB983C1-3-bachillerato-16-febrer",
     "name": "3) Bachillerato 16 FEBRERO - JULIO 2025",
     "responsible": "Pendiente de asignar",
@@ -1905,7 +1754,24 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 133,
+    "sourceRow": 125,
+    "code": "B16-FMT-01-6EBA7CE9-desarrollo-y-formacion-i",
+    "name": "DESARROLLO Y FORMACION INTEGRAL -PARTICIPANTES EN ACTIVIDADES DE DESARROLLO Y FORMACIÓN INTEGRAL",
+    "responsible": "Pendiente de asignar",
+    "contributors": "Planteles",
+    "activity": "DESARROLLO Y FORMACION INTEGRAL -PARTICIPANTES EN ACTIVIDADES DE DESARROLLO Y FORMACIÓN INTEGRAL.xlsx",
+    "dedupeKey": "7624e347c37afd9a",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "pending_indicator_code",
+      "private_fields_blank",
+      "source_workbook_template",
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 126,
     "code": "B16-FMT-01-73CBDE41-bach-16-terminaron",
     "name": "BACH 16 TERMINARON",
     "responsible": "Pendiente de asignar",
@@ -1922,7 +1788,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 134,
+    "sourceRow": 127,
     "code": "B16-FMT-01-76B62473-formato-conformacion-de",
     "name": "Formato conformación de academias por plantel",
     "responsible": "Pendiente de asignar",
@@ -1939,7 +1805,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 135,
+    "sourceRow": 128,
     "code": "B16-FMT-01-85FF7F0A-estrategias-para-combati",
     "name": "Estrategias para combatir el abandono escolar",
     "responsible": "Pendiente de asignar",
@@ -1956,7 +1822,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 136,
+    "sourceRow": 129,
     "code": "B16-FMT-01-9129D9B3-concursos-academicos",
     "name": "CONCURSOS ACADEMICOS",
     "responsible": "Pendiente de asignar",
@@ -1973,7 +1839,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 137,
+    "sourceRow": 130,
     "code": "B16-FMT-01-9CE2F116-datos-planteles-y-buzon",
     "name": "DATOS PLANTELES Y BUZÓN UCOL",
     "responsible": "Pendiente de asignar",
@@ -1990,7 +1856,41 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 138,
+    "sourceRow": 131,
+    "code": "B16-FMT-01-A2A43E4E-1-1-2-0-3-estrategias-pa",
+    "name": "1.1.2.0.3.Estrategias para combatir el abandono escolar",
+    "responsible": "Pendiente de asignar",
+    "contributors": "Planteles",
+    "activity": "1.1.2.0.3.Estrategias para combatir el abandono escolar.xlsx",
+    "dedupeKey": "57cbe2c11b24c639",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "pending_indicator_code",
+      "private_fields_blank",
+      "source_workbook_template",
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 132,
+    "code": "B16-FMT-01-A574F062-formato-indicador-de-int",
+    "name": "Formato_Indicador de internacionalización",
+    "responsible": "Pendiente de asignar",
+    "contributors": "Planteles",
+    "activity": "Formato_Indicador de internacionalización.xlsx",
+    "dedupeKey": "204fc9745acd8193",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "pending_indicator_code",
+      "private_fields_blank",
+      "source_workbook_template",
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 133,
     "code": "B16-FMT-01-AC736017-idiomas",
     "name": "Idiomas",
     "responsible": "Pendiente de asignar",
@@ -2007,7 +1907,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 139,
+    "sourceRow": 134,
     "code": "B16-FMT-01-B53F23A1-2-bachillerato-16-agosto",
     "name": "2) Bachillerato 16 AGOSTO 2024 -ENERO 2025",
     "responsible": "Pendiente de asignar",
@@ -2024,7 +1924,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 140,
+    "sourceRow": 135,
     "code": "B16-FMT-01-BD626F5D-academia-de-programa-tec",
     "name": "Academia de programa técnico AP13-Campo disciplinar.",
     "responsible": "Pendiente de asignar",
@@ -2041,7 +1941,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 141,
+    "sourceRow": 136,
     "code": "B16-FMT-01-C7B22BC5-cronograma-del-para-la-p",
     "name": "Cronograma del para la promoción del aprendizaje intercultural, internacional y-o globa",
     "responsible": "Pendiente de asignar",
@@ -2058,7 +1958,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 142,
+    "sourceRow": 137,
     "code": "B16-FMT-01-CC792A5F-concentrado-abandono-esc",
     "name": "CONCENTRADO_ABANDONO ESCOLAR _SEP 2025",
     "responsible": "Pendiente de asignar",
@@ -2075,7 +1975,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 143,
+    "sourceRow": 138,
     "code": "B16-FMT-01-CE2296AB-red-de-apoyo-academico",
     "name": "Red de apoyo académico",
     "responsible": "Pendiente de asignar",
@@ -2092,7 +1992,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 144,
+    "sourceRow": 139,
     "code": "B16-FMT-01-CF8AE174-registro-interesados-man",
     "name": "Registro interesados manuales inglés",
     "responsible": "Pendiente de asignar",
@@ -2109,7 +2009,24 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 145,
+    "sourceRow": 140,
+    "code": "B16-FMT-01-D055E9FA-1-1-2-2-11-seguimiento-c",
+    "name": "1.1.2.2.11 Seguimiento capacitación en materia de género planteles",
+    "responsible": "Pendiente de asignar",
+    "contributors": "Planteles",
+    "activity": "1.1.2.2.11 Seguimiento capacitación en materia de género planteles.xlsx",
+    "dedupeKey": "5fe0219f2d733c47",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "pending_indicator_code",
+      "private_fields_blank",
+      "source_workbook_template",
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 141,
     "code": "B16-FMT-01-D2B34193-enlaces-unidades-de-aten",
     "name": "Enlaces Unidades de atención y redes de apoyo",
     "responsible": "Pendiente de asignar",
@@ -2126,7 +2043,24 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 146,
+    "sourceRow": 142,
+    "code": "B16-FMT-01-D30B3A90-formacion-apoyo-academic",
+    "name": "Formación_apoyo académico_2026",
+    "responsible": "Pendiente de asignar",
+    "contributors": "Planteles",
+    "activity": "Formación_apoyo académico_2026.xlsx",
+    "dedupeKey": "4ecf09855879f9dc",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "pending_indicator_code",
+      "private_fields_blank",
+      "source_workbook_template",
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 143,
     "code": "B16-FMT-01-D98834ED-formato-de-cronograma-de",
     "name": "Formato de cronograma de academia de plantel",
     "responsible": "Pendiente de asignar",
@@ -2143,7 +2077,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 147,
+    "sourceRow": 144,
     "code": "B16-FMT-01-E3FE144D-academias-bg24-campo-dis",
     "name": "Academias BG24_Campo disciplinar_v4.0",
     "responsible": "Pendiente de asignar",
@@ -2160,7 +2094,24 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 148,
+    "sourceRow": 145,
+    "code": "B16-FMT-01-E8EBFAA5-2-1-4-1-2-seguimiento-a",
+    "name": "2.1.4.1.2 Seguimiento a proyectos de investigación en planteles",
+    "responsible": "Pendiente de asignar",
+    "contributors": "Planteles",
+    "activity": "2.1.4.1.2 Seguimiento a proyectos de investigación en planteles.xlsx",
+    "dedupeKey": "73c48ddae8036f62",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "pending_indicator_code",
+      "private_fields_blank",
+      "source_workbook_template",
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 146,
     "code": "B16-FMT-01-E8EFB8C0-seguimiento-a-proyectos",
     "name": "Seguimiento a proyectos de investigación en planteles",
     "responsible": "Pendiente de asignar",
@@ -2177,13 +2128,30 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 149,
+    "sourceRow": 147,
     "code": "B16-FMT-01-F40AA656-4-bachillerato-16-agosto",
     "name": "4) Bachillerato 16 AGOSTO 2025 -ENERO 2026",
     "responsible": "Pendiente de asignar",
     "contributors": "Planteles",
     "activity": "4) Bachillerato 16 AGOSTO 2025 -ENERO 2026.xlsx",
     "dedupeKey": "a1ad46a4f7f12e89",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "pending_indicator_code",
+      "private_fields_blank",
+      "source_workbook_template",
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 148,
+    "code": "B16-FMT-01-FBF5B718-1-1-2-3-1-modelo-de-las",
+    "name": "1.1.2.3.1. Modelo de las Naciones Unidas",
+    "responsible": "Pendiente de asignar",
+    "contributors": "Planteles",
+    "activity": "1.1.2.3.1. Modelo de las Naciones Unidas.xlsx",
+    "dedupeKey": "15cf7bff70debe96",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [

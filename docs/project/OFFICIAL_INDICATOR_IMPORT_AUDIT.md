@@ -23,9 +23,10 @@ Tambien se reviso el historial Git completo (`git log --all --name-only -- *.xls
 - 88 filas unicas de catalogo.
 - 48 codigos de indicador en catalogo.
 - 52 libros `.xlsx` analizados para formatos.
-- 60 plantillas manipulables generadas desde hojas oficiales.
-- 41 indicadores con alcance de plantel detectado desde evidencias.
-- 97 indicadores totales disponibles en la app despues de extender los formatos que solo aparecen en libros Excel.
+- 52 plantillas manipulables generadas desde hojas oficiales.
+- 39 indicadores con alcance de plantel detectado desde evidencias.
+- 96 indicadores totales disponibles en la app despues de extender los formatos que solo aparecen en libros Excel.
+- Los codigos detectados solamente en notas o pies de tabla se conservan como referencias de auditoria, pero no se crean como indicadores visibles.
 
 ## Brecha detectada
 

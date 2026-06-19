@@ -31,10 +31,13 @@ describe("SIGI store and RBAC", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const indicators = listIndicators(director);
 
-    expect(officialCatalogStats.uniqueIndicators).toBe(97);
+    expect(officialCatalogStats.uniqueIndicators).toBe(96);
     expect(officialDataSummary.workbookCount).toBe(52);
-    expect(Object.keys(officialWorkbookTemplates)).toHaveLength(60);
-    expect(indicators.length).toBeGreaterThanOrEqual(97);
+    expect(Object.keys(officialWorkbookTemplates)).toHaveLength(52);
+    expect(indicators.length).toBeGreaterThanOrEqual(96);
+    expect(indicators.some((indicator) =>
+      indicator.name.toLowerCase().includes("la tabla anterior incide")
+    )).toBe(false);
     expect(getIndicatorByCode("1.0.0.0.2")).toMatchObject({
       name: expect.stringContaining("titul"),
       active: true,
@@ -648,7 +651,7 @@ describe("SIGI store and RBAC", () => {
         }
       },
       {
-        code: "1.1.2.5.5",
+        code: "B16-FMT-01-43FE55CA-formacion-docente-2026",
         expectedKeys: ["tipo_de_evento", "nombre_del_evento", "poblacion_docente_nms_h", "m", "poblacion_docente_nms_total"],
         sampleValues: {
           tipo_de_evento: "Curso",

@@ -38,6 +38,7 @@ export type OfficialWorkbookSummary = {
   category: string;
   sizeBytes: number;
   detectedIndicatorCodes: string[];
+  detectedReferenceCodes: string[];
   detectedPlanteles: string[];
   formulaCells: number;
   sheets: OfficialWorkbookSheetSummary[];
@@ -961,53 +962,55 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
     "headerRows": []
   },
   {
-    "indicatorCode": "1.1.2.0.1-FMT-4EB45B2E",
-    "officialCode": "1.1.2.0.1",
+    "indicatorCode": "B16-FMT-01-4EB45B2E-1-1-2-0-1-porcentaje-de",
+    "officialCode": null,
     "sourcePath": "private-workbook-02",
     "planteles": [],
     "classification": "official_table",
-    "confidence": "detected-code",
+    "confidence": "source-table-pending-code",
     "headerRows": []
   },
   {
-    "indicatorCode": "1.1.2.0.3",
-    "officialCode": "1.1.2.0.3",
+    "indicatorCode": "B16-FMT-01-A2A43E4E-1-1-2-0-3-estrategias-pa",
+    "officialCode": null,
     "sourcePath": "private-workbook-03",
     "planteles": [],
     "classification": "matrix_gender_totals",
-    "confidence": "detected-code",
+    "confidence": "source-table-pending-code",
     "headerRows": []
   },
   {
-    "indicatorCode": "1.1.2.5.1",
-    "officialCode": "1.1.2.5.1",
+    "indicatorCode": "B16-FMT-01-43FE55CA-formacion-docente-2026",
+    "officialCode": null,
     "sourcePath": "private-workbook-04",
     "planteles": [],
     "classification": "official_table",
-    "confidence": "detected-code",
+    "confidence": "source-table-pending-code",
     "headerRows": []
   },
   {
-    "indicatorCode": "1.1.2.5.5",
-    "officialCode": "1.1.2.5.5",
+    "indicatorCode": "B16-FMT-01-E8EBFAA5-2-1-4-1-2-seguimiento-a",
+    "officialCode": null,
     "sourcePath": "private-workbook-05",
-    "planteles": [],
+    "planteles": [
+      "Bachillerato 15"
+    ],
     "classification": "official_table",
-    "confidence": "detected-code",
+    "confidence": "source-table-pending-code",
     "headerRows": []
   },
   {
-    "indicatorCode": "1.1.2.5.7",
-    "officialCode": "1.1.2.5.7",
+    "indicatorCode": "B16-FMT-01-D055E9FA-1-1-2-2-11-seguimiento-c",
+    "officialCode": null,
     "sourcePath": "private-workbook-06",
     "planteles": [],
-    "classification": "official_table",
-    "confidence": "detected-code",
+    "classification": "matrix_gender_totals",
+    "confidence": "source-table-pending-code",
     "headerRows": []
   },
   {
-    "indicatorCode": "3.1.1.2.2",
-    "officialCode": "3.1.1.2.2",
+    "indicatorCode": "1.1.2.3.1",
+    "officialCode": "1.1.2.3.1",
     "sourcePath": "private-workbook-07",
     "planteles": [],
     "classification": "official_table",
@@ -1015,110 +1018,54 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
     "headerRows": []
   },
   {
-    "indicatorCode": "2.1.4.1.2",
-    "officialCode": "2.1.4.1.2",
+    "indicatorCode": "B16-FMT-01-FBF5B718-1-1-2-3-1-modelo-de-las",
+    "officialCode": null,
     "sourcePath": "private-workbook-08",
-    "planteles": [
-      "Bachillerato 15"
-    ],
-    "classification": "official_table",
-    "confidence": "detected-code",
-    "headerRows": []
-  },
-  {
-    "indicatorCode": "1.1.2.2.11",
-    "officialCode": "1.1.2.2.11",
-    "sourcePath": "private-workbook-09",
-    "planteles": [],
-    "classification": "matrix_gender_totals",
-    "confidence": "detected-code",
-    "headerRows": []
-  },
-  {
-    "indicatorCode": "1.1.2.3.1",
-    "officialCode": "1.1.2.3.1",
-    "sourcePath": "private-workbook-10",
     "planteles": [],
     "classification": "official_table",
-    "confidence": "detected-code",
-    "headerRows": []
-  },
-  {
-    "indicatorCode": "1.1.2.3.1-FMT-FBF5B718",
-    "officialCode": "1.1.2.3.1",
-    "sourcePath": "private-workbook-11",
-    "planteles": [],
-    "classification": "official_table",
-    "confidence": "detected-code",
+    "confidence": "source-table-pending-code",
     "headerRows": []
   },
   {
     "indicatorCode": "1.1.2.1.4",
     "officialCode": "1.1.2.1.4",
-    "sourcePath": "private-workbook-12",
+    "sourcePath": "private-workbook-09",
     "planteles": [],
     "classification": "official_table",
     "confidence": "detected-code",
     "headerRows": []
   },
   {
-    "indicatorCode": "1.1.2.5.1-FMT-D30B3A90",
-    "officialCode": "1.1.2.5.1",
-    "sourcePath": "private-workbook-13",
+    "indicatorCode": "B16-FMT-01-D30B3A90-formacion-apoyo-academic",
+    "officialCode": null,
+    "sourcePath": "private-workbook-10",
     "planteles": [],
     "classification": "official_table",
-    "confidence": "detected-code",
+    "confidence": "source-table-pending-code",
     "headerRows": []
   },
   {
-    "indicatorCode": "1.1.2.5.5-FMT-D30B3A90",
-    "officialCode": "1.1.2.5.5",
-    "sourcePath": "private-workbook-14",
-    "planteles": [],
-    "classification": "official_table",
-    "confidence": "detected-code",
-    "headerRows": []
-  },
-  {
-    "indicatorCode": "1.1.2.5.7-FMT-D30B3A90",
-    "officialCode": "1.1.2.5.7",
-    "sourcePath": "private-workbook-15",
-    "planteles": [],
-    "classification": "official_table",
-    "confidence": "detected-code",
-    "headerRows": []
-  },
-  {
-    "indicatorCode": "1.1.2.5.8",
-    "officialCode": "1.1.2.5.8",
-    "sourcePath": "private-workbook-16",
-    "planteles": [],
-    "classification": "official_table",
-    "confidence": "detected-code",
-    "headerRows": []
-  },
-  {
-    "indicatorCode": "1.1.2.3.1-FMT-2A7229AD",
-    "officialCode": "1.1.2.3.1",
-    "sourcePath": "private-workbook-17",
+    "indicatorCode": "B16-FMT-01-2A7229AD-1-1-2-3-1-convocatorias",
+    "officialCode": null,
+    "sourcePath": "private-workbook-11",
     "planteles": [],
     "classification": "matrix_gender_totals",
-    "confidence": "detected-code",
+    "confidence": "source-table-pending-code",
     "headerRows": []
   },
   {
     "indicatorCode": "1.1.2.3.1-FMT-AD152691",
     "officialCode": "1.1.2.3.1",
-    "sourcePath": "private-workbook-18",
+    "sourcePath": "private-workbook-12",
     "planteles": [],
     "classification": "matrix_gender_totals",
     "confidence": "detected-code",
     "headerRows": []
   },
   {
-    "indicatorCode": "1.1.2.0.3-FMT-EDABD54D",
+    "indicatorCode": "1.1.2.0.3",
     "officialCode": "1.1.2.0.3",
-    "sourcePath": "private-workbook-19",
+    "sourcePath": "private-workbook-13",
     "planteles": [
       "Bachillerato 1"
     ],
@@ -1129,7 +1076,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-73CBDE41-bach-16-terminaron",
     "officialCode": null,
-    "sourcePath": "private-workbook-20",
+    "sourcePath": "private-workbook-14",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1140,7 +1087,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-12F38BB9-formato-media-superior",
     "officialCode": null,
-    "sourcePath": "private-workbook-21",
+    "sourcePath": "private-workbook-15",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1151,7 +1098,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-1D310056-seguimiento-capacitacion",
     "officialCode": null,
-    "sourcePath": "private-workbook-22",
+    "sourcePath": "private-workbook-16",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1160,42 +1107,20 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
     "headerRows": []
   },
   {
-    "indicatorCode": "1.1.1.3.2",
-    "officialCode": "1.1.1.3.2",
-    "sourcePath": "private-workbook-23",
+    "indicatorCode": "B16-FMT-01-62323922-formacion-docente",
+    "officialCode": null,
+    "sourcePath": "private-workbook-17",
     "planteles": [
       "Bachillerato 16"
     ],
     "classification": "official_table",
-    "confidence": "detected-code",
-    "headerRows": []
-  },
-  {
-    "indicatorCode": "1.1.1.3.3",
-    "officialCode": "1.1.1.3.3",
-    "sourcePath": "private-workbook-24",
-    "planteles": [
-      "Bachillerato 16"
-    ],
-    "classification": "official_table",
-    "confidence": "detected-code",
-    "headerRows": []
-  },
-  {
-    "indicatorCode": "1.1.1.5.1",
-    "officialCode": "1.1.1.5.1",
-    "sourcePath": "private-workbook-25",
-    "planteles": [
-      "Bachillerato 16"
-    ],
-    "classification": "official_table",
-    "confidence": "detected-code",
+    "confidence": "source-table-pending-code",
     "headerRows": []
   },
   {
     "indicatorCode": "B16-FMT-01-9CE2F116-datos-planteles-y-buzon",
     "officialCode": null,
-    "sourcePath": "private-workbook-26",
+    "sourcePath": "private-workbook-18",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1206,7 +1131,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "1.1.3.0.3",
     "officialCode": "1.1.3.0.3",
-    "sourcePath": "private-workbook-27",
+    "sourcePath": "private-workbook-19",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1217,7 +1142,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-D2B34193-enlaces-unidades-de-aten",
     "officialCode": null,
-    "sourcePath": "private-workbook-28",
+    "sourcePath": "private-workbook-20",
     "planteles": [
       "Bachillerato 1",
       "Bachillerato 10",
@@ -1262,7 +1187,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "1.1.3.0.3-FMT-7E91E4DB",
     "officialCode": "1.1.3.0.3",
-    "sourcePath": "private-workbook-29",
+    "sourcePath": "private-workbook-21",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1273,7 +1198,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "1.1.3.0.3-FMT-74E3FB42",
     "officialCode": "1.1.3.0.3",
-    "sourcePath": "private-workbook-30",
+    "sourcePath": "private-workbook-22",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1282,20 +1207,9 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
     "headerRows": []
   },
   {
-    "indicatorCode": "1.1.1.5.2",
-    "officialCode": "1.1.1.5.2",
-    "sourcePath": "private-workbook-31",
-    "planteles": [
-      "Bachillerato 16"
-    ],
-    "classification": "official_table",
-    "confidence": "detected-code",
-    "headerRows": []
-  },
-  {
-    "indicatorCode": "B16-FMT-01-E8EFB8C0-seguimiento-a-proyectos",
+    "indicatorCode": "B16-FMT-01-0C3E7CB6-formacion-apoyo-academic",
     "officialCode": null,
-    "sourcePath": "private-workbook-32",
+    "sourcePath": "private-workbook-23",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1304,20 +1218,31 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
     "headerRows": []
   },
   {
-    "indicatorCode": "1.1.3.0.3-FMT-6B682267",
-    "officialCode": "1.1.3.0.3",
-    "sourcePath": "private-workbook-33",
+    "indicatorCode": "B16-FMT-01-E8EFB8C0-seguimiento-a-proyectos",
+    "officialCode": null,
+    "sourcePath": "private-workbook-24",
     "planteles": [
       "Bachillerato 16"
     ],
     "classification": "official_table",
-    "confidence": "detected-code",
+    "confidence": "source-table-pending-code",
+    "headerRows": []
+  },
+  {
+    "indicatorCode": "B16-FMT-01-6B682267-viajes-de-estudio-educac",
+    "officialCode": null,
+    "sourcePath": "private-workbook-25",
+    "planteles": [
+      "Bachillerato 16"
+    ],
+    "classification": "official_table",
+    "confidence": "source-table-pending-code",
     "headerRows": []
   },
   {
     "indicatorCode": "B16-FMT-01-55725D79-personal-plantel-2025",
     "officialCode": null,
-    "sourcePath": "private-workbook-34",
+    "sourcePath": "private-workbook-26",
     "planteles": [
       "Bachillerato 1",
       "Bachillerato 10",
@@ -1362,7 +1287,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "1.1.3.0.3-FMT-26A4E4BB",
     "officialCode": "1.1.3.0.3",
-    "sourcePath": "private-workbook-35",
+    "sourcePath": "private-workbook-27",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1371,20 +1296,20 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
     "headerRows": []
   },
   {
-    "indicatorCode": "1.1.3.0.3-FMT-6EBA7CE9",
-    "officialCode": "1.1.3.0.3",
-    "sourcePath": "private-workbook-36",
+    "indicatorCode": "B16-FMT-01-6EBA7CE9-desarrollo-y-formacion-i",
+    "officialCode": null,
+    "sourcePath": "private-workbook-28",
     "planteles": [
       "Bachillerato 16"
     ],
     "classification": "matrix_gender_totals",
-    "confidence": "detected-code",
+    "confidence": "source-table-pending-code",
     "headerRows": []
   },
   {
     "indicatorCode": "B16-FMT-01-85FF7F0A-estrategias-para-combati",
     "officialCode": null,
-    "sourcePath": "private-workbook-37",
+    "sourcePath": "private-workbook-29",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1395,7 +1320,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-0A31F882-bachillerato-16-febrero",
     "officialCode": null,
-    "sourcePath": "private-workbook-38",
+    "sourcePath": "private-workbook-30",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1406,7 +1331,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-C7B22BC5-cronograma-del-para-la-p",
     "officialCode": null,
-    "sourcePath": "private-workbook-39",
+    "sourcePath": "private-workbook-31",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1415,20 +1340,20 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
     "headerRows": []
   },
   {
-    "indicatorCode": "1.1.4.4.4",
-    "officialCode": "1.1.4.4.4",
-    "sourcePath": "private-workbook-40",
+    "indicatorCode": "B16-FMT-01-A574F062-formato-indicador-de-int",
+    "officialCode": null,
+    "sourcePath": "private-workbook-32",
     "planteles": [
       "Bachillerato 16"
     ],
     "classification": "matrix_gender_totals",
-    "confidence": "detected-code",
+    "confidence": "source-table-pending-code",
     "headerRows": []
   },
   {
     "indicatorCode": "1.1.2.1.8",
     "officialCode": "1.1.2.1.8",
-    "sourcePath": "private-workbook-41",
+    "sourcePath": "private-workbook-33",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1439,7 +1364,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-55EF8C78-la-ciencia-en-los-bachil",
     "officialCode": null,
-    "sourcePath": "private-workbook-42",
+    "sourcePath": "private-workbook-34",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1450,7 +1375,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-9129D9B3-concursos-academicos",
     "officialCode": null,
-    "sourcePath": "private-workbook-43",
+    "sourcePath": "private-workbook-35",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1461,7 +1386,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-628F230D-nivelacion-academica-jun",
     "officialCode": null,
-    "sourcePath": "private-workbook-44",
+    "sourcePath": "private-workbook-36",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1472,7 +1397,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-CC792A5F-concentrado-abandono-esc",
     "officialCode": null,
-    "sourcePath": "private-workbook-45",
+    "sourcePath": "private-workbook-37",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1483,7 +1408,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-CE2296AB-red-de-apoyo-academico",
     "officialCode": null,
-    "sourcePath": "private-workbook-46",
+    "sourcePath": "private-workbook-38",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1494,7 +1419,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-19F01A78-nivelacion-academica-dic",
     "officialCode": null,
-    "sourcePath": "private-workbook-47",
+    "sourcePath": "private-workbook-39",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1505,7 +1430,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-0CE86D23-alumnos-que-realizaron-e",
     "officialCode": null,
-    "sourcePath": "private-workbook-48",
+    "sourcePath": "private-workbook-40",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1516,7 +1441,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-1E107D9F-personal-plantel-2026",
     "officialCode": null,
-    "sourcePath": "private-workbook-49",
+    "sourcePath": "private-workbook-41",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1527,7 +1452,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-F40AA656-4-bachillerato-16-agosto",
     "officialCode": null,
-    "sourcePath": "private-workbook-50",
+    "sourcePath": "private-workbook-42",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1538,7 +1463,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-33E7A579-1-bachillerato-16-febrer",
     "officialCode": null,
-    "sourcePath": "private-workbook-51",
+    "sourcePath": "private-workbook-43",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1549,7 +1474,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-697E06CF-academia-de-programa-tec",
     "officialCode": null,
-    "sourcePath": "private-workbook-52",
+    "sourcePath": "private-workbook-44",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1560,7 +1485,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-BD626F5D-academia-de-programa-tec",
     "officialCode": null,
-    "sourcePath": "private-workbook-53",
+    "sourcePath": "private-workbook-45",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1571,7 +1496,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-6BB983C1-3-bachillerato-16-febrer",
     "officialCode": null,
-    "sourcePath": "private-workbook-54",
+    "sourcePath": "private-workbook-46",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1582,7 +1507,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-E3FE144D-academias-bg24-campo-dis",
     "officialCode": null,
-    "sourcePath": "private-workbook-55",
+    "sourcePath": "private-workbook-47",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1593,7 +1518,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-D98834ED-formato-de-cronograma-de",
     "officialCode": null,
-    "sourcePath": "private-workbook-56",
+    "sourcePath": "private-workbook-48",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1604,7 +1529,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-B53F23A1-2-bachillerato-16-agosto",
     "officialCode": null,
-    "sourcePath": "private-workbook-57",
+    "sourcePath": "private-workbook-49",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1615,7 +1540,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-AC736017-idiomas",
     "officialCode": null,
-    "sourcePath": "private-workbook-58",
+    "sourcePath": "private-workbook-50",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1626,7 +1551,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-76B62473-formato-conformacion-de",
     "officialCode": null,
-    "sourcePath": "private-workbook-59",
+    "sourcePath": "private-workbook-51",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1637,7 +1562,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "B16-FMT-01-CF8AE174-registro-interesados-man",
     "officialCode": null,
-    "sourcePath": "private-workbook-60",
+    "sourcePath": "private-workbook-52",
     "planteles": [
       "Bachillerato 16"
     ],
@@ -1791,11 +1716,11 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "official_code_detected"
     ]
   },
-  "1.1.2.0.1-FMT-4EB45B2E": {
-    "indicatorCode": "1.1.2.0.1-FMT-4EB45B2E",
-    "officialCode": "1.1.2.0.1",
-    "indicatorName": "PORCENTAJE DE RETENCIÓN ESCOLAR DE EMS",
-    "sourceLabel": "Formato oficial 1.1.2.0.1-FMT-4EB45B2E",
+  "B16-FMT-01-4EB45B2E-1-1-2-0-1-porcentaje-de": {
+    "indicatorCode": "B16-FMT-01-4EB45B2E-1-1-2-0-1-porcentaje-de",
+    "officialCode": null,
+    "indicatorName": "1.1.2.0.1. porcentaje de retención escolar de EMS",
+    "sourceLabel": "Formato oficial B16-FMT-01-4EB45B2E-1-1-2-0-1-porcentaje-de",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
     "groups": [
@@ -1877,15 +1802,14 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
-      "official_code_detected",
-      "shared_official_code_split_by_source"
+      "pending_indicator_code"
     ]
   },
-  "1.1.2.0.3": {
-    "indicatorCode": "1.1.2.0.3",
-    "officialCode": "1.1.2.0.3",
-    "indicatorName": "TASA DE ABANDONO ESCOLAR DE EDUCACIÓN MEDIA SUPERIOR",
-    "sourceLabel": "Formato oficial 1.1.2.0.3",
+  "B16-FMT-01-A2A43E4E-1-1-2-0-3-estrategias-pa": {
+    "indicatorCode": "B16-FMT-01-A2A43E4E-1-1-2-0-3-estrategias-pa",
+    "officialCode": null,
+    "indicatorName": "1.1.2.0.3.Estrategias para combatir el abandono escolar",
+    "sourceLabel": "Formato oficial B16-FMT-01-A2A43E4E-1-1-2-0-3-estrategias-pa",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
     "groups": [
@@ -1944,14 +1868,14 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
-      "official_code_detected"
+      "pending_indicator_code"
     ]
   },
-  "1.1.2.5.1": {
-    "indicatorCode": "1.1.2.5.1",
-    "officialCode": "1.1.2.5.1",
-    "indicatorName": "Porcentaje de docentes de educación media superior y superior que cumple con perfil docente idóneo de acuerdo con el modelo educativo institucional",
-    "sourceLabel": "Formato oficial 1.1.2.5.1",
+  "B16-FMT-01-43FE55CA-formacion-docente-2026": {
+    "indicatorCode": "B16-FMT-01-43FE55CA-formacion-docente-2026",
+    "officialCode": null,
+    "indicatorName": "Formación_docente_2026",
+    "sourceLabel": "Formato oficial B16-FMT-01-43FE55CA-formacion-docente-2026",
     "sourcePath": "private-workbook",
     "sheetName": "DOCENTES",
     "groups": [
@@ -2013,18 +1937,6 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       }
     ],
     "initialRows": [
-      {
-        "no": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS:",
-        "tipo_de_evento": "",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms_h": "",
-        "m": "",
-        "poblacion_docente_nms_total": ""
-      },
       {
         "no": "1.1.2.5.1",
         "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que cumple con perfil docente idóneo de acuerdo con el modelo educativo institucional",
@@ -2093,461 +2005,14 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
-      "official_code_detected"
+      "pending_indicator_code"
     ]
   },
-  "1.1.2.5.5": {
-    "indicatorCode": "1.1.2.5.5",
-    "officialCode": "1.1.2.5.5",
-    "indicatorName": "Porcentaje de docentes de educación media superior y superior que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocionales, inclu",
-    "sourceLabel": "Formato oficial 1.1.2.5.5",
-    "sourcePath": "private-workbook",
-    "sheetName": "DOCENTES",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
-    "columns": [
-      {
-        "key": "no",
-        "label": "No.",
-        "type": "text"
-      },
-      {
-        "key": "tipo_de_evento",
-        "label": "Tipo de evento",
-        "type": "text"
-      },
-      {
-        "key": "nombre_del_evento",
-        "label": "Nombre del evento",
-        "type": "text"
-      },
-      {
-        "key": "duracion_en_horas",
-        "label": "Duración en horas",
-        "type": "text"
-      },
-      {
-        "key": "modalidad",
-        "label": "Modalidad",
-        "type": "text"
-      },
-      {
-        "key": "competencias_desarrolladas",
-        "label": "Competencias desarrolladas",
-        "type": "text"
-      },
-      {
-        "key": "evento_organizado_por",
-        "label": "Evento organizado por:",
-        "type": "text"
-      },
-      {
-        "key": "poblacion_docente_nms_h",
-        "label": "Población docente NMS H",
-        "type": "number"
-      },
-      {
-        "key": "m",
-        "label": "M",
-        "type": "number"
-      },
-      {
-        "key": "poblacion_docente_nms_total",
-        "label": "Población docente NMS Total",
-        "type": "number"
-      }
-    ],
-    "initialRows": [
-      {
-        "no": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS:",
-        "tipo_de_evento": "",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms_h": "",
-        "m": "",
-        "poblacion_docente_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.1",
-        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que cumple con perfil docente idóneo de acuerdo con el modelo educativo institucional",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms_h": "",
-        "m": "",
-        "poblacion_docente_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.5",
-        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocionales, inclusión, investigación, internacionalización, arte, cultura, innovación, igualdad género, sustentabilidad, sostenibilidad y medio ambiente, con enfoque interseccional y de interculturalidad",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms_h": "",
-        "m": "",
-        "poblacion_docente_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.7",
-        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms_h": "",
-        "m": "",
-        "poblacion_docente_nms_total": ""
-      },
-      {
-        "no": "3.1.1.2.2",
-        "tipo_de_evento": "Número de eventos de educación continua",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms_h": "",
-        "m": "",
-        "poblacion_docente_nms_total": ""
-      }
-    ],
-    "showTotals": true,
-    "allowAddRows": true,
-    "addRowLabel": "Agregar fila",
-    "emptyRow": {
-      "no": "",
-      "tipo_de_evento": "",
-      "nombre_del_evento": "",
-      "duracion_en_horas": "",
-      "modalidad": "",
-      "competencias_desarrolladas": "",
-      "evento_organizado_por": "",
-      "poblacion_docente_nms_h": "",
-      "m": "",
-      "poblacion_docente_nms_total": ""
-    },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
-    "quality": [
-      "source_workbook_template",
-      "private_fields_blank",
-      "official_code_detected"
-    ]
-  },
-  "1.1.2.5.7": {
-    "indicatorCode": "1.1.2.5.7",
-    "officialCode": "1.1.2.5.7",
-    "indicatorName": "Porcentaje de docentes de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
-    "sourceLabel": "Formato oficial 1.1.2.5.7",
-    "sourcePath": "private-workbook",
-    "sheetName": "DOCENTES",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
-    "columns": [
-      {
-        "key": "no",
-        "label": "No.",
-        "type": "text"
-      },
-      {
-        "key": "tipo_de_evento",
-        "label": "Tipo de evento",
-        "type": "text"
-      },
-      {
-        "key": "nombre_del_evento",
-        "label": "Nombre del evento",
-        "type": "text"
-      },
-      {
-        "key": "duracion_en_horas",
-        "label": "Duración en horas",
-        "type": "text"
-      },
-      {
-        "key": "modalidad",
-        "label": "Modalidad",
-        "type": "text"
-      },
-      {
-        "key": "competencias_desarrolladas",
-        "label": "Competencias desarrolladas",
-        "type": "text"
-      },
-      {
-        "key": "evento_organizado_por",
-        "label": "Evento organizado por:",
-        "type": "text"
-      },
-      {
-        "key": "poblacion_docente_nms_h",
-        "label": "Población docente NMS H",
-        "type": "number"
-      },
-      {
-        "key": "m",
-        "label": "M",
-        "type": "number"
-      },
-      {
-        "key": "poblacion_docente_nms_total",
-        "label": "Población docente NMS Total",
-        "type": "number"
-      }
-    ],
-    "initialRows": [
-      {
-        "no": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS:",
-        "tipo_de_evento": "",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms_h": "",
-        "m": "",
-        "poblacion_docente_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.1",
-        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que cumple con perfil docente idóneo de acuerdo con el modelo educativo institucional",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms_h": "",
-        "m": "",
-        "poblacion_docente_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.5",
-        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocionales, inclusión, investigación, internacionalización, arte, cultura, innovación, igualdad género, sustentabilidad, sostenibilidad y medio ambiente, con enfoque interseccional y de interculturalidad",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms_h": "",
-        "m": "",
-        "poblacion_docente_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.7",
-        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms_h": "",
-        "m": "",
-        "poblacion_docente_nms_total": ""
-      },
-      {
-        "no": "3.1.1.2.2",
-        "tipo_de_evento": "Número de eventos de educación continua",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms_h": "",
-        "m": "",
-        "poblacion_docente_nms_total": ""
-      }
-    ],
-    "showTotals": true,
-    "allowAddRows": true,
-    "addRowLabel": "Agregar fila",
-    "emptyRow": {
-      "no": "",
-      "tipo_de_evento": "",
-      "nombre_del_evento": "",
-      "duracion_en_horas": "",
-      "modalidad": "",
-      "competencias_desarrolladas": "",
-      "evento_organizado_por": "",
-      "poblacion_docente_nms_h": "",
-      "m": "",
-      "poblacion_docente_nms_total": ""
-    },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
-    "quality": [
-      "source_workbook_template",
-      "private_fields_blank",
-      "official_code_detected"
-    ]
-  },
-  "3.1.1.2.2": {
-    "indicatorCode": "3.1.1.2.2",
-    "officialCode": "3.1.1.2.2",
-    "indicatorName": "Número de eventos de educación continua",
-    "sourceLabel": "Formato oficial 3.1.1.2.2",
-    "sourcePath": "private-workbook",
-    "sheetName": "DOCENTES",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
-    "columns": [
-      {
-        "key": "no",
-        "label": "No.",
-        "type": "text"
-      },
-      {
-        "key": "tipo_de_evento",
-        "label": "Tipo de evento",
-        "type": "text"
-      },
-      {
-        "key": "nombre_del_evento",
-        "label": "Nombre del evento",
-        "type": "text"
-      },
-      {
-        "key": "duracion_en_horas",
-        "label": "Duración en horas",
-        "type": "text"
-      },
-      {
-        "key": "modalidad",
-        "label": "Modalidad",
-        "type": "text"
-      },
-      {
-        "key": "competencias_desarrolladas",
-        "label": "Competencias desarrolladas",
-        "type": "text"
-      },
-      {
-        "key": "evento_organizado_por",
-        "label": "Evento organizado por:",
-        "type": "text"
-      },
-      {
-        "key": "poblacion_docente_nms_h",
-        "label": "Población docente NMS H",
-        "type": "number"
-      },
-      {
-        "key": "m",
-        "label": "M",
-        "type": "number"
-      },
-      {
-        "key": "poblacion_docente_nms_total",
-        "label": "Población docente NMS Total",
-        "type": "number"
-      }
-    ],
-    "initialRows": [
-      {
-        "no": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS:",
-        "tipo_de_evento": "",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms_h": "",
-        "m": "",
-        "poblacion_docente_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.1",
-        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que cumple con perfil docente idóneo de acuerdo con el modelo educativo institucional",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms_h": "",
-        "m": "",
-        "poblacion_docente_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.5",
-        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocionales, inclusión, investigación, internacionalización, arte, cultura, innovación, igualdad género, sustentabilidad, sostenibilidad y medio ambiente, con enfoque interseccional y de interculturalidad",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms_h": "",
-        "m": "",
-        "poblacion_docente_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.7",
-        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms_h": "",
-        "m": "",
-        "poblacion_docente_nms_total": ""
-      },
-      {
-        "no": "3.1.1.2.2",
-        "tipo_de_evento": "Número de eventos de educación continua",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms_h": "",
-        "m": "",
-        "poblacion_docente_nms_total": ""
-      }
-    ],
-    "showTotals": true,
-    "allowAddRows": true,
-    "addRowLabel": "Agregar fila",
-    "emptyRow": {
-      "no": "",
-      "tipo_de_evento": "",
-      "nombre_del_evento": "",
-      "duracion_en_horas": "",
-      "modalidad": "",
-      "competencias_desarrolladas": "",
-      "evento_organizado_por": "",
-      "poblacion_docente_nms_h": "",
-      "m": "",
-      "poblacion_docente_nms_total": ""
-    },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
-    "quality": [
-      "source_workbook_template",
-      "private_fields_blank",
-      "official_code_detected"
-    ]
-  },
-  "2.1.4.1.2": {
-    "indicatorCode": "2.1.4.1.2",
-    "officialCode": "2.1.4.1.2",
-    "indicatorName": "Número de estudiantes que colaboran en proyectos de investigación liderados por profesorado de tiempo completo",
-    "sourceLabel": "Formato oficial 2.1.4.1.2",
+  "B16-FMT-01-E8EBFAA5-2-1-4-1-2-seguimiento-a": {
+    "indicatorCode": "B16-FMT-01-E8EBFAA5-2-1-4-1-2-seguimiento-a",
+    "officialCode": null,
+    "indicatorName": "2.1.4.1.2 Seguimiento a proyectos de investigación en planteles",
+    "sourceLabel": "Formato oficial B16-FMT-01-E8EBFAA5-2-1-4-1-2-seguimiento-a",
     "sourcePath": "private-workbook",
     "sheetName": "2.1.4.1.2",
     "groups": [
@@ -2648,14 +2113,14 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
-      "official_code_detected"
+      "pending_indicator_code"
     ]
   },
-  "1.1.2.2.11": {
-    "indicatorCode": "1.1.2.2.11",
-    "officialCode": "1.1.2.2.11",
-    "indicatorName": "Porcentaje de estudiantes de educación media superior y superior que participan en acciones de igualdad de género",
-    "sourceLabel": "Formato oficial 1.1.2.2.11",
+  "B16-FMT-01-D055E9FA-1-1-2-2-11-seguimiento-c": {
+    "indicatorCode": "B16-FMT-01-D055E9FA-1-1-2-2-11-seguimiento-c",
+    "officialCode": null,
+    "indicatorName": "1.1.2.2.11 Seguimiento capacitación en materia de género planteles",
+    "sourceLabel": "Formato oficial B16-FMT-01-D055E9FA-1-1-2-2-11-seguimiento-c",
     "sourcePath": "private-workbook",
     "sheetName": "1.1.2.2.11",
     "groups": [
@@ -2749,7 +2214,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
-      "official_code_detected"
+      "pending_indicator_code"
     ]
   },
   "1.1.2.3.1": {
@@ -2818,11 +2283,11 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "official_code_detected"
     ]
   },
-  "1.1.2.3.1-FMT-FBF5B718": {
-    "indicatorCode": "1.1.2.3.1-FMT-FBF5B718",
-    "officialCode": "1.1.2.3.1",
-    "indicatorName": "PORCENTAJE DE ESTUDIANTES DE MEDIA SUPERIOR QUE PARTICIPAN EN ACTIVIDADES DE FORMACIÓN INTEGRAL",
-    "sourceLabel": "Formato oficial 1.1.2.3.1-FMT-FBF5B718",
+  "B16-FMT-01-FBF5B718-1-1-2-3-1-modelo-de-las": {
+    "indicatorCode": "B16-FMT-01-FBF5B718-1-1-2-3-1-modelo-de-las",
+    "officialCode": null,
+    "indicatorName": "1.1.2.3.1. Modelo de las Naciones Unidas",
+    "sourceLabel": "Formato oficial B16-FMT-01-FBF5B718-1-1-2-3-1-modelo-de-las",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
     "groups": [
@@ -2895,8 +2360,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
-      "official_code_detected",
-      "shared_official_code_split_by_source"
+      "pending_indicator_code"
     ]
   },
   "1.1.2.1.4": {
@@ -3000,11 +2464,11 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "official_code_detected"
     ]
   },
-  "1.1.2.5.1-FMT-D30B3A90": {
-    "indicatorCode": "1.1.2.5.1-FMT-D30B3A90",
-    "officialCode": "1.1.2.5.1",
-    "indicatorName": "Porcentaje de docentes de educación media superior y superior que cumple con perfil docente idóneo de acuerdo con el modelo educativo institucional",
-    "sourceLabel": "Formato oficial 1.1.2.5.1-FMT-D30B3A90",
+  "B16-FMT-01-D30B3A90-formacion-apoyo-academic": {
+    "indicatorCode": "B16-FMT-01-D30B3A90-formacion-apoyo-academic",
+    "officialCode": null,
+    "indicatorName": "Formación_apoyo académico_2026",
+    "sourceLabel": "Formato oficial B16-FMT-01-D30B3A90-formacion-apoyo-academic",
     "sourcePath": "private-workbook",
     "sheetName": "PERSONAL DE APOYO",
     "groups": [
@@ -3066,18 +2530,6 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       }
     ],
     "initialRows": [
-      {
-        "no": "La tabla anterior incide en la siguiente línea de acción del informe de labores de la DGEMS y planteles de NMS:",
-        "tipo_de_evento": "",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "personal_de_apoyo_academico_nms_h": "",
-        "m": "",
-        "personal_de_apoyo_academico_nms_total": ""
-      },
       {
         "no": "1.1.2.5.1",
         "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que cumple con perfil docente idóneo de acuerdo con el modelo educativo institucional",
@@ -3146,464 +2598,14 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
-      "official_code_detected",
-      "shared_official_code_split_by_source"
+      "pending_indicator_code"
     ]
   },
-  "1.1.2.5.5-FMT-D30B3A90": {
-    "indicatorCode": "1.1.2.5.5-FMT-D30B3A90",
-    "officialCode": "1.1.2.5.5",
-    "indicatorName": "Porcentaje de docentes de educación media superior y superior que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocionales, inclu",
-    "sourceLabel": "Formato oficial 1.1.2.5.5-FMT-D30B3A90",
-    "sourcePath": "private-workbook",
-    "sheetName": "PERSONAL DE APOYO",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
-    "columns": [
-      {
-        "key": "no",
-        "label": "No.",
-        "type": "text"
-      },
-      {
-        "key": "tipo_de_evento",
-        "label": "Tipo de evento",
-        "type": "text"
-      },
-      {
-        "key": "nombre_del_evento",
-        "label": "Nombre del evento",
-        "type": "text"
-      },
-      {
-        "key": "duracion_en_horas",
-        "label": "Duración en horas",
-        "type": "text"
-      },
-      {
-        "key": "modalidad",
-        "label": "Modalidad",
-        "type": "text"
-      },
-      {
-        "key": "competencias_desarrolladas",
-        "label": "Competencias desarrolladas",
-        "type": "text"
-      },
-      {
-        "key": "evento_organizado_por",
-        "label": "Evento organizado por:",
-        "type": "text"
-      },
-      {
-        "key": "personal_de_apoyo_academico_nms_h",
-        "label": "Personal de apoyo académico NMS H",
-        "type": "number"
-      },
-      {
-        "key": "m",
-        "label": "M",
-        "type": "number"
-      },
-      {
-        "key": "personal_de_apoyo_academico_nms_total",
-        "label": "Personal de apoyo académico NMS Total",
-        "type": "number"
-      }
-    ],
-    "initialRows": [
-      {
-        "no": "La tabla anterior incide en la siguiente línea de acción del informe de labores de la DGEMS y planteles de NMS:",
-        "tipo_de_evento": "",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "personal_de_apoyo_academico_nms_h": "",
-        "m": "",
-        "personal_de_apoyo_academico_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.1",
-        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que cumple con perfil docente idóneo de acuerdo con el modelo educativo institucional",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "personal_de_apoyo_academico_nms_h": "",
-        "m": "",
-        "personal_de_apoyo_academico_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.5",
-        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocionales, inclusión, investigación, internacionalización, arte, cultura, innovación, igualdad género, sustentabilidad, sostenibilidad y medio ambiente, con enfoque interseccional y de interculturalidad",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "personal_de_apoyo_academico_nms_h": "",
-        "m": "",
-        "personal_de_apoyo_academico_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.7",
-        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "personal_de_apoyo_academico_nms_h": "",
-        "m": "",
-        "personal_de_apoyo_academico_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.8",
-        "tipo_de_evento": "Porcentaje de personal de apoyo académico de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "personal_de_apoyo_academico_nms_h": "",
-        "m": "",
-        "personal_de_apoyo_academico_nms_total": ""
-      }
-    ],
-    "showTotals": true,
-    "allowAddRows": true,
-    "addRowLabel": "Agregar fila",
-    "emptyRow": {
-      "no": "",
-      "tipo_de_evento": "",
-      "nombre_del_evento": "",
-      "duracion_en_horas": "",
-      "modalidad": "",
-      "competencias_desarrolladas": "",
-      "evento_organizado_por": "",
-      "personal_de_apoyo_academico_nms_h": "",
-      "m": "",
-      "personal_de_apoyo_academico_nms_total": ""
-    },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
-    "quality": [
-      "source_workbook_template",
-      "private_fields_blank",
-      "official_code_detected",
-      "shared_official_code_split_by_source"
-    ]
-  },
-  "1.1.2.5.7-FMT-D30B3A90": {
-    "indicatorCode": "1.1.2.5.7-FMT-D30B3A90",
-    "officialCode": "1.1.2.5.7",
-    "indicatorName": "Porcentaje de docentes de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
-    "sourceLabel": "Formato oficial 1.1.2.5.7-FMT-D30B3A90",
-    "sourcePath": "private-workbook",
-    "sheetName": "PERSONAL DE APOYO",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
-    "columns": [
-      {
-        "key": "no",
-        "label": "No.",
-        "type": "text"
-      },
-      {
-        "key": "tipo_de_evento",
-        "label": "Tipo de evento",
-        "type": "text"
-      },
-      {
-        "key": "nombre_del_evento",
-        "label": "Nombre del evento",
-        "type": "text"
-      },
-      {
-        "key": "duracion_en_horas",
-        "label": "Duración en horas",
-        "type": "text"
-      },
-      {
-        "key": "modalidad",
-        "label": "Modalidad",
-        "type": "text"
-      },
-      {
-        "key": "competencias_desarrolladas",
-        "label": "Competencias desarrolladas",
-        "type": "text"
-      },
-      {
-        "key": "evento_organizado_por",
-        "label": "Evento organizado por:",
-        "type": "text"
-      },
-      {
-        "key": "personal_de_apoyo_academico_nms_h",
-        "label": "Personal de apoyo académico NMS H",
-        "type": "number"
-      },
-      {
-        "key": "m",
-        "label": "M",
-        "type": "number"
-      },
-      {
-        "key": "personal_de_apoyo_academico_nms_total",
-        "label": "Personal de apoyo académico NMS Total",
-        "type": "number"
-      }
-    ],
-    "initialRows": [
-      {
-        "no": "La tabla anterior incide en la siguiente línea de acción del informe de labores de la DGEMS y planteles de NMS:",
-        "tipo_de_evento": "",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "personal_de_apoyo_academico_nms_h": "",
-        "m": "",
-        "personal_de_apoyo_academico_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.1",
-        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que cumple con perfil docente idóneo de acuerdo con el modelo educativo institucional",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "personal_de_apoyo_academico_nms_h": "",
-        "m": "",
-        "personal_de_apoyo_academico_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.5",
-        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocionales, inclusión, investigación, internacionalización, arte, cultura, innovación, igualdad género, sustentabilidad, sostenibilidad y medio ambiente, con enfoque interseccional y de interculturalidad",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "personal_de_apoyo_academico_nms_h": "",
-        "m": "",
-        "personal_de_apoyo_academico_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.7",
-        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "personal_de_apoyo_academico_nms_h": "",
-        "m": "",
-        "personal_de_apoyo_academico_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.8",
-        "tipo_de_evento": "Porcentaje de personal de apoyo académico de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "personal_de_apoyo_academico_nms_h": "",
-        "m": "",
-        "personal_de_apoyo_academico_nms_total": ""
-      }
-    ],
-    "showTotals": true,
-    "allowAddRows": true,
-    "addRowLabel": "Agregar fila",
-    "emptyRow": {
-      "no": "",
-      "tipo_de_evento": "",
-      "nombre_del_evento": "",
-      "duracion_en_horas": "",
-      "modalidad": "",
-      "competencias_desarrolladas": "",
-      "evento_organizado_por": "",
-      "personal_de_apoyo_academico_nms_h": "",
-      "m": "",
-      "personal_de_apoyo_academico_nms_total": ""
-    },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
-    "quality": [
-      "source_workbook_template",
-      "private_fields_blank",
-      "official_code_detected",
-      "shared_official_code_split_by_source"
-    ]
-  },
-  "1.1.2.5.8": {
-    "indicatorCode": "1.1.2.5.8",
-    "officialCode": "1.1.2.5.8",
-    "indicatorName": "Porcentaje de personal de apoyo académico de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
-    "sourceLabel": "Formato oficial 1.1.2.5.8",
-    "sourcePath": "private-workbook",
-    "sheetName": "PERSONAL DE APOYO",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
-    "columns": [
-      {
-        "key": "no",
-        "label": "No.",
-        "type": "text"
-      },
-      {
-        "key": "tipo_de_evento",
-        "label": "Tipo de evento",
-        "type": "text"
-      },
-      {
-        "key": "nombre_del_evento",
-        "label": "Nombre del evento",
-        "type": "text"
-      },
-      {
-        "key": "duracion_en_horas",
-        "label": "Duración en horas",
-        "type": "text"
-      },
-      {
-        "key": "modalidad",
-        "label": "Modalidad",
-        "type": "text"
-      },
-      {
-        "key": "competencias_desarrolladas",
-        "label": "Competencias desarrolladas",
-        "type": "text"
-      },
-      {
-        "key": "evento_organizado_por",
-        "label": "Evento organizado por:",
-        "type": "text"
-      },
-      {
-        "key": "personal_de_apoyo_academico_nms_h",
-        "label": "Personal de apoyo académico NMS H",
-        "type": "number"
-      },
-      {
-        "key": "m",
-        "label": "M",
-        "type": "number"
-      },
-      {
-        "key": "personal_de_apoyo_academico_nms_total",
-        "label": "Personal de apoyo académico NMS Total",
-        "type": "number"
-      }
-    ],
-    "initialRows": [
-      {
-        "no": "La tabla anterior incide en la siguiente línea de acción del informe de labores de la DGEMS y planteles de NMS:",
-        "tipo_de_evento": "",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "personal_de_apoyo_academico_nms_h": "",
-        "m": "",
-        "personal_de_apoyo_academico_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.1",
-        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que cumple con perfil docente idóneo de acuerdo con el modelo educativo institucional",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "personal_de_apoyo_academico_nms_h": "",
-        "m": "",
-        "personal_de_apoyo_academico_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.5",
-        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocionales, inclusión, investigación, internacionalización, arte, cultura, innovación, igualdad género, sustentabilidad, sostenibilidad y medio ambiente, con enfoque interseccional y de interculturalidad",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "personal_de_apoyo_academico_nms_h": "",
-        "m": "",
-        "personal_de_apoyo_academico_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.7",
-        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "personal_de_apoyo_academico_nms_h": "",
-        "m": "",
-        "personal_de_apoyo_academico_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.8",
-        "tipo_de_evento": "Porcentaje de personal de apoyo académico de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "personal_de_apoyo_academico_nms_h": "",
-        "m": "",
-        "personal_de_apoyo_academico_nms_total": ""
-      }
-    ],
-    "showTotals": true,
-    "allowAddRows": true,
-    "addRowLabel": "Agregar fila",
-    "emptyRow": {
-      "no": "",
-      "tipo_de_evento": "",
-      "nombre_del_evento": "",
-      "duracion_en_horas": "",
-      "modalidad": "",
-      "competencias_desarrolladas": "",
-      "evento_organizado_por": "",
-      "personal_de_apoyo_academico_nms_h": "",
-      "m": "",
-      "personal_de_apoyo_academico_nms_total": ""
-    },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
-    "quality": [
-      "source_workbook_template",
-      "private_fields_blank",
-      "official_code_detected"
-    ]
-  },
-  "1.1.2.3.1-FMT-2A7229AD": {
-    "indicatorCode": "1.1.2.3.1-FMT-2A7229AD",
-    "officialCode": "1.1.2.3.1",
-    "indicatorName": "PORCENTAJE DE ESTUDIANTES DE MEDIA SUPERIOR QUE PARTICIPAN EN ACTIVIDADES DE FORMACIÓN INTEGRAL",
-    "sourceLabel": "Formato oficial 1.1.2.3.1-FMT-2A7229AD",
+  "B16-FMT-01-2A7229AD-1-1-2-3-1-convocatorias": {
+    "indicatorCode": "B16-FMT-01-2A7229AD-1-1-2-3-1-convocatorias",
+    "officialCode": null,
+    "indicatorName": "1.1.2.3.1.Convocatorias externas ",
+    "sourceLabel": "Formato oficial B16-FMT-01-2A7229AD-1-1-2-3-1-convocatorias",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
     "groups": [
@@ -3697,8 +2699,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
-      "official_code_detected",
-      "shared_official_code_split_by_source"
+      "pending_indicator_code"
     ]
   },
   "1.1.2.3.1-FMT-AD152691": {
@@ -3796,11 +2797,11 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "shared_official_code_split_by_source"
     ]
   },
-  "1.1.2.0.3-FMT-EDABD54D": {
-    "indicatorCode": "1.1.2.0.3-FMT-EDABD54D",
+  "1.1.2.0.3": {
+    "indicatorCode": "1.1.2.0.3",
     "officialCode": "1.1.2.0.3",
     "indicatorName": "Tasa de abadono escolar de educación media superior",
-    "sourceLabel": "Formato oficial 1.1.2.0.3-FMT-EDABD54D",
+    "sourceLabel": "Formato oficial 1.1.2.0.3",
     "sourcePath": "private-workbook",
     "sheetName": "Indicador 1.1.2.0.3",
     "groups": [
@@ -4020,8 +3021,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
-      "official_code_detected",
-      "shared_official_code_split_by_source"
+      "official_code_detected"
     ]
   },
   "B16-FMT-01-73CBDE41-bach-16-terminaron": {
@@ -4541,11 +3541,11 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "pending_indicator_code"
     ]
   },
-  "1.1.1.3.2": {
-    "indicatorCode": "1.1.1.3.2",
-    "officialCode": "1.1.1.3.2",
-    "indicatorName": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS:  Número de personal de apoyo académico de NMS y NS que reciben ca",
-    "sourceLabel": "Formato oficial 1.1.1.3.2",
+  "B16-FMT-01-62323922-formacion-docente": {
+    "indicatorCode": "B16-FMT-01-62323922-formacion-docente",
+    "officialCode": null,
+    "indicatorName": "Formación_docente",
+    "sourceLabel": "Formato oficial B16-FMT-01-62323922-formacion-docente",
     "sourcePath": "private-workbook",
     "sheetName": "DOCENTES",
     "groups": [
@@ -4608,7 +3608,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     ],
     "initialRows": [
       {
-        "no": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS: 1.1.1.3.2 Número de personal de apoyo académico de NMS y NS que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocional, inclusión, investigación, arte, cultura, e innovación, género y desarrollo sostenible del medio ambientales 1.1.1.3.3 Número de docentes del NMS y NS con capacitación en diseño curricular y estrategias didácticas para el aprendizaje en ambientes virtuales (PE en línea) 1.1.1.5.1 Número de docentes de NMS y NS que recibe capacitación disciplinar pertinente en su área de desempeño",
+        "no": "",
         "tipo_de_evento": "",
         "nombre_del_evento": "",
         "duracion_en_horas": "",
@@ -4639,209 +3639,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
-      "official_code_detected"
-    ]
-  },
-  "1.1.1.3.3": {
-    "indicatorCode": "1.1.1.3.3",
-    "officialCode": "1.1.1.3.3",
-    "indicatorName": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS: 1.1.1.3.2 Número de personal de apoyo académico de NMS y NS que r",
-    "sourceLabel": "Formato oficial 1.1.1.3.3",
-    "sourcePath": "private-workbook",
-    "sheetName": "DOCENTES",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
-    "columns": [
-      {
-        "key": "no",
-        "label": "No.",
-        "type": "text"
-      },
-      {
-        "key": "tipo_de_evento",
-        "label": "Tipo de evento",
-        "type": "text"
-      },
-      {
-        "key": "nombre_del_evento",
-        "label": "Nombre del evento",
-        "type": "text"
-      },
-      {
-        "key": "duracion_en_horas",
-        "label": "Duración en horas",
-        "type": "text"
-      },
-      {
-        "key": "modalidad",
-        "label": "Modalidad",
-        "type": "text"
-      },
-      {
-        "key": "competencias_desarrolladas",
-        "label": "Competencias desarrolladas",
-        "type": "text"
-      },
-      {
-        "key": "evento_organizado_por",
-        "label": "Evento organizado por:",
-        "type": "text"
-      },
-      {
-        "key": "poblacion_docente_nms_h",
-        "label": "Población docente NMS H",
-        "type": "number"
-      },
-      {
-        "key": "m",
-        "label": "M",
-        "type": "number"
-      },
-      {
-        "key": "poblacion_docente_nms_total",
-        "label": "Población docente NMS Total",
-        "type": "number"
-      }
-    ],
-    "initialRows": [
-      {
-        "no": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS: 1.1.1.3.2 Número de personal de apoyo académico de NMS y NS que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocional, inclusión, investigación, arte, cultura, e innovación, género y desarrollo sostenible del medio ambientales 1.1.1.3.3 Número de docentes del NMS y NS con capacitación en diseño curricular y estrategias didácticas para el aprendizaje en ambientes virtuales (PE en línea) 1.1.1.5.1 Número de docentes de NMS y NS que recibe capacitación disciplinar pertinente en su área de desempeño",
-        "tipo_de_evento": "",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms_h": "",
-        "m": "",
-        "poblacion_docente_nms_total": ""
-      }
-    ],
-    "showTotals": true,
-    "allowAddRows": true,
-    "addRowLabel": "Agregar fila",
-    "emptyRow": {
-      "no": "",
-      "tipo_de_evento": "",
-      "nombre_del_evento": "",
-      "duracion_en_horas": "",
-      "modalidad": "",
-      "competencias_desarrolladas": "",
-      "evento_organizado_por": "",
-      "poblacion_docente_nms_h": "",
-      "m": "",
-      "poblacion_docente_nms_total": ""
-    },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
-    "quality": [
-      "source_workbook_template",
-      "private_fields_blank",
-      "official_code_detected"
-    ]
-  },
-  "1.1.1.5.1": {
-    "indicatorCode": "1.1.1.5.1",
-    "officialCode": "1.1.1.5.1",
-    "indicatorName": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS: 1.1.1.3.2 Número de personal de apoyo académico de NMS y NS que r",
-    "sourceLabel": "Formato oficial 1.1.1.5.1",
-    "sourcePath": "private-workbook",
-    "sheetName": "DOCENTES",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
-    "columns": [
-      {
-        "key": "no",
-        "label": "No.",
-        "type": "text"
-      },
-      {
-        "key": "tipo_de_evento",
-        "label": "Tipo de evento",
-        "type": "text"
-      },
-      {
-        "key": "nombre_del_evento",
-        "label": "Nombre del evento",
-        "type": "text"
-      },
-      {
-        "key": "duracion_en_horas",
-        "label": "Duración en horas",
-        "type": "text"
-      },
-      {
-        "key": "modalidad",
-        "label": "Modalidad",
-        "type": "text"
-      },
-      {
-        "key": "competencias_desarrolladas",
-        "label": "Competencias desarrolladas",
-        "type": "text"
-      },
-      {
-        "key": "evento_organizado_por",
-        "label": "Evento organizado por:",
-        "type": "text"
-      },
-      {
-        "key": "poblacion_docente_nms_h",
-        "label": "Población docente NMS H",
-        "type": "number"
-      },
-      {
-        "key": "m",
-        "label": "M",
-        "type": "number"
-      },
-      {
-        "key": "poblacion_docente_nms_total",
-        "label": "Población docente NMS Total",
-        "type": "number"
-      }
-    ],
-    "initialRows": [
-      {
-        "no": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS: 1.1.1.3.2 Número de personal de apoyo académico de NMS y NS que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocional, inclusión, investigación, arte, cultura, e innovación, género y desarrollo sostenible del medio ambientales 1.1.1.3.3 Número de docentes del NMS y NS con capacitación en diseño curricular y estrategias didácticas para el aprendizaje en ambientes virtuales (PE en línea) 1.1.1.5.1 Número de docentes de NMS y NS que recibe capacitación disciplinar pertinente en su área de desempeño",
-        "tipo_de_evento": "",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms_h": "",
-        "m": "",
-        "poblacion_docente_nms_total": ""
-      }
-    ],
-    "showTotals": true,
-    "allowAddRows": true,
-    "addRowLabel": "Agregar fila",
-    "emptyRow": {
-      "no": "",
-      "tipo_de_evento": "",
-      "nombre_del_evento": "",
-      "duracion_en_horas": "",
-      "modalidad": "",
-      "competencias_desarrolladas": "",
-      "evento_organizado_por": "",
-      "poblacion_docente_nms_h": "",
-      "m": "",
-      "poblacion_docente_nms_total": ""
-    },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
-    "quality": [
-      "source_workbook_template",
-      "private_fields_blank",
-      "official_code_detected"
+      "pending_indicator_code"
     ]
   },
   "B16-FMT-01-9CE2F116-datos-planteles-y-buzon": {
@@ -6132,11 +4930,11 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "shared_official_code_split_by_source"
     ]
   },
-  "1.1.1.5.2": {
-    "indicatorCode": "1.1.1.5.2",
-    "officialCode": "1.1.1.5.2",
-    "indicatorName": "La tabla anterior incide en la siguiente línea de acción del informe de labores de la DGEMS y planteles de NMS:  Número de personal de apoyo académico de NMS y NS que recibe capaci",
-    "sourceLabel": "Formato oficial 1.1.1.5.2",
+  "B16-FMT-01-0C3E7CB6-formacion-apoyo-academic": {
+    "indicatorCode": "B16-FMT-01-0C3E7CB6-formacion-apoyo-academic",
+    "officialCode": null,
+    "indicatorName": "Formación_apoyo académico",
+    "sourceLabel": "Formato oficial B16-FMT-01-0C3E7CB6-formacion-apoyo-academic",
     "sourcePath": "private-workbook",
     "sheetName": "PERSONAL DE APOYO",
     "groups": [
@@ -6199,7 +4997,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     ],
     "initialRows": [
       {
-        "no": "La tabla anterior incide en la siguiente línea de acción del informe de labores de la DGEMS y planteles de NMS: 1.1.1.5.2 Número de personal de apoyo académico de NMS y NS que recibe capacitación disciplinar pertinente en su área de desempeño",
+        "no": "",
         "tipo_de_evento": "",
         "nombre_del_evento": "",
         "duracion_en_horas": "",
@@ -6230,7 +5028,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
-      "official_code_detected"
+      "pending_indicator_code"
     ]
   },
   "B16-FMT-01-E8EFB8C0-seguimiento-a-proyectos": {
@@ -6348,11 +5146,11 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "pending_indicator_code"
     ]
   },
-  "1.1.3.0.3-FMT-6B682267": {
-    "indicatorCode": "1.1.3.0.3-FMT-6B682267",
-    "officialCode": "1.1.3.0.3",
-    "indicatorName": "EDUCACIÓN PERTINENTE Y DE CALIDAD  Porcentaje de estudiantes de NMS y NS participantes en las actividades de desarrollo y formación integral",
-    "sourceLabel": "Formato oficial 1.1.3.0.3-FMT-6B682267",
+  "B16-FMT-01-6B682267-viajes-de-estudio-educac": {
+    "indicatorCode": "B16-FMT-01-6B682267-viajes-de-estudio-educac",
+    "officialCode": null,
+    "indicatorName": "VIAJES DE ESTUDIO-EDUCACIÓN PERTINENTE Y DE CALIDAD",
+    "sourceLabel": "Formato oficial B16-FMT-01-6B682267-viajes-de-estudio-educac",
     "sourcePath": "private-workbook",
     "sheetName": "Table 1",
     "groups": [
@@ -6434,8 +5232,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
-      "official_code_detected",
-      "shared_official_code_split_by_source"
+      "pending_indicator_code"
     ]
   },
   "B16-FMT-01-55725D79-personal-plantel-2025": {
@@ -7686,11 +6483,11 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "shared_official_code_split_by_source"
     ]
   },
-  "1.1.3.0.3-FMT-6EBA7CE9": {
-    "indicatorCode": "1.1.3.0.3-FMT-6EBA7CE9",
-    "officialCode": "1.1.3.0.3",
-    "indicatorName": "Porcentaje de estudiantes de NMS y NS participantes en las actividades de desarrollo y formación integral",
-    "sourceLabel": "Formato oficial 1.1.3.0.3-FMT-6EBA7CE9",
+  "B16-FMT-01-6EBA7CE9-desarrollo-y-formacion-i": {
+    "indicatorCode": "B16-FMT-01-6EBA7CE9-desarrollo-y-formacion-i",
+    "officialCode": null,
+    "indicatorName": "DESARROLLO Y FORMACION INTEGRAL -PARTICIPANTES EN ACTIVIDADES DE DESARROLLO Y FORMACIÓN INTEGRAL",
+    "sourceLabel": "Formato oficial B16-FMT-01-6EBA7CE9-desarrollo-y-formacion-i",
     "sourcePath": "private-workbook",
     "sheetName": "Table 1",
     "groups": [
@@ -7791,8 +6588,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
-      "official_code_detected",
-      "shared_official_code_split_by_source"
+      "pending_indicator_code"
     ]
   },
   "B16-FMT-01-85FF7F0A-estrategias-para-combati": {
@@ -8921,11 +7717,11 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "pending_indicator_code"
     ]
   },
-  "1.1.4.4.4": {
-    "indicatorCode": "1.1.4.4.4",
-    "officialCode": "1.1.4.4.4",
-    "indicatorName": "Número de estudiantes de NMS y NS participando en acciones de internacionalización",
-    "sourceLabel": "Formato oficial 1.1.4.4.4",
+  "B16-FMT-01-A574F062-formato-indicador-de-int": {
+    "indicatorCode": "B16-FMT-01-A574F062-formato-indicador-de-int",
+    "officialCode": null,
+    "indicatorName": "Formato_Indicador de internacionalización",
+    "sourceLabel": "Formato oficial B16-FMT-01-A574F062-formato-indicador-de-int",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
     "groups": [
@@ -9175,7 +7971,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
-      "official_code_detected"
+      "pending_indicator_code"
     ]
   },
   "1.1.2.1.8": {
@@ -16976,6 +15772,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "detectedIndicatorCodes": [
       "1.1.2.0.1"
     ],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [],
     "formulaCells": 0,
     "sheets": [
@@ -17109,9 +15906,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             }
           ]
         },
-        "codeDescriptions": [
-          "Indicador 1.1.2.0.1. Porcentaje retención escolar de educación media superior"
-        ]
+        "codeDescriptions": []
       }
     ],
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
@@ -17122,9 +15917,8 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "sourcePathHash": "4eb45b2e86e4f3bd12ccab84a202ac96c4479e31107d2783ec60534206d5d639",
     "category": "Indicadores / Mtra Daniela",
     "sizeBytes": 10314,
-    "detectedIndicatorCodes": [
-      "1.1.2.0.1"
-    ],
+    "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [],
     "formulaCells": 0,
     "sheets": [
@@ -17204,9 +15998,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             }
           ]
         },
-        "codeDescriptions": [
-          "1.1.2.0.1. PORCENTAJE DE RETENCIÓN ESCOLAR DE EMS"
-        ]
+        "codeDescriptions": []
       }
     ],
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
@@ -17217,9 +16009,8 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "sourcePathHash": "a2a43e4eeb788e8a41aaece62f16dab30fd86d0af4a9f820c63312e7ce0e8330",
     "category": "Indicadores / Mtra Daniela",
     "sizeBytes": 9878,
-    "detectedIndicatorCodes": [
-      "1.1.2.0.3"
-    ],
+    "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [],
     "formulaCells": 0,
     "sheets": [
@@ -17276,9 +16067,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             }
           ]
         },
-        "codeDescriptions": [
-          "1.1.2.0.3. TASA DE ABANDONO ESCOLAR DE EDUCACIÓN MEDIA SUPERIOR"
-        ]
+        "codeDescriptions": []
       }
     ],
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
@@ -17289,12 +16078,8 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "sourcePathHash": "43fe55caf0bb52dbd821e66b2d4305fc8b877ac6b680fb28d34f76728d5d807e",
     "category": "Indicadores / Mtro Oscar Delgado",
     "sizeBytes": 22252,
-    "detectedIndicatorCodes": [
-      "1.1.2.5.1",
-      "1.1.2.5.5",
-      "1.1.2.5.7",
-      "3.1.1.2.2"
-    ],
+    "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [],
     "formulaCells": 0,
     "sheets": [
@@ -17373,18 +16158,6 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
           ],
           "initialRows": [
             {
-              "no": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS:",
-              "tipo_de_evento": "",
-              "nombre_del_evento": "",
-              "duracion_en_horas": "",
-              "modalidad": "",
-              "competencias_desarrolladas": "",
-              "evento_organizado_por": "",
-              "poblacion_docente_nms_h": "",
-              "m": "",
-              "poblacion_docente_nms_total": ""
-            },
-            {
               "no": "1.1.2.5.1",
               "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que cumple con perfil docente idóneo de acuerdo con el modelo educativo institucional",
               "nombre_del_evento": "",
@@ -17434,12 +16207,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             }
           ]
         },
-        "codeDescriptions": [
-          "1.1.2.5.1 Porcentaje de docentes de educación media superior y superior que cumple con perfil docente idóneo de acuerdo con el modelo educativo institucional",
-          "1.1.2.5.5 Porcentaje de docentes de educación media superior y superior que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocionales, inclusión, investigación, internacionalización, arte, cultura, innovación, igualdad género, sustentabilidad, sostenibilidad y medio ambiente, con enfoque interseccional y de interculturalidad",
-          "1.1.2.5.7 Porcentaje de docentes de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
-          "3.1.1.2.2 Número de eventos de educación continua"
-        ]
+        "codeDescriptions": []
       }
     ],
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
@@ -17450,9 +16218,8 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "sourcePathHash": "e8ebfaa5f4a11362a45348bd460d2d00c1e54c7eebffb2d9a9a5645cf7a537ff",
     "category": "Indicadores / Mtra Ariadna",
     "sizeBytes": 41454,
-    "detectedIndicatorCodes": [
-      "2.1.4.1.2"
-    ],
+    "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 15"
     ],
@@ -17553,9 +16320,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             }
           ]
         },
-        "codeDescriptions": [
-          "2.1.4.1.2 Número de estudiantes que colaboran en proyectos de investigación liderados por profesorado de tiempo completo"
-        ]
+        "codeDescriptions": []
       }
     ],
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
@@ -17566,9 +16331,8 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "sourcePathHash": "d055e9faf256b34d8d02944be938507c4c9379d45936fe4cc4d79628792feefb",
     "category": "Indicadores / Mtra Ariadna",
     "sizeBytes": 42215,
-    "detectedIndicatorCodes": [
-      "1.1.2.2.11"
-    ],
+    "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [],
     "formulaCells": 0,
     "sheets": [
@@ -17660,9 +16424,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             }
           ]
         },
-        "codeDescriptions": [
-          "1.1.2.2.11 Porcentaje de estudiantes de educación media superior y superior que participan en acciones de igualdad de género"
-        ]
+        "codeDescriptions": []
       }
     ],
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
@@ -17676,6 +16438,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "detectedIndicatorCodes": [
       "1.1.2.3.1"
     ],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [],
     "formulaCells": 0,
     "sheets": [
@@ -17732,10 +16495,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             }
           ]
         },
-        "codeDescriptions": [
-          "Actividades POA 2026 ACCIÓN 1.1.2.3 Articular las actividades de formación integral en todas sus dimensiones para enriquecer la experiencia estudiantil. Gestionar los viajes académicos y extracurriculares organizados en el plantel. (DGEMS).",
-          "INDICADOR: 1.1.2.3.1 Porcentaje de estudiantes de media superior que participan en actividades de formación integral."
-        ]
+        "codeDescriptions": []
       }
     ],
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
@@ -17746,9 +16506,8 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "sourcePathHash": "fbf5b7183a98e6ae3a8e65ea259e64e529254bd74158d0098a28c95a191d39cf",
     "category": "Indicadores / Mtra Daniela",
     "sizeBytes": 10481,
-    "detectedIndicatorCodes": [
-      "1.1.2.3.1"
-    ],
+    "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [],
     "formulaCells": 0,
     "sheets": [
@@ -17819,9 +16578,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             }
           ]
         },
-        "codeDescriptions": [
-          "1.1.2.3.1. PORCENTAJE DE ESTUDIANTES DE MEDIA SUPERIOR QUE PARTICIPAN EN ACTIVIDADES DE FORMACIÓN INTEGRAL."
-        ]
+        "codeDescriptions": []
       }
     ],
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
@@ -17835,6 +16592,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "detectedIndicatorCodes": [
       "1.1.2.1.4"
     ],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [],
     "formulaCells": 0,
     "sheets": [
@@ -17926,10 +16684,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             }
           ]
         },
-        "codeDescriptions": [
-          "Actividades POA 2026 ACCIÓN : 1.1.2.1 Ofrecer servicios y programas de apoyo integral a estudiantes universitarios, con enfoque interseccional e intercultural, que promuevan la equidad, el bienestar emocional y la mejora de condiciones educativas. Participar en acciones de promoción en los servicios médicos, nutricionales y psicológicos a través de las Unidades de Salud Integral y el CUAP. (DGDI).",
-          "INDICADOR: Código 1.1.2.1.4 Porcentaje de estudiantes de educación media superior y superior atendidos en los servicios de salud integral."
-        ]
+        "codeDescriptions": []
       }
     ],
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
@@ -17940,12 +16695,8 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "sourcePathHash": "d30b3a90f8c8007ad4be2fdd1da9bdc2d70b7f31f944c55986da5a16dbc888a6",
     "category": "Indicadores / Mtro Oscar Delgado",
     "sizeBytes": 22967,
-    "detectedIndicatorCodes": [
-      "1.1.2.5.1",
-      "1.1.2.5.5",
-      "1.1.2.5.7",
-      "1.1.2.5.8"
-    ],
+    "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [],
     "formulaCells": 0,
     "sheets": [
@@ -18024,18 +16775,6 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
           ],
           "initialRows": [
             {
-              "no": "La tabla anterior incide en la siguiente línea de acción del informe de labores de la DGEMS y planteles de NMS:",
-              "tipo_de_evento": "",
-              "nombre_del_evento": "",
-              "duracion_en_horas": "",
-              "modalidad": "",
-              "competencias_desarrolladas": "",
-              "evento_organizado_por": "",
-              "personal_de_apoyo_academico_nms_h": "",
-              "m": "",
-              "personal_de_apoyo_academico_nms_total": ""
-            },
-            {
               "no": "1.1.2.5.1",
               "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que cumple con perfil docente idóneo de acuerdo con el modelo educativo institucional",
               "nombre_del_evento": "",
@@ -18085,12 +16824,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             }
           ]
         },
-        "codeDescriptions": [
-          "1.1.2.5.1 Porcentaje de docentes de educación media superior y superior que cumple con perfil docente idóneo de acuerdo con el modelo educativo institucional",
-          "1.1.2.5.5 Porcentaje de docentes de educación media superior y superior que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocionales, inclusión, investigación, internacionalización, arte, cultura, innovación, igualdad género, sustentabilidad, sostenibilidad y medio ambiente, con enfoque interseccional y de interculturalidad",
-          "1.1.2.5.7 Porcentaje de docentes de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
-          "1.1.2.5.8 Porcentaje de personal de apoyo académico de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño"
-        ]
+        "codeDescriptions": []
       }
     ],
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
@@ -18101,9 +16835,8 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "sourcePathHash": "2a7229ad36bbc3c237708338f144440471a96dccc18bc0a66e801e7e277bc375",
     "category": "Indicadores / Mtra Daniela",
     "sizeBytes": 10148,
-    "detectedIndicatorCodes": [
-      "1.1.2.3.1"
-    ],
+    "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [],
     "formulaCells": 0,
     "sheets": [
@@ -18195,9 +16928,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             }
           ]
         },
-        "codeDescriptions": [
-          "1.1.2.3.1. PORCENTAJE DE ESTUDIANTES DE MEDIA SUPERIOR QUE PARTICIPAN EN ACTIVIDADES DE FORMACIÓN INTEGRAL."
-        ]
+        "codeDescriptions": []
       }
     ],
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
@@ -18211,6 +16942,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "detectedIndicatorCodes": [
       "1.1.2.3.1"
     ],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [],
     "formulaCells": 0,
     "sheets": [
@@ -18295,9 +17027,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             }
           ]
         },
-        "codeDescriptions": [
-          "Indicador: 1.1.2.3.1 Porcentaje de estudiantes de NMS y NS participantes en las actividades de desarrollo y formación integral"
-        ]
+        "codeDescriptions": []
       }
     ],
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
@@ -18311,6 +17041,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "detectedIndicatorCodes": [
       "1.1.2.0.3"
     ],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 1"
     ],
@@ -18474,9 +17205,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             }
           ]
         },
-        "codeDescriptions": [
-          "Indicador 1.1.2.0.3. Tasa de abadono escolar de educación media superior"
-        ]
+        "codeDescriptions": []
       },
       {
         "name": "Sheet 02",
@@ -18692,9 +17421,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             }
           ]
         },
-        "codeDescriptions": [
-          "Indicador 1.1.2.0.3. Tasa de abadono escolar de educación media superior"
-        ]
+        "codeDescriptions": []
       }
     ],
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
@@ -18706,6 +17433,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "BACH 16 TERMINARON.xlsx",
     "sizeBytes": 10098,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -18829,6 +17557,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "formato media superior.xlsx",
     "sizeBytes": 18610,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -19150,6 +17879,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "Seguimiento capacitación en materia de género planteles.xlsx",
     "sizeBytes": 11063,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -19234,11 +17964,8 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "sourcePathHash": "6232392292322fb1ed738aff63b2565b3b7ea1d266fdda91158161c0507943a9",
     "category": "Formación_docente.xlsx",
     "sizeBytes": 22090,
-    "detectedIndicatorCodes": [
-      "1.1.1.3.2",
-      "1.1.1.3.3",
-      "1.1.1.5.1"
-    ],
+    "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -19319,7 +18046,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
           ],
           "initialRows": [
             {
-              "no": "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS: 1.1.1.3.2 Número de personal de apoyo académico de NMS y NS que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocional, inclusión, investigación, arte, cultura, e innovación, género y desarrollo sostenible del medio ambientales 1.1.1.3.3 Número de docentes del NMS y NS con capacitación en diseño curricular y estrategias didácticas para el aprendizaje en ambientes virtuales (PE en línea) 1.1.1.5.1 Número de docentes de NMS y NS que recibe capacitación disciplinar pertinente en su área de desempeño",
+              "no": "",
               "tipo_de_evento": "",
               "nombre_del_evento": "",
               "duracion_en_horas": "",
@@ -19332,9 +18059,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             }
           ]
         },
-        "codeDescriptions": [
-          "La tabla anterior incide en las siguientes líneas de acción del informe de labores de la DGEMS y planteles de NMS: 1.1.1.3.2 Número de personal de apoyo académico de NMS y NS que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocional, inclusión, investigación, arte, cultura, e innovación, género y desarrollo sostenible del medio ambientales 1.1.1.3.3 Número de docentes del NMS y NS con capacitación en diseño curricular y estrategias didácticas para el aprendizaje en ambientes virtuales (PE en línea) 1.1.1.5.1 Número de docentes de NMS y NS que recibe capacitación disciplinar pertinente en su área de desempeño"
-        ]
+        "codeDescriptions": []
       }
     ],
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
@@ -19346,6 +18071,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "DATOS  PLANTELES Y BUZÓN UCOL.xlsx",
     "sizeBytes": 9390,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -19502,6 +18228,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "detectedIndicatorCodes": [
       "1.1.3.0.3"
     ],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -19588,9 +18315,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             }
           ]
         },
-        "codeDescriptions": [
-          "Indicador: 1.1.3.0.3 Porcentaje de estudiantes de NMS participantes en las actividades de desarrollo y formación integral"
-        ]
+        "codeDescriptions": []
       }
     ],
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
@@ -19602,6 +18327,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "Espacio común EMS",
     "sizeBytes": 19404,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 1",
       "Bachillerato 10",
@@ -20476,6 +19202,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "detectedIndicatorCodes": [
       "1.1.3.0.3"
     ],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -20555,9 +19282,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             }
           ]
         },
-        "codeDescriptions": [
-          "Indicador: 1.1.3.0.3 Porcentaje de estudiantes de NMS participantes en las actividades de desarrollo y formación integral"
-        ]
+        "codeDescriptions": []
       }
     ],
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
@@ -20571,6 +19296,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "detectedIndicatorCodes": [
       "1.1.3.0.3"
     ],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -20684,9 +19410,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             }
           ]
         },
-        "codeDescriptions": [
-          "Indicador: 1.1.3.0.3 Porcentaje de estudiantes de NMS participantes en las actividades de desarrollo y formación integral"
-        ]
+        "codeDescriptions": []
       }
     ],
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
@@ -20697,9 +19421,8 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "sourcePathHash": "0c3e7cb6ba32ee3d0cf0200d48cc4b57025a3f86fd51f8bd700946835496debc",
     "category": "Formación_apoyo académico.xlsx",
     "sizeBytes": 22509,
-    "detectedIndicatorCodes": [
-      "1.1.1.5.2"
-    ],
+    "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -20780,7 +19503,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
           ],
           "initialRows": [
             {
-              "no": "La tabla anterior incide en la siguiente línea de acción del informe de labores de la DGEMS y planteles de NMS: 1.1.1.5.2 Número de personal de apoyo académico de NMS y NS que recibe capacitación disciplinar pertinente en su área de desempeño",
+              "no": "",
               "tipo_de_evento": "",
               "nombre_del_evento": "",
               "duracion_en_horas": "",
@@ -20793,9 +19516,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             }
           ]
         },
-        "codeDescriptions": [
-          "La tabla anterior incide en la siguiente línea de acción del informe de labores de la DGEMS y planteles de NMS: 1.1.1.5.2 Número de personal de apoyo académico de NMS y NS que recibe capacitación disciplinar pertinente en su área de desempeño"
-        ]
+        "codeDescriptions": []
       }
     ],
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
@@ -20807,6 +19528,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "Seguimiento a proyectos de investigación en planteles.xlsx",
     "sizeBytes": 11709,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -20925,9 +19647,8 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "sourcePathHash": "6b6822674173f7e56896146b86805a61779d64267fca74ef9105738681504c91",
     "category": "VIAJES DE ESTUDIO-EDUCACIÓN PERTINENTE Y DE CALIDAD.xlsx",
     "sizeBytes": 7677,
-    "detectedIndicatorCodes": [
-      "1.1.3.0.3"
-    ],
+    "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -21009,9 +19730,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             }
           ]
         },
-        "codeDescriptions": [
-          "EDUCACIÓN PERTINENTE Y DE CALIDAD 1.1.3.0.3 Porcentaje de estudiantes de NMS y NS participantes en las actividades de desarrollo y formación integral."
-        ]
+        "codeDescriptions": []
       }
     ],
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
@@ -21023,6 +19742,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "PERSONAL PLANTEL_2025.xlsx",
     "sizeBytes": 123252,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 1",
       "Bachillerato 10",
@@ -25021,6 +23741,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "detectedIndicatorCodes": [
       "1.1.3.0.3"
     ],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -25121,9 +23842,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             }
           ]
         },
-        "codeDescriptions": [
-          "Indicador: 1.1.3.0.3 Porcentaje de estudiantes de NMS participantes en las actividades de desarrollo y formación integral"
-        ]
+        "codeDescriptions": []
       }
     ],
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
@@ -25134,9 +23853,8 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "sourcePathHash": "6eba7ce9c353e101d6f2c0e14aba293e5832fc0267449ad584812c5dd88608ef",
     "category": "DESARROLLO Y FORMACION INTEGRAL -PARTICIPANTES EN ACTIVIDADES DE DESARROLLO Y FORMACIÓN INTEGRAL.xlsx",
     "sizeBytes": 11723,
-    "detectedIndicatorCodes": [
-      "1.1.3.0.3"
-    ],
+    "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -25237,9 +23955,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             }
           ]
         },
-        "codeDescriptions": [
-          "1.1.3.0.3 Porcentaje de estudiantes de NMS y NS participantes en las actividades de desarrollo y formación integral."
-        ]
+        "codeDescriptions": []
       }
     ],
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
@@ -25251,6 +23967,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "Estrategias para combatir el abandono escolar.xlsx",
     "sizeBytes": 9682,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -25342,6 +24059,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "Prácticas de Laboratorios",
     "sizeBytes": 35672,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -26291,6 +25009,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "Acciones de internacionalización e interculturalidad",
     "sizeBytes": 59099,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -26502,9 +25221,8 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "sourcePathHash": "a574f0629c9a9b76d1b57924ce9552e1d8ac2da81d610f1761aea1a3191633e4",
     "category": "Acciones de internacionalización e interculturalidad",
     "sizeBytes": 21897,
-    "detectedIndicatorCodes": [
-      "1.1.4.4.4"
-    ],
+    "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -26754,9 +25472,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             }
           ]
         },
-        "codeDescriptions": [
-          "1.1.4.4.4 Número de estudiantes de NMS y NS participando en acciones de internacionalización"
-        ]
+        "codeDescriptions": []
       }
     ],
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
@@ -26770,6 +25486,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "detectedIndicatorCodes": [
       "1.1.2.1.8"
     ],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -26896,10 +25613,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             }
           ]
         },
-        "codeDescriptions": [
-          "Indicador: 1.1.2.1.8 Porcentaje de titulación por cohorte del NMS",
-          "Directores y Directoras de Programas Educativos Técnicos: Para el registro del avance del POA 2025 en el indicador de Titulación 1.1.2.1.8, recuerden que se debe registrar en referencia al egreso 2024 de la opción Técnica y el dato a registrar en la plataforma e-planea, deberán considerar los titulados que egresaron en 2024 y que logren realizar este trámite hasta junio 2025. No deben de considerar al estudiantado que está por egresar y que realizaron su examen y lo pasaron, esto es, la cantidad de estudiantes que egresan en 2025, no deberán de tomarlos en cuenta."
-        ]
+        "codeDescriptions": []
       }
     ],
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
@@ -26911,6 +25625,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "La ciencia en los bachilleratos universitarios",
     "sizeBytes": 24609,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -27016,6 +25731,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "Concursos Académicos (ciencias, matemáticas, robótica, entre otras).",
     "sizeBytes": 26104,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -27114,6 +25830,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "NIVELACION ACADEMICA_junio- agosto 2025.xlsx",
     "sizeBytes": 91306,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -27966,6 +26683,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "CONCENTRADO_ABANDONO ESCOLAR _SEP 2025.xlsx",
     "sizeBytes": 175712,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -28825,6 +27543,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "Red de apoyo académico.xlsx",
     "sizeBytes": 11213,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -28963,6 +27682,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "NIVELACION ACADEMICA_DICIEMBRE 2024- ENERO 2025.xlsx",
     "sizeBytes": 91554,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -29836,6 +28556,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "Exámenes aprobados para titulación ",
     "sizeBytes": 14930,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -30451,6 +29172,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "2026_Personal",
     "sizeBytes": 75173,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -31099,6 +29821,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "Prácticas de Laboratorios",
     "sizeBytes": 34861,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -31936,6 +30659,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "Prácticas de Laboratorios",
     "sizeBytes": 34858,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -32885,6 +31609,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "Academia de programa técnico AQ15-Campo disciplinar..xlsx",
     "sizeBytes": 13869,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -33235,6 +31960,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "Academia de programa técnico AP13-Campo disciplinar..xlsx",
     "sizeBytes": 13293,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -33529,6 +32255,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "Prácticas de Laboratorios",
     "sizeBytes": 34842,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -34478,6 +33205,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "Academias BG24_Campo disciplinar_v4.0.xlsx",
     "sizeBytes": 54555,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -34695,6 +33423,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "Formato de cronograma de academia de plantel.xlsx",
     "sizeBytes": 10548,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -35028,6 +33757,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "Prácticas de Laboratorios",
     "sizeBytes": 33166,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -35865,6 +34595,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "Idiomas.xlsx",
     "sizeBytes": 9095,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -35956,6 +34687,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "Formato conformación de academias por plantel.xlsx",
     "sizeBytes": 33506,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
@@ -36513,6 +35245,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "category": "Registro interesados manuales inglés.xlsx",
     "sizeBytes": 193530,
     "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [
       "Bachillerato 16"
     ],
