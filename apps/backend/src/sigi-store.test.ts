@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { officialCatalogStats, officialIndicatorPlantelScopes } from "./official-catalog.generated.js";
+import { officialCatalogRows, officialCatalogStats, officialIndicatorPlantelScopes } from "./official-catalog.generated.js";
 import { officialDataSummary, officialWorkbookTemplates } from "./official-data.generated.js";
 import { createCaptureDraft, resetCaptureDraftsForTest } from "./capture-store.js";
 import {
@@ -42,6 +42,15 @@ describe("SIGI store and RBAC", () => {
       plantelScopeSource: "official-import"
     });
     expect(listUsers(director).some((user) => user.role === "responsable" && user.indicatorCodes.length > 1)).toBe(true);
+  });
+
+  it("keeps official catalog indicators visible for plantel capture even when no detailed workbook exists", () => {
+    const bachillerato16 = sessionFromHeaders({ "x-role": "plantel", "x-plantel-id": "1" });
+    const visibleCodes = new Set(listIndicators(bachillerato16).map((indicator) => indicator.code));
+    const catalogCodes = Array.from(new Set(officialCatalogRows.map((row) => row.code).filter(Boolean)));
+
+    expect(catalogCodes.length).toBeGreaterThanOrEqual(48);
+    expect(catalogCodes.filter((code) => !visibleCodes.has(code))).toEqual([]);
   });
 
   it("authenticates delivery users without exposing password hashes", () => {

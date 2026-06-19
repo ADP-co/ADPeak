@@ -9,6 +9,8 @@ Fecha de revision: 2026-06-19
 
 El conector de Google Drive devolvio la carpeta `1oDfIBw4A9443XppW0_hl4PWqLnyEwSTs` sin archivos visibles para la cuenta conectada. Por eso la importacion reproducible usa los ZIP descargados localmente.
 
+Tambien se reviso el historial Git completo (`git log --all --name-only -- *.xlsx *.xls *.csv`) y no hay hojas de calculo versionadas en ninguna rama remota/local. El archivo `SIGI-POA DGEMS 2026.docx` menciona los codigos de indicador, pero no contiene tablas ni campos de captura; por tanto no aporta formatos detallados para los codigos sin libro Excel.
+
 ## Resultado importado
 
 - 99 filas fisicas desde `Libro1.xlsx`.
@@ -20,7 +22,7 @@ El conector de Google Drive devolvio la carpeta `1oDfIBw4A9443XppW0_hl4PWqLnyEwS
 
 ## Brecha detectada
 
-Hay 37 codigos de `Libro1.xlsx` que no tienen un libro de formato detallado correspondiente dentro de los ZIP disponibles. En el sistema quedan como indicadores oficiales con responsable, contribuyente y actividad base, pero su tabla detallada usa la plantilla estructural del sistema hasta que el profesor/equipo proporcione el formato exacto.
+Hay 37 codigos de `Libro1.xlsx` que no tienen un libro de formato detallado correspondiente dentro de los ZIP disponibles ni en el historial Git. En el sistema quedan como indicadores oficiales con responsable, contribuyente y actividad base, pero su tabla detallada usa la plantilla estructural del sistema hasta que el profesor/equipo proporcione el formato exacto.
 
 | Codigo | Indicador | Responsable | Actividad base |
 |---|---|---|---|
