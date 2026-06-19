@@ -7,7 +7,13 @@ Fecha de revision: 2026-06-19
 - `drive-download-20260428T232937Z-3-001.zip`: contiene `Libro1.xlsx`, `SIGI-POA DGEMS 2026.docx` y `Bachillerato 16-20260424T001029Z-3-001.zip`.
 - `indicadores-20260428T232925Z-3-001.zip`: contiene 13 libros de formatos oficiales de indicadores.
 
-El conector de Google Drive devolvio la carpeta `1oDfIBw4A9443XppW0_hl4PWqLnyEwSTs` sin archivos visibles para la cuenta conectada. Por eso la importacion reproducible usa los ZIP descargados localmente.
+El conector de Google Drive devolvio la carpeta `1oDfIBw4A9443XppW0_hl4PWqLnyEwSTs` sin archivos visibles para la cuenta conectada. La consulta de metadatos devolvio `404 File not found`, y el acceso HTTP publico abre una pantalla de inicio de sesion de Google Drive. Por eso la importacion reproducible usa los ZIP descargados localmente.
+
+Verificacion local de fuentes:
+
+- `drive-download-20260428T232937Z-3-001.zip`: 3 archivos, 1 hoja Excel (`Libro1.xlsx`).
+- `Bachillerato 16-20260424T001029Z-3-001.zip`: 995 archivos, 39 libros Excel.
+- `indicadores-20260428T232925Z-3-001.zip`: 13 libros Excel de formatos oficiales.
 
 Tambien se reviso el historial Git completo (`git log --all --name-only -- *.xlsx *.xls *.csv`) y no hay hojas de calculo versionadas en ninguna rama remota/local. El archivo `SIGI-POA DGEMS 2026.docx` menciona los codigos de indicador, pero no contiene tablas ni campos de captura; por tanto no aporta formatos detallados para los codigos sin libro Excel.
 
@@ -19,6 +25,7 @@ Tambien se reviso el historial Git completo (`git log --all --name-only -- *.xls
 - 52 libros `.xlsx` analizados para formatos.
 - 60 plantillas manipulables generadas desde hojas oficiales.
 - 41 indicadores con alcance de plantel detectado desde evidencias.
+- 97 indicadores totales disponibles en la app despues de extender los formatos que solo aparecen en libros Excel.
 
 ## Brecha detectada
 
