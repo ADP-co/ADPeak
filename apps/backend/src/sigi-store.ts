@@ -839,7 +839,25 @@ function progressForCapturedRow(row: Record<string, unknown>, status: CaptureDra
 }
 
 function readableValue(value: unknown) {
-  return typeof value === "string" ? value.trim() : "";
+  return typeof value === "string" ? cleanReportText(value.trim()) : "";
+}
+
+function cleanReportText(value: string) {
+  if (!value.includes("\uFFFD")) {
+    return value;
+  }
+
+  return value
+    .replace(/\uFFFDlvarez/g, "\u00C1lvarez")
+    .replace(/T\uFFFDcnico/g, "T\u00E9cnico")
+    .replace(/Qu\uFFFDmico/g, "Qu\u00EDmico")
+    .replace(/Cl\uFFFDnica/g, "Cl\u00EDnica")
+    .replace(/Atenci\uFFFDn/g, "Atenci\u00F3n")
+    .replace(/Promoci\uFFFDn/g, "Promoci\u00F3n")
+    .replace(/N\uFFFDmero/g, "N\u00FAmero")
+    .replace(/Matr\uFFFDcula/g, "Matr\u00EDcula")
+    .replace(/titulaci\uFFFDn/g, "titulaci\u00F3n")
+    .replace(/Titulaci\uFFFDn/g, "Titulaci\u00F3n");
 }
 
 function numberValue(value: unknown) {
@@ -921,7 +939,7 @@ function reportDetailValue(value: unknown): string {
   }
 
   if (typeof value === "string") {
-    return value.trim();
+    return cleanReportText(value.trim());
   }
 
   if (typeof value === "number" || typeof value === "boolean") {

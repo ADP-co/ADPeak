@@ -473,6 +473,49 @@ describe("SIGI store and RBAC", () => {
     ]));
   });
 
+  it("repairs replacement characters from client-submitted report text", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const indicator = saveIndicator(director, {
+      code: "TMP-REPORT-ENCODING",
+      name: "Indicador temporal para reporte con acentos",
+      dataType: "number",
+      responsibleNames: ["Adriana Ruiz Rivera"],
+      contributorNames: ["Planteles"],
+      activities: ["Titulación"],
+      plantelIds: [1],
+      templateColumns: [
+        { key: "plantel", label: "Plantel", type: "readonly" },
+        { key: "delegacion", label: "Delegación", type: "readonly" },
+        { key: "programa", label: "Programa", type: "text" }
+      ]
+    });
+
+    createCaptureDraft({
+      plantelId: 1,
+      indicadorId: indicator.id,
+      actividadId: 1,
+      periodoId: 1,
+      responsableId: indicator.primaryResponsibleId,
+      payload: {
+        rows: [{
+          plantel: "Bachillerato 16",
+          delegacion: "Villa de \uFFFDlvarez",
+          programa: "T\uFFFDcnico Analista Programador"
+        }]
+      }
+    });
+
+    const report = buildReportPayload(director, { plantelId: "1", periodo: "2026-2" });
+    const reportRow = report.indicadores
+      .find((item) => item.id === "TMP-REPORT-ENCODING")
+      ?.datos[0];
+
+    expect(reportRow?.detalle).toEqual(expect.arrayContaining([
+      { campo: "Delegación", valor: "Villa de Álvarez" },
+      { campo: "Programa", valor: "Técnico Analista Programador" }
+    ]));
+  });
+
   it("builds the official health integral matrix for indicator 1.1.2.1.4", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const plantel = sessionFromHeaders({
