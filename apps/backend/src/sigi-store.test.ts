@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { officialCatalogStats } from "./official-catalog.generated.js";
+import { officialCatalogStats, officialIndicatorPlantelScopes } from "./official-catalog.generated.js";
 import { officialDataSummary, officialWorkbookTemplates } from "./official-data.generated.js";
 import { createCaptureDraft, resetCaptureDraftsForTest } from "./capture-store.js";
 import {
@@ -186,7 +186,7 @@ describe("SIGI store and RBAC", () => {
     expect(bachillerato4.indicadores.some((indicator) => indicator.id === "1.0.0.0.2")).toBe(false);
   });
 
-  it("keeps imported official indicators unassigned and exposes them only after director assignment", () => {
+  it("keeps imported official indicators unassigned while allowing plantel capture until director narrows the scope", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const bachillerato16 = sessionFromHeaders({ "x-role": "plantel", "x-plantel-id": "1" });
     const bachillerato4 = sessionFromHeaders({ "x-role": "plantel", "x-plantel-id": "2" });
@@ -198,8 +198,22 @@ describe("SIGI store and RBAC", () => {
 
     expect(indicator?.plantelIds).toEqual([]);
     expect(unassigned.plantelScopeSource).toBe("official-import");
-    expect(listIndicators(bachillerato16).some((item) => item.code === "1.0.0.0.2")).toBe(false);
+    expect(listIndicators(bachillerato16).some((item) => item.code === "1.0.0.0.2")).toBe(true);
+    expect(listIndicators(bachillerato4).some((item) => item.code === "1.0.0.0.2")).toBe(true);
     expect(templateForIndicator(unassigned, director).initialRows.every((row) => row.plantel === "Sin plantel asignado")).toBe(true);
+    expect(templateForIndicator(unassigned, bachillerato16).initialRows.every((row) => row.plantel === "Bachillerato 16")).toBe(true);
+
+    expect(() =>
+      assertCaptureAccess(
+        bachillerato16,
+        {
+          plantelId: 1,
+          indicadorId: unassigned.id,
+          payload: { rows: templateForIndicator(unassigned, bachillerato16).initialRows, justificacion: "Captura con fuente oficial" }
+        },
+        "submit"
+      )
+    ).not.toThrow();
 
     const saved = saveIndicator(director, {
       ...unassigned,
@@ -652,7 +666,7 @@ describe("SIGI store and RBAC", () => {
     });
   });
 
-  it("generates a readable unassigned template and enables capture after explicit plantel assignment", () => {
+  it("generates readable official templates and allows plantel capture when the official import has no narrower scope", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const plantel = sessionFromHeaders({
       "x-role": "plantel",
@@ -663,13 +677,18 @@ describe("SIGI store and RBAC", () => {
       .filter((indicator) => indicator.plantelScopeSource === "official-import")
       .forEach((indicator) => {
       const template = templateForIndicator(indicator, director);
+      const importedScope = officialIndicatorPlantelScopes[indicator.code] ?? [];
+      const allowsPlantel =
+        indicator.plantelIds.includes(1) ||
+        importedScope.includes(1) ||
+        (indicator.plantelScopeSource === "official-import" && indicator.plantelIds.length === 0 && importedScope.length === 0);
 
       expect(template.columns.length, indicator.code).toBeGreaterThan(0);
       expect(template.initialRows.length, indicator.code).toBeGreaterThan(0);
       expect(template.initialRows.length, indicator.code).toBeGreaterThanOrEqual(1);
-      const isAlreadyScopedToPlantel = listIndicators(plantel).some((item) => item.code === indicator.code);
+      const isVisibleToPlantel = listIndicators(plantel).some((item) => item.code === indicator.code);
       if (template.columns.some((column) => column.key === "plantel")) {
-        const expectedPlantel = isAlreadyScopedToPlantel ? "Bachillerato 16" : "Sin plantel asignado";
+        const expectedPlantel = indicator.plantelIds.length > 0 || importedScope.length > 0 ? "Bachillerato 16" : "Sin plantel asignado";
         expect(template.initialRows.every((row) => row.plantel === expectedPlantel), indicator.code).toBe(true);
       }
 
@@ -684,7 +703,9 @@ describe("SIGI store and RBAC", () => {
           "draft"
         );
 
-      if (isAlreadyScopedToPlantel) {
+      expect(isVisibleToPlantel).toBe(allowsPlantel);
+
+      if (allowsPlantel) {
         expect(draftAttempt).not.toThrow();
       } else {
         expect(draftAttempt).toThrow(SigiForbiddenError);
@@ -715,11 +736,15 @@ describe("SIGI store and RBAC", () => {
   });
 
   it("blocks captures for indicators that are not assigned to the requested plantel", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
     const plantel = sessionFromHeaders({
       "x-role": "plantel",
       "x-plantel-id": "2"
     });
-    const indicator = getIndicatorByCode("1.0.0.0.2");
+    const indicator = saveIndicator(director, {
+      ...getIndicatorByCode("1.0.0.0.2")!,
+      plantelIds: [1]
+    });
 
     expect(indicator).toBeDefined();
     expect(() =>
@@ -727,7 +752,7 @@ describe("SIGI store and RBAC", () => {
         plantel,
         {
           plantelId: 2,
-          indicadorId: indicator!.id,
+          indicadorId: indicator.id,
           payload: { rows: [{ egresados_mujeres: 1, egresados_hombres: 1, matricula_mujeres: 1, matricula_hombres: 1 }] }
         },
         "draft"

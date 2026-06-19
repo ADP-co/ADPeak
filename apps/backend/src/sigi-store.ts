@@ -1469,6 +1469,14 @@ function isResponsibleAssigned(session: SigiSession, indicator: SigiIndicator) {
 }
 
 function canUseIndicatorForPlantel(indicator: SigiIndicator, plantelId: number) {
+  if (
+    indicator.plantelScopeSource === "official-import" &&
+    indicator.plantelIds.length === 0 &&
+    !officialIndicatorPlantelScopes[indicator.code]?.length
+  ) {
+    return planteles.some((plantel) => plantel.id === plantelId);
+  }
+
   return effectivePlantelIdsForIndicator(indicator).includes(plantelId);
 }
 

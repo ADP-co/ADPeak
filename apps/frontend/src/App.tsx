@@ -213,6 +213,14 @@ function canDisplayCatalogIndicatorForUser(indicator: CatalogIndicator, user?: U
   }
 
   if (user.role === 'plantel') {
+    if (
+      indicator.plantelScopeSource === 'official-import' &&
+      indicator.plantelIds.length === 0 &&
+      !(officialIndicatorPlantelScopes[indicator.code]?.length)
+    ) {
+      return true;
+    }
+
     return effectivePlantelIdsForCatalogIndicator(indicator).includes(user.plantelId ?? -1);
   }
 

@@ -33,6 +33,7 @@ export type CatalogIndicator = {
   contributorNames: string[];
   activities: string[];
   plantelIds: number[];
+  plantelScopeSource?: 'manual' | 'official-import';
   templateColumns?: ColumnConfig[];
 };
 
