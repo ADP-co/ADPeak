@@ -209,7 +209,7 @@ export const planteles: Plantel[] = [
 
 const unassignedPlantel: Plantel = { id: 0, key: "sin-plantel", name: "Sin plantel asignado" };
 const officialSourcePlantelIds: number[] = [];
-const officialCatalogImportVersion = "2026-06-18-official-workbook-templates-v4";
+const officialCatalogImportVersion = "2026-06-19-official-indicators-v5";
 
 const responsibleNames = Array.from(
   new Set(officialCatalogRows.map((row) => row.responsible).filter(Boolean))
@@ -1572,7 +1572,7 @@ function rowForOfficialWorkbookColumns(
     const sourceValue = sourceRow[column.key];
 
     if (normalizedLabel.includes("plantel")) {
-      row[column.key] = plantel.id === unassignedPlantel.id ? "" : plantel.name;
+      row[column.key] = plantel.name;
       continue;
     }
 

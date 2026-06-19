@@ -15,15 +15,15 @@ export type OfficialCatalogRow = {
 };
 
 export const officialCatalogStats = {
-  "sourceRows": 140,
-  "uniqueRows": 129,
+  "sourceRows": 148,
+  "uniqueRows": 137,
   "duplicateRows": 11,
-  "uniqueIndicators": 89,
+  "uniqueIndicators": 97,
   "uniqueResponsibles": 19,
   "uniqueContributors": 23,
-  "uniqueActivities": 107,
+  "uniqueActivities": 113,
   "blankActivities": 3,
-  "workbookOnlyIndicators": 41
+  "workbookOnlyIndicators": 49
 } as const;
 
 export const officialIndicatorPlantelScopes: Record<string, number[]> = {
@@ -1417,6 +1417,42 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   },
   {
     "sourceRow": 105,
+    "code": "1.1.2.0.1-FMT-4EB45B2E",
+    "name": "PORCENTAJE DE RETENCIÓN ESCOLAR DE EMS",
+    "responsible": "Liliana Yunuen Rojas Maciel",
+    "contributors": "Liliana Yunuen Rojas Maciel",
+    "activity": "1.1.2.0.1. porcentaje de retención escolar de EMS.xlsx",
+    "dedupeKey": "7091eac81c6702b3",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "official_code_detected",
+      "private_fields_blank",
+      "shared_official_code_split_by_source",
+      "source_workbook_template",
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 106,
+    "code": "1.1.2.0.3-FMT-EDABD54D",
+    "name": "Tasa de abadono escolar de educación media superior",
+    "responsible": "Liliana Yunuen Rojas Maciel",
+    "contributors": "Liliana Yunuen Rojas Maciel, Daniela Nohemi Navarro Castillo",
+    "activity": "Indicador 1.1.2.0.3..xlsx",
+    "dedupeKey": "03f57bb268e59d3f",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "official_code_detected",
+      "private_fields_blank",
+      "shared_official_code_split_by_source",
+      "source_workbook_template",
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 107,
     "code": "1.1.2.1.8",
     "name": "Porcentaje de titulación por cohorte del NMS",
     "responsible": "Pendiente de asignar",
@@ -1433,7 +1469,115 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 106,
+    "sourceRow": 108,
+    "code": "1.1.2.3.1-FMT-2A7229AD",
+    "name": "PORCENTAJE DE ESTUDIANTES DE MEDIA SUPERIOR QUE PARTICIPAN EN ACTIVIDADES DE FORMACIÓN INTEGRAL",
+    "responsible": "Laura Gabriela Calvario",
+    "contributors": "Laura Gabriela Calvario",
+    "activity": "1.1.2.3.1.Convocatorias externas .xlsx",
+    "dedupeKey": "1ca6b1ca21afcc1b",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "official_code_detected",
+      "private_fields_blank",
+      "shared_official_code_split_by_source",
+      "source_workbook_template",
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 109,
+    "code": "1.1.2.3.1-FMT-AD152691",
+    "name": "Porcentaje de estudiantes de NMS y NS participantes en las actividades de desarrollo y formación integral",
+    "responsible": "Laura Gabriela Calvario",
+    "contributors": "Laura Gabriela Calvario",
+    "activity": "1.1.2.3.1 Programa Adopta una Prepa .xlsx",
+    "dedupeKey": "976ea8dba8e5d548",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "official_code_detected",
+      "private_fields_blank",
+      "shared_official_code_split_by_source",
+      "source_workbook_template",
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 110,
+    "code": "1.1.2.3.1-FMT-FBF5B718",
+    "name": "PORCENTAJE DE ESTUDIANTES DE MEDIA SUPERIOR QUE PARTICIPAN EN ACTIVIDADES DE FORMACIÓN INTEGRAL",
+    "responsible": "Laura Gabriela Calvario",
+    "contributors": "Laura Gabriela Calvario",
+    "activity": "1.1.2.3.1. Modelo de las Naciones Unidas.xlsx",
+    "dedupeKey": "c378057223e8c1c5",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "official_code_detected",
+      "private_fields_blank",
+      "shared_official_code_split_by_source",
+      "source_workbook_template",
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 111,
+    "code": "1.1.2.5.1-FMT-D30B3A90",
+    "name": "Porcentaje de docentes de educación media superior y superior que cumple con perfil docente idóneo de acuerdo con el modelo educativo institucional",
+    "responsible": "Oscar Delgado Sánchez",
+    "contributors": "Oscar Delgado Sánchez",
+    "activity": "Formación_apoyo académico_2026.xlsx",
+    "dedupeKey": "9506d0491c4351f9",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "official_code_detected",
+      "private_fields_blank",
+      "shared_official_code_split_by_source",
+      "source_workbook_template",
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 112,
+    "code": "1.1.2.5.5-FMT-D30B3A90",
+    "name": "Porcentaje de docentes de educación media superior y superior que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocionales, inclu",
+    "responsible": "Oscar Delgado Sánchez",
+    "contributors": "Oscar Delgado Sánchez",
+    "activity": "Formación_apoyo académico_2026.xlsx",
+    "dedupeKey": "b3a654e117daf271",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "official_code_detected",
+      "private_fields_blank",
+      "shared_official_code_split_by_source",
+      "source_workbook_template",
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 113,
+    "code": "1.1.2.5.7-FMT-D30B3A90",
+    "name": "Porcentaje de docentes de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
+    "responsible": "Oscar Delgado Sánchez",
+    "contributors": "Oscar Delgado Sánchez",
+    "activity": "Formación_apoyo académico_2026.xlsx",
+    "dedupeKey": "7234ee88d6f3b6be",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "official_code_detected",
+      "private_fields_blank",
+      "shared_official_code_split_by_source",
+      "source_workbook_template",
+      "workbook_only_indicator"
+    ]
+  },
+  {
+    "sourceRow": 114,
     "code": "1.1.3.0.3",
     "name": "Porcentaje de estudiantes de NMS participantes en las actividades de desarrollo y formación integral",
     "responsible": "Pendiente de asignar",
@@ -1450,7 +1594,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 107,
+    "sourceRow": 115,
     "code": "1.1.3.0.3-FMT-26A4E4BB",
     "name": "Porcentaje de estudiantes de NMS participantes en las actividades de desarrollo y formación integral",
     "responsible": "Pendiente de asignar",
@@ -1468,7 +1612,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 108,
+    "sourceRow": 116,
     "code": "1.1.3.0.3-FMT-6B682267",
     "name": "EDUCACIÓN PERTINENTE Y DE CALIDAD Porcentaje de estudiantes de NMS y NS participantes en las actividades de desarrollo y formación integral",
     "responsible": "Pendiente de asignar",
@@ -1486,7 +1630,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 109,
+    "sourceRow": 117,
     "code": "1.1.3.0.3-FMT-6EBA7CE9",
     "name": "Porcentaje de estudiantes de NMS y NS participantes en las actividades de desarrollo y formación integral",
     "responsible": "Pendiente de asignar",
@@ -1504,7 +1648,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 110,
+    "sourceRow": 118,
     "code": "1.1.3.0.3-FMT-74E3FB42",
     "name": "Porcentaje de estudiantes de NMS participantes en las actividades de desarrollo y formación integral",
     "responsible": "Pendiente de asignar",
@@ -1522,7 +1666,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 111,
+    "sourceRow": 119,
     "code": "1.1.3.0.3-FMT-7E91E4DB",
     "name": "Porcentaje de estudiantes de NMS participantes en las actividades de desarrollo y formación integral",
     "responsible": "Pendiente de asignar",
@@ -1540,7 +1684,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 112,
+    "sourceRow": 120,
     "code": "1.1.4.4.4",
     "name": "Número de estudiantes de NMS y NS participando en acciones de internacionalización",
     "responsible": "Pendiente de asignar",
@@ -1557,7 +1701,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 113,
+    "sourceRow": 121,
     "code": "B16-FMT-01-0A31F882-bachillerato-16-febrero",
     "name": "Bachillerato 16 FEBRERO - JULIO 2026",
     "responsible": "Pendiente de asignar",
@@ -1574,7 +1718,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 114,
+    "sourceRow": 122,
     "code": "B16-FMT-01-0CE86D23-alumnos-que-realizaron-e",
     "name": "Alumnos que realizaron examen de conocImientos para titulación",
     "responsible": "Pendiente de asignar",
@@ -1591,7 +1735,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 115,
+    "sourceRow": 123,
     "code": "B16-FMT-01-12F38BB9-formato-media-superior",
     "name": "formato media superior",
     "responsible": "Pendiente de asignar",
@@ -1608,7 +1752,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 116,
+    "sourceRow": 124,
     "code": "B16-FMT-01-19F01A78-nivelacion-academica-dic",
     "name": "NIVELACION ACADEMICA_DICIEMBRE 2024- ENERO 2025",
     "responsible": "Pendiente de asignar",
@@ -1625,7 +1769,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 117,
+    "sourceRow": 125,
     "code": "B16-FMT-01-1D310056-seguimiento-capacitacion",
     "name": "Seguimiento capacitación en materia de género planteles",
     "responsible": "Pendiente de asignar",
@@ -1642,7 +1786,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 118,
+    "sourceRow": 126,
     "code": "B16-FMT-01-1E107D9F-personal-plantel-2026",
     "name": "PERSONAL _PLANTEL_2026",
     "responsible": "Pendiente de asignar",
@@ -1659,7 +1803,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 119,
+    "sourceRow": 127,
     "code": "B16-FMT-01-33E7A579-1-bachillerato-16-febrer",
     "name": "1) Bachillerato 16 FEBRERO- AGOSTO 2024",
     "responsible": "Pendiente de asignar",
@@ -1676,7 +1820,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 120,
+    "sourceRow": 128,
     "code": "B16-FMT-01-55725D79-personal-plantel-2025",
     "name": "PERSONAL PLANTEL_2025",
     "responsible": "Pendiente de asignar",
@@ -1693,7 +1837,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 121,
+    "sourceRow": 129,
     "code": "B16-FMT-01-55EF8C78-la-ciencia-en-los-bachil",
     "name": "LA CIENCIA EN LOS BACHILLERATOS UNIVERSITARIOS",
     "responsible": "Pendiente de asignar",
@@ -1710,7 +1854,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 122,
+    "sourceRow": 130,
     "code": "B16-FMT-01-628F230D-nivelacion-academica-jun",
     "name": "NIVELACION ACADEMICA_junio- agosto 2025",
     "responsible": "Pendiente de asignar",
@@ -1727,7 +1871,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 123,
+    "sourceRow": 131,
     "code": "B16-FMT-01-697E06CF-academia-de-programa-tec",
     "name": "Academia de programa técnico AQ15-Campo disciplinar.",
     "responsible": "Pendiente de asignar",
@@ -1744,7 +1888,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 124,
+    "sourceRow": 132,
     "code": "B16-FMT-01-6BB983C1-3-bachillerato-16-febrer",
     "name": "3) Bachillerato 16 FEBRERO - JULIO 2025",
     "responsible": "Pendiente de asignar",
@@ -1761,7 +1905,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 125,
+    "sourceRow": 133,
     "code": "B16-FMT-01-73CBDE41-bach-16-terminaron",
     "name": "BACH 16 TERMINARON",
     "responsible": "Pendiente de asignar",
@@ -1778,7 +1922,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 126,
+    "sourceRow": 134,
     "code": "B16-FMT-01-76B62473-formato-conformacion-de",
     "name": "Formato conformación de academias por plantel",
     "responsible": "Pendiente de asignar",
@@ -1795,7 +1939,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 127,
+    "sourceRow": 135,
     "code": "B16-FMT-01-85FF7F0A-estrategias-para-combati",
     "name": "Estrategias para combatir el abandono escolar",
     "responsible": "Pendiente de asignar",
@@ -1812,7 +1956,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 128,
+    "sourceRow": 136,
     "code": "B16-FMT-01-9129D9B3-concursos-academicos",
     "name": "CONCURSOS ACADEMICOS",
     "responsible": "Pendiente de asignar",
@@ -1829,7 +1973,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 129,
+    "sourceRow": 137,
     "code": "B16-FMT-01-9CE2F116-datos-planteles-y-buzon",
     "name": "DATOS PLANTELES Y BUZÓN UCOL",
     "responsible": "Pendiente de asignar",
@@ -1846,7 +1990,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 130,
+    "sourceRow": 138,
     "code": "B16-FMT-01-AC736017-idiomas",
     "name": "Idiomas",
     "responsible": "Pendiente de asignar",
@@ -1863,7 +2007,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 131,
+    "sourceRow": 139,
     "code": "B16-FMT-01-B53F23A1-2-bachillerato-16-agosto",
     "name": "2) Bachillerato 16 AGOSTO 2024 -ENERO 2025",
     "responsible": "Pendiente de asignar",
@@ -1880,7 +2024,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 132,
+    "sourceRow": 140,
     "code": "B16-FMT-01-BD626F5D-academia-de-programa-tec",
     "name": "Academia de programa técnico AP13-Campo disciplinar.",
     "responsible": "Pendiente de asignar",
@@ -1897,7 +2041,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 133,
+    "sourceRow": 141,
     "code": "B16-FMT-01-C7B22BC5-cronograma-del-para-la-p",
     "name": "Cronograma del para la promoción del aprendizaje intercultural, internacional y-o globa",
     "responsible": "Pendiente de asignar",
@@ -1914,7 +2058,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 134,
+    "sourceRow": 142,
     "code": "B16-FMT-01-CC792A5F-concentrado-abandono-esc",
     "name": "CONCENTRADO_ABANDONO ESCOLAR _SEP 2025",
     "responsible": "Pendiente de asignar",
@@ -1931,7 +2075,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 135,
+    "sourceRow": 143,
     "code": "B16-FMT-01-CE2296AB-red-de-apoyo-academico",
     "name": "Red de apoyo académico",
     "responsible": "Pendiente de asignar",
@@ -1948,7 +2092,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 136,
+    "sourceRow": 144,
     "code": "B16-FMT-01-CF8AE174-registro-interesados-man",
     "name": "Registro interesados manuales inglés",
     "responsible": "Pendiente de asignar",
@@ -1965,7 +2109,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 137,
+    "sourceRow": 145,
     "code": "B16-FMT-01-D2B34193-enlaces-unidades-de-aten",
     "name": "Enlaces Unidades de atención y redes de apoyo",
     "responsible": "Pendiente de asignar",
@@ -1982,7 +2126,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 138,
+    "sourceRow": 146,
     "code": "B16-FMT-01-D98834ED-formato-de-cronograma-de",
     "name": "Formato de cronograma de academia de plantel",
     "responsible": "Pendiente de asignar",
@@ -1999,7 +2143,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 139,
+    "sourceRow": 147,
     "code": "B16-FMT-01-E3FE144D-academias-bg24-campo-dis",
     "name": "Academias BG24_Campo disciplinar_v4.0",
     "responsible": "Pendiente de asignar",
@@ -2016,7 +2160,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 140,
+    "sourceRow": 148,
     "code": "B16-FMT-01-E8EFB8C0-seguimiento-a-proyectos",
     "name": "Seguimiento a proyectos de investigación en planteles",
     "responsible": "Pendiente de asignar",
@@ -2033,7 +2177,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 141,
+    "sourceRow": 149,
     "code": "B16-FMT-01-F40AA656-4-bachillerato-16-agosto",
     "name": "4) Bachillerato 16 AGOSTO 2025 -ENERO 2026",
     "responsible": "Pendiente de asignar",

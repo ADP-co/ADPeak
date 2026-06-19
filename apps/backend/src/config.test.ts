@@ -55,7 +55,7 @@ describe("getAppConfig", () => {
         ...validEnv,
         DATABASE_URL: "not-a-url"
       })
-    ).toThrow("DATABASE_URL debe ser una URL valida.");
+    ).toThrow("DATABASE_URL debe ser una URL válida.");
   });
 
   it("redacts sensitive values from diagnostics", () => {
@@ -72,6 +72,6 @@ describe("getAppConfig", () => {
         APP_ENV: "production",
         AUTH_SECRET: "local-dev-auth-secret-change-me"
       })
-    ).toThrow("AUTH_SECRET no puede usar un valor de ejemplo en produccion.");
+    ).toThrow("AUTH_SECRET no puede usar un valor de ejemplo en producción.");
   });
 });

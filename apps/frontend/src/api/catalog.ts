@@ -427,7 +427,7 @@ function buildOfficialWorkbookTemplate(indicator: CatalogIndicator, plantelName:
 
     columns.forEach((column) => {
       if (normalizeText(column.label).includes('plantel')) {
-        row[column.key] = plantelName === UNASSIGNED_PLANTEL_LABEL ? '' : plantelName;
+        row[column.key] = plantelName;
         return;
       }
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import os
 import re
 import unicodedata
 import zipfile
@@ -14,10 +15,20 @@ from openpyxl import load_workbook
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-SOURCE_DIR = Path(r"C:\Users\Lenovo\Downloads\drive-download-20260428T232937Z-3-001")
+SOURCE_DIR = Path(os.environ.get(
+    "ADPEAK_OFFICIAL_SOURCE_DIR",
+    r"C:\Users\Lenovo\Downloads\drive-download-20260428T232937Z-3-001",
+))
 SOURCE_ZIP = SOURCE_DIR.with_suffix(".zip")
 CATALOG_XLSX = SOURCE_DIR / "Libro1.xlsx"
-NESTED_ZIP = SOURCE_DIR / "Bachillerato 16-20260424T001029Z-3-001.zip"
+NESTED_ZIP = Path(os.environ.get(
+    "ADPEAK_OFFICIAL_BACH16_ZIP",
+    SOURCE_DIR / "Bachillerato 16-20260424T001029Z-3-001.zip",
+))
+INDICADORES_ZIP = Path(os.environ.get(
+    "ADPEAK_OFFICIAL_INDICADORES_ZIP",
+    SOURCE_DIR.parent / "indicadores-20260428T232925Z-3-001.zip",
+))
 
 BACKEND_CATALOG_TARGET = REPO_ROOT / "apps/backend/src/official-catalog.generated.ts"
 FRONTEND_CATALOG_TARGET = REPO_ROOT / "apps/frontend/src/catalog/officialCatalog.generated.ts"
@@ -57,10 +68,10 @@ HEADER_TOKENS = {
     "seguimiento",
     "semestre",
     "total",
+    "estudiante",
 }
 
 READONLY_TOKENS = {
-    "actividad",
     "delegacion",
     "plantel",
     "programa",
@@ -305,90 +316,99 @@ def workbook_summaries() -> tuple[
     template_candidates: list[dict[str, Any]] = []
     workbook_templates: dict[str, dict[str, Any]] = {}
 
-    if not NESTED_ZIP.exists():
+    archives = official_workbook_archives()
+    if not archives:
         return summaries, {}, [], [], {}
 
-    with zipfile.ZipFile(NESTED_ZIP) as archive:
-        infos = [info for info in archive.infolist() if not info.is_dir()]
-        for info in infos:
-            category = category_from_path(info.filename)
-            group = evidence_groups.setdefault(
-                category,
-                {"category": category, "fileCount": 0, "totalBytes": 0, "byExtension": Counter()},
-            )
-            group["fileCount"] += 1
-            group["totalBytes"] += info.file_size
-            group["byExtension"][Path(info.filename).suffix.lower() or "<none>"] += 1
+    for archive_path, source_scope, source_prefix in archives:
+        with zipfile.ZipFile(archive_path) as archive:
+            infos = [info for info in archive.infolist() if not info.is_dir()]
+            for info in infos:
+                category = category_from_path(info.filename, source_prefix)
+                group = evidence_groups.setdefault(
+                    category,
+                    {"category": category, "fileCount": 0, "totalBytes": 0, "byExtension": Counter()},
+                )
+                group["fileCount"] += 1
+                group["totalBytes"] += info.file_size
+                group["byExtension"][Path(info.filename).suffix.lower() or "<none>"] += 1
 
-        for info in infos:
-            if Path(info.filename).suffix.lower() != ".xlsx":
-                continue
-            payload = archive.read(info)
-            digest = hashlib.sha256(payload).hexdigest()
-            workbook = load_workbook(io.BytesIO(payload), data_only=False, read_only=True)
-            codes: set[str] = set()
-            planteles: set[str] = set()
-            sheets = []
-            formulas = 0
+            for info in infos:
+                if Path(info.filename).suffix.lower() != ".xlsx":
+                    continue
+                payload = archive.read(info)
+                digest = hashlib.sha256(payload).hexdigest()
+                workbook = load_workbook(io.BytesIO(payload), data_only=False, read_only=True)
+                codes: set[str] = set()
+                planteles: set[str] = set()
+                sheets = []
+                formulas = 0
 
-            for sheet in workbook.worksheets:
-                sheet_summary = summarize_sheet(sheet)
-                codes.update(sheet_summary.pop("codes"))
-                planteles.update(sheet_summary.pop("planteles"))
-                formulas += sheet_summary["formulaCells"]
-                sheets.append(sheet_summary)
+                for sheet in workbook.worksheets:
+                    sheet_summary = summarize_sheet(sheet)
+                    indicator_codes = sheet_summary.pop("indicatorCodes")
+                    sheet_codes = sheet_summary.pop("codes")
+                    codes.update(indicator_codes or sheet_codes)
+                    planteles.update(sheet_summary.pop("planteles"))
+                    formulas += sheet_summary["formulaCells"]
+                    sheets.append(sheet_summary)
 
-            if not planteles:
-                planteles.add("Bachillerato 16")
-            table_sheets = [sheet for sheet in sheets if sheet.get("table")]
-            source_codes = sorted(codes, key=normalize_key)
-            template_codes = source_codes or (
-                [synthetic_workbook_code(info.filename, digest)] if table_sheets else []
-            )
+                if not planteles and source_scope:
+                    planteles.add(source_scope)
+                table_sheets = [sheet for sheet in sheets if sheet.get("table")]
+                source_codes = sorted(codes, key=normalize_key)
+                template_codes = source_codes or (
+                    [synthetic_workbook_code(info.filename, digest)] if table_sheets else []
+                )
 
-            for source_index, source_code in enumerate(template_codes, start=1):
-                original_code = source_code if source_code in source_codes else ""
-                template_code = source_code
-                if template_code in workbook_templates:
-                    template_code = synthetic_workbook_code(info.filename, digest, original_code or source_code, source_index)
+                for source_index, source_code in enumerate(template_codes, start=1):
+                    original_code = source_code if source_code in source_codes else ""
+                    template_code = unique_workbook_template_code(
+                        source_code,
+                        info.filename,
+                        digest,
+                        workbook_templates,
+                        original_code=original_code,
+                        source_index=source_index,
+                    )
 
-                if "Bachillerato 16" in planteles:
-                    scopes[template_code].add(1)
-                template_candidates.append(
+                    if source_scope == "Bachillerato 16" and "Bachillerato 16" in planteles:
+                        scopes[template_code].add(1)
+                    template_candidates.append(
+                        {
+                            "indicatorCode": template_code,
+                            "officialCode": original_code or None,
+                            "sourcePath": source_path_for_summary(info.filename, source_prefix),
+                            "planteles": sorted(planteles, key=str.casefold),
+                            "classification": classify_workbook(sheets),
+                            "confidence": "detected-code" if original_code else "source-table-pending-code",
+                            "headerRows": first_header_rows(sheets),
+                        }
+                    )
+                    table_template = template_from_workbook_sheets(
+                        template_code,
+                        sheets,
+                        source_path_for_summary(info.filename, source_prefix),
+                        official_code=original_code,
+                        source_index=source_index,
+                    )
+                    if table_template and template_code not in workbook_templates:
+                        workbook_templates[template_code] = table_template
+
+                summaries.append(
                     {
-                        "indicatorCode": template_code,
-                        "officialCode": original_code or None,
-                        "sourcePath": unicodedata.normalize("NFC", info.filename),
-                        "planteles": sorted(planteles, key=str.casefold),
-                        "classification": classify_workbook(sheets),
-                        "confidence": "detected-code" if original_code else "source-table-pending-code",
-                        "headerRows": first_header_rows(sheets),
+                        "id": digest[:16],
+                        "sourceLabel": unicodedata.normalize("NFC", Path(info.filename).name),
+                        "sourcePathHash": digest,
+                        "category": category_from_path(info.filename, source_prefix),
+                        "sizeBytes": info.file_size,
+                        "detectedIndicatorCodes": sorted(codes),
+                        "detectedPlanteles": sorted(planteles, key=str.casefold),
+                        "formulaCells": formulas,
+                        "sheets": sheets,
+                        "privacy": "Row-level personal data remains in private storage only.",
                     }
                 )
-                table_template = template_from_workbook_sheets(
-                    template_code,
-                    sheets,
-                    info.filename,
-                    official_code=original_code,
-                    source_index=source_index,
-                )
-                if table_template and template_code not in workbook_templates:
-                    workbook_templates[template_code] = table_template
-
-            summaries.append(
-                {
-                    "id": digest[:16],
-                    "sourceLabel": unicodedata.normalize("NFC", Path(info.filename).name),
-                    "sourcePathHash": digest,
-                    "category": category_from_path(info.filename),
-                    "sizeBytes": info.file_size,
-                    "detectedIndicatorCodes": sorted(codes),
-                    "detectedPlanteles": sorted(planteles, key=str.casefold),
-                    "formulaCells": formulas,
-                    "sheets": sheets,
-                    "privacy": "Row-level personal data remains in private storage only.",
-                }
-            )
 
     groups = []
     for value in evidence_groups.values():
@@ -412,6 +432,45 @@ def workbook_summaries() -> tuple[
     )
 
 
+def unique_workbook_template_code(
+    source_code: str,
+    source_path: str,
+    digest: str,
+    existing_templates: dict[str, dict[str, Any]],
+    *,
+    original_code: str = "",
+    source_index: int = 1,
+) -> str:
+    if source_code not in existing_templates:
+        return source_code
+
+    candidate = synthetic_workbook_code(source_path, digest, original_code or source_code, source_index)
+    counter = 2
+    while candidate in existing_templates:
+        candidate = synthetic_workbook_code(source_path, digest, original_code or source_code, source_index + counter)
+        counter += 1
+    return candidate
+
+
+def official_workbook_archives() -> list[tuple[Path, str | None, str]]:
+    archives: list[tuple[Path, str | None, str]] = []
+    # The general indicator package carries the reusable official formats. It
+    # is processed first so its template wins the base code when Bachillerato 16
+    # also contains evidence for the same indicator.
+    if INDICADORES_ZIP.exists():
+        archives.append((INDICADORES_ZIP, None, "Indicadores"))
+    if NESTED_ZIP.exists():
+        archives.append((NESTED_ZIP, "Bachillerato 16", "Bachillerato 16"))
+    return archives
+
+
+def source_path_for_summary(filename: str, source_prefix: str) -> str:
+    clean = unicodedata.normalize("NFC", filename)
+    if source_prefix == "Indicadores" and clean.startswith("indicadores/"):
+        clean = clean.removeprefix("indicadores/")
+    return clean if clean.startswith(f"{source_prefix}/") else f"{source_prefix}/{clean}"
+
+
 def summarize_sheet(sheet: Any) -> dict[str, Any]:
     codes: set[str] = set()
     planteles: set[str] = set()
@@ -423,6 +482,7 @@ def summarize_sheet(sheet: Any) -> dict[str, Any]:
     non_empty_rows: list[dict[str, Any]] = []
     code_descriptions: list[str] = []
     columns_observed = 0
+    indicator_codes: set[str] = set()
 
     max_row = min(sheet.max_row or 80, 120)
     max_col = min(sheet.max_column or 30, 30)
@@ -440,6 +500,8 @@ def summarize_sheet(sheet: Any) -> dict[str, Any]:
         non_empty_rows.append({"row": row_number, "values": trim_trailing_blanks(values)})
         row_codes = CODE_RE.findall(row_text)
         codes.update(row_codes)
+        if row_codes and "indicador" in normalize_key(row_text):
+            indicator_codes.update(row_codes)
         if row_codes and len(code_descriptions) < 5:
             code_descriptions.append(row_text)
         for match in PLANTEL_RE.finditer(row_text):
@@ -470,6 +532,7 @@ def summarize_sheet(sheet: Any) -> dict[str, Any]:
         "formulaCells": formula_cells,
         "table": extract_table_from_rows(non_empty_rows),
         "codeDescriptions": code_descriptions,
+        "indicatorCodes": indicator_codes,
         "codes": codes,
         "planteles": planteles,
     }
@@ -492,8 +555,11 @@ def extract_table_from_rows(rows: list[dict[str, Any]]) -> dict[str, Any] | None
         values = row["values"]
         normalized = " ".join(normalize_key(value) for value in values if value)
         token_score = sum(1 for token in HEADER_TOKENS if token in normalized)
+        core_score = sum(1 for token in ("plantel", "actividad", "meta", "avance", "observacion") if token in normalized)
         width_score = min(4, len([value for value in values if value]))
-        score = token_score * 3 + width_score
+        next_values = rows[index + 1]["values"] if index + 1 < len(rows) else []
+        merge_bonus = 12 if should_merge_header_rows(values, next_values) else 0
+        score = token_score * 3 + core_score * 4 + width_score + merge_bonus
         if score > best_score and token_score >= 1 and width_score >= 2:
             best_index = index
             best_score = score
@@ -501,7 +567,7 @@ def extract_table_from_rows(rows: list[dict[str, Any]]) -> dict[str, Any] | None
     if best_index < 0:
         return None
 
-    header_values = rows[best_index]["values"]
+    header_values, data_start = combined_header_values(rows, best_index)
     width = len(header_values)
     columns = []
     seen_keys: set[str] = set()
@@ -511,12 +577,13 @@ def extract_table_from_rows(rows: list[dict[str, Any]]) -> dict[str, Any] | None
         columns.append(column_from_label(label, seen_keys))
 
     initial_rows = []
-    for row in rows[best_index + 1:]:
+    for row in rows[data_start:]:
         values = row["values"][:width]
         if not any(values):
             continue
         normalized = normalize_key(" ".join(values))
-        if "nota" in normalized and len(values) <= 2:
+        non_empty_values = [value for value in values if value]
+        if ("nota" in normalized or "totales" in normalized) and len(non_empty_values) <= 2:
             continue
 
         row_object: dict[str, Any] = {}
@@ -537,6 +604,58 @@ def extract_table_from_rows(rows: list[dict[str, Any]]) -> dict[str, Any] | None
     }
 
 
+def combined_header_values(rows: list[dict[str, Any]], best_index: int) -> tuple[list[str], int]:
+    primary = rows[best_index]["values"]
+    secondary = rows[best_index + 1]["values"] if best_index + 1 < len(rows) else []
+
+    if not should_merge_header_rows(primary, secondary):
+        return primary, best_index + 1
+
+    width = max(len(primary), len(secondary))
+    parent = forward_fill(primary + [""] * (width - len(primary)))
+    child = secondary + [""] * (width - len(secondary))
+    labels: list[str] = []
+
+    for index in range(width):
+        parent_label = clean_text(parent[index])
+        child_label = clean_text(child[index])
+
+        if child_label and parent_label and normalize_key(child_label) not in normalize_key(parent_label):
+            labels.append(f"{parent_label} {child_label}")
+        else:
+            labels.append(child_label or parent_label or f"Columna {index + 1}")
+
+    return labels, best_index + 2
+
+
+def should_merge_header_rows(primary: list[str], secondary: list[str]) -> bool:
+    if not secondary:
+        return False
+
+    primary_text = " ".join(normalize_key(value) for value in primary if value)
+    secondary_text = " ".join(normalize_key(value) for value in secondary if value)
+    if not secondary_text:
+        return False
+
+    secondary_tokens = set(secondary_text.split())
+    short_subheaders = {"h", "m", "t", "mujeres", "hombres", "total", "docentes", "administrativos"}
+    has_subheaders = bool(secondary_tokens & short_subheaders)
+    has_primary_groups = any(token in primary_text for token in ("periodo", "febrero", "agosto", "enero", "cantidad", "matricula"))
+    has_blanks = "" in primary or "" in secondary
+
+    return has_subheaders and (has_primary_groups or has_blanks)
+
+
+def forward_fill(values: list[str]) -> list[str]:
+    filled: list[str] = []
+    current = ""
+    for value in values:
+        if value:
+            current = value
+        filled.append(current)
+    return filled
+
+
 def column_from_label(label: str, seen_keys: set[str]) -> dict[str, Any]:
     normalized = normalize_key(label)
     key = normalized.replace(" ", "_")[:48] or "columna"
@@ -549,7 +668,7 @@ def column_from_label(label: str, seen_keys: set[str]) -> dict[str, Any]:
 
     if any(token in normalized for token in READONLY_TOKENS):
         column_type = "readonly"
-    elif any(token in normalized for token in NUMBER_TOKENS):
+    elif any(token in normalized for token in NUMBER_TOKENS) or set(normalized.split()) & {"m", "h", "t"}:
         column_type = "number"
     else:
         column_type = "text"
@@ -750,8 +869,10 @@ def classify_workbook(sheets: list[dict[str, Any]]) -> str:
     return "official_table"
 
 
-def category_from_path(filename: str) -> str:
+def category_from_path(filename: str, source_prefix: str = "") -> str:
     parts = [part for part in unicodedata.normalize("NFC", filename).split("/") if part]
+    if source_prefix == "Indicadores" and len(parts) >= 2:
+        return f"Indicadores / {parts[1]}"
     if len(parts) >= 3:
         return parts[2]
     if len(parts) >= 2:
@@ -796,11 +917,12 @@ def generate_data_file(
     row_count = sum(sheet["nonEmptyRows"] for summary in summaries for sheet in summary["sheets"])
     nested_file_count = sum(group["fileCount"] for group in evidence_groups)
     nested_total_bytes = sum(group["totalBytes"] for group in evidence_groups)
+    source_packages = [path.name for path, _scope, _prefix in official_workbook_archives()]
     summary = {
-        "sourcePackage": SOURCE_ZIP.name,
-        "plantel": "Bachillerato 16",
+        "sourcePackage": ", ".join(source_packages) or SOURCE_ZIP.name,
+        "plantel": "Indicadores oficiales y Bachillerato 16",
         "generatedAt": "2026-06-17",
-        "topLevelFiles": 3,
+        "topLevelFiles": 3 + (1 if INDICADORES_ZIP.exists() else 0),
         "nestedFiles": nested_file_count,
         "nestedTotalBytes": nested_total_bytes,
         "workbookCount": len(summaries),
@@ -810,7 +932,7 @@ def generate_data_file(
         if frontend
         else "Row-level personal data and evidence files remain backend-private; source binaries are not committed.",
     }
-    return f"""// Generated by tools/import-official-data.py from drive-download-20260428T232937Z-3-001.zip.
+    return f"""// Generated by tools/import-official-data.py from official Drive exports.
 // Source binaries and personal identifiers are intentionally not committed.
 
 export type OfficialEvidenceGroup = {{

@@ -31,10 +31,10 @@ describe("SIGI store and RBAC", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const indicators = listIndicators(director);
 
-    expect(officialCatalogStats.uniqueIndicators).toBe(89);
-    expect(officialDataSummary.workbookCount).toBe(39);
-    expect(Object.keys(officialWorkbookTemplates)).toHaveLength(41);
-    expect(indicators.length).toBeGreaterThanOrEqual(89);
+    expect(officialCatalogStats.uniqueIndicators).toBe(97);
+    expect(officialDataSummary.workbookCount).toBe(52);
+    expect(Object.keys(officialWorkbookTemplates)).toHaveLength(60);
+    expect(indicators.length).toBeGreaterThanOrEqual(97);
     expect(getIndicatorByCode("1.0.0.0.2")).toMatchObject({
       name: expect.stringContaining("titul"),
       active: true,
@@ -296,15 +296,15 @@ describe("SIGI store and RBAC", () => {
     const sources = officialSourcesPayload(director);
 
     expect(sources.summary).toMatchObject({
-      plantel: "Bachillerato 16",
-      topLevelFiles: 3,
-      nestedFiles: 981,
-      workbookCount: 39,
-      worksheetCount: 53
+      plantel: "Indicadores oficiales y Bachillerato 16",
+      topLevelFiles: 4,
+      nestedFiles: 994,
+      workbookCount: 52,
+      worksheetCount: 67
     });
-    expect(sources.summary.worksheetNonEmptyRows).toBe(1313);
-    expect(sources.evidenceGroups).toHaveLength(70);
-    expect(sources.workbookSummaries).toHaveLength(39);
+    expect(sources.summary.worksheetNonEmptyRows).toBe(1437);
+    expect(sources.evidenceGroups).toHaveLength(75);
+    expect(sources.workbookSummaries).toHaveLength(52);
   });
 
   it("includes official evidence groups in Bachillerato 16 report exports", () => {
@@ -315,8 +315,8 @@ describe("SIGI store and RBAC", () => {
     expect(officialSources).toBeDefined();
     expect(report.indicadores.every((indicator) => Boolean(indicator.id))).toBe(true);
     expect(report.indicadores.flatMap((indicator) => indicator.datos).every((row) => Boolean(row.registro_id))).toBe(true);
-    expect(officialSources?.datos).toHaveLength(70);
-    expect(officialSources?.datos.reduce((total, row) => total + row.evidencias, 0)).toBe(981);
+    expect(officialSources?.datos).toHaveLength(75);
+    expect(officialSources?.datos.reduce((total, row) => total + row.evidencias, 0)).toBe(994);
   });
 
   it("uses active false for logical indicator deletion", () => {
@@ -470,22 +470,19 @@ describe("SIGI store and RBAC", () => {
 
     const template = templateForIndicator(indicator, director);
 
-    expect(template.headerRows).toBeDefined();
     expect(template.showTotals).toBe(true);
     expect(template.columns.map((column) => [column.key, column.type])).toEqual([
       ["plantel", "readonly"],
-      ["actividad", "readonly"],
-      ["servicios_medicos", "number"],
-      ["dgdi", "number"],
-      ["cuap", "number"],
-      ["feb_ago_mujeres", "number"],
-      ["feb_ago_hombres", "number"],
-      ["feb_ago_total", "calculated"],
-      ["ago_ene_mujeres", "number"],
-      ["ago_ene_hombres", "number"],
-      ["ago_ene_total", "calculated"]
+      ["nota_anotar_solo_la_actividad_desarrollada_unida", "text"],
+      ["nota_anotar_solo_la_actividad_desarrollada_unida_2", "text"],
+      ["nota_anotar_solo_la_actividad_desarrollada_unida_3", "text"],
+      ["febrero_agosto_2026_m", "number"],
+      ["febrero_agosto_2026_h", "number"],
+      ["t", "number"],
+      ["agosto_enero_2027_m", "number"],
+      ["agosto_enero_2027_h", "number"],
+      ["t_2", "number"]
     ]);
-    expect(template.initialRows.map((row) => row.actividad)).toEqual(indicator.activities);
     expect(template.initialRows.every((row) => row.plantel === "Bachillerato 16")).toBe(true);
 
     expect(() =>
@@ -497,13 +494,13 @@ describe("SIGI store and RBAC", () => {
           payload: {
             rows: [{
               ...template.initialRows[0],
-              servicios_medicos: 1,
-              dgdi: 2,
-              cuap: 3,
-              feb_ago_mujeres: 4,
-              feb_ago_hombres: 5,
-              ago_ene_mujeres: 6,
-              ago_ene_hombres: 7
+              nota_anotar_solo_la_actividad_desarrollada_unida: "Servicios médicos",
+              nota_anotar_solo_la_actividad_desarrollada_unida_2: "DGDI",
+              nota_anotar_solo_la_actividad_desarrollada_unida_3: "CUAP",
+              febrero_agosto_2026_m: 4,
+              febrero_agosto_2026_h: 5,
+              agosto_enero_2027_m: 6,
+              agosto_enero_2027_h: 7
             }]
           }
         },
@@ -576,30 +573,26 @@ describe("SIGI store and RBAC", () => {
       },
       {
         code: "1.1.2.3.1",
-        expectedKeys: ["actividades_desarrollo", "matricula_total", "incorporacion_total_num", "incorporacion_total_pct"],
+        expectedKeys: ["plantel", "estudiantes_m", "estudiantes_h", "docentes_m", "docentes_h"],
         sampleValues: {
-          actividades_desarrollo: 2,
-          actividades_formacion: 1,
-          matricula_mujeres: 30,
-          matricula_hombres: 20,
-          incorporacion_mujeres_num: 15,
-          incorporacion_hombres_num: 10,
-          descripcion: "Actividades realizadas"
+          estudiantes_m: 30,
+          estudiantes_h: 20,
+          docentes_m: 3,
+          docentes_h: 2
         }
       },
       {
         code: "1.1.2.5.5",
-        expectedKeys: ["tipo_evento", "nombre_evento", "participantes_hombres", "participantes_mujeres", "participantes_total"],
+        expectedKeys: ["tipo_de_evento", "nombre_del_evento", "poblacion_docente_nms_h", "m", "poblacion_docente_nms_total"],
         sampleValues: {
-          tipo_evento: "Curso",
-          nombre_evento: "Capacitación docente",
-          duracion_horas: 12,
+          tipo_de_evento: "Curso",
+          nombre_del_evento: "Capacitación docente",
+          duracion_en_horas: 12,
           modalidad: "Presencial",
-          competencias: "Didácticas",
-          organizado_por: "DGEMS",
-          participantes_hombres: 4,
-          participantes_mujeres: 6,
-          evidencias: 1
+          competencias_desarrolladas: "Didácticas",
+          evento_organizado_por: "DGEMS",
+          poblacion_docente_nms_h: 4,
+          m: 6
         }
       },
       {
@@ -626,7 +619,7 @@ describe("SIGI store and RBAC", () => {
       const keys = template.columns.map((column) => column.key);
 
       expectedKeys.forEach((key) => expect(keys).toContain(key));
-      expect(template.initialRows.length).toBe(indicator.activities.length);
+      expect(template.initialRows.length).toBeGreaterThan(0);
 
       expect(() =>
         assertCaptureAccess(
@@ -673,11 +666,7 @@ describe("SIGI store and RBAC", () => {
 
       expect(template.columns.length, indicator.code).toBeGreaterThan(0);
       expect(template.initialRows.length, indicator.code).toBeGreaterThan(0);
-      expect(template.initialRows.length, indicator.code).toBeGreaterThanOrEqual(
-        indicator.activities.length > 0 && !["1.0.0.0.1", "1.0.0.0.2"].includes(indicator.code)
-          ? indicator.activities.length
-          : 1
-      );
+      expect(template.initialRows.length, indicator.code).toBeGreaterThanOrEqual(1);
       const isAlreadyScopedToPlantel = listIndicators(plantel).some((item) => item.code === indicator.code);
       if (template.columns.some((column) => column.key === "plantel")) {
         const expectedPlantel = isAlreadyScopedToPlantel ? "Bachillerato 16" : "Sin plantel asignado";

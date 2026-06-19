@@ -82,7 +82,7 @@ export function getAppConfig(
     /local|example|change-me|placeholder/i.test(authSecret)
   ) {
     throw new ConfigurationError(
-      "AUTH_SECRET no puede usar un valor de ejemplo en produccion."
+      "AUTH_SECRET no puede usar un valor de ejemplo en producción."
     );
   }
 
@@ -174,7 +174,7 @@ function parseUrl(value: string, key: string): string {
   try {
     return new URL(value).toString().replace(/\/$/, "");
   } catch {
-    throw new ConfigurationError(`${key} debe ser una URL valida.`);
+    throw new ConfigurationError(`${key} debe ser una URL válida.`);
   }
 }
 
