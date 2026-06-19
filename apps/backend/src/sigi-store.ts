@@ -209,7 +209,7 @@ export const planteles: Plantel[] = [
 
 const unassignedPlantel: Plantel = { id: 0, key: "sin-plantel", name: "Sin plantel asignado" };
 const officialSourcePlantelIds: number[] = [];
-const officialCatalogImportVersion = "2026-06-19-official-indicators-v6";
+const officialCatalogImportVersion = "2026-06-19-official-indicators-v7";
 
 const responsibleNames = Array.from(
   new Set(officialCatalogRows.map((row) => row.responsible).filter(Boolean))
@@ -1244,6 +1244,23 @@ function mergeInitialIndicators(persisted?: SigiIndicator[], applyCatalogMigrati
     );
     const seededIndicator = byCode.get(normalizedIndicator.code);
 
+    if (applyCatalogMigration && isRetiredOfficialImport(normalizedIndicator, seededIndicator)) {
+      continue;
+    }
+
+    if (
+      applyCatalogMigration &&
+      seededIndicator?.plantelScopeSource === "official-import" &&
+      normalizedIndicator.plantelScopeSource === "official-import"
+    ) {
+      byCode.set(normalizedIndicator.code, {
+        ...seededIndicator,
+        id: normalizedIndicator.id,
+        active: normalizedIndicator.active
+      });
+      continue;
+    }
+
     byCode.set(normalizedIndicator.code, seededIndicator
       ? {
           ...seededIndicator,
@@ -1254,6 +1271,10 @@ function mergeInitialIndicators(persisted?: SigiIndicator[], applyCatalogMigrati
   }
 
   return ensureUniqueIndicatorIds(Array.from(byCode.values()));
+}
+
+function isRetiredOfficialImport(indicator: SigiIndicator, seededIndicator?: SigiIndicator) {
+  return indicator.plantelScopeSource === "official-import" && !seededIndicator;
 }
 
 function isKnownTestIndicator(indicator: Partial<SigiIndicator>) {
