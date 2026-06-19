@@ -157,7 +157,7 @@ describe("SIGI store and RBAC", () => {
     expect(report.indicadores.every((indicator) => assignedCodes.includes(indicator.id))).toBe(true);
   });
 
-  it("keeps report filters explicit and leaves imported official indicators unassigned until configured", () => {
+  it("keeps report filters explicit and includes capturable official indicators without explicit plantel scope", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const currentCycle = buildReportPayload(director, {
       cicloEscolar: "2025-2026",
@@ -190,9 +190,9 @@ describe("SIGI store and RBAC", () => {
     expect(previousCycle.periodo).toBe("2025-2");
     expect(previousCycle.cicloEscolar).toBe("2024-2025");
     expect(currentCycle.indicadores.flatMap((indicator) => indicator.datos).every((row) => row.estado === "Borrador" || row.estado === "Aprobado")).toBe(true);
-    expect(currentCycle.indicadores.flatMap((indicator) => indicator.datos).some((row) => row.plantel === "Sin plantel asignado")).toBe(true);
-    expect(bachillerato16.indicadores.some((indicator) => indicator.id === "1.0.0.0.2")).toBe(false);
-    expect(bachillerato4.indicadores.some((indicator) => indicator.id === "1.0.0.0.2")).toBe(false);
+    expect(currentCycle.indicadores.flatMap((indicator) => indicator.datos).some((row) => row.plantel === "Bachillerato 16")).toBe(true);
+    expect(bachillerato16.indicadores.some((indicator) => indicator.id === "1.0.0.0.2")).toBe(true);
+    expect(bachillerato4.indicadores.some((indicator) => indicator.id === "1.0.0.0.2")).toBe(true);
   });
 
   it("keeps imported official indicators unassigned while allowing plantel capture until director narrows the scope", () => {

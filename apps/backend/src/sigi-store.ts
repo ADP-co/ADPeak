@@ -740,6 +740,14 @@ function plantelesForReport(indicator: SigiIndicator, scopedPlanteles: Plantel[]
   const effectivePlantelIds = effectivePlantelIdsForIndicator(indicator);
 
   if (effectivePlantelIds.length === 0) {
+    if (
+      indicator.plantelScopeSource === "official-import" &&
+      indicator.plantelIds.length === 0 &&
+      !officialIndicatorPlantelScopes[indicator.code]?.length
+    ) {
+      return scopedPlanteles.filter((plantel) => canUseIndicatorForPlantel(indicator, plantel.id));
+    }
+
     return hasPlantelFilter ? [] : [unassignedPlantel];
   }
 
