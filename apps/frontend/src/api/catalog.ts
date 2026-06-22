@@ -418,11 +418,7 @@ function buildOfficialWorkbookTemplate(indicator: CatalogIndicator, plantelName:
   const imported = officialWorkbookTemplates[indicator.code];
   const columns = imported.columns;
   const displayCode = imported.officialCode || (indicator.code.startsWith('B16-FMT-') ? 'Pendiente de mapeo' : indicator.code);
-  const indicatorInfoText = imported.officialCode && imported.officialCode !== indicator.code
-    ? `Código oficial ${imported.officialCode}. Formato diferenciado por fuente oficial.`
-    : imported.officialCode
-      ? `Código ${imported.officialCode} ${indicator.name}.`
-      : `${indicator.name}.`;
+  const groups = imported.groups.filter((group) => group.label !== 'Formato oficial importado');
   const applyPlantel = (sourceRow: Record<string, unknown>) => {
     const row: Record<string, unknown> = {};
 
@@ -444,23 +440,9 @@ function buildOfficialWorkbookTemplate(indicator: CatalogIndicator, plantelName:
   return {
     indicatorCode: displayCode,
     indicatorName: indicator.name,
-    groups: imported.groups.length > 0
-      ? imported.groups
-      : [{ label: 'Formato oficial importado', colspan: Math.max(columns.length, 1) }],
+    groups,
     columns,
     initialRows,
-    infoBlocks: [
-      {
-        label: 'INDICADOR',
-        text: indicatorInfoText,
-        tone: 'highlight',
-      },
-      {
-        label: 'FUENTE',
-        text: `${imported.sourceLabel} · ${imported.sheetName}`,
-      },
-    ],
-    footerNote: imported.footerNote,
     showTotals: imported.showTotals,
     allowAddRows: imported.allowAddRows,
     addRowLabel: imported.addRowLabel,

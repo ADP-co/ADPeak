@@ -2496,12 +2496,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "1.0.0.0.2 Titulación por cohorte.xlsx",
     "sourcePath": "Indicadores/Adriana Ruiz/1.0.0.0.2 Titulación por cohorte.xlsx",
     "sheetName": "Titulación",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "delegacion",
@@ -2583,7 +2578,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
       "matricula_de_primer_ingreso_de_la_misma_cohorte__4": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -2597,12 +2592,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "1.1.2.3.1 Programa Adopta una Prepa .xlsx",
     "sourcePath": "Indicadores/Ariadna Zuñiga/1.1.2.3.1 Programa Adopta una Prepa .xlsx",
     "sheetName": "1.1.2.3.1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 9
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "columna_1",
@@ -2677,7 +2667,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "total_docentes_asistentes_mujeres": "",
       "total_docentes_asistentes_hombres": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -2691,12 +2681,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "1.1.2.0.3.Estrategias para combatir el abandono escolar.xlsx",
     "sourcePath": "Indicadores/Daniela Navarro/1.1.2.0.3.Estrategias para combatir el abandono escolar.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 5
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -2743,7 +2728,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_de_alumnos_hombres": "",
       "cantidad_de_alumnos_total": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -2757,12 +2742,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "41221 - Porcentaje de UO que realizan acciones de actualización, mantenimiento preventivo o correctivo de la insfraestructura tecnologica.xlsx",
     "sourcePath": "Indicadores/Angel Ordoñez/41221 - Porcentaje de UO que realizan acciones de actualización, mantenimiento preventivo o correctivo de la insfraestructura tecnologica.xlsx",
     "sheetName": "Hoja2",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 11
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "columna_1",
@@ -2916,7 +2896,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "de_equipos_atendidos": "",
       "observaciones": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -2930,12 +2910,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Indicador 1.1.2.0.3..xlsx",
     "sourcePath": "Indicadores/Liliana Rojas/Indicador 1.1.2.0.3..xlsx",
     "sheetName": "Indicador 1.1.2.0.3",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 19
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "escuela",
@@ -3143,7 +3118,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "columna_18": "",
       "tasa_de_desercion_2": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -3157,12 +3132,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Indicador 1.1.2.0.1..xlsx",
     "sourcePath": "Indicadores/Liliana Rojas/Indicador 1.1.2.0.1..xlsx",
     "sheetName": "Indicador 1.1.2.0.1.",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 12
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "semestre",
@@ -3286,7 +3256,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "ago_2026_ene_2027_mujeres": "",
       "ago_2026_ene_2027_total": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -3300,12 +3270,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "4.1.1.0.1. Numero de Sistemas de Informacion Institucionales que interoperan.xlsx",
     "sourcePath": "Indicadores/Angel Ordoñez/4.1.1.0.1. Numero de Sistemas de Informacion Institucionales que interoperan.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 3
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "columna_1",
@@ -3338,7 +3303,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "nombre_del_software": "",
       "aspecto_de_la_formacion_integral_del_estudiantad": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -3352,12 +3317,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "4.1.1.1.1. - Número de sistemas implementados y mejorados para fortalecer la gestión de procesos institucionales..xlsx",
     "sourcePath": "Indicadores/Angel Ordoñez/4.1.1.1.1. - Número de sistemas implementados y mejorados para fortalecer la gestión de procesos institucionales..xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 7
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "columna_1",
@@ -3418,7 +3378,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "autorizo": "",
       "observaciones": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -3432,12 +3392,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato con OPCIONES de llenado de academias por plantel.xlsx",
     "sourcePath": "Indicadores/Adriana Ruiz/formatos/Formato con OPCIONES de llenado de academias por plantel.xlsx",
     "sheetName": "INFORME SEMESTRAL FEBRERO",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 12
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -3673,7 +3628,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "docentes_que_participaron_en_las_academias_m": "",
       "total_m": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -3687,12 +3642,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "1.1.1.1.1 Formato conformación de academias por plantel.xlsx",
     "sourcePath": "Indicadores/Adriana Ruiz/1.1.1.1.1 Formato conformación de academias por plantel.xlsx",
     "sheetName": "INFORME SEMESTRAL FEBRERO",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 12
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -3900,7 +3850,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "docentes_que_participaron_en_las_academias_m": "",
       "total_m": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -3915,12 +3865,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Titulación por cohorte.xlsx",
     "sourcePath": "Indicadores/Adriana Ruiz/formatos/Titulación por cohorte.xlsx",
     "sheetName": "Titulación",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "delegacion",
@@ -4062,7 +4007,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
       "matricula_de_primer_ingreso_de_la_misma_cohorte__4": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -4077,12 +4022,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "1.1.2.3.1.Convocatorias externas .xlsx",
     "sourcePath": "Indicadores/Daniela Navarro/1.1.2.3.1.Convocatorias externas .xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -4164,7 +4104,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_de_alumnos_participantes_mujeres": "",
       "cantidad_de_alumnos_participantes_total": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -4178,12 +4118,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "1.1.2.3.1 Porcentaje de estudiantes de media superior que participan en actividades de formación integral.VIAJES DE ESTUDIO.xlsx",
     "sourcePath": "Indicadores/Carlos Nava/1.1.2.3.1 Porcentaje de estudiantes de media superior que participan en actividades de formación integral.VIAJES DE ESTUDIO.xlsx",
     "sheetName": "Table 1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 5
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -4230,7 +4165,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "docentes_m": "",
       "docentes_h": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -4245,12 +4180,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "1.1.2.0.1. porcentaje de retención escolar de EMS.xlsx",
     "sourcePath": "Indicadores/Daniela Navarro/1.1.2.0.1. porcentaje de retención escolar de EMS.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 7
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "nombre_de_la_actividad",
@@ -4311,7 +4241,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_de_participantes_padres_madres_y_o_tuto_2": "",
       "periodo_de_realizacion_padres_madres_y_o_tutores": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -4325,12 +4255,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "3.1.0.0.1.xlsx",
     "sourcePath": "Indicadores/Oscar Mendoza/3.1.0.0.1.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 11
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -4419,7 +4344,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "total_personal_administrativo_hombres": "",
       "total_de_participantes_hombres": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -4433,12 +4358,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "1.1.2.1.4 Porcentaje de estudiantes de educación media superior y superior atendidos en los servicios de salud integral..xlsx",
     "sourcePath": "Indicadores/Carlos Nava/1.1.2.1.4 Porcentaje de estudiantes de educación media superior y superior atendidos en los servicios de salud integral..xlsx",
     "sheetName": "Table 1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -4520,7 +4440,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "agosto_enero_2027_h": "",
       "agosto_enero_2027_t": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -4534,12 +4454,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "1.1.2.3.1.xlsx",
     "sourcePath": "Indicadores/Oscar Mendoza/1.1.2.3.1.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 11
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -4628,7 +4543,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "total_personal_administrativo_hombres": "",
       "total_de_participantes_hombres": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -4642,12 +4557,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Opción de llenado Seguimiento de PTC.xlsx",
     "sourcePath": "Indicadores/Adriana Ruiz/formatos/Opción de llenado Seguimiento de PTC.xlsx",
     "sheetName": "PTC",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 4
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -4687,7 +4597,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "nombre_del_docente": "",
       "nivel": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -4701,12 +4611,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "2.1.4.1.2 Seguimiento a proyectos de investigación en planteles.xlsx",
     "sourcePath": "Indicadores/Ariadna Zuñiga/2.1.4.1.2 Seguimiento a proyectos de investigación en planteles.xlsx",
     "sheetName": "2.1.4.1.2",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 11
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -4795,7 +4700,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "numero_de_estudiantes_hombres": "",
       "observaciones_indicar_el_periodo_del_proyecto_ho": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -4809,12 +4714,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "1.1.2.5.3 Seguimiento de PTC.xlsx",
     "sourcePath": "Indicadores/Adriana Ruiz/1.1.2.5.3 Seguimiento de PTC.xlsx",
     "sheetName": "PTC",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 4
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -4854,7 +4754,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "nombre_del_docente": "",
       "nivel": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -4869,12 +4769,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "1.1.2.2.11 Seguimiento capacitación en materia de género planteles.xlsx",
     "sourcePath": "Indicadores/Ariadna Zuñiga/1.1.2.2.11 Seguimiento capacitación en materia de género planteles.xlsx",
     "sheetName": "1.1.2.2.11",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -4956,7 +4851,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "total_personal_administrativo_hombres": "",
       "temas_que_se_abordaron_hombres": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -4970,12 +4865,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "1.1.2.5.10 - Porcentaje de docentes de educación media superior y superior certificados en el dominio de una Lengua Extranjera.xlsx",
     "sourcePath": "Indicadores/Laura Calvario - solo responsable/1.1.2.5.10 - Porcentaje de docentes de educación media superior y superior certificados en el dominio de una Lengua Extranjera.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 9
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "agosto_2025_enero_2026_m",
@@ -5050,7 +4940,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "agosto_2026_enero_2027_h": "",
       "total_h_3": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -5064,12 +4954,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "NIVELACION ACADEMICA_ agosto 2025_ENERO2026 (1).xlsx",
     "sourcePath": "Indicadores/Marcial Aviña/NIVELACION ACADEMICA_ agosto 2025_ENERO2026 (1).xlsx",
     "sheetName": "ORDINARIO",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 19
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -5340,7 +5225,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_estudiantes_que_asistieron_t": "",
       "atencion_t": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -5354,12 +5239,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "1.1.2.2.10.xlsx",
     "sourcePath": "Indicadores/Oscar Mendoza/1.1.2.2.10.xlsx",
     "sheetName": "1.1.2.2.10",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 11
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -5448,7 +5328,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "total_personal_administrativo_hombres": "",
       "total_de_participantes_hombres": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -5462,12 +5342,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "1.1.2.3.1. Modelo de las Naciones Unidas.xlsx",
     "sourcePath": "Indicadores/Daniela Navarro/1.1.2.3.1. Modelo de las Naciones Unidas.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 7
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -5528,7 +5403,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_de_alumnos_participantes_hombres": "",
       "cantidad_de_alumnos_participantes_mujeres": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -5542,12 +5417,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formación_docente_2026.xlsx",
     "sourcePath": "Indicadores/Oscar Delgado/Formación_docente_2026.xlsx",
     "sheetName": "DOCENTES",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "no",
@@ -5665,7 +5535,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "poblacion_docente_nms_m": "",
       "poblacion_docente_nms_total": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -5679,12 +5549,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "3.1.1.3.6.xlsx",
     "sourcePath": "Indicadores/Oscar Mendoza/3.1.1.3.6.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 11
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -5773,7 +5638,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "total_personal_administrativo_hombres": "",
       "total_de_participantes_hombres": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -5787,12 +5652,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formación_apoyo académico_2026.xlsx",
     "sourcePath": "Indicadores/Oscar Delgado/Formación_apoyo académico_2026.xlsx",
     "sheetName": "PERSONAL DE APOYO",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "no",
@@ -5910,7 +5770,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "personal_de_apoyo_academico_nms_m": "",
       "personal_de_apoyo_academico_nms_total": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -5924,12 +5784,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "BACH 16 TERMINARON.xlsx",
     "sourcePath": "Bachillerato 16/CONSTANCIAS SEMANA DE VINCULACIÓN ACADEMICA/BACH 16 TERMINARON.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 4
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "no",
@@ -6029,7 +5884,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "correo": "",
       "facultad": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -6043,12 +5898,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "formato media superior.xlsx",
     "sourcePath": "Bachillerato 16/Mobiliario/formato media superior.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -6346,7 +6196,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "n_inventario_de_los_equipos_a_sustituir": "",
       "equipo_por_espacio_nuevo": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -6360,12 +6210,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Seguimiento capacitación en materia de género planteles.xlsx",
     "sourcePath": "Bachillerato 16/Sensibilidad en Materia de Género/Seguimiento capacitación en materia de género planteles.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 6
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -6427,7 +6272,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "numero_de_alumnos_participantes": "",
       "temas_que_se_abordaron": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -6441,12 +6286,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formación_docente.xlsx",
     "sourcePath": "Bachillerato 16/Formación Docente y Apoyo Académico/Formación_docente.xlsx",
     "sheetName": "DOCENTES",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "no",
@@ -6528,7 +6368,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "poblacion_docente_nms_m": "",
       "poblacion_docente_nms_total": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -6542,12 +6382,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "DATOS  PLANTELES Y BUZÓN UCOL.xlsx",
     "sourcePath": "Bachillerato 16/Proceso de Admisión 2025/DATOS  PLANTELES Y BUZÓN UCOL.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 17
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -6678,7 +6513,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "no_de_trabajador_de_responsable_de_buzon_ucol": "",
       "correo_de_responsable_de_buzon_ucol": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -6692,12 +6527,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "JORNADA POR LA PAZ Y CONTRA LAS ADICCIONES FEB-AGO25.xlsx",
     "sourcePath": "Bachillerato 16/Programas Interinstitucionales/Estrategia en el aula, prevención de adicciones/JORNADA POR LA PAZ Y CONTRA LAS ADICCIONES FEB-AGO25.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 9
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -6772,7 +6602,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_de_participantes_estudiantado": "",
       "cantidad_de_participantes_padres_madres_de_famil": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -6786,12 +6616,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Enlaces Unidades de atención y redes de apoyo.xlsx",
     "sourcePath": "Bachillerato 16/Programas Interinstitucionales/Espacio común EMS/Enlaces Unidades de atención y redes de apoyo.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 17
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -7606,7 +7431,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "columna_16": "",
       "telefono_de_contacto": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -7620,12 +7445,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "MUNCOL.xlsx",
     "sourcePath": "Bachillerato 16/Programas Interinstitucionales/MUNCOL/MUNCOL.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 8
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "columna_1",
@@ -7743,7 +7563,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_de_alumnos_participantes_hombres": "",
       "cantidad_de_alumnos_participantes_mujeres": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -7758,12 +7578,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Proyecto SEMS Alfabetización y Educación Validación de alumnos.xlsx",
     "sourcePath": "Bachillerato 16/Programas Interinstitucionales/Programa de Alfabetización MONAE/Proyecto SEMS Alfabetización y Educación Validación de alumnos.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 11
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -7865,7 +7680,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "secundaria": "",
       "validar_si_no": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -7880,12 +7695,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formación_apoyo académico.xlsx",
     "sourcePath": "Bachillerato 16/Formación Docente y Apoyo Académico/Formación_apoyo académico.xlsx",
     "sheetName": "PERSONAL DE APOYO",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "no",
@@ -7967,7 +7777,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "personal_de_apoyo_academico_nms_m": "",
       "personal_de_apoyo_academico_nms_total": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -7981,12 +7791,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Seguimiento a proyectos de investigación en planteles.xlsx",
     "sourcePath": "Bachillerato 16/Seguimiento a Proyectos de Investigación/Seguimiento a proyectos de investigación en planteles.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 12
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -8082,7 +7887,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "columna_11": "",
       "temas_que_se_abordaron": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -8096,12 +7901,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "VIAJES DE ESTUDIO-EDUCACIÓN PERTINENTE Y DE CALIDAD.xlsx",
     "sourcePath": "Bachillerato 16/Viajes de Estudio/VIAJES DE ESTUDIO-EDUCACIÓN PERTINENTE Y DE CALIDAD.xlsx",
     "sheetName": "Table 1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 6
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "estudiantes",
@@ -8171,7 +7971,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "nombre_del_lugar_visitado": "",
       "descripcion_del_impacto_academico": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -8185,12 +7985,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "PERSONAL PLANTEL_2025.xlsx",
     "sourcePath": "Bachillerato 16/Personal del Plantel/PERSONAL PLANTEL_2025.xlsx",
     "sheetName": "PERSONAL DOCENTE AGO-23_ENE-24",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 15
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -9310,7 +9105,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "semestre_en_que_se_imparte": "",
       "programa_educativo": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -9324,12 +9119,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Convocatorias SEMS.xlsx",
     "sourcePath": "Bachillerato 16/Programas Interinstitucionales/Convocatoria SEMS/Convocatorias SEMS.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 11
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "columna_1",
@@ -9418,7 +9208,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_de_alumnos_participantes_hombres": "",
       "cantidad_de_alumnos_participantes_mujeres": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -9433,12 +9223,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "DESARROLLO Y FORMACION INTEGRAL -PARTICIPANTES EN ACTIVIDADES DE DESARROLLO Y FORMACIÓN INTEGRAL.xlsx",
     "sourcePath": "Bachillerato 16/Actividades de Desarrollo y Formación Integral/DESARROLLO Y FORMACION INTEGRAL -PARTICIPANTES EN ACTIVIDADES DE DESARROLLO Y FORMACIÓN INTEGRAL.xlsx",
     "sheetName": "Table 1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 12
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "nombre_de_la_actividad",
@@ -9534,7 +9319,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "incorporacion_de_estudiantes_total_no": "",
       "incorporacion_de_estudiantes_total": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -9548,12 +9333,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Estrategias para combatir el abandono escolar.xlsx",
     "sourcePath": "Bachillerato 16/Seguimiento Académico del Estudiantado/Estrategias para combatir el abandono escolar.xlsx",
     "sheetName": "Estrategias para combatir el ab",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 5
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -9621,7 +9401,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_de_alumnos_hombres": "",
       "cantidad_de_alumnos_total": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -9635,12 +9415,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Bachillerato 16 FEBRERO - JULIO 2026.xlsx",
     "sourcePath": "Bachillerato 16/Promoción de la Ciencia/Prácticas de Laboratorios/Bachillerato 16 FEBRERO - JULIO 2026.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 14
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "turno",
@@ -10518,7 +10293,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "1_0_4_0_sum_k3_m5_3": "",
       "sum_d4_l4_sum_d5_l5_sum_d6_l6": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -10532,12 +10307,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Cronograma del para la promoción del aprendizaje intercultural, internacional y-o globa.xlsx",
     "sourcePath": "Bachillerato 16/Internacionalización e Interculturalidad/Acciones de internacionalización e interculturalidad/Cronograma del para la promoción del aprendizaje intercultural, internacional y-o globa.xlsx",
     "sheetName": "AGOSTO 2024 – ENERO 2025",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 5
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "cargo_y_correo_del_la_responsable_no_de_estudian",
@@ -10584,7 +10354,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "fecha_de_realizacion_no_docentes_participantes": "",
       "fecha_de_realizacion_daniel_ochoa_roxana_gonzale": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -10598,12 +10368,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato_Indicador de internacionalización.xlsx",
     "sourcePath": "Bachillerato 16/Internacionalización e Interculturalidad/Acciones de internacionalización e interculturalidad/Formato_Indicador de internacionalización.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 13
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "no",
@@ -10841,7 +10606,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "poblacion_directiva_y_de_apoyo_academico_asisten_3": "",
       "total_global_subtotal": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -10855,12 +10620,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "INDICADOR DE TITULACION 2025.xlsx",
     "sourcePath": "Bachillerato 16/Titulación/INDICADOR DE TITULACION 2025.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "delegacion",
@@ -10978,7 +10738,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
       "matricula_de_primer_ingreso_de_la_misma_cohorte__4": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -10992,12 +10752,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "LA CIENCIA EN LOS BACHILLERATOS UNIVERSITARIOS.xlsx",
     "sourcePath": "Bachillerato 16/Promoción de la Ciencia/La ciencia en los bachilleratos universitarios/LA CIENCIA EN LOS BACHILLERATOS UNIVERSITARIOS.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "bachillerato",
@@ -11079,7 +10834,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "asignatura_s_participantes_docentes": "",
       "fecha_de_realizacion_docentes": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -11093,12 +10848,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "CONCURSOS ACADEMICOS.xlsx",
     "sourcePath": "Bachillerato 16/Promoción de la Ciencia/Concursos Académicos (ciencias, matemáticas, robótica, entre otras)./CONCURSOS ACADEMICOS.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 9
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "bachillerato",
@@ -11173,7 +10923,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "participantes_estudiantes_3": "",
       "participantes_docentes": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -11187,12 +10937,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "NIVELACION ACADEMICA_junio- agosto 2025.xlsx",
     "sourcePath": "Bachillerato 16/Nivelación Academica/NIVELACION ACADEMICA_junio- agosto 2025.xlsx",
     "sheetName": "ORDINARIO",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 19
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -11463,7 +11208,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_estudiantes_que_asistieron_t": "",
       "atencion_t": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -11477,12 +11222,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "CONCENTRADO_ABANDONO ESCOLAR _SEP 2025.xlsx",
     "sourcePath": "Bachillerato 16/Seguimiento Académico del Estudiantado/CONCENTRADO_ABANDONO ESCOLAR _SEP 2025.xlsx",
     "sheetName": "REPORTE ENERO 2025",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 27
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "columna_1",
@@ -11770,7 +11510,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "subtotal_no_especifico_h": "",
       "subtotal_no_especifico_m": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -11784,12 +11524,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Red de apoyo académico.xlsx",
     "sourcePath": "Bachillerato 16/Seguimiento Académico del Estudiantado/Red de apoyo académico.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 7
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "nombre_de_la_actividad",
@@ -11886,7 +11621,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_de_participantes_padres_madres_y_o_tuto_2": "",
       "periodo_de_realizacion_padres_madres_y_o_tutores": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -11900,12 +11635,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "NIVELACION ACADEMICA_DICIEMBRE 2024- ENERO 2025.xlsx",
     "sourcePath": "Bachillerato 16/Nivelación Academica/NIVELACION ACADEMICA_DICIEMBRE 2024- ENERO 2025.xlsx",
     "sheetName": "ORDINARIO",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 19
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -12197,7 +11927,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_estudiantes_que_asistieron_t": "",
       "atencion_t": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -12211,12 +11941,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Alumnos que realizaron examen de conocImientos para titulación.xlsx",
     "sourcePath": "Bachillerato 16/Titulación/Exámenes aprobados para titulación /Alumnos que realizaron examen de conocImientos para titulación.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 7
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "columna_1",
@@ -12808,7 +12533,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "plan": "",
       "grupo": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -12822,12 +12547,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "PERSONAL _PLANTEL_2026.xlsx",
     "sourcePath": "Bachillerato 16/Personal del Plantel/2026_Personal/PERSONAL _PLANTEL_2026.xlsx",
     "sheetName": "PERSONAL DOCENTE_2026",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 17
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -13623,7 +13343,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cuarto_semestre_asignaturas_llenar_una_asignatur": "",
       "sexto_semestre_llenar_una_asignatura_en_cada_fil": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -13637,12 +13357,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "4) Bachillerato 16 AGOSTO 2025 -ENERO 2026.xlsx",
     "sourcePath": "Bachillerato 16/Promoción de la Ciencia/Prácticas de Laboratorios/ARCHIVO Bachillerato 16/4) Bachillerato 16 AGOSTO 2025 -ENERO 2026.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 14
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "turno",
@@ -14408,7 +14123,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "1_0_4_0_sum_k3_m5_3": "",
       "sum_d4_l4_sum_d5_l5_sum_d6_l6": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -14422,12 +14137,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "1) Bachillerato 16 FEBRERO- AGOSTO 2024.xlsx",
     "sourcePath": "Bachillerato 16/Promoción de la Ciencia/Prácticas de Laboratorios/ARCHIVO Bachillerato 16/1) Bachillerato 16 FEBRERO- AGOSTO 2024.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 14
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "turno",
@@ -15305,7 +15015,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "1_0_4_0_sum_k3_m5_3": "",
       "sum_d4_l4_sum_d5_l5_sum_d6_l6": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -15319,12 +15029,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Academia de programa técnico AQ15-Campo disciplinar..xlsx",
     "sourcePath": "Bachillerato 16/Academias/Academia de programa técnico AQ15-Campo disciplinar..xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 5
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "nombre_del_docente",
@@ -15714,7 +15419,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "correo_electronico_institucional": "",
       "numero_contacto": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -15728,12 +15433,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Academia de programa técnico AP13-Campo disciplinar..xlsx",
     "sourcePath": "Bachillerato 16/Academias/Academia de programa técnico AP13-Campo disciplinar..xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 5
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "nombre_del_docente",
@@ -16067,7 +15767,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "correo_electronico_institucional": "",
       "numero_contacto": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -16081,12 +15781,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "3) Bachillerato 16 FEBRERO - JULIO 2025.xlsx",
     "sourcePath": "Bachillerato 16/Promoción de la Ciencia/Prácticas de Laboratorios/ARCHIVO Bachillerato 16/3) Bachillerato 16 FEBRERO - JULIO 2025.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 14
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "turno",
@@ -16964,7 +16659,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "1_0_4_0_sum_k3_m5_3": "",
       "sum_d4_l4_sum_d5_l5_sum_d6_l6": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -16978,12 +16673,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Academias BG24_Campo disciplinar_v4.0.xlsx",
     "sourcePath": "Bachillerato 16/Academias/Academias BG24_Campo disciplinar_v4.0.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 5
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "nombre_del_docente",
@@ -17240,7 +16930,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "correo_electronico_institucional": "",
       "numero_contacto": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -17254,12 +16944,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato de cronograma de academia de plantel.xlsx",
     "sourcePath": "Bachillerato 16/Academias/Formato de cronograma de academia de plantel.xlsx",
     "sheetName": "5, 3 y 1 semestre",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 6
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "columna_1",
@@ -17569,7 +17254,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "auditorio_del_plantel": "",
       "1_0": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -17583,12 +17268,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "2) Bachillerato 16 AGOSTO 2024 -ENERO 2025.xlsx",
     "sourcePath": "Bachillerato 16/Promoción de la Ciencia/Prácticas de Laboratorios/ARCHIVO Bachillerato 16/2) Bachillerato 16 AGOSTO 2024 -ENERO 2025.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 14
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "turno",
@@ -18354,7 +18034,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "1_0_4_0_sum_k3_m5_3": "",
       "sum_d4_l4_sum_d5_l5_sum_d6_l6": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -18368,12 +18048,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Idiomas.xlsx",
     "sourcePath": "Bachillerato 16/Academias/Idiomas.xlsx",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 5
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "nombre",
@@ -18441,7 +18116,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "correo_electronico_institucional": "",
       "numero_contacto": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -18455,12 +18130,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato conformación de academias por plantel.xlsx",
     "sourcePath": "Bachillerato 16/Academias/Formato conformación de academias por plantel.xlsx",
     "sheetName": "INFORME SEMESTRAL FEBRERO",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 12
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -18724,7 +18394,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "docentes_que_participaron_en_las_academias_m": "",
       "total_m": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -18738,12 +18408,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Registro interesados manuales inglés.xlsx",
     "sourcePath": "Bachillerato 16/Academias/Registro interesados manuales inglés.xlsx",
     "sheetName": "Registro Manuales",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 8
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "columna_1",
@@ -18831,7 +18496,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "asignatura_que_imparte": "",
       "manual_en_el_que_le_interesa_participar": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",

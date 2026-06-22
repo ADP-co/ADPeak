@@ -884,19 +884,14 @@ def template_from_workbook_sheets(
         "sourceLabel": source_label,
         "sourcePath": unicodedata.normalize("NFC", source_path),
         "sheetName": selected["name"],
-        "groups": [
-            {
-                "label": "Formato oficial importado",
-                "colspan": max(len(columns), 1),
-            }
-        ],
+        "groups": [],
         "columns": columns,
         "initialRows": table["initialRows"],
         "showTotals": any(column["type"] == "number" for column in columns),
         "allowAddRows": True,
         "addRowLabel": "Agregar fila",
         "emptyRow": empty_row_for_columns(columns),
-        "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+        "footerNote": "",
         "quality": [
             value
             for value in [

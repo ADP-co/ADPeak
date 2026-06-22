@@ -318,6 +318,9 @@ describe("SIGI store and RBAC", () => {
     expect(directorPlanteles).toContain("Bachillerato 1");
     expect(directorPlanteles).toContain("Bachillerato 16");
     expect(directorTemplate.initialRows.some((row) => row.nombre_completo)).toBe(true);
+    expect(directorTemplate.infoBlocks ?? []).toHaveLength(0);
+    expect(directorTemplate.footerNote).toBeUndefined();
+    expect(directorTemplate.groups.some((group) => group.label === "Formato oficial importado")).toBe(false);
 
     const plantelTemplate = templateForIndicator(indicator!, bachillerato16);
 

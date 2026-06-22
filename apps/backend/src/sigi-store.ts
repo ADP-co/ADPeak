@@ -1589,11 +1589,7 @@ function officialWorkbookTemplate(indicator: SigiIndicator, session?: SigiSessio
   const sessionPlantel = session?.role === "plantel" ? plantel : undefined;
   const columns = sanitizeTemplateColumns(imported.columns);
   const displayCode = imported.officialCode || (indicator.code.startsWith("B16-FMT-") ? "Pendiente de mapeo" : indicator.code);
-  const indicatorInfoText = imported.officialCode && imported.officialCode !== indicator.code
-    ? `Código oficial ${imported.officialCode}. Formato diferenciado por fuente oficial.`
-    : imported.officialCode
-      ? `Código ${imported.officialCode} ${indicator.name}.`
-      : `${indicator.name}.`;
+  const groups = imported.groups.filter((group) => group.label !== "Formato oficial importado");
   const sourceRows = rowsForOfficialWorkbookSession(imported.initialRows, columns, sessionPlantel);
   const rows = sourceRows.length > 0
     ? sourceRows.map((row) => rowForOfficialWorkbookColumns(columns, row, sessionPlantel))
@@ -1602,23 +1598,9 @@ function officialWorkbookTemplate(indicator: SigiIndicator, session?: SigiSessio
   return {
     indicatorCode: displayCode,
     indicatorName: indicator.name,
-    groups: imported.groups.length > 0
-      ? imported.groups
-      : [{ label: "Formato oficial importado", colspan: Math.max(columns.length, 1) }],
+    groups,
     columns,
     initialRows: rows,
-    infoBlocks: [
-      {
-        label: "INDICADOR",
-        text: indicatorInfoText,
-        tone: "highlight"
-      },
-      {
-        label: "FUENTE",
-        text: `${imported.sourceLabel} · ${imported.sheetName}`
-      }
-    ],
-    footerNote: imported.footerNote,
     showTotals: imported.showTotals,
     allowAddRows: imported.allowAddRows,
     addRowLabel: imported.addRowLabel,

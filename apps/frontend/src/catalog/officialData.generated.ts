@@ -1809,12 +1809,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial 1.0.0.0.2",
     "sourcePath": "private-workbook",
     "sheetName": "Titulación",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "delegacion",
@@ -1896,7 +1891,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
       "matricula_de_primer_ingreso_de_la_misma_cohorte__4": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -1910,12 +1905,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial 1.1.2.3.1",
     "sourcePath": "private-workbook",
     "sheetName": "1.1.2.3.1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 9
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "columna_1",
@@ -1990,7 +1980,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "total_docentes_asistentes_mujeres": "",
       "total_docentes_asistentes_hombres": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -2004,12 +1994,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-A2A43E4E-1-1-2-0-3-estrategias-pa",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 5
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -2056,7 +2041,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_de_alumnos_hombres": "",
       "cantidad_de_alumnos_total": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -2070,12 +2055,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-E81E8473-41221-porcentaje-de-uo-q",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja2",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 11
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "columna_1",
@@ -2229,7 +2209,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "de_equipos_atendidos": "",
       "observaciones": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -2243,12 +2223,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial 1.1.2.0.3",
     "sourcePath": "private-workbook",
     "sheetName": "Indicador 1.1.2.0.3",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 19
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "escuela",
@@ -2456,7 +2431,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "columna_18": "",
       "tasa_de_desercion_2": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -2470,12 +2445,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial 1.1.2.0.1",
     "sourcePath": "private-workbook",
     "sheetName": "Indicador 1.1.2.0.1.",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 12
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "semestre",
@@ -2599,7 +2569,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "ago_2026_ene_2027_mujeres": "",
       "ago_2026_ene_2027_total": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -2613,12 +2583,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-64E229A5-4-1-1-0-1-numero-de-sist",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 3
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "columna_1",
@@ -2651,7 +2616,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "nombre_del_software": "",
       "aspecto_de_la_formacion_integral_del_estudiantad": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -2665,12 +2630,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-E8DBA518-4-1-1-1-1-numero-de-sist",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 7
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "columna_1",
@@ -2731,7 +2691,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "autorizo": "",
       "observaciones": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -2745,12 +2705,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial 1.1.1.1.1",
     "sourcePath": "private-workbook",
     "sheetName": "INFORME SEMESTRAL FEBRERO",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 12
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -2986,7 +2941,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "docentes_que_participaron_en_las_academias_m": "",
       "total_m": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -3000,12 +2955,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial 1.1.1.1.1-FMT-489662BE",
     "sourcePath": "private-workbook",
     "sheetName": "INFORME SEMESTRAL FEBRERO",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 12
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -3213,7 +3163,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "docentes_que_participaron_en_las_academias_m": "",
       "total_m": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -3228,12 +3178,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial 1.0.0.0.2-FMT-7639E719",
     "sourcePath": "private-workbook",
     "sheetName": "Titulación",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "delegacion",
@@ -3375,7 +3320,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
       "matricula_de_primer_ingreso_de_la_misma_cohorte__4": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -3390,12 +3335,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-2A7229AD-1-1-2-3-1-convocatorias",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -3477,7 +3417,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_de_alumnos_participantes_mujeres": "",
       "cantidad_de_alumnos_participantes_total": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -3491,12 +3431,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial 1.1.2.3.1-FMT-6434504C",
     "sourcePath": "private-workbook",
     "sheetName": "Table 1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 5
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -3543,7 +3478,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "docentes_m": "",
       "docentes_h": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -3558,12 +3493,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-4EB45B2E-1-1-2-0-1-porcentaje-de",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 7
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "nombre_de_la_actividad",
@@ -3624,7 +3554,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_de_participantes_padres_madres_y_o_tuto_2": "",
       "periodo_de_realizacion_padres_madres_y_o_tutores": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -3638,12 +3568,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-1E04CC2A-3-1-0-0-1",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 11
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -3732,7 +3657,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "total_personal_administrativo_hombres": "",
       "total_de_participantes_hombres": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -3746,12 +3671,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial 1.1.2.1.4",
     "sourcePath": "private-workbook",
     "sheetName": "Table 1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -3833,7 +3753,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "agosto_enero_2027_h": "",
       "agosto_enero_2027_t": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -3847,12 +3767,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-AB95A3B8-1-1-2-3-1",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 11
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -3941,7 +3856,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "total_personal_administrativo_hombres": "",
       "total_de_participantes_hombres": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -3955,12 +3870,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial 1.1.2.5.3",
     "sourcePath": "private-workbook",
     "sheetName": "PTC",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 4
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -4000,7 +3910,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "nombre_del_docente": "",
       "nivel": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -4014,12 +3924,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-E8EBFAA5-2-1-4-1-2-seguimiento-a",
     "sourcePath": "private-workbook",
     "sheetName": "2.1.4.1.2",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 11
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -4108,7 +4013,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "numero_de_estudiantes_hombres": "",
       "observaciones_indicar_el_periodo_del_proyecto_ho": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -4122,12 +4027,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial 1.1.2.5.3-FMT-6D26FF23",
     "sourcePath": "private-workbook",
     "sheetName": "PTC",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 4
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -4167,7 +4067,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "nombre_del_docente": "",
       "nivel": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -4182,12 +4082,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-D055E9FA-1-1-2-2-11-seguimiento-c",
     "sourcePath": "private-workbook",
     "sheetName": "1.1.2.2.11",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -4269,7 +4164,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "total_personal_administrativo_hombres": "",
       "temas_que_se_abordaron_hombres": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -4283,12 +4178,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-A31E8100-1-1-2-5-10-porcentaje-de",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 9
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "agosto_2025_enero_2026_m",
@@ -4363,7 +4253,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "agosto_2026_enero_2027_h": "",
       "total_h_3": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -4377,12 +4267,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-F2A88F7E-nivelacion-academica-ago",
     "sourcePath": "private-workbook",
     "sheetName": "ORDINARIO",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 19
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -4653,7 +4538,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_estudiantes_que_asistieron_t": "",
       "atencion_t": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -4667,12 +4552,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-DF9CD1A2-1-1-2-2-10",
     "sourcePath": "private-workbook",
     "sheetName": "1.1.2.2.10",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 11
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -4761,7 +4641,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "total_personal_administrativo_hombres": "",
       "total_de_participantes_hombres": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -4775,12 +4655,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-FBF5B718-1-1-2-3-1-modelo-de-las",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 7
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -4841,7 +4716,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_de_alumnos_participantes_hombres": "",
       "cantidad_de_alumnos_participantes_mujeres": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -4855,12 +4730,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-43FE55CA-formacion-docente-2026",
     "sourcePath": "private-workbook",
     "sheetName": "DOCENTES",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "no",
@@ -4978,7 +4848,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "poblacion_docente_nms_m": "",
       "poblacion_docente_nms_total": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -4992,12 +4862,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-D6D521C8-3-1-1-3-6",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 11
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -5086,7 +4951,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "total_personal_administrativo_hombres": "",
       "total_de_participantes_hombres": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -5100,12 +4965,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-D30B3A90-formacion-apoyo-academic",
     "sourcePath": "private-workbook",
     "sheetName": "PERSONAL DE APOYO",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "no",
@@ -5223,7 +5083,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "personal_de_apoyo_academico_nms_m": "",
       "personal_de_apoyo_academico_nms_total": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -5237,12 +5097,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-73CBDE41-bach-16-terminaron",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 4
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "no",
@@ -5342,7 +5197,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "correo": "",
       "facultad": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -5356,12 +5211,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-12F38BB9-formato-media-superior",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -5659,7 +5509,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "n_inventario_de_los_equipos_a_sustituir": "",
       "equipo_por_espacio_nuevo": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -5673,12 +5523,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-1D310056-seguimiento-capacitacion",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 6
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -5740,7 +5585,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "numero_de_alumnos_participantes": "",
       "temas_que_se_abordaron": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -5754,12 +5599,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-62323922-formacion-docente",
     "sourcePath": "private-workbook",
     "sheetName": "DOCENTES",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "no",
@@ -5841,7 +5681,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "poblacion_docente_nms_m": "",
       "poblacion_docente_nms_total": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -5855,12 +5695,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-9CE2F116-datos-planteles-y-buzon",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 17
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -5991,7 +5826,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "no_de_trabajador_de_responsable_de_buzon_ucol": "",
       "correo_de_responsable_de_buzon_ucol": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -6005,12 +5840,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial 1.1.3.0.3",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 9
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -6085,7 +5915,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_de_participantes_estudiantado": "",
       "cantidad_de_participantes_padres_madres_de_famil": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -6099,12 +5929,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-D2B34193-enlaces-unidades-de-aten",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 17
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -6919,7 +6744,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "columna_16": "",
       "telefono_de_contacto": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -6933,12 +6758,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial 1.1.3.0.3-FMT-7E91E4DB",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 8
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "columna_1",
@@ -7056,7 +6876,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_de_alumnos_participantes_hombres": "",
       "cantidad_de_alumnos_participantes_mujeres": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -7071,12 +6891,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial 1.1.3.0.3-FMT-74E3FB42",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 11
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -7178,7 +6993,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "secundaria": "",
       "validar_si_no": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -7193,12 +7008,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-0C3E7CB6-formacion-apoyo-academic",
     "sourcePath": "private-workbook",
     "sheetName": "PERSONAL DE APOYO",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "no",
@@ -7280,7 +7090,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "personal_de_apoyo_academico_nms_m": "",
       "personal_de_apoyo_academico_nms_total": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -7294,12 +7104,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-E8EFB8C0-seguimiento-a-proyectos",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 12
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -7395,7 +7200,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "columna_11": "",
       "temas_que_se_abordaron": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -7409,12 +7214,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-6B682267-viajes-de-estudio-educac",
     "sourcePath": "private-workbook",
     "sheetName": "Table 1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 6
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "estudiantes",
@@ -7484,7 +7284,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "nombre_del_lugar_visitado": "",
       "descripcion_del_impacto_academico": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -7498,12 +7298,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-55725D79-personal-plantel-2025",
     "sourcePath": "private-workbook",
     "sheetName": "PERSONAL DOCENTE AGO-23_ENE-24",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 15
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -8623,7 +8418,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "semestre_en_que_se_imparte": "",
       "programa_educativo": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -8637,12 +8432,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial 1.1.3.0.3-FMT-26A4E4BB",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 11
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "columna_1",
@@ -8731,7 +8521,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_de_alumnos_participantes_hombres": "",
       "cantidad_de_alumnos_participantes_mujeres": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -8746,12 +8536,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-6EBA7CE9-desarrollo-y-formacion-i",
     "sourcePath": "private-workbook",
     "sheetName": "Table 1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 12
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "nombre_de_la_actividad",
@@ -8847,7 +8632,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "incorporacion_de_estudiantes_total_no": "",
       "incorporacion_de_estudiantes_total": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -8861,12 +8646,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-85FF7F0A-estrategias-para-combati",
     "sourcePath": "private-workbook",
     "sheetName": "Estrategias para combatir el ab",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 5
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -8934,7 +8714,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_de_alumnos_hombres": "",
       "cantidad_de_alumnos_total": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -8948,12 +8728,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-0A31F882-bachillerato-16-febrero",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 14
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "turno",
@@ -9831,7 +9606,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "1_0_4_0_sum_k3_m5_3": "",
       "sum_d4_l4_sum_d5_l5_sum_d6_l6": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -9845,12 +9620,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-C7B22BC5-cronograma-del-para-la-p",
     "sourcePath": "private-workbook",
     "sheetName": "AGOSTO 2024 – ENERO 2025",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 5
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "cargo_y_correo_del_la_responsable_no_de_estudian",
@@ -9897,7 +9667,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "fecha_de_realizacion_no_docentes_participantes": "",
       "fecha_de_realizacion_daniel_ochoa_roxana_gonzale": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -9911,12 +9681,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-A574F062-formato-indicador-de-int",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 13
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "no",
@@ -10154,7 +9919,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "poblacion_directiva_y_de_apoyo_academico_asisten_3": "",
       "total_global_subtotal": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -10168,12 +9933,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial 1.1.2.1.8",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "delegacion",
@@ -10291,7 +10051,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
       "matricula_de_primer_ingreso_de_la_misma_cohorte__4": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -10305,12 +10065,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-55EF8C78-la-ciencia-en-los-bachil",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 10
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "bachillerato",
@@ -10392,7 +10147,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "asignatura_s_participantes_docentes": "",
       "fecha_de_realizacion_docentes": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -10406,12 +10161,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-9129D9B3-concursos-academicos",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 9
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "bachillerato",
@@ -10486,7 +10236,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "participantes_estudiantes_3": "",
       "participantes_docentes": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -10500,12 +10250,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-628F230D-nivelacion-academica-jun",
     "sourcePath": "private-workbook",
     "sheetName": "ORDINARIO",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 19
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -10776,7 +10521,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_estudiantes_que_asistieron_t": "",
       "atencion_t": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -10790,12 +10535,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-CC792A5F-concentrado-abandono-esc",
     "sourcePath": "private-workbook",
     "sheetName": "REPORTE ENERO 2025",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 27
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "columna_1",
@@ -11083,7 +10823,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "subtotal_no_especifico_h": "",
       "subtotal_no_especifico_m": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -11097,12 +10837,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-CE2296AB-red-de-apoyo-academico",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 7
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "nombre_de_la_actividad",
@@ -11199,7 +10934,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_de_participantes_padres_madres_y_o_tuto_2": "",
       "periodo_de_realizacion_padres_madres_y_o_tutores": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -11213,12 +10948,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-19F01A78-nivelacion-academica-dic",
     "sourcePath": "private-workbook",
     "sheetName": "ORDINARIO",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 19
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -11510,7 +11240,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_estudiantes_que_asistieron_t": "",
       "atencion_t": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -11524,12 +11254,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-0CE86D23-alumnos-que-realizaron-e",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 7
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "columna_1",
@@ -12121,7 +11846,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "plan": "",
       "grupo": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -12135,12 +11860,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-1E107D9F-personal-plantel-2026",
     "sourcePath": "private-workbook",
     "sheetName": "PERSONAL DOCENTE_2026",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 17
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -12936,7 +12656,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cuarto_semestre_asignaturas_llenar_una_asignatur": "",
       "sexto_semestre_llenar_una_asignatura_en_cada_fil": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -12950,12 +12670,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-F40AA656-4-bachillerato-16-agosto",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 14
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "turno",
@@ -13721,7 +13436,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "1_0_4_0_sum_k3_m5_3": "",
       "sum_d4_l4_sum_d5_l5_sum_d6_l6": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -13735,12 +13450,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-33E7A579-1-bachillerato-16-febrer",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 14
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "turno",
@@ -14618,7 +14328,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "1_0_4_0_sum_k3_m5_3": "",
       "sum_d4_l4_sum_d5_l5_sum_d6_l6": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -14632,12 +14342,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-697E06CF-academia-de-programa-tec",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 5
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "nombre_del_docente",
@@ -15027,7 +14732,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "correo_electronico_institucional": "",
       "numero_contacto": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -15041,12 +14746,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-BD626F5D-academia-de-programa-tec",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 5
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "nombre_del_docente",
@@ -15380,7 +15080,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "correo_electronico_institucional": "",
       "numero_contacto": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -15394,12 +15094,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-6BB983C1-3-bachillerato-16-febrer",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 14
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "turno",
@@ -16277,7 +15972,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "1_0_4_0_sum_k3_m5_3": "",
       "sum_d4_l4_sum_d5_l5_sum_d6_l6": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -16291,12 +15986,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-E3FE144D-academias-bg24-campo-dis",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 5
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "nombre_del_docente",
@@ -16553,7 +16243,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "correo_electronico_institucional": "",
       "numero_contacto": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -16567,12 +16257,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-D98834ED-formato-de-cronograma-de",
     "sourcePath": "private-workbook",
     "sheetName": "5, 3 y 1 semestre",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 6
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "columna_1",
@@ -16882,7 +16567,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "auditorio_del_plantel": "",
       "1_0": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -16896,12 +16581,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-B53F23A1-2-bachillerato-16-agosto",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 14
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "turno",
@@ -17667,7 +17347,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "1_0_4_0_sum_k3_m5_3": "",
       "sum_d4_l4_sum_d5_l5_sum_d6_l6": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -17681,12 +17361,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-AC736017-idiomas",
     "sourcePath": "private-workbook",
     "sheetName": "Hoja1",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 5
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "nombre",
@@ -17754,7 +17429,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "correo_electronico_institucional": "",
       "numero_contacto": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -17768,12 +17443,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-76B62473-formato-conformacion-de",
     "sourcePath": "private-workbook",
     "sheetName": "INFORME SEMESTRAL FEBRERO",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 12
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "plantel",
@@ -18037,7 +17707,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "docentes_que_participaron_en_las_academias_m": "",
       "total_m": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
@@ -18051,12 +17721,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourceLabel": "Formato oficial B16-FMT-01-CF8AE174-registro-interesados-man",
     "sourcePath": "private-workbook",
     "sheetName": "Registro Manuales",
-    "groups": [
-      {
-        "label": "Formato oficial importado",
-        "colspan": 8
-      }
-    ],
+    "groups": [],
     "columns": [
       {
         "key": "columna_1",
@@ -18144,7 +17809,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "asignatura_que_imparte": "",
       "manual_en_el_que_le_interesa_participar": ""
     },
-    "footerNote": "Plantilla generada desde el archivo oficial. Los campos personales se dejan en blanco para captura segura.",
+    "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
