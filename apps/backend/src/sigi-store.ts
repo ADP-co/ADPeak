@@ -609,16 +609,16 @@ export function assertCaptureAccess(
   }
 
   if (request.payload) {
-    validateCapturePayload(indicator, request.payload, action === "submit");
+    validateCapturePayload(indicator, request.payload, action === "submit", session);
   }
 }
 
-export function validateCapturePayload(indicator: SigiIndicator, payload: CapturePayload, requireJustification: boolean) {
+export function validateCapturePayload(indicator: SigiIndicator, payload: CapturePayload, requireJustification: boolean, session?: SigiSession) {
   if (!Array.isArray(payload.rows) || payload.rows.some((row) => typeof row !== "object" || row === null || Array.isArray(row))) {
-    throw new SigiValidationError("La captura debe incluir filas validas.");
+    throw new SigiValidationError("La captura debe incluir filas válidas.");
   }
 
-  const template = templateForIndicator(indicator);
+  const template = templateForIndicator(indicator, session);
   const minimumRows = template.initialRows.length;
 
   if (payload.rows.length === 0 || (requireJustification && !template.allowAddRows && payload.rows.length < minimumRows)) {
@@ -1586,6 +1586,7 @@ function configuredTemplate(indicator: SigiIndicator, session?: SigiSession): In
 function officialWorkbookTemplate(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
   const imported = officialWorkbookTemplates[indicator.code];
   const plantel = plantelForTemplate(session, indicator);
+  const sessionPlantel = session?.role === "plantel" ? plantel : undefined;
   const columns = sanitizeTemplateColumns(imported.columns);
   const displayCode = imported.officialCode || (indicator.code.startsWith("B16-FMT-") ? "Pendiente de mapeo" : indicator.code);
   const indicatorInfoText = imported.officialCode && imported.officialCode !== indicator.code
@@ -1593,9 +1594,10 @@ function officialWorkbookTemplate(indicator: SigiIndicator, session?: SigiSessio
     : imported.officialCode
       ? `Código ${imported.officialCode} ${indicator.name}.`
       : `${indicator.name}.`;
-  const rows = imported.initialRows.length > 0
-    ? imported.initialRows.map((row) => rowForOfficialWorkbookColumns(columns, row, plantel))
-    : [rowForOfficialWorkbookColumns(columns, imported.emptyRow, plantel)];
+  const sourceRows = rowsForOfficialWorkbookSession(imported.initialRows, columns, sessionPlantel);
+  const rows = sourceRows.length > 0
+    ? sourceRows.map((row) => rowForOfficialWorkbookColumns(columns, row, sessionPlantel))
+    : [rowForOfficialWorkbookColumns(columns, imported.emptyRow, sessionPlantel ?? plantel)];
 
   return {
     indicatorCode: displayCode,
@@ -1620,7 +1622,7 @@ function officialWorkbookTemplate(indicator: SigiIndicator, session?: SigiSessio
     showTotals: imported.showTotals,
     allowAddRows: imported.allowAddRows,
     addRowLabel: imported.addRowLabel,
-    emptyRow: rowForOfficialWorkbookColumns(columns, imported.emptyRow, plantel),
+    emptyRow: rowForOfficialWorkbookColumns(columns, imported.emptyRow, sessionPlantel ?? plantel),
     analysisHeading: "Análisis",
     analysisLabel: "Descripción y observaciones",
     analysisPlaceholder: "Describe brevemente el avance, pendientes o comentarios del formato oficial."
@@ -1630,7 +1632,7 @@ function officialWorkbookTemplate(indicator: SigiIndicator, session?: SigiSessio
 function rowForOfficialWorkbookColumns(
   columns: TemplateColumn[],
   sourceRow: Record<string, unknown>,
-  plantel: Plantel
+  plantel?: Plantel
 ) {
   const row: Record<string, unknown> = {};
 
@@ -1639,7 +1641,7 @@ function rowForOfficialWorkbookColumns(
     const sourceValue = sourceRow[column.key];
 
     if (normalizedLabel.includes("plantel")) {
-      row[column.key] = plantel.name;
+      row[column.key] = plantel?.name || sourceValue || "";
       continue;
     }
 
@@ -1647,6 +1649,26 @@ function rowForOfficialWorkbookColumns(
   }
 
   return row;
+}
+
+function rowsForOfficialWorkbookSession(
+  rows: Record<string, unknown>[],
+  columns: TemplateColumn[],
+  plantel?: Plantel
+) {
+  if (!plantel) {
+    return rows;
+  }
+
+  const plantelColumn = columns.find((column) => normalizeKey(column.label).includes("plantel"));
+  if (!plantelColumn) {
+    return rows;
+  }
+
+  return rows.filter((row) => {
+    const value = row[plantelColumn.key];
+    return !value || normalizeKey(String(value)) === normalizeKey(plantel.name);
+  });
 }
 
 function rowForConfiguredColumns(columns: TemplateColumn[], plantel: Plantel, activity: string) {

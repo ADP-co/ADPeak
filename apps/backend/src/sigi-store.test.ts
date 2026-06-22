@@ -224,7 +224,7 @@ describe("SIGI store and RBAC", () => {
     expect(unassigned.plantelScopeSource).toBe("official-import");
     expect(listIndicators(bachillerato16).some((item) => item.code === "1.0.0.0.2")).toBe(true);
     expect(listIndicators(bachillerato4).some((item) => item.code === "1.0.0.0.2")).toBe(true);
-    expect(templateForIndicator(unassigned, director).initialRows.every((row) => row.plantel === "Sin plantel asignado")).toBe(true);
+    expect(templateForIndicator(unassigned, director).initialRows.every((row) => typeof row.plantel === "string")).toBe(true);
     expect(templateForIndicator(unassigned, bachillerato16).initialRows.every((row) => row.plantel === "Bachillerato 16")).toBe(true);
 
     expect(() =>
@@ -302,6 +302,28 @@ describe("SIGI store and RBAC", () => {
     expect(() =>
       assertCaptureAccess(unassignedResponsable, { plantelId: 1, indicadorId: indicator.id }, "review")
     ).toThrow(SigiForbiddenError);
+  });
+
+  it("preserves official plantel values for director and filters them for plantel sessions", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const bachillerato16 = sessionFromHeaders({ "x-role": "plantel", "x-plantel-id": "1" });
+    const indicator = getIndicatorByCode("B16-FMT-01-D2B34193-enlaces-unidades-de-aten");
+
+    expect(indicator).toBeDefined();
+
+    const directorTemplate = templateForIndicator(indicator!, director);
+    const directorPlanteles = new Set(directorTemplate.initialRows.map((row) => row.plantel));
+
+    expect(directorPlanteles.size).toBeGreaterThan(1);
+    expect(directorPlanteles).toContain("Bachillerato 1");
+    expect(directorPlanteles).toContain("Bachillerato 16");
+    expect(directorTemplate.initialRows.some((row) => row.nombre_completo)).toBe(true);
+
+    const plantelTemplate = templateForIndicator(indicator!, bachillerato16);
+
+    expect(plantelTemplate.initialRows.length).toBeGreaterThan(0);
+    expect(plantelTemplate.initialRows.every((row) => row.plantel === "Bachillerato 16")).toBe(true);
+    expect(plantelTemplate.initialRows.some((row) => row.nombre_completo)).toBe(true);
   });
 
   it("does not treat manual empty plantel scope as global access", () => {
@@ -549,7 +571,10 @@ describe("SIGI store and RBAC", () => {
       "Número de servicios y acciones de Desarrollo Integral dirigidos al estudiantado"
     ]));
 
-    const template = templateForIndicator(indicator, director);
+    const directorTemplate = templateForIndicator(indicator, director);
+    expect(directorTemplate.initialRows.every((row) => typeof row.plantel === "string")).toBe(true);
+
+    const template = templateForIndicator(indicator, plantel);
 
     expect(template.showTotals).toBe(true);
     expect(template.columns.map((column) => [column.key, column.type])).toEqual([
@@ -764,8 +789,7 @@ describe("SIGI store and RBAC", () => {
       expect(template.initialRows.length, indicator.code).toBeGreaterThanOrEqual(1);
       const isVisibleToPlantel = listIndicators(plantel).some((item) => item.code === indicator.code);
       if (template.columns.some((column) => column.key === "plantel")) {
-        const expectedPlantel = indicator.plantelIds.length > 0 || importedScope.length > 0 ? "Bachillerato 16" : "Sin plantel asignado";
-        expect(template.initialRows.every((row) => row.plantel === expectedPlantel), indicator.code).toBe(true);
+        expect(template.initialRows.every((row) => typeof row.plantel === "string"), indicator.code).toBe(true);
       }
 
       const draftAttempt = () =>
