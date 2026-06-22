@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Eye, EyeOff, PlusCircle, Search, Trash2 } from 'lucide-react';
 import { ConfirmModal } from './ConfirmModal';
-import { deactivateIndicator, fetchIndicators, saveIndicator, type CatalogIndicator } from '../../api/catalog';
+import { deactivateIndicator, fetchIndicators, plantelScopeLabelForIndicator, saveIndicator, type CatalogIndicator } from '../../api/catalog';
 
 export interface IndicatorRecord {
   id: string;
   code: string;
   name: string;
+  alcance: string;
   plantel?: string;
   supervisor?: string;
   responsable: string;
@@ -23,6 +24,7 @@ function fromCatalogIndicator(indicator: CatalogIndicator): IndicatorRecord {
     id: String(indicator.id),
     code: indicator.code,
     name: indicator.name,
+    alcance: plantelScopeLabelForIndicator(indicator),
     responsable: indicator.responsibleNames.join(', ') || 'Sin asignar',
     contribuidor: indicator.contributorNames.join(', ') || 'Planteles',
     enabled: indicator.active,
@@ -128,6 +130,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
       return [
         indicator.code,
         indicator.name,
+        indicator.alcance,
         indicator.responsable,
         indicator.contribuidor,
       ].some((value) => normalizeSearch(value).includes(normalizedSearch));
@@ -145,8 +148,8 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
           <div className="flex items-center gap-2 w-full max-w-xl">
             <input
               type="text"
-              aria-label="Filtro de indicadores por código, nombre, responsable o contribuidor"
-              placeholder="Buscar por código, nombre, responsable o contribuidor..."
+              aria-label="Filtro de indicadores por código, nombre, alcance, responsable o contribuidor"
+              placeholder="Buscar por código, nombre, alcance, responsable o contribuidor..."
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               onKeyDown={(event) => event.key === 'Enter' && setActiveSearch(searchTerm.trim())}
@@ -182,14 +185,15 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
 
       <div className="bg-brand-Blanco rounded-lg shadow-md overflow-hidden border border-brand-Gris_bajo/20">
         <div className="w-full overflow-x-auto">
-          <table className="w-full min-w-[920px] border-collapse text-center">
+          <table className="w-full min-w-[1120px] border-collapse text-center">
             <thead>
               <tr className="bg-brand-Gris_bajo/35 text-brand-Gris_oscuro font-title font-bold text-sm select-none border-b border-brand-Gris_bajo/20">
-                <th className="py-4 px-6 w-[15%]">Código</th>
-                <th className="py-4 px-6 w-[35%] text-left">Nombre</th>
-                <th className="py-4 px-6 w-[20%]">Contribuidor</th>
-                <th className="py-4 px-6 w-[15%]">Responsable</th>
-                <th className="py-4 px-6 w-[15%]">Acciones</th>
+                <th className="py-4 px-5 w-[12%]">Código</th>
+                <th className="py-4 px-5 w-[30%] text-left">Nombre</th>
+                <th className="py-4 px-5 w-[16%]">Alcance</th>
+                <th className="py-4 px-5 w-[14%]">Contribuidor</th>
+                <th className="py-4 px-5 w-[14%]">Responsable</th>
+                <th className="py-4 px-5 w-[14%]">Acciones</th>
               </tr>
             </thead>
 
@@ -201,19 +205,22 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
                     indicator.enabled === false ? 'opacity-60' : ''
                   }`}
                 >
-                  <td className="py-4 px-6 text-center font-mono font-medium text-brand-Gris_oscuro/80">
+                  <td className="py-4 px-5 text-center font-mono font-medium text-brand-Gris_oscuro/80">
                     {indicator.code}
                   </td>
-                  <td className="py-4 px-6 font-medium leading-relaxed text-left">
+                  <td className="py-4 px-5 font-medium leading-relaxed text-left">
                     {indicator.name}
                   </td>
-                  <td className="py-4 px-6 font-medium text-brand-Gris_oscuro/80">
+                  <td className="py-4 px-5 font-medium text-brand-Gris_oscuro/80">
+                    {indicator.alcance}
+                  </td>
+                  <td className="py-4 px-5 font-medium text-brand-Gris_oscuro/80">
                     {indicator.contribuidor}
                   </td>
-                  <td className="py-4 px-6 font-medium text-brand-Gris_oscuro/80">
+                  <td className="py-4 px-5 font-medium text-brand-Gris_oscuro/80">
                     {indicator.responsable}
                   </td>
-                  <td className="py-4 px-6">
+                  <td className="py-4 px-5">
                     <div className="flex items-center justify-center gap-3">
                       <button
                         type="button"
@@ -245,7 +252,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
               ))}
               {filteredIndicators.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="py-8 px-6 text-center text-brand-Gris_oscuro/70">
+                  <td colSpan={6} className="py-8 px-6 text-center text-brand-Gris_oscuro/70">
                     Sin resultados para la busqueda actual.
                   </td>
                 </tr>

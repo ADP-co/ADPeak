@@ -62,6 +62,7 @@ export const IndicatorsTable = ({
 
   const getPlantelLabel = (indicator: Indicator) => indicator.plantel ?? indicator.contribuidor ?? 'Sin asignar';
   const getSupervisorLabel = (indicator: Indicator) => indicator.supervisor ?? indicator.responsable ?? 'Sin asignar';
+  const scopeColumnLabel = user?.role === 'plantel' ? 'Plantel' : 'Alcance';
 
   // Mapeo de prioridad para ordenar por estatus cuando el filtro es "todos"
   const statusPriority: Record<IndicatorStatus, number> = {
@@ -154,7 +155,7 @@ export const IndicatorsTable = ({
                 <th className={`py-4 px-6 ${showScopeColumns ? 'w-[34%]' : 'w-[50%]'}`}>Nombre</th>
                 {showScopeColumns && (
                   <>
-                    <th className="py-4 px-6 w-[14%] text-center">Plantel</th>
+                    <th className="py-4 px-6 w-[14%] text-center">{scopeColumnLabel}</th>
                     <th className="py-4 px-6 w-[14%] text-center">Supervisor</th>
                   </>
                 )}

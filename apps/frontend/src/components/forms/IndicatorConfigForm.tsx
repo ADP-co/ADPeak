@@ -10,6 +10,7 @@ import {
   fetchIndicators,
   fetchIndicatorTemplate,
   fetchUsers,
+  plantelScopeLabelForIndicator,
   saveIndicator,
   type CatalogIndicator,
   type CatalogUser,
@@ -276,6 +277,16 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
           onChange={(event) => setIndicatorName(event.target.value)}
           disabled={isLoading}
         />
+        {editingIndicator && (
+          <div className="grid grid-cols-1 gap-2 rounded-lg border border-brand-Gris_bajo/40 bg-brand-Gris_bajo/5 px-4 py-3 md:grid-cols-[160px_1fr] md:items-center">
+            <span className="text-xs font-bold uppercase tracking-wide text-brand-Gris_oscuro/60">
+              Alcance actual
+            </span>
+            <span className="text-sm font-semibold text-brand-Gris_oscuro">
+              {plantelScopeLabelForIndicator(editingIndicator)}
+            </span>
+          </div>
+        )}
         {isLoading && (
           <p className="text-sm font-body font-semibold text-brand-Verde_oscuro" role="status">
             Cargando datos actuales del indicador...

@@ -19,10 +19,10 @@ import { AuthProvider, useAuth, type User } from './context/AuthContext';
 import { Login } from './components/ui/Login';
 import { Toaster, toast } from 'sonner';
 import { useCaptureDraft } from './hooks/useCaptureDraft';
-import { buildHealthIntegralTemplate, buildTemplateForCatalogIndicator, catalogPlanteles, fetchIndicatorTemplate, fetchIndicators, type CatalogIndicator } from './api/catalog';
+import { buildHealthIntegralTemplate, buildTemplateForCatalogIndicator, catalogPlanteles, fetchIndicatorTemplate, fetchIndicators, plantelScopeLabelForIndicator, type CatalogIndicator } from './api/catalog';
 import { officialIndicatorPlantelScopes } from './catalog/officialCatalog.generated';
 
-const UNASSIGNED_PLANTEL_LABEL = 'Sin plantel asignado';
+const UNASSIGNED_PLANTEL_LABEL = 'Todos los planteles';
 
 const plantelIndicatorScope: Pick<Indicator, 'plantel' | 'supervisor' | 'responsable' | 'contribuidor'> = {
   plantel: UNASSIGNED_PLANTEL_LABEL,
@@ -150,24 +150,6 @@ function plantelNameFromId(id?: number) {
   return catalogPlanteles.find((plantel) => plantel.id === id)?.name ?? `Bachillerato ${id}`;
 }
 
-function plantelScopeLabelFromIds(ids?: number[]) {
-  if (!ids?.length) {
-    return UNASSIGNED_PLANTEL_LABEL;
-  }
-
-  const labels = ids.map((id) => plantelNameFromId(id));
-
-  if (labels.length === 1) {
-    return labels[0];
-  }
-
-  if (labels.length === catalogPlanteles.length) {
-    return 'Todos los planteles';
-  }
-
-  return `${labels.length} planteles`;
-}
-
 function positiveQueryParam(params: URLSearchParams, key: string) {
   const value = Number(params.get(key));
   return Number.isInteger(value) && value > 0 ? value : undefined;
@@ -193,8 +175,7 @@ function applySessionScope(indicator: Indicator, user?: User | null): Indicator 
 
 function catalogToIndicator(indicator: CatalogIndicator, user?: User | null): Indicator {
   const scope = indicator.responsibleNames.join(', ') || 'Responsable DGEMS';
-  const effectivePlantelIds = effectivePlantelIdsForCatalogIndicator(indicator);
-  const plantelScope = user?.role === 'plantel' ? plantelNameFromId(user.plantelId) : plantelScopeLabelFromIds(effectivePlantelIds);
+  const plantelScope = user?.role === 'plantel' ? plantelNameFromId(user.plantelId) : plantelScopeLabelForIndicator(indicator);
 
   return {
     code: indicator.code,
