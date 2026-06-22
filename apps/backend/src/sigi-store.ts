@@ -209,7 +209,7 @@ export const planteles: Plantel[] = [
 
 const unassignedPlantel: Plantel = { id: 0, key: "sin-plantel", name: "Sin plantel asignado" };
 const officialSourcePlantelIds: number[] = [];
-const officialCatalogImportVersion = "2026-06-22-official-indicators-v8";
+const officialCatalogImportVersion = "2026-06-22-official-indicators-v9";
 
 const responsibleNames = Array.from(
   new Set(officialCatalogRows.map((row) => row.responsible).filter(Boolean))
@@ -370,7 +370,7 @@ export function deactivateUser(session: SigiSession, id: string) {
 export function authenticateUser(username: string, password: string): AuthenticatedSigiUser | undefined {
   const normalizedUsername = normalizeUsername(username);
   const user = Array.from(users.values()).find((candidate) =>
-    candidate.active && candidate.username === normalizedUsername
+    candidate.active && matchesLoginUsername(candidate, normalizedUsername)
   );
 
   if (!user || user.passwordHash !== hashPassword(password)) {
@@ -378,6 +378,18 @@ export function authenticateUser(username: string, password: string): Authentica
   }
 
   return authenticatedUser(user);
+}
+
+function matchesLoginUsername(user: SigiUser, normalizedUsername: string) {
+  if (user.username === normalizedUsername) {
+    return true;
+  }
+
+  return user.id === "director-1" && [
+    "admin",
+    "administrador",
+    "directordgems"
+  ].includes(normalizedUsername);
 }
 
 export function createSessionToken(user: AuthenticatedSigiUser | SigiUser) {

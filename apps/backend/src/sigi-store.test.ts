@@ -64,6 +64,18 @@ describe("SIGI store and RBAC", () => {
       id: "director-1",
       role: "admin"
     });
+    expect(authenticateUser("admin", "Director2026!")).toMatchObject({
+      id: "director-1",
+      role: "admin"
+    });
+    expect(authenticateUser("administrador", "Director2026!")).toMatchObject({
+      id: "director-1",
+      role: "admin"
+    });
+    expect(authenticateUser("Director DGEMS", "Director2026!")).toMatchObject({
+      id: "director-1",
+      role: "admin"
+    });
     expect(authenticateUser("resp01", "Resp2026!")).toMatchObject({
       role: "responsable",
       responsableId: 1

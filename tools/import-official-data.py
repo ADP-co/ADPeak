@@ -48,6 +48,7 @@ CODE_RE = re.compile(r"\b\d+(?:\.\d+){3,}\b")
 PLANTEL_RE = re.compile(r"\bBACH(?:ILLERATO)?\s*\.?\s*(\d+)\b|\bBachillerato\s+(\d+)\b", re.I)
 EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+", re.I)
 CONTACT_RE = re.compile(r"\b(?:ext\.?|extension|tel(?:efono)?\.?|celular|correo)\b", re.I)
+PHONE_NUMBER_RE = re.compile(r"(?<!\d)(?:\+?52\s*)?(?:\d[\s().-]*){8,}\d(?:\.0)?(?!\d)")
 MOJIBAKE_MARKERS = ("\u00c3", "\u00c2", "\u00e2", "\ufffd")
 HEADER_TOKENS = {
     "accion",
@@ -106,14 +107,10 @@ PRIVATE_TOKENS = {
     "correo",
     "curp",
     "cuenta",
-    "director",
     "email",
     "extension",
-    "nombre",
-    "profesor",
-    "responsable",
+    "telefonico",
     "telefono",
-    "trabajador",
 }
 
 
@@ -782,7 +779,7 @@ def value_for_column(column: dict[str, Any], value: str) -> Any:
 
 
 def is_private_cell_value(value: str) -> bool:
-    return bool(EMAIL_RE.search(value) or CONTACT_RE.search(value))
+    return bool(EMAIL_RE.search(value) or CONTACT_RE.search(value) or PHONE_NUMBER_RE.search(value))
 
 
 def sanitize_header_row(values: list[str]) -> list[str]:
