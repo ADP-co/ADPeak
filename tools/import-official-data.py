@@ -25,9 +25,18 @@ NESTED_ZIP = Path(os.environ.get(
     "ADPEAK_OFFICIAL_BACH16_ZIP",
     SOURCE_DIR / "Bachillerato 16-20260424T001029Z-3-001.zip",
 ))
+
+
+def newest_indicator_package() -> Path:
+    preferred = SOURCE_DIR.parent / "indicadores-20260622T210134Z-3-001.zip"
+    if preferred.exists():
+        return preferred
+    return SOURCE_DIR.parent / "indicadores-20260428T232925Z-3-001.zip"
+
+
 INDICADORES_ZIP = Path(os.environ.get(
     "ADPEAK_OFFICIAL_INDICADORES_ZIP",
-    SOURCE_DIR.parent / "indicadores-20260428T232925Z-3-001.zip",
+    newest_indicator_package(),
 ))
 
 BACKEND_CATALOG_TARGET = REPO_ROOT / "apps/backend/src/official-catalog.generated.ts"
@@ -505,7 +514,7 @@ def summarize_sheet(sheet: Any) -> dict[str, Any]:
         codes.update(row_codes)
         if row_codes and "indicador" in normalize_key(row_text):
             indicator_codes.update(row_codes)
-        if row_codes and len(code_descriptions) < 5:
+        if row_codes and not is_reference_note_row(normalize_key(row_text)) and len(code_descriptions) < 5:
             code_descriptions.append(row_text)
         for match in PLANTEL_RE.finditer(row_text):
             number = match.group(1) or match.group(2)
@@ -560,8 +569,13 @@ def extract_table_from_rows(rows: list[dict[str, Any]]) -> dict[str, Any] | None
         token_score = sum(1 for token in HEADER_TOKENS if token in normalized)
         core_score = sum(1 for token in ("plantel", "actividad", "meta", "avance", "observacion") if token in normalized)
         width_score = min(4, len([value for value in values if value]))
-        next_values = rows[index + 1]["values"] if index + 1 < len(rows) else []
-        merge_bonus = 12 if should_merge_header_rows(values, next_values) else 0
+        next_values = adjacent_row_values(rows, index, 1)
+        third_values = adjacent_row_values(rows, index, 2)
+        merge_bonus = 0
+        if next_values and third_values and should_merge_three_header_rows(values, next_values, third_values):
+            merge_bonus = 18
+        elif next_values and should_merge_header_rows(values, next_values):
+            merge_bonus = 12
         score = token_score * 3 + core_score * 4 + width_score + merge_bonus
         if score > best_score and token_score >= 1 and width_score >= 2:
             best_index = index
@@ -610,9 +624,15 @@ def extract_table_from_rows(rows: list[dict[str, Any]]) -> dict[str, Any] | None
 def is_non_capture_row(normalized: str, non_empty_values: list[str]) -> bool:
     if not non_empty_values:
         return True
-    if ("nota" in normalized or "totales" in normalized) and len(non_empty_values) <= 2:
+    if ("nota" in normalized or "total" in normalized or "totales" in normalized) and len(non_empty_values) <= 2:
         return True
-    if len(non_empty_values) <= 2 and any(
+    if is_reference_note_row(normalized):
+        return True
+    return False
+
+
+def is_reference_note_row(normalized: str) -> bool:
+    return any(
         marker in normalized
         for marker in (
             "la tabla anterior incide",
@@ -621,33 +641,52 @@ def is_non_capture_row(normalized: str, non_empty_values: list[str]) -> bool:
             "informe de labores",
             "instrucciones para el llenado",
         )
-    ):
-        return True
-    return False
+    )
 
 
 def combined_header_values(rows: list[dict[str, Any]], best_index: int) -> tuple[list[str], int]:
     primary = rows[best_index]["values"]
-    secondary = rows[best_index + 1]["values"] if best_index + 1 < len(rows) else []
+    secondary = adjacent_row_values(rows, best_index, 1)
+    tertiary = adjacent_row_values(rows, best_index, 2)
+
+    if secondary and tertiary and should_merge_three_header_rows(primary, secondary, tertiary):
+        return merge_header_rows([primary, secondary, tertiary]), best_index + 3
 
     if not should_merge_header_rows(primary, secondary):
         return primary, best_index + 1
 
-    width = max(len(primary), len(secondary))
-    parent = forward_fill(primary + [""] * (width - len(primary)))
-    child = secondary + [""] * (width - len(secondary))
+    return merge_header_rows([primary, secondary]), best_index + 2
+
+
+def adjacent_row_values(rows: list[dict[str, Any]], index: int, offset: int) -> list[str]:
+    target_index = index + offset
+    if target_index >= len(rows):
+        return []
+    if rows[target_index]["row"] != rows[index]["row"] + offset:
+        return []
+    return rows[target_index]["values"]
+
+
+def merge_header_rows(header_rows: list[list[str]]) -> list[str]:
+    width = max(len(row) for row in header_rows)
+    filled_rows = [forward_fill(row + [""] * (width - len(row))) for row in header_rows]
     labels: list[str] = []
 
     for index in range(width):
-        parent_label = clean_text(parent[index])
-        child_label = clean_text(child[index])
+        parts: list[str] = []
+        normalized_parts: set[str] = set()
+        for row in filled_rows:
+            label = clean_text(row[index])
+            normalized = normalize_key(label)
+            if not label or normalized in normalized_parts:
+                continue
+            if len(normalized) > 2 and any(normalized in existing for existing in normalized_parts):
+                continue
+            parts.append(label)
+            normalized_parts.add(normalized)
+        labels.append(" ".join(parts) or f"Columna {index + 1}")
 
-        if child_label and parent_label and normalize_key(child_label) not in normalize_key(parent_label):
-            labels.append(f"{parent_label} {child_label}")
-        else:
-            labels.append(child_label or parent_label or f"Columna {index + 1}")
-
-    return labels, best_index + 2
+    return labels
 
 
 def should_merge_header_rows(primary: list[str], secondary: list[str]) -> bool:
@@ -666,6 +705,28 @@ def should_merge_header_rows(primary: list[str], secondary: list[str]) -> bool:
     has_blanks = "" in primary or "" in secondary
 
     return has_subheaders and (has_primary_groups or has_blanks)
+
+
+def should_merge_three_header_rows(primary: list[str], secondary: list[str], tertiary: list[str]) -> bool:
+    if not tertiary:
+        return False
+
+    primary_text = " ".join(normalize_key(value) for value in primary if value)
+    secondary_text = " ".join(normalize_key(value) for value in secondary if value)
+    tertiary_text = " ".join(normalize_key(value) for value in tertiary if value)
+    if not tertiary_text:
+        return False
+
+    tertiary_tokens = set(tertiary_text.split())
+    short_subheaders = {"h", "m", "t", "mujeres", "hombres", "total", "docentes", "administrativos"}
+    has_subheaders = bool(tertiary_tokens & short_subheaders)
+    has_primary_groups = any(
+        token in primary_text
+        for token in ("plantel", "programa", "periodo", "febrero", "agosto", "enero", "cantidad", "matricula", "egresados")
+    )
+    has_secondary_group = any(token in secondary_text for token in ("porcentaje", "titulacion", "cumplimiento", "avance"))
+
+    return has_subheaders and has_primary_groups and (has_secondary_group or "" in primary or "" in secondary)
 
 
 def forward_fill(values: list[str]) -> list[str]:
@@ -945,7 +1006,7 @@ def generate_data_file(
     summary = {
         "sourcePackage": ", ".join(source_packages) or SOURCE_ZIP.name,
         "plantel": "Indicadores oficiales y Bachillerato 16",
-        "generatedAt": "2026-06-17",
+        "generatedAt": "2026-06-22",
         "topLevelFiles": 3 + (1 if INDICADORES_ZIP.exists() else 0),
         "nestedFiles": nested_file_count,
         "nestedTotalBytes": nested_total_bytes,

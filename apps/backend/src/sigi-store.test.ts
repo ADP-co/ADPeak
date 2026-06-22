@@ -31,10 +31,10 @@ describe("SIGI store and RBAC", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const indicators = listIndicators(director);
 
-    expect(officialCatalogStats.uniqueIndicators).toBe(96);
-    expect(officialDataSummary.workbookCount).toBe(52);
-    expect(Object.keys(officialWorkbookTemplates)).toHaveLength(52);
-    expect(indicators.length).toBeGreaterThanOrEqual(96);
+    expect(officialCatalogStats.uniqueIndicators).toBe(108);
+    expect(officialDataSummary.workbookCount).toBe(69);
+    expect(Object.keys(officialWorkbookTemplates)).toHaveLength(67);
+    expect(indicators.length).toBeGreaterThanOrEqual(108);
     expect(indicators.some((indicator) =>
       indicator.name.toLowerCase().includes("la tabla anterior incide")
     )).toBe(false);
@@ -324,13 +324,13 @@ describe("SIGI store and RBAC", () => {
     expect(sources.summary).toMatchObject({
       plantel: "Indicadores oficiales y Bachillerato 16",
       topLevelFiles: 4,
-      nestedFiles: 994,
-      workbookCount: 52,
-      worksheetCount: 67
+      nestedFiles: 1013,
+      workbookCount: 69,
+      worksheetCount: 97
     });
-    expect(sources.summary.worksheetNonEmptyRows).toBe(1437);
-    expect(sources.evidenceGroups).toHaveLength(75);
-    expect(sources.workbookSummaries).toHaveLength(52);
+    expect(sources.summary.worksheetNonEmptyRows).toBe(1715);
+    expect(sources.evidenceGroups).toHaveLength(81);
+    expect(sources.workbookSummaries).toHaveLength(69);
   });
 
   it("includes official evidence groups in Bachillerato 16 report exports", () => {
@@ -341,8 +341,8 @@ describe("SIGI store and RBAC", () => {
     expect(officialSources).toBeDefined();
     expect(report.indicadores.every((indicator) => Boolean(indicator.id))).toBe(true);
     expect(report.indicadores.flatMap((indicator) => indicator.datos).every((row) => Boolean(row.registro_id))).toBe(true);
-    expect(officialSources?.datos).toHaveLength(75);
-    expect(officialSources?.datos.reduce((total, row) => total + row.evidencias, 0)).toBe(994);
+    expect(officialSources?.datos).toHaveLength(81);
+    expect(officialSources?.datos.reduce((total, row) => total + row.evidencias, 0)).toBe(1013);
   });
 
   it("uses active false for logical indicator deletion", () => {
@@ -547,10 +547,10 @@ describe("SIGI store and RBAC", () => {
       ["nota_anotar_solo_la_actividad_desarrollada_unida_3", "text"],
       ["febrero_agosto_2026_m", "number"],
       ["febrero_agosto_2026_h", "number"],
-      ["t", "number"],
+      ["febrero_agosto_2026_t", "number"],
       ["agosto_enero_2027_m", "number"],
       ["agosto_enero_2027_h", "number"],
-      ["t_2", "number"]
+      ["agosto_enero_2027_t", "number"]
     ]);
     expect(template.initialRows.every((row) => row.plantel === "Bachillerato 16")).toBe(true);
 
@@ -642,17 +642,26 @@ describe("SIGI store and RBAC", () => {
       },
       {
         code: "1.1.2.3.1",
-        expectedKeys: ["plantel", "estudiantes_m", "estudiantes_h", "docentes_m", "docentes_h"],
+        expectedKeys: [
+          "nombre_de_la_charla",
+          "ponente",
+          "fecha_de_la_actividad",
+          "total_estudiantes_asistentes_mujeres",
+          "total_docentes_asistentes_hombres"
+        ],
         sampleValues: {
-          estudiantes_m: 30,
-          estudiantes_h: 20,
-          docentes_m: 3,
-          docentes_h: 2
+          nombre_de_la_charla: "Adopta una Prepa",
+          ponente: "DGEMS",
+          fecha_de_la_actividad: "2026-06-22",
+          total_estudiantes_asistentes_mujeres: 30,
+          total_estudiantes_asistentes_hombres: 20,
+          total_docentes_asistentes_mujeres: 3,
+          total_docentes_asistentes_hombres: 2
         }
       },
       {
         code: "B16-FMT-01-43FE55CA-formacion-docente-2026",
-        expectedKeys: ["tipo_de_evento", "nombre_del_evento", "poblacion_docente_nms_h", "m", "poblacion_docente_nms_total"],
+        expectedKeys: ["tipo_de_evento", "nombre_del_evento", "poblacion_docente_nms_h", "poblacion_docente_nms_m", "poblacion_docente_nms_total"],
         sampleValues: {
           tipo_de_evento: "Curso",
           nombre_del_evento: "Capacitación docente",
@@ -661,7 +670,7 @@ describe("SIGI store and RBAC", () => {
           competencias_desarrolladas: "Didácticas",
           evento_organizado_por: "DGEMS",
           poblacion_docente_nms_h: 4,
-          m: 6
+          poblacion_docente_nms_m: 6
         }
       },
       {
