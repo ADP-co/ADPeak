@@ -26,6 +26,7 @@ import {
   deactivateUser,
   getIndicatorByCode,
   getIndicatorById,
+  listIndicatorHistory,
   listIndicators,
   listUsers,
   officialSourcesPayload,
@@ -270,6 +271,21 @@ const server = createServer(async (request, response) => {
       }
 
       sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON valido." });
+      return;
+    }
+  }
+
+  if (request.method === "GET" && url.pathname === "/api/v1/indicadores/historial") {
+    try {
+      const session = sessionFromHeaders(request.headers);
+      sendJson(response, 200, { history: listIndicatorHistory(session) });
+      return;
+    } catch (error) {
+      if (sendError(response, error)) {
+        return;
+      }
+
+      sendJson(response, 400, { error: "invalid_request", message: "No se pudo consultar el historial." });
       return;
     }
   }

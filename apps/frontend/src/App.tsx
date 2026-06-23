@@ -13,6 +13,7 @@ import { UsersTable } from './components/ui/UsersTable';
 import { Dashboard } from './components/ui/Dashboard';
 import { ReportsDashboard } from './components/ui/ReportsDashboard';
 import { AccountProfile } from './components/ui/AccountProfile';
+import { IndicatorHistory } from './components/ui/IndicatorHistory';
 import { Button } from './components/ui/Button';
 import MediaSuperiorLogo from './assets/MediaSuperiorLogo.png';
 import { AuthProvider, useAuth, type User } from './context/AuthContext';
@@ -693,13 +694,17 @@ function AppContent() {
           <>
             <Route path="/analisis" element={<Dashboard onSelectIndicator={handleSelectIndicator} />} />
             <Route path="/usuarios" element={<UsersTable />} />
+            <Route path="/historial" element={<IndicatorHistory />} />
             <Route path="/indicadores/configurar/:code" element={<IndicatorConfigForm onBack={() => navigate('/indicadores')} />} />
           </>
         )}
 
         {/* Vistas de Responsable */}
         {role === 'responsable' && (
-          <Route path="/revision" element={<Dashboard onSelectIndicator={handleSelectIndicator} />} />
+          <>
+            <Route path="/revision" element={<Dashboard onSelectIndicator={handleSelectIndicator} />} />
+            <Route path="/historial" element={<IndicatorHistory />} />
+          </>
         )}
 
         {/* Vistas compartidas: Indicadores (Admin ve gestión, Plantel solo ve tabla) */}

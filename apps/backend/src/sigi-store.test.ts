@@ -10,6 +10,7 @@ import {
   deactivateUser,
   getIndicatorByCode,
   listIndicators,
+  listIndicatorHistory,
   listUsers,
   officialSourcesPayload,
   reloadSigiStateFromPersistence,
@@ -154,6 +155,43 @@ describe("SIGI store and RBAC", () => {
 
     expect(indicators.length).toBeGreaterThan(0);
     expect(indicators.every((indicator) => indicator.responsibleIds.includes(1))).toBe(true);
+  });
+
+  it("scopes indicator history to the responsible user's assigned indicators", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const assigned = saveIndicator(director, {
+      code: "TMP-HISTORY-ASSIGNED",
+      name: "Indicador temporal asignado al responsable",
+      dataType: "text",
+      responsibleNames: ["Liliana Yunuen Rojas Maciel"],
+      contributorNames: ["Planteles"],
+      activities: ["Actividad de historial"],
+      plantelIds: [1]
+    });
+    const unassigned = saveIndicator(director, {
+      code: "TMP-HISTORY-UNASSIGNED",
+      name: "Indicador temporal asignado a otro responsable",
+      dataType: "text",
+      responsibleNames: ["Adriana Ruiz Rivera"],
+      contributorNames: ["Planteles"],
+      activities: ["Actividad externa"],
+      plantelIds: [1]
+    });
+    const responsable = sessionFromHeaders({
+      "x-role": "responsable",
+      "x-responsable-id": String(assigned.responsibleIds[0])
+    });
+    const history = listIndicatorHistory(responsable);
+    const directorHistory = listIndicatorHistory(director);
+
+    expect(history.some((item) => item.code === assigned.code)).toBe(true);
+    expect(history.some((item) => item.code === unassigned.code)).toBe(false);
+    expect(history.find((item) => item.code === assigned.code)).toMatchObject({
+      action: "Creado",
+      updatedBy: "Director DGEMS",
+      active: true
+    });
+    expect(directorHistory.some((item) => item.code === unassigned.code)).toBe(true);
   });
 
   it("scopes report indicators for responsible users", () => {

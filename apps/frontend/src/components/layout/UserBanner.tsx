@@ -19,11 +19,13 @@ const navLinksByRole: Record<UserRole, { label: string; href: string }[]> = {
   admin: [
     { label: 'Análisis', href: '/analisis' },
     { label: 'Indicadores', href: '/indicadores' },
+    { label: 'Historial', href: '/historial' },
     { label: 'Reportes', href: '/reportes' },
     { label: 'Usuarios', href: '/usuarios' }
   ],
   responsable: [
     { label: 'Revisión', href: '/revision' },
+    { label: 'Historial', href: '/historial' },
     { label: 'Reportes', href: '/reportes' }
   ]
 };

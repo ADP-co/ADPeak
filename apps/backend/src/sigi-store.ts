@@ -75,6 +75,21 @@ export type SigiIndicator = {
   plantelIds: number[];
   plantelScopeSource?: "official-import" | "manual";
   templateColumns?: TemplateColumn[];
+  updatedAt?: string;
+  updatedBy?: string;
+  lastChange?: "importado" | "creado" | "actualizado" | "desactivado" | "habilitado";
+};
+
+export type SigiIndicatorHistoryEntry = {
+  id: number;
+  code: string;
+  name: string;
+  action: string;
+  updatedAt: string;
+  updatedBy: string;
+  responsibleNames: string[];
+  plantelScope: string;
+  active: boolean;
 };
 
 export type Plantel = {
@@ -210,6 +225,7 @@ export const planteles: Plantel[] = [
 const unassignedPlantel: Plantel = { id: 0, key: "sin-plantel", name: "Sin plantel asignado" };
 const officialSourcePlantelIds: number[] = [];
 const officialCatalogImportVersion = "2026-06-22-official-indicators-v9";
+const officialCatalogImportedAt = "2026-06-22T12:00:00.000-06:00";
 
 const responsibleNames = Array.from(
   new Set(officialCatalogRows.map((row) => row.responsible).filter(Boolean))
@@ -414,6 +430,25 @@ export function listIndicators(session: SigiSession, options: { includeInactive?
     .sort((a, b) => a.code.localeCompare(b.code, "es", { numeric: true }));
 }
 
+export function listIndicatorHistory(session: SigiSession): SigiIndicatorHistoryEntry[] {
+  return listIndicators(session, { includeInactive: session.role === "director" })
+    .map((indicator) => ({
+      id: indicator.id,
+      code: indicator.code,
+      name: indicator.name,
+      action: indicatorChangeLabel(indicator.lastChange),
+      updatedAt: indicatorUpdatedAt(indicator),
+      updatedBy: indicator.updatedBy ?? "Sistema",
+      responsibleNames: indicator.responsibleNames,
+      plantelScope: plantelScopeLabel(indicator),
+      active: indicator.active
+    }))
+    .sort((a, b) =>
+      b.updatedAt.localeCompare(a.updatedAt) ||
+      a.code.localeCompare(b.code, "es", { numeric: true })
+    );
+}
+
 export function getIndicatorById(id: number) {
   return indicators.get(id);
 }
@@ -434,6 +469,9 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
   const responsibleIds = normalizeResponsibleIds(input.responsibleIds, input.responsibleNames);
   const primaryResponsibleId = input.primaryResponsibleId ?? responsibleIds[0] ?? 1;
   const isNewIndicator = !existing;
+  const lastChange = existing?.active === false && input.active !== false
+    ? "habilitado"
+    : isNewIndicator ? "creado" : "actualizado";
   const nextContributorNames = input.contributorNames ?? existing?.contributorNames ?? [];
   const inputHasPlantelIds = Object.prototype.hasOwnProperty.call(input, "plantelIds");
   const isOfficialImportedIndicator = Boolean(
@@ -470,7 +508,10 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
     plantelScopeSource: preservesOfficialImportedScope
       ? "official-import"
       : inputHasPlantelIds ? "manual" : existing?.plantelScopeSource ?? "manual",
-    templateColumns: sanitizeTemplateColumns(input.templateColumns ?? existing?.templateColumns)
+    templateColumns: sanitizeTemplateColumns(input.templateColumns ?? existing?.templateColumns),
+    updatedAt: new Date().toISOString(),
+    updatedBy: actorNameForSession(session),
+    lastChange
   };
 
   indicators.set(id, indicator);
@@ -486,7 +527,13 @@ export function deactivateIndicator(session: SigiSession, id: number) {
     return undefined;
   }
 
-  const updated = { ...indicator, active: false };
+  const updated = {
+    ...indicator,
+    active: false,
+    updatedAt: new Date().toISOString(),
+    updatedBy: actorNameForSession(session),
+    lastChange: "desactivado" as const
+  };
   indicators.set(id, updated);
   persistCatalogState();
   return updated;
@@ -1033,7 +1080,10 @@ function buildIndicators() {
       contributorNames: contributors,
       activities: [row.activity || "Actividad general"],
       plantelIds: [...officialSourcePlantelIds],
-      plantelScopeSource: "official-import"
+      plantelScopeSource: "official-import",
+      updatedAt: officialCatalogImportedAt,
+      updatedBy: "Sistema",
+      lastChange: "importado"
     });
   }
 
@@ -1141,7 +1191,10 @@ function normalizePersistedIndicator(indicator: SigiIndicator): SigiIndicator {
     contributorNames: indicator.contributorNames ?? seededIndicator?.contributorNames ?? [],
     activities: indicator.activities?.length ? indicator.activities : seededIndicator?.activities ?? ["Actividad general"],
     templateColumns: sanitizeTemplateColumns(indicator.templateColumns ?? seededIndicator?.templateColumns),
-    active: indicator.active ?? true
+    active: indicator.active ?? true,
+    updatedAt: indicator.updatedAt ?? seededIndicator?.updatedAt ?? officialCatalogImportedAt,
+    updatedBy: indicator.updatedBy ?? seededIndicator?.updatedBy ?? "Sistema",
+    lastChange: indicator.lastChange ?? seededIndicator?.lastChange ?? "importado"
   };
 }
 
@@ -1537,6 +1590,70 @@ function canUseIndicatorForPlantel(indicator: SigiIndicator, plantelId: number) 
   }
 
   return effectivePlantelIdsForIndicator(indicator).includes(plantelId);
+}
+
+function indicatorChangeLabel(change: SigiIndicator["lastChange"]) {
+  if (change === "creado") {
+    return "Creado";
+  }
+
+  if (change === "actualizado") {
+    return "Actualizado";
+  }
+
+  if (change === "desactivado") {
+    return "Desactivado";
+  }
+
+  if (change === "habilitado") {
+    return "Habilitado";
+  }
+
+  return "Carga inicial";
+}
+
+function indicatorUpdatedAt(indicator: SigiIndicator) {
+  if ((indicator.lastChange ?? "importado") === "importado" && (indicator.updatedBy ?? "Sistema") === "Sistema") {
+    return officialCatalogImportedAt;
+  }
+
+  return indicator.updatedAt ?? officialCatalogImportedAt;
+}
+
+function actorNameForSession(session: SigiSession) {
+  return users.get(session.userId)?.name ?? (
+    session.role === "director"
+      ? "Director DGEMS"
+      : session.role === "responsable"
+        ? `Responsable ${session.responsableId ?? ""}`.trim()
+        : `Plantel ${session.plantelId ?? ""}`.trim()
+  );
+}
+
+function plantelScopeLabel(indicator: SigiIndicator) {
+  if (
+    indicator.plantelScopeSource === "official-import" &&
+    indicator.plantelIds.length === 0 &&
+    !officialIndicatorPlantelScopes[indicator.code]?.length
+  ) {
+    return "Todos los planteles";
+  }
+
+  const effectivePlantelIds = effectivePlantelIdsForIndicator(indicator);
+
+  if (effectivePlantelIds.length === 0) {
+    return "Pendiente de definir";
+  }
+
+  if (effectivePlantelIds.length === planteles.length) {
+    return "Todos los planteles";
+  }
+
+  if (effectivePlantelIds.length === 1) {
+    return planteles.find((plantel) => plantel.id === effectivePlantelIds[0])?.name ?? "Plantel";
+  }
+
+  return `${effectivePlantelIds.length} planteles`;
 }
 
 function effectivePlantelIdsForIndicator(indicator: SigiIndicator) {

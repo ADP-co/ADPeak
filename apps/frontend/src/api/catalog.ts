@@ -37,6 +37,18 @@ export type CatalogIndicator = {
   templateColumns?: ColumnConfig[];
 };
 
+export type IndicatorHistoryEntry = {
+  id: number;
+  code: string;
+  name: string;
+  action: string;
+  updatedAt: string;
+  updatedBy: string;
+  responsibleNames: string[];
+  plantelScope: string;
+  active: boolean;
+};
+
 type IndicatorTemplateResponse = IndicatorTemplate & {
   initialRows?: Record<string, unknown>[];
 };
@@ -127,6 +139,11 @@ export async function fetchIndicators() {
   } catch {
     return readStorage(INDICATORS_STORAGE_KEY, fallbackIndicators);
   }
+}
+
+export async function fetchIndicatorHistory() {
+  const response = await apiJson<{ history: IndicatorHistoryEntry[] }>('/indicadores/historial');
+  return response.history;
 }
 
 export async function saveIndicator(input: Partial<CatalogIndicator>) {
