@@ -1,6 +1,7 @@
 import {
   handleCaptureDrafts,
   handleIndicatorAction,
+  handleIndicatorHistory,
   handleIndicators,
   handleLogin,
   handleOfficialSources,
@@ -37,6 +38,11 @@ export default async function handler(request: any, response: any) {
 
   if (path === "indicadores") {
     await handleIndicators(request, response);
+    return;
+  }
+
+  if (path === "indicadores/historial") {
+    await handleIndicatorHistory(request, response);
     return;
   }
 

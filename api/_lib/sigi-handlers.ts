@@ -191,6 +191,22 @@ export async function handleIndicators(request: RequestLike, response: any) {
   methodNotAllowed(response, ["GET", "POST", "OPTIONS"]);
 }
 
+export async function handleIndicatorHistory(request: RequestLike, response: any) {
+  if (prepare(request, response, ["GET", "OPTIONS"])) {
+    return;
+  }
+
+  try {
+    const sigi = await loadSigi();
+    const session = sigi.sessionFromHeaders(request.headers ?? {});
+    sendJson(response, 200, { history: sigi.listIndicatorHistory(session) });
+  } catch (error) {
+    if (!sendKnownError(response, error)) {
+      sendJson(response, 500, { error: "indicator_history_error" });
+    }
+  }
+}
+
 export async function handleIndicatorAction(request: RequestLike, response: any) {
   if (handleOptions(request, response)) {
     return;
