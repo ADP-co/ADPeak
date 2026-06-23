@@ -224,7 +224,7 @@ export const planteles: Plantel[] = [
 
 const unassignedPlantel: Plantel = { id: 0, key: "sin-plantel", name: "Sin plantel asignado" };
 const officialSourcePlantelIds: number[] = [];
-const officialCatalogImportVersion = "2026-06-22-official-indicators-v9";
+const officialCatalogImportVersion = "2026-06-23-indicadores-zip-only-v1";
 const officialCatalogImportedAt = "2026-06-22T12:00:00.000-06:00";
 
 const responsibleNames = Array.from(
@@ -540,41 +540,25 @@ export function deactivateIndicator(session: SigiSession, id: number) {
 }
 
 const studentPeriodMatrixCodes = new Set([
-  "1.1.2.1.1",
-  "1.1.2.1.3",
-  "1.1.2.2.1",
-  "1.1.2.2.8",
-  "1.1.2.2.9",
   "1.1.2.2.10",
-  "1.1.2.2.11",
-  "1.1.2.4.1"
+  "1.1.2.2.11"
 ]);
 
 const integralDevelopmentCodes = new Set(["1.1.2.3.1"]);
 
 const staffTrainingCodes = new Set([
-  "1.1.2.5.5",
-  "1.1.2.5.6",
-  "1.1.2.5.7",
-  "1.1.2.5.8",
-  "1.1.2.5.9",
-  "1.1.2.5.10",
-  "4.1.4.3.3"
+  "1.1.2.5.10"
 ]);
 
-const staffProfileCodes = new Set(["1.1.2.5.1", "1.1.2.5.3"]);
+const staffProfileCodes = new Set(["1.1.2.5.3"]);
 
 const participantActionCodes = new Set([
-  "2.1.4.1.1",
   "2.1.4.1.2",
-  "2.1.4.1.3",
   "3.1.0.0.1",
-  "3.1.1.2.2",
-  "3.1.1.3.6",
-  "4.1.5.3.3"
+  "3.1.1.3.6"
 ]);
 
-const infrastructureCodes = new Set(["4.1.2.1.3", "4.1.2.1.6", "4.1.2.2.1"]);
+const infrastructureCodes = new Set(["FMT-01-E81E8473-41221-porcentaje-de-uo-q"]);
 
 export function templateForIndicator(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
   if (officialWorkbookTemplates[indicator.code]) {
@@ -1309,7 +1293,7 @@ function mergeInitialIndicators(persisted?: SigiIndicator[], applyCatalogMigrati
     );
     const seededIndicator = byCode.get(normalizedIndicator.code);
 
-    if (applyCatalogMigration && isRetiredOfficialImport(normalizedIndicator, seededIndicator)) {
+    if (applyCatalogMigration && !seededIndicator) {
       continue;
     }
 
@@ -1336,10 +1320,6 @@ function mergeInitialIndicators(persisted?: SigiIndicator[], applyCatalogMigrati
   }
 
   return ensureUniqueIndicatorIds(Array.from(byCode.values()));
-}
-
-function isRetiredOfficialImport(indicator: SigiIndicator, seededIndicator?: SigiIndicator) {
-  return indicator.plantelScopeSource === "official-import" && !seededIndicator;
 }
 
 function isKnownTestIndicator(indicator: Partial<SigiIndicator>) {
@@ -1705,7 +1685,7 @@ function officialWorkbookTemplate(indicator: SigiIndicator, session?: SigiSessio
   const plantel = plantelForTemplate(session, indicator);
   const sessionPlantel = session?.role === "plantel" ? plantel : undefined;
   const columns = sanitizeTemplateColumns(imported.columns);
-  const displayCode = imported.officialCode || (indicator.code.startsWith("B16-FMT-") ? "Pendiente de mapeo" : indicator.code);
+  const displayCode = imported.officialCode || (indicator.code.startsWith("FMT-") ? "Pendiente de mapeo" : indicator.code);
   const groups = imported.groups.filter((group) => group.label !== "Formato oficial importado");
   const sourceRows = rowsForOfficialWorkbookSession(imported.initialRows, columns, sessionPlantel);
   const rows = sourceRows.length > 0

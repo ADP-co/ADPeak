@@ -15,28 +15,10 @@ from openpyxl import load_workbook
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-SOURCE_DIR = Path(os.environ.get(
-    "ADPEAK_OFFICIAL_SOURCE_DIR",
-    r"C:\Users\Lenovo\Downloads\drive-download-20260428T232937Z-3-001",
-))
-SOURCE_ZIP = SOURCE_DIR.with_suffix(".zip")
-CATALOG_XLSX = SOURCE_DIR / "Libro1.xlsx"
-NESTED_ZIP = Path(os.environ.get(
-    "ADPEAK_OFFICIAL_BACH16_ZIP",
-    SOURCE_DIR / "Bachillerato 16-20260424T001029Z-3-001.zip",
-))
-
-
-def newest_indicator_package() -> Path:
-    preferred = SOURCE_DIR.parent / "indicadores-20260622T210134Z-3-001.zip"
-    if preferred.exists():
-        return preferred
-    return SOURCE_DIR.parent / "indicadores-20260428T232925Z-3-001.zip"
-
-
+DOWNLOADS_DIR = Path(os.environ.get("ADPEAK_DOWNLOADS_DIR", r"C:\Users\Lenovo\Downloads"))
 INDICADORES_ZIP = Path(os.environ.get(
     "ADPEAK_OFFICIAL_INDICADORES_ZIP",
-    newest_indicator_package(),
+    DOWNLOADS_DIR / "indicadores-20260622T210134Z-3-001.zip",
 ))
 
 BACKEND_CATALOG_TARGET = REPO_ROOT / "apps/backend/src/official-catalog.generated.ts"
@@ -139,105 +121,6 @@ def write_text(path: Path, text: str) -> None:
     path.write_text(text.rstrip() + "\n", encoding="utf-8")
 
 
-def catalog_rows() -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    workbook = load_workbook(CATALOG_XLSX, data_only=True, read_only=True)
-    sheet = workbook["Reporte Final"]
-    seen: dict[str, int] = {}
-    rows: list[dict[str, Any]] = []
-
-    for index, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=2):
-        code, name, responsible, contributors, activity = [clean_text(cell) for cell in row[:5]]
-        if not any((code, name, responsible, contributors, activity)):
-            continue
-        dedupe_key = "\u241f".join((code, name, responsible, contributors, activity))
-        duplicate_of = seen.get(dedupe_key)
-        if duplicate_of is None:
-            seen[dedupe_key] = index
-
-        rows.append(
-            {
-                "sourceRow": index,
-                "code": code,
-                "name": name,
-                "responsible": responsible,
-                "contributors": contributors,
-                "activity": activity,
-                "dedupeKey": hashlib.sha256(dedupe_key.encode("utf-8")).hexdigest()[:16],
-                "isDuplicate": duplicate_of is not None,
-                "duplicateOfSourceRow": duplicate_of,
-                "dataQuality": [] if activity else ["blank_activity"],
-            }
-        )
-
-    contributors = sorted(
-        {
-            person.strip()
-            for row in rows
-            for person in row["contributors"].split(",")
-            if person.strip()
-        },
-        key=lambda item: item.casefold(),
-    )
-    stats = {
-        "sourceRows": len(rows),
-        "uniqueRows": len({row["dedupeKey"] for row in rows}),
-        "duplicateRows": sum(1 for row in rows if row["isDuplicate"]),
-        "uniqueIndicators": len({row["code"] for row in rows if row["code"]}),
-        "uniqueResponsibles": len({row["responsible"] for row in rows if row["responsible"]}),
-        "uniqueContributors": len(contributors),
-        "uniqueActivities": len({row["activity"] for row in rows if row["activity"]}),
-        "blankActivities": sum(1 for row in rows if not row["activity"]),
-    }
-    return rows, stats
-
-
-def extend_rows_with_workbook_indicators(
-    rows: list[dict[str, Any]],
-    workbook_templates: dict[str, dict[str, Any]],
-) -> list[dict[str, Any]]:
-    existing_codes = {row["code"] for row in rows if row["code"]}
-    existing_rows_by_code: dict[str, dict[str, Any]] = {}
-    for row in rows:
-        if row["code"] and row["code"] not in existing_rows_by_code:
-            existing_rows_by_code[row["code"]] = row
-    next_source_row = max((row["sourceRow"] for row in rows), default=1) + 1
-    extended = list(rows)
-
-    for code, template in sorted(workbook_templates.items(), key=lambda item: normalize_key(item[0])):
-        if code in existing_codes:
-            continue
-
-        original_code = clean_text(template.get("officialCode"))
-        original_row = existing_rows_by_code.get(original_code)
-        name = clean_text(template.get("indicatorName")) or f"Indicador oficial {code}"
-        activity = clean_text(template.get("sourceLabel")) or "Actividad oficial importada"
-        responsible = original_row["responsible"] if original_row else "Pendiente de asignar"
-        contributors = original_row["contributors"] if original_row else "Planteles"
-        data_quality = list(template.get("quality") or [])
-        if original_code and original_code != code:
-            data_quality.append("shared_official_code_split_by_source")
-        if not original_code:
-            data_quality.append("pending_indicator_code")
-        dedupe_key = "\u241f".join((code, name, responsible, contributors, activity))
-        extended.append(
-            {
-                "sourceRow": next_source_row,
-                "code": code,
-                "name": name,
-                "responsible": responsible,
-                "contributors": contributors,
-                "activity": activity,
-                "dedupeKey": hashlib.sha256(dedupe_key.encode("utf-8")).hexdigest()[:16],
-                "isDuplicate": False,
-                "duplicateOfSourceRow": None,
-                "dataQuality": sorted(set(data_quality + ["workbook_only_indicator"])),
-            }
-        )
-        next_source_row += 1
-
-    return extended
-
-
 def catalog_stats(rows: list[dict[str, Any]]) -> dict[str, Any]:
     contributors = sorted(
         {
@@ -309,6 +192,64 @@ def catalog_plantel_scopes(rows: list[dict[str, Any]], detected_scopes: dict[str
     }
 
 
+RESPONSIBLE_FOLDER_ALIASES = {
+    "adriana ruiz": "Adriana Ruiz Rivera",
+    "ariadna zuniga": "Ariadna Zúñiga Torres",
+    "angel ordonez": "Angel Ordoñez",
+    "daniela navarro": "Daniela Nohemi Navarro Castillo",
+    "liliana rojas": "Liliana Yunuen Rojas Maciel",
+    "oscar pedraza": "Oscar Pedraza Farías",
+    "carlos nava": "Carlos Hernández Nava",
+    "oscar mendoza": "Oscar Gustavo Mendoza Barajas",
+    "laura calvario solo responsable": "Laura Gabriela Calvario",
+    "marcial avina": "Marcial Aviña Iglesias",
+    "oscar delgado": "Oscar Delgado Sánchez",
+}
+
+
+def workbook_catalog_rows(workbook_templates: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+
+    for source_row, (code, template) in enumerate(
+        sorted(workbook_templates.items(), key=lambda item: normalize_key(item[0])),
+        start=2,
+    ):
+        source_path = clean_text(template.get("sourcePath"))
+        if not source_path.startswith("Indicadores/"):
+            continue
+
+        responsible = responsible_from_source_path(source_path)
+        activity = (
+            clean_text(template.get("activityLabel"))
+            or clean_text(template.get("sourceLabel"))
+            or clean_text(Path(source_path).name)
+            or "Formato oficial importado"
+        )
+        name = clean_text(template.get("indicatorName")) or clean_text(template.get("officialCode")) or code
+        dedupe_key = "\u241f".join((code, name, responsible, "Planteles", activity))
+        rows.append({
+            "sourceRow": source_row,
+            "code": code,
+            "name": name,
+            "responsible": responsible,
+            "contributors": "Planteles",
+            "activity": activity,
+            "dedupeKey": hashlib.sha256(dedupe_key.encode("utf-8")).hexdigest()[:16],
+            "isDuplicate": False,
+            "duplicateOfSourceRow": None,
+            "dataQuality": sorted(set(list(template.get("quality") or []) + ["source_zip_indicator"])),
+        })
+
+    return rows
+
+
+def responsible_from_source_path(source_path: str) -> str:
+    parts = [part for part in unicodedata.normalize("NFC", source_path).split("/") if part]
+    folder = parts[1] if len(parts) > 2 and parts[0] == "Indicadores" else parts[0] if parts else ""
+    normalized = normalize_key(folder)
+    return RESPONSIBLE_FOLDER_ALIASES.get(normalized, folder.replace(" - solo responsable", "").strip() or "Pendiente de asignar")
+
+
 def workbook_summaries() -> tuple[
     list[dict[str, Any]],
     dict[str, list[int]],
@@ -360,6 +301,10 @@ def workbook_summaries() -> tuple[
                     planteles.update(sheet_summary.pop("planteles"))
                     formulas += sheet_summary["formulaCells"]
                     sheets.append(sheet_summary)
+
+                filename_codes = CODE_RE.findall(unicodedata.normalize("NFC", info.filename))
+                if filename_codes:
+                    indicator_codes.update(filename_codes)
 
                 if not planteles and source_scope:
                     planteles.add(source_scope)
@@ -463,13 +408,8 @@ def unique_workbook_template_code(
 
 def official_workbook_archives() -> list[tuple[Path, str | None, str]]:
     archives: list[tuple[Path, str | None, str]] = []
-    # The general indicator package carries the reusable official formats. It
-    # is processed first so its template wins the base code when Bachillerato 16
-    # also contains evidence for the same indicator.
     if INDICADORES_ZIP.exists():
         archives.append((INDICADORES_ZIP, None, "Indicadores"))
-    if NESTED_ZIP.exists():
-        archives.append((NESTED_ZIP, "Bachillerato 16", "Bachillerato 16"))
     return archives
 
 
@@ -490,6 +430,7 @@ def summarize_sheet(sheet: Any) -> dict[str, Any]:
     header_rows: list[list[str]] = []
     non_empty_rows: list[dict[str, Any]] = []
     code_descriptions: list[str] = []
+    activity_descriptions: list[str] = []
     columns_observed = 0
     indicator_codes: set[str] = set()
 
@@ -513,6 +454,9 @@ def summarize_sheet(sheet: Any) -> dict[str, Any]:
             indicator_codes.update(row_codes)
         if row_codes and not is_reference_note_row(normalize_key(row_text)) and len(code_descriptions) < 5:
             code_descriptions.append(row_text)
+        activity_description = activity_description_from_row(row_text)
+        if activity_description and len(activity_descriptions) < 3:
+            activity_descriptions.append(activity_description)
         for match in PLANTEL_RE.finditer(row_text):
             number = match.group(1) or match.group(2)
             if number:
@@ -541,10 +485,22 @@ def summarize_sheet(sheet: Any) -> dict[str, Any]:
         "formulaCells": formula_cells,
         "table": extract_table_from_rows(non_empty_rows),
         "codeDescriptions": code_descriptions,
+        "activityDescriptions": activity_descriptions,
         "indicatorCodes": indicator_codes,
         "codes": codes,
         "planteles": planteles,
     }
+
+
+def activity_description_from_row(row_text: str) -> str:
+    match = re.search(r"(?i)\bACTIVIDADES?\s*:\s*(.+)", row_text)
+    if not match:
+        return ""
+
+    activity = match.group(1)
+    activity = re.split(r"(?i)\b(registre|nota|indicador|c[oó]digo)\b", activity)[0]
+    activity = clean_text(activity).strip(" .:-")
+    return activity[:180]
 
 
 def trim_trailing_blanks(values: list[str]) -> list[str]:
@@ -847,7 +803,7 @@ def synthetic_workbook_code(
     suffix = digest[:8].upper()
     if official_code:
         return f"{official_code}-FMT-{suffix}"
-    return f"B16-FMT-{source_index:02d}-{suffix}-{stem or 'oficial'}"
+    return f"FMT-{source_index:02d}-{suffix}-{stem or 'oficial'}"
 
 
 def template_from_workbook_sheets(
@@ -881,6 +837,7 @@ def template_from_workbook_sheets(
         "indicatorCode": code,
         "officialCode": official_code or None,
         "indicatorName": indicator_name_from_sources(official_code or code, sheets, source_label),
+        "activityLabel": activity_label_from_sources(sheets),
         "sourceLabel": source_label,
         "sourcePath": unicodedata.normalize("NFC", source_path),
         "sheetName": selected["name"],
@@ -912,10 +869,21 @@ def indicator_name_from_sources(code: str, sheets: list[dict[str, Any]], fallbac
                 continue
             cleaned = re.sub(r"(?i)^.*indicador\s*:?\s*", "", description).strip()
             cleaned = cleaned.replace(code, "").strip(" .:-")
+            cleaned = re.sub(r"(?i)^c[oó]digo\s*", "", cleaned).strip(" .:-")
             if cleaned:
                 return cleaned[:180]
 
     return re.sub(r"\.xlsx$", "", fallback, flags=re.I)
+
+
+def activity_label_from_sources(sheets: list[dict[str, Any]]) -> str:
+    for sheet in sheets:
+        for activity in sheet.get("activityDescriptions", []):
+            cleaned = clean_text(activity)
+            if cleaned:
+                return cleaned
+
+    return ""
 
 
 def empty_row_for_columns(columns: list[dict[str, Any]]) -> dict[str, Any]:
@@ -958,7 +926,8 @@ def category_from_path(filename: str, source_prefix: str = "") -> str:
 
 
 def generate_catalog_file(rows: list[dict[str, Any]], stats: dict[str, Any], scopes: dict[str, list[int]]) -> str:
-    return f"""// Generated by tools/import-official-data.py from Libro1.xlsx.
+    source_name = INDICADORES_ZIP.name
+    return f"""// Generated by tools/import-official-data.py from {source_name}.
 // Source binaries and row-level private data are intentionally not committed.
 
 export type OfficialCatalogRow = {{
@@ -996,8 +965,8 @@ def generate_data_file(
     nested_total_bytes = sum(group["totalBytes"] for group in evidence_groups)
     source_packages = [path.name for path, _scope, _prefix in official_workbook_archives()]
     summary = {
-        "sourcePackage": ", ".join(source_packages) or SOURCE_ZIP.name,
-        "plantel": "Indicadores oficiales y Bachillerato 16",
+        "sourcePackage": ", ".join(source_packages) or INDICADORES_ZIP.name,
+        "plantel": "Indicadores oficiales",
         "generatedAt": "2026-06-22",
         "topLevelFiles": 3 + (1 if INDICADORES_ZIP.exists() else 0),
         "nestedFiles": nested_file_count,
@@ -1040,6 +1009,7 @@ export type OfficialWorkbookSheetSummary = {{
     initialRows: Array<Record<string, unknown>>;
   }} | null;
   codeDescriptions: string[];
+  activityDescriptions: string[];
 }};
 
 export type OfficialWorkbookSummary = {{
@@ -1071,6 +1041,7 @@ export type OfficialWorkbookTemplate = {{
   officialCode?: string | null;
   indicatorName: string;
   sourceLabel: string;
+  activityLabel?: string;
   sourcePath: string;
   sheetName: string;
   groups: Array<{{ label: string; colspan: number }}>;
@@ -1114,11 +1085,8 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = {json_ts(sum
 
 
 def main() -> None:
-    if not CATALOG_XLSX.exists():
-        raise FileNotFoundError(CATALOG_XLSX)
-    rows, _stats = catalog_rows()
     summaries, detected_scopes, evidence_groups, template_candidates, workbook_templates = workbook_summaries()
-    rows = extend_rows_with_workbook_indicators(rows, workbook_templates)
+    rows = workbook_catalog_rows(workbook_templates)
     stats = catalog_stats(rows)
     scopes = catalog_plantel_scopes(rows, detected_scopes)
 

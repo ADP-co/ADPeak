@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Lock, PlusCircle, Search, Trash2, Unlock, X } from 'lucide-react';
 import { ConfirmModal } from './ConfirmModal';
 import { catalogPlanteles, deactivateUser, fetchUsers, saveUser, type CatalogUser } from '../../api/catalog';
+import { officialCatalogRows } from '../../catalog/officialCatalog.generated';
 
 export type SystemRole = 'Administrador' | 'Responsable' | 'Plantel';
 
@@ -23,20 +24,7 @@ const KNOWN_PLANTELES = catalogPlanteles.map((plantel) => ({
   name: plantel.name,
 }));
 const MOCK_PLANTELES = ['-', ...KNOWN_PLANTELES.map((plantel) => plantel.label)];
-const MOCK_INDICADORES = [
-  '1.0.0.0.2',
-  '1.1.0.0.1',
-  '1.1.1.0.1',
-  '1.1.1.1.1',
-  '1.1.2.0.1',
-  '1.1.2.0.3',
-  '1.1.2.1.1',
-  '1.1.2.1.3',
-  '1.1.2.1.4',
-  '1.1.2.2.1',
-  '1.1.2.2.5',
-  '1.1.2.2.8',
-];
+const MOCK_INDICADORES = officialCatalogRows.map((indicator) => indicator.code);
 
 function normalizeSearch(value: string) {
   return value

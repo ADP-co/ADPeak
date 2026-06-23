@@ -21,7 +21,7 @@ import { Login } from './components/ui/Login';
 import { Toaster, toast } from 'sonner';
 import { useCaptureDraft } from './hooks/useCaptureDraft';
 import { buildHealthIntegralTemplate, buildTemplateForCatalogIndicator, catalogPlanteles, fetchIndicatorTemplate, fetchIndicators, plantelScopeLabelForIndicator, type CatalogIndicator } from './api/catalog';
-import { officialIndicatorPlantelScopes } from './catalog/officialCatalog.generated';
+import { officialCatalogRows, officialIndicatorPlantelScopes } from './catalog/officialCatalog.generated';
 
 const UNASSIGNED_PLANTEL_LABEL = 'Todos los planteles';
 
@@ -32,20 +32,11 @@ const plantelIndicatorScope: Pick<Indicator, 'plantel' | 'supervisor' | 'respons
   contribuidor: UNASSIGNED_PLANTEL_LABEL,
 };
 
-const mockupIndicatorsBase: Indicator[] = [
-    { code: '1.0.0.0.2', name: 'Porcentaje de titulación por cohorte del NMS', status: 'Pendiente' },
-    { code: '1.1.0.0.1', name: 'Porcentaje de cobertura en educación media superior', status: 'Corregir' },
-    { code: '1.1.1.0.1', name: 'Porcentaje de aceptación en educación media superior', status: 'Corregir' },
-    { code: '1.1.1.1.1', name: 'Porcentaje de programas educativos de educación media superior nuevos', status: 'Pendiente' },
-    { code: '1.1.2.0.1', name: 'Porcentaje de retención escolar de educación media superior', status: 'Pendiente' },
-    { code: '1.1.2.0.3', name: 'Tasa de abandono escolar de educación media superior', status: 'Pendiente' },
-    { code: '1.1.2.1.1', name: 'Porcentaje de estudiantes de educación media superior', status: 'Pendiente' },
-    { code: '1.1.2.1.3', name: 'Porcentaje de estudiantes de educación media superior que sus padres...', status: 'Pendiente' },
-    { code: '1.1.2.1.4', name: 'Porcentaje de estudiantes atendidos en los servicios de salud integral.', status: 'En revisión' },
-    { code: '1.1.2.2.1.', name: 'Porcentaje de estudiantes atendidos en acciones de reforzamiento', status: 'En revisión' },
-    { code: '1.1.2.2.5', name: 'Número de programas educativos de media superior', status: 'Aprobado' },
-    { code: '1.1.2.2.8', name: 'Porcentaje de estudiantes certificados en el dominio de una lengua extranjera', status: 'Aprobado' },
-  ];
+const mockupIndicatorsBase: Indicator[] = officialCatalogRows.map((indicator) => ({
+  code: indicator.code,
+  name: indicator.name,
+  status: 'Pendiente',
+}));
 
 const mockupIndicators: Indicator[] = mockupIndicatorsBase.map((indicator) => ({
   ...indicator,

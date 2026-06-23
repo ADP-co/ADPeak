@@ -32,10 +32,10 @@ describe("SIGI store and RBAC", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const indicators = listIndicators(director);
 
-    expect(officialCatalogStats.uniqueIndicators).toBe(108);
-    expect(officialDataSummary.workbookCount).toBe(69);
-    expect(Object.keys(officialWorkbookTemplates)).toHaveLength(67);
-    expect(indicators.length).toBeGreaterThanOrEqual(108);
+    expect(officialCatalogStats.uniqueIndicators).toBe(28);
+    expect(officialDataSummary.workbookCount).toBe(30);
+    expect(Object.keys(officialWorkbookTemplates)).toHaveLength(28);
+    expect(indicators.length).toBeGreaterThanOrEqual(28);
     expect(indicators.some((indicator) =>
       indicator.name.toLowerCase().includes("la tabla anterior incide")
     )).toBe(false);
@@ -53,7 +53,7 @@ describe("SIGI store and RBAC", () => {
     const visibleCodes = new Set(listIndicators(bachillerato16).map((indicator) => indicator.code));
     const catalogCodes = Array.from(new Set(officialCatalogRows.map((row) => row.code).filter(Boolean)));
 
-    expect(catalogCodes.length).toBeGreaterThanOrEqual(48);
+    expect(catalogCodes.length).toBe(28);
     expect(catalogCodes.filter((code) => !visibleCodes.has(code))).toEqual([]);
   });
 
@@ -345,7 +345,7 @@ describe("SIGI store and RBAC", () => {
   it("preserves official plantel values for director and filters them for plantel sessions", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const bachillerato16 = sessionFromHeaders({ "x-role": "plantel", "x-plantel-id": "1" });
-    const indicator = getIndicatorByCode("B16-FMT-01-D2B34193-enlaces-unidades-de-aten");
+    const indicator = getIndicatorByCode("1.1.1.1.1");
 
     expect(indicator).toBeDefined();
 
@@ -353,9 +353,8 @@ describe("SIGI store and RBAC", () => {
     const directorPlanteles = new Set(directorTemplate.initialRows.map((row) => row.plantel));
 
     expect(directorPlanteles.size).toBeGreaterThan(1);
-    expect(directorPlanteles).toContain("Bachillerato 1");
-    expect(directorPlanteles).toContain("Bachillerato 16");
-    expect(directorTemplate.initialRows.some((row) => row.nombre_completo)).toBe(true);
+    expect(Array.from(directorPlanteles).some((plantel) => String(plantel).includes("Bachillerato"))).toBe(true);
+    expect(directorTemplate.initialRows.some((row) => "nombre_del_programa" in row)).toBe(true);
     expect(directorTemplate.infoBlocks ?? []).toHaveLength(0);
     expect(directorTemplate.footerNote).toBeUndefined();
     expect(directorTemplate.groups.some((group) => group.label === "Formato oficial importado")).toBe(false);
@@ -364,7 +363,7 @@ describe("SIGI store and RBAC", () => {
 
     expect(plantelTemplate.initialRows.length).toBeGreaterThan(0);
     expect(plantelTemplate.initialRows.every((row) => row.plantel === "Bachillerato 16")).toBe(true);
-    expect(plantelTemplate.initialRows.some((row) => row.nombre_completo)).toBe(true);
+    expect(plantelTemplate.initialRows.some((row) => "nombre_del_programa" in row)).toBe(true);
   });
 
   it("does not treat manual empty plantel scope as global access", () => {
@@ -397,18 +396,18 @@ describe("SIGI store and RBAC", () => {
     const sources = officialSourcesPayload(director);
 
     expect(sources.summary).toMatchObject({
-      plantel: "Indicadores oficiales y Bachillerato 16",
+      plantel: "Indicadores oficiales",
       topLevelFiles: 4,
-      nestedFiles: 1013,
-      workbookCount: 69,
-      worksheetCount: 97
+      nestedFiles: 32,
+      workbookCount: 30,
+      worksheetCount: 44
     });
-    expect(sources.summary.worksheetNonEmptyRows).toBe(1715);
-    expect(sources.evidenceGroups).toHaveLength(81);
-    expect(sources.workbookSummaries).toHaveLength(69);
+    expect(sources.summary.worksheetNonEmptyRows).toBe(402);
+    expect(sources.evidenceGroups).toHaveLength(11);
+    expect(sources.workbookSummaries).toHaveLength(30);
   });
 
-  it("includes official evidence groups in Bachillerato 16 report exports", () => {
+  it("includes official ZIP evidence groups in report exports", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const report = buildReportPayload(director, { plantelId: "1", now: new Date("2026-06-12T00:00:00.000Z") });
     const officialSources = report.indicadores.find((indicator) => indicator.id === "fuentes-oficiales-cargadas");
@@ -416,8 +415,8 @@ describe("SIGI store and RBAC", () => {
     expect(officialSources).toBeDefined();
     expect(report.indicadores.every((indicator) => Boolean(indicator.id))).toBe(true);
     expect(report.indicadores.flatMap((indicator) => indicator.datos).every((row) => Boolean(row.registro_id))).toBe(true);
-    expect(officialSources?.datos).toHaveLength(81);
-    expect(officialSources?.datos.reduce((total, row) => total + row.evidencias, 0)).toBe(1013);
+    expect(officialSources?.datos).toHaveLength(11);
+    expect(officialSources?.datos.reduce((total, row) => total + row.evidencias, 0)).toBe(32);
   });
 
   it("uses active false for logical indicator deletion", () => {
@@ -607,9 +606,7 @@ describe("SIGI store and RBAC", () => {
 
     expect(indicator).toBeDefined();
     expect(indicator.activities).toEqual(expect.arrayContaining([
-      "Promoción de la salud",
-      "Clínica Universitaria de Atención Psicológica",
-      "Número de servicios y acciones de Desarrollo Integral dirigidos al estudiantado"
+      "PROMOCIÓN DE LA SALUD"
     ]));
 
     const directorTemplate = templateForIndicator(indicator, director);
@@ -708,14 +705,13 @@ describe("SIGI store and RBAC", () => {
 
     const cases = [
       {
-        code: "1.1.2.1.1",
-        expectedKeys: ["feb_ago_mujeres", "feb_ago_hombres", "feb_ago_total", "ago_ene_total", "total_anual"],
+        code: "1.1.2.2.10",
+        expectedKeys: ["nombre_de_la_actividad", "descripcion_de_la_actividad", "total_estudiantes_mujeres", "total_estudiantes_hombres"],
         sampleValues: {
-          meta: 100,
-          feb_ago_mujeres: 7,
-          feb_ago_hombres: 8,
-          ago_ene_mujeres: 5,
-          ago_ene_hombres: 6
+          nombre_de_la_actividad: "Acción ambiental",
+          descripcion_de_la_actividad: "Campaña de reciclaje",
+          total_estudiantes_mujeres: 7,
+          total_estudiantes_hombres: 8
         }
       },
       {
@@ -738,7 +734,7 @@ describe("SIGI store and RBAC", () => {
         }
       },
       {
-        code: "B16-FMT-01-43FE55CA-formacion-docente-2026",
+        code: "FMT-01-43FE55CA-formacion-docente-2026",
         expectedKeys: ["tipo_de_evento", "nombre_del_evento", "poblacion_docente_nms_h", "poblacion_docente_nms_m", "poblacion_docente_nms_total"],
         sampleValues: {
           tipo_de_evento: "Curso",
@@ -752,14 +748,14 @@ describe("SIGI store and RBAC", () => {
         }
       },
       {
-        code: "4.1.2.1.6",
-        expectedKeys: ["rubro", "cantidad_actual", "cantidad_solicitada", "cantidad_total"],
+        code: "FMT-01-E81E8473-41221-porcentaje-de-uo-q",
+        expectedKeys: ["dependencia_area", "actividad", "descripcion", "total_de_equipos", "equipos_atendidos"],
         sampleValues: {
-          rubro: "Equipo",
-          descripcion: "Videoproyector",
-          cantidad_actual: 1,
-          cantidad_solicitada: 2,
-          estado: "Solicitado"
+          dependencia_area: "DGEMS",
+          actividad: "Mantenimiento preventivo",
+          descripcion: "Revisión de equipos",
+          total_de_equipos: 10,
+          equipos_atendidos: "8"
         }
       }
     ];

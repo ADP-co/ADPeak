@@ -372,37 +372,21 @@ function buildFallbackUsers(indicators: CatalogIndicator[]): CatalogUser[] {
 }
 
 const studentPeriodMatrixCodes = new Set([
-  '1.1.2.1.1',
-  '1.1.2.1.3',
-  '1.1.2.2.1',
-  '1.1.2.2.8',
-  '1.1.2.2.9',
   '1.1.2.2.10',
   '1.1.2.2.11',
-  '1.1.2.4.1',
 ]);
 
 const integralDevelopmentCodes = new Set(['1.1.2.3.1']);
-const staffProfileCodes = new Set(['1.1.2.5.1', '1.1.2.5.3']);
+const staffProfileCodes = new Set(['1.1.2.5.3']);
 const staffTrainingCodes = new Set([
-  '1.1.2.5.5',
-  '1.1.2.5.6',
-  '1.1.2.5.7',
-  '1.1.2.5.8',
-  '1.1.2.5.9',
   '1.1.2.5.10',
-  '4.1.4.3.3',
 ]);
 const participantActionCodes = new Set([
-  '2.1.4.1.1',
   '2.1.4.1.2',
-  '2.1.4.1.3',
   '3.1.0.0.1',
-  '3.1.1.2.2',
   '3.1.1.3.6',
-  '4.1.5.3.3',
 ]);
-const infrastructureCodes = new Set(['4.1.2.1.3', '4.1.2.1.6', '4.1.2.2.1']);
+const infrastructureCodes = new Set(['FMT-01-E81E8473-41221-porcentaje-de-uo-q']);
 
 const activitiesForTemplate = (indicator: Pick<CatalogIndicator, 'activities'>) =>
   indicator.activities.length > 0 ? indicator.activities : ['Actividad general'];
@@ -479,7 +463,7 @@ export function buildTemplateForCatalogIndicator(indicator: CatalogIndicator, pl
 function buildOfficialWorkbookTemplate(indicator: CatalogIndicator, plantelName: string): IndicatorTemplateResponse {
   const imported = officialWorkbookTemplates[indicator.code];
   const columns = imported.columns;
-  const displayCode = imported.officialCode || (indicator.code.startsWith('B16-FMT-') ? 'Pendiente de mapeo' : indicator.code);
+  const displayCode = imported.officialCode || (indicator.code.startsWith('FMT-') ? 'Pendiente de mapeo' : indicator.code);
   const groups = imported.groups.filter((group) => group.label !== 'Formato oficial importado');
   const applyPlantel = (sourceRow: Record<string, unknown>) => {
     const row: Record<string, unknown> = {};
