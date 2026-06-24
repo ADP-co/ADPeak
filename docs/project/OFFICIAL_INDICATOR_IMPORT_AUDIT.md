@@ -12,16 +12,12 @@ El conector de Google Drive habia devuelto la carpeta original sin archivos visi
 
 ## Resultado importado
 
-- 99 filas fisicas desde `Libro1.xlsx`.
-- 159 filas totales de catalogo despues de agregar formatos que solo aparecen en libros Excel.
-- 148 filas unicas trazables.
-- 108 codigos unicos de indicador disponibles en la aplicacion.
-- 19 responsables y 23 contribuyentes.
-- 128 actividades detectadas.
-- 69 libros Excel analizados.
-- 67 plantillas manipulables generadas desde hojas oficiales.
-- 39 indicadores con alcance de plantel detectado desde evidencias.
-- 81 grupos de evidencias/fuentes oficiales para reportes.
+- 32 archivos revisados desde `indicadores-20260622T210134Z-3-001.zip`.
+- 30 libros Excel, 1 PDF y 1 DOCX detectados en el paquete vigente.
+- 28 codigos visibles de indicador disponibles en la aplicacion.
+- 28 plantillas manipulables generadas desde hojas oficiales.
+- 30 resumenes de libros/fuentes oficiales disponibles para auditoria interna.
+- Version de migracion actual: `2026-06-23-indicadores-zip-only-v1`.
 
 ## Controles de calidad
 
@@ -33,12 +29,12 @@ El conector de Google Drive habia devuelto la carpeta original sin archivos visi
 
 ## Brecha documentada
 
-De los 48 codigos base de `Libro1.xlsx`, 7 tienen plantilla asociada directamente por codigo oficial en los paquetes Excel actuales. Los demas siguen disponibles como indicadores oficiales con responsable, contribuyente y actividad base, pero su captura queda en plantilla estructural hasta que se proporcione un formato Excel especifico por codigo.
+El paquete vigente incluye formatos con codigo oficial directo y tambien variantes detectadas desde nombres de archivos u hojas. Las variantes tecnicas `FMT-*` y `*-FMT-*` no deben tratarse como codigos finales del profesor en comunicacion externa; se conservan solo cuando el sistema necesita distinguir una plantilla importada que todavia no tiene mapeo oficial unico.
 
-Esta brecha no bloquea operacion: evita inventar columnas del profesor y permite que el Director configure o ajuste el formato cuando reciba la hoja oficial correspondiente.
+Esta brecha no bloquea operacion, pero debe resolverse en una normalizacion posterior separando formalmente `indicador oficial` de `variante de formato` para evitar duplicados visuales.
 
 ## Decision aplicada
 
-- El paquete `indicadores-20260622T210134Z-3-001.zip` reemplaza al paquete anterior de 13 libros como fuente principal de formatos.
-- Bachillerato 16 se mantiene de forma aditiva porque contiene 39 libros adicionales de evidencia/plantilla que no vienen en el ZIP nuevo.
-- La migracion de catalogo sube a `2026-06-22-official-indicators-v8` para que produccion en Postgres regenere indicadores oficiales y retire imports obsoletos.
+- El paquete `indicadores-20260622T210134Z-3-001.zip` reemplaza al paquete anterior como fuente principal de formatos visibles.
+- No se versionan ZIP, Excel, PDF, DOCX ni evidencias fuente.
+- La migracion de catalogo vigente es `2026-06-23-indicadores-zip-only-v1` para que produccion regenere indicadores oficiales y retire imports obsoletos.

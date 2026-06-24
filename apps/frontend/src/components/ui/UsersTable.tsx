@@ -429,7 +429,7 @@ export const UsersTable = () => {
               {filteredUsers.length === 0 && (
                 <tr>
                   <td colSpan={4} className="py-8 px-6 text-center text-brand-Gris_oscuro/70">
-                    Sin resultados para la busqueda actual.
+                    Sin resultados para la búsqueda actual.
                   </td>
                 </tr>
               )}
@@ -603,7 +603,7 @@ export const UsersTable = () => {
       <ConfirmModal
         isOpen={!!userToDelete}
         title="Desactivar usuario"
-        message={`Deseas desactivar al usuario ${userToDelete?.name}? Se conservara su historial.`}
+        message={`¿Deseas desactivar al usuario ${userToDelete?.name}? Se conservará su historial.`}
         onConfirm={confirmDeleteUser}
         onCancel={() => setUserToDelete(null)}
         confirmText="Desactivar"
@@ -612,7 +612,7 @@ export const UsersTable = () => {
       <ConfirmModal
         isOpen={!!userToToggleBlock}
         title={userToToggleBlock?.isBlocked ? 'Desbloquear usuario' : 'Bloquear usuario'}
-        message={`Deseas ${userToToggleBlock?.isBlocked ? 'desbloquear' : 'bloquear'} al usuario ${userToToggleBlock?.name}?`}
+        message={`¿Deseas ${userToToggleBlock?.isBlocked ? 'desbloquear' : 'bloquear'} al usuario ${userToToggleBlock?.name}?`}
         onConfirm={confirmToggleBlockUser}
         onCancel={() => setUserToToggleBlock(null)}
         confirmText={userToToggleBlock?.isBlocked ? 'Desbloquear' : 'Bloquear'}

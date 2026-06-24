@@ -1,4 +1,4 @@
-import { apiJson } from './client';
+import { API_REQUESTS_ENABLED, apiJson } from './client';
 import {
   officialDataSummary,
   officialEvidenceGroups,
@@ -27,7 +27,11 @@ export const fallbackOfficialSources: OfficialSourcesPayload = {
 export async function fetchOfficialSources() {
   try {
     return await apiJson<OfficialSourcesPayload>('/fuentes-oficiales');
-  } catch {
+  } catch (error) {
+    if (API_REQUESTS_ENABLED) {
+      throw error;
+    }
+
     return fallbackOfficialSources;
   }
 }

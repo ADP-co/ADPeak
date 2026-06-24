@@ -63,6 +63,10 @@ export type CaptureDraft = {
 };
 
 function shouldUseStaticFallback(error: unknown) {
+  if (API_REQUESTS_ENABLED) {
+    return false;
+  }
+
   if (!axios.isAxiosError(error)) {
     return false;
   }

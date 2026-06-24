@@ -38,7 +38,12 @@ const DonutCard = ({ title, percentage, colorClass, strokeColor }: DonutCardProp
       </div>
 
       <div className="relative flex items-center justify-center w-32 h-32">
-        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+        <svg
+          className="w-full h-full transform -rotate-90"
+          viewBox="0 0 100 100"
+          role="img"
+          aria-label={`${title}: ${percentage}%`}
+        >
           <circle
             cx="50"
             cy="50"
@@ -289,7 +294,13 @@ export const ReportsDashboard = () => {
   const [officialSources, setOfficialSources] = useState<OfficialSourcesPayload>(fallbackOfficialSources);
 
   useEffect(() => {
-    fetchOfficialSources().then(setOfficialSources);
+    fetchOfficialSources()
+      .then(setOfficialSources)
+      .catch(() => {
+        if (!API_REQUESTS_ENABLED) {
+          setOfficialSources(fallbackOfficialSources);
+        }
+      });
   }, []);
 
   useEffect(() => {
@@ -367,7 +378,7 @@ export const ReportsDashboard = () => {
         return buildFallbackReport(item, selectedDate, officialSources);
       }
 
-      throw new Error(`No se pudo preparar el reporte de ${item.plantel}.`);
+      throw new Error(`No se pudo preparar la descarga de ${item.plantel}.`);
     }
   };
 
@@ -482,7 +493,14 @@ export const ReportsDashboard = () => {
     }
 
     return (
-      <div className={`relative w-full h-6 rounded-full overflow-hidden ${bgColor}`}>
+      <div
+        className={`relative w-full h-6 rounded-full overflow-hidden ${bgColor}`}
+        role="progressbar"
+        aria-label={`Progreso de ${item.plantel}`}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={item.percentage}
+      >
         {/* Relleno que crece según el porcentaje */}
         <div
           className={`absolute top-0 left-0 h-full rounded-full ${fillColor} transition-all duration-1000 ease-out`}

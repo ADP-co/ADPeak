@@ -40,6 +40,7 @@ coverage/
 .vite/
 .cache/
 .vercel/
+output/
 playwright-report/
 test-results/
 site/

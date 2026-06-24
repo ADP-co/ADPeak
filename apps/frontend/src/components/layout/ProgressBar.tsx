@@ -17,6 +17,11 @@ export const ProgressBar = ({ totalIndicators, completedIndicators }: ProgressBa
       <div
         className="h-6 w-full bg-brand-Verde_principal/20 rounded-full overflow-hidden relative drop-shadow-sm"
         title={`Progreso: ${completedIndicators} de ${totalIndicators} indicadores`}
+        role="progressbar"
+        aria-label="Progreso de indicadores"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={PorcentajeFinal}
       >
         {/* Barra de Progreso Activa*/}
         <div

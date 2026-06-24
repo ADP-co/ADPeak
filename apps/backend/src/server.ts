@@ -526,7 +526,7 @@ const server = createServer(async (request, response) => {
         if (!isCapturePayload(payload)) {
           sendJson(response, 400, {
             error: "invalid_capture_payload",
-            message: "La actualizacion debe incluir payload.rows."
+            message: "La actualización debe incluir filas de captura."
           });
           return;
         }

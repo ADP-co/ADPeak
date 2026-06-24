@@ -21,6 +21,7 @@ import { Login } from './components/ui/Login';
 import { Toaster, toast } from 'sonner';
 import { useCaptureDraft } from './hooks/useCaptureDraft';
 import { buildHealthIntegralTemplate, buildTemplateForCatalogIndicator, catalogPlanteles, fetchIndicatorTemplate, fetchIndicators, plantelScopeLabelForIndicator, type CatalogIndicator } from './api/catalog';
+import { API_REQUESTS_ENABLED } from './api/client';
 import { officialCatalogRows, officialIndicatorPlantelScopes } from './catalog/officialCatalog.generated';
 
 const UNASSIGNED_PLANTEL_LABEL = 'Todos los planteles';
@@ -377,6 +378,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
   const resolvedIndicatorId = selectedCatalogIndicator?.id ?? (canUseMockupIndicatorId ? getIndicatorIdByCode(selectedCode) : 0);
   const fallbackTemplate = fallbackTemplateForIndicator(selectedCode, selectedIndicator, selectedCatalogIndicator);
   const [remoteTemplate, setRemoteTemplate] = useState<(IndicatorTemplate & { initialRows?: Record<string, unknown>[] }) | null>(null);
+  const [templateLoadError, setTemplateLoadError] = useState('');
   const selectedTemplate = {
     ...(remoteTemplate ?? fallbackTemplate),
     indicatorCode: remoteTemplate?.indicatorCode ?? selectedCode,
@@ -386,6 +388,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
   useEffect(() => {
     let isMounted = true;
     setRemoteTemplate(null);
+    setTemplateLoadError('');
 
     fetchIndicatorTemplate(selectedCode)
       .then((template) => {
@@ -393,9 +396,10 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
           setRemoteTemplate(template);
         }
       })
-      .catch(() => {
+      .catch((error) => {
         if (isMounted) {
           setRemoteTemplate(null);
+          setTemplateLoadError(error instanceof Error ? error.message : 'No se pudo cargar la plantilla.');
         }
       });
 
@@ -443,6 +447,24 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
         <Button type="button" className="mt-5 text-xs py-1.5 px-4" onClick={() => navigate('/indicadores')}>
           Volver
         </Button>
+      </section>
+    );
+  }
+
+  if (API_REQUESTS_ENABLED && !remoteTemplate) {
+    return (
+      <section className="w-full max-w-[1250px] mx-auto bg-brand-Blanco rounded-lg shadow-md border border-brand-Gris_bajo/20 p-8">
+        <h1 className="font-title text-xl font-bold text-brand-Gris_oscuro mb-2">
+          {templateLoadError ? 'Plantilla no disponible' : 'Cargando plantilla...'}
+        </h1>
+        <p className="font-body text-sm text-brand-Gris_oscuro">
+          {templateLoadError || 'Espera un momento mientras se carga el formato oficial.'}
+        </p>
+        {templateLoadError && (
+          <Button type="button" className="mt-5 text-xs py-1.5 px-4" onClick={() => navigate('/indicadores')}>
+            Volver
+          </Button>
+        )}
       </section>
     );
   }
@@ -518,7 +540,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
       existingEvidenceName={captureDraft.capture?.payload.evidencia?.nombre}
       canReview={user?.role === 'responsable' || user?.role === 'admin'}
       captureStatus={captureDraft.capture?.estado}
-      isReadOnly={user?.role === 'plantel' && !isEditableCaptureStatus(captureDraft.capture?.estado)}
+      isReadOnly={user?.role !== 'plantel' || !isEditableCaptureStatus(captureDraft.capture?.estado)}
       onSaveDraft={handleSaveDraft}
       onSendReview={handleSendReview}
       onApprove={handleApprove}
@@ -634,10 +656,12 @@ function AppContent() {
             .map((indicator) => catalogToIndicator(indicator, user))
         : catalogLoaded
           ? []
-          : mockupIndicators.map((indicator) => applySessionScope(indicator, user))
+          : API_REQUESTS_ENABLED
+            ? []
+            : mockupIndicators.map((indicator) => applySessionScope(indicator, user))
       ).map((indicator) => ({
         ...indicator,
-        status: indicatorStatusOverrides[indicator.code] ?? indicator.status,
+        status: API_REQUESTS_ENABLED ? indicator.status : indicatorStatusOverrides[indicator.code] ?? indicator.status,
       })),
     [catalogIndicators, catalogLoaded, indicatorStatusOverrides, user]
   );

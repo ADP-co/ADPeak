@@ -716,6 +716,10 @@ export function assertCaptureAccess(
     throw new SigiForbiddenError("El plantel solo puede operar su propio alcance.");
   }
 
+  if ((action === "draft" || action === "submit") && session.role !== "plantel") {
+    throw new SigiForbiddenError("Solo el plantel puede capturar o enviar indicadores.");
+  }
+
   if (!canUseIndicatorForPlantel(indicator, request.plantelId)) {
     throw new SigiForbiddenError("El indicador no esta asignado a este plantel.");
   }
@@ -793,9 +797,15 @@ export function buildReportPayload(
   const cicloEscolar = filters.cicloEscolar ?? "2025-2026";
   const periodo = filters.periodo ?? "2026-A";
   const requestedPeriodoId = periodIdFromReportPeriod(periodo);
+  const hasPlantelFilter = Boolean(filters.plantelId || filters.plantel);
   const plantelId = session.role === "plantel"
     ? session.plantelId
     : resolvePlantelId(filters.plantelId ?? filters.plantel);
+
+  if (hasPlantelFilter && !plantelId) {
+    throw new SigiValidationError("El plantel solicitado no existe.");
+  }
+
   const scopedPlanteles = plantelId
     ? planteles.filter((plantel) => plantel.id === plantelId)
     : planteles;
@@ -844,10 +854,6 @@ export function buildReportPayload(
       datos: rows
     };
   }).filter((indicator) => indicator.datos.length > 0);
-  const officialSourcesReport = session.role === "director"
-    ? officialSourcesReportRows(plantelId, periodo, cicloEscolar)
-    : undefined;
-
   const identityPlantel = plantelId ? planteles.find((plantel) => plantel.id === plantelId) : undefined;
   const responsibleUser = session.role === "responsable"
     ? users.get(`responsable-${session.responsableId}`)
@@ -862,7 +868,7 @@ export function buildReportPayload(
       tipo: identityPlantel ? "Plantel" : session.role === "responsable" ? "Responsable" : "Institucional",
       nombre: identityPlantel?.name ?? responsibleUser?.name ?? "DGEMS"
     },
-    indicadores: officialSourcesReport ? [...grouped, officialSourcesReport] : grouped
+    indicadores: grouped
   };
 }
 
@@ -1005,11 +1011,9 @@ function numberValue(value: unknown) {
 
 function reportDetailsFromCapturedRow(row: Record<string, unknown>, indicator: SigiIndicator) {
   const details: Array<{ campo: string; valor: string }> = [];
-  const labelsByKey = new Map((indicator.templateColumns ?? []).map((column) => [column.key, column.label]));
-  const orderedKeys = uniqueStrings([
-    ...(indicator.templateColumns ?? []).map((column) => column.key),
-    ...Object.keys(row)
-  ]);
+  const templateColumns = templateForIndicator(indicator).columns;
+  const labelsByKey = new Map(templateColumns.map((column) => [column.key, column.label]));
+  const orderedKeys = templateColumns.map((column) => column.key);
   const seenLabels = new Set<string>();
 
   for (const key of orderedKeys) {
@@ -1089,36 +1093,6 @@ function readableReportDetailLabel(key: string) {
     .replace(/\s+/g, " ")
     .trim()
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
-
-function officialSourcesReportRows(
-  plantelId: number | undefined,
-  periodo: string,
-  cicloEscolar: string
-): SigiReportPayload["indicadores"][number] | undefined {
-  if (plantelId && plantelId !== 1) {
-    return undefined;
-  }
-
-  return {
-    id: "fuentes-oficiales-cargadas",
-    nombre: "Fuentes oficiales cargadas",
-    descripcion: "Inventario agregado del paquete oficial recibido.",
-    datos: officialEvidenceGroups.map((group, index) => ({
-      registro_id: `fuente-oficial-${index + 1}`,
-      actividad: group.category,
-      responsable: officialDataSummary.plantel,
-      estado: "Aprobado",
-      avance: "100%",
-      plantel: officialDataSummary.plantel,
-      plantelId: "1",
-      periodo,
-      ciclo: cicloEscolar,
-      meta: group.fileCount,
-      evidencias: group.fileCount,
-      vencimiento: "en_tiempo"
-    }))
-  };
 }
 
 function buildIndicators() {
@@ -2563,10 +2537,13 @@ function inferDataType(name: string): SigiIndicator["dataType"] {
   return "number";
 }
 
-function periodIdFromReportPeriod(_periodo: string) {
-  // El sprint actual opera con un periodo activo de captura. El texto del
-  // reporte se conserva para filtros visuales, pero el ID real se mantiene
-  // estable hasta que exista un catalogo de periodos en backend.
+function periodIdFromReportPeriod(periodo: string) {
+  const normalized = normalizeKey(periodo);
+
+  if (normalized.includes("2025") || normalized.includes("2024")) {
+    return 2;
+  }
+
   return 1;
 }
 

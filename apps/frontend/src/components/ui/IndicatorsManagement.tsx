@@ -253,7 +253,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
               {filteredIndicators.length === 0 && (
                 <tr>
                   <td colSpan={6} className="py-8 px-6 text-center text-brand-Gris_oscuro/70">
-                    Sin resultados para la busqueda actual.
+                    Sin resultados para la búsqueda actual.
                   </td>
                 </tr>
               )}
@@ -265,7 +265,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
       <ConfirmModal
         isOpen={!!indicatorToDelete}
         title="Desactivar indicador"
-        message={`Deseas desactivar el indicador ${indicatorToDelete?.code}? Se conservara su historial.`}
+        message={`¿Deseas desactivar el indicador ${indicatorToDelete?.code}? Se conservará su historial.`}
         onConfirm={confirmDeleteIndicator}
         onCancel={() => setIndicatorToDelete(null)}
         confirmText="Desactivar"

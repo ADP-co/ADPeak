@@ -10,6 +10,8 @@ interface PasswordFieldProps {
   value: string;
   onChange: (value: string) => void;
   autoComplete?: string;
+  describedBy?: string;
+  invalid?: boolean;
 }
 
 const PasswordField = ({
@@ -18,6 +20,8 @@ const PasswordField = ({
   value,
   onChange,
   autoComplete,
+  describedBy,
+  invalid = false,
 }: PasswordFieldProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const inputId = useId();
@@ -35,6 +39,10 @@ const PasswordField = ({
           value={value}
           onChange={(event) => onChange(event.target.value)}
           autoComplete={autoComplete}
+          required
+          minLength={label === 'Contraseña actual' ? undefined : 8}
+          aria-invalid={invalid}
+          aria-describedby={describedBy}
           className="h-10 w-full rounded-md border border-brand-Gris_bajo/50 bg-brand-Blanco pl-3 pr-12 font-body text-sm text-brand-Gris_oscuro transition-colors focus:border-brand-Verde_oscuro focus:outline-none focus:ring-1 focus:ring-brand-Verde_oscuro"
         />
         <button
@@ -62,6 +70,7 @@ export const AccountProfile = ({ onBack }: AccountProfileProps) => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSavingPassword, setIsSavingPassword] = useState(false);
+  const passwordFeedbackId = useId();
 
   const handleSavePassword = async () => {
     setSaveMessage('');
@@ -136,11 +145,13 @@ export const AccountProfile = ({ onBack }: AccountProfileProps) => {
 
           <div className="mt-2 flex flex-col gap-5">
             <PasswordField
-              label="Contraseña"
+              label="Contraseña actual"
               placeholder="Escribe tu contraseña actual"
               value={currentPassword}
               onChange={setCurrentPassword}
               autoComplete="current-password"
+              describedBy={passwordFeedbackId}
+              invalid={Boolean(passwordError)}
             />
             <PasswordField
               label="Nueva Contraseña"
@@ -148,6 +159,8 @@ export const AccountProfile = ({ onBack }: AccountProfileProps) => {
               value={newPassword}
               onChange={setNewPassword}
               autoComplete="new-password"
+              describedBy={passwordFeedbackId}
+              invalid={Boolean(passwordError)}
             />
             <PasswordField
               label="Confirmar Nueva Contraseña"
@@ -155,14 +168,16 @@ export const AccountProfile = ({ onBack }: AccountProfileProps) => {
               value={confirmPassword}
               onChange={setConfirmPassword}
               autoComplete="new-password"
+              describedBy={passwordFeedbackId}
+              invalid={Boolean(passwordError)}
             />
             {passwordError && (
-              <p className="text-xs font-semibold text-brand-Status_rojo">{passwordError}</p>
+              <p id={passwordFeedbackId} role="alert" className="text-xs font-semibold text-brand-Status_rojo">{passwordError}</p>
             )}
           </div>
 
           {saveMessage && (
-            <p className="text-right font-body text-sm font-semibold text-brand-Verde_oscuro">{saveMessage}</p>
+            <p id={passwordFeedbackId} role="status" aria-live="polite" className="text-right font-body text-sm font-semibold text-brand-Verde_oscuro">{saveMessage}</p>
           )}
 
           <div className="mt-4 flex justify-end">
@@ -172,7 +187,7 @@ export const AccountProfile = ({ onBack }: AccountProfileProps) => {
               disabled={isSavingPassword}
               className="px-8 py-2.5 text-sm"
             >
-              {isSavingPassword ? 'Guardando' : 'Guardar Contraseña'}
+              {isSavingPassword ? 'Guardando' : 'Guardar contraseña'}
             </Button>
           </div>
         </div>

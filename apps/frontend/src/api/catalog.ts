@@ -1,4 +1,4 @@
-import { apiJson } from './client';
+import { API_REQUESTS_ENABLED, apiJson } from './client';
 import {
   officialCatalogRows,
   officialIndicatorPlantelScopes,
@@ -137,7 +137,11 @@ export async function fetchIndicators() {
     const response = await apiJson<{ indicators: CatalogIndicator[] }>('/indicadores');
     writeStorage(INDICATORS_STORAGE_KEY, response.indicators);
     return response.indicators;
-  } catch {
+  } catch (error) {
+    if (API_REQUESTS_ENABLED) {
+      throw error;
+    }
+
     return readStorage(INDICATORS_STORAGE_KEY, fallbackIndicators);
   }
 }
@@ -207,7 +211,11 @@ export async function deactivateIndicator(id: number) {
 export async function fetchIndicatorTemplate(codeOrId: string) {
   try {
     return await apiJson<IndicatorTemplateResponse>(`/indicadores/${encodeURIComponent(codeOrId)}/template`);
-  } catch {
+  } catch (error) {
+    if (API_REQUESTS_ENABLED) {
+      throw error;
+    }
+
     const indicator = readStorage(INDICATORS_STORAGE_KEY, fallbackIndicators)
       .find((candidate) => candidate.code === codeOrId || String(candidate.id) === codeOrId);
     return templateForIndicator(indicator ?? fallbackIndicators[0]);
@@ -219,7 +227,11 @@ export async function fetchUsers() {
     const response = await apiJson<{ users: CatalogUser[] }>('/usuarios');
     writeStorage(USERS_STORAGE_KEY, response.users);
     return response.users;
-  } catch {
+  } catch (error) {
+    if (API_REQUESTS_ENABLED) {
+      throw error;
+    }
+
     return readStorage(USERS_STORAGE_KEY, fallbackUsers);
   }
 }
@@ -463,7 +475,7 @@ export function buildTemplateForCatalogIndicator(indicator: CatalogIndicator, pl
 
 function buildOfficialWorkbookTemplate(indicator: CatalogIndicator, plantelName: string): IndicatorTemplateResponse {
   const imported = officialWorkbookTemplates[indicator.code];
-  const columns = imported.columns;
+  const columns = relaxBlankReadonlyColumns(imported.columns, imported.initialRows, imported.emptyRow);
   const displayCode = imported.officialCode || (indicator.code.startsWith('FMT-') ? 'Pendiente de mapeo' : indicator.code);
   const groups = imported.groups.filter((group) => group.label !== 'Formato oficial importado');
   const applyPlantel = (sourceRow: Record<string, unknown>) => {
@@ -499,6 +511,42 @@ function buildOfficialWorkbookTemplate(indicator: CatalogIndicator, plantelName:
     analysisLabel: 'Descripción y observaciones',
     analysisPlaceholder: 'Describe brevemente el avance, pendientes o comentarios del formato oficial.',
   };
+}
+
+function relaxBlankReadonlyColumns(
+  columns: ColumnConfig[],
+  rows: Record<string, unknown>[],
+  emptyRow: Record<string, unknown>
+) {
+  return columns.map((column) => {
+    if (column.type !== 'readonly' || isProtectedContextColumn(column)) {
+      return column;
+    }
+
+    const hasOfficialValue = [...rows, emptyRow].some((row) => {
+      const value = row[column.key];
+      return value !== undefined && value !== null && String(value).trim() !== '';
+    });
+
+    return hasOfficialValue ? column : { ...column, type: editableTypeForBlankColumn(column) };
+  });
+}
+
+function isProtectedContextColumn(column: ColumnConfig) {
+  const normalized = normalizeText(`${column.label} ${column.key}`);
+  return ['plantel', 'delegacion', 'responsable', 'periodo', 'ciclo', 'semestre'].some((token) =>
+    normalized.includes(token)
+  );
+}
+
+function editableTypeForBlankColumn(column: ColumnConfig): 'number' | 'text' {
+  const normalized = normalizeText(`${column.label} ${column.key}`);
+
+  if (/(^| )(no|num|numero|cantidad|sesiones|total)( |$)/.test(normalized)) {
+    return 'number';
+  }
+
+  return 'text';
 }
 
 function templateForIndicator(indicator: CatalogIndicator): IndicatorTemplateResponse {

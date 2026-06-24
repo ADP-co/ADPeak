@@ -288,6 +288,7 @@ describe("SIGI store and RBAC", () => {
     expect(currentCycle.indicadores.flatMap((indicator) => indicator.datos).some((row) => row.plantel === "Bachillerato 16")).toBe(true);
     expect(bachillerato16.indicadores.some((indicator) => indicator.id === "1.0.0.0.2")).toBe(true);
     expect(bachillerato4.indicadores.some((indicator) => indicator.id === "1.0.0.0.2")).toBe(true);
+    expect(() => buildReportPayload(director, { plantelId: "999", periodo: "2026-2" })).toThrow(SigiValidationError);
   });
 
   it("keeps imported official indicators unassigned while allowing plantel capture until director narrows the scope", () => {
@@ -459,16 +460,17 @@ describe("SIGI store and RBAC", () => {
     expect(sources.workbookSummaries).toHaveLength(30);
   });
 
-  it("includes official ZIP evidence groups in report exports", () => {
+  it("keeps official ZIP evidence groups outside report exports", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
+    const sources = officialSourcesPayload(director);
     const report = buildReportPayload(director, { plantelId: "1", now: new Date("2026-06-12T00:00:00.000Z") });
     const officialSources = report.indicadores.find((indicator) => indicator.id === "fuentes-oficiales-cargadas");
 
-    expect(officialSources).toBeDefined();
+    expect(sources.evidenceGroups).toHaveLength(11);
+    expect(sources.evidenceGroups.reduce((total, group) => total + group.fileCount, 0)).toBe(32);
+    expect(officialSources).toBeUndefined();
     expect(report.indicadores.every((indicator) => Boolean(indicator.id))).toBe(true);
     expect(report.indicadores.flatMap((indicator) => indicator.datos).every((row) => Boolean(row.registro_id))).toBe(true);
-    expect(officialSources?.datos).toHaveLength(11);
-    expect(officialSources?.datos.reduce((total, row) => total + row.evidencias, 0)).toBe(32);
   });
 
   it("uses active false for logical indicator deletion", () => {
@@ -591,7 +593,11 @@ describe("SIGI store and RBAC", () => {
     });
 
     const report = buildReportPayload(director, { plantelId: "1", periodo: "2026-2" });
+    const previousPeriodReport = buildReportPayload(director, { plantelId: "1", periodo: "2025-2" });
     const reportRow = report.indicadores
+      .find((item) => item.id === "TMP-REPORT-DETAIL")
+      ?.datos[0];
+    const previousPeriodRow = previousPeriodReport.indicadores
       .find((item) => item.id === "TMP-REPORT-DETAIL")
       ?.datos[0];
 
@@ -600,6 +606,7 @@ describe("SIGI store and RBAC", () => {
       { campo: "Hombres", valor: "10" },
       { campo: "Observaciones", valor: "Dato importado y editable" }
     ]));
+    expect(previousPeriodRow?.captureId).toBeUndefined();
   });
 
   it("repairs replacement characters from client-submitted report text", () => {

@@ -31,18 +31,22 @@ function initialCaptureId(storageKey: string) {
 export function useCaptureDraft(options: UseCaptureDraftOptions) {
   const queryClient = useQueryClient();
   const { requestedCaptureId, storageScope, enabled = true, ...captureOptions } = options;
-  const hasRequestedCapture = Boolean(requestedCaptureId);
+  const [ignoredRequestedCaptureId, setIgnoredRequestedCaptureId] = useState<number | undefined>();
+  const effectiveRequestedCaptureId = requestedCaptureId && requestedCaptureId !== ignoredRequestedCaptureId
+    ? requestedCaptureId
+    : undefined;
+  const hasRequestedCapture = Boolean(effectiveRequestedCaptureId);
   const storageKey = `${STORAGE_KEY_PREFIX}:${storageScope ?? [
     options.plantelId,
     options.indicadorId,
     options.periodoId,
     options.actividadId,
   ].join(':')}`;
-  const [captureId, setCaptureId] = useState<number | undefined>(() => requestedCaptureId ?? initialCaptureId(storageKey));
+  const [captureId, setCaptureId] = useState<number | undefined>(() => effectiveRequestedCaptureId ?? initialCaptureId(storageKey));
 
   useEffect(() => {
-    setCaptureId(requestedCaptureId ?? initialCaptureId(storageKey));
-  }, [requestedCaptureId, storageKey]);
+    setCaptureId(effectiveRequestedCaptureId ?? initialCaptureId(storageKey));
+  }, [effectiveRequestedCaptureId, storageKey]);
 
   const captureQuery = useQuery({
     queryKey: ['capture-draft', storageKey, captureId],
@@ -74,16 +78,18 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
 
   useEffect(() => {
     if (
-      !hasRequestedCapture &&
       captureQuery.error instanceof CaptureRequestError &&
       (captureQuery.error.code === 'capture_not_found' ||
         captureQuery.error.status === 400 ||
         captureQuery.error.status === 403)
     ) {
       window.localStorage.removeItem(storageKey);
+      if (requestedCaptureId) {
+        setIgnoredRequestedCaptureId(requestedCaptureId);
+      }
       setCaptureId(undefined);
     }
-  }, [captureQuery.error, hasRequestedCapture, storageKey]);
+  }, [captureQuery.error, requestedCaptureId, storageKey]);
 
   const saveDraftMutation = useMutation({
     mutationFn: async (payload: CapturePayload) => {

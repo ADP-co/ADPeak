@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { loginWithCredentials } from '../../api/auth';
+import { API_REQUESTS_ENABLED } from '../../api/client';
 import { Button } from './Button';
 import { Input } from './Input';
 import UDCBanner from '../../assets/Ucol_Banner.jpg';
@@ -128,7 +129,7 @@ export const Login = () => {
         <form onSubmit={handleLogin} className="space-y-4">
           <Input
             label="Usuario"
-            placeholder="Ingrese su usuario..."
+            placeholder="Escribe tu usuario"
             value={username}
             autoComplete="username"
             onChange={(e) => setUsername(e.target.value)}
@@ -136,7 +137,7 @@ export const Login = () => {
           <Input
             label="Contraseña"
             type="password"
-            placeholder="Ingrese su contraseña..."
+            placeholder="Escribe tu contraseña"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
@@ -157,6 +158,10 @@ export const Login = () => {
 };
 
 function canUseLocalFallback(error: unknown) {
+  if (API_REQUESTS_ENABLED) {
+    return false;
+  }
+
   if (error instanceof TypeError) {
     return true;
   }

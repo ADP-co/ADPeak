@@ -27,9 +27,9 @@ Fuentes generadas y versionadas:
 
 | Mision | Evidencia | Resultado |
 |---|---|---|
-| Analista | 159 filas de catalogo, 108 codigos unicos, 19 responsables, 23 contribuyentes, 128 actividades | Cumple |
-| Implementador | 69 libros Excel analizados, 67 plantillas oficiales, fuente nueva integrada de forma aditiva | Cumple |
-| Validador | Pruebas unitarias, typecheck, build y flujo API por rol despues de regenerar | En verificacion final |
+| Analista | ZIP vigente con 32 archivos: 30 Excel, 1 PDF y 1 DOCX | Cumple |
+| Implementador | 28 indicadores visibles generados y 28 plantillas oficiales disponibles desde el paquete vigente | Cumple |
+| Validador | Pruebas unitarias, typecheck, build y flujo API por rol despues de los ajustes finales | En verificacion final |
 
 ## Reglas de calidad aplicadas
 
@@ -43,10 +43,10 @@ Fuentes generadas y versionadas:
 
 | Grupo | Cantidad | Criterio de implementacion | Verificacion |
 |---|---:|---|---|
-| Indicadores totales visibles | 108 | Catalogo oficial importado y migrado a produccion `v8` | API `/api/v1/indicadores` con Director |
-| Formatos con Excel oficial | 67 | Plantilla generada desde encabezados/filas del libro | Auditoria de `/indicadores/:code/template` |
-| Indicadores con alcance de plantel detectado | 39 | Restringidos por `officialIndicatorPlantelScopes` | Pruebas de acceso por Plantel |
-| Grupos de evidencia oficial | 81 | Fuentes disponibles para reportes administrativos | Reporte Director |
+| Indicadores totales visibles | 28 | Catalogo oficial derivado del ZIP `indicadores-20260622T210134Z-3-001.zip` | API `/api/v1/indicadores` con Director |
+| Formatos con Excel oficial | 28 | Plantilla generada desde encabezados/filas del libro | Auditoria de `/indicadores/:code/template` |
+| Libros Excel revisados | 30 | Paquete vigente local, sin versionar binarios | Importador oficial |
+| Grupos de evidencia oficial | 30 | Resumen agregado de libros oficiales, sin exponer rutas privadas | Reporte Director |
 | Falsos positivos retirados | 0 visibles | Notas tipo `La tabla anterior incide...` quedan fuera de catalogo y plantillas | `rg` sobre generados |
 
 ## Regresion funcional requerida
@@ -59,4 +59,4 @@ Fuentes generadas y versionadas:
 
 ## Veredicto
 
-Los indicadores disponibles en el paquete nuevo quedaron importados de forma reproducible junto con Bachillerato 16. La validacion final debe confirmar en produccion que Postgres migro a `v8` y que la API publica ya devuelve los 108 indicadores.
+Los indicadores disponibles en el paquete nuevo quedaron importados de forma reproducible desde `indicadores-20260622T210134Z-3-001.zip`. La validacion final debe confirmar en produccion que Postgres migro a `2026-06-23-indicadores-zip-only-v1` y que la API publica devuelve los 28 indicadores visibles esperados.
