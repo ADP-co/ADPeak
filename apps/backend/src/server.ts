@@ -37,7 +37,8 @@ import {
   SigiAuthError,
   SigiForbiddenError,
   SigiValidationError,
-  templateForIndicator
+  templateForIndicator,
+  updateOwnPassword
 } from "./sigi-store.js";
 import {
   authenticateDemoUser,
@@ -177,6 +178,26 @@ const server = createServer(async (request, response) => {
       sendJson(response, 200, { user, sessionToken: createSessionToken(user) });
       return;
     } catch {
+      sendJson(response, 400, {
+        error: "invalid_json",
+        message: "El cuerpo de la solicitud debe ser JSON valido."
+      });
+      return;
+    }
+  }
+
+  if (request.method === "PATCH" && url.pathname === "/api/v1/auth/password") {
+    try {
+      const session = sessionFromHeaders(request.headers);
+      const user = updateOwnPassword(session, await readJsonBody(request));
+      await flushPersistedState();
+      sendJson(response, 200, { user });
+      return;
+    } catch (error) {
+      if (sendError(response, error)) {
+        return;
+      }
+
       sendJson(response, 400, {
         error: "invalid_json",
         message: "El cuerpo de la solicitud debe ser JSON valido."

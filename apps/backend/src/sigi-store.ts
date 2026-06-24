@@ -80,6 +80,12 @@ export type SigiIndicator = {
   lastChange?: "importado" | "creado" | "actualizado" | "desactivado" | "habilitado";
 };
 
+export type SigiIndicatorStatus = "Pendiente" | "En revisión" | "Corregir" | "Aprobado";
+
+export type SigiIndicatorListItem = SigiIndicator & {
+  status: SigiIndicatorStatus;
+};
+
 export type SigiIndicatorHistoryEntry = {
   id: number;
   code: string;
@@ -146,7 +152,7 @@ export type SigiReportPayload = {
       actividadId?: number;
       actividad: string;
       responsable: string;
-      estado: "Borrador" | "Enviado" | "Observado" | "Aprobado";
+      estado: "Borrador" | "En revisión" | "Observado" | "Aprobado";
       avance: string;
       plantel: string;
       plantelId: string;
@@ -396,6 +402,44 @@ export function authenticateUser(username: string, password: string): Authentica
   return authenticatedUser(user);
 }
 
+export function updateOwnPassword(
+  session: SigiSession,
+  input: { currentPassword?: unknown; newPassword?: unknown; confirmPassword?: unknown }
+) {
+  const user = users.get(session.userId);
+  const currentPassword = typeof input.currentPassword === "string" ? input.currentPassword : "";
+  const newPassword = typeof input.newPassword === "string" ? input.newPassword : "";
+  const confirmPassword = typeof input.confirmPassword === "string" ? input.confirmPassword : "";
+
+  if (!user || !user.active) {
+    throw new SigiAuthError("La sesión no corresponde a un usuario activo.");
+  }
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    throw new SigiValidationError("Completa los tres campos de contraseña.");
+  }
+
+  if (user.passwordHash !== hashPassword(currentPassword)) {
+    throw new SigiValidationError("La contraseña actual no es correcta.");
+  }
+
+  if (newPassword.length < 8) {
+    throw new SigiValidationError("La nueva contraseña debe tener al menos 8 caracteres.");
+  }
+
+  if (newPassword !== confirmPassword) {
+    throw new SigiValidationError("La confirmación no coincide con la nueva contraseña.");
+  }
+
+  const updated = {
+    ...user,
+    passwordHash: hashPassword(newPassword)
+  };
+  users.set(user.id, updated);
+  persistCatalogState();
+  return publicUser(updated);
+}
+
 function matchesLoginUsername(user: SigiUser, normalizedUsername: string) {
   if (user.username === normalizedUsername) {
     return true;
@@ -423,10 +467,14 @@ export function createSessionToken(user: AuthenticatedSigiUser | SigiUser) {
   return `${encodedPayload}.${signature}`;
 }
 
-export function listIndicators(session: SigiSession, options: { includeInactive?: boolean } = {}) {
+export function listIndicators(session: SigiSession, options: { includeInactive?: boolean } = {}): SigiIndicatorListItem[] {
   return Array.from(indicators.values())
     .filter((indicator) => options.includeInactive || indicator.active)
     .filter((indicator) => canReadIndicator(session, indicator))
+    .map((indicator) => ({
+      ...indicator,
+      status: workflowStatusForIndicator(session, indicator)
+    }))
     .sort((a, b) => a.code.localeCompare(b.code, "es", { numeric: true }));
 }
 
@@ -447,6 +495,47 @@ export function listIndicatorHistory(session: SigiSession): SigiIndicatorHistory
       b.updatedAt.localeCompare(a.updatedAt) ||
       a.code.localeCompare(b.code, "es", { numeric: true })
     );
+}
+
+function workflowStatusForIndicator(session: SigiSession, indicator: SigiIndicator): SigiIndicatorStatus {
+  if (!indicator.active) {
+    return "Corregir";
+  }
+
+  const relevantCaptures = listCaptureDrafts()
+    .filter((draft) => draft.indicadorId === indicator.id && draft.estado !== "cerrado")
+    .filter((draft) => {
+      if (session.role === "plantel") {
+        return draft.plantelId === session.plantelId;
+      }
+
+      if (session.role === "responsable") {
+        return isResponsibleAssigned(session, indicator);
+      }
+
+      return true;
+    })
+    .sort((a, b) => b.actualizadoEn.localeCompare(a.actualizadoEn));
+
+  const latest = relevantCaptures[0];
+
+  if (!latest) {
+    return "Pendiente";
+  }
+
+  if (latest.estado === "aprobado" || latest.estado === "cerrado") {
+    return "Aprobado";
+  }
+
+  if (latest.estado === "en_revision") {
+    return "En revisión";
+  }
+
+  if (latest.estado === "correccion_solicitada") {
+    return "Corregir";
+  }
+
+  return "Pendiente";
 }
 
 export function getIndicatorById(id: number) {
@@ -662,7 +751,7 @@ export function validateCapturePayload(indicator: SigiIndicator, payload: Captur
   );
 
   if (unknownKeys.length > 0) {
-    throw new SigiValidationError(`La captura incluye columnas no configuradas: ${Array.from(new Set(unknownKeys)).join(", ")}.`);
+    throw new SigiValidationError("La captura contiene campos de una plantilla anterior. Recarga el indicador y vuelve a guardar.");
   }
 
   const missingValues = payload.rows.some((row) =>
@@ -701,14 +790,12 @@ export function buildReportPayload(
   session: SigiSession,
   filters: { plantelId?: string; plantel?: string; periodo?: string; cicloEscolar?: string; now?: Date } = {}
 ): SigiReportPayload {
-  if (session.role === "plantel") {
-    throw new SigiForbiddenError("El plantel no tiene acceso a reportes institucionales.");
-  }
-
   const cicloEscolar = filters.cicloEscolar ?? "2025-2026";
   const periodo = filters.periodo ?? "2026-A";
   const requestedPeriodoId = periodIdFromReportPeriod(periodo);
-  const plantelId = resolvePlantelId(filters.plantelId ?? filters.plantel);
+  const plantelId = session.role === "plantel"
+    ? session.plantelId
+    : resolvePlantelId(filters.plantelId ?? filters.plantel);
   const scopedPlanteles = plantelId
     ? planteles.filter((plantel) => plantel.id === plantelId)
     : planteles;
@@ -857,7 +944,7 @@ function reportStatusForCapture(status: CaptureDraft["estado"]): SigiReportPaylo
   }
 
   if (status === "en_revision") {
-    return "Enviado";
+    return "En revisión";
   }
 
   return "Borrador";
@@ -1684,7 +1771,11 @@ function officialWorkbookTemplate(indicator: SigiIndicator, session?: SigiSessio
   const imported = officialWorkbookTemplates[indicator.code];
   const plantel = plantelForTemplate(session, indicator);
   const sessionPlantel = session?.role === "plantel" ? plantel : undefined;
-  const columns = sanitizeTemplateColumns(imported.columns);
+  const columns = relaxBlankReadonlyColumns(
+    sanitizeTemplateColumns(imported.columns),
+    imported.initialRows,
+    imported.emptyRow
+  );
   const displayCode = imported.officialCode || (indicator.code.startsWith("FMT-") ? "Pendiente de mapeo" : indicator.code);
   const groups = imported.groups.filter((group) => group.label !== "Formato oficial importado");
   const sourceRows = rowsForOfficialWorkbookSession(imported.initialRows, columns, sessionPlantel);
@@ -1706,6 +1797,32 @@ function officialWorkbookTemplate(indicator: SigiIndicator, session?: SigiSessio
     analysisLabel: "Descripción y observaciones",
     analysisPlaceholder: "Describe brevemente el avance, pendientes o comentarios del formato oficial."
   };
+}
+
+function relaxBlankReadonlyColumns(
+  columns: TemplateColumn[],
+  rows: Record<string, unknown>[],
+  emptyRow: Record<string, unknown>
+) {
+  return columns.map((column) => {
+    if (column.type !== "readonly" || isProtectedContextColumn(column)) {
+      return column;
+    }
+
+    const hasOfficialValue = [...rows, emptyRow].some((row) => {
+      const value = row[column.key];
+      return value !== undefined && value !== null && String(value).trim() !== "";
+    });
+
+    return hasOfficialValue ? column : { ...column, type: "text" as const };
+  });
+}
+
+function isProtectedContextColumn(column: TemplateColumn) {
+  const normalized = normalizeKey(`${column.label} ${column.key}`);
+  return ["plantel", "delegacion", "responsable", "periodo", "ciclo", "semestre"].some((token) =>
+    normalized.includes(token)
+  );
 }
 
 function rowForOfficialWorkbookColumns(

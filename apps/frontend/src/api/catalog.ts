@@ -23,6 +23,7 @@ export type CatalogIndicator = {
   id: number;
   code: string;
   name: string;
+  status?: 'Corregir' | 'Pendiente' | 'En revisión' | 'Aprobado';
   description: string;
   dataType: 'number' | 'percentage' | 'text';
   period: string;

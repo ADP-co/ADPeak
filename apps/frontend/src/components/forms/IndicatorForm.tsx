@@ -192,6 +192,22 @@ const enrichRowWithCalculatedValues = (row: Record<string, unknown>, columns: Co
   return enrichedRow;
 };
 
+const hasMeaningfulValue = (value: unknown) => value !== undefined && value !== null && String(value).trim() !== '';
+
+const sanitizeRowForTemplate = (row: Record<string, unknown>, columns: ColumnConfig[]) => {
+  const sanitizedRow: Record<string, unknown> = {};
+
+  columns.forEach((column) => {
+    if (column.type === 'calculated') {
+      return;
+    }
+
+    sanitizedRow[column.key] = row[column.key] ?? '';
+  });
+
+  return enrichRowWithCalculatedValues(sanitizedRow, columns);
+};
+
 const totalForColumn = (rows: Record<string, unknown>[] | undefined, column: ColumnConfig, columns: ColumnConfig[]) => {
   if (column.type !== 'number' && column.type !== 'calculated') {
     return '';
@@ -292,15 +308,23 @@ export const IndicatorForm = ({
   }, [hasUserTouchedFields, initialData, initialDataSignature, initialJustificacion, reset]);
 
   const toSubmission = (data: FormData): FormSubmission => ({
-    rows: data.rows.map((row) =>
-      enrichRowWithCalculatedValues(row as Record<string, unknown>, template.columns)
-    ),
+    rows: data.rows.map((row) => sanitizeRowForTemplate(row as Record<string, unknown>, template.columns)),
     justificacion: data.justificacion,
     evidencia: data.evidencia,
   });
 
   const createEmptyRow = () => {
-    const source = template.emptyRow ?? initialData[0] ?? {};
+    const currentRows = (watchedRows ?? []) as Record<string, unknown>[];
+    const source =
+      [...currentRows].reverse().find((row) =>
+        template.columns.some((column) => column.type === 'readonly' && hasMeaningfulValue(row?.[column.key]))
+      ) ??
+      initialData[fields.length] ??
+      initialData.find((row) =>
+        template.columns.some((column) => column.type === 'readonly' && hasMeaningfulValue(row?.[column.key]))
+      ) ??
+      template.emptyRow ??
+      {};
     const row: Record<string, unknown> = {};
 
     template.columns.forEach((column) => {
@@ -308,7 +332,14 @@ export const IndicatorForm = ({
         return;
       }
 
-      row[column.key] = column.type === 'readonly' ? source[column.key] ?? '' : '';
+      if (column.type === 'readonly') {
+        const sourceValue = source[column.key];
+        const emptyRowValue = template.emptyRow?.[column.key];
+        row[column.key] = hasMeaningfulValue(sourceValue) ? sourceValue : emptyRowValue ?? '';
+        return;
+      }
+
+      row[column.key] = '';
     });
 
     return row;

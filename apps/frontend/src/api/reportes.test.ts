@@ -39,11 +39,16 @@ const sampleReport: ExportReport = {
 describe('report exports', () => {
   it('uses readable CSV headers for administrators', () => {
     const csv = reportToCsv(sampleReport);
-    const header = csv.split('\n')[0];
+    const lines = csv.split('\n');
+    const header = lines[5];
 
     expect(csv.startsWith('\uFEFF')).toBe(true);
-    expect(csv).toContain('"Periodo","Ciclo escolar","Fecha de generación"');
+    expect(lines[0]).toContain('"Periodo","2026-2"');
+    expect(lines[1]).toContain('"Ciclo escolar","2025-2026"');
+    expect(lines[2]).toContain('"Fecha de generación"');
+    expect(lines[3]).toContain('"Alcance","Plantel: Bachillerato 16"');
     expect(header).not.toContain('"Plantel"');
+    expect(header).not.toContain('"Periodo"');
     expect(header).toContain('"Meta"');
     expect(header).toContain('"Mujeres"');
     expect(header).toContain('"Observaciones"');

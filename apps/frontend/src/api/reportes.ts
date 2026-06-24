@@ -81,10 +81,6 @@ export function reportToCsv(report: ExportReport) {
   const includePlantelColumn = shouldShowPlantelColumn(report);
   const detailHeaders = reportDetailHeaders(report);
   const headers = [
-    'Periodo',
-    'Ciclo escolar',
-    'Fecha de generación',
-    'Alcance',
     ...(includePlantelColumn ? ['Plantel'] : []),
     'Indicador',
     'Actividad',
@@ -98,10 +94,6 @@ export function reportToCsv(report: ExportReport) {
   ];
   const rows = report.indicadores.flatMap((indicator) =>
     indicator.datos.map((dataRow) => [
-      report.periodo,
-      report.cicloEscolar,
-      formatReportDate(report.fechaGeneracion),
-      report.identidadReporte.nombre,
       ...(includePlantelColumn ? [dataRow.plantel ?? report.identidadReporte.nombre] : []),
       indicator.nombre,
       dataRow.actividad,
@@ -115,7 +107,13 @@ export function reportToCsv(report: ExportReport) {
     ])
   );
 
-  const csvBody = [headers, ...rows]
+  const summaryRows = [
+    ['Periodo', report.periodo],
+    ['Ciclo escolar', report.cicloEscolar],
+    ['Fecha de generación', formatReportDate(report.fechaGeneracion)],
+    ['Alcance', `${report.identidadReporte.tipo}: ${report.identidadReporte.nombre}`],
+  ];
+  const csvBody = [...summaryRows, [], headers, ...rows]
     .map((row) => row.map((cell) => `"${cleanExportText(String(cell)).replace(/"/g, '""')}"`).join(','))
     .join('\n');
 

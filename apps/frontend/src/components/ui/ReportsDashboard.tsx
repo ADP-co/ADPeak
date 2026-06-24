@@ -9,11 +9,13 @@ import {
   type ExportReport,
   type ReportDataRow,
 } from '../../api/reportes';
+import { API_REQUESTS_ENABLED } from '../../api/client';
 import {
   fallbackOfficialSources,
   fetchOfficialSources,
   type OfficialSourcesPayload,
 } from '../../api/officialData';
+import { useAuth } from '../../context/AuthContext';
 
 // Tarjeta de Gráfica de Dona
 interface DonutCardProps {
@@ -174,6 +176,8 @@ interface PlantelProgressRecord {
   id: string;
   plantel: string;
   plantelId: string;
+  indicatorId?: string;
+  kind?: 'plantel' | 'indicador';
   periodos: string[];
   percentage: number;
   status: PlantelStatus;
@@ -208,6 +212,28 @@ function buildPlantelProgress(report: ExportReport, selectedPeriod: string): Pla
       id: `plantel-${plantelId}`,
       plantel,
       plantelId: String(plantelId),
+      kind: 'plantel',
+      periodos: [selectedPeriod],
+      percentage,
+      status: statusForRows(rows, percentage),
+    };
+  });
+}
+
+function buildIndicatorProgress(report: ExportReport, selectedPeriod: string): PlantelProgressRecord[] {
+  return report.indicadores.map((indicator) => {
+    const rows = indicator.datos;
+    const percentage = Math.round(
+      rows.reduce((total, row) => total + parseProgress(row.avance), 0) / Math.max(rows.length, 1)
+    );
+    const indicatorId = indicator.id ?? slugify(indicator.nombre);
+
+    return {
+      id: `indicador-${indicatorId}`,
+      indicatorId,
+      kind: 'indicador',
+      plantel: indicator.nombre,
+      plantelId: '',
       periodos: [selectedPeriod],
       percentage,
       status: statusForRows(rows, percentage),
@@ -247,6 +273,7 @@ function normalizeStatus(value: string) {
 
 // Pantalla Principal de Reportes
 export const ReportsDashboard = () => {
+  const { user } = useAuth();
 
   // Estados para simular la carga del backend
   const [dateOptions] = useState(periodOptions);
@@ -281,10 +308,10 @@ export const ReportsDashboard = () => {
           setReport(nextReport);
         }
       })
-      .catch(() => {
+      .catch((error) => {
         if (isMounted) {
           setReport(null);
-          setLoadError('No se pudo cargar la información de reportes. Se muestran datos disponibles.');
+          setLoadError(error instanceof Error ? error.message : 'No se pudo cargar la información de reportes.');
         }
       })
       .finally(() => {
@@ -306,6 +333,7 @@ export const ReportsDashboard = () => {
       periodos: ['2026-1', '2026-2'],
       percentage: 100,
       status: 'Completo',
+      kind: 'plantel',
     },
   ];
 
@@ -317,17 +345,29 @@ export const ReportsDashboard = () => {
       const report = await fetchExportReport({
         cicloEscolar: selectedOption.cicloEscolar,
         periodo: selectedOption.value,
-        plantelId: item.plantelId,
+        plantelId: item.kind === 'plantel' ? item.plantelId : undefined,
       });
+      const scopedReport = item.kind === 'indicador'
+        ? {
+            ...report,
+            indicadores: report.indicadores.filter((indicator) =>
+              (indicator.id ?? slugify(indicator.nombre)) === item.indicatorId
+            ),
+          }
+        : report;
 
-      if (countReportRows(report) === 0) {
+      if (countReportRows(scopedReport) === 0) {
         throw new Error(`No hay registros para ${item.plantel}.`);
       }
 
-      return report;
+      return scopedReport;
     } catch {
-      setReportMessage(`Preparando informacion disponible para ${item.plantel}.`);
-      return buildFallbackReport(item, selectedDate, officialSources);
+      if (!API_REQUESTS_ENABLED) {
+        setReportMessage(`Preparando información disponible para ${item.plantel}.`);
+        return buildFallbackReport(item, selectedDate, officialSources);
+      }
+
+      throw new Error(`No se pudo preparar el reporte de ${item.plantel}.`);
     }
   };
 
@@ -339,35 +379,55 @@ export const ReportsDashboard = () => {
     link.download = filename;
     document.body.appendChild(link);
     link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
+    window.setTimeout(() => {
+      link.remove();
+      URL.revokeObjectURL(url);
+    }, 1000);
   };
 
   const handleGenerateCsv = async (item: PlantelProgressRecord) => {
-    setGeneratingDocumentId(`${item.id}:csv`);
-    const report = await loadReport(item);
-    const csv = reportToCsv(report);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-    const recordCount = countReportRows(report);
+    try {
+      setGeneratingDocumentId(`${item.id}:csv`);
+      const report = await loadReport(item);
+      const csv = reportToCsv(report);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      const recordCount = countReportRows(report);
 
-    downloadDocument(blob, `reporte-${slugify(item.plantel)}-${selectedDate}.csv`);
-    setGeneratingDocumentId(null);
-    setReportMessage(`Listo: ${recordCount} registros de ${item.plantel}.`);
+      downloadDocument(blob, `reporte-${slugify(item.plantel)}-${selectedDate}.csv`);
+      setReportMessage(`Listo: ${recordCount} registros.`);
+    } catch (error) {
+      setReportMessage(error instanceof Error ? error.message : 'No se pudo descargar el reporte.');
+    } finally {
+      setGeneratingDocumentId(null);
+    }
   };
 
   const handleGeneratePdf = async (item: PlantelProgressRecord) => {
-    setGeneratingDocumentId(`${item.id}:pdf`);
-    const report = await loadReport(item);
-    const pdf = await reportToPdfBlob(report);
-    const recordCount = countReportRows(report);
+    try {
+      setGeneratingDocumentId(`${item.id}:pdf`);
+      const report = await loadReport(item);
+      const pdf = await reportToPdfBlob(report);
+      const recordCount = countReportRows(report);
 
-    downloadDocument(pdf, `reporte-${slugify(item.plantel)}-${selectedDate}.pdf`);
-    setGeneratingDocumentId(null);
-    setReportMessage(`Listo: ${recordCount} registros de ${item.plantel}.`);
+      downloadDocument(pdf, `reporte-${slugify(item.plantel)}-${selectedDate}.pdf`);
+      setReportMessage(`Listo: ${recordCount} registros.`);
+    } catch (error) {
+      setReportMessage(error instanceof Error ? error.message : 'No se pudo descargar el reporte.');
+    } finally {
+      setGeneratingDocumentId(null);
+    }
   };
 
-  const plantelesFromReport = report ? buildPlantelProgress(report, selectedDate) : [];
-  const plantelRows = plantelesFromReport.length > 0 ? plantelesFromReport : fallbackPlanteles;
+  const plantelesFromReport = report
+    ? user?.role === 'responsable'
+      ? buildIndicatorProgress(report, selectedDate)
+      : buildPlantelProgress(report, selectedDate)
+    : [];
+  const plantelRows = plantelesFromReport.length > 0
+    ? plantelesFromReport
+    : API_REQUESTS_ENABLED
+      ? []
+      : fallbackPlanteles;
 
   // Filtramos por progreso y siempre ordenamos alfabéticamente/numéricamente por plantel
   const visiblePlanteles = plantelRows.filter((item) => !selectedDate || item.periodos.includes(selectedDate));
@@ -484,7 +544,7 @@ export const ReportsDashboard = () => {
       <div>
         <div className="flex flex-wrap items-center justify-between mb-4">
           <h2 className="font-title text-3xl font-bold text-brand-Gris_oscuro">
-            Progreso de los Planteles
+            {user?.role === 'responsable' ? 'Progreso de Indicadores' : 'Progreso de los Planteles'}
           </h2>
           <div className="flex items-center gap-2">
             <label htmlFor="reports-status-filter" className="text-xs text-brand-Gris_oscuro font-bold font-accent">Filtrar por</label>
@@ -528,7 +588,7 @@ export const ReportsDashboard = () => {
 
             <thead>
               <tr className="bg-brand-Gris_bajo/35 text-brand-Gris_oscuro font-title font-bold text-sm select-none border-b border-brand-Gris_bajo/20">
-                <th className="py-4 px-6 w-[20%] text-left">Plantel</th>
+                <th className="py-4 px-6 w-[20%] text-left">{user?.role === 'responsable' ? 'Indicador' : 'Plantel'}</th>
                 <th className="py-4 px-6 w-[55%]">Progreso</th>
                 <th className="py-4 px-6 w-[25%]">Documentos</th>
               </tr>
@@ -577,7 +637,7 @@ export const ReportsDashboard = () => {
               {processedPlanteles.length === 0 && (
                 <tr>
                   <td colSpan={3} className="py-8 px-6 text-center text-brand-Gris_oscuro/60">
-                    No hay planteles para el periodo seleccionado.
+                    No hay registros para el periodo seleccionado.
                   </td>
                 </tr>
               )}

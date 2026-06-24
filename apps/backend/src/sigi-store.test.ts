@@ -18,6 +18,7 @@ import {
   saveUser,
   sessionFromHeaders,
   templateForIndicator,
+  updateOwnPassword,
   SigiForbiddenError,
   SigiValidationError
 } from "./sigi-store.js";
@@ -96,6 +97,47 @@ describe("SIGI store and RBAC", () => {
     });
     expect(authenticateUser("director", "incorrecta")).toBeUndefined();
     expect(users.some((user) => "passwordHash" in user)).toBe(false);
+  });
+
+  it("updates the active user's password only after validating the current password", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+
+    expect(() =>
+      updateOwnPassword(director, {
+        currentPassword: "incorrecta",
+        newPassword: "Nueva2026!",
+        confirmPassword: "Nueva2026!"
+      })
+    ).toThrow(SigiValidationError);
+
+    expect(() =>
+      updateOwnPassword(director, {
+        currentPassword: "Director2026!",
+        newPassword: "corta",
+        confirmPassword: "corta"
+      })
+    ).toThrow(SigiValidationError);
+
+    expect(() =>
+      updateOwnPassword(director, {
+        currentPassword: "Director2026!",
+        newPassword: "Nueva2026!",
+        confirmPassword: "Distinta2026!"
+      })
+    ).toThrow(SigiValidationError);
+
+    expect(updateOwnPassword(director, {
+      currentPassword: "Director2026!",
+      newPassword: "Nueva2026!",
+      confirmPassword: "Nueva2026!"
+    })).toMatchObject({ id: "director-1" });
+    expect(authenticateUser("director", "Director2026!")).toBeUndefined();
+    expect(authenticateUser("director", "Nueva2026!")).toMatchObject({ id: "director-1" });
+    updateOwnPassword(director, {
+      currentPassword: "Nueva2026!",
+      newPassword: "Director2026!",
+      confirmPassword: "Director2026!"
+    });
   });
 
   it("seeds every Universidad de Colima bachillerato account", () => {
@@ -382,13 +424,23 @@ describe("SIGI store and RBAC", () => {
     ).toThrow(SigiValidationError);
   });
 
-  it("prevents plantel users from reading institutional reports", () => {
+  it("allows plantel users to read only their own report scope", () => {
     const plantel = sessionFromHeaders({
       "x-role": "plantel",
       "x-plantel-id": "1"
     });
+    const report = buildReportPayload(plantel, {
+      plantelId: "2",
+      cicloEscolar: "2025-2026",
+      periodo: "2026-2"
+    });
 
-    expect(() => buildReportPayload(plantel)).toThrow(SigiForbiddenError);
+    expect(report.tipoReporte).toBe("plantel");
+    expect(report.identidadReporte).toMatchObject({
+      tipo: "Plantel",
+      nombre: "Bachillerato 16"
+    });
+    expect(report.indicadores.flatMap((indicator) => indicator.datos).every((row) => row.plantelId === "1")).toBe(true);
   });
 
   it("exposes the complete official source package as sanitized structured data", () => {

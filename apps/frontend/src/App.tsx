@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useParams, Outlet } from 'react-router-dom';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Navbar } from './components/layout/Navbar';
 import { UserBanner } from './components/layout/UserBanner';
 import { IndicatorForm, type FormSubmission } from './components/forms/IndicatorForm';
@@ -172,7 +172,7 @@ function catalogToIndicator(indicator: CatalogIndicator, user?: User | null): In
   return {
     code: indicator.code,
     name: indicator.name,
-    status: indicator.active ? 'Pendiente' : 'Corregir',
+    status: indicator.status ?? (indicator.active ? 'Pendiente' : 'Corregir'),
     plantel: plantelScope,
     supervisor: scope,
     responsable: scope,
@@ -515,7 +515,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
       initialData={formInitialData}
       initialJustificacion={captureDraft.capture?.payload.justificacion}
       existingEvidenceName={captureDraft.capture?.payload.evidencia?.nombre}
-      canReview={user?.role === 'responsable'}
+      canReview={user?.role === 'responsable' || user?.role === 'admin'}
       captureStatus={captureDraft.capture?.estado}
       isReadOnly={user?.role === 'plantel' && !isEditableCaptureStatus(captureDraft.capture?.estado)}
       onSaveDraft={handleSaveDraft}
@@ -593,34 +593,37 @@ function AppContent() {
     () => readIndicatorStatusOverrides()
   );
 
-  useEffect(() => {
+  const loadCatalogIndicators = useCallback(async () => {
     if (!user) {
       setCatalogIndicators([]);
       setCatalogLoaded(false);
-      return undefined;
+      return;
     }
 
-    let isMounted = true;
     setCatalogLoaded(false);
 
-    fetchIndicators()
-      .then((items) => {
-        if (isMounted) {
-          setCatalogIndicators(items);
-          setCatalogLoaded(true);
-        }
-      })
-      .catch(() => {
-        if (isMounted) {
-          setCatalogIndicators([]);
-          setCatalogLoaded(true);
-        }
-      });
+    try {
+      const items = await fetchIndicators();
 
-    return () => {
-      isMounted = false;
-    };
+      setCatalogIndicators(items);
+      setIndicatorStatusOverrides((current) => {
+        const next = { ...current };
+        items.forEach((item) => {
+          delete next[item.code];
+        });
+        window.localStorage.setItem(INDICATOR_STATUS_STORAGE_KEY, JSON.stringify(next));
+        return next;
+      });
+      setCatalogLoaded(true);
+    } catch {
+      setCatalogIndicators([]);
+      setCatalogLoaded(true);
+    }
   }, [user]);
+
+  useEffect(() => {
+    void loadCatalogIndicators();
+  }, [loadCatalogIndicators]);
 
   const indicators = useMemo(
     () =>
@@ -664,6 +667,7 @@ function AppContent() {
       window.localStorage.setItem(INDICATOR_STATUS_STORAGE_KEY, JSON.stringify(next));
       return next;
     });
+    void loadCatalogIndicators();
   };
 
   const role = user?.role || 'plantel'; // Fallback por defecto
@@ -722,8 +726,8 @@ function AppContent() {
           }
         />
 
-        {/* Reportes disponibles para direccion y responsables; Plantel permanece en captura. */}
-        <Route path="/reportes" element={role === 'plantel' ? <Navigate to="/indicadores" replace /> : <ReportsDashboard />} />
+        {/* Reportes disponibles por alcance de sesión. */}
+        <Route path="/reportes" element={<ReportsDashboard />} />
         <Route path="/perfil" element={<AccountProfile onBack={() => navigate(homePathForRole(role))} />} />
       </Route>
 

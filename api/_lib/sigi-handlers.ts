@@ -72,6 +72,25 @@ export async function handleLogin(request: RequestLike, response: any) {
   }
 }
 
+export async function handleUpdatePassword(request: RequestLike, response: any) {
+  if (prepare(request, response, ["PATCH", "OPTIONS"])) {
+    return;
+  }
+
+  try {
+    const sigi = await loadSigi();
+    const session = sigi.sessionFromHeaders(request.headers ?? {});
+    const user = sigi.updateOwnPassword(session, await readJsonBody(request));
+
+    await flushRuntimeState();
+    sendJson(response, 200, { user });
+  } catch (error) {
+    if (!sendKnownError(response, error)) {
+      sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON valido." });
+    }
+  }
+}
+
 export async function handleUsers(request: RequestLike, response: any) {
   if (handleOptions(request, response)) {
     return;

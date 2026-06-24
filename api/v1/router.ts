@@ -6,6 +6,7 @@ import {
   handleLogin,
   handleOfficialSources,
   handleReports,
+  handleUpdatePassword,
   handleUserAction,
   handleUsers,
 } from "../_lib/sigi-handlers";
@@ -22,6 +23,11 @@ export default async function handler(request: any, response: any) {
 
   if (path === "auth/login") {
     await handleLogin(request, response);
+    return;
+  }
+
+  if (path === "auth/password") {
+    await handleUpdatePassword(request, response);
     return;
   }
 
