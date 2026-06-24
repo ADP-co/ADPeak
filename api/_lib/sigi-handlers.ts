@@ -352,7 +352,22 @@ export async function handleCaptureDrafts(request: RequestLike, response: any) {
       }
 
       sigi.assertCaptureAccess(session, scope, "read");
-      sendJson(response, 200, { capture: captures.findCaptureDraftByScope(scope) ?? null });
+      const capture = captures.findCaptureDraftByScope(scope);
+
+      if (capture) {
+        try {
+          sigi.assertCaptureAccess(session, capture, "read");
+        } catch (error) {
+          if (error instanceof sigi.SigiValidationError) {
+            sendJson(response, 200, { capture: null });
+            return;
+          }
+
+          throw error;
+        }
+      }
+
+      sendJson(response, 200, { capture: capture ?? null });
       return;
     }
 
