@@ -314,7 +314,7 @@ function buildFallbackIndicators(): CatalogIndicator[] {
   const responsibleIdByName = new Map(responsibleNames.map((name, index) => [name, index + 1]));
   const byCode = new Map<string, CatalogIndicator>();
 
-  officialCatalogRows.forEach((row) => {
+  officialCatalogRows.filter((row) => !isSyntheticIndicatorCode(row.code)).forEach((row) => {
     const responsibleId = responsibleIdByName.get(row.responsible) ?? 1;
     const contributors = splitNames(row.contributors);
     const existing = byCode.get(row.code);
@@ -346,6 +346,10 @@ function buildFallbackIndicators(): CatalogIndicator[] {
   });
 
   return Array.from(byCode.values()).sort((a, b) => a.code.localeCompare(b.code, 'es', { numeric: true }));
+}
+
+function isSyntheticIndicatorCode(code: string) {
+  return code.startsWith('FMT-') || code.includes('-FMT-');
 }
 
 function buildFallbackUsers(indicators: CatalogIndicator[]): CatalogUser[] {

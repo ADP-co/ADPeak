@@ -469,6 +469,7 @@ export function createSessionToken(user: AuthenticatedSigiUser | SigiUser) {
 
 export function listIndicators(session: SigiSession, options: { includeInactive?: boolean } = {}): SigiIndicatorListItem[] {
   return Array.from(indicators.values())
+    .filter((indicator) => !isSyntheticIndicatorCode(indicator.code))
     .filter((indicator) => options.includeInactive || indicator.active)
     .filter((indicator) => canReadIndicator(session, indicator))
     .map((indicator) => ({
@@ -792,11 +793,13 @@ export function officialSourcesPayload(session: SigiSession): OfficialSourcesPay
 
 export function buildReportPayload(
   session: SigiSession,
-  filters: { plantelId?: string; plantel?: string; periodo?: string; cicloEscolar?: string; now?: Date } = {}
+  filters: { plantelId?: string; plantel?: string; periodo?: string; cicloEscolar?: string; estado?: string; now?: Date } = {}
 ): SigiReportPayload {
   const cicloEscolar = filters.cicloEscolar ?? "2025-2026";
   const periodo = filters.periodo ?? "2026-A";
-  const requestedPeriodoId = periodIdFromReportPeriod(periodo);
+  const requestedPeriodoId = periodIdFromReportPeriod(`${periodo} ${cicloEscolar}`);
+  const includeBaseRows = requestedPeriodoId === currentReportPeriodId();
+  const normalizedStatusFilter = normalizeReportStatusFilter(filters.estado);
   const hasPlantelFilter = Boolean(filters.plantelId || filters.plantel);
   const plantelId = session.role === "plantel"
     ? session.plantelId
@@ -827,10 +830,14 @@ export function buildReportPayload(
         });
 
         if (capturedRows.length > 0) {
-          return capturedRows;
+          return filterReportRowsByStatus(capturedRows, normalizedStatusFilter);
         }
 
-        return {
+        if (!includeBaseRows) {
+          return [];
+        }
+
+        return filterReportRowsByStatus([{
           registro_id: `${indicator.code}-${plantel.id}-${activityIndex + 1}`,
           actividad: activity || "Actividad general",
           responsable: indicator.responsibleNames.join(", "),
@@ -843,7 +850,7 @@ export function buildReportPayload(
           meta: 100,
           evidencias: 0,
           vencimiento: "atrasado" as const
-        };
+        }], normalizedStatusFilter);
       })
     );
 
@@ -1709,6 +1716,10 @@ function effectivePlantelIdsForIndicator(indicator: SigiIndicator) {
   return [];
 }
 
+function isSyntheticIndicatorCode(code: string) {
+  return code.startsWith("FMT-") || code.includes("-FMT-");
+}
+
 function officialImportEvidencePlantelIds(code?: string) {
   if (code && officialIndicatorPlantelScopes[code]?.length) {
     return normalizePlantelScope(officialIndicatorPlantelScopes[code]);
@@ -2537,14 +2548,63 @@ function inferDataType(name: string): SigiIndicator["dataType"] {
   return "number";
 }
 
+function currentReportPeriodId() {
+  return 1;
+}
+
 function periodIdFromReportPeriod(periodo: string) {
   const normalized = normalizeKey(periodo);
 
-  if (normalized.includes("2025") || normalized.includes("2024")) {
+  if (normalized.includes("2024")) {
     return 2;
   }
 
-  return 1;
+  if (normalized.includes("2025") && !normalized.includes("2026")) {
+    return 2;
+  }
+
+  return currentReportPeriodId();
+}
+
+function normalizeReportStatusFilter(status?: string) {
+  const normalized = normalizeKey(status ?? "");
+
+  if (!normalized) {
+    return undefined;
+  }
+
+  if (normalized.includes("aprobado") || normalized.includes("completo")) {
+    return "aprobado";
+  }
+
+  if (normalized.includes("revision") || normalized.includes("enviado")) {
+    return "en revision";
+  }
+
+  if (normalized.includes("observado") || normalized.includes("corregir") || normalized.includes("correccion")) {
+    return "observado";
+  }
+
+  if (normalized.includes("borrador") || normalized.includes("pendiente")) {
+    return "borrador";
+  }
+
+  if (normalized.includes("atrasado")) {
+    return "atrasado";
+  }
+
+  return normalized;
+}
+
+function filterReportRowsByStatus(
+  rows: SigiReportPayload["indicadores"][number]["datos"],
+  normalizedStatusFilter?: string
+) {
+  if (!normalizedStatusFilter) {
+    return rows;
+  }
+
+  return rows.filter((row) => normalizeReportStatusFilter(row.estado) === normalizedStatusFilter);
 }
 
 function resolvePlantelId(value?: string) {

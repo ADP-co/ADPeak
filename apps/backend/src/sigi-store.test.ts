@@ -36,7 +36,8 @@ describe("SIGI store and RBAC", () => {
     expect(officialCatalogStats.uniqueIndicators).toBe(28);
     expect(officialDataSummary.workbookCount).toBe(30);
     expect(Object.keys(officialWorkbookTemplates)).toHaveLength(28);
-    expect(indicators.length).toBeGreaterThanOrEqual(28);
+    expect(indicators.length).toBeGreaterThan(0);
+    expect(indicators.every((indicator) => !indicator.code.startsWith("FMT-") && !indicator.code.includes("-FMT-"))).toBe(true);
     expect(indicators.some((indicator) =>
       indicator.name.toLowerCase().includes("la tabla anterior incide")
     )).toBe(false);
@@ -50,12 +51,15 @@ describe("SIGI store and RBAC", () => {
   });
 
   it("keeps official catalog indicators visible for plantel capture even when no detailed workbook exists", () => {
-    const bachillerato16 = sessionFromHeaders({ "x-role": "plantel", "x-plantel-id": "1" });
-    const visibleCodes = new Set(listIndicators(bachillerato16).map((indicator) => indicator.code));
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const visibleCodes = new Set(listIndicators(director).map((indicator) => indicator.code));
     const catalogCodes = Array.from(new Set(officialCatalogRows.map((row) => row.code).filter(Boolean)));
+    const publicCatalogCodes = catalogCodes.filter((code) => !code.startsWith("FMT-") && !code.includes("-FMT-"));
 
     expect(catalogCodes.length).toBe(28);
-    expect(catalogCodes.filter((code) => !visibleCodes.has(code))).toEqual([]);
+    expect(publicCatalogCodes.length).toBeLessThan(catalogCodes.length);
+    expect(publicCatalogCodes.filter((code) => !visibleCodes.has(code))).toEqual([]);
+    expect(catalogCodes.filter((code) => code.startsWith("FMT-") || code.includes("-FMT-")).some((code) => visibleCodes.has(code))).toBe(false);
   });
 
   it("authenticates delivery users without exposing password hashes", () => {
@@ -285,10 +289,23 @@ describe("SIGI store and RBAC", () => {
     expect(previousCycle.periodo).toBe("2025-2");
     expect(previousCycle.cicloEscolar).toBe("2024-2025");
     expect(currentCycle.indicadores.flatMap((indicator) => indicator.datos).every((row) => row.estado === "Borrador" || row.estado === "Aprobado")).toBe(true);
+    expect(previousCycle.indicadores.flatMap((indicator) => indicator.datos).length).toBeLessThan(
+      currentCycle.indicadores.flatMap((indicator) => indicator.datos).length
+    );
     expect(currentCycle.indicadores.flatMap((indicator) => indicator.datos).some((row) => row.plantel === "Bachillerato 16")).toBe(true);
     expect(bachillerato16.indicadores.some((indicator) => indicator.id === "1.0.0.0.2")).toBe(true);
     expect(bachillerato4.indicadores.some((indicator) => indicator.id === "1.0.0.0.2")).toBe(true);
     expect(() => buildReportPayload(director, { plantelId: "999", periodo: "2026-2" })).toThrow(SigiValidationError);
+  });
+
+  it("applies report status filters", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const invalidStatus = buildReportPayload(director, { estado: "NO_EXISTE", periodo: "2026-2" });
+    const drafts = buildReportPayload(director, { estado: "Borrador", periodo: "2026-2" });
+
+    expect(invalidStatus.indicadores).toHaveLength(0);
+    expect(drafts.indicadores.flatMap((indicator) => indicator.datos).length).toBeGreaterThan(0);
+    expect(drafts.indicadores.flatMap((indicator) => indicator.datos).every((row) => row.estado === "Borrador")).toBe(true);
   });
 
   it("keeps imported official indicators unassigned while allowing plantel capture until director narrows the scope", () => {
@@ -593,7 +610,11 @@ describe("SIGI store and RBAC", () => {
     });
 
     const report = buildReportPayload(director, { plantelId: "1", periodo: "2026-2" });
-    const previousPeriodReport = buildReportPayload(director, { plantelId: "1", periodo: "2025-2" });
+    const previousPeriodReport = buildReportPayload(director, {
+      plantelId: "1",
+      cicloEscolar: "2024-2025",
+      periodo: "2025-2"
+    });
     const reportRow = report.indicadores
       .find((item) => item.id === "TMP-REPORT-DETAIL")
       ?.datos[0];

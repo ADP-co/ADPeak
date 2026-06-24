@@ -28,6 +28,7 @@ FRONTEND_DATA_TARGET = REPO_ROOT / "apps/frontend/src/catalog/officialData.gener
 
 CODE_RE = re.compile(r"\b\d+(?:\.\d+){3,}\b")
 PLANTEL_RE = re.compile(r"\bBACH(?:ILLERATO)?\s*\.?\s*(\d+)\b|\bBachillerato\s+(\d+)\b", re.I)
+PLANTEL_LIST_RE = re.compile(r"\bBachillerato\s+((?:\d+\s*,?\s*){2,})", re.I)
 EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+", re.I)
 CONTACT_RE = re.compile(r"\b(?:ext\.?|extension|tel(?:efono)?\.?|celular|correo)\b", re.I)
 PHONE_NUMBER_RE = re.compile(r"(?<!\d)(?:\+?52\s*)?(?:\d[\s().-]*){8,}\d(?:\.0)?(?!\d)")
@@ -208,6 +209,29 @@ def catalog_plantel_scopes(rows: list[dict[str, Any]], detected_scopes: dict[str
     }
 
 
+def plantel_id_from_name(name: str) -> int | None:
+    normalized = normalize_key(name)
+
+    if "linea" in normalized:
+        return 36
+    if "iuba" in normalized or "bellas artes" in normalized:
+        return 37
+
+    match = re.search(r"\b(\d+)\b", normalized)
+    if not match:
+        return None
+
+    number = int(match.group(1))
+    legacy_ids = {16: 1, 4: 2, 1: 3, 33: 4}
+    if number in legacy_ids:
+        return legacy_ids[number]
+    if not 1 <= number <= 35:
+        return None
+
+    generated_numbers = [candidate for candidate in range(1, 36) if candidate not in legacy_ids]
+    return 5 + generated_numbers.index(number)
+
+
 RESPONSIBLE_FOLDER_ALIASES = {
     "adriana ruiz": "Adriana Ruiz Rivera",
     "ariadna zuniga": "Ariadna Zúñiga Torres",
@@ -341,8 +365,21 @@ def workbook_summaries() -> tuple[
                         source_index=source_index,
                     )
 
-                    if source_scope == "Bachillerato 16" and "Bachillerato 16" in planteles:
-                        scopes[template_code].add(1)
+                    detected_plantel_ids = [
+                        plantel_id
+                        for plantel_id in (plantel_id_from_name(plantel) for plantel in planteles)
+                        if plantel_id is not None
+                    ]
+                    if source_scope:
+                        source_scope_id = plantel_id_from_name(source_scope)
+                        if source_scope_id is not None:
+                            detected_plantel_ids.append(source_scope_id)
+
+                    for plantel_id in detected_plantel_ids:
+                        scopes[template_code].add(plantel_id)
+                        if original_code:
+                            scopes[original_code].add(plantel_id)
+
                     template_candidates.append(
                         {
                             "indicatorCode": template_code,
@@ -478,6 +515,17 @@ def summarize_sheet(sheet: Any) -> dict[str, Any]:
             number = match.group(1) or match.group(2)
             if number:
                 planteles.add(f"Bachillerato {int(number)}")
+        for match in PLANTEL_LIST_RE.finditer(row_text):
+            for number in re.findall(r"\d+", match.group(1)):
+                planteles.add(f"Bachillerato {int(number)}")
+        normalized_row_text = normalize_key(row_text)
+        if "bachillerato" in normalized_row_text and "1,2" in row_text.replace(" ", "") and re.search(r"\b35\b", row_text):
+            for number in range(1, 36):
+                planteles.add(f"Bachillerato {number}")
+        if "iuba" in normalized_row_text or "bellas artes" in normalized_row_text:
+            planteles.add("IUBA Bachillerato")
+        if "bachillerato en linea" in normalized_row_text:
+            planteles.add("Bachillerato en línea")
 
         for cell in row:
             if isinstance(cell.value, str) and cell.value.startswith("="):

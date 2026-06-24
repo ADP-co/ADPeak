@@ -12,8 +12,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-const FALLBACK_STORAGE_KEY = 'adpeak.static.captures';
-
 export class CaptureRequestError extends Error {
   constructor(
     message: string,
@@ -62,40 +60,6 @@ export type CaptureDraft = {
   actualizadoEn: string;
 };
 
-function shouldUseStaticFallback(error: unknown) {
-  if (API_REQUESTS_ENABLED) {
-    return false;
-  }
-
-  if (!axios.isAxiosError(error)) {
-    return false;
-  }
-
-  if (!error.response) {
-    return !isAbsoluteApiBaseUrl();
-  }
-
-  if (error.response.status === 405) {
-    return true;
-  }
-
-  if (error.response.status !== 404) {
-    return false;
-  }
-
-  const data = error.response.data;
-  if (!data || typeof data !== 'object') {
-    return true;
-  }
-
-  const errorCode = 'error' in data ? data.error : undefined;
-  return errorCode === 'not_found';
-}
-
-function isAbsoluteApiBaseUrl() {
-  return /^https?:\/\//i.test(API_BASE_URL);
-}
-
 function captureError(error: unknown, fallbackMessage: string) {
   if (!axios.isAxiosError(error)) {
     return new CaptureRequestError(fallbackMessage);
@@ -141,175 +105,13 @@ function cleanServerMessage(message: string) {
     .replace(/esta/g, 'está');
 }
 
-function readFallbackCaptures() {
-  if (typeof window === 'undefined') {
-    return new Map<number, CaptureDraft>();
-  }
-
-  try {
-    const rawValue = window.localStorage.getItem(FALLBACK_STORAGE_KEY);
-    const parsedValue = rawValue ? JSON.parse(rawValue) as CaptureDraft[] : [];
-    return new Map(parsedValue.map((capture) => [capture.id, capture]));
-  } catch {
-    return new Map<number, CaptureDraft>();
-  }
-}
-
-function writeFallbackCaptures(captures: Map<number, CaptureDraft>) {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  window.localStorage.setItem(FALLBACK_STORAGE_KEY, JSON.stringify(Array.from(captures.values())));
-}
-
-function buildFallbackCapture({
-  id,
-  request,
-  payload,
-  estado = 'borrador',
-  versionActual = 1,
-}: {
-  id: number;
-  request?: Partial<CaptureDraftRequest>;
-  payload?: CapturePayload;
-  estado?: CaptureDraft['estado'];
-  versionActual?: number;
-}): CaptureDraft {
-  const timestamp = new Date().toISOString();
-
-  return {
-    id,
-    plantelId: request?.plantelId ?? 1,
-    indicadorId: request?.indicadorId ?? 1,
-    actividadId: request?.actividadId ?? 1,
-    periodoId: request?.periodoId ?? 1,
-    responsableId: request?.responsableId ?? 2,
-    estado,
-    versionActual,
-    payload: payload ?? request?.payload ?? { rows: [] },
-    cerradoEn: null,
-    creadoEn: timestamp,
-    actualizadoEn: timestamp,
-  };
-}
-
-function createFallbackDraft(request: CaptureDraftRequest) {
-  const captures = readFallbackCaptures();
-  const draft = buildFallbackCapture({ id: Date.now(), request });
-
-  captures.set(draft.id, draft);
-  writeFallbackCaptures(captures);
-  return draft;
-}
-
-function updateFallbackDraft(captureId: number, payload: CapturePayload) {
-  const captures = readFallbackCaptures();
-  const currentCapture = captures.get(captureId);
-
-  if (currentCapture && !isEditableFallbackStatus(currentCapture.estado)) {
-    throw new CaptureRequestError('La captura ya fue enviada y no puede modificarse hasta que se solicite corrección.', 'capture_not_editable', 409);
-  }
-
-  const updatedCapture = {
-    ...buildFallbackCapture({ id: captureId, payload }),
-    ...currentCapture,
-    payload,
-    versionActual: (currentCapture?.versionActual ?? 1) + 1,
-    actualizadoEn: new Date().toISOString(),
-  };
-
-  captures.set(captureId, updatedCapture);
-  writeFallbackCaptures(captures);
-  return updatedCapture;
-}
-
-function getFallbackDraft(captureId: number) {
-  const draft = readFallbackCaptures().get(captureId);
-
-  if (!draft) {
-    throw new CaptureRequestError('No se encontró el borrador guardado. Se buscará la captura vigente.', 'capture_not_found', 404);
-  }
-
-  return draft;
-}
-
-function sendFallbackDraftToReview(captureId: number) {
-  const captures = readFallbackCaptures();
-  const currentCapture = captures.get(captureId);
-
-  if (!currentCapture || currentCapture.payload.rows.length === 0) {
-    throw new CaptureRequestError('La captura está incompleta. Vuelve a abrir el indicador y conserva todas las filas oficiales.', 'invalid_capture_payload', 400);
-  }
-
-  if (!isEditableFallbackStatus(currentCapture.estado)) {
-    throw new CaptureRequestError('No se pudo enviar esta captura a revisión.', 'invalid_capture_status', 409);
-  }
-
-  const updatedCapture = {
-    ...buildFallbackCapture({ id: captureId }),
-    ...currentCapture,
-    estado: 'en_revision' as const,
-    versionActual: (currentCapture?.versionActual ?? 1) + 1,
-    actualizadoEn: new Date().toISOString(),
-  };
-
-  captures.set(captureId, updatedCapture);
-  writeFallbackCaptures(captures);
-  return updatedCapture;
-}
-
-function requestFallbackCorrection(captureId: number, observacion: string) {
-  const captures = readFallbackCaptures();
-  const currentCapture = captures.get(captureId);
-
-  if (currentCapture?.estado !== 'en_revision') {
-    throw new CaptureRequestError('La captura debe estar en revisión para solicitar corrección.', 'invalid_capture_status', 409);
-  }
-
-  const updatedCapture = {
-    ...buildFallbackCapture({ id: captureId }),
-    ...currentCapture,
-    estado: 'correccion_solicitada' as const,
-    observacion,
-    versionActual: (currentCapture?.versionActual ?? 1) + 1,
-    actualizadoEn: new Date().toISOString(),
-  };
-
-  captures.set(captureId, updatedCapture);
-  writeFallbackCaptures(captures);
-  return updatedCapture;
-}
-
-function approveFallbackDraft(captureId: number) {
-  const captures = readFallbackCaptures();
-  const currentCapture = captures.get(captureId);
-
-  if (currentCapture?.estado !== 'en_revision') {
-    throw new CaptureRequestError('La captura debe estar en revisión para aprobarse.', 'invalid_capture_status', 409);
-  }
-
-  const updatedCapture = {
-    ...buildFallbackCapture({ id: captureId }),
-    ...currentCapture,
-    estado: 'aprobado' as const,
-    observacion: null,
-    versionActual: (currentCapture?.versionActual ?? 1) + 1,
-    actualizadoEn: new Date().toISOString(),
-  };
-
-  captures.set(captureId, updatedCapture);
-  writeFallbackCaptures(captures);
-  return updatedCapture;
-}
-
-function isEditableFallbackStatus(status: CaptureDraft['estado']) {
-  return status === 'borrador' || status === 'correccion_solicitada';
+function apiUnavailableCaptureError() {
+  return new CaptureRequestError('No se pudo conectar con el sistema. Intenta de nuevo.', 'api_unavailable');
 }
 
 export async function createCaptureDraft(request: CaptureDraftRequest) {
   if (!API_REQUESTS_ENABLED) {
-    return createFallbackDraft(request);
+    throw apiUnavailableCaptureError();
   }
 
   try {
@@ -335,10 +137,6 @@ export async function findCaptureDraft(request: Omit<CaptureDraftRequest, 'paylo
     const response = await api.get<{ capture: CaptureDraft | null }>(`/capturas/borradores?${params.toString()}`);
     return response.data.capture;
   } catch (error) {
-    if (shouldUseStaticFallback(error)) {
-      return undefined;
-    }
-
     throw captureError(error, 'No se pudo consultar la captura.');
   }
 }
@@ -349,7 +147,7 @@ export async function updateCaptureDraft(
   motivoCambio = 'actualización desde frontend',
 ) {
   if (!API_REQUESTS_ENABLED) {
-    return updateFallbackDraft(captureId, payload);
+    throw apiUnavailableCaptureError();
   }
 
   try {
@@ -365,24 +163,20 @@ export async function updateCaptureDraft(
 
 export async function getCaptureDraft(captureId: number) {
   if (!API_REQUESTS_ENABLED) {
-    return getFallbackDraft(captureId);
+    throw apiUnavailableCaptureError();
   }
 
   try {
     const response = await api.get<CaptureDraft>(`/capturas/${captureId}`);
     return response.data;
   } catch (error) {
-    if (shouldUseStaticFallback(error)) {
-      return getFallbackDraft(captureId);
-    }
-
     throw captureError(error, 'No se pudo cargar el borrador.');
   }
 }
 
 export async function sendCaptureToReview(captureId: number) {
   if (!API_REQUESTS_ENABLED) {
-    return sendFallbackDraftToReview(captureId);
+    throw apiUnavailableCaptureError();
   }
 
   try {
@@ -395,7 +189,7 @@ export async function sendCaptureToReview(captureId: number) {
 
 export async function requestCaptureCorrection(captureId: number, observacion: string) {
   if (!API_REQUESTS_ENABLED) {
-    return requestFallbackCorrection(captureId, observacion);
+    throw apiUnavailableCaptureError();
   }
 
   try {
@@ -408,7 +202,7 @@ export async function requestCaptureCorrection(captureId: number, observacion: s
 
 export async function approveCapture(captureId: number) {
   if (!API_REQUESTS_ENABLED) {
-    return approveFallbackDraft(captureId);
+    throw apiUnavailableCaptureError();
   }
 
   try {

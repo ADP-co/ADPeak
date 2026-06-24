@@ -794,7 +794,8 @@ function reportFiltersFromUrl(url: URL) {
     cicloEscolar: url.searchParams.get("cicloEscolar") ?? undefined,
     periodo: url.searchParams.get("periodo") ?? undefined,
     plantel: url.searchParams.get("plantel") ?? undefined,
-    plantelId: url.searchParams.get("plantelId") ?? undefined
+    plantelId: url.searchParams.get("plantelId") ?? undefined,
+    estado: url.searchParams.get("estado") ?? url.searchParams.get("status") ?? undefined
   };
 }
 
