@@ -488,6 +488,7 @@ function buildOfficialWorkbookTemplate(indicator: CatalogIndicator, plantelName:
     indicatorCode: displayCode,
     indicatorName: indicator.name,
     groups,
+    headerRows: imported.headerRows,
     columns,
     initialRows,
     showTotals: imported.showTotals,

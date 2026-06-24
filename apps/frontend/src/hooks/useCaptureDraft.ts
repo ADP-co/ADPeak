@@ -76,7 +76,9 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
     if (
       !hasRequestedCapture &&
       captureQuery.error instanceof CaptureRequestError &&
-      captureQuery.error.code === 'capture_not_found'
+      (captureQuery.error.code === 'capture_not_found' ||
+        captureQuery.error.status === 400 ||
+        captureQuery.error.status === 403)
     ) {
       window.localStorage.removeItem(storageKey);
       setCaptureId(undefined);

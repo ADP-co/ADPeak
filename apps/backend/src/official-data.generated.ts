@@ -20,6 +20,11 @@ export type OfficialWorkbookSheetSummary = {
   formulaCells: number;
   table?: {
     headerRow: number;
+    headerRows?: Array<Array<{
+      label: string;
+      colspan?: number;
+      rowspan?: number;
+    }>>;
     columns: Array<{
       key: string;
       label: string;
@@ -65,6 +70,11 @@ export type OfficialWorkbookTemplate = {
   sourcePath: string;
   sheetName: string;
   groups: Array<{ label: string; colspan: number }>;
+  headerRows?: Array<Array<{
+    label: string;
+    colspan?: number;
+    rowspan?: number;
+  }>>;
   columns: Array<{
     key: string;
     label: string;
@@ -854,6 +864,57 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Adriana Ruiz/1.0.0.0.2 Titulación por cohorte.xlsx",
     "sheetName": "Titulación",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "Delegación",
+          "rowspan": 3
+        },
+        {
+          "label": "Plantel",
+          "rowspan": 3
+        },
+        {
+          "label": "Programa Educativo",
+          "rowspan": 3
+        },
+        {
+          "label": "Egresados titulados en el año 2025",
+          "colspan": 3,
+          "rowspan": 2
+        },
+        {
+          "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas",
+          "colspan": 3,
+          "rowspan": 2
+        },
+        {
+          "label": "% de titulación por cohorte",
+          "rowspan": 3
+        }
+      ],
+      [],
+      [
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Hombres"
+        },
+        {
+          "label": "Total"
+        },
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Hombres"
+        },
+        {
+          "label": "Total"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "delegacion",
@@ -872,38 +933,38 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       },
       {
         "key": "egresados_titulados_en_el_ano_2025_mujeres",
-        "label": "Egresados titulados en el año 2025 Mujeres",
+        "label": "Mujeres",
         "type": "number"
       },
       {
         "key": "egresados_titulados_en_el_ano_2025_hombres",
-        "label": "Egresados titulados en el año 2025 Hombres",
+        "label": "Hombres",
         "type": "number"
       },
       {
         "key": "egresados_titulados_en_el_ano_2025_total",
-        "label": "Egresados titulados en el año 2025 Total",
+        "label": "Total",
         "type": "number"
       },
       {
         "key": "matricula_de_primer_ingreso_de_la_misma_cohorte_",
-        "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas Mujeres",
+        "label": "Mujeres",
         "type": "number"
       },
       {
         "key": "matricula_de_primer_ingreso_de_la_misma_cohorte__2",
-        "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas Hombres",
+        "label": "Hombres",
         "type": "number"
       },
       {
         "key": "matricula_de_primer_ingreso_de_la_misma_cohorte__3",
-        "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas Total",
+        "label": "Total",
         "type": "number"
       },
       {
-        "key": "matricula_de_primer_ingreso_de_la_misma_cohorte__4",
-        "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas % de titulación por cohorte Total",
-        "type": "number"
+        "key": "de_titulacion_por_cohorte",
+        "label": "% de titulación por cohorte",
+        "type": "text"
       }
     ],
     "initialRows": [
@@ -917,7 +978,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
         "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
         "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte__4": ""
+        "de_titulacion_por_cohorte": ""
       }
     ],
     "showTotals": true,
@@ -933,7 +994,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
       "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
       "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-      "matricula_de_primer_ingreso_de_la_misma_cohorte__4": ""
+      "de_titulacion_por_cohorte": ""
     },
     "footerNote": "",
     "quality": [
@@ -951,6 +1012,49 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Ariadna Zuñiga/1.1.2.3.1 Programa Adopta una Prepa .xlsx",
     "sheetName": "1.1.2.3.1",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "Columna 1",
+          "rowspan": 2
+        },
+        {
+          "label": "Nombre de la charla",
+          "colspan": 2,
+          "rowspan": 2
+        },
+        {
+          "label": "Ponente",
+          "rowspan": 2
+        },
+        {
+          "label": "Fecha de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "Total estudiantes asistentes",
+          "colspan": 2
+        },
+        {
+          "label": "Total docentes asistentes",
+          "colspan": 2
+        }
+      ],
+      [
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Hombres"
+        },
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Hombres"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "columna_1",
@@ -979,22 +1083,22 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       },
       {
         "key": "total_estudiantes_asistentes_mujeres",
-        "label": "Total estudiantes asistentes Mujeres",
+        "label": "Mujeres",
         "type": "number"
       },
       {
         "key": "total_estudiantes_asistentes_hombres",
-        "label": "Total estudiantes asistentes Hombres",
+        "label": "Hombres",
         "type": "number"
       },
       {
         "key": "total_docentes_asistentes_mujeres",
-        "label": "Total docentes asistentes Mujeres",
+        "label": "Mujeres",
         "type": "number"
       },
       {
         "key": "total_docentes_asistentes_hombres",
-        "label": "Total docentes asistentes Hombres",
+        "label": "Hombres",
         "type": "number"
       }
     ],
@@ -1041,6 +1145,33 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Daniela Navarro/1.1.2.0.3.Estrategias para combatir el abandono escolar.xlsx",
     "sheetName": "Hoja1",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "PLANTEL",
+          "rowspan": 2
+        },
+        {
+          "label": "ESTRATEGIAS PARA COMBATIR EL ABANDONO ESCOLAR",
+          "rowspan": 2
+        },
+        {
+          "label": "CANTIDAD DE ALUMNOS",
+          "colspan": 3
+        }
+      ],
+      [
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "TOTAL"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -1054,17 +1185,17 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       },
       {
         "key": "cantidad_de_alumnos_mujeres",
-        "label": "CANTIDAD DE ALUMNOS MUJERES",
+        "label": "MUJERES",
         "type": "number"
       },
       {
         "key": "cantidad_de_alumnos_hombres",
-        "label": "CANTIDAD DE ALUMNOS HOMBRES",
+        "label": "HOMBRES",
         "type": "number"
       },
       {
         "key": "cantidad_de_alumnos_total",
-        "label": "CANTIDAD DE ALUMNOS TOTAL",
+        "label": "TOTAL",
         "type": "number"
       }
     ],
@@ -1103,6 +1234,43 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Angel Ordoñez/41221 - Porcentaje de UO que realizan acciones de actualización, mantenimiento preventivo o correctivo de la insfraestructura tecnologica.xlsx",
     "sheetName": "Hoja2",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "Columna 1"
+        },
+        {
+          "label": "Dependencia / Área"
+        },
+        {
+          "label": "Responsable"
+        },
+        {
+          "label": "Actividad"
+        },
+        {
+          "label": "Descripción"
+        },
+        {
+          "label": "Fecha"
+        },
+        {
+          "label": "Estatus"
+        },
+        {
+          "label": "Total de Equipos"
+        },
+        {
+          "label": "Equipos Atendidos"
+        },
+        {
+          "label": "% de equipos atendidos"
+        },
+        {
+          "label": "Observaciones"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "columna_1",
@@ -1272,6 +1440,58 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Liliana Rojas/Indicador 1.1.2.0.3..xlsx",
     "sheetName": "Indicador 1.1.2.0.3",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "Escuela"
+        },
+        {
+          "label": "Semestre"
+        },
+        {
+          "label": "Programa Educativo"
+        },
+        {
+          "label": "Matr."
+        },
+        {
+          "label": "Tasa de Reprobación",
+          "colspan": 2
+        },
+        {
+          "label": "Tasa de Aprobación",
+          "colspan": 2
+        },
+        {
+          "label": "Tasa de Deserción",
+          "colspan": 2
+        },
+        {
+          "label": "Escuela"
+        },
+        {
+          "label": "Semestre"
+        },
+        {
+          "label": "Programa Educativo"
+        },
+        {
+          "label": "Matr."
+        },
+        {
+          "label": "Tasa de Reprobación",
+          "colspan": 2
+        },
+        {
+          "label": "Tasa de Aprobación",
+          "colspan": 2
+        },
+        {
+          "label": "Tasa de Deserción",
+          "colspan": 2
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "escuela",
@@ -1299,8 +1519,8 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "type": "text"
       },
       {
-        "key": "columna_6",
-        "label": "Columna 6",
+        "key": "tasa_de_reprobacion_2",
+        "label": "Tasa de Reprobación",
         "type": "text"
       },
       {
@@ -1309,8 +1529,8 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "type": "text"
       },
       {
-        "key": "columna_8",
-        "label": "Columna 8",
+        "key": "tasa_de_aprobacion_2",
+        "label": "Tasa de Aprobación",
         "type": "text"
       },
       {
@@ -1319,8 +1539,8 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "type": "text"
       },
       {
-        "key": "columna_10",
-        "label": "Columna 10",
+        "key": "tasa_de_desercion_2",
+        "label": "Tasa de Deserción",
         "type": "text"
       },
       {
@@ -1344,27 +1564,32 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "type": "text"
       },
       {
-        "key": "tasa_de_reprobacion_2",
+        "key": "tasa_de_reprobacion_3",
         "label": "Tasa de Reprobación",
         "type": "text"
       },
       {
-        "key": "columna_16",
-        "label": "Columna 16",
+        "key": "tasa_de_reprobacion_4",
+        "label": "Tasa de Reprobación",
         "type": "text"
       },
       {
-        "key": "tasa_de_aprobacion_2",
+        "key": "tasa_de_aprobacion_3",
         "label": "Tasa de Aprobación",
         "type": "text"
       },
       {
-        "key": "columna_18",
-        "label": "Columna 18",
+        "key": "tasa_de_aprobacion_4",
+        "label": "Tasa de Aprobación",
         "type": "text"
       },
       {
-        "key": "tasa_de_desercion_2",
+        "key": "tasa_de_desercion_3",
+        "label": "Tasa de Deserción",
+        "type": "text"
+      },
+      {
+        "key": "tasa_de_desercion_4",
         "label": "Tasa de Deserción",
         "type": "text"
       }
@@ -1376,20 +1601,21 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "programa_educativo": "",
         "matr": "",
         "tasa_de_reprobacion": "No",
-        "columna_6": "%",
+        "tasa_de_reprobacion_2": "%",
         "tasa_de_aprobacion": "No",
-        "columna_8": "%",
+        "tasa_de_aprobacion_2": "%",
         "tasa_de_desercion": "No",
-        "columna_10": "%",
+        "tasa_de_desercion_2": "%",
         "escuela_2": "",
         "semestre_2": "",
         "programa_educativo_2": "",
         "matr_2": "",
-        "tasa_de_reprobacion_2": "No",
-        "columna_16": "%",
-        "tasa_de_aprobacion_2": "No",
-        "columna_18": "%",
-        "tasa_de_desercion_2": "No"
+        "tasa_de_reprobacion_3": "No",
+        "tasa_de_reprobacion_4": "%",
+        "tasa_de_aprobacion_3": "No",
+        "tasa_de_aprobacion_4": "%",
+        "tasa_de_desercion_3": "No",
+        "tasa_de_desercion_4": "%"
       },
       {
         "escuela": "Bachillerato 1",
@@ -1397,20 +1623,21 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "programa_educativo": "Bachillerato general",
         "matr": "",
         "tasa_de_reprobacion": "",
-        "columna_6": "",
+        "tasa_de_reprobacion_2": "",
         "tasa_de_aprobacion": "",
-        "columna_8": "",
+        "tasa_de_aprobacion_2": "",
         "tasa_de_desercion": "",
-        "columna_10": "",
+        "tasa_de_desercion_2": "",
         "escuela_2": "Bachillerato 1",
         "semestre_2": "Primero",
         "programa_educativo_2": "Bachillerato general",
         "matr_2": "",
-        "tasa_de_reprobacion_2": "",
-        "columna_16": "",
-        "tasa_de_aprobacion_2": "",
-        "columna_18": "",
-        "tasa_de_desercion_2": ""
+        "tasa_de_reprobacion_3": "",
+        "tasa_de_reprobacion_4": "",
+        "tasa_de_aprobacion_3": "",
+        "tasa_de_aprobacion_4": "",
+        "tasa_de_desercion_3": "",
+        "tasa_de_desercion_4": ""
       },
       {
         "escuela": "Bachillerato 1",
@@ -1418,20 +1645,21 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "programa_educativo": "Bachillerato general",
         "matr": "",
         "tasa_de_reprobacion": "",
-        "columna_6": "",
+        "tasa_de_reprobacion_2": "",
         "tasa_de_aprobacion": "",
-        "columna_8": "",
+        "tasa_de_aprobacion_2": "",
         "tasa_de_desercion": "",
-        "columna_10": "",
+        "tasa_de_desercion_2": "",
         "escuela_2": "Bachillerato 1",
         "semestre_2": "Tercero",
         "programa_educativo_2": "Bachillerato general",
         "matr_2": "",
-        "tasa_de_reprobacion_2": "",
-        "columna_16": "",
-        "tasa_de_aprobacion_2": "",
-        "columna_18": "",
-        "tasa_de_desercion_2": ""
+        "tasa_de_reprobacion_3": "",
+        "tasa_de_reprobacion_4": "",
+        "tasa_de_aprobacion_3": "",
+        "tasa_de_aprobacion_4": "",
+        "tasa_de_desercion_3": "",
+        "tasa_de_desercion_4": ""
       },
       {
         "escuela": "Bachillerato 1",
@@ -1439,20 +1667,21 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "programa_educativo": "Bachillerato general",
         "matr": "",
         "tasa_de_reprobacion": "",
-        "columna_6": "",
+        "tasa_de_reprobacion_2": "",
         "tasa_de_aprobacion": "",
-        "columna_8": "",
+        "tasa_de_aprobacion_2": "",
         "tasa_de_desercion": "",
-        "columna_10": "",
+        "tasa_de_desercion_2": "",
         "escuela_2": "Bachillerato 1",
         "semestre_2": "Quinto",
         "programa_educativo_2": "Bachillerato general",
         "matr_2": "",
-        "tasa_de_reprobacion_2": "",
-        "columna_16": "",
-        "tasa_de_aprobacion_2": "",
-        "columna_18": "",
-        "tasa_de_desercion_2": ""
+        "tasa_de_reprobacion_3": "",
+        "tasa_de_reprobacion_4": "",
+        "tasa_de_aprobacion_3": "",
+        "tasa_de_aprobacion_4": "",
+        "tasa_de_desercion_3": "",
+        "tasa_de_desercion_4": ""
       }
     ],
     "showTotals": false,
@@ -1464,20 +1693,21 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "programa_educativo": "",
       "matr": "",
       "tasa_de_reprobacion": "",
-      "columna_6": "",
+      "tasa_de_reprobacion_2": "",
       "tasa_de_aprobacion": "",
-      "columna_8": "",
+      "tasa_de_aprobacion_2": "",
       "tasa_de_desercion": "",
-      "columna_10": "",
+      "tasa_de_desercion_2": "",
       "escuela_2": "",
       "semestre_2": "",
       "programa_educativo_2": "",
       "matr_2": "",
-      "tasa_de_reprobacion_2": "",
-      "columna_16": "",
-      "tasa_de_aprobacion_2": "",
-      "columna_18": "",
-      "tasa_de_desercion_2": ""
+      "tasa_de_reprobacion_3": "",
+      "tasa_de_reprobacion_4": "",
+      "tasa_de_aprobacion_3": "",
+      "tasa_de_aprobacion_4": "",
+      "tasa_de_desercion_3": "",
+      "tasa_de_desercion_4": ""
     },
     "footerNote": "",
     "quality": [
@@ -1496,6 +1726,63 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Liliana Rojas/Indicador 1.1.2.0.1..xlsx",
     "sheetName": "Indicador 1.1.2.0.1.",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "Semestre",
+          "rowspan": 2
+        },
+        {
+          "label": "Ago 2025-Ene 2026",
+          "colspan": 3
+        },
+        {
+          "label": "Semestre",
+          "rowspan": 2
+        },
+        {
+          "label": "Feb 2026-Ago 2026",
+          "colspan": 3
+        },
+        {
+          "label": "Semestre",
+          "rowspan": 2
+        },
+        {
+          "label": "Ago 2026-Ene 2027",
+          "colspan": 3
+        }
+      ],
+      [
+        {
+          "label": "Hombres"
+        },
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Total"
+        },
+        {
+          "label": "Hombres"
+        },
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Total"
+        },
+        {
+          "label": "Hombres"
+        },
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Total"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "semestre",
@@ -1504,57 +1791,57 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       },
       {
         "key": "ago_2025_ene_2026_hombres",
-        "label": "Ago 2025-Ene 2026 Hombres",
+        "label": "Hombres",
         "type": "number"
       },
       {
         "key": "ago_2025_ene_2026_mujeres",
-        "label": "Ago 2025-Ene 2026 Mujeres",
+        "label": "Mujeres",
         "type": "number"
       },
       {
         "key": "ago_2025_ene_2026_total",
-        "label": "Ago 2025-Ene 2026 Total",
+        "label": "Total",
         "type": "number"
       },
       {
-        "key": "semestre_total",
-        "label": "Semestre Total",
+        "key": "semestre_2",
+        "label": "Semestre",
         "type": "readonly"
       },
       {
         "key": "feb_2026_ago_2026_hombres",
-        "label": "Feb 2026-Ago 2026 Hombres",
+        "label": "Hombres",
         "type": "number"
       },
       {
         "key": "feb_2026_ago_2026_mujeres",
-        "label": "Feb 2026-Ago 2026 Mujeres",
+        "label": "Mujeres",
         "type": "number"
       },
       {
         "key": "feb_2026_ago_2026_total",
-        "label": "Feb 2026-Ago 2026 Total",
+        "label": "Total",
         "type": "number"
       },
       {
-        "key": "semestre_total_2",
-        "label": "Semestre Total",
+        "key": "semestre_3",
+        "label": "Semestre",
         "type": "readonly"
       },
       {
         "key": "ago_2026_ene_2027_hombres",
-        "label": "Ago 2026-Ene 2027 Hombres",
+        "label": "Hombres",
         "type": "number"
       },
       {
         "key": "ago_2026_ene_2027_mujeres",
-        "label": "Ago 2026-Ene 2027 Mujeres",
+        "label": "Mujeres",
         "type": "number"
       },
       {
         "key": "ago_2026_ene_2027_total",
-        "label": "Ago 2026-Ene 2027 Total",
+        "label": "Total",
         "type": "number"
       }
     ],
@@ -1564,11 +1851,11 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "ago_2025_ene_2026_hombres": "",
         "ago_2025_ene_2026_mujeres": "",
         "ago_2025_ene_2026_total": "",
-        "semestre_total": "Segundo",
+        "semestre_2": "Segundo",
         "feb_2026_ago_2026_hombres": "",
         "feb_2026_ago_2026_mujeres": "",
         "feb_2026_ago_2026_total": "",
-        "semestre_total_2": "Primero",
+        "semestre_3": "Primero",
         "ago_2026_ene_2027_hombres": "",
         "ago_2026_ene_2027_mujeres": "",
         "ago_2026_ene_2027_total": ""
@@ -1578,11 +1865,11 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "ago_2025_ene_2026_hombres": "",
         "ago_2025_ene_2026_mujeres": "",
         "ago_2025_ene_2026_total": "",
-        "semestre_total": "Cuarto",
+        "semestre_2": "Cuarto",
         "feb_2026_ago_2026_hombres": "",
         "feb_2026_ago_2026_mujeres": "",
         "feb_2026_ago_2026_total": "",
-        "semestre_total_2": "Tercero",
+        "semestre_3": "Tercero",
         "ago_2026_ene_2027_hombres": "",
         "ago_2026_ene_2027_mujeres": "",
         "ago_2026_ene_2027_total": ""
@@ -1592,11 +1879,11 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "ago_2025_ene_2026_hombres": "",
         "ago_2025_ene_2026_mujeres": "",
         "ago_2025_ene_2026_total": "",
-        "semestre_total": "Sexto",
+        "semestre_2": "Sexto",
         "feb_2026_ago_2026_hombres": "",
         "feb_2026_ago_2026_mujeres": "",
         "feb_2026_ago_2026_total": "",
-        "semestre_total_2": "Quinto",
+        "semestre_3": "Quinto",
         "ago_2026_ene_2027_hombres": "",
         "ago_2026_ene_2027_mujeres": "",
         "ago_2026_ene_2027_total": ""
@@ -1610,11 +1897,11 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "ago_2025_ene_2026_hombres": "",
       "ago_2025_ene_2026_mujeres": "",
       "ago_2025_ene_2026_total": "",
-      "semestre_total": "",
+      "semestre_2": "",
       "feb_2026_ago_2026_hombres": "",
       "feb_2026_ago_2026_mujeres": "",
       "feb_2026_ago_2026_total": "",
-      "semestre_total_2": "",
+      "semestre_3": "",
       "ago_2026_ene_2027_hombres": "",
       "ago_2026_ene_2027_mujeres": "",
       "ago_2026_ene_2027_total": ""
@@ -1635,6 +1922,19 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Angel Ordoñez/4.1.1.0.1. Numero de Sistemas de Informacion Institucionales que interoperan.xlsx",
     "sheetName": "Hoja1",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "Columna 1"
+        },
+        {
+          "label": "Nombre del Software"
+        },
+        {
+          "label": "Aspecto de la formación integral del estudiantado a la que da seguimiento"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "columna_1",
@@ -1683,6 +1983,31 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Angel Ordoñez/4.1.1.1.1. - Número de sistemas implementados y mejorados para fortalecer la gestión de procesos institucionales..xlsx",
     "sheetName": "Hoja1",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "Columna 1"
+        },
+        {
+          "label": "Fecha"
+        },
+        {
+          "label": "Versión"
+        },
+        {
+          "label": "Respnsable"
+        },
+        {
+          "label": "Descripción breve del cambio"
+        },
+        {
+          "label": "Autorizo"
+        },
+        {
+          "label": "Observaciones"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "columna_1",
@@ -1759,6 +2084,63 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Adriana Ruiz/formatos/Formato con OPCIONES de llenado de academias por plantel.xlsx",
     "sheetName": "INFORME SEMESTRAL FEBRERO",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "PLANTEL",
+          "rowspan": 2
+        },
+        {
+          "label": "NOMBRE DEL PROGRAMA",
+          "rowspan": 2
+        },
+        {
+          "label": "No. DE ACADEMIAS POR PLANTEL",
+          "rowspan": 2
+        },
+        {
+          "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS",
+          "colspan": 3
+        },
+        {
+          "label": "No. DE SESIONES ORDINARIAS",
+          "rowspan": 2
+        },
+        {
+          "label": "No. SESIONES EXTRAORDINARIAS",
+          "rowspan": 2
+        },
+        {
+          "label": "ACTIVIDADES DE TRABAJO REALIZADAS (Agregar las opciones)",
+          "rowspan": 2
+        },
+        {
+          "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL",
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "A) ÁREA DE FORMACIÓN"
+        },
+        {
+          "label": "B) SEMESTRE"
+        },
+        {
+          "label": "C) CAMPO DISCIPLINAR"
+        },
+        {
+          "label": "H"
+        },
+        {
+          "label": "M"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -1777,47 +2159,47 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       },
       {
         "key": "tipo_de_integracion_de_academias_a_area_de_forma",
-        "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS A) ÁREA DE FORMACIÓN",
+        "label": "A) ÁREA DE FORMACIÓN",
         "type": "text"
       },
       {
         "key": "tipo_de_integracion_de_academias_b_semestre",
-        "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS B) SEMESTRE",
+        "label": "B) SEMESTRE",
         "type": "readonly"
       },
       {
         "key": "tipo_de_integracion_de_academias_c_campo_discipl",
-        "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS C) CAMPO DISCIPLINAR",
+        "label": "C) CAMPO DISCIPLINAR",
         "type": "text"
       },
       {
-        "key": "no_de_sesiones_ordinarias_c_campo_disciplinar",
-        "label": "No. DE SESIONES ORDINARIAS C) CAMPO DISCIPLINAR",
+        "key": "no_de_sesiones_ordinarias",
+        "label": "No. DE SESIONES ORDINARIAS",
         "type": "text"
       },
       {
-        "key": "no_sesiones_extraordinarias_c_campo_disciplinar",
-        "label": "No. SESIONES EXTRAORDINARIAS C) CAMPO DISCIPLINAR",
+        "key": "no_sesiones_extraordinarias",
+        "label": "No. SESIONES EXTRAORDINARIAS",
         "type": "text"
       },
       {
         "key": "actividades_de_trabajo_realizadas_agregar_las_op",
-        "label": "ACTIVIDADES DE TRABAJO REALIZADAS (Agregar las opciones) C) CAMPO DISCIPLINAR",
+        "label": "ACTIVIDADES DE TRABAJO REALIZADAS (Agregar las opciones)",
         "type": "text"
       },
       {
         "key": "docentes_que_participaron_en_las_academias_h",
-        "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS H",
+        "label": "H",
         "type": "number"
       },
       {
         "key": "docentes_que_participaron_en_las_academias_m",
-        "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS M",
+        "label": "M",
         "type": "number"
       },
       {
-        "key": "total_m",
-        "label": "TOTAL M",
+        "key": "total",
+        "label": "TOTAL",
         "type": "number"
       }
     ],
@@ -1829,12 +2211,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "tipo_de_integracion_de_academias_a_area_de_forma": "",
         "tipo_de_integracion_de_academias_b_semestre": "",
         "tipo_de_integracion_de_academias_c_campo_discipl": "",
-        "no_de_sesiones_ordinarias_c_campo_disciplinar": "1,2,3, otro",
-        "no_sesiones_extraordinarias_c_campo_disciplinar": "1,2,3, otro",
+        "no_de_sesiones_ordinarias": "1,2,3, otro",
+        "no_sesiones_extraordinarias": "1,2,3, otro",
         "actividades_de_trabajo_realizadas_agregar_las_op": "La actividades vienen marcadas en los lineamiento de conformación y funcionamientos de las academias.",
         "docentes_que_participaron_en_las_academias_h": "",
         "docentes_que_participaron_en_las_academias_m": "",
-        "total_m": ""
+        "total": ""
       },
       {
         "plantel": "",
@@ -1843,12 +2225,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "tipo_de_integracion_de_academias_a_area_de_forma": "",
         "tipo_de_integracion_de_academias_b_semestre": "",
         "tipo_de_integracion_de_academias_c_campo_discipl": "",
-        "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-        "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
         "actividades_de_trabajo_realizadas_agregar_las_op": "Una vez que señale las opciones, dar un espacio en cada una de ellas para que anoten en específico lo que realizó.",
         "docentes_que_participaron_en_las_academias_h": "",
         "docentes_que_participaron_en_las_academias_m": "",
-        "total_m": ""
+        "total": ""
       },
       {
         "plantel": "INDICACIONES PARA EL LLENADO DEL FORMATO DE CONCENTRADO DE ACADEMIAS POR PLANTEL",
@@ -1857,12 +2239,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "tipo_de_integracion_de_academias_a_area_de_forma": "",
         "tipo_de_integracion_de_academias_b_semestre": "",
         "tipo_de_integracion_de_academias_c_campo_discipl": "",
-        "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-        "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
         "actividades_de_trabajo_realizadas_agregar_las_op": "",
         "docentes_que_participaron_en_las_academias_h": "",
         "docentes_que_participaron_en_las_academias_m": "",
-        "total_m": ""
+        "total": ""
       },
       {
         "plantel": "DATOS DE IDENTIFICACIÓN DE ACADEMIAS",
@@ -1871,12 +2253,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "tipo_de_integracion_de_academias_a_area_de_forma": "",
         "tipo_de_integracion_de_academias_b_semestre": "",
         "tipo_de_integracion_de_academias_c_campo_discipl": "",
-        "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-        "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
         "actividades_de_trabajo_realizadas_agregar_las_op": "",
         "docentes_que_participaron_en_las_academias_h": "",
         "docentes_que_participaron_en_las_academias_m": "",
-        "total_m": ""
+        "total": ""
       },
       {
         "plantel": "Periodo escolar: Señalar el periodo y año en el que se ubica la academia",
@@ -1885,12 +2267,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "tipo_de_integracion_de_academias_a_area_de_forma": "",
         "tipo_de_integracion_de_academias_b_semestre": "",
         "tipo_de_integracion_de_academias_c_campo_discipl": "",
-        "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-        "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
         "actividades_de_trabajo_realizadas_agregar_las_op": "",
         "docentes_que_participaron_en_las_academias_h": "",
         "docentes_que_participaron_en_las_academias_m": "",
-        "total_m": ""
+        "total": ""
       },
       {
         "plantel": "Plantel: Escribir el nombre del plantel en el cual se encuentran conformadas las academias.",
@@ -1899,12 +2281,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "tipo_de_integracion_de_academias_a_area_de_forma": "",
         "tipo_de_integracion_de_academias_b_semestre": "",
         "tipo_de_integracion_de_academias_c_campo_discipl": "",
-        "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-        "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
         "actividades_de_trabajo_realizadas_agregar_las_op": "",
         "docentes_que_participaron_en_las_academias_h": "",
         "docentes_que_participaron_en_las_academias_m": "",
-        "total_m": ""
+        "total": ""
       },
       {
         "plantel": "Programa educativo: Escribir el nombre del plan de estudios correspondiente.",
@@ -1913,12 +2295,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "tipo_de_integracion_de_academias_a_area_de_forma": "",
         "tipo_de_integracion_de_academias_b_semestre": "",
         "tipo_de_integracion_de_academias_c_campo_discipl": "",
-        "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-        "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
         "actividades_de_trabajo_realizadas_agregar_las_op": "",
         "docentes_que_participaron_en_las_academias_h": "",
         "docentes_que_participaron_en_las_academias_m": "",
-        "total_m": ""
+        "total": ""
       },
       {
         "plantel": "Tipos de integración de academias: Marcar los tipos de academias implementadas en el plantel por programa educativo.",
@@ -1927,12 +2309,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "tipo_de_integracion_de_academias_a_area_de_forma": "",
         "tipo_de_integracion_de_academias_b_semestre": "",
         "tipo_de_integracion_de_academias_c_campo_discipl": "",
-        "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-        "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
         "actividades_de_trabajo_realizadas_agregar_las_op": "",
         "docentes_que_participaron_en_las_academias_h": "",
         "docentes_que_participaron_en_las_academias_m": "",
-        "total_m": ""
+        "total": ""
       },
       {
         "plantel": "Sesiones ordinarias: Escribir el número de sesiones realizadas durante el semestre de manera habitual.",
@@ -1941,12 +2323,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "tipo_de_integracion_de_academias_a_area_de_forma": "",
         "tipo_de_integracion_de_academias_b_semestre": "",
         "tipo_de_integracion_de_academias_c_campo_discipl": "",
-        "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-        "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
         "actividades_de_trabajo_realizadas_agregar_las_op": "",
         "docentes_que_participaron_en_las_academias_h": "",
         "docentes_que_participaron_en_las_academias_m": "",
-        "total_m": ""
+        "total": ""
       },
       {
         "plantel": "Sesiones extraordinarias: Escribir el número de sesiones realizadas para asuntos especiales o urgentes.",
@@ -1955,12 +2337,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "tipo_de_integracion_de_academias_a_area_de_forma": "",
         "tipo_de_integracion_de_academias_b_semestre": "",
         "tipo_de_integracion_de_academias_c_campo_discipl": "",
-        "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-        "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
         "actividades_de_trabajo_realizadas_agregar_las_op": "",
         "docentes_que_participaron_en_las_academias_h": "",
         "docentes_que_participaron_en_las_academias_m": "",
-        "total_m": ""
+        "total": ""
       },
       {
         "plantel": "Actividades de trabajo realizadas: Rde a cuerdo a las necesidades del plantel, registrar las actividades que se realizaron durante el semestre.",
@@ -1969,12 +2351,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "tipo_de_integracion_de_academias_a_area_de_forma": "",
         "tipo_de_integracion_de_academias_b_semestre": "",
         "tipo_de_integracion_de_academias_c_campo_discipl": "",
-        "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-        "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
         "actividades_de_trabajo_realizadas_agregar_las_op": "",
         "docentes_que_participaron_en_las_academias_h": "",
         "docentes_que_participaron_en_las_academias_m": "",
-        "total_m": ""
+        "total": ""
       }
     ],
     "showTotals": true,
@@ -1987,12 +2369,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "tipo_de_integracion_de_academias_a_area_de_forma": "",
       "tipo_de_integracion_de_academias_b_semestre": "",
       "tipo_de_integracion_de_academias_c_campo_discipl": "",
-      "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-      "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+      "no_de_sesiones_ordinarias": "",
+      "no_sesiones_extraordinarias": "",
       "actividades_de_trabajo_realizadas_agregar_las_op": "",
       "docentes_que_participaron_en_las_academias_h": "",
       "docentes_que_participaron_en_las_academias_m": "",
-      "total_m": ""
+      "total": ""
     },
     "footerNote": "",
     "quality": [
@@ -2010,6 +2392,63 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Adriana Ruiz/1.1.1.1.1 Formato conformación de academias por plantel.xlsx",
     "sheetName": "INFORME SEMESTRAL FEBRERO",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "PLANTEL",
+          "rowspan": 2
+        },
+        {
+          "label": "NOMBRE DEL PROGRAMA",
+          "rowspan": 2
+        },
+        {
+          "label": "No. DE ACADEMIAS POR PLANTEL",
+          "rowspan": 2
+        },
+        {
+          "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS",
+          "colspan": 3
+        },
+        {
+          "label": "No. DE SESIONES ORDINARIAS",
+          "rowspan": 2
+        },
+        {
+          "label": "No. SESIONES EXTRAORDINARIAS",
+          "rowspan": 2
+        },
+        {
+          "label": "ACTIVIDADES DE TRABAJO REALIZADAS (mencionar la actividad)",
+          "rowspan": 2
+        },
+        {
+          "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL",
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "ÁREA DE FORMACIÓN"
+        },
+        {
+          "label": "SEMESTRE"
+        },
+        {
+          "label": "CAMPO DISCIPLINAR"
+        },
+        {
+          "label": "H"
+        },
+        {
+          "label": "M"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -2028,47 +2467,47 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       },
       {
         "key": "tipo_de_integracion_de_academias_area_de_formaci",
-        "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS ÁREA DE FORMACIÓN",
+        "label": "ÁREA DE FORMACIÓN",
         "type": "text"
       },
       {
         "key": "tipo_de_integracion_de_academias_semestre",
-        "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS SEMESTRE",
+        "label": "SEMESTRE",
         "type": "readonly"
       },
       {
         "key": "tipo_de_integracion_de_academias_campo_disciplin",
-        "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS CAMPO DISCIPLINAR",
+        "label": "CAMPO DISCIPLINAR",
         "type": "text"
       },
       {
-        "key": "no_de_sesiones_ordinarias_campo_disciplinar",
-        "label": "No. DE SESIONES ORDINARIAS CAMPO DISCIPLINAR",
+        "key": "no_de_sesiones_ordinarias",
+        "label": "No. DE SESIONES ORDINARIAS",
         "type": "text"
       },
       {
-        "key": "no_sesiones_extraordinarias_campo_disciplinar",
-        "label": "No. SESIONES EXTRAORDINARIAS CAMPO DISCIPLINAR",
+        "key": "no_sesiones_extraordinarias",
+        "label": "No. SESIONES EXTRAORDINARIAS",
         "type": "text"
       },
       {
         "key": "actividades_de_trabajo_realizadas_mencionar_la_a",
-        "label": "ACTIVIDADES DE TRABAJO REALIZADAS (mencionar la actividad) CAMPO DISCIPLINAR",
+        "label": "ACTIVIDADES DE TRABAJO REALIZADAS (mencionar la actividad)",
         "type": "text"
       },
       {
         "key": "docentes_que_participaron_en_las_academias_h",
-        "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS H",
+        "label": "H",
         "type": "number"
       },
       {
         "key": "docentes_que_participaron_en_las_academias_m",
-        "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS M",
+        "label": "M",
         "type": "number"
       },
       {
-        "key": "total_m",
-        "label": "TOTAL M",
+        "key": "total",
+        "label": "TOTAL",
         "type": "number"
       }
     ],
@@ -2080,12 +2519,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "tipo_de_integracion_de_academias_area_de_formaci": "",
         "tipo_de_integracion_de_academias_semestre": "",
         "tipo_de_integracion_de_academias_campo_disciplin": "",
-        "no_de_sesiones_ordinarias_campo_disciplinar": "",
-        "no_sesiones_extraordinarias_campo_disciplinar": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
         "actividades_de_trabajo_realizadas_mencionar_la_a": "",
         "docentes_que_participaron_en_las_academias_h": "",
         "docentes_que_participaron_en_las_academias_m": "",
-        "total_m": ""
+        "total": ""
       },
       {
         "plantel": "DATOS DE IDENTIFICACIÓN DE ACADEMIAS",
@@ -2094,12 +2533,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "tipo_de_integracion_de_academias_area_de_formaci": "",
         "tipo_de_integracion_de_academias_semestre": "",
         "tipo_de_integracion_de_academias_campo_disciplin": "",
-        "no_de_sesiones_ordinarias_campo_disciplinar": "",
-        "no_sesiones_extraordinarias_campo_disciplinar": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
         "actividades_de_trabajo_realizadas_mencionar_la_a": "",
         "docentes_que_participaron_en_las_academias_h": "",
         "docentes_que_participaron_en_las_academias_m": "",
-        "total_m": ""
+        "total": ""
       },
       {
         "plantel": "Periodo escolar: Señalar el periodo y año en el que se ubica la academia",
@@ -2108,12 +2547,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "tipo_de_integracion_de_academias_area_de_formaci": "",
         "tipo_de_integracion_de_academias_semestre": "",
         "tipo_de_integracion_de_academias_campo_disciplin": "",
-        "no_de_sesiones_ordinarias_campo_disciplinar": "",
-        "no_sesiones_extraordinarias_campo_disciplinar": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
         "actividades_de_trabajo_realizadas_mencionar_la_a": "",
         "docentes_que_participaron_en_las_academias_h": "",
         "docentes_que_participaron_en_las_academias_m": "",
-        "total_m": ""
+        "total": ""
       },
       {
         "plantel": "Plantel: Escribir el nombre del plantel en el cual se encuentran conformadas las academias.",
@@ -2122,12 +2561,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "tipo_de_integracion_de_academias_area_de_formaci": "",
         "tipo_de_integracion_de_academias_semestre": "",
         "tipo_de_integracion_de_academias_campo_disciplin": "",
-        "no_de_sesiones_ordinarias_campo_disciplinar": "",
-        "no_sesiones_extraordinarias_campo_disciplinar": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
         "actividades_de_trabajo_realizadas_mencionar_la_a": "",
         "docentes_que_participaron_en_las_academias_h": "",
         "docentes_que_participaron_en_las_academias_m": "",
-        "total_m": ""
+        "total": ""
       },
       {
         "plantel": "Programa educativo: Escribir el nombre del plan de estudios correspondiente.",
@@ -2136,12 +2575,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "tipo_de_integracion_de_academias_area_de_formaci": "",
         "tipo_de_integracion_de_academias_semestre": "",
         "tipo_de_integracion_de_academias_campo_disciplin": "",
-        "no_de_sesiones_ordinarias_campo_disciplinar": "",
-        "no_sesiones_extraordinarias_campo_disciplinar": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
         "actividades_de_trabajo_realizadas_mencionar_la_a": "",
         "docentes_que_participaron_en_las_academias_h": "",
         "docentes_que_participaron_en_las_academias_m": "",
-        "total_m": ""
+        "total": ""
       },
       {
         "plantel": "Tipos de integración de academias: Marcar los tipos de academias implementadas en el plantel por programa educativo.",
@@ -2150,12 +2589,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "tipo_de_integracion_de_academias_area_de_formaci": "",
         "tipo_de_integracion_de_academias_semestre": "",
         "tipo_de_integracion_de_academias_campo_disciplin": "",
-        "no_de_sesiones_ordinarias_campo_disciplinar": "",
-        "no_sesiones_extraordinarias_campo_disciplinar": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
         "actividades_de_trabajo_realizadas_mencionar_la_a": "",
         "docentes_que_participaron_en_las_academias_h": "",
         "docentes_que_participaron_en_las_academias_m": "",
-        "total_m": ""
+        "total": ""
       },
       {
         "plantel": "Sesiones ordinarias: Escribir el número de sesiones realizadas durante el semestre de manera habitual.",
@@ -2164,12 +2603,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "tipo_de_integracion_de_academias_area_de_formaci": "",
         "tipo_de_integracion_de_academias_semestre": "",
         "tipo_de_integracion_de_academias_campo_disciplin": "",
-        "no_de_sesiones_ordinarias_campo_disciplinar": "",
-        "no_sesiones_extraordinarias_campo_disciplinar": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
         "actividades_de_trabajo_realizadas_mencionar_la_a": "",
         "docentes_que_participaron_en_las_academias_h": "",
         "docentes_que_participaron_en_las_academias_m": "",
-        "total_m": ""
+        "total": ""
       },
       {
         "plantel": "Sesiones extraordinarias: Escribir el número de sesiones realizadas para asuntos especiales o urgentes.",
@@ -2178,12 +2617,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "tipo_de_integracion_de_academias_area_de_formaci": "",
         "tipo_de_integracion_de_academias_semestre": "",
         "tipo_de_integracion_de_academias_campo_disciplin": "",
-        "no_de_sesiones_ordinarias_campo_disciplinar": "",
-        "no_sesiones_extraordinarias_campo_disciplinar": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
         "actividades_de_trabajo_realizadas_mencionar_la_a": "",
         "docentes_que_participaron_en_las_academias_h": "",
         "docentes_que_participaron_en_las_academias_m": "",
-        "total_m": ""
+        "total": ""
       },
       {
         "plantel": "Actividades de trabajo realizadas: Rde a cuerdo a las necesidades del plantel, registrar las actividades que se realizaron durante el semestre.",
@@ -2192,12 +2631,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "tipo_de_integracion_de_academias_area_de_formaci": "",
         "tipo_de_integracion_de_academias_semestre": "",
         "tipo_de_integracion_de_academias_campo_disciplin": "",
-        "no_de_sesiones_ordinarias_campo_disciplinar": "",
-        "no_sesiones_extraordinarias_campo_disciplinar": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
         "actividades_de_trabajo_realizadas_mencionar_la_a": "",
         "docentes_que_participaron_en_las_academias_h": "",
         "docentes_que_participaron_en_las_academias_m": "",
-        "total_m": ""
+        "total": ""
       }
     ],
     "showTotals": true,
@@ -2210,12 +2649,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "tipo_de_integracion_de_academias_area_de_formaci": "",
       "tipo_de_integracion_de_academias_semestre": "",
       "tipo_de_integracion_de_academias_campo_disciplin": "",
-      "no_de_sesiones_ordinarias_campo_disciplinar": "",
-      "no_sesiones_extraordinarias_campo_disciplinar": "",
+      "no_de_sesiones_ordinarias": "",
+      "no_sesiones_extraordinarias": "",
       "actividades_de_trabajo_realizadas_mencionar_la_a": "",
       "docentes_que_participaron_en_las_academias_h": "",
       "docentes_que_participaron_en_las_academias_m": "",
-      "total_m": ""
+      "total": ""
     },
     "footerNote": "",
     "quality": [
@@ -2234,6 +2673,57 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Adriana Ruiz/formatos/Titulación por cohorte.xlsx",
     "sheetName": "Titulación",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "Delegación",
+          "rowspan": 3
+        },
+        {
+          "label": "Plantel",
+          "rowspan": 3
+        },
+        {
+          "label": "Programa Educativo",
+          "rowspan": 3
+        },
+        {
+          "label": "Egresados titulados en el año 2025",
+          "colspan": 3,
+          "rowspan": 2
+        },
+        {
+          "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas",
+          "colspan": 3,
+          "rowspan": 2
+        },
+        {
+          "label": "% de titulación por cohorte",
+          "rowspan": 3
+        }
+      ],
+      [],
+      [
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Hombres"
+        },
+        {
+          "label": "Total"
+        },
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Hombres"
+        },
+        {
+          "label": "Total"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "delegacion",
@@ -2252,38 +2742,38 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       },
       {
         "key": "egresados_titulados_en_el_ano_2025_mujeres",
-        "label": "Egresados titulados en el año 2025 Mujeres",
+        "label": "Mujeres",
         "type": "number"
       },
       {
         "key": "egresados_titulados_en_el_ano_2025_hombres",
-        "label": "Egresados titulados en el año 2025 Hombres",
+        "label": "Hombres",
         "type": "number"
       },
       {
         "key": "egresados_titulados_en_el_ano_2025_total",
-        "label": "Egresados titulados en el año 2025 Total",
+        "label": "Total",
         "type": "number"
       },
       {
         "key": "matricula_de_primer_ingreso_de_la_misma_cohorte_",
-        "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas Mujeres",
+        "label": "Mujeres",
         "type": "number"
       },
       {
         "key": "matricula_de_primer_ingreso_de_la_misma_cohorte__2",
-        "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas Hombres",
+        "label": "Hombres",
         "type": "number"
       },
       {
         "key": "matricula_de_primer_ingreso_de_la_misma_cohorte__3",
-        "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas Total",
+        "label": "Total",
         "type": "number"
       },
       {
-        "key": "matricula_de_primer_ingreso_de_la_misma_cohorte__4",
-        "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas % de titulación por cohorte Total",
-        "type": "number"
+        "key": "de_titulacion_por_cohorte",
+        "label": "% de titulación por cohorte",
+        "type": "text"
       }
     ],
     "initialRows": [
@@ -2297,7 +2787,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
         "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
         "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte__4": ""
+        "de_titulacion_por_cohorte": ""
       },
       {
         "delegacion": "",
@@ -2309,7 +2799,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
         "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
         "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte__4": ""
+        "de_titulacion_por_cohorte": "Egresados titulados / Matrícula de primer ingreso*100"
       },
       {
         "delegacion": "",
@@ -2321,7 +2811,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
         "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
         "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte__4": ""
+        "de_titulacion_por_cohorte": ""
       },
       {
         "delegacion": "",
@@ -2333,7 +2823,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
         "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
         "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte__4": ""
+        "de_titulacion_por_cohorte": ""
       },
       {
         "delegacion": "",
@@ -2345,7 +2835,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
         "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
         "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte__4": ""
+        "de_titulacion_por_cohorte": ""
       },
       {
         "delegacion": "",
@@ -2357,7 +2847,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
         "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
         "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte__4": ""
+        "de_titulacion_por_cohorte": ""
       }
     ],
     "showTotals": true,
@@ -2373,7 +2863,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
       "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
       "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-      "matricula_de_primer_ingreso_de_la_misma_cohorte__4": ""
+      "de_titulacion_por_cohorte": ""
     },
     "footerNote": "",
     "quality": [
@@ -2392,6 +2882,52 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Daniela Navarro/1.1.2.3.1.Convocatorias externas .xlsx",
     "sheetName": "Hoja1",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "PLANTEL",
+          "rowspan": 2
+        },
+        {
+          "label": "NOMBRE DE LA CONVOCATORIA REALIZADA",
+          "rowspan": 2
+        },
+        {
+          "label": "CANTIDAD DE PARTICIPANTES",
+          "colspan": 5
+        },
+        {
+          "label": "CANTIDAD DE ALUMNOS PARTICIPANTES",
+          "colspan": 3
+        }
+      ],
+      [
+        {
+          "label": "DOCENTES"
+        },
+        {
+          "label": "ADMINISTRATIVOS"
+        },
+        {
+          "label": "COORDINADORES ACADÉMICOS"
+        },
+        {
+          "label": "ASESORES PEDAGÓGICOS"
+        },
+        {
+          "label": "OTRO PERSONAL"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "TOTAL"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -2405,42 +2941,42 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       },
       {
         "key": "cantidad_de_participantes_docentes",
-        "label": "CANTIDAD DE PARTICIPANTES DOCENTES",
+        "label": "DOCENTES",
         "type": "number"
       },
       {
         "key": "cantidad_de_participantes_administrativos",
-        "label": "CANTIDAD DE PARTICIPANTES ADMINISTRATIVOS",
+        "label": "ADMINISTRATIVOS",
         "type": "number"
       },
       {
         "key": "cantidad_de_participantes_coordinadores_academic",
-        "label": "CANTIDAD DE PARTICIPANTES COORDINADORES ACADÉMICOS",
+        "label": "COORDINADORES ACADÉMICOS",
         "type": "number"
       },
       {
         "key": "cantidad_de_participantes_asesores_pedagogicos",
-        "label": "CANTIDAD DE PARTICIPANTES ASESORES PEDAGÓGICOS",
+        "label": "ASESORES PEDAGÓGICOS",
         "type": "number"
       },
       {
         "key": "cantidad_de_participantes_otro_personal",
-        "label": "CANTIDAD DE PARTICIPANTES OTRO PERSONAL",
+        "label": "OTRO PERSONAL",
         "type": "number"
       },
       {
         "key": "cantidad_de_alumnos_participantes_hombres",
-        "label": "CANTIDAD DE ALUMNOS PARTICIPANTES HOMBRES",
+        "label": "HOMBRES",
         "type": "number"
       },
       {
         "key": "cantidad_de_alumnos_participantes_mujeres",
-        "label": "CANTIDAD DE ALUMNOS PARTICIPANTES MUJERES",
+        "label": "MUJERES",
         "type": "number"
       },
       {
         "key": "cantidad_de_alumnos_participantes_total",
-        "label": "CANTIDAD DE ALUMNOS PARTICIPANTES TOTAL",
+        "label": "TOTAL",
         "type": "number"
       }
     ],
@@ -2490,6 +3026,44 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Carlos Nava/1.1.2.3.1 Porcentaje de estudiantes de media superior que participan en actividades de formación integral.VIAJES DE ESTUDIO.xlsx",
     "sheetName": "Table 1",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "PLANTEL",
+          "rowspan": 2
+        },
+        {
+          "label": "ESTUDIANTES",
+          "colspan": 2
+        },
+        {
+          "label": "DOCENTES",
+          "colspan": 2
+        },
+        {
+          "label": "institución educativa, otro.",
+          "rowspan": 2
+        },
+        {
+          "label": "la formación del estudiante.",
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "M"
+        },
+        {
+          "label": "H"
+        },
+        {
+          "label": "M"
+        },
+        {
+          "label": "H"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -2498,23 +3072,33 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       },
       {
         "key": "estudiantes_m",
-        "label": "ESTUDIANTES M",
+        "label": "M",
         "type": "number"
       },
       {
         "key": "estudiantes_h",
-        "label": "ESTUDIANTES H",
+        "label": "H",
         "type": "number"
       },
       {
         "key": "docentes_m",
-        "label": "DOCENTES M",
+        "label": "M",
         "type": "number"
       },
       {
         "key": "docentes_h",
-        "label": "DOCENTES H",
+        "label": "H",
         "type": "number"
+      },
+      {
+        "key": "institucion_educativa_otro",
+        "label": "institución educativa, otro.",
+        "type": "text"
+      },
+      {
+        "key": "la_formacion_del_estudiante",
+        "label": "la formación del estudiante.",
+        "type": "text"
       }
     ],
     "initialRows": [
@@ -2523,7 +3107,9 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "estudiantes_m": "",
         "estudiantes_h": "",
         "docentes_m": "",
-        "docentes_h": ""
+        "docentes_h": "",
+        "institucion_educativa_otro": "",
+        "la_formacion_del_estudiante": ""
       }
     ],
     "showTotals": true,
@@ -2534,7 +3120,9 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "estudiantes_m": "",
       "estudiantes_h": "",
       "docentes_m": "",
-      "docentes_h": ""
+      "docentes_h": "",
+      "institucion_educativa_otro": "",
+      "la_formacion_del_estudiante": ""
     },
     "footerNote": "",
     "quality": [
@@ -2553,6 +3141,50 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Daniela Navarro/1.1.2.0.1. porcentaje de retención escolar de EMS.xlsx",
     "sheetName": "Hoja1",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "Nombre de la actividad",
+          "rowspan": 3
+        },
+        {
+          "label": "Responsable",
+          "rowspan": 3
+        },
+        {
+          "label": "Cantidad de participantes",
+          "colspan": 4
+        },
+        {
+          "label": "Periodo de realización",
+          "rowspan": 3
+        }
+      ],
+      [
+        {
+          "label": "Alumnado",
+          "colspan": 2
+        },
+        {
+          "label": "Padres, madres y/o tutores",
+          "colspan": 2
+        }
+      ],
+      [
+        {
+          "label": "M"
+        },
+        {
+          "label": "H"
+        },
+        {
+          "label": "M"
+        },
+        {
+          "label": "H"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "nombre_de_la_actividad",
@@ -2566,28 +3198,28 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       },
       {
         "key": "cantidad_de_participantes_alumnado_m",
-        "label": "Cantidad de participantes Alumnado M",
+        "label": "M",
         "type": "number"
       },
       {
         "key": "cantidad_de_participantes_alumnado_h",
-        "label": "Cantidad de participantes Alumnado H",
+        "label": "H",
         "type": "number"
       },
       {
         "key": "cantidad_de_participantes_padres_madres_y_o_tuto",
-        "label": "Cantidad de participantes Padres, madres y/o tutores M",
+        "label": "M",
         "type": "number"
       },
       {
         "key": "cantidad_de_participantes_padres_madres_y_o_tuto_2",
-        "label": "Cantidad de participantes Padres, madres y/o tutores H",
+        "label": "H",
         "type": "number"
       },
       {
-        "key": "periodo_de_realizacion_padres_madres_y_o_tutores",
-        "label": "Periodo de realización Padres, madres y/o tutores H",
-        "type": "number"
+        "key": "periodo_de_realizacion",
+        "label": "Periodo de realización",
+        "type": "text"
       }
     ],
     "initialRows": [
@@ -2598,7 +3230,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "cantidad_de_participantes_alumnado_h": "",
         "cantidad_de_participantes_padres_madres_y_o_tuto": "",
         "cantidad_de_participantes_padres_madres_y_o_tuto_2": "",
-        "periodo_de_realizacion_padres_madres_y_o_tutores": ""
+        "periodo_de_realizacion": ""
       }
     ],
     "showTotals": true,
@@ -2611,7 +3243,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "cantidad_de_participantes_alumnado_h": "",
       "cantidad_de_participantes_padres_madres_y_o_tuto": "",
       "cantidad_de_participantes_padres_madres_y_o_tuto_2": "",
-      "periodo_de_realizacion_padres_madres_y_o_tutores": ""
+      "periodo_de_realizacion": ""
     },
     "footerNote": "",
     "quality": [
@@ -2630,6 +3262,59 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Oscar Mendoza/3.1.0.0.1.xlsx",
     "sheetName": "Hoja1",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "Plantel",
+          "colspan": 2,
+          "rowspan": 2
+        },
+        {
+          "label": "Nombre de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "Descripción de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "TOTAL ESTUDIANTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DOCENTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL PERSONAL ADMINISTRATIVO",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DE PARTICIPANTES",
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -2653,37 +3338,37 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       },
       {
         "key": "total_estudiantes_mujeres",
-        "label": "TOTAL ESTUDIANTES MUJERES",
+        "label": "MUJERES",
         "type": "number"
       },
       {
         "key": "total_estudiantes_hombres",
-        "label": "TOTAL ESTUDIANTES HOMBRES",
+        "label": "HOMBRES",
         "type": "number"
       },
       {
         "key": "total_docentes_mujeres",
-        "label": "TOTAL DOCENTES MUJERES",
+        "label": "MUJERES",
         "type": "number"
       },
       {
-        "key": "numero_de_personal_administrativo_hombres",
-        "label": "NÚMERO DE PERSONAL ADMINISTRATIVO HOMBRES",
+        "key": "total_docentes_hombres",
+        "label": "HOMBRES",
         "type": "number"
       },
       {
         "key": "total_personal_administrativo_mujeres",
-        "label": "TOTAL PERSONAL ADMINISTRATIVO MUJERES",
+        "label": "MUJERES",
         "type": "number"
       },
       {
         "key": "total_personal_administrativo_hombres",
-        "label": "TOTAL PERSONAL ADMINISTRATIVO HOMBRES",
+        "label": "HOMBRES",
         "type": "number"
       },
       {
-        "key": "total_de_participantes_hombres",
-        "label": "TOTAL DE PARTICIPANTES HOMBRES",
+        "key": "total_de_participantes",
+        "label": "TOTAL DE PARTICIPANTES",
         "type": "number"
       }
     ],
@@ -2696,10 +3381,10 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "total_estudiantes_mujeres": "",
         "total_estudiantes_hombres": "",
         "total_docentes_mujeres": "",
-        "numero_de_personal_administrativo_hombres": "",
+        "total_docentes_hombres": "",
         "total_personal_administrativo_mujeres": "",
         "total_personal_administrativo_hombres": "",
-        "total_de_participantes_hombres": ""
+        "total_de_participantes": ""
       }
     ],
     "showTotals": true,
@@ -2713,10 +3398,10 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "total_estudiantes_mujeres": "",
       "total_estudiantes_hombres": "",
       "total_docentes_mujeres": "",
-      "numero_de_personal_administrativo_hombres": "",
+      "total_docentes_hombres": "",
       "total_personal_administrativo_mujeres": "",
       "total_personal_administrativo_hombres": "",
-      "total_de_participantes_hombres": ""
+      "total_de_participantes": ""
     },
     "footerNote": "",
     "quality": [
@@ -2734,6 +3419,55 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Carlos Nava/1.1.2.1.4 Porcentaje de estudiantes de educación media superior y superior atendidos en los servicios de salud integral..xlsx",
     "sheetName": "Table 1",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "Plantel",
+          "rowspan": 2
+        },
+        {
+          "label": "Nota: anotar solo la actividad desarrollada. Unidades de salud integral",
+          "colspan": 3
+        },
+        {
+          "label": "Febrero– Agosto 2026",
+          "colspan": 3
+        },
+        {
+          "label": "Agosto- Enero 2027",
+          "colspan": 3
+        }
+      ],
+      [
+        {
+          "label": "SERVICIOS MEDICOS"
+        },
+        {
+          "label": "DGDI"
+        },
+        {
+          "label": "CUAP"
+        },
+        {
+          "label": "M"
+        },
+        {
+          "label": "H"
+        },
+        {
+          "label": "T"
+        },
+        {
+          "label": "M"
+        },
+        {
+          "label": "H"
+        },
+        {
+          "label": "T"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -2742,47 +3476,47 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       },
       {
         "key": "nota_anotar_solo_la_actividad_desarrollada_unida",
-        "label": "Nota: anotar solo la actividad desarrollada. Unidades de salud integral SERVICIOS MEDICOS",
+        "label": "SERVICIOS MEDICOS",
         "type": "text"
       },
       {
         "key": "nota_anotar_solo_la_actividad_desarrollada_unida_2",
-        "label": "Nota: anotar solo la actividad desarrollada. Unidades de salud integral DGDI",
+        "label": "DGDI",
         "type": "text"
       },
       {
         "key": "nota_anotar_solo_la_actividad_desarrollada_unida_3",
-        "label": "Nota: anotar solo la actividad desarrollada. Unidades de salud integral CUAP",
+        "label": "CUAP",
         "type": "text"
       },
       {
         "key": "febrero_agosto_2026_m",
-        "label": "Febrero– Agosto 2026 M",
+        "label": "M",
         "type": "number"
       },
       {
         "key": "febrero_agosto_2026_h",
-        "label": "Febrero– Agosto 2026 H",
+        "label": "H",
         "type": "number"
       },
       {
         "key": "febrero_agosto_2026_t",
-        "label": "Febrero– Agosto 2026 T",
+        "label": "T",
         "type": "number"
       },
       {
         "key": "agosto_enero_2027_m",
-        "label": "Agosto- Enero 2027 M",
+        "label": "M",
         "type": "number"
       },
       {
         "key": "agosto_enero_2027_h",
-        "label": "Agosto- Enero 2027 H",
+        "label": "H",
         "type": "number"
       },
       {
         "key": "agosto_enero_2027_t",
-        "label": "Agosto- Enero 2027 T",
+        "label": "T",
         "type": "number"
       }
     ],
@@ -2831,6 +3565,59 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Oscar Mendoza/1.1.2.3.1.xlsx",
     "sheetName": "Hoja1",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "Plantel",
+          "colspan": 2,
+          "rowspan": 2
+        },
+        {
+          "label": "Nombre de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "Descripción de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "TOTAL ESTUDIANTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DOCENTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL PERSONAL ADMINISTRATIVO",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DE PARTICIPANTES",
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -2854,37 +3641,37 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       },
       {
         "key": "total_estudiantes_mujeres",
-        "label": "TOTAL ESTUDIANTES MUJERES",
+        "label": "MUJERES",
         "type": "number"
       },
       {
         "key": "total_estudiantes_hombres",
-        "label": "TOTAL ESTUDIANTES HOMBRES",
+        "label": "HOMBRES",
         "type": "number"
       },
       {
         "key": "total_docentes_mujeres",
-        "label": "TOTAL DOCENTES MUJERES",
+        "label": "MUJERES",
         "type": "number"
       },
       {
-        "key": "numero_de_personal_administrativo_hombres",
-        "label": "NÚMERO DE PERSONAL ADMINISTRATIVO HOMBRES",
+        "key": "total_docentes_hombres",
+        "label": "HOMBRES",
         "type": "number"
       },
       {
         "key": "total_personal_administrativo_mujeres",
-        "label": "TOTAL PERSONAL ADMINISTRATIVO MUJERES",
+        "label": "MUJERES",
         "type": "number"
       },
       {
         "key": "total_personal_administrativo_hombres",
-        "label": "TOTAL PERSONAL ADMINISTRATIVO HOMBRES",
+        "label": "HOMBRES",
         "type": "number"
       },
       {
-        "key": "total_de_participantes_hombres",
-        "label": "TOTAL DE PARTICIPANTES HOMBRES",
+        "key": "total_de_participantes",
+        "label": "TOTAL DE PARTICIPANTES",
         "type": "number"
       }
     ],
@@ -2897,10 +3684,10 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "total_estudiantes_mujeres": "",
         "total_estudiantes_hombres": "",
         "total_docentes_mujeres": "",
-        "numero_de_personal_administrativo_hombres": "",
+        "total_docentes_hombres": "",
         "total_personal_administrativo_mujeres": "",
         "total_personal_administrativo_hombres": "",
-        "total_de_participantes_hombres": ""
+        "total_de_participantes": ""
       }
     ],
     "showTotals": true,
@@ -2914,10 +3701,10 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "total_estudiantes_mujeres": "",
       "total_estudiantes_hombres": "",
       "total_docentes_mujeres": "",
-      "numero_de_personal_administrativo_hombres": "",
+      "total_docentes_hombres": "",
       "total_personal_administrativo_mujeres": "",
       "total_personal_administrativo_hombres": "",
-      "total_de_participantes_hombres": ""
+      "total_de_participantes": ""
     },
     "footerNote": "",
     "quality": [
@@ -2936,6 +3723,22 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Adriana Ruiz/formatos/Opción de llenado Seguimiento de PTC.xlsx",
     "sheetName": "PTC",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "PLANTEL"
+        },
+        {
+          "label": "No. PTC"
+        },
+        {
+          "label": "NOMBRE DEL DOCENTE"
+        },
+        {
+          "label": "NIVEL"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -2991,6 +3794,37 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Ariadna Zuñiga/2.1.4.1.2 Seguimiento a proyectos de investigación en planteles.xlsx",
     "sheetName": "2.1.4.1.2",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "PLANTEL",
+          "colspan": 2,
+          "rowspan": 2
+        },
+        {
+          "label": "Nombre de /los proyectos de investigación",
+          "colspan": 6,
+          "rowspan": 2
+        },
+        {
+          "label": "Número de estudiantes",
+          "colspan": 2
+        },
+        {
+          "label": "Observaciones (indicar el periodo del proyecto)",
+          "colspan": 3,
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Hombres"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -3034,18 +3868,28 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       },
       {
         "key": "numero_de_estudiantes_mujeres",
-        "label": "Número de estudiantes Mujeres",
+        "label": "Mujeres",
         "type": "number"
       },
       {
         "key": "numero_de_estudiantes_hombres",
-        "label": "Número de estudiantes Hombres",
+        "label": "Hombres",
         "type": "number"
       },
       {
-        "key": "observaciones_indicar_el_periodo_del_proyecto_ho",
-        "label": "Observaciones (indicar el periodo del proyecto) Hombres",
-        "type": "number"
+        "key": "observaciones_indicar_el_periodo_del_proyecto",
+        "label": "Observaciones (indicar el periodo del proyecto)",
+        "type": "text"
+      },
+      {
+        "key": "observaciones_indicar_el_periodo_del_proyecto_2",
+        "label": "Observaciones (indicar el periodo del proyecto)",
+        "type": "text"
+      },
+      {
+        "key": "observaciones_indicar_el_periodo_del_proyecto_3",
+        "label": "Observaciones (indicar el periodo del proyecto)",
+        "type": "text"
       }
     ],
     "initialRows": [
@@ -3060,7 +3904,9 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "nombre_de_los_proyectos_de_investigacion_6": "",
         "numero_de_estudiantes_mujeres": "",
         "numero_de_estudiantes_hombres": "",
-        "observaciones_indicar_el_periodo_del_proyecto_ho": ""
+        "observaciones_indicar_el_periodo_del_proyecto": "",
+        "observaciones_indicar_el_periodo_del_proyecto_2": "",
+        "observaciones_indicar_el_periodo_del_proyecto_3": ""
       }
     ],
     "showTotals": true,
@@ -3077,7 +3923,9 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "nombre_de_los_proyectos_de_investigacion_6": "",
       "numero_de_estudiantes_mujeres": "",
       "numero_de_estudiantes_hombres": "",
-      "observaciones_indicar_el_periodo_del_proyecto_ho": ""
+      "observaciones_indicar_el_periodo_del_proyecto": "",
+      "observaciones_indicar_el_periodo_del_proyecto_2": "",
+      "observaciones_indicar_el_periodo_del_proyecto_3": ""
     },
     "footerNote": "",
     "quality": [
@@ -3095,6 +3943,22 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Adriana Ruiz/1.1.2.5.3 Seguimiento de PTC.xlsx",
     "sheetName": "PTC",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "PLANTEL"
+        },
+        {
+          "label": "PTC"
+        },
+        {
+          "label": "NOMBRE DEL DOCENTE"
+        },
+        {
+          "label": "NIVEL"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -3151,6 +4015,55 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Ariadna Zuñiga/1.1.2.2.11 Seguimiento capacitación en materia de género planteles.xlsx",
     "sheetName": "1.1.2.2.11",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "Plantel",
+          "colspan": 2,
+          "rowspan": 2
+        },
+        {
+          "label": "Nombre de la capacitación y /o actividades formativas",
+          "rowspan": 2
+        },
+        {
+          "label": "TOTAL ESTUDIANTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DOCENTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL PERSONAL ADMINISTRATIVO",
+          "colspan": 2
+        },
+        {
+          "label": "TEMAS QUE SE ABORDARON",
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -3169,38 +4082,38 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       },
       {
         "key": "total_estudiantes_mujeres",
-        "label": "TOTAL ESTUDIANTES MUJERES",
+        "label": "MUJERES",
         "type": "number"
       },
       {
         "key": "total_estudiantes_hombres",
-        "label": "TOTAL ESTUDIANTES HOMBRES",
+        "label": "HOMBRES",
         "type": "number"
       },
       {
         "key": "total_docentes_mujeres",
-        "label": "TOTAL DOCENTES MUJERES",
+        "label": "MUJERES",
         "type": "number"
       },
       {
-        "key": "numero_de_personal_administrativo_hombres",
-        "label": "NÚMERO DE PERSONAL ADMINISTRATIVO HOMBRES",
+        "key": "total_docentes_hombres",
+        "label": "HOMBRES",
         "type": "number"
       },
       {
         "key": "total_personal_administrativo_mujeres",
-        "label": "TOTAL PERSONAL ADMINISTRATIVO MUJERES",
+        "label": "MUJERES",
         "type": "number"
       },
       {
         "key": "total_personal_administrativo_hombres",
-        "label": "TOTAL PERSONAL ADMINISTRATIVO HOMBRES",
+        "label": "HOMBRES",
         "type": "number"
       },
       {
-        "key": "temas_que_se_abordaron_hombres",
-        "label": "TEMAS QUE SE ABORDARON HOMBRES",
-        "type": "number"
+        "key": "temas_que_se_abordaron",
+        "label": "TEMAS QUE SE ABORDARON",
+        "type": "text"
       }
     ],
     "initialRows": [
@@ -3211,10 +4124,10 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "total_estudiantes_mujeres": "",
         "total_estudiantes_hombres": "",
         "total_docentes_mujeres": "",
-        "numero_de_personal_administrativo_hombres": "",
+        "total_docentes_hombres": "",
         "total_personal_administrativo_mujeres": "",
         "total_personal_administrativo_hombres": "",
-        "temas_que_se_abordaron_hombres": ""
+        "temas_que_se_abordaron": ""
       }
     ],
     "showTotals": true,
@@ -3227,10 +4140,10 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "total_estudiantes_mujeres": "",
       "total_estudiantes_hombres": "",
       "total_docentes_mujeres": "",
-      "numero_de_personal_administrativo_hombres": "",
+      "total_docentes_hombres": "",
       "total_personal_administrativo_mujeres": "",
       "total_personal_administrativo_hombres": "",
-      "temas_que_se_abordaron_hombres": ""
+      "temas_que_se_abordaron": ""
     },
     "footerNote": "",
     "quality": [
@@ -3248,6 +4161,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Laura Calvario - solo responsable/1.1.2.5.10 - Porcentaje de docentes de educación media superior y superior certificados en el dominio de una Lengua Extranjera.xlsx",
     "sheetName": "Hoja1",
     "groups": [],
+    "headerRows": [],
     "columns": [
       {
         "key": "agosto_2025_enero_2026_m",
@@ -3338,6 +4252,86 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Marcial Aviña/NIVELACION ACADEMICA_ agosto 2025_ENERO2026 (1).xlsx",
     "sheetName": "ORDINARIO",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "PLANTEL",
+          "rowspan": 2
+        },
+        {
+          "label": "GRADO",
+          "rowspan": 2
+        },
+        {
+          "label": "MATRICULA",
+          "colspan": 3
+        },
+        {
+          "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar)",
+          "colspan": 8
+        },
+        {
+          "label": "No. ASIGNATURAS CON ALUMNOS EN ORDINARIO",
+          "rowspan": 2
+        },
+        {
+          "label": "No.ASIGNATURAS QUE DIERON NIVELACIÓN ACADÉMICA",
+          "rowspan": 2
+        },
+        {
+          "label": "CANTIDAD ESTUDIANTES QUE ASISTIERON",
+          "colspan": 3
+        },
+        {
+          "label": "% ATENCIÓN",
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "H"
+        },
+        {
+          "label": "M"
+        },
+        {
+          "label": "T"
+        },
+        {
+          "label": "A"
+        },
+        {
+          "label": "B"
+        },
+        {
+          "label": "C"
+        },
+        {
+          "label": "D"
+        },
+        {
+          "label": "E"
+        },
+        {
+          "label": "F"
+        },
+        {
+          "label": "G"
+        },
+        {
+          "label": "H"
+        },
+        {
+          "label": "H"
+        },
+        {
+          "label": "M"
+        },
+        {
+          "label": "T"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -3351,88 +4345,88 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       },
       {
         "key": "matricula_h",
-        "label": "MATRICULA H",
+        "label": "H",
         "type": "number"
       },
       {
         "key": "matricula_m",
-        "label": "MATRICULA M",
+        "label": "M",
         "type": "number"
       },
       {
         "key": "matricula_t",
-        "label": "MATRICULA T",
+        "label": "T",
         "type": "number"
       },
       {
         "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi",
-        "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) A",
+        "label": "A",
         "type": "number"
       },
       {
         "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_2",
-        "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) B",
+        "label": "B",
         "type": "number"
       },
       {
         "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_3",
-        "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) C",
+        "label": "C",
         "type": "number"
       },
       {
         "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_4",
-        "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) D",
+        "label": "D",
         "type": "number"
       },
       {
         "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_5",
-        "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) E",
+        "label": "E",
         "type": "number"
       },
       {
         "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_6",
-        "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) F",
+        "label": "F",
         "type": "number"
       },
       {
         "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_7",
-        "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) G",
+        "label": "G",
         "type": "number"
       },
       {
         "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_8",
-        "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) H",
+        "label": "H",
         "type": "number"
       },
       {
-        "key": "no_asignaturas_con_alumnos_en_ordinario_h",
-        "label": "No. ASIGNATURAS CON ALUMNOS EN ORDINARIO H",
+        "key": "no_asignaturas_con_alumnos_en_ordinario",
+        "label": "No. ASIGNATURAS CON ALUMNOS EN ORDINARIO",
         "type": "number"
       },
       {
-        "key": "no_asignaturas_que_dieron_nivelacion_academica_h",
-        "label": "No.ASIGNATURAS QUE DIERON NIVELACIÓN ACADÉMICA H",
-        "type": "number"
+        "key": "no_asignaturas_que_dieron_nivelacion_academica",
+        "label": "No.ASIGNATURAS QUE DIERON NIVELACIÓN ACADÉMICA",
+        "type": "text"
       },
       {
         "key": "cantidad_estudiantes_que_asistieron_h",
-        "label": "CANTIDAD ESTUDIANTES QUE ASISTIERON H",
+        "label": "H",
         "type": "number"
       },
       {
         "key": "cantidad_estudiantes_que_asistieron_m",
-        "label": "CANTIDAD ESTUDIANTES QUE ASISTIERON M",
+        "label": "M",
         "type": "number"
       },
       {
         "key": "cantidad_estudiantes_que_asistieron_t",
-        "label": "CANTIDAD ESTUDIANTES QUE ASISTIERON T",
+        "label": "T",
         "type": "number"
       },
       {
-        "key": "atencion_t",
-        "label": "% ATENCIÓN T",
-        "type": "number"
+        "key": "atencion",
+        "label": "% ATENCIÓN",
+        "type": "text"
       }
     ],
     "initialRows": [
@@ -3450,12 +4444,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
         "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
         "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-        "no_asignaturas_con_alumnos_en_ordinario_h": "",
-        "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "",
         "cantidad_estudiantes_que_asistieron_h": 0.0,
         "cantidad_estudiantes_que_asistieron_m": 0.0,
         "cantidad_estudiantes_que_asistieron_t": "",
-        "atencion_t": ""
+        "atencion": "=(R9*100)/E9"
       },
       {
         "plantel": "",
@@ -3471,12 +4465,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
         "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
         "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-        "no_asignaturas_con_alumnos_en_ordinario_h": "",
-        "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "",
         "cantidad_estudiantes_que_asistieron_h": 0.0,
         "cantidad_estudiantes_que_asistieron_m": 0.0,
         "cantidad_estudiantes_que_asistieron_t": "",
-        "atencion_t": ""
+        "atencion": "=(R10*100)/E10"
       },
       {
         "plantel": "",
@@ -3492,12 +4486,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
         "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
         "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-        "no_asignaturas_con_alumnos_en_ordinario_h": "",
-        "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "",
         "cantidad_estudiantes_que_asistieron_h": 0.0,
         "cantidad_estudiantes_que_asistieron_m": 0.0,
         "cantidad_estudiantes_que_asistieron_t": "",
-        "atencion_t": ""
+        "atencion": "=(R11*100)/E11"
       },
       {
         "plantel": "SEMIESCOLARIZADO",
@@ -3513,12 +4507,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
         "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
         "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-        "no_asignaturas_con_alumnos_en_ordinario_h": "",
-        "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "",
         "cantidad_estudiantes_que_asistieron_h": "",
         "cantidad_estudiantes_que_asistieron_m": "",
         "cantidad_estudiantes_que_asistieron_t": "",
-        "atencion_t": ""
+        "atencion": ""
       },
       {
         "plantel": "PLANTEL",
@@ -3534,12 +4528,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
         "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
         "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-        "no_asignaturas_con_alumnos_en_ordinario_h": "",
-        "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "No.ASIGNATURAS QUE DIERON NIVELACIÓN ACADÉMICA",
         "cantidad_estudiantes_que_asistieron_h": "",
         "cantidad_estudiantes_que_asistieron_m": "",
         "cantidad_estudiantes_que_asistieron_t": "",
-        "atencion_t": ""
+        "atencion": "% ATENCIÓN"
       },
       {
         "plantel": "",
@@ -3555,12 +4549,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
         "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
         "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-        "no_asignaturas_con_alumnos_en_ordinario_h": "",
-        "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "",
         "cantidad_estudiantes_que_asistieron_h": 0.0,
         "cantidad_estudiantes_que_asistieron_m": 0.0,
         "cantidad_estudiantes_que_asistieron_t": "",
-        "atencion_t": ""
+        "atencion": "=(R16*100)/E16"
       },
       {
         "plantel": "",
@@ -3576,12 +4570,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
         "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
         "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-        "no_asignaturas_con_alumnos_en_ordinario_h": "",
-        "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "",
         "cantidad_estudiantes_que_asistieron_h": 0.0,
         "cantidad_estudiantes_que_asistieron_m": 0.0,
         "cantidad_estudiantes_que_asistieron_t": "",
-        "atencion_t": ""
+        "atencion": "=(R17*100)/E17"
       }
     ],
     "showTotals": true,
@@ -3601,12 +4595,12 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
       "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
       "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-      "no_asignaturas_con_alumnos_en_ordinario_h": "",
-      "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+      "no_asignaturas_con_alumnos_en_ordinario": "",
+      "no_asignaturas_que_dieron_nivelacion_academica": "",
       "cantidad_estudiantes_que_asistieron_h": "",
       "cantidad_estudiantes_que_asistieron_m": "",
       "cantidad_estudiantes_que_asistieron_t": "",
-      "atencion_t": ""
+      "atencion": ""
     },
     "footerNote": "",
     "quality": [
@@ -3624,6 +4618,59 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Oscar Mendoza/1.1.2.2.10.xlsx",
     "sheetName": "1.1.2.2.10",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "Plantel",
+          "colspan": 2,
+          "rowspan": 2
+        },
+        {
+          "label": "Nombre de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "Descripción de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "TOTAL ESTUDIANTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DOCENTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL PERSONAL ADMINISTRATIVO",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DE PARTICIPANTES",
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -3647,37 +4694,37 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       },
       {
         "key": "total_estudiantes_mujeres",
-        "label": "TOTAL ESTUDIANTES MUJERES",
+        "label": "MUJERES",
         "type": "number"
       },
       {
         "key": "total_estudiantes_hombres",
-        "label": "TOTAL ESTUDIANTES HOMBRES",
+        "label": "HOMBRES",
         "type": "number"
       },
       {
         "key": "total_docentes_mujeres",
-        "label": "TOTAL DOCENTES MUJERES",
+        "label": "MUJERES",
         "type": "number"
       },
       {
-        "key": "numero_de_personal_administrativo_hombres",
-        "label": "NÚMERO DE PERSONAL ADMINISTRATIVO HOMBRES",
+        "key": "total_docentes_hombres",
+        "label": "HOMBRES",
         "type": "number"
       },
       {
         "key": "total_personal_administrativo_mujeres",
-        "label": "TOTAL PERSONAL ADMINISTRATIVO MUJERES",
+        "label": "MUJERES",
         "type": "number"
       },
       {
         "key": "total_personal_administrativo_hombres",
-        "label": "TOTAL PERSONAL ADMINISTRATIVO HOMBRES",
+        "label": "HOMBRES",
         "type": "number"
       },
       {
-        "key": "total_de_participantes_hombres",
-        "label": "TOTAL DE PARTICIPANTES HOMBRES",
+        "key": "total_de_participantes",
+        "label": "TOTAL DE PARTICIPANTES",
         "type": "number"
       }
     ],
@@ -3690,10 +4737,10 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "total_estudiantes_mujeres": "",
         "total_estudiantes_hombres": "",
         "total_docentes_mujeres": "",
-        "numero_de_personal_administrativo_hombres": "",
+        "total_docentes_hombres": "",
         "total_personal_administrativo_mujeres": "",
         "total_personal_administrativo_hombres": "",
-        "total_de_participantes_hombres": ""
+        "total_de_participantes": ""
       }
     ],
     "showTotals": true,
@@ -3707,10 +4754,10 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "total_estudiantes_mujeres": "",
       "total_estudiantes_hombres": "",
       "total_docentes_mujeres": "",
-      "numero_de_personal_administrativo_hombres": "",
+      "total_docentes_hombres": "",
       "total_personal_administrativo_mujeres": "",
       "total_personal_administrativo_hombres": "",
-      "total_de_participantes_hombres": ""
+      "total_de_participantes": ""
     },
     "footerNote": "",
     "quality": [
@@ -3728,6 +4775,42 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Daniela Navarro/1.1.2.3.1. Modelo de las Naciones Unidas.xlsx",
     "sheetName": "Hoja1",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "PLANTEL",
+          "rowspan": 2
+        },
+        {
+          "label": "NOMBRE DEL ALUMNADO PARTICIPANTE",
+          "rowspan": 2
+        },
+        {
+          "label": "NÚMERO DE CUENTA",
+          "rowspan": 2
+        },
+        {
+          "label": "NOMBRE DEL PROFESORADO ACOMPAÑANTE",
+          "rowspan": 2
+        },
+        {
+          "label": "Columna 5",
+          "rowspan": 2
+        },
+        {
+          "label": "CANTIDAD DE ALUMNOS PARTICIPANTES",
+          "colspan": 2
+        }
+      ],
+      [
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -3750,18 +4833,18 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "type": "text"
       },
       {
-        "key": "nombre_del_profesorado_acompanante_2",
-        "label": "NOMBRE DEL PROFESORADO ACOMPAÑANTE",
+        "key": "columna_5",
+        "label": "Columna 5",
         "type": "text"
       },
       {
         "key": "cantidad_de_alumnos_participantes_hombres",
-        "label": "CANTIDAD DE ALUMNOS PARTICIPANTES HOMBRES",
+        "label": "HOMBRES",
         "type": "number"
       },
       {
         "key": "cantidad_de_alumnos_participantes_mujeres",
-        "label": "CANTIDAD DE ALUMNOS PARTICIPANTES MUJERES",
+        "label": "MUJERES",
         "type": "number"
       }
     ],
@@ -3771,7 +4854,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "nombre_del_alumnado_participante": "",
         "numero_de_cuenta": "",
         "nombre_del_profesorado_acompanante": "",
-        "nombre_del_profesorado_acompanante_2": "",
+        "columna_5": "",
         "cantidad_de_alumnos_participantes_hombres": "",
         "cantidad_de_alumnos_participantes_mujeres": ""
       }
@@ -3784,7 +4867,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "nombre_del_alumnado_participante": "",
       "numero_de_cuenta": "",
       "nombre_del_profesorado_acompanante": "",
-      "nombre_del_profesorado_acompanante_2": "",
+      "columna_5": "",
       "cantidad_de_alumnos_participantes_hombres": "",
       "cantidad_de_alumnos_participantes_mujeres": ""
     },
@@ -3805,6 +4888,53 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Oscar Delgado/Formación_docente_2026.xlsx",
     "sheetName": "DOCENTES",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "No.",
+          "rowspan": 2
+        },
+        {
+          "label": "Tipo de evento",
+          "rowspan": 2
+        },
+        {
+          "label": "Nombre del evento",
+          "rowspan": 2
+        },
+        {
+          "label": "Duración en horas",
+          "rowspan": 2
+        },
+        {
+          "label": "Modalidad",
+          "rowspan": 2
+        },
+        {
+          "label": "Competencias desarrolladas",
+          "rowspan": 2
+        },
+        {
+          "label": "Evento organizado por:",
+          "rowspan": 2
+        },
+        {
+          "label": "Población docente NMS",
+          "colspan": 3
+        }
+      ],
+      [
+        {
+          "label": "H"
+        },
+        {
+          "label": "M"
+        },
+        {
+          "label": "Total"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "no",
@@ -3843,17 +4973,17 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       },
       {
         "key": "poblacion_docente_nms_h",
-        "label": "Población docente NMS H",
+        "label": "H",
         "type": "number"
       },
       {
         "key": "poblacion_docente_nms_m",
-        "label": "Población docente NMS M",
+        "label": "M",
         "type": "number"
       },
       {
         "key": "poblacion_docente_nms_total",
-        "label": "Población docente NMS Total",
+        "label": "Total",
         "type": "number"
       }
     ],
@@ -3938,6 +5068,59 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Oscar Mendoza/3.1.1.3.6.xlsx",
     "sheetName": "Hoja1",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "Plantel",
+          "colspan": 2,
+          "rowspan": 2
+        },
+        {
+          "label": "Nombre de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "Descripción de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "TOTAL ESTUDIANTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DOCENTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL PERSONAL ADMINISTRATIVO",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DE PARTICIPANTES",
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -3961,37 +5144,37 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       },
       {
         "key": "total_estudiantes_mujeres",
-        "label": "TOTAL ESTUDIANTES MUJERES",
+        "label": "MUJERES",
         "type": "number"
       },
       {
         "key": "total_estudiantes_hombres",
-        "label": "TOTAL ESTUDIANTES HOMBRES",
+        "label": "HOMBRES",
         "type": "number"
       },
       {
         "key": "total_docentes_mujeres",
-        "label": "TOTAL DOCENTES MUJERES",
+        "label": "MUJERES",
         "type": "number"
       },
       {
-        "key": "numero_de_personal_administrativo_hombres",
-        "label": "NÚMERO DE PERSONAL ADMINISTRATIVO HOMBRES",
+        "key": "total_docentes_hombres",
+        "label": "HOMBRES",
         "type": "number"
       },
       {
         "key": "total_personal_administrativo_mujeres",
-        "label": "TOTAL PERSONAL ADMINISTRATIVO MUJERES",
+        "label": "MUJERES",
         "type": "number"
       },
       {
         "key": "total_personal_administrativo_hombres",
-        "label": "TOTAL PERSONAL ADMINISTRATIVO HOMBRES",
+        "label": "HOMBRES",
         "type": "number"
       },
       {
-        "key": "total_de_participantes_hombres",
-        "label": "TOTAL DE PARTICIPANTES HOMBRES",
+        "key": "total_de_participantes",
+        "label": "TOTAL DE PARTICIPANTES",
         "type": "number"
       }
     ],
@@ -4004,10 +5187,10 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "total_estudiantes_mujeres": "",
         "total_estudiantes_hombres": "",
         "total_docentes_mujeres": "",
-        "numero_de_personal_administrativo_hombres": "",
+        "total_docentes_hombres": "",
         "total_personal_administrativo_mujeres": "",
         "total_personal_administrativo_hombres": "",
-        "total_de_participantes_hombres": ""
+        "total_de_participantes": ""
       }
     ],
     "showTotals": true,
@@ -4021,10 +5204,10 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "total_estudiantes_mujeres": "",
       "total_estudiantes_hombres": "",
       "total_docentes_mujeres": "",
-      "numero_de_personal_administrativo_hombres": "",
+      "total_docentes_hombres": "",
       "total_personal_administrativo_mujeres": "",
       "total_personal_administrativo_hombres": "",
-      "total_de_participantes_hombres": ""
+      "total_de_participantes": ""
     },
     "footerNote": "",
     "quality": [
@@ -4042,6 +5225,53 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Oscar Delgado/Formación_apoyo académico_2026.xlsx",
     "sheetName": "PERSONAL DE APOYO",
     "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "No.",
+          "rowspan": 2
+        },
+        {
+          "label": "Tipo de evento",
+          "rowspan": 2
+        },
+        {
+          "label": "Nombre del evento",
+          "rowspan": 2
+        },
+        {
+          "label": "Duración en horas",
+          "rowspan": 2
+        },
+        {
+          "label": "Modalidad",
+          "rowspan": 2
+        },
+        {
+          "label": "Competencias desarrolladas",
+          "rowspan": 2
+        },
+        {
+          "label": "Evento organizado por:",
+          "rowspan": 2
+        },
+        {
+          "label": "Personal de apoyo académico NMS",
+          "colspan": 3
+        }
+      ],
+      [
+        {
+          "label": "H"
+        },
+        {
+          "label": "M"
+        },
+        {
+          "label": "Total"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "no",
@@ -4080,17 +5310,17 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       },
       {
         "key": "personal_de_apoyo_academico_nms_h",
-        "label": "Personal de apoyo académico NMS H",
+        "label": "H",
         "type": "number"
       },
       {
         "key": "personal_de_apoyo_academico_nms_m",
-        "label": "Personal de apoyo académico NMS M",
+        "label": "M",
         "type": "number"
       },
       {
         "key": "personal_de_apoyo_academico_nms_total",
-        "label": "Personal de apoyo académico NMS Total",
+        "label": "Total",
         "type": "number"
       }
     ],
@@ -4211,6 +5441,57 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 8,
+          "headerRows": [
+            [
+              {
+                "label": "Delegación",
+                "rowspan": 3
+              },
+              {
+                "label": "Plantel",
+                "rowspan": 3
+              },
+              {
+                "label": "Programa Educativo",
+                "rowspan": 3
+              },
+              {
+                "label": "Egresados titulados en el año 2025",
+                "colspan": 3,
+                "rowspan": 2
+              },
+              {
+                "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas",
+                "colspan": 3,
+                "rowspan": 2
+              },
+              {
+                "label": "% de titulación por cohorte",
+                "rowspan": 3
+              }
+            ],
+            [],
+            [
+              {
+                "label": "Mujeres"
+              },
+              {
+                "label": "Hombres"
+              },
+              {
+                "label": "Total"
+              },
+              {
+                "label": "Mujeres"
+              },
+              {
+                "label": "Hombres"
+              },
+              {
+                "label": "Total"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "delegacion",
@@ -4232,44 +5513,44 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "egresados_titulados_en_el_ano_2025_mujeres",
-              "label": "Egresados titulados en el año 2025 Mujeres",
+              "label": "Mujeres",
               "type": "number",
               "private": false
             },
             {
               "key": "egresados_titulados_en_el_ano_2025_hombres",
-              "label": "Egresados titulados en el año 2025 Hombres",
+              "label": "Hombres",
               "type": "number",
               "private": false
             },
             {
               "key": "egresados_titulados_en_el_ano_2025_total",
-              "label": "Egresados titulados en el año 2025 Total",
+              "label": "Total",
               "type": "number",
               "private": false
             },
             {
               "key": "matricula_de_primer_ingreso_de_la_misma_cohorte_",
-              "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas Mujeres",
+              "label": "Mujeres",
               "type": "number",
               "private": false
             },
             {
               "key": "matricula_de_primer_ingreso_de_la_misma_cohorte__2",
-              "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas Hombres",
+              "label": "Hombres",
               "type": "number",
               "private": false
             },
             {
               "key": "matricula_de_primer_ingreso_de_la_misma_cohorte__3",
-              "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas Total",
+              "label": "Total",
               "type": "number",
               "private": false
             },
             {
-              "key": "matricula_de_primer_ingreso_de_la_misma_cohorte__4",
-              "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas % de titulación por cohorte Total",
-              "type": "number",
+              "key": "de_titulacion_por_cohorte",
+              "label": "% de titulación por cohorte",
+              "type": "text",
               "private": false
             }
           ],
@@ -4284,7 +5565,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
               "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
               "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte__4": ""
+              "de_titulacion_por_cohorte": ""
             }
           ]
         },
@@ -4314,6 +5595,25 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 8,
+          "headerRows": [
+            [
+              {
+                "label": "Delegación"
+              },
+              {
+                "label": "Plantel"
+              },
+              {
+                "label": "Programa Educativo"
+              },
+              {
+                "label": "Estrategias"
+              },
+              {
+                "label": "Acciones implementadas"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "delegacion",
@@ -4406,6 +5706,49 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 8,
+          "headerRows": [
+            [
+              {
+                "label": "Columna 1",
+                "rowspan": 2
+              },
+              {
+                "label": "Nombre de la charla",
+                "colspan": 2,
+                "rowspan": 2
+              },
+              {
+                "label": "Ponente",
+                "rowspan": 2
+              },
+              {
+                "label": "Fecha de la actividad",
+                "rowspan": 2
+              },
+              {
+                "label": "Total estudiantes asistentes",
+                "colspan": 2
+              },
+              {
+                "label": "Total docentes asistentes",
+                "colspan": 2
+              }
+            ],
+            [
+              {
+                "label": "Mujeres"
+              },
+              {
+                "label": "Hombres"
+              },
+              {
+                "label": "Mujeres"
+              },
+              {
+                "label": "Hombres"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "columna_1",
@@ -4439,25 +5782,25 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "total_estudiantes_asistentes_mujeres",
-              "label": "Total estudiantes asistentes Mujeres",
+              "label": "Mujeres",
               "type": "number",
               "private": false
             },
             {
               "key": "total_estudiantes_asistentes_hombres",
-              "label": "Total estudiantes asistentes Hombres",
+              "label": "Hombres",
               "type": "number",
               "private": false
             },
             {
               "key": "total_docentes_asistentes_mujeres",
-              "label": "Total docentes asistentes Mujeres",
+              "label": "Mujeres",
               "type": "number",
               "private": false
             },
             {
               "key": "total_docentes_asistentes_hombres",
-              "label": "Total docentes asistentes Hombres",
+              "label": "Hombres",
               "type": "number",
               "private": false
             }
@@ -4552,6 +5895,33 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 4,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL",
+                "rowspan": 2
+              },
+              {
+                "label": "ESTRATEGIAS PARA COMBATIR EL ABANDONO ESCOLAR",
+                "rowspan": 2
+              },
+              {
+                "label": "CANTIDAD DE ALUMNOS",
+                "colspan": 3
+              }
+            ],
+            [
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "TOTAL"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -4567,19 +5937,19 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "cantidad_de_alumnos_mujeres",
-              "label": "CANTIDAD DE ALUMNOS MUJERES",
+              "label": "MUJERES",
               "type": "number",
               "private": false
             },
             {
               "key": "cantidad_de_alumnos_hombres",
-              "label": "CANTIDAD DE ALUMNOS HOMBRES",
+              "label": "HOMBRES",
               "type": "number",
               "private": false
             },
             {
               "key": "cantidad_de_alumnos_total",
-              "label": "CANTIDAD DE ALUMNOS TOTAL",
+              "label": "TOTAL",
               "type": "number",
               "private": false
             }
@@ -4644,6 +6014,43 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 4,
+          "headerRows": [
+            [
+              {
+                "label": "Columna 1"
+              },
+              {
+                "label": "Dependencia / Área"
+              },
+              {
+                "label": "Responsable"
+              },
+              {
+                "label": "Actividad"
+              },
+              {
+                "label": "Descripción"
+              },
+              {
+                "label": "Fecha"
+              },
+              {
+                "label": "Estatus"
+              },
+              {
+                "label": "Total de Equipos"
+              },
+              {
+                "label": "Equipos Atendidos"
+              },
+              {
+                "label": "% de equipos atendidos"
+              },
+              {
+                "label": "Observaciones"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "columna_1",
@@ -4843,6 +6250,114 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 4,
+          "headerRows": [
+            [
+              {
+                "label": "Programa educativo",
+                "rowspan": 3
+              },
+              {
+                "label": "Matricula escolar oficializada",
+                "rowspan": 3
+              },
+              {
+                "label": "Altas vigentes",
+                "colspan": 6
+              },
+              {
+                "label": "Variación de la matrícula",
+                "rowspan": 3
+              },
+              {
+                "label": "Justificación",
+                "rowspan": 3
+              },
+              {
+                "label": "Programa educativo",
+                "rowspan": 3
+              },
+              {
+                "label": "Matricula escolar oficializada",
+                "rowspan": 3
+              },
+              {
+                "label": "Altas vigentes",
+                "colspan": 6
+              },
+              {
+                "label": "Variación de la matrícula",
+                "rowspan": 3
+              },
+              {
+                "label": "Justificación",
+                "rowspan": 3
+              }
+            ],
+            [
+              {
+                "label": "2",
+                "colspan": 2
+              },
+              {
+                "label": "4",
+                "colspan": 2
+              },
+              {
+                "label": "6",
+                "colspan": 2
+              },
+              {
+                "label": "1",
+                "colspan": 2
+              },
+              {
+                "label": "3",
+                "colspan": 2
+              },
+              {
+                "label": "5",
+                "colspan": 2
+              }
+            ],
+            [
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "programa_educativo",
@@ -4858,110 +6373,110 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "altas_vigentes_2_h",
-              "label": "Altas vigentes 2 H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
               "key": "altas_vigentes_2_m",
-              "label": "Altas vigentes 2 M",
+              "label": "M",
               "type": "number",
               "private": false
             },
             {
               "key": "altas_vigentes_4_h",
-              "label": "Altas vigentes 4 H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
               "key": "altas_vigentes_4_m",
-              "label": "Altas vigentes 4 M",
+              "label": "M",
               "type": "number",
               "private": false
             },
             {
               "key": "altas_vigentes_6_h",
-              "label": "Altas vigentes 6 H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
               "key": "altas_vigentes_6_m",
-              "label": "Altas vigentes 6 M",
+              "label": "M",
               "type": "number",
               "private": false
             },
             {
-              "key": "variacion_de_la_matricula_6_m",
-              "label": "Variación de la matrícula 6 M",
-              "type": "number",
+              "key": "variacion_de_la_matricula",
+              "label": "Variación de la matrícula",
+              "type": "text",
               "private": false
             },
             {
-              "key": "justificacion_6_m",
-              "label": "Justificación 6 M",
-              "type": "number",
+              "key": "justificacion",
+              "label": "Justificación",
+              "type": "text",
               "private": false
             },
             {
-              "key": "programa_educativo_6_m",
-              "label": "Programa educativo 6 M",
+              "key": "programa_educativo_2",
+              "label": "Programa educativo",
               "type": "readonly",
               "private": false
             },
             {
-              "key": "matricula_escolar_oficializada_6_m",
-              "label": "Matricula escolar oficializada 6 M",
-              "type": "number",
+              "key": "matricula_escolar_oficializada_2",
+              "label": "Matricula escolar oficializada",
+              "type": "text",
               "private": false
             },
             {
               "key": "altas_vigentes_1_h",
-              "label": "Altas vigentes 1 H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
               "key": "altas_vigentes_1_m",
-              "label": "Altas vigentes 1 M",
+              "label": "M",
               "type": "number",
               "private": false
             },
             {
               "key": "altas_vigentes_3_h",
-              "label": "Altas vigentes 3 H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
               "key": "altas_vigentes_3_m",
-              "label": "Altas vigentes 3 M",
+              "label": "M",
               "type": "number",
               "private": false
             },
             {
               "key": "altas_vigentes_5_h",
-              "label": "Altas vigentes 5 H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
               "key": "altas_vigentes_5_m",
-              "label": "Altas vigentes 5 M",
+              "label": "M",
               "type": "number",
               "private": false
             },
             {
-              "key": "variacion_de_la_matricula_5_m",
-              "label": "Variación de la matrícula 5 M",
-              "type": "number",
+              "key": "variacion_de_la_matricula_2",
+              "label": "Variación de la matrícula",
+              "type": "text",
               "private": false
             },
             {
-              "key": "justificacion_5_m",
-              "label": "Justificación 5 M",
-              "type": "number",
+              "key": "justificacion_2",
+              "label": "Justificación",
+              "type": "text",
               "private": false
             }
           ],
@@ -4975,18 +6490,18 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "altas_vigentes_4_m": 23.0,
               "altas_vigentes_6_h": 19.0,
               "altas_vigentes_6_m": 16.0,
-              "variacion_de_la_matricula_6_m": -6.0,
-              "justificacion_6_m": "",
-              "programa_educativo_6_m": "AP13",
-              "matricula_escolar_oficializada_6_m": 160.0,
+              "variacion_de_la_matricula": "-6",
+              "justificacion": "3 estudiantes de segundo semestre se fueron por cambio de plantel y cambio de área, 1 estudiante de cuarto semestre cambio de residencia y 2 estudiantes de sexto semestre reprobaron.",
+              "programa_educativo_2": "AP13",
+              "matricula_escolar_oficializada_2": "160",
               "altas_vigentes_1_h": 31.0,
               "altas_vigentes_1_m": 29.0,
               "altas_vigentes_3_h": 28.0,
               "altas_vigentes_3_m": 29.0,
               "altas_vigentes_5_h": 19.0,
               "altas_vigentes_5_m": 22.0,
-              "variacion_de_la_matricula_5_m": -2.0,
-              "justificacion_5_m": ""
+              "variacion_de_la_matricula_2": "-2",
+              "justificacion_2": "Hay 60 estudiantes de nuevo ingreso, 1 estudiante de tercer semestre llegó por portabilidad de estudios y 2 estudiantes de quinto semestre desertaron."
             }
           ]
         },
@@ -5036,6 +6551,58 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 4,
+          "headerRows": [
+            [
+              {
+                "label": "Escuela"
+              },
+              {
+                "label": "Semestre"
+              },
+              {
+                "label": "Programa Educativo"
+              },
+              {
+                "label": "Matr."
+              },
+              {
+                "label": "Tasa de Reprobación",
+                "colspan": 2
+              },
+              {
+                "label": "Tasa de Aprobación",
+                "colspan": 2
+              },
+              {
+                "label": "Tasa de Deserción",
+                "colspan": 2
+              },
+              {
+                "label": "Escuela"
+              },
+              {
+                "label": "Semestre"
+              },
+              {
+                "label": "Programa Educativo"
+              },
+              {
+                "label": "Matr."
+              },
+              {
+                "label": "Tasa de Reprobación",
+                "colspan": 2
+              },
+              {
+                "label": "Tasa de Aprobación",
+                "colspan": 2
+              },
+              {
+                "label": "Tasa de Deserción",
+                "colspan": 2
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "escuela",
@@ -5068,8 +6635,8 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "private": false
             },
             {
-              "key": "columna_6",
-              "label": "Columna 6",
+              "key": "tasa_de_reprobacion_2",
+              "label": "Tasa de Reprobación",
               "type": "text",
               "private": false
             },
@@ -5080,8 +6647,8 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "private": false
             },
             {
-              "key": "columna_8",
-              "label": "Columna 8",
+              "key": "tasa_de_aprobacion_2",
+              "label": "Tasa de Aprobación",
               "type": "text",
               "private": false
             },
@@ -5092,8 +6659,8 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "private": false
             },
             {
-              "key": "columna_10",
-              "label": "Columna 10",
+              "key": "tasa_de_desercion_2",
+              "label": "Tasa de Deserción",
               "type": "text",
               "private": false
             },
@@ -5122,31 +6689,37 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "private": false
             },
             {
-              "key": "tasa_de_reprobacion_2",
+              "key": "tasa_de_reprobacion_3",
               "label": "Tasa de Reprobación",
               "type": "text",
               "private": false
             },
             {
-              "key": "columna_16",
-              "label": "Columna 16",
+              "key": "tasa_de_reprobacion_4",
+              "label": "Tasa de Reprobación",
               "type": "text",
               "private": false
             },
             {
-              "key": "tasa_de_aprobacion_2",
+              "key": "tasa_de_aprobacion_3",
               "label": "Tasa de Aprobación",
               "type": "text",
               "private": false
             },
             {
-              "key": "columna_18",
-              "label": "Columna 18",
+              "key": "tasa_de_aprobacion_4",
+              "label": "Tasa de Aprobación",
               "type": "text",
               "private": false
             },
             {
-              "key": "tasa_de_desercion_2",
+              "key": "tasa_de_desercion_3",
+              "label": "Tasa de Deserción",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "tasa_de_desercion_4",
               "label": "Tasa de Deserción",
               "type": "text",
               "private": false
@@ -5159,20 +6732,21 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "programa_educativo": "",
               "matr": "",
               "tasa_de_reprobacion": "No",
-              "columna_6": "%",
+              "tasa_de_reprobacion_2": "%",
               "tasa_de_aprobacion": "No",
-              "columna_8": "%",
+              "tasa_de_aprobacion_2": "%",
               "tasa_de_desercion": "No",
-              "columna_10": "%",
+              "tasa_de_desercion_2": "%",
               "escuela_2": "",
               "semestre_2": "",
               "programa_educativo_2": "",
               "matr_2": "",
-              "tasa_de_reprobacion_2": "No",
-              "columna_16": "%",
-              "tasa_de_aprobacion_2": "No",
-              "columna_18": "%",
-              "tasa_de_desercion_2": "No"
+              "tasa_de_reprobacion_3": "No",
+              "tasa_de_reprobacion_4": "%",
+              "tasa_de_aprobacion_3": "No",
+              "tasa_de_aprobacion_4": "%",
+              "tasa_de_desercion_3": "No",
+              "tasa_de_desercion_4": "%"
             },
             {
               "escuela": "Bachillerato 1",
@@ -5180,20 +6754,21 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "programa_educativo": "Bachillerato general",
               "matr": "",
               "tasa_de_reprobacion": "",
-              "columna_6": "",
+              "tasa_de_reprobacion_2": "",
               "tasa_de_aprobacion": "",
-              "columna_8": "",
+              "tasa_de_aprobacion_2": "",
               "tasa_de_desercion": "",
-              "columna_10": "",
+              "tasa_de_desercion_2": "",
               "escuela_2": "Bachillerato 1",
               "semestre_2": "Primero",
               "programa_educativo_2": "Bachillerato general",
               "matr_2": "",
-              "tasa_de_reprobacion_2": "",
-              "columna_16": "",
-              "tasa_de_aprobacion_2": "",
-              "columna_18": "",
-              "tasa_de_desercion_2": ""
+              "tasa_de_reprobacion_3": "",
+              "tasa_de_reprobacion_4": "",
+              "tasa_de_aprobacion_3": "",
+              "tasa_de_aprobacion_4": "",
+              "tasa_de_desercion_3": "",
+              "tasa_de_desercion_4": ""
             },
             {
               "escuela": "Bachillerato 1",
@@ -5201,20 +6776,21 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "programa_educativo": "Bachillerato general",
               "matr": "",
               "tasa_de_reprobacion": "",
-              "columna_6": "",
+              "tasa_de_reprobacion_2": "",
               "tasa_de_aprobacion": "",
-              "columna_8": "",
+              "tasa_de_aprobacion_2": "",
               "tasa_de_desercion": "",
-              "columna_10": "",
+              "tasa_de_desercion_2": "",
               "escuela_2": "Bachillerato 1",
               "semestre_2": "Tercero",
               "programa_educativo_2": "Bachillerato general",
               "matr_2": "",
-              "tasa_de_reprobacion_2": "",
-              "columna_16": "",
-              "tasa_de_aprobacion_2": "",
-              "columna_18": "",
-              "tasa_de_desercion_2": ""
+              "tasa_de_reprobacion_3": "",
+              "tasa_de_reprobacion_4": "",
+              "tasa_de_aprobacion_3": "",
+              "tasa_de_aprobacion_4": "",
+              "tasa_de_desercion_3": "",
+              "tasa_de_desercion_4": ""
             },
             {
               "escuela": "Bachillerato 1",
@@ -5222,20 +6798,21 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "programa_educativo": "Bachillerato general",
               "matr": "",
               "tasa_de_reprobacion": "",
-              "columna_6": "",
+              "tasa_de_reprobacion_2": "",
               "tasa_de_aprobacion": "",
-              "columna_8": "",
+              "tasa_de_aprobacion_2": "",
               "tasa_de_desercion": "",
-              "columna_10": "",
+              "tasa_de_desercion_2": "",
               "escuela_2": "Bachillerato 1",
               "semestre_2": "Quinto",
               "programa_educativo_2": "Bachillerato general",
               "matr_2": "",
-              "tasa_de_reprobacion_2": "",
-              "columna_16": "",
-              "tasa_de_aprobacion_2": "",
-              "columna_18": "",
-              "tasa_de_desercion_2": ""
+              "tasa_de_reprobacion_3": "",
+              "tasa_de_reprobacion_4": "",
+              "tasa_de_aprobacion_3": "",
+              "tasa_de_aprobacion_4": "",
+              "tasa_de_desercion_3": "",
+              "tasa_de_desercion_4": ""
             }
           ]
         },
@@ -5292,6 +6869,63 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 4,
+          "headerRows": [
+            [
+              {
+                "label": "Semestre",
+                "rowspan": 2
+              },
+              {
+                "label": "Ago 2025-Ene 2026",
+                "colspan": 3
+              },
+              {
+                "label": "Semestre",
+                "rowspan": 2
+              },
+              {
+                "label": "Feb 2026-Ago 2026",
+                "colspan": 3
+              },
+              {
+                "label": "Semestre",
+                "rowspan": 2
+              },
+              {
+                "label": "Ago 2026-Ene 2027",
+                "colspan": 3
+              }
+            ],
+            [
+              {
+                "label": "Hombres"
+              },
+              {
+                "label": "Mujeres"
+              },
+              {
+                "label": "Total"
+              },
+              {
+                "label": "Hombres"
+              },
+              {
+                "label": "Mujeres"
+              },
+              {
+                "label": "Total"
+              },
+              {
+                "label": "Hombres"
+              },
+              {
+                "label": "Mujeres"
+              },
+              {
+                "label": "Total"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "semestre",
@@ -5301,67 +6935,67 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "ago_2025_ene_2026_hombres",
-              "label": "Ago 2025-Ene 2026 Hombres",
+              "label": "Hombres",
               "type": "number",
               "private": false
             },
             {
               "key": "ago_2025_ene_2026_mujeres",
-              "label": "Ago 2025-Ene 2026 Mujeres",
+              "label": "Mujeres",
               "type": "number",
               "private": false
             },
             {
               "key": "ago_2025_ene_2026_total",
-              "label": "Ago 2025-Ene 2026 Total",
+              "label": "Total",
               "type": "number",
               "private": false
             },
             {
-              "key": "semestre_total",
-              "label": "Semestre Total",
+              "key": "semestre_2",
+              "label": "Semestre",
               "type": "readonly",
               "private": false
             },
             {
               "key": "feb_2026_ago_2026_hombres",
-              "label": "Feb 2026-Ago 2026 Hombres",
+              "label": "Hombres",
               "type": "number",
               "private": false
             },
             {
               "key": "feb_2026_ago_2026_mujeres",
-              "label": "Feb 2026-Ago 2026 Mujeres",
+              "label": "Mujeres",
               "type": "number",
               "private": false
             },
             {
               "key": "feb_2026_ago_2026_total",
-              "label": "Feb 2026-Ago 2026 Total",
+              "label": "Total",
               "type": "number",
               "private": false
             },
             {
-              "key": "semestre_total_2",
-              "label": "Semestre Total",
+              "key": "semestre_3",
+              "label": "Semestre",
               "type": "readonly",
               "private": false
             },
             {
               "key": "ago_2026_ene_2027_hombres",
-              "label": "Ago 2026-Ene 2027 Hombres",
+              "label": "Hombres",
               "type": "number",
               "private": false
             },
             {
               "key": "ago_2026_ene_2027_mujeres",
-              "label": "Ago 2026-Ene 2027 Mujeres",
+              "label": "Mujeres",
               "type": "number",
               "private": false
             },
             {
               "key": "ago_2026_ene_2027_total",
-              "label": "Ago 2026-Ene 2027 Total",
+              "label": "Total",
               "type": "number",
               "private": false
             }
@@ -5372,11 +7006,11 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "ago_2025_ene_2026_hombres": "",
               "ago_2025_ene_2026_mujeres": "",
               "ago_2025_ene_2026_total": "",
-              "semestre_total": "Segundo",
+              "semestre_2": "Segundo",
               "feb_2026_ago_2026_hombres": "",
               "feb_2026_ago_2026_mujeres": "",
               "feb_2026_ago_2026_total": "",
-              "semestre_total_2": "Primero",
+              "semestre_3": "Primero",
               "ago_2026_ene_2027_hombres": "",
               "ago_2026_ene_2027_mujeres": "",
               "ago_2026_ene_2027_total": ""
@@ -5386,11 +7020,11 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "ago_2025_ene_2026_hombres": "",
               "ago_2025_ene_2026_mujeres": "",
               "ago_2025_ene_2026_total": "",
-              "semestre_total": "Cuarto",
+              "semestre_2": "Cuarto",
               "feb_2026_ago_2026_hombres": "",
               "feb_2026_ago_2026_mujeres": "",
               "feb_2026_ago_2026_total": "",
-              "semestre_total_2": "Tercero",
+              "semestre_3": "Tercero",
               "ago_2026_ene_2027_hombres": "",
               "ago_2026_ene_2027_mujeres": "",
               "ago_2026_ene_2027_total": ""
@@ -5400,11 +7034,11 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "ago_2025_ene_2026_hombres": "",
               "ago_2025_ene_2026_mujeres": "",
               "ago_2025_ene_2026_total": "",
-              "semestre_total": "Sexto",
+              "semestre_2": "Sexto",
               "feb_2026_ago_2026_hombres": "",
               "feb_2026_ago_2026_mujeres": "",
               "feb_2026_ago_2026_total": "",
-              "semestre_total_2": "Quinto",
+              "semestre_3": "Quinto",
               "ago_2026_ene_2027_hombres": "",
               "ago_2026_ene_2027_mujeres": "",
               "ago_2026_ene_2027_total": ""
@@ -5451,6 +7085,19 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 4,
+          "headerRows": [
+            [
+              {
+                "label": "Columna 1"
+              },
+              {
+                "label": "Nombre del Software"
+              },
+              {
+                "label": "Aspecto de la formación integral del estudiantado a la que da seguimiento"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "columna_1",
@@ -5519,6 +7166,31 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 4,
+          "headerRows": [
+            [
+              {
+                "label": "Columna 1"
+              },
+              {
+                "label": "Fecha"
+              },
+              {
+                "label": "Versión"
+              },
+              {
+                "label": "Respnsable"
+              },
+              {
+                "label": "Descripción breve del cambio"
+              },
+              {
+                "label": "Autorizo"
+              },
+              {
+                "label": "Observaciones"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "columna_1",
@@ -5629,6 +7301,63 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 9,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL",
+                "rowspan": 2
+              },
+              {
+                "label": "NOMBRE DEL PROGRAMA",
+                "rowspan": 2
+              },
+              {
+                "label": "No. DE ACADEMIAS POR PLANTEL",
+                "rowspan": 2
+              },
+              {
+                "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS",
+                "colspan": 3
+              },
+              {
+                "label": "No. DE SESIONES ORDINARIAS",
+                "rowspan": 2
+              },
+              {
+                "label": "No. SESIONES EXTRAORDINARIAS",
+                "rowspan": 2
+              },
+              {
+                "label": "ACTIVIDADES DE TRABAJO REALIZADAS (Agregar las opciones)",
+                "rowspan": 2
+              },
+              {
+                "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL",
+                "rowspan": 2
+              }
+            ],
+            [
+              {
+                "label": "A) ÁREA DE FORMACIÓN"
+              },
+              {
+                "label": "B) SEMESTRE"
+              },
+              {
+                "label": "C) CAMPO DISCIPLINAR"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -5650,55 +7379,55 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "tipo_de_integracion_de_academias_a_area_de_forma",
-              "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS A) ÁREA DE FORMACIÓN",
+              "label": "A) ÁREA DE FORMACIÓN",
               "type": "text",
               "private": false
             },
             {
               "key": "tipo_de_integracion_de_academias_b_semestre",
-              "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS B) SEMESTRE",
+              "label": "B) SEMESTRE",
               "type": "readonly",
               "private": false
             },
             {
               "key": "tipo_de_integracion_de_academias_c_campo_discipl",
-              "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS C) CAMPO DISCIPLINAR",
+              "label": "C) CAMPO DISCIPLINAR",
               "type": "text",
               "private": false
             },
             {
-              "key": "no_de_sesiones_ordinarias_c_campo_disciplinar",
-              "label": "No. DE SESIONES ORDINARIAS C) CAMPO DISCIPLINAR",
+              "key": "no_de_sesiones_ordinarias",
+              "label": "No. DE SESIONES ORDINARIAS",
               "type": "text",
               "private": false
             },
             {
-              "key": "no_sesiones_extraordinarias_c_campo_disciplinar",
-              "label": "No. SESIONES EXTRAORDINARIAS C) CAMPO DISCIPLINAR",
+              "key": "no_sesiones_extraordinarias",
+              "label": "No. SESIONES EXTRAORDINARIAS",
               "type": "text",
               "private": false
             },
             {
               "key": "actividades_de_trabajo_realizadas_agregar_las_op",
-              "label": "ACTIVIDADES DE TRABAJO REALIZADAS (Agregar las opciones) C) CAMPO DISCIPLINAR",
+              "label": "ACTIVIDADES DE TRABAJO REALIZADAS (Agregar las opciones)",
               "type": "text",
               "private": false
             },
             {
               "key": "docentes_que_participaron_en_las_academias_h",
-              "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
               "key": "docentes_que_participaron_en_las_academias_m",
-              "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS M",
+              "label": "M",
               "type": "number",
               "private": false
             },
             {
-              "key": "total_m",
-              "label": "TOTAL M",
+              "key": "total",
+              "label": "TOTAL",
               "type": "number",
               "private": false
             }
@@ -5711,12 +7440,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_a_area_de_forma": "",
               "tipo_de_integracion_de_academias_b_semestre": "",
               "tipo_de_integracion_de_academias_c_campo_discipl": "",
-              "no_de_sesiones_ordinarias_c_campo_disciplinar": "1,2,3, otro",
-              "no_sesiones_extraordinarias_c_campo_disciplinar": "1,2,3, otro",
+              "no_de_sesiones_ordinarias": "1,2,3, otro",
+              "no_sesiones_extraordinarias": "1,2,3, otro",
               "actividades_de_trabajo_realizadas_agregar_las_op": "La actividades vienen marcadas en los lineamiento de conformación y funcionamientos de las academias.",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "",
@@ -5725,12 +7454,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_a_area_de_forma": "",
               "tipo_de_integracion_de_academias_b_semestre": "",
               "tipo_de_integracion_de_academias_c_campo_discipl": "",
-              "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_agregar_las_op": "Una vez que señale las opciones, dar un espacio en cada una de ellas para que anoten en específico lo que realizó.",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "INDICACIONES PARA EL LLENADO DEL FORMATO DE CONCENTRADO DE ACADEMIAS POR PLANTEL",
@@ -5739,12 +7468,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_a_area_de_forma": "",
               "tipo_de_integracion_de_academias_b_semestre": "",
               "tipo_de_integracion_de_academias_c_campo_discipl": "",
-              "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_agregar_las_op": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "DATOS DE IDENTIFICACIÓN DE ACADEMIAS",
@@ -5753,12 +7482,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_a_area_de_forma": "",
               "tipo_de_integracion_de_academias_b_semestre": "",
               "tipo_de_integracion_de_academias_c_campo_discipl": "",
-              "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_agregar_las_op": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Periodo escolar: Señalar el periodo y año en el que se ubica la academia",
@@ -5767,12 +7496,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_a_area_de_forma": "",
               "tipo_de_integracion_de_academias_b_semestre": "",
               "tipo_de_integracion_de_academias_c_campo_discipl": "",
-              "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_agregar_las_op": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Plantel: Escribir el nombre del plantel en el cual se encuentran conformadas las academias.",
@@ -5781,12 +7510,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_a_area_de_forma": "",
               "tipo_de_integracion_de_academias_b_semestre": "",
               "tipo_de_integracion_de_academias_c_campo_discipl": "",
-              "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_agregar_las_op": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Programa educativo: Escribir el nombre del plan de estudios correspondiente.",
@@ -5795,12 +7524,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_a_area_de_forma": "",
               "tipo_de_integracion_de_academias_b_semestre": "",
               "tipo_de_integracion_de_academias_c_campo_discipl": "",
-              "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_agregar_las_op": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Tipos de integración de academias: Marcar los tipos de academias implementadas en el plantel por programa educativo.",
@@ -5809,12 +7538,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_a_area_de_forma": "",
               "tipo_de_integracion_de_academias_b_semestre": "",
               "tipo_de_integracion_de_academias_c_campo_discipl": "",
-              "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_agregar_las_op": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Sesiones ordinarias: Escribir el número de sesiones realizadas durante el semestre de manera habitual.",
@@ -5823,12 +7552,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_a_area_de_forma": "",
               "tipo_de_integracion_de_academias_b_semestre": "",
               "tipo_de_integracion_de_academias_c_campo_discipl": "",
-              "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_agregar_las_op": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Sesiones extraordinarias: Escribir el número de sesiones realizadas para asuntos especiales o urgentes.",
@@ -5837,12 +7566,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_a_area_de_forma": "",
               "tipo_de_integracion_de_academias_b_semestre": "",
               "tipo_de_integracion_de_academias_c_campo_discipl": "",
-              "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_agregar_las_op": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             }
           ]
         },
@@ -5882,6 +7611,63 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 10,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL",
+                "rowspan": 2
+              },
+              {
+                "label": "NOMBRE DEL PROGRAMA",
+                "rowspan": 2
+              },
+              {
+                "label": "No. DE ACADEMIAS POR PLANTEL",
+                "rowspan": 2
+              },
+              {
+                "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS",
+                "colspan": 3
+              },
+              {
+                "label": "No. DE SESIONES ORDINARIAS",
+                "rowspan": 2
+              },
+              {
+                "label": "No. SESIONES EXTRAORDINARIAS",
+                "rowspan": 2
+              },
+              {
+                "label": "ACTIVIDADES DE TRABAJO REALIZADAS (Agregar las opciones)",
+                "rowspan": 2
+              },
+              {
+                "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL",
+                "rowspan": 2
+              }
+            ],
+            [
+              {
+                "label": "A) ÁREA DE FORMACIÓN"
+              },
+              {
+                "label": "B) SEMESTRE"
+              },
+              {
+                "label": "C) CAMPO DISCIPLINAR"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -5903,55 +7689,55 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "tipo_de_integracion_de_academias_a_area_de_forma",
-              "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS A) ÁREA DE FORMACIÓN",
+              "label": "A) ÁREA DE FORMACIÓN",
               "type": "text",
               "private": false
             },
             {
               "key": "tipo_de_integracion_de_academias_b_semestre",
-              "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS B) SEMESTRE",
+              "label": "B) SEMESTRE",
               "type": "readonly",
               "private": false
             },
             {
               "key": "tipo_de_integracion_de_academias_c_campo_discipl",
-              "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS C) CAMPO DISCIPLINAR",
+              "label": "C) CAMPO DISCIPLINAR",
               "type": "text",
               "private": false
             },
             {
-              "key": "no_de_sesiones_ordinarias_c_campo_disciplinar",
-              "label": "No. DE SESIONES ORDINARIAS C) CAMPO DISCIPLINAR",
+              "key": "no_de_sesiones_ordinarias",
+              "label": "No. DE SESIONES ORDINARIAS",
               "type": "text",
               "private": false
             },
             {
-              "key": "no_sesiones_extraordinarias_c_campo_disciplinar",
-              "label": "No. SESIONES EXTRAORDINARIAS C) CAMPO DISCIPLINAR",
+              "key": "no_sesiones_extraordinarias",
+              "label": "No. SESIONES EXTRAORDINARIAS",
               "type": "text",
               "private": false
             },
             {
               "key": "actividades_de_trabajo_realizadas_agregar_las_op",
-              "label": "ACTIVIDADES DE TRABAJO REALIZADAS (Agregar las opciones) C) CAMPO DISCIPLINAR",
+              "label": "ACTIVIDADES DE TRABAJO REALIZADAS (Agregar las opciones)",
               "type": "text",
               "private": false
             },
             {
               "key": "docentes_que_participaron_en_las_academias_h",
-              "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
               "key": "docentes_que_participaron_en_las_academias_m",
-              "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS M",
+              "label": "M",
               "type": "number",
               "private": false
             },
             {
-              "key": "total_m",
-              "label": "TOTAL M",
+              "key": "total",
+              "label": "TOTAL",
               "type": "number",
               "private": false
             }
@@ -5964,12 +7750,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_a_area_de_forma": "",
               "tipo_de_integracion_de_academias_b_semestre": "",
               "tipo_de_integracion_de_academias_c_campo_discipl": "",
-              "no_de_sesiones_ordinarias_c_campo_disciplinar": "1,2,3, otro",
-              "no_sesiones_extraordinarias_c_campo_disciplinar": "1,2,3, otro",
+              "no_de_sesiones_ordinarias": "1,2,3, otro",
+              "no_sesiones_extraordinarias": "1,2,3, otro",
               "actividades_de_trabajo_realizadas_agregar_las_op": "La actividades vienen marcadas en los lineamiento de conformación y funcionamientos de las academias.",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "",
@@ -5978,12 +7764,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_a_area_de_forma": "",
               "tipo_de_integracion_de_academias_b_semestre": "",
               "tipo_de_integracion_de_academias_c_campo_discipl": "",
-              "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_agregar_las_op": "Una vez que señale las opciones, dar un espacio en cada una de ellas para que anoten en específico lo que realizó.",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "INDICACIONES PARA EL LLENADO DEL FORMATO DE CONCENTRADO DE ACADEMIAS POR PLANTEL",
@@ -5992,12 +7778,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_a_area_de_forma": "",
               "tipo_de_integracion_de_academias_b_semestre": "",
               "tipo_de_integracion_de_academias_c_campo_discipl": "",
-              "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_agregar_las_op": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "DATOS DE IDENTIFICACIÓN DE ACADEMIAS",
@@ -6006,12 +7792,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_a_area_de_forma": "",
               "tipo_de_integracion_de_academias_b_semestre": "",
               "tipo_de_integracion_de_academias_c_campo_discipl": "",
-              "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_agregar_las_op": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Periodo escolar: Señalar el periodo y año en el que se ubica la academia",
@@ -6020,12 +7806,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_a_area_de_forma": "",
               "tipo_de_integracion_de_academias_b_semestre": "",
               "tipo_de_integracion_de_academias_c_campo_discipl": "",
-              "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_agregar_las_op": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Plantel: Escribir el nombre del plantel en el cual se encuentran conformadas las academias.",
@@ -6034,12 +7820,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_a_area_de_forma": "",
               "tipo_de_integracion_de_academias_b_semestre": "",
               "tipo_de_integracion_de_academias_c_campo_discipl": "",
-              "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_agregar_las_op": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Programa educativo: Escribir el nombre del plan de estudios correspondiente.",
@@ -6048,12 +7834,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_a_area_de_forma": "",
               "tipo_de_integracion_de_academias_b_semestre": "",
               "tipo_de_integracion_de_academias_c_campo_discipl": "",
-              "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_agregar_las_op": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Tipos de integración de academias: Marcar los tipos de academias implementadas en el plantel por programa educativo.",
@@ -6062,12 +7848,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_a_area_de_forma": "",
               "tipo_de_integracion_de_academias_b_semestre": "",
               "tipo_de_integracion_de_academias_c_campo_discipl": "",
-              "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_agregar_las_op": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Sesiones ordinarias: Escribir el número de sesiones realizadas durante el semestre de manera habitual.",
@@ -6076,12 +7862,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_a_area_de_forma": "",
               "tipo_de_integracion_de_academias_b_semestre": "",
               "tipo_de_integracion_de_academias_c_campo_discipl": "",
-              "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_agregar_las_op": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Sesiones extraordinarias: Escribir el número de sesiones realizadas para asuntos especiales o urgentes.",
@@ -6090,12 +7876,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_a_area_de_forma": "",
               "tipo_de_integracion_de_academias_b_semestre": "",
               "tipo_de_integracion_de_academias_c_campo_discipl": "",
-              "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_agregar_las_op": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Actividades de trabajo realizadas: Rde a cuerdo a las necesidades del plantel, registrar las actividades que se realizaron durante el semestre.",
@@ -6104,12 +7890,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_a_area_de_forma": "",
               "tipo_de_integracion_de_academias_b_semestre": "",
               "tipo_de_integracion_de_academias_c_campo_discipl": "",
-              "no_de_sesiones_ordinarias_c_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_c_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_agregar_las_op": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             }
           ]
         },
@@ -6174,6 +7960,63 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 9,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL",
+                "rowspan": 2
+              },
+              {
+                "label": "NOMBRE DEL PROGRAMA",
+                "rowspan": 2
+              },
+              {
+                "label": "No. DE ACADEMIAS POR PLANTEL",
+                "rowspan": 2
+              },
+              {
+                "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS",
+                "colspan": 3
+              },
+              {
+                "label": "No. DE SESIONES ORDINARIAS",
+                "rowspan": 2
+              },
+              {
+                "label": "No. SESIONES EXTRAORDINARIAS",
+                "rowspan": 2
+              },
+              {
+                "label": "ACTIVIDADES DE TRABAJO REALIZADAS (mencionar la actividad)",
+                "rowspan": 2
+              },
+              {
+                "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL",
+                "rowspan": 2
+              }
+            ],
+            [
+              {
+                "label": "ÁREA DE FORMACIÓN"
+              },
+              {
+                "label": "SEMESTRE"
+              },
+              {
+                "label": "CAMPO DISCIPLINAR"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -6195,55 +8038,55 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "tipo_de_integracion_de_academias_area_de_formaci",
-              "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS ÁREA DE FORMACIÓN",
+              "label": "ÁREA DE FORMACIÓN",
               "type": "text",
               "private": false
             },
             {
               "key": "tipo_de_integracion_de_academias_semestre",
-              "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS SEMESTRE",
+              "label": "SEMESTRE",
               "type": "readonly",
               "private": false
             },
             {
               "key": "tipo_de_integracion_de_academias_campo_disciplin",
-              "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS CAMPO DISCIPLINAR",
+              "label": "CAMPO DISCIPLINAR",
               "type": "text",
               "private": false
             },
             {
-              "key": "no_de_sesiones_ordinarias_campo_disciplinar",
-              "label": "No. DE SESIONES ORDINARIAS CAMPO DISCIPLINAR",
+              "key": "no_de_sesiones_ordinarias",
+              "label": "No. DE SESIONES ORDINARIAS",
               "type": "text",
               "private": false
             },
             {
-              "key": "no_sesiones_extraordinarias_campo_disciplinar",
-              "label": "No. SESIONES EXTRAORDINARIAS CAMPO DISCIPLINAR",
+              "key": "no_sesiones_extraordinarias",
+              "label": "No. SESIONES EXTRAORDINARIAS",
               "type": "text",
               "private": false
             },
             {
               "key": "actividades_de_trabajo_realizadas_mencionar_la_a",
-              "label": "ACTIVIDADES DE TRABAJO REALIZADAS (mencionar la actividad) CAMPO DISCIPLINAR",
+              "label": "ACTIVIDADES DE TRABAJO REALIZADAS (mencionar la actividad)",
               "type": "text",
               "private": false
             },
             {
               "key": "docentes_que_participaron_en_las_academias_h",
-              "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
               "key": "docentes_que_participaron_en_las_academias_m",
-              "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS M",
+              "label": "M",
               "type": "number",
               "private": false
             },
             {
-              "key": "total_m",
-              "label": "TOTAL M",
+              "key": "total",
+              "label": "TOTAL",
               "type": "number",
               "private": false
             }
@@ -6256,12 +8099,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_area_de_formaci": "",
               "tipo_de_integracion_de_academias_semestre": "",
               "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_mencionar_la_a": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "DATOS DE IDENTIFICACIÓN DE ACADEMIAS",
@@ -6270,12 +8113,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_area_de_formaci": "",
               "tipo_de_integracion_de_academias_semestre": "",
               "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_mencionar_la_a": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Periodo escolar: Señalar el periodo y año en el que se ubica la academia",
@@ -6284,12 +8127,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_area_de_formaci": "",
               "tipo_de_integracion_de_academias_semestre": "",
               "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_mencionar_la_a": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Plantel: Escribir el nombre del plantel en el cual se encuentran conformadas las academias.",
@@ -6298,12 +8141,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_area_de_formaci": "",
               "tipo_de_integracion_de_academias_semestre": "",
               "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_mencionar_la_a": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Programa educativo: Escribir el nombre del plan de estudios correspondiente.",
@@ -6312,12 +8155,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_area_de_formaci": "",
               "tipo_de_integracion_de_academias_semestre": "",
               "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_mencionar_la_a": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Tipos de integración de academias: Marcar los tipos de academias implementadas en el plantel por programa educativo.",
@@ -6326,12 +8169,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_area_de_formaci": "",
               "tipo_de_integracion_de_academias_semestre": "",
               "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_mencionar_la_a": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Sesiones ordinarias: Escribir el número de sesiones realizadas durante el semestre de manera habitual.",
@@ -6340,12 +8183,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_area_de_formaci": "",
               "tipo_de_integracion_de_academias_semestre": "",
               "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_mencionar_la_a": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Sesiones extraordinarias: Escribir el número de sesiones realizadas para asuntos especiales o urgentes.",
@@ -6354,12 +8197,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_area_de_formaci": "",
               "tipo_de_integracion_de_academias_semestre": "",
               "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_mencionar_la_a": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             }
           ]
         },
@@ -6395,6 +8238,63 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 10,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL",
+                "rowspan": 2
+              },
+              {
+                "label": "NOMBRE DEL PROGRAMA",
+                "rowspan": 2
+              },
+              {
+                "label": "No. DE ACADEMIAS POR PLANTEL",
+                "rowspan": 2
+              },
+              {
+                "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS",
+                "colspan": 3
+              },
+              {
+                "label": "No. DE SESIONES ORDINARIAS",
+                "rowspan": 2
+              },
+              {
+                "label": "No. SESIONES EXTRAORDINARIAS",
+                "rowspan": 2
+              },
+              {
+                "label": "ACTIVIDADES DE TRABAJO REALIZADAS (mencionar la actividad)",
+                "rowspan": 2
+              },
+              {
+                "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL",
+                "rowspan": 2
+              }
+            ],
+            [
+              {
+                "label": "ÁREA DE FORMACIÓN"
+              },
+              {
+                "label": "SEMESTRE"
+              },
+              {
+                "label": "CAMPO DISCIPLINAR"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -6416,55 +8316,55 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "tipo_de_integracion_de_academias_area_de_formaci",
-              "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS ÁREA DE FORMACIÓN",
+              "label": "ÁREA DE FORMACIÓN",
               "type": "text",
               "private": false
             },
             {
               "key": "tipo_de_integracion_de_academias_semestre",
-              "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS SEMESTRE",
+              "label": "SEMESTRE",
               "type": "readonly",
               "private": false
             },
             {
               "key": "tipo_de_integracion_de_academias_campo_disciplin",
-              "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS CAMPO DISCIPLINAR",
+              "label": "CAMPO DISCIPLINAR",
               "type": "text",
               "private": false
             },
             {
-              "key": "no_de_sesiones_ordinarias_campo_disciplinar",
-              "label": "No. DE SESIONES ORDINARIAS CAMPO DISCIPLINAR",
+              "key": "no_de_sesiones_ordinarias",
+              "label": "No. DE SESIONES ORDINARIAS",
               "type": "text",
               "private": false
             },
             {
-              "key": "no_sesiones_extraordinarias_campo_disciplinar",
-              "label": "No. SESIONES EXTRAORDINARIAS CAMPO DISCIPLINAR",
+              "key": "no_sesiones_extraordinarias",
+              "label": "No. SESIONES EXTRAORDINARIAS",
               "type": "text",
               "private": false
             },
             {
               "key": "actividades_de_trabajo_realizadas_mencionar_la_a",
-              "label": "ACTIVIDADES DE TRABAJO REALIZADAS (mencionar la actividad) CAMPO DISCIPLINAR",
+              "label": "ACTIVIDADES DE TRABAJO REALIZADAS (mencionar la actividad)",
               "type": "text",
               "private": false
             },
             {
               "key": "docentes_que_participaron_en_las_academias_h",
-              "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
               "key": "docentes_que_participaron_en_las_academias_m",
-              "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS M",
+              "label": "M",
               "type": "number",
               "private": false
             },
             {
-              "key": "total_m",
-              "label": "TOTAL M",
+              "key": "total",
+              "label": "TOTAL",
               "type": "number",
               "private": false
             }
@@ -6477,12 +8377,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_area_de_formaci": "",
               "tipo_de_integracion_de_academias_semestre": "",
               "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_mencionar_la_a": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "DATOS DE IDENTIFICACIÓN DE ACADEMIAS",
@@ -6491,12 +8391,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_area_de_formaci": "",
               "tipo_de_integracion_de_academias_semestre": "",
               "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_mencionar_la_a": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Periodo escolar: Señalar el periodo y año en el que se ubica la academia",
@@ -6505,12 +8405,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_area_de_formaci": "",
               "tipo_de_integracion_de_academias_semestre": "",
               "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_mencionar_la_a": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Plantel: Escribir el nombre del plantel en el cual se encuentran conformadas las academias.",
@@ -6519,12 +8419,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_area_de_formaci": "",
               "tipo_de_integracion_de_academias_semestre": "",
               "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_mencionar_la_a": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Programa educativo: Escribir el nombre del plan de estudios correspondiente.",
@@ -6533,12 +8433,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_area_de_formaci": "",
               "tipo_de_integracion_de_academias_semestre": "",
               "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_mencionar_la_a": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Tipos de integración de academias: Marcar los tipos de academias implementadas en el plantel por programa educativo.",
@@ -6547,12 +8447,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_area_de_formaci": "",
               "tipo_de_integracion_de_academias_semestre": "",
               "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_mencionar_la_a": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Sesiones ordinarias: Escribir el número de sesiones realizadas durante el semestre de manera habitual.",
@@ -6561,12 +8461,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_area_de_formaci": "",
               "tipo_de_integracion_de_academias_semestre": "",
               "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_mencionar_la_a": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Sesiones extraordinarias: Escribir el número de sesiones realizadas para asuntos especiales o urgentes.",
@@ -6575,12 +8475,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_area_de_formaci": "",
               "tipo_de_integracion_de_academias_semestre": "",
               "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_mencionar_la_a": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             },
             {
               "plantel": "Actividades de trabajo realizadas: Rde a cuerdo a las necesidades del plantel, registrar las actividades que se realizaron durante el semestre.",
@@ -6589,12 +8489,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "tipo_de_integracion_de_academias_area_de_formaci": "",
               "tipo_de_integracion_de_academias_semestre": "",
               "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias_campo_disciplinar": "",
-              "no_sesiones_extraordinarias_campo_disciplinar": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
               "actividades_de_trabajo_realizadas_mencionar_la_a": "",
               "docentes_que_participaron_en_las_academias_h": "",
               "docentes_que_participaron_en_las_academias_m": "",
-              "total_m": ""
+              "total": ""
             }
           ]
         },
@@ -6671,6 +8571,57 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 8,
+          "headerRows": [
+            [
+              {
+                "label": "Delegación",
+                "rowspan": 3
+              },
+              {
+                "label": "Plantel",
+                "rowspan": 3
+              },
+              {
+                "label": "Programa Educativo",
+                "rowspan": 3
+              },
+              {
+                "label": "Egresados titulados en el año 2025",
+                "colspan": 3,
+                "rowspan": 2
+              },
+              {
+                "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas",
+                "colspan": 3,
+                "rowspan": 2
+              },
+              {
+                "label": "% de titulación por cohorte",
+                "rowspan": 3
+              }
+            ],
+            [],
+            [
+              {
+                "label": "Mujeres"
+              },
+              {
+                "label": "Hombres"
+              },
+              {
+                "label": "Total"
+              },
+              {
+                "label": "Mujeres"
+              },
+              {
+                "label": "Hombres"
+              },
+              {
+                "label": "Total"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "delegacion",
@@ -6692,44 +8643,44 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "egresados_titulados_en_el_ano_2025_mujeres",
-              "label": "Egresados titulados en el año 2025 Mujeres",
+              "label": "Mujeres",
               "type": "number",
               "private": false
             },
             {
               "key": "egresados_titulados_en_el_ano_2025_hombres",
-              "label": "Egresados titulados en el año 2025 Hombres",
+              "label": "Hombres",
               "type": "number",
               "private": false
             },
             {
               "key": "egresados_titulados_en_el_ano_2025_total",
-              "label": "Egresados titulados en el año 2025 Total",
+              "label": "Total",
               "type": "number",
               "private": false
             },
             {
               "key": "matricula_de_primer_ingreso_de_la_misma_cohorte_",
-              "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas Mujeres",
+              "label": "Mujeres",
               "type": "number",
               "private": false
             },
             {
               "key": "matricula_de_primer_ingreso_de_la_misma_cohorte__2",
-              "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas Hombres",
+              "label": "Hombres",
               "type": "number",
               "private": false
             },
             {
               "key": "matricula_de_primer_ingreso_de_la_misma_cohorte__3",
-              "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas Total",
+              "label": "Total",
               "type": "number",
               "private": false
             },
             {
-              "key": "matricula_de_primer_ingreso_de_la_misma_cohorte__4",
-              "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas % de titulación por cohorte Total",
-              "type": "number",
+              "key": "de_titulacion_por_cohorte",
+              "label": "% de titulación por cohorte",
+              "type": "text",
               "private": false
             }
           ],
@@ -6744,7 +8695,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
               "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
               "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte__4": ""
+              "de_titulacion_por_cohorte": ""
             },
             {
               "delegacion": "",
@@ -6756,7 +8707,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
               "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
               "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte__4": ""
+              "de_titulacion_por_cohorte": "Egresados titulados / Matrícula de primer ingreso*100"
             },
             {
               "delegacion": "",
@@ -6768,7 +8719,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
               "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
               "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte__4": ""
+              "de_titulacion_por_cohorte": ""
             },
             {
               "delegacion": "",
@@ -6780,7 +8731,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
               "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
               "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte__4": ""
+              "de_titulacion_por_cohorte": ""
             },
             {
               "delegacion": "",
@@ -6792,7 +8743,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
               "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
               "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte__4": ""
+              "de_titulacion_por_cohorte": ""
             },
             {
               "delegacion": "",
@@ -6804,7 +8755,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
               "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
               "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte__4": ""
+              "de_titulacion_por_cohorte": ""
             }
           ]
         },
@@ -6838,6 +8789,25 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 8,
+          "headerRows": [
+            [
+              {
+                "label": "Delegación"
+              },
+              {
+                "label": "Plantel"
+              },
+              {
+                "label": "Programa Educativo"
+              },
+              {
+                "label": "Estrategias"
+              },
+              {
+                "label": "Acciones implementadas"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "delegacion",
@@ -6965,6 +8935,52 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 4,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL",
+                "rowspan": 2
+              },
+              {
+                "label": "NOMBRE DE LA CONVOCATORIA REALIZADA",
+                "rowspan": 2
+              },
+              {
+                "label": "CANTIDAD DE PARTICIPANTES",
+                "colspan": 5
+              },
+              {
+                "label": "CANTIDAD DE ALUMNOS PARTICIPANTES",
+                "colspan": 3
+              }
+            ],
+            [
+              {
+                "label": "DOCENTES"
+              },
+              {
+                "label": "ADMINISTRATIVOS"
+              },
+              {
+                "label": "COORDINADORES ACADÉMICOS"
+              },
+              {
+                "label": "ASESORES PEDAGÓGICOS"
+              },
+              {
+                "label": "OTRO PERSONAL"
+              },
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "TOTAL"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -6980,49 +8996,49 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "cantidad_de_participantes_docentes",
-              "label": "CANTIDAD DE PARTICIPANTES DOCENTES",
+              "label": "DOCENTES",
               "type": "number",
               "private": false
             },
             {
               "key": "cantidad_de_participantes_administrativos",
-              "label": "CANTIDAD DE PARTICIPANTES ADMINISTRATIVOS",
+              "label": "ADMINISTRATIVOS",
               "type": "number",
               "private": false
             },
             {
               "key": "cantidad_de_participantes_coordinadores_academic",
-              "label": "CANTIDAD DE PARTICIPANTES COORDINADORES ACADÉMICOS",
+              "label": "COORDINADORES ACADÉMICOS",
               "type": "number",
               "private": false
             },
             {
               "key": "cantidad_de_participantes_asesores_pedagogicos",
-              "label": "CANTIDAD DE PARTICIPANTES ASESORES PEDAGÓGICOS",
+              "label": "ASESORES PEDAGÓGICOS",
               "type": "number",
               "private": false
             },
             {
               "key": "cantidad_de_participantes_otro_personal",
-              "label": "CANTIDAD DE PARTICIPANTES OTRO PERSONAL",
+              "label": "OTRO PERSONAL",
               "type": "number",
               "private": false
             },
             {
               "key": "cantidad_de_alumnos_participantes_hombres",
-              "label": "CANTIDAD DE ALUMNOS PARTICIPANTES HOMBRES",
+              "label": "HOMBRES",
               "type": "number",
               "private": false
             },
             {
               "key": "cantidad_de_alumnos_participantes_mujeres",
-              "label": "CANTIDAD DE ALUMNOS PARTICIPANTES MUJERES",
+              "label": "MUJERES",
               "type": "number",
               "private": false
             },
             {
               "key": "cantidad_de_alumnos_participantes_total",
-              "label": "CANTIDAD DE ALUMNOS PARTICIPANTES TOTAL",
+              "label": "TOTAL",
               "type": "number",
               "private": false
             }
@@ -7091,6 +9107,44 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 8,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL",
+                "rowspan": 2
+              },
+              {
+                "label": "ESTUDIANTES",
+                "colspan": 2
+              },
+              {
+                "label": "DOCENTES",
+                "colspan": 2
+              },
+              {
+                "label": "institución educativa, otro.",
+                "rowspan": 2
+              },
+              {
+                "label": "la formación del estudiante.",
+                "rowspan": 2
+              }
+            ],
+            [
+              {
+                "label": "M"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "H"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -7100,26 +9154,38 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "estudiantes_m",
-              "label": "ESTUDIANTES M",
+              "label": "M",
               "type": "number",
               "private": false
             },
             {
               "key": "estudiantes_h",
-              "label": "ESTUDIANTES H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
               "key": "docentes_m",
-              "label": "DOCENTES M",
+              "label": "M",
               "type": "number",
               "private": false
             },
             {
               "key": "docentes_h",
-              "label": "DOCENTES H",
+              "label": "H",
               "type": "number",
+              "private": false
+            },
+            {
+              "key": "institucion_educativa_otro",
+              "label": "institución educativa, otro.",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "la_formacion_del_estudiante",
+              "label": "la formación del estudiante.",
+              "type": "text",
               "private": false
             }
           ],
@@ -7129,7 +9195,9 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "estudiantes_m": "",
               "estudiantes_h": "",
               "docentes_m": "",
-              "docentes_h": ""
+              "docentes_h": "",
+              "institucion_educativa_otro": "",
+              "la_formacion_del_estudiante": ""
             }
           ]
         },
@@ -7180,6 +9248,50 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 5,
+          "headerRows": [
+            [
+              {
+                "label": "Nombre de la actividad",
+                "rowspan": 3
+              },
+              {
+                "label": "Responsable",
+                "rowspan": 3
+              },
+              {
+                "label": "Cantidad de participantes",
+                "colspan": 4
+              },
+              {
+                "label": "Periodo de realización",
+                "rowspan": 3
+              }
+            ],
+            [
+              {
+                "label": "Alumnado",
+                "colspan": 2
+              },
+              {
+                "label": "Padres, madres y/o tutores",
+                "colspan": 2
+              }
+            ],
+            [
+              {
+                "label": "M"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "H"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "nombre_de_la_actividad",
@@ -7195,32 +9307,32 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "cantidad_de_participantes_alumnado_m",
-              "label": "Cantidad de participantes Alumnado M",
+              "label": "M",
               "type": "number",
               "private": false
             },
             {
               "key": "cantidad_de_participantes_alumnado_h",
-              "label": "Cantidad de participantes Alumnado H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
               "key": "cantidad_de_participantes_padres_madres_y_o_tuto",
-              "label": "Cantidad de participantes Padres, madres y/o tutores M",
+              "label": "M",
               "type": "number",
               "private": false
             },
             {
               "key": "cantidad_de_participantes_padres_madres_y_o_tuto_2",
-              "label": "Cantidad de participantes Padres, madres y/o tutores H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
-              "key": "periodo_de_realizacion_padres_madres_y_o_tutores",
-              "label": "Periodo de realización Padres, madres y/o tutores H",
-              "type": "number",
+              "key": "periodo_de_realizacion",
+              "label": "Periodo de realización",
+              "type": "text",
               "private": false
             }
           ],
@@ -7232,7 +9344,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "cantidad_de_participantes_alumnado_h": "",
               "cantidad_de_participantes_padres_madres_y_o_tuto": "",
               "cantidad_de_participantes_padres_madres_y_o_tuto_2": "",
-              "periodo_de_realizacion_padres_madres_y_o_tutores": ""
+              "periodo_de_realizacion": ""
             }
           ]
         },
@@ -7290,10 +9402,63 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
           ]
         ],
         "numericCells": 0,
-        "textCells": 18,
+        "textCells": 17,
         "formulaCells": 0,
         "table": {
           "headerRow": 5,
+          "headerRows": [
+            [
+              {
+                "label": "Plantel",
+                "colspan": 2,
+                "rowspan": 2
+              },
+              {
+                "label": "Nombre de la actividad",
+                "rowspan": 2
+              },
+              {
+                "label": "Descripción de la actividad",
+                "rowspan": 2
+              },
+              {
+                "label": "TOTAL ESTUDIANTES",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL DOCENTES",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL PERSONAL ADMINISTRATIVO",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL DE PARTICIPANTES",
+                "rowspan": 2
+              }
+            ],
+            [
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -7321,43 +9486,43 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "total_estudiantes_mujeres",
-              "label": "TOTAL ESTUDIANTES MUJERES",
+              "label": "MUJERES",
               "type": "number",
               "private": false
             },
             {
               "key": "total_estudiantes_hombres",
-              "label": "TOTAL ESTUDIANTES HOMBRES",
+              "label": "HOMBRES",
               "type": "number",
               "private": false
             },
             {
               "key": "total_docentes_mujeres",
-              "label": "TOTAL DOCENTES MUJERES",
+              "label": "MUJERES",
               "type": "number",
               "private": false
             },
             {
-              "key": "numero_de_personal_administrativo_hombres",
-              "label": "NÚMERO DE PERSONAL ADMINISTRATIVO HOMBRES",
+              "key": "total_docentes_hombres",
+              "label": "HOMBRES",
               "type": "number",
               "private": false
             },
             {
               "key": "total_personal_administrativo_mujeres",
-              "label": "TOTAL PERSONAL ADMINISTRATIVO MUJERES",
+              "label": "MUJERES",
               "type": "number",
               "private": false
             },
             {
               "key": "total_personal_administrativo_hombres",
-              "label": "TOTAL PERSONAL ADMINISTRATIVO HOMBRES",
+              "label": "HOMBRES",
               "type": "number",
               "private": false
             },
             {
-              "key": "total_de_participantes_hombres",
-              "label": "TOTAL DE PARTICIPANTES HOMBRES",
+              "key": "total_de_participantes",
+              "label": "TOTAL DE PARTICIPANTES",
               "type": "number",
               "private": false
             }
@@ -7371,10 +9536,10 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "total_estudiantes_mujeres": "",
               "total_estudiantes_hombres": "",
               "total_docentes_mujeres": "",
-              "numero_de_personal_administrativo_hombres": "",
+              "total_docentes_hombres": "",
               "total_personal_administrativo_mujeres": "",
               "total_personal_administrativo_hombres": "",
-              "total_de_participantes_hombres": ""
+              "total_de_participantes": ""
             }
           ]
         },
@@ -7420,6 +9585,55 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 4,
+          "headerRows": [
+            [
+              {
+                "label": "Plantel",
+                "rowspan": 2
+              },
+              {
+                "label": "Nota: anotar solo la actividad desarrollada. Unidades de salud integral",
+                "colspan": 3
+              },
+              {
+                "label": "Febrero– Agosto 2026",
+                "colspan": 3
+              },
+              {
+                "label": "Agosto- Enero 2027",
+                "colspan": 3
+              }
+            ],
+            [
+              {
+                "label": "SERVICIOS MEDICOS"
+              },
+              {
+                "label": "DGDI"
+              },
+              {
+                "label": "CUAP"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "T"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "T"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -7429,55 +9643,55 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "nota_anotar_solo_la_actividad_desarrollada_unida",
-              "label": "Nota: anotar solo la actividad desarrollada. Unidades de salud integral SERVICIOS MEDICOS",
+              "label": "SERVICIOS MEDICOS",
               "type": "text",
               "private": false
             },
             {
               "key": "nota_anotar_solo_la_actividad_desarrollada_unida_2",
-              "label": "Nota: anotar solo la actividad desarrollada. Unidades de salud integral DGDI",
+              "label": "DGDI",
               "type": "text",
               "private": false
             },
             {
               "key": "nota_anotar_solo_la_actividad_desarrollada_unida_3",
-              "label": "Nota: anotar solo la actividad desarrollada. Unidades de salud integral CUAP",
+              "label": "CUAP",
               "type": "text",
               "private": false
             },
             {
               "key": "febrero_agosto_2026_m",
-              "label": "Febrero– Agosto 2026 M",
+              "label": "M",
               "type": "number",
               "private": false
             },
             {
               "key": "febrero_agosto_2026_h",
-              "label": "Febrero– Agosto 2026 H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
               "key": "febrero_agosto_2026_t",
-              "label": "Febrero– Agosto 2026 T",
+              "label": "T",
               "type": "number",
               "private": false
             },
             {
               "key": "agosto_enero_2027_m",
-              "label": "Agosto- Enero 2027 M",
+              "label": "M",
               "type": "number",
               "private": false
             },
             {
               "key": "agosto_enero_2027_h",
-              "label": "Agosto- Enero 2027 H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
               "key": "agosto_enero_2027_t",
-              "label": "Agosto- Enero 2027 T",
+              "label": "T",
               "type": "number",
               "private": false
             }
@@ -7554,10 +9768,63 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
           ]
         ],
         "numericCells": 0,
-        "textCells": 18,
+        "textCells": 17,
         "formulaCells": 0,
         "table": {
           "headerRow": 5,
+          "headerRows": [
+            [
+              {
+                "label": "Plantel",
+                "colspan": 2,
+                "rowspan": 2
+              },
+              {
+                "label": "Nombre de la actividad",
+                "rowspan": 2
+              },
+              {
+                "label": "Descripción de la actividad",
+                "rowspan": 2
+              },
+              {
+                "label": "TOTAL ESTUDIANTES",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL DOCENTES",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL PERSONAL ADMINISTRATIVO",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL DE PARTICIPANTES",
+                "rowspan": 2
+              }
+            ],
+            [
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -7585,43 +9852,43 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "total_estudiantes_mujeres",
-              "label": "TOTAL ESTUDIANTES MUJERES",
+              "label": "MUJERES",
               "type": "number",
               "private": false
             },
             {
               "key": "total_estudiantes_hombres",
-              "label": "TOTAL ESTUDIANTES HOMBRES",
+              "label": "HOMBRES",
               "type": "number",
               "private": false
             },
             {
               "key": "total_docentes_mujeres",
-              "label": "TOTAL DOCENTES MUJERES",
+              "label": "MUJERES",
               "type": "number",
               "private": false
             },
             {
-              "key": "numero_de_personal_administrativo_hombres",
-              "label": "NÚMERO DE PERSONAL ADMINISTRATIVO HOMBRES",
+              "key": "total_docentes_hombres",
+              "label": "HOMBRES",
               "type": "number",
               "private": false
             },
             {
               "key": "total_personal_administrativo_mujeres",
-              "label": "TOTAL PERSONAL ADMINISTRATIVO MUJERES",
+              "label": "MUJERES",
               "type": "number",
               "private": false
             },
             {
               "key": "total_personal_administrativo_hombres",
-              "label": "TOTAL PERSONAL ADMINISTRATIVO HOMBRES",
+              "label": "HOMBRES",
               "type": "number",
               "private": false
             },
             {
-              "key": "total_de_participantes_hombres",
-              "label": "TOTAL DE PARTICIPANTES HOMBRES",
+              "key": "total_de_participantes",
+              "label": "TOTAL DE PARTICIPANTES",
               "type": "number",
               "private": false
             }
@@ -7635,10 +9902,10 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "total_estudiantes_mujeres": "",
               "total_estudiantes_hombres": "",
               "total_docentes_mujeres": "",
-              "numero_de_personal_administrativo_hombres": "",
+              "total_docentes_hombres": "",
               "total_personal_administrativo_mujeres": "",
               "total_personal_administrativo_hombres": "",
-              "total_de_participantes_hombres": ""
+              "total_de_participantes": ""
             }
           ]
         },
@@ -7684,6 +9951,22 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 7,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL"
+              },
+              {
+                "label": "No. PTC"
+              },
+              {
+                "label": "NOMBRE DEL DOCENTE"
+              },
+              {
+                "label": "NIVEL"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -7745,6 +10028,19 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 7,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL"
+              },
+              {
+                "label": "No. de Docentes"
+              },
+              {
+                "label": "NOMBRE DEL DOCENTE"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -7799,6 +10095,19 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 7,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL"
+              },
+              {
+                "label": "No. de Docentes"
+              },
+              {
+                "label": "NOMBRE DEL DOCENTE"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -7877,6 +10186,37 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 5,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL",
+                "colspan": 2,
+                "rowspan": 2
+              },
+              {
+                "label": "Nombre de /los proyectos de investigación",
+                "colspan": 6,
+                "rowspan": 2
+              },
+              {
+                "label": "Número de estudiantes",
+                "colspan": 2
+              },
+              {
+                "label": "Observaciones (indicar el periodo del proyecto)",
+                "colspan": 3,
+                "rowspan": 2
+              }
+            ],
+            [
+              {
+                "label": "Mujeres"
+              },
+              {
+                "label": "Hombres"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -7928,20 +10268,32 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "numero_de_estudiantes_mujeres",
-              "label": "Número de estudiantes Mujeres",
+              "label": "Mujeres",
               "type": "number",
               "private": false
             },
             {
               "key": "numero_de_estudiantes_hombres",
-              "label": "Número de estudiantes Hombres",
+              "label": "Hombres",
               "type": "number",
               "private": false
             },
             {
-              "key": "observaciones_indicar_el_periodo_del_proyecto_ho",
-              "label": "Observaciones (indicar el periodo del proyecto) Hombres",
-              "type": "number",
+              "key": "observaciones_indicar_el_periodo_del_proyecto",
+              "label": "Observaciones (indicar el periodo del proyecto)",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "observaciones_indicar_el_periodo_del_proyecto_2",
+              "label": "Observaciones (indicar el periodo del proyecto)",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "observaciones_indicar_el_periodo_del_proyecto_3",
+              "label": "Observaciones (indicar el periodo del proyecto)",
+              "type": "text",
               "private": false
             }
           ],
@@ -7957,7 +10309,9 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "nombre_de_los_proyectos_de_investigacion_6": "",
               "numero_de_estudiantes_mujeres": "",
               "numero_de_estudiantes_hombres": "",
-              "observaciones_indicar_el_periodo_del_proyecto_ho": ""
+              "observaciones_indicar_el_periodo_del_proyecto": "",
+              "observaciones_indicar_el_periodo_del_proyecto_2": "",
+              "observaciones_indicar_el_periodo_del_proyecto_3": ""
             }
           ]
         },
@@ -8001,6 +10355,22 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 7,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL"
+              },
+              {
+                "label": "PTC"
+              },
+              {
+                "label": "NOMBRE DEL DOCENTE"
+              },
+              {
+                "label": "NIVEL"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -8062,6 +10432,19 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 7,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL"
+              },
+              {
+                "label": "CANTIDAD"
+              },
+              {
+                "label": "NOMBRE DEL DOCENTE"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -8116,6 +10499,19 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 7,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL"
+              },
+              {
+                "label": "CANTIDAD"
+              },
+              {
+                "label": "NOMBRE DEL DOCENTE"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -8194,10 +10590,59 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
           ]
         ],
         "numericCells": 0,
-        "textCells": 16,
+        "textCells": 15,
         "formulaCells": 0,
         "table": {
           "headerRow": 5,
+          "headerRows": [
+            [
+              {
+                "label": "Plantel",
+                "colspan": 2,
+                "rowspan": 2
+              },
+              {
+                "label": "Nombre de la capacitación y /o actividades formativas",
+                "rowspan": 2
+              },
+              {
+                "label": "TOTAL ESTUDIANTES",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL DOCENTES",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL PERSONAL ADMINISTRATIVO",
+                "colspan": 2
+              },
+              {
+                "label": "TEMAS QUE SE ABORDARON",
+                "rowspan": 2
+              }
+            ],
+            [
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -8219,44 +10664,44 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "total_estudiantes_mujeres",
-              "label": "TOTAL ESTUDIANTES MUJERES",
+              "label": "MUJERES",
               "type": "number",
               "private": false
             },
             {
               "key": "total_estudiantes_hombres",
-              "label": "TOTAL ESTUDIANTES HOMBRES",
+              "label": "HOMBRES",
               "type": "number",
               "private": false
             },
             {
               "key": "total_docentes_mujeres",
-              "label": "TOTAL DOCENTES MUJERES",
+              "label": "MUJERES",
               "type": "number",
               "private": false
             },
             {
-              "key": "numero_de_personal_administrativo_hombres",
-              "label": "NÚMERO DE PERSONAL ADMINISTRATIVO HOMBRES",
+              "key": "total_docentes_hombres",
+              "label": "HOMBRES",
               "type": "number",
               "private": false
             },
             {
               "key": "total_personal_administrativo_mujeres",
-              "label": "TOTAL PERSONAL ADMINISTRATIVO MUJERES",
+              "label": "MUJERES",
               "type": "number",
               "private": false
             },
             {
               "key": "total_personal_administrativo_hombres",
-              "label": "TOTAL PERSONAL ADMINISTRATIVO HOMBRES",
+              "label": "HOMBRES",
               "type": "number",
               "private": false
             },
             {
-              "key": "temas_que_se_abordaron_hombres",
-              "label": "TEMAS QUE SE ABORDARON HOMBRES",
-              "type": "number",
+              "key": "temas_que_se_abordaron",
+              "label": "TEMAS QUE SE ABORDARON",
+              "type": "text",
               "private": false
             }
           ],
@@ -8268,10 +10713,10 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "total_estudiantes_mujeres": "",
               "total_estudiantes_hombres": "",
               "total_docentes_mujeres": "",
-              "numero_de_personal_administrativo_hombres": "",
+              "total_docentes_hombres": "",
               "total_personal_administrativo_mujeres": "",
               "total_personal_administrativo_hombres": "",
-              "temas_que_se_abordaron_hombres": ""
+              "temas_que_se_abordaron": ""
             }
           ]
         },
@@ -8319,6 +10764,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 3,
+          "headerRows": [],
           "columns": [
             {
               "key": "agosto_2025_enero_2026_m",
@@ -8415,6 +10861,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 3,
+          "headerRows": [],
           "columns": [
             {
               "key": "agosto_2025_enero_2026",
@@ -8423,8 +10870,8 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "private": false
             },
             {
-              "key": "columna_2",
-              "label": "Columna 2",
+              "key": "agosto_2025_enero_2026_2",
+              "label": "Agosto 2025-Enero 2026",
               "type": "text",
               "private": false
             },
@@ -8441,8 +10888,8 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "private": false
             },
             {
-              "key": "columna_5",
-              "label": "Columna 5",
+              "key": "enero_2026_junio_2026_2",
+              "label": "Enero 2026-Junio 2026",
               "type": "text",
               "private": false
             },
@@ -8459,8 +10906,8 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "private": false
             },
             {
-              "key": "columna_8",
-              "label": "Columna 8",
+              "key": "agosto_2026_enero_2027_2",
+              "label": "Agosto 2026- Enero 2027",
               "type": "text",
               "private": false
             },
@@ -8474,13 +10921,13 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
           "initialRows": [
             {
               "agosto_2025_enero_2026": "",
-              "columna_2": "",
+              "agosto_2025_enero_2026_2": "",
               "total": "",
               "enero_2026_junio_2026": "",
-              "columna_5": "",
+              "enero_2026_junio_2026_2": "",
               "total_2": "",
               "agosto_2026_enero_2027": "",
-              "columna_8": "",
+              "agosto_2026_enero_2027_2": "",
               "total_3": ""
             }
           ]
@@ -8538,6 +10985,86 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 15,
         "table": {
           "headerRow": 7,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL",
+                "rowspan": 2
+              },
+              {
+                "label": "GRADO",
+                "rowspan": 2
+              },
+              {
+                "label": "MATRICULA",
+                "colspan": 3
+              },
+              {
+                "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar)",
+                "colspan": 8
+              },
+              {
+                "label": "No. ASIGNATURAS CON ALUMNOS EN ORDINARIO",
+                "rowspan": 2
+              },
+              {
+                "label": "No.ASIGNATURAS QUE DIERON NIVELACIÓN ACADÉMICA",
+                "rowspan": 2
+              },
+              {
+                "label": "CANTIDAD ESTUDIANTES QUE ASISTIERON",
+                "colspan": 3
+              },
+              {
+                "label": "% ATENCIÓN",
+                "rowspan": 2
+              }
+            ],
+            [
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "T"
+              },
+              {
+                "label": "A"
+              },
+              {
+                "label": "B"
+              },
+              {
+                "label": "C"
+              },
+              {
+                "label": "D"
+              },
+              {
+                "label": "E"
+              },
+              {
+                "label": "F"
+              },
+              {
+                "label": "G"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "T"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -8553,104 +11080,104 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "matricula_h",
-              "label": "MATRICULA H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
               "key": "matricula_m",
-              "label": "MATRICULA M",
+              "label": "M",
               "type": "number",
               "private": false
             },
             {
               "key": "matricula_t",
-              "label": "MATRICULA T",
+              "label": "T",
               "type": "number",
               "private": false
             },
             {
               "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi",
-              "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) A",
+              "label": "A",
               "type": "number",
               "private": false
             },
             {
               "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_2",
-              "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) B",
+              "label": "B",
               "type": "number",
               "private": false
             },
             {
               "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_3",
-              "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) C",
+              "label": "C",
               "type": "number",
               "private": false
             },
             {
               "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_4",
-              "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) D",
+              "label": "D",
               "type": "number",
               "private": false
             },
             {
               "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_5",
-              "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) E",
+              "label": "E",
               "type": "number",
               "private": false
             },
             {
               "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_6",
-              "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) F",
+              "label": "F",
               "type": "number",
               "private": false
             },
             {
               "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_7",
-              "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) G",
+              "label": "G",
               "type": "number",
               "private": false
             },
             {
               "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_8",
-              "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
-              "key": "no_asignaturas_con_alumnos_en_ordinario_h",
-              "label": "No. ASIGNATURAS CON ALUMNOS EN ORDINARIO H",
+              "key": "no_asignaturas_con_alumnos_en_ordinario",
+              "label": "No. ASIGNATURAS CON ALUMNOS EN ORDINARIO",
               "type": "number",
               "private": false
             },
             {
-              "key": "no_asignaturas_que_dieron_nivelacion_academica_h",
-              "label": "No.ASIGNATURAS QUE DIERON NIVELACIÓN ACADÉMICA H",
-              "type": "number",
+              "key": "no_asignaturas_que_dieron_nivelacion_academica",
+              "label": "No.ASIGNATURAS QUE DIERON NIVELACIÓN ACADÉMICA",
+              "type": "text",
               "private": false
             },
             {
               "key": "cantidad_estudiantes_que_asistieron_h",
-              "label": "CANTIDAD ESTUDIANTES QUE ASISTIERON H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
               "key": "cantidad_estudiantes_que_asistieron_m",
-              "label": "CANTIDAD ESTUDIANTES QUE ASISTIERON M",
+              "label": "M",
               "type": "number",
               "private": false
             },
             {
               "key": "cantidad_estudiantes_que_asistieron_t",
-              "label": "CANTIDAD ESTUDIANTES QUE ASISTIERON T",
+              "label": "T",
               "type": "number",
               "private": false
             },
             {
-              "key": "atencion_t",
-              "label": "% ATENCIÓN T",
-              "type": "number",
+              "key": "atencion",
+              "label": "% ATENCIÓN",
+              "type": "text",
               "private": false
             }
           ],
@@ -8669,12 +11196,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-              "no_asignaturas_con_alumnos_en_ordinario_h": "",
-              "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+              "no_asignaturas_con_alumnos_en_ordinario": "",
+              "no_asignaturas_que_dieron_nivelacion_academica": "",
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion_t": ""
+              "atencion": "=(R9*100)/E9"
             },
             {
               "plantel": "",
@@ -8690,12 +11217,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-              "no_asignaturas_con_alumnos_en_ordinario_h": "",
-              "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+              "no_asignaturas_con_alumnos_en_ordinario": "",
+              "no_asignaturas_que_dieron_nivelacion_academica": "",
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion_t": ""
+              "atencion": "=(R10*100)/E10"
             },
             {
               "plantel": "",
@@ -8711,12 +11238,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-              "no_asignaturas_con_alumnos_en_ordinario_h": "",
-              "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+              "no_asignaturas_con_alumnos_en_ordinario": "",
+              "no_asignaturas_que_dieron_nivelacion_academica": "",
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion_t": ""
+              "atencion": "=(R11*100)/E11"
             },
             {
               "plantel": "SEMIESCOLARIZADO",
@@ -8732,12 +11259,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-              "no_asignaturas_con_alumnos_en_ordinario_h": "",
-              "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+              "no_asignaturas_con_alumnos_en_ordinario": "",
+              "no_asignaturas_que_dieron_nivelacion_academica": "",
               "cantidad_estudiantes_que_asistieron_h": "",
               "cantidad_estudiantes_que_asistieron_m": "",
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion_t": ""
+              "atencion": ""
             },
             {
               "plantel": "PLANTEL",
@@ -8753,12 +11280,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-              "no_asignaturas_con_alumnos_en_ordinario_h": "",
-              "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+              "no_asignaturas_con_alumnos_en_ordinario": "",
+              "no_asignaturas_que_dieron_nivelacion_academica": "No.ASIGNATURAS QUE DIERON NIVELACIÓN ACADÉMICA",
               "cantidad_estudiantes_que_asistieron_h": "",
               "cantidad_estudiantes_que_asistieron_m": "",
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion_t": ""
+              "atencion": "% ATENCIÓN"
             },
             {
               "plantel": "",
@@ -8774,12 +11301,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-              "no_asignaturas_con_alumnos_en_ordinario_h": "",
-              "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+              "no_asignaturas_con_alumnos_en_ordinario": "",
+              "no_asignaturas_que_dieron_nivelacion_academica": "",
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion_t": ""
+              "atencion": "=(R16*100)/E16"
             },
             {
               "plantel": "",
@@ -8795,12 +11322,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-              "no_asignaturas_con_alumnos_en_ordinario_h": "",
-              "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+              "no_asignaturas_con_alumnos_en_ordinario": "",
+              "no_asignaturas_que_dieron_nivelacion_academica": "",
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion_t": ""
+              "atencion": "=(R17*100)/E17"
             }
           ]
         },
@@ -8841,6 +11368,86 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 15,
         "table": {
           "headerRow": 7,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL",
+                "rowspan": 2
+              },
+              {
+                "label": "GRADO",
+                "rowspan": 2
+              },
+              {
+                "label": "MATRICULA",
+                "colspan": 3
+              },
+              {
+                "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar)",
+                "colspan": 8
+              },
+              {
+                "label": "No. ASIGNATURAS CON ALUMNOS EN ORDINARIO",
+                "rowspan": 2
+              },
+              {
+                "label": "No.ASIGNATURAS QUE DIERON NIVELACIÓN ACADÉMICA",
+                "rowspan": 2
+              },
+              {
+                "label": "CANTIDAD ESTUDIANTES QUE ASISTIERON",
+                "colspan": 3
+              },
+              {
+                "label": "% ATENCIÓN",
+                "rowspan": 2
+              }
+            ],
+            [
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "T"
+              },
+              {
+                "label": "A"
+              },
+              {
+                "label": "B"
+              },
+              {
+                "label": "C"
+              },
+              {
+                "label": "D"
+              },
+              {
+                "label": "E"
+              },
+              {
+                "label": "F"
+              },
+              {
+                "label": "G"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "T"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -8856,104 +11463,104 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "matricula_h",
-              "label": "MATRICULA H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
               "key": "matricula_m",
-              "label": "MATRICULA M",
+              "label": "M",
               "type": "number",
               "private": false
             },
             {
               "key": "matricula_t",
-              "label": "MATRICULA T",
+              "label": "T",
               "type": "number",
               "private": false
             },
             {
               "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi",
-              "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) A",
+              "label": "A",
               "type": "number",
               "private": false
             },
             {
               "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_2",
-              "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) B",
+              "label": "B",
               "type": "number",
               "private": false
             },
             {
               "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_3",
-              "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) C",
+              "label": "C",
               "type": "number",
               "private": false
             },
             {
               "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_4",
-              "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) D",
+              "label": "D",
               "type": "number",
               "private": false
             },
             {
               "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_5",
-              "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) E",
+              "label": "E",
               "type": "number",
               "private": false
             },
             {
               "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_6",
-              "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) F",
+              "label": "F",
               "type": "number",
               "private": false
             },
             {
               "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_7",
-              "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) G",
+              "label": "G",
               "type": "number",
               "private": false
             },
             {
               "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_8",
-              "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
-              "key": "no_asignaturas_con_alumnos_en_ordinario_h",
-              "label": "No. ASIGNATURAS CON ALUMNOS EN ORDINARIO H",
+              "key": "no_asignaturas_con_alumnos_en_ordinario",
+              "label": "No. ASIGNATURAS CON ALUMNOS EN ORDINARIO",
               "type": "number",
               "private": false
             },
             {
-              "key": "no_asignaturas_que_dieron_nivelacion_academica_h",
-              "label": "No.ASIGNATURAS QUE DIERON NIVELACIÓN ACADÉMICA H",
-              "type": "number",
+              "key": "no_asignaturas_que_dieron_nivelacion_academica",
+              "label": "No.ASIGNATURAS QUE DIERON NIVELACIÓN ACADÉMICA",
+              "type": "text",
               "private": false
             },
             {
               "key": "cantidad_estudiantes_que_asistieron_h",
-              "label": "CANTIDAD ESTUDIANTES QUE ASISTIERON H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
               "key": "cantidad_estudiantes_que_asistieron_m",
-              "label": "CANTIDAD ESTUDIANTES QUE ASISTIERON M",
+              "label": "M",
               "type": "number",
               "private": false
             },
             {
               "key": "cantidad_estudiantes_que_asistieron_t",
-              "label": "CANTIDAD ESTUDIANTES QUE ASISTIERON T",
+              "label": "T",
               "type": "number",
               "private": false
             },
             {
-              "key": "atencion_t",
-              "label": "% ATENCIÓN T",
-              "type": "number",
+              "key": "atencion",
+              "label": "% ATENCIÓN",
+              "type": "text",
               "private": false
             }
           ],
@@ -8972,12 +11579,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-              "no_asignaturas_con_alumnos_en_ordinario_h": "",
-              "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+              "no_asignaturas_con_alumnos_en_ordinario": "",
+              "no_asignaturas_que_dieron_nivelacion_academica": "",
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion_t": ""
+              "atencion": "=(R9*100)/E9"
             },
             {
               "plantel": "",
@@ -8993,12 +11600,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-              "no_asignaturas_con_alumnos_en_ordinario_h": "",
-              "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+              "no_asignaturas_con_alumnos_en_ordinario": "",
+              "no_asignaturas_que_dieron_nivelacion_academica": "",
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion_t": ""
+              "atencion": "=(R10*100)/E10"
             },
             {
               "plantel": "",
@@ -9014,12 +11621,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-              "no_asignaturas_con_alumnos_en_ordinario_h": "",
-              "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+              "no_asignaturas_con_alumnos_en_ordinario": "",
+              "no_asignaturas_que_dieron_nivelacion_academica": "",
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion_t": ""
+              "atencion": "=(R11*100)/E11"
             },
             {
               "plantel": "SEMIESCOLARIZADO",
@@ -9035,12 +11642,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-              "no_asignaturas_con_alumnos_en_ordinario_h": "",
-              "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+              "no_asignaturas_con_alumnos_en_ordinario": "",
+              "no_asignaturas_que_dieron_nivelacion_academica": "",
               "cantidad_estudiantes_que_asistieron_h": "",
               "cantidad_estudiantes_que_asistieron_m": "",
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion_t": ""
+              "atencion": ""
             },
             {
               "plantel": "PLANTEL",
@@ -9056,12 +11663,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-              "no_asignaturas_con_alumnos_en_ordinario_h": "",
-              "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+              "no_asignaturas_con_alumnos_en_ordinario": "",
+              "no_asignaturas_que_dieron_nivelacion_academica": "No.ASIGNATURAS QUE DIERON NIVELACIÓN ACADÉMICA",
               "cantidad_estudiantes_que_asistieron_h": "",
               "cantidad_estudiantes_que_asistieron_m": "",
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion_t": ""
+              "atencion": "% ATENCIÓN"
             },
             {
               "plantel": "",
@@ -9077,12 +11684,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-              "no_asignaturas_con_alumnos_en_ordinario_h": "",
-              "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+              "no_asignaturas_con_alumnos_en_ordinario": "",
+              "no_asignaturas_que_dieron_nivelacion_academica": "",
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion_t": ""
+              "atencion": "=(R16*100)/E16"
             },
             {
               "plantel": "",
@@ -9098,12 +11705,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-              "no_asignaturas_con_alumnos_en_ordinario_h": "",
-              "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+              "no_asignaturas_con_alumnos_en_ordinario": "",
+              "no_asignaturas_que_dieron_nivelacion_academica": "",
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion_t": ""
+              "atencion": "=(R17*100)/E17"
             }
           ]
         },
@@ -9144,6 +11751,86 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 15,
         "table": {
           "headerRow": 7,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL",
+                "rowspan": 2
+              },
+              {
+                "label": "GRADO",
+                "rowspan": 2
+              },
+              {
+                "label": "MATRICULA",
+                "colspan": 3
+              },
+              {
+                "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar)",
+                "colspan": 8
+              },
+              {
+                "label": "No. ASIGNATURAS CON ALUMNOS EN ORDINARIO",
+                "rowspan": 2
+              },
+              {
+                "label": "No.ASIGNATURAS QUE DIERON NIVELACIÓN ACADÉMICA",
+                "rowspan": 2
+              },
+              {
+                "label": "CANTIDAD ESTUDIANTES QUE ASISTIERON",
+                "colspan": 3
+              },
+              {
+                "label": "% ATENCIÓN",
+                "rowspan": 2
+              }
+            ],
+            [
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "T"
+              },
+              {
+                "label": "A"
+              },
+              {
+                "label": "B"
+              },
+              {
+                "label": "C"
+              },
+              {
+                "label": "D"
+              },
+              {
+                "label": "E"
+              },
+              {
+                "label": "F"
+              },
+              {
+                "label": "G"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "T"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -9159,104 +11846,104 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "matricula_h",
-              "label": "MATRICULA H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
               "key": "matricula_m",
-              "label": "MATRICULA M",
+              "label": "M",
               "type": "number",
               "private": false
             },
             {
               "key": "matricula_t",
-              "label": "MATRICULA T",
+              "label": "T",
               "type": "number",
               "private": false
             },
             {
               "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi",
-              "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) A",
+              "label": "A",
               "type": "number",
               "private": false
             },
             {
               "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_2",
-              "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) B",
+              "label": "B",
               "type": "number",
               "private": false
             },
             {
               "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_3",
-              "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) C",
+              "label": "C",
               "type": "number",
               "private": false
             },
             {
               "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_4",
-              "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) D",
+              "label": "D",
               "type": "number",
               "private": false
             },
             {
               "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_5",
-              "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) E",
+              "label": "E",
               "type": "number",
               "private": false
             },
             {
               "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_6",
-              "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) F",
+              "label": "F",
               "type": "number",
               "private": false
             },
             {
               "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_7",
-              "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) G",
+              "label": "G",
               "type": "number",
               "private": false
             },
             {
               "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_8",
-              "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar) H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
-              "key": "no_asignaturas_con_alumnos_en_ordinario_h",
-              "label": "No. ASIGNATURAS CON ALUMNOS EN ORDINARIO H",
+              "key": "no_asignaturas_con_alumnos_en_ordinario",
+              "label": "No. ASIGNATURAS CON ALUMNOS EN ORDINARIO",
               "type": "number",
               "private": false
             },
             {
-              "key": "no_asignaturas_que_dieron_nivelacion_academica_h",
-              "label": "No.ASIGNATURAS QUE DIERON NIVELACIÓN ACADÉMICA H",
-              "type": "number",
+              "key": "no_asignaturas_que_dieron_nivelacion_academica",
+              "label": "No.ASIGNATURAS QUE DIERON NIVELACIÓN ACADÉMICA",
+              "type": "text",
               "private": false
             },
             {
               "key": "cantidad_estudiantes_que_asistieron_h",
-              "label": "CANTIDAD ESTUDIANTES QUE ASISTIERON H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
               "key": "cantidad_estudiantes_que_asistieron_m",
-              "label": "CANTIDAD ESTUDIANTES QUE ASISTIERON M",
+              "label": "M",
               "type": "number",
               "private": false
             },
             {
               "key": "cantidad_estudiantes_que_asistieron_t",
-              "label": "CANTIDAD ESTUDIANTES QUE ASISTIERON T",
+              "label": "T",
               "type": "number",
               "private": false
             },
             {
-              "key": "atencion_t",
-              "label": "% ATENCIÓN T",
-              "type": "number",
+              "key": "atencion",
+              "label": "% ATENCIÓN",
+              "type": "text",
               "private": false
             }
           ],
@@ -9275,12 +11962,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-              "no_asignaturas_con_alumnos_en_ordinario_h": "",
-              "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+              "no_asignaturas_con_alumnos_en_ordinario": "",
+              "no_asignaturas_que_dieron_nivelacion_academica": "",
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion_t": ""
+              "atencion": "=(R9*100)/E9"
             },
             {
               "plantel": "",
@@ -9296,12 +11983,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-              "no_asignaturas_con_alumnos_en_ordinario_h": "",
-              "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+              "no_asignaturas_con_alumnos_en_ordinario": "",
+              "no_asignaturas_que_dieron_nivelacion_academica": "",
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion_t": ""
+              "atencion": "=(R10*100)/E10"
             },
             {
               "plantel": "",
@@ -9317,12 +12004,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-              "no_asignaturas_con_alumnos_en_ordinario_h": "",
-              "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+              "no_asignaturas_con_alumnos_en_ordinario": "",
+              "no_asignaturas_que_dieron_nivelacion_academica": "",
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion_t": ""
+              "atencion": "=(R11*100)/E11"
             },
             {
               "plantel": "SEMIESCOLARIZADO",
@@ -9338,12 +12025,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-              "no_asignaturas_con_alumnos_en_ordinario_h": "",
-              "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+              "no_asignaturas_con_alumnos_en_ordinario": "",
+              "no_asignaturas_que_dieron_nivelacion_academica": "",
               "cantidad_estudiantes_que_asistieron_h": "",
               "cantidad_estudiantes_que_asistieron_m": "",
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion_t": ""
+              "atencion": ""
             },
             {
               "plantel": "PLANTEL",
@@ -9359,12 +12046,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-              "no_asignaturas_con_alumnos_en_ordinario_h": "",
-              "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+              "no_asignaturas_con_alumnos_en_ordinario": "",
+              "no_asignaturas_que_dieron_nivelacion_academica": "No.ASIGNATURAS QUE DIERON NIVELACIÓN ACADÉMICA",
               "cantidad_estudiantes_que_asistieron_h": "",
               "cantidad_estudiantes_que_asistieron_m": "",
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion_t": ""
+              "atencion": "% ATENCIÓN"
             },
             {
               "plantel": "",
@@ -9380,12 +12067,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-              "no_asignaturas_con_alumnos_en_ordinario_h": "",
-              "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+              "no_asignaturas_con_alumnos_en_ordinario": "",
+              "no_asignaturas_que_dieron_nivelacion_academica": "",
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion_t": ""
+              "atencion": "=(R16*100)/E16"
             },
             {
               "plantel": "",
@@ -9401,12 +12088,12 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
               "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
-              "no_asignaturas_con_alumnos_en_ordinario_h": "",
-              "no_asignaturas_que_dieron_nivelacion_academica_h": "",
+              "no_asignaturas_con_alumnos_en_ordinario": "",
+              "no_asignaturas_que_dieron_nivelacion_academica": "",
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion_t": ""
+              "atencion": "=(R17*100)/E17"
             }
           ]
         },
@@ -9464,10 +12151,63 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
           ]
         ],
         "numericCells": 0,
-        "textCells": 18,
+        "textCells": 17,
         "formulaCells": 0,
         "table": {
           "headerRow": 5,
+          "headerRows": [
+            [
+              {
+                "label": "Plantel",
+                "colspan": 2,
+                "rowspan": 2
+              },
+              {
+                "label": "Nombre de la actividad",
+                "rowspan": 2
+              },
+              {
+                "label": "Descripción de la actividad",
+                "rowspan": 2
+              },
+              {
+                "label": "TOTAL ESTUDIANTES",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL DOCENTES",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL PERSONAL ADMINISTRATIVO",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL DE PARTICIPANTES",
+                "rowspan": 2
+              }
+            ],
+            [
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -9495,43 +12235,43 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "total_estudiantes_mujeres",
-              "label": "TOTAL ESTUDIANTES MUJERES",
+              "label": "MUJERES",
               "type": "number",
               "private": false
             },
             {
               "key": "total_estudiantes_hombres",
-              "label": "TOTAL ESTUDIANTES HOMBRES",
+              "label": "HOMBRES",
               "type": "number",
               "private": false
             },
             {
               "key": "total_docentes_mujeres",
-              "label": "TOTAL DOCENTES MUJERES",
+              "label": "MUJERES",
               "type": "number",
               "private": false
             },
             {
-              "key": "numero_de_personal_administrativo_hombres",
-              "label": "NÚMERO DE PERSONAL ADMINISTRATIVO HOMBRES",
+              "key": "total_docentes_hombres",
+              "label": "HOMBRES",
               "type": "number",
               "private": false
             },
             {
               "key": "total_personal_administrativo_mujeres",
-              "label": "TOTAL PERSONAL ADMINISTRATIVO MUJERES",
+              "label": "MUJERES",
               "type": "number",
               "private": false
             },
             {
               "key": "total_personal_administrativo_hombres",
-              "label": "TOTAL PERSONAL ADMINISTRATIVO HOMBRES",
+              "label": "HOMBRES",
               "type": "number",
               "private": false
             },
             {
-              "key": "total_de_participantes_hombres",
-              "label": "TOTAL DE PARTICIPANTES HOMBRES",
+              "key": "total_de_participantes",
+              "label": "TOTAL DE PARTICIPANTES",
               "type": "number",
               "private": false
             }
@@ -9545,10 +12285,10 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "total_estudiantes_mujeres": "",
               "total_estudiantes_hombres": "",
               "total_docentes_mujeres": "",
-              "numero_de_personal_administrativo_hombres": "",
+              "total_docentes_hombres": "",
               "total_personal_administrativo_mujeres": "",
               "total_personal_administrativo_hombres": "",
-              "total_de_participantes_hombres": ""
+              "total_de_participantes": ""
             }
           ]
         },
@@ -9635,6 +12375,42 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 5,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL",
+                "rowspan": 2
+              },
+              {
+                "label": "NOMBRE DEL ALUMNADO PARTICIPANTE",
+                "rowspan": 2
+              },
+              {
+                "label": "NÚMERO DE CUENTA",
+                "rowspan": 2
+              },
+              {
+                "label": "NOMBRE DEL PROFESORADO ACOMPAÑANTE",
+                "rowspan": 2
+              },
+              {
+                "label": "Columna 5",
+                "rowspan": 2
+              },
+              {
+                "label": "CANTIDAD DE ALUMNOS PARTICIPANTES",
+                "colspan": 2
+              }
+            ],
+            [
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "MUJERES"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -9661,20 +12437,20 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "private": false
             },
             {
-              "key": "nombre_del_profesorado_acompanante_2",
-              "label": "NOMBRE DEL PROFESORADO ACOMPAÑANTE",
+              "key": "columna_5",
+              "label": "Columna 5",
               "type": "text",
               "private": false
             },
             {
               "key": "cantidad_de_alumnos_participantes_hombres",
-              "label": "CANTIDAD DE ALUMNOS PARTICIPANTES HOMBRES",
+              "label": "HOMBRES",
               "type": "number",
               "private": false
             },
             {
               "key": "cantidad_de_alumnos_participantes_mujeres",
-              "label": "CANTIDAD DE ALUMNOS PARTICIPANTES MUJERES",
+              "label": "MUJERES",
               "type": "number",
               "private": false
             }
@@ -9685,7 +12461,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "nombre_del_alumnado_participante": "",
               "numero_de_cuenta": "",
               "nombre_del_profesorado_acompanante": "",
-              "nombre_del_profesorado_acompanante_2": "",
+              "columna_5": "",
               "cantidad_de_alumnos_participantes_hombres": "",
               "cantidad_de_alumnos_participantes_mujeres": ""
             }
@@ -9738,6 +12514,53 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 12,
+          "headerRows": [
+            [
+              {
+                "label": "No.",
+                "rowspan": 2
+              },
+              {
+                "label": "Tipo de evento",
+                "rowspan": 2
+              },
+              {
+                "label": "Nombre del evento",
+                "rowspan": 2
+              },
+              {
+                "label": "Duración en horas",
+                "rowspan": 2
+              },
+              {
+                "label": "Modalidad",
+                "rowspan": 2
+              },
+              {
+                "label": "Competencias desarrolladas",
+                "rowspan": 2
+              },
+              {
+                "label": "Evento organizado por:",
+                "rowspan": 2
+              },
+              {
+                "label": "Población docente NMS",
+                "colspan": 3
+              }
+            ],
+            [
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "Total"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "no",
@@ -9783,19 +12606,19 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "poblacion_docente_nms_h",
-              "label": "Población docente NMS H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
               "key": "poblacion_docente_nms_m",
-              "label": "Población docente NMS M",
+              "label": "M",
               "type": "number",
               "private": false
             },
             {
               "key": "poblacion_docente_nms_total",
-              "label": "Población docente NMS Total",
+              "label": "Total",
               "type": "number",
               "private": false
             }
@@ -9908,10 +12731,63 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
           ]
         ],
         "numericCells": 0,
-        "textCells": 18,
+        "textCells": 17,
         "formulaCells": 0,
         "table": {
           "headerRow": 5,
+          "headerRows": [
+            [
+              {
+                "label": "Plantel",
+                "colspan": 2,
+                "rowspan": 2
+              },
+              {
+                "label": "Nombre de la actividad",
+                "rowspan": 2
+              },
+              {
+                "label": "Descripción de la actividad",
+                "rowspan": 2
+              },
+              {
+                "label": "TOTAL ESTUDIANTES",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL DOCENTES",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL PERSONAL ADMINISTRATIVO",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL DE PARTICIPANTES",
+                "rowspan": 2
+              }
+            ],
+            [
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -9939,43 +12815,43 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "total_estudiantes_mujeres",
-              "label": "TOTAL ESTUDIANTES MUJERES",
+              "label": "MUJERES",
               "type": "number",
               "private": false
             },
             {
               "key": "total_estudiantes_hombres",
-              "label": "TOTAL ESTUDIANTES HOMBRES",
+              "label": "HOMBRES",
               "type": "number",
               "private": false
             },
             {
               "key": "total_docentes_mujeres",
-              "label": "TOTAL DOCENTES MUJERES",
+              "label": "MUJERES",
               "type": "number",
               "private": false
             },
             {
-              "key": "numero_de_personal_administrativo_hombres",
-              "label": "NÚMERO DE PERSONAL ADMINISTRATIVO HOMBRES",
+              "key": "total_docentes_hombres",
+              "label": "HOMBRES",
               "type": "number",
               "private": false
             },
             {
               "key": "total_personal_administrativo_mujeres",
-              "label": "TOTAL PERSONAL ADMINISTRATIVO MUJERES",
+              "label": "MUJERES",
               "type": "number",
               "private": false
             },
             {
               "key": "total_personal_administrativo_hombres",
-              "label": "TOTAL PERSONAL ADMINISTRATIVO HOMBRES",
+              "label": "HOMBRES",
               "type": "number",
               "private": false
             },
             {
-              "key": "total_de_participantes_hombres",
-              "label": "TOTAL DE PARTICIPANTES HOMBRES",
+              "key": "total_de_participantes",
+              "label": "TOTAL DE PARTICIPANTES",
               "type": "number",
               "private": false
             }
@@ -9989,10 +12865,10 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "total_estudiantes_mujeres": "",
               "total_estudiantes_hombres": "",
               "total_docentes_mujeres": "",
-              "numero_de_personal_administrativo_hombres": "",
+              "total_docentes_hombres": "",
               "total_personal_administrativo_mujeres": "",
               "total_personal_administrativo_hombres": "",
-              "total_de_participantes_hombres": ""
+              "total_de_participantes": ""
             }
           ]
         },
@@ -10041,6 +12917,53 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 12,
+          "headerRows": [
+            [
+              {
+                "label": "No.",
+                "rowspan": 2
+              },
+              {
+                "label": "Tipo de evento",
+                "rowspan": 2
+              },
+              {
+                "label": "Nombre del evento",
+                "rowspan": 2
+              },
+              {
+                "label": "Duración en horas",
+                "rowspan": 2
+              },
+              {
+                "label": "Modalidad",
+                "rowspan": 2
+              },
+              {
+                "label": "Competencias desarrolladas",
+                "rowspan": 2
+              },
+              {
+                "label": "Evento organizado por:",
+                "rowspan": 2
+              },
+              {
+                "label": "Personal de apoyo académico NMS",
+                "colspan": 3
+              }
+            ],
+            [
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "Total"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "no",
@@ -10086,19 +13009,19 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "personal_de_apoyo_academico_nms_h",
-              "label": "Personal de apoyo académico NMS H",
+              "label": "H",
               "type": "number",
               "private": false
             },
             {
               "key": "personal_de_apoyo_academico_nms_m",
-              "label": "Personal de apoyo académico NMS M",
+              "label": "M",
               "type": "number",
               "private": false
             },
             {
               "key": "personal_de_apoyo_academico_nms_total",
-              "label": "Personal de apoyo académico NMS Total",
+              "label": "Total",
               "type": "number",
               "private": false
             }

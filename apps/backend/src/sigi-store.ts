@@ -1787,6 +1787,7 @@ function officialWorkbookTemplate(indicator: SigiIndicator, session?: SigiSessio
     indicatorCode: displayCode,
     indicatorName: indicator.name,
     groups,
+    headerRows: imported.headerRows,
     columns,
     initialRows: rows,
     showTotals: imported.showTotals,

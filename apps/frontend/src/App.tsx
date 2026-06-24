@@ -373,7 +373,8 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
     : applySessionScope(selectedMockupIndicator ?? mockupIndicators[0], user);
   const isWaitingForCatalogIndicator = !selectedCatalogIndicator && !selectedMockupIndicator && !catalogLoaded;
   const isUnknownIndicator = !selectedCatalogIndicator && !selectedMockupIndicator && catalogLoaded;
-  const resolvedIndicatorId = selectedCatalogIndicator?.id ?? (selectedMockupIndicator ? getIndicatorIdByCode(selectedCode) : 0);
+  const canUseMockupIndicatorId = Boolean(selectedMockupIndicator && catalogLoaded);
+  const resolvedIndicatorId = selectedCatalogIndicator?.id ?? (canUseMockupIndicatorId ? getIndicatorIdByCode(selectedCode) : 0);
   const fallbackTemplate = fallbackTemplateForIndicator(selectedCode, selectedIndicator, selectedCatalogIndicator);
   const [remoteTemplate, setRemoteTemplate] = useState<(IndicatorTemplate & { initialRows?: Record<string, unknown>[] }) | null>(null);
   const selectedTemplate = {
@@ -417,7 +418,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
     actividadId: activeActividadId,
     responsableId: activeResponsableId,
     storageScope: `plantel-${activePlantelId}:${selectedCode}:periodo-${activePeriodoId}:actividad-${activeActividadId}`,
-    enabled: resolvedIndicatorId > 0 && !isWaitingForCatalogIndicator && !isUnknownIndicator,
+    enabled: resolvedIndicatorId > 0 && Boolean(selectedCatalogIndicator || canUseMockupIndicatorId) && !isWaitingForCatalogIndicator && !isUnknownIndicator,
   });
 
   const templateInitialRows = remoteTemplate?.initialRows ?? fallbackTemplate.initialRows ?? mockInitialData;

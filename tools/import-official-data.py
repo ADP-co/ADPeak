@@ -101,7 +101,23 @@ def clean_text(value: Any) -> str:
         return ""
     text = str(value).replace("\n", " ").strip()
     text = " ".join(text.split())
-    return unicodedata.normalize("NFC", text)
+    return unicodedata.normalize("NFC", repair_mojibake(text))
+
+
+def repair_mojibake(value: str) -> str:
+    if not any(marker in value for marker in MOJIBAKE_MARKERS):
+        return value
+
+    for encoding in ("latin1", "cp1252"):
+        try:
+            repaired = value.encode(encoding).decode("utf-8")
+        except UnicodeError:
+            continue
+
+        if sum(repaired.count(marker) for marker in MOJIBAKE_MARKERS) < sum(value.count(marker) for marker in MOJIBAKE_MARKERS):
+            return repaired
+
+    return value
 
 
 def normalize_key(value: str) -> str:
@@ -285,7 +301,7 @@ def workbook_summaries() -> tuple[
                     continue
                 payload = archive.read(info)
                 digest = hashlib.sha256(payload).hexdigest()
-                workbook = load_workbook(io.BytesIO(payload), data_only=False, read_only=True)
+                workbook = load_workbook(io.BytesIO(payload), data_only=False, read_only=False)
                 reference_codes: set[str] = set()
                 indicator_codes: set[str] = set()
                 planteles: set[str] = set()
@@ -414,7 +430,7 @@ def official_workbook_archives() -> list[tuple[Path, str | None, str]]:
 
 
 def source_path_for_summary(filename: str, source_prefix: str) -> str:
-    clean = unicodedata.normalize("NFC", filename)
+    clean = unicodedata.normalize("NFC", repair_mojibake(filename))
     if source_prefix == "Indicadores" and clean.startswith("indicadores/"):
         clean = clean.removeprefix("indicadores/")
     return clean if clean.startswith(f"{source_prefix}/") else f"{source_prefix}/{clean}"
@@ -436,6 +452,7 @@ def summarize_sheet(sheet: Any) -> dict[str, Any]:
 
     max_row = min(sheet.max_row or 80, 120)
     max_col = min(sheet.max_column or 30, 30)
+    merged_ranges = merged_ranges_for_sheet(sheet, max_row, max_col)
 
     for row_number, row in enumerate(sheet.iter_rows(min_row=1, max_row=max_row, max_col=max_col, values_only=False), start=1):
         values = [clean_text(cell.value) for cell in row]
@@ -483,13 +500,42 @@ def summarize_sheet(sheet: Any) -> dict[str, Any]:
         "numericCells": numeric_cells,
         "textCells": text_cells,
         "formulaCells": formula_cells,
-        "table": extract_table_from_rows(non_empty_rows),
+        "table": extract_table_from_rows(non_empty_rows, merged_ranges),
         "codeDescriptions": code_descriptions,
         "activityDescriptions": activity_descriptions,
         "indicatorCodes": indicator_codes,
         "codes": codes,
         "planteles": planteles,
     }
+
+
+def merged_ranges_for_sheet(sheet: Any, max_row: int, max_col: int) -> list[dict[str, Any]]:
+    ranges: list[dict[str, Any]] = []
+
+    for merged in sheet.merged_cells.ranges:
+        min_row, min_col, max_merged_row, max_merged_col = (
+            merged.min_row,
+            merged.min_col,
+            merged.max_row,
+            merged.max_col,
+        )
+
+        if min_row > max_row or min_col > max_col:
+            continue
+
+        label = clean_text(sheet.cell(min_row, min_col).value)
+        if not label:
+            continue
+
+        ranges.append({
+            "min_row": min_row,
+            "max_row": min(max_merged_row, max_row),
+            "min_col": min_col,
+            "max_col": min(max_merged_col, max_col),
+            "label": label,
+        })
+
+    return ranges
 
 
 def activity_description_from_row(row_text: str) -> str:
@@ -510,7 +556,7 @@ def trim_trailing_blanks(values: list[str]) -> list[str]:
     return trimmed
 
 
-def extract_table_from_rows(rows: list[dict[str, Any]]) -> dict[str, Any] | None:
+def extract_table_from_rows(rows: list[dict[str, Any]], merged_ranges: list[dict[str, Any]] | None = None) -> dict[str, Any] | None:
     if not rows:
         return None
 
@@ -537,14 +583,18 @@ def extract_table_from_rows(rows: list[dict[str, Any]]) -> dict[str, Any] | None
     if best_index < 0:
         return None
 
-    header_values, data_start = combined_header_values(rows, best_index)
+    header_matrix, header_row_numbers, data_start = combined_header_matrix(rows, best_index)
+    header_values = combined_header_labels(header_matrix, header_row_numbers, merged_ranges or [])
+    header_rows = structured_header_rows(header_matrix, header_row_numbers, merged_ranges or [])
+    column_labels = display_column_labels(header_matrix, header_row_numbers, merged_ranges or [])
     width = len(header_values)
     columns = []
     seen_keys: set[str] = set()
     for index, label in enumerate(header_values):
         if not label:
             label = f"Columna {index + 1}"
-        columns.append(column_from_label(label, seen_keys))
+        display_label = column_labels[index] if index < len(column_labels) and column_labels[index] else label
+        columns.append(column_from_label(display_label, seen_keys, key_label=label))
 
     initial_rows = []
     for row in rows[data_start:]:
@@ -569,6 +619,7 @@ def extract_table_from_rows(rows: list[dict[str, Any]]) -> dict[str, Any] | None
 
     return {
         "headerRow": rows[best_index]["row"],
+        "headerRows": header_rows,
         "columns": columns,
         "initialRows": initial_rows,
     }
@@ -598,17 +649,284 @@ def is_reference_note_row(normalized: str) -> bool:
 
 
 def combined_header_values(rows: list[dict[str, Any]], best_index: int) -> tuple[list[str], int]:
+    header_matrix, header_row_numbers, data_start = combined_header_matrix(rows, best_index)
+    return combined_header_labels(header_matrix, header_row_numbers, []), data_start
+
+
+def combined_header_matrix(rows: list[dict[str, Any]], best_index: int) -> tuple[list[list[str]], list[int], int]:
     primary = rows[best_index]["values"]
     secondary = adjacent_row_values(rows, best_index, 1)
     tertiary = adjacent_row_values(rows, best_index, 2)
 
     if secondary and tertiary and should_merge_three_header_rows(primary, secondary, tertiary):
-        return merge_header_rows([primary, secondary, tertiary]), best_index + 3
+        return [primary, secondary, tertiary], [rows[best_index + offset]["row"] for offset in range(3)], best_index + 3
 
     if not should_merge_header_rows(primary, secondary):
-        return primary, best_index + 1
+        return [primary], [rows[best_index]["row"]], best_index + 1
 
-    return merge_header_rows([primary, secondary]), best_index + 2
+    return [primary, secondary], [rows[best_index]["row"], rows[best_index + 1]["row"]], best_index + 2
+
+
+def combined_header_labels(
+    header_rows: list[list[str]],
+    header_row_numbers: list[int],
+    merged_ranges: list[dict[str, Any]],
+) -> list[str]:
+    if not merged_ranges:
+        return merge_header_rows(header_rows)
+
+    header_ranges = header_ranges_with_vertical_singletons(header_rows, header_row_numbers, merged_ranges)
+    grid = expanded_header_grid(header_rows, header_row_numbers, header_ranges)
+    labels: list[str] = []
+
+    if not grid:
+        return []
+
+    width = max(len(row) for row in grid)
+    for col_index in range(width):
+        parts: list[str] = []
+        normalized_parts: set[str] = set()
+        for row in grid:
+            label = clean_text(row[col_index] if col_index < len(row) else "")
+            normalized = normalize_key(label)
+            if not label or normalized in normalized_parts:
+                continue
+            if len(normalized) > 2 and any(normalized in existing for existing in normalized_parts):
+                continue
+            parts.append(label)
+            normalized_parts.add(normalized)
+        labels.append(" ".join(parts) or f"Columna {col_index + 1}")
+
+    return labels
+
+
+def display_column_labels(
+    header_rows: list[list[str]],
+    header_row_numbers: list[int],
+    merged_ranges: list[dict[str, Any]],
+) -> list[str]:
+    if not merged_ranges:
+        return merge_header_rows(header_rows)
+
+    header_ranges = header_ranges_with_vertical_singletons(header_rows, header_row_numbers, merged_ranges)
+    grid = expanded_header_grid(header_rows, header_row_numbers, header_ranges)
+    labels: list[str] = []
+
+    if not grid:
+        return []
+
+    width = max(len(row) for row in grid)
+    for col_index in range(width):
+        label = ""
+        for row in reversed(grid):
+            value = clean_text(row[col_index] if col_index < len(row) else "")
+            if value:
+                label = value
+                break
+        labels.append(label or f"Columna {col_index + 1}")
+
+    return labels
+
+
+def expanded_header_grid(
+    header_rows: list[list[str]],
+    header_row_numbers: list[int],
+    merged_ranges: list[dict[str, Any]],
+) -> list[list[str]]:
+    width = max(
+        [len(row) for row in header_rows] +
+        [merged["max_col"] for merged in merged_ranges if merged["min_row"] in header_row_numbers or merged["max_row"] in header_row_numbers] +
+        [1]
+    )
+    grid = [row + [""] * (width - len(row)) for row in header_rows]
+    row_index_by_number = {row_number: index for index, row_number in enumerate(header_row_numbers)}
+
+    for merged in merged_ranges:
+        overlapping_rows = [
+            row_number
+            for row_number in header_row_numbers
+            if merged["min_row"] <= row_number <= merged["max_row"]
+        ]
+        if not overlapping_rows:
+            continue
+
+        label = clean_text(merged["label"])
+        for row_number in overlapping_rows:
+            row_index = row_index_by_number[row_number]
+            for column_index in range(merged["min_col"] - 1, min(merged["max_col"], width)):
+                grid[row_index][column_index] = label
+
+    return grid
+
+
+def effective_header_merged_ranges(
+    header_rows: list[list[str]],
+    header_row_numbers: list[int],
+    merged_ranges: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    row_index_by_number = {row_number: index for index, row_number in enumerate(header_row_numbers)}
+    effective_ranges: list[dict[str, Any]] = []
+
+    for merged in merged_ranges:
+        overlapping_rows = [
+            row_number
+            for row_number in header_row_numbers
+            if merged["min_row"] <= row_number <= merged["max_row"]
+        ]
+        if not overlapping_rows:
+            continue
+
+        adjusted = dict(merged)
+        first_overlap = min(overlapping_rows)
+        min_col = merged["min_col"]
+        max_col = merged["max_col"]
+
+        for candidate_row in reversed([row_number for row_number in header_row_numbers if row_number < first_overlap]):
+            row_index = row_index_by_number[candidate_row]
+            can_lift = True
+            for column_number in range(min_col, max_col + 1):
+                raw_value = clean_text(header_rows[row_index][column_number - 1] if column_number <= len(header_rows[row_index]) else "")
+                if raw_value or header_cell_has_other_merge(candidate_row, column_number, merged, merged_ranges):
+                    can_lift = False
+                    break
+
+            if not can_lift:
+                break
+
+            adjusted["min_row"] = candidate_row
+
+        effective_ranges.append(adjusted)
+
+    return effective_ranges
+
+
+def header_ranges_with_vertical_singletons(
+    header_rows: list[list[str]],
+    header_row_numbers: list[int],
+    merged_ranges: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    effective_ranges = effective_header_merged_ranges(header_rows, header_row_numbers, merged_ranges)
+    grid = expanded_header_grid(header_rows, header_row_numbers, effective_ranges)
+
+    if len(header_row_numbers) < 2 or not grid:
+        return effective_ranges
+
+    width = max(len(row) for row in grid)
+    synthetic_ranges: list[dict[str, Any]] = []
+
+    for column_index in range(width):
+        non_empty = [
+            (row_index, clean_text(row[column_index] if column_index < len(row) else ""))
+            for row_index, row in enumerate(grid)
+            if clean_text(row[column_index] if column_index < len(row) else "")
+        ]
+
+        if len(non_empty) != 1:
+            continue
+
+        row_index, label = non_empty[0]
+        if row_index == 0:
+            continue
+
+        synthetic_ranges.append({
+            "min_row": header_row_numbers[0],
+            "max_row": header_row_numbers[-1],
+            "min_col": column_index + 1,
+            "max_col": column_index + 1,
+            "label": label,
+        })
+
+    return effective_ranges + synthetic_ranges
+
+
+def header_cell_has_other_merge(
+    row_number: int,
+    column_number: int,
+    current_merge: dict[str, Any],
+    merged_ranges: list[dict[str, Any]],
+) -> bool:
+    for merged in merged_ranges:
+        if merged is current_merge:
+            continue
+        if (
+            merged["min_row"] <= row_number <= merged["max_row"] and
+            merged["min_col"] <= column_number <= merged["max_col"] and
+            clean_text(merged["label"])
+        ):
+            return True
+
+    return False
+
+
+def structured_header_rows(
+    header_rows: list[list[str]],
+    header_row_numbers: list[int],
+    merged_ranges: list[dict[str, Any]],
+) -> list[list[dict[str, Any]]]:
+    if not merged_ranges or not header_rows:
+        return []
+
+    effective_ranges = header_ranges_with_vertical_singletons(header_rows, header_row_numbers, merged_ranges)
+    width = max(
+        [len(row) for row in header_rows] +
+        [merged["max_col"] for merged in effective_ranges if merged["min_row"] in header_row_numbers or merged["max_row"] in header_row_numbers] +
+        [1]
+    )
+    row_index_by_number = {row_number: index for index, row_number in enumerate(header_row_numbers)}
+    merged_by_start = {
+        (merged["min_row"], merged["min_col"]): merged
+        for merged in effective_ranges
+    }
+    covered: set[tuple[int, int]] = set()
+    structured: list[list[dict[str, Any]]] = []
+    grid = expanded_header_grid(header_rows, header_row_numbers, effective_ranges)
+
+    for row_index, row_number in enumerate(header_row_numbers):
+        cells: list[dict[str, Any]] = []
+        for column_number in range(1, width + 1):
+            if (row_number, column_number) in covered:
+                continue
+
+            merged = merged_by_start.get((row_number, column_number))
+            if merged:
+                row_span = len([
+                    candidate
+                    for candidate in header_row_numbers
+                    if merged["min_row"] <= candidate <= merged["max_row"]
+                ])
+                col_span = min(merged["max_col"], width) - merged["min_col"] + 1
+                for candidate_row in header_row_numbers:
+                    if not (merged["min_row"] <= candidate_row <= merged["max_row"]):
+                        continue
+                    for candidate_col in range(merged["min_col"], min(merged["max_col"], width) + 1):
+                        if candidate_row == row_number and candidate_col == column_number:
+                            continue
+                        covered.add((candidate_row, candidate_col))
+                cell = {"label": clean_text(merged["label"])}
+                if col_span > 1:
+                    cell["colspan"] = col_span
+                if row_span > 1:
+                    cell["rowspan"] = row_span
+                cells.append(cell)
+                continue
+
+            label = clean_text(grid[row_index][column_number - 1] if column_number <= len(grid[row_index]) else "") or f"Columna {column_number}"
+            row_span = 1
+            for next_row_index in range(row_index + 1, len(header_row_numbers)):
+                next_row_number = header_row_numbers[next_row_index]
+                next_value = clean_text(grid[next_row_index][column_number - 1] if column_number <= len(grid[next_row_index]) else "")
+                if next_value:
+                    break
+                covered.add((next_row_number, column_number))
+                row_span += 1
+
+            cell = {"label": label}
+            if row_span > 1:
+                cell["rowspan"] = row_span
+            cells.append(cell)
+        structured.append(cells)
+
+    return structured
 
 
 def adjacent_row_values(rows: list[dict[str, Any]], index: int, offset: int) -> list[str]:
@@ -692,8 +1010,9 @@ def forward_fill(values: list[str]) -> list[str]:
     return filled
 
 
-def column_from_label(label: str, seen_keys: set[str]) -> dict[str, Any]:
-    normalized = normalize_key(label)
+def column_from_label(label: str, seen_keys: set[str], *, key_label: str | None = None) -> dict[str, Any]:
+    normalized = normalize_key(key_label or label)
+    display_normalized = normalize_key(label)
     key = normalized.replace(" ", "_")[:48] or "columna"
     counter = 2
     base_key = key
@@ -702,9 +1021,11 @@ def column_from_label(label: str, seen_keys: set[str]) -> dict[str, Any]:
         counter += 1
     seen_keys.add(key)
 
-    if any(token in normalized for token in READONLY_TOKENS):
+    semantic_text = f"{normalized} {display_normalized}"
+
+    if any(token in semantic_text for token in READONLY_TOKENS):
         column_type = "readonly"
-    elif any(token in normalized for token in NUMBER_TOKENS) or set(normalized.split()) & {"m", "h", "t"}:
+    elif any(token in semantic_text for token in NUMBER_TOKENS) or set(display_normalized.split()) & {"m", "h", "t"}:
         column_type = "number"
     else:
         column_type = "text"
@@ -713,7 +1034,7 @@ def column_from_label(label: str, seen_keys: set[str]) -> dict[str, Any]:
         "key": key,
         "label": label,
         "type": column_type,
-        "private": any(token in normalized for token in PRIVATE_TOKENS),
+        "private": any(token in semantic_text for token in PRIVATE_TOKENS),
     }
 
 
@@ -842,6 +1163,7 @@ def template_from_workbook_sheets(
         "sourcePath": unicodedata.normalize("NFC", source_path),
         "sheetName": selected["name"],
         "groups": [],
+        "headerRows": table.get("headerRows") or [],
         "columns": columns,
         "initialRows": table["initialRows"],
         "showTotals": any(column["type"] == "number" for column in columns),
@@ -1000,6 +1322,11 @@ export type OfficialWorkbookSheetSummary = {{
   formulaCells: number;
   table?: {{
     headerRow: number;
+    headerRows?: Array<Array<{{
+      label: string;
+      colspan?: number;
+      rowspan?: number;
+    }}>>;
     columns: Array<{{
       key: string;
       label: string;
@@ -1045,6 +1372,11 @@ export type OfficialWorkbookTemplate = {{
   sourcePath: string;
   sheetName: string;
   groups: Array<{{ label: string; colspan: number }}>;
+  headerRows?: Array<Array<{{
+    label: string;
+    colspan?: number;
+    rowspan?: number;
+  }}>>;
   columns: Array<{{
     key: string;
     label: string;

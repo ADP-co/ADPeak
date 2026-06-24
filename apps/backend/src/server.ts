@@ -407,7 +407,22 @@ const server = createServer(async (request, response) => {
       }
 
       assertCaptureAccess(session, scope, "read");
-      sendJson(response, 200, { capture: findCaptureDraftByScope(scope) ?? null });
+      const capture = findCaptureDraftByScope(scope);
+
+      if (capture) {
+        try {
+          assertCaptureAccess(session, capture, "read");
+        } catch (error) {
+          if (error instanceof SigiValidationError) {
+            sendJson(response, 200, { capture: null });
+            return;
+          }
+
+          throw error;
+        }
+      }
+
+      sendJson(response, 200, { capture: capture ?? null });
       return;
     } catch (error) {
       if (sendError(response, error)) {
@@ -478,7 +493,8 @@ const server = createServer(async (request, response) => {
     const action = captureMatch[2];
 
     if (request.method === "GET" && !action) {
-      const draft = getCaptureDraft(captureId);
+      try {
+        const draft = getCaptureDraft(captureId);
 
       if (!draft) {
         sendJson(response, 404, {
@@ -488,8 +504,15 @@ const server = createServer(async (request, response) => {
         return;
       }
 
-      assertCaptureAccess(session, draft, "read");
-      sendJson(response, 200, draft);
+        assertCaptureAccess(session, draft, "read");
+        sendJson(response, 200, draft);
+      } catch (error) {
+        if (sendError(response, error)) {
+          return;
+        }
+
+        throw error;
+      }
       return;
     }
 
@@ -635,7 +658,8 @@ const server = createServer(async (request, response) => {
     }
 
     if (request.method === "POST" && action === "aprobar") {
-      const draft = getCaptureDraft(captureId);
+      try {
+        const draft = getCaptureDraft(captureId);
 
       if (!draft) {
         sendJson(response, 404, {
@@ -656,8 +680,15 @@ const server = createServer(async (request, response) => {
         return;
       }
 
-      await flushPersistedState();
-      sendJson(response, 200, updatedDraft);
+        await flushPersistedState();
+        sendJson(response, 200, updatedDraft);
+      } catch (error) {
+        if (sendError(response, error)) {
+          return;
+        }
+
+        throw error;
+      }
       return;
     }
   }
