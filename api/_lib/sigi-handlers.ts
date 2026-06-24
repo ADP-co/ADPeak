@@ -582,6 +582,7 @@ function filtersFromRequest(request: RequestLike) {
     periodo: queryValue(query.periodo),
     plantel: queryValue(query.plantel),
     plantelId: queryValue(query.plantelId),
+    estado: queryValue(query.estado) ?? queryValue(query.status)
   };
 }
 
