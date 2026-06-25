@@ -643,6 +643,7 @@ def extract_table_from_rows(rows: list[dict[str, Any]], merged_ranges: list[dict
             label = f"Columna {index + 1}"
         display_label = column_labels[index] if index < len(column_labels) and column_labels[index] else label
         columns.append(column_from_label(display_label, seen_keys, key_label=label))
+    apply_official_calculated_columns(columns)
 
     initial_rows = []
     for row in rows[data_start:]:
@@ -1086,11 +1087,40 @@ def column_from_label(label: str, seen_keys: set[str], *, key_label: str | None 
     }
 
 
+def apply_official_calculated_columns(columns: list[dict[str, Any]]) -> None:
+    """Promote known Excel formula columns to reproducible web calculations."""
+    keys = {column["key"] for column in columns}
+
+    attendance_column = next(
+        (
+            column
+            for column in columns
+            if "atencion" in normalize_key(f"{column['label']} {column['key']}")
+        ),
+        None,
+    )
+    if attendance_column and {
+        "matricula_t",
+        "cantidad_estudiantes_que_asistieron_t",
+    }.issubset(keys):
+        attendance_column["type"] = "calculated"
+        attendance_column["calculation"] = {
+            "type": "percentage",
+            "numeratorKey": "cantidad_estudiantes_que_asistieron_t",
+            "denominatorKey": "matricula_t",
+            "decimals": 2,
+        }
+        return
+
+
 def value_for_column(column: dict[str, Any], value: str) -> Any:
     if column.get("private"):
         return ""
 
     if is_private_cell_value(value):
+        return ""
+
+    if column["type"] == "calculated":
         return ""
 
     if column["type"] == "number":
@@ -1214,7 +1244,7 @@ def template_from_workbook_sheets(
         "headerRows": table.get("headerRows") or [],
         "columns": columns,
         "initialRows": table["initialRows"],
-        "showTotals": any(column["type"] == "number" for column in columns),
+        "showTotals": any(column["type"] in ("number", "calculated") for column in columns),
         "allowAddRows": True,
         "addRowLabel": "Agregar fila",
         "emptyRow": empty_row_for_columns(columns),
@@ -1260,6 +1290,7 @@ def empty_row_for_columns(columns: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         column["key"]: ""
         for column in columns
+        if column["type"] != "calculated"
     }
 
 
@@ -1359,6 +1390,20 @@ export type OfficialEvidenceGroup = {{
   sampleFileTypes: string[];
 }};
 
+export type OfficialCalculationConfig =
+  | {{ type: "sum"; sourceKeys: string[] }}
+  | {{
+      type: "percentage";
+      numeratorKey: string;
+      denominatorKey: string;
+      decimals?: number;
+    }}
+  | {{
+      type: "formula";
+      expression: string;
+      decimals?: number;
+    }};
+
 export type OfficialWorkbookSheetSummary = {{
   name: string;
   nonEmptyRows: number;
@@ -1378,7 +1423,8 @@ export type OfficialWorkbookSheetSummary = {{
     columns: Array<{{
       key: string;
       label: string;
-      type: "readonly" | "number" | "text";
+      type: "readonly" | "number" | "text" | "calculated";
+      calculation?: OfficialCalculationConfig;
       private?: boolean;
     }}>;
     initialRows: Array<Record<string, unknown>>;
@@ -1428,7 +1474,8 @@ export type OfficialWorkbookTemplate = {{
   columns: Array<{{
     key: string;
     label: string;
-    type: "readonly" | "number" | "text";
+    type: "readonly" | "number" | "text" | "calculated";
+    calculation?: OfficialCalculationConfig;
   }}>;
   initialRows: Array<Record<string, unknown>>;
   showTotals: boolean;

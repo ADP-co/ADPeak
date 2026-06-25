@@ -9,6 +9,20 @@ export type OfficialEvidenceGroup = {
   sampleFileTypes: string[];
 };
 
+export type OfficialCalculationConfig =
+  | { type: "sum"; sourceKeys: string[] }
+  | {
+      type: "percentage";
+      numeratorKey: string;
+      denominatorKey: string;
+      decimals?: number;
+    }
+  | {
+      type: "formula";
+      expression: string;
+      decimals?: number;
+    };
+
 export type OfficialWorkbookSheetSummary = {
   name: string;
   nonEmptyRows: number;
@@ -28,7 +42,8 @@ export type OfficialWorkbookSheetSummary = {
     columns: Array<{
       key: string;
       label: string;
-      type: "readonly" | "number" | "text";
+      type: "readonly" | "number" | "text" | "calculated";
+      calculation?: OfficialCalculationConfig;
       private?: boolean;
     }>;
     initialRows: Array<Record<string, unknown>>;
@@ -78,7 +93,8 @@ export type OfficialWorkbookTemplate = {
   columns: Array<{
     key: string;
     label: string;
-    type: "readonly" | "number" | "text";
+    type: "readonly" | "number" | "text" | "calculated";
+    calculation?: OfficialCalculationConfig;
   }>;
   initialRows: Array<Record<string, unknown>>;
   showTotals: boolean;
@@ -4531,7 +4547,13 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       {
         "key": "atencion",
         "label": "% ATENCIÓN",
-        "type": "text"
+        "type": "calculated",
+        "calculation": {
+          "type": "percentage",
+          "numeratorKey": "cantidad_estudiantes_que_asistieron_t",
+          "denominatorKey": "matricula_t",
+          "decimals": 2
+        }
       }
     ],
     "initialRows": [
@@ -4554,7 +4576,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "cantidad_estudiantes_que_asistieron_h": 0.0,
         "cantidad_estudiantes_que_asistieron_m": 0.0,
         "cantidad_estudiantes_que_asistieron_t": "",
-        "atencion": "=(R9*100)/E9"
+        "atencion": ""
       },
       {
         "plantel": "",
@@ -4575,7 +4597,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "cantidad_estudiantes_que_asistieron_h": 0.0,
         "cantidad_estudiantes_que_asistieron_m": 0.0,
         "cantidad_estudiantes_que_asistieron_t": "",
-        "atencion": "=(R10*100)/E10"
+        "atencion": ""
       },
       {
         "plantel": "",
@@ -4596,7 +4618,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "cantidad_estudiantes_que_asistieron_h": 0.0,
         "cantidad_estudiantes_que_asistieron_m": 0.0,
         "cantidad_estudiantes_que_asistieron_t": "",
-        "atencion": "=(R11*100)/E11"
+        "atencion": ""
       },
       {
         "plantel": "SEMIESCOLARIZADO",
@@ -4638,7 +4660,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "cantidad_estudiantes_que_asistieron_h": "",
         "cantidad_estudiantes_que_asistieron_m": "",
         "cantidad_estudiantes_que_asistieron_t": "",
-        "atencion": "% ATENCIÓN"
+        "atencion": ""
       },
       {
         "plantel": "",
@@ -4659,7 +4681,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "cantidad_estudiantes_que_asistieron_h": 0.0,
         "cantidad_estudiantes_que_asistieron_m": 0.0,
         "cantidad_estudiantes_que_asistieron_t": "",
-        "atencion": "=(R16*100)/E16"
+        "atencion": ""
       },
       {
         "plantel": "",
@@ -4680,7 +4702,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "cantidad_estudiantes_que_asistieron_h": 0.0,
         "cantidad_estudiantes_que_asistieron_m": 0.0,
         "cantidad_estudiantes_que_asistieron_t": "",
-        "atencion": "=(R17*100)/E17"
+        "atencion": ""
       }
     ],
     "showTotals": true,
@@ -4704,8 +4726,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "no_asignaturas_que_dieron_nivelacion_academica": "",
       "cantidad_estudiantes_que_asistieron_h": "",
       "cantidad_estudiantes_que_asistieron_m": "",
-      "cantidad_estudiantes_que_asistieron_t": "",
-      "atencion": ""
+      "cantidad_estudiantes_que_asistieron_t": ""
     },
     "footerNote": "",
     "quality": [
@@ -11387,8 +11408,14 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             {
               "key": "atencion",
               "label": "% ATENCIÓN",
-              "type": "text",
-              "private": false
+              "type": "calculated",
+              "private": false,
+              "calculation": {
+                "type": "percentage",
+                "numeratorKey": "cantidad_estudiantes_que_asistieron_t",
+                "denominatorKey": "matricula_t",
+                "decimals": 2
+              }
             }
           ],
           "initialRows": [
@@ -11411,7 +11438,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion": "=(R9*100)/E9"
+              "atencion": ""
             },
             {
               "plantel": "",
@@ -11432,7 +11459,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion": "=(R10*100)/E10"
+              "atencion": ""
             },
             {
               "plantel": "",
@@ -11453,7 +11480,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion": "=(R11*100)/E11"
+              "atencion": ""
             },
             {
               "plantel": "SEMIESCOLARIZADO",
@@ -11495,7 +11522,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "cantidad_estudiantes_que_asistieron_h": "",
               "cantidad_estudiantes_que_asistieron_m": "",
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion": "% ATENCIÓN"
+              "atencion": ""
             },
             {
               "plantel": "",
@@ -11516,7 +11543,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion": "=(R16*100)/E16"
+              "atencion": ""
             },
             {
               "plantel": "",
@@ -11537,7 +11564,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion": "=(R17*100)/E17"
+              "atencion": ""
             }
           ]
         },
@@ -11770,8 +11797,14 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             {
               "key": "atencion",
               "label": "% ATENCIÓN",
-              "type": "text",
-              "private": false
+              "type": "calculated",
+              "private": false,
+              "calculation": {
+                "type": "percentage",
+                "numeratorKey": "cantidad_estudiantes_que_asistieron_t",
+                "denominatorKey": "matricula_t",
+                "decimals": 2
+              }
             }
           ],
           "initialRows": [
@@ -11794,7 +11827,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion": "=(R9*100)/E9"
+              "atencion": ""
             },
             {
               "plantel": "",
@@ -11815,7 +11848,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion": "=(R10*100)/E10"
+              "atencion": ""
             },
             {
               "plantel": "",
@@ -11836,7 +11869,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion": "=(R11*100)/E11"
+              "atencion": ""
             },
             {
               "plantel": "SEMIESCOLARIZADO",
@@ -11878,7 +11911,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "cantidad_estudiantes_que_asistieron_h": "",
               "cantidad_estudiantes_que_asistieron_m": "",
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion": "% ATENCIÓN"
+              "atencion": ""
             },
             {
               "plantel": "",
@@ -11899,7 +11932,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion": "=(R16*100)/E16"
+              "atencion": ""
             },
             {
               "plantel": "",
@@ -11920,7 +11953,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion": "=(R17*100)/E17"
+              "atencion": ""
             }
           ]
         },
@@ -12153,8 +12186,14 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             {
               "key": "atencion",
               "label": "% ATENCIÓN",
-              "type": "text",
-              "private": false
+              "type": "calculated",
+              "private": false,
+              "calculation": {
+                "type": "percentage",
+                "numeratorKey": "cantidad_estudiantes_que_asistieron_t",
+                "denominatorKey": "matricula_t",
+                "decimals": 2
+              }
             }
           ],
           "initialRows": [
@@ -12177,7 +12216,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion": "=(R9*100)/E9"
+              "atencion": ""
             },
             {
               "plantel": "",
@@ -12198,7 +12237,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion": "=(R10*100)/E10"
+              "atencion": ""
             },
             {
               "plantel": "",
@@ -12219,7 +12258,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion": "=(R11*100)/E11"
+              "atencion": ""
             },
             {
               "plantel": "SEMIESCOLARIZADO",
@@ -12261,7 +12300,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "cantidad_estudiantes_que_asistieron_h": "",
               "cantidad_estudiantes_que_asistieron_m": "",
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion": "% ATENCIÓN"
+              "atencion": ""
             },
             {
               "plantel": "",
@@ -12282,7 +12321,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion": "=(R16*100)/E16"
+              "atencion": ""
             },
             {
               "plantel": "",
@@ -12303,7 +12342,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "cantidad_estudiantes_que_asistieron_h": 0.0,
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
-              "atencion": "=(R17*100)/E17"
+              "atencion": ""
             }
           ]
         },

@@ -62,6 +62,28 @@ describe("SIGI store and RBAC", () => {
     expect(catalogCodes.filter((code) => code.startsWith("FMT-") || code.includes("-FMT-")).some((code) => visibleCodes.has(code))).toBe(false);
   });
 
+  it("converts official Excel attendance formulas into calculated template columns", () => {
+    const nivelacionTemplate = Object.values(officialWorkbookTemplates).find((template) =>
+      template.sourceLabel.includes("NIVELACION ACADEMICA")
+    );
+
+    expect(nivelacionTemplate).toBeDefined();
+    expect(nivelacionTemplate?.columns.find((column) => column.key === "atencion")).toMatchObject({
+      type: "calculated",
+      calculation: {
+        type: "percentage",
+        numeratorKey: "cantidad_estudiantes_que_asistieron_t",
+        denominatorKey: "matricula_t",
+        decimals: 2
+      }
+    });
+    expect(
+      nivelacionTemplate?.initialRows.some((row) =>
+        Object.values(row).some((value) => String(value).trim().startsWith("="))
+      )
+    ).toBe(false);
+  });
+
   it("authenticates delivery users without exposing password hashes", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const users = listUsers(director);
