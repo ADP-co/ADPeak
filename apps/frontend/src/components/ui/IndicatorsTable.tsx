@@ -9,6 +9,7 @@ export type IndicatorStatus = 'Corregir' | 'Pendiente' | 'En revisión' | 'Aprob
 
 // Estructura de datos que requiere cada fila de la tabla
 export interface Indicator {
+  rowKey?: string;
   code: string;
   name: string;
   plantelId?: number;
@@ -27,6 +28,7 @@ interface IndicatorsTableProps {
   onSelectIndicator?: (indicator: Indicator) => void;
   showScopeColumns?: boolean;
   periodLabel?: string;
+  title?: string;
 }
 
 export const IndicatorsTable = ({
@@ -34,6 +36,7 @@ export const IndicatorsTable = ({
   onSelectIndicator,
   showScopeColumns = true,
   periodLabel = 'Periodo 2025 - 2026',
+  title = 'Indicadores',
 }: IndicatorsTableProps) => {
 
   const [filter, setFilter] = useState<string>('todos');
@@ -68,7 +71,7 @@ export const IndicatorsTable = ({
 
   const getPlantelLabel = (indicator: Indicator) => indicator.plantel ?? indicator.contribuidor ?? 'Sin asignar';
   const getSupervisorLabel = (indicator: Indicator) => indicator.supervisor ?? indicator.responsable ?? 'Sin asignar';
-  const scopeColumnLabel = user?.role === 'plantel' ? 'Plantel' : 'Alcance';
+  const scopeColumnLabel = user?.role === 'plantel' || user?.role === 'responsable' ? 'Plantel' : 'Alcance';
 
   // Mapeo de prioridad para ordenar por estatus cuando el filtro es "todos"
   const statusPriority: Record<IndicatorStatus, number> = {
@@ -119,7 +122,7 @@ export const IndicatorsTable = ({
       {/* Controles de Filtro */}
         <div className="flex flex-col gap-4 pb-4 pt-8 md:flex-row md:items-end md:justify-between">
           <h1 className="font-title text-3xl font-bold text-brand-Gris_oscuro shrink-0 select-none">
-            Indicadores
+            {title}
           </h1>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-end">
             <Input
@@ -174,7 +177,7 @@ export const IndicatorsTable = ({
             <tbody className="divide-y divide-brand-Gris_bajo/20 font-body text-sm text-brand-Gris_oscuro">
               {filteredIndicators.map((indicator) => (
                 <tr
-                  key={indicator.code}
+                  key={indicator.rowKey ?? indicator.code}
                   className="hover:bg-brand-Gris_bajo/15 transition-colors duration-150 ease-in-out group"
                 >
                   {/* Código del Indicador */}

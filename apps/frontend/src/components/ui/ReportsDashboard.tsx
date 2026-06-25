@@ -184,6 +184,7 @@ interface PlantelProgressRecord {
   indicatorId?: string;
   kind?: 'plantel' | 'indicador';
   periodos: string[];
+  recordCount?: number;
   percentage: number;
   status: PlantelStatus;
 }
@@ -219,6 +220,7 @@ function buildPlantelProgress(report: ExportReport, selectedPeriod: string): Pla
       plantelId: String(plantelId),
       kind: 'plantel',
       periodos: [selectedPeriod],
+      recordCount: rows.length,
       percentage,
       status: statusForRows(rows, percentage),
     };
@@ -240,6 +242,7 @@ function buildIndicatorProgress(report: ExportReport, selectedPeriod: string): P
       plantel: indicator.nombre,
       plantelId: '',
       periodos: [selectedPeriod],
+      recordCount: rows.length,
       percentage,
       status: statusForRows(rows, percentage),
     };
@@ -573,7 +576,7 @@ export const ReportsDashboard = () => {
       <div>
         <div className="flex flex-wrap items-center justify-between mb-4">
           <h2 className="font-title text-3xl font-bold text-brand-Gris_oscuro">
-            {isResponsible ? 'Progreso de mis indicadores' : 'Progreso de los Planteles'}
+            {isResponsible ? 'Información capturada' : 'Progreso de los Planteles'}
           </h2>
           <div className="flex items-center gap-2">
             <label htmlFor="reports-status-filter" className="text-xs text-brand-Gris_oscuro font-bold font-accent">Filtrar por</label>
@@ -618,7 +621,7 @@ export const ReportsDashboard = () => {
             <thead>
               <tr className="bg-brand-Gris_bajo/35 text-brand-Gris_oscuro font-title font-bold text-sm select-none border-b border-brand-Gris_bajo/20">
                 <th className="py-4 px-6 w-[20%] text-left">{isResponsible ? 'Indicador' : 'Plantel'}</th>
-                <th className="py-4 px-6 w-[55%]">Progreso</th>
+                <th className="py-4 px-6 w-[55%]">{isResponsible ? 'Registros capturados' : 'Progreso'}</th>
                 <th className="py-4 px-6 w-[25%]">Documentos</th>
               </tr>
             </thead>
@@ -634,7 +637,16 @@ export const ReportsDashboard = () => {
 
                   {/* Barra Mágica */}
                   <td className="py-4 px-6">
-                    {renderProgressBar(item)}
+                    {isResponsible ? (
+                      <div className="flex flex-col items-center justify-center gap-1">
+                        <span className="font-title text-lg font-bold text-brand-Verde_oscuro">
+                          {item.recordCount ?? 0}
+                        </span>
+                        <span className="font-body text-xs text-brand-Gris_oscuro/70">
+                          {item.status}
+                        </span>
+                      </div>
+                    ) : renderProgressBar(item)}
                   </td>
 
                   {/* Botones de documentos */}

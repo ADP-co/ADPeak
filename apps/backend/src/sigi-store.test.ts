@@ -282,6 +282,23 @@ describe("SIGI store and RBAC", () => {
       "x-role": "responsable",
       "x-responsable-id": "1"
     });
+    const assigned = listIndicators(responsable).find((indicator) =>
+      indicator.plantelIds.length === 0 || indicator.plantelIds.includes(1)
+    )!;
+    const template = templateForIndicator(assigned, responsable);
+
+    createCaptureDraft({
+      plantelId: 1,
+      indicadorId: assigned.id,
+      actividadId: 1,
+      periodoId: 1,
+      responsableId: assigned.primaryResponsibleId,
+      payload: {
+        rows: template.initialRows,
+        justificacion: "Captura real para reporte de responsable."
+      }
+    });
+
     const assignedCodes = listIndicators(responsable).map((indicator) => indicator.code);
     const report = buildReportPayload(responsable, {
       cicloEscolar: "2025-2026",
@@ -291,6 +308,7 @@ describe("SIGI store and RBAC", () => {
     expect(report.tipoReporte).toBe("responsable");
     expect(report.indicadores.length).toBeGreaterThan(0);
     expect(report.indicadores.every((indicator) => assignedCodes.includes(indicator.id))).toBe(true);
+    expect(report.indicadores.flatMap((indicator) => indicator.datos).every((row) => row.plantelId === "1")).toBe(true);
   });
 
   it("rejects plantel-scoped report filters for responsible users", () => {

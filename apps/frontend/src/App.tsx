@@ -118,7 +118,7 @@ function homePathForRole(role?: string) {
   }
 
   if (role === 'responsable') {
-    return '/revision';
+    return '/indicadores';
   }
 
   return '/indicadores';
@@ -553,7 +553,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
       isBusy={captureDraft.isBusy}
       statusMessage={captureDraft.statusMessage}
       errorMessage={captureDraft.errorMessage}
-      onBack={() => navigate(user?.role === 'responsable' ? '/revision' : '/indicadores')}
+      onBack={() => navigate(user?.role === 'responsable' ? (requestedCaptureId ? '/revision' : '/indicadores') : '/indicadores')}
     />
   );
 }
@@ -727,7 +727,19 @@ function AppContent() {
         {/* Vistas de Responsable */}
         {role === 'responsable' && (
           <>
-            <Route path="/revision" element={<Dashboard onSelectIndicator={handleSelectIndicator} />} />
+            <Route path="/indicadores" element={
+              <>
+                <ProgressBar totalIndicators={indicators.length} completedIndicators={completedIndicatorCount} />
+                <IndicatorsTable
+                  indicators={indicators}
+                  onSelectIndicator={handleSelectIndicator}
+                  showScopeColumns={false}
+                  title="Mis indicadores"
+                  periodLabel="Indicadores asignados"
+                />
+              </>
+            } />
+            <Route path="/revision" element={<Dashboard mode="responsible-review" onSelectIndicator={handleSelectIndicator} />} />
             <Route path="/historial" element={<IndicatorHistory />} />
           </>
         )}

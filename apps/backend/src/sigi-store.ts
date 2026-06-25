@@ -834,7 +834,7 @@ export function buildReportPayload(
   const cicloEscolar = filters.cicloEscolar ?? "2025-2026";
   const periodo = filters.periodo ?? "2026-A";
   const requestedPeriodoId = periodIdFromReportPeriod(`${periodo} ${cicloEscolar}`);
-  const includeBaseRows = requestedPeriodoId === currentReportPeriodId();
+  const includeBaseRows = session.role === "responsable" ? false : requestedPeriodoId === currentReportPeriodId();
   const normalizedStatusFilter = normalizeReportStatusFilter(filters.estado);
   const hasPlantelFilter = Boolean(filters.plantelId || filters.plantel);
 

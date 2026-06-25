@@ -68,11 +68,13 @@ const DonutCard = ({ title, percentage, colorClass, strokeColor }: DonutCardProp
 
 interface DashboardProps {
   onSelectIndicator?: (indicator: Indicator) => void;
+  mode?: 'general' | 'responsible-review';
 }
 
-export const Dashboard = ({ onSelectIndicator }: DashboardProps) => {
+export const Dashboard = ({ onSelectIndicator, mode = 'general' }: DashboardProps) => {
   const { user } = useAuth();
   const isResponsible = user?.role === 'responsable';
+  const isResponsibleReview = isResponsible && mode === 'responsible-review';
   const [selectedCycle, setSelectedCycle] = useState(cycleOptions[0].value);
   const [selectedPlantel, setSelectedPlantel] = useState('todos');
   const [report, setReport] = useState<ExportReport | null>(null);
@@ -127,7 +129,11 @@ export const Dashboard = ({ onSelectIndicator }: DashboardProps) => {
     };
   }, [isResponsible, selectedCycle, selectedPlantel, user?.id]);
 
-  const scopedIndicators = useMemo(() => reportToIndicators(report), [report]);
+  const scopedIndicators = useMemo(
+    () => reportToIndicators(report, { splitByCapture: isResponsibleReview })
+      .filter((indicator) => !isResponsibleReview || indicator.status === 'En revisión'),
+    [isResponsibleReview, report]
+  );
   const totalRows = useMemo(
     () => report?.indicadores.flatMap((indicator) => indicator.datos).length ?? 0,
     [report]
@@ -151,13 +157,13 @@ export const Dashboard = ({ onSelectIndicator }: DashboardProps) => {
         <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
           <div>
             <h1 className="font-title text-3xl font-bold text-brand-Gris_oscuro">
-              {isResponsible ? 'Mis indicadores en revisión' : 'Progreso General'}
+              {isResponsibleReview ? 'Indicadores en revisión' : isResponsible ? 'Mis indicadores' : 'Progreso General'}
             </h1>
             <p className="mt-1 text-sm font-body text-brand-Gris_oscuro/70">
               {isLoading
                 ? 'Actualizando alcance...'
                 : isResponsible
-                  ? `${totalIndicators} indicadores asignados y ${totalRows} registros de revisión`
+                  ? `${totalIndicators} capturas por revisar`
                   : `${totalIndicators} indicadores y ${totalRows} registros visibles`}
             </p>
           </div>
@@ -224,41 +230,69 @@ export const Dashboard = ({ onSelectIndicator }: DashboardProps) => {
       <IndicatorsTable
         indicators={scopedIndicators}
         onSelectIndicator={onSelectIndicator}
-        showScopeColumns={!isResponsible}
+        showScopeColumns={!isResponsible || isResponsibleReview}
+        title={isResponsibleReview ? 'Capturas recibidas' : 'Indicadores'}
         periodLabel={`Ciclo ${selectedCycleLabel}`}
       />
     </div>
   );
 };
 
-function reportToIndicators(report: ExportReport | null): Indicator[] {
+function reportToIndicators(report: ExportReport | null, options: { splitByCapture?: boolean } = {}): Indicator[] {
   if (!report) {
     return [];
   }
 
-  return report.indicadores
+  const rowsByIndicator = report.indicadores
     .filter((indicator) => indicator.id !== 'fuentes-oficiales-cargadas')
-    .map((indicator) => {
-      const rows = indicator.datos;
-      const bestRow = rows.find((row) => normalizeStatus(row.estado) === 'En revisión') ?? rows[0];
-      const planteles = uniqueLabels(rows.map((row) => row.plantel).filter(Boolean));
-      const responsables = uniqueLabels(rows.map((row) => row.responsable).filter(Boolean));
+    .flatMap((indicator) => {
+      const groupedRows = options.splitByCapture
+        ? groupRowsForReview(indicator.datos)
+        : [indicator.datos];
 
-      return {
-        code: indicator.id ?? slugCode(indicator.nombre),
-        name: indicator.nombre,
-        plantelId: bestRow?.plantelId ? Number(bestRow.plantelId) : undefined,
-        captureId: bestRow?.captureId,
-        actividadId: bestRow?.actividadId,
-        periodoId: bestRow?.periodoId,
-        status: statusFromRows(rows),
-        plantel: summarizeLabels(planteles, 'planteles'),
-        supervisor: summarizeLabels(responsables, 'responsables'),
-        responsable: summarizeLabels(responsables, 'responsables'),
-        contribuidor: summarizeLabels(planteles, 'planteles'),
-      };
-    })
-    .sort((a, b) => a.code.localeCompare(b.code, 'es', { numeric: true }));
+      return groupedRows.map((rows, groupIndex) => {
+        const bestRow = rows.find((row) => normalizeStatus(row.estado) === 'En revisión') ?? rows[0];
+        const planteles = uniqueLabels(rows.map((row) => row.plantel).filter(Boolean));
+        const responsables = uniqueLabels(rows.map((row) => row.responsable).filter(Boolean));
+        const code = indicator.id ?? slugCode(indicator.nombre);
+        const rowKey = options.splitByCapture
+          ? `${code}:${bestRow?.captureId ?? bestRow?.plantelId ?? groupIndex}`
+          : code;
+
+        return {
+          rowKey,
+          code,
+          name: indicator.nombre,
+          plantelId: bestRow?.plantelId ? Number(bestRow.plantelId) : undefined,
+          captureId: bestRow?.captureId,
+          actividadId: bestRow?.actividadId,
+          periodoId: bestRow?.periodoId,
+          status: statusFromRows(rows),
+          plantel: summarizeLabels(planteles, 'planteles'),
+          supervisor: summarizeLabels(responsables, 'responsables'),
+          responsable: summarizeLabels(responsables, 'responsables'),
+          contribuidor: summarizeLabels(planteles, 'planteles'),
+        };
+      });
+    });
+
+  return rowsByIndicator.sort((a, b) =>
+    a.code.localeCompare(b.code, 'es', { numeric: true }) ||
+    (a.plantel ?? '').localeCompare(b.plantel ?? '', 'es', { numeric: true })
+  );
+}
+
+function groupRowsForReview(rows: ReportDataRow[]) {
+  const grouped = new Map<string, ReportDataRow[]>();
+
+  rows.forEach((row, index) => {
+    const key = row.captureId
+      ? `capture:${row.captureId}`
+      : `scope:${row.plantelId ?? 'sin-plantel'}:${row.actividadId ?? index}`;
+    grouped.set(key, [...(grouped.get(key) ?? []), row]);
+  });
+
+  return Array.from(grouped.values());
 }
 
 function statusFromRows(rows: ReportDataRow[]): IndicatorStatus {

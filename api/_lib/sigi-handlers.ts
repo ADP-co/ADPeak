@@ -450,8 +450,11 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
         return;
       }
 
-      sigi.assertCaptureAccess(session, { ...draft, payload: body.payload }, "draft");
-      const updatedDraft = captures.updateCaptureDraft(id, body.payload);
+      const accessAction = session.role === "responsable" ? "responsibleEdit" : "draft";
+      sigi.assertCaptureAccess(session, { ...draft, payload: body.payload }, accessAction);
+      const updatedDraft = captures.updateCaptureDraft(id, body.payload, {
+        allowReviewStatus: accessAction === "responsibleEdit"
+      });
 
       if (!updatedDraft) {
         sendJson(response, 409, {
@@ -461,6 +464,7 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
         return;
       }
 
+      sigi.recordResponsibleCaptureEdit(session, updatedDraft);
       await flushRuntimeState();
       sendJson(response, 200, updatedDraft);
       return;

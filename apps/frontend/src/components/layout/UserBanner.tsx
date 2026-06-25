@@ -25,7 +25,8 @@ const navLinksByRole: Record<UserRole, { label: string; href: string }[]> = {
     { label: 'Usuarios', href: '/usuarios' }
   ],
   responsable: [
-    { label: 'Revisión', href: '/revision' },
+    { label: 'Mis indicadores', href: '/indicadores' },
+    { label: 'En revisión', href: '/revision' },
     { label: 'Historial', href: '/historial' },
     { label: 'Reportes', href: '/reportes' }
   ]
