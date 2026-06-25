@@ -165,14 +165,20 @@ export function listCaptureDrafts() {
     .sort((a, b) => a.id - b.id);
 }
 
-export function updateCaptureDraft(captureId: number, payload: CapturePayload) {
+export function updateCaptureDraft(
+  captureId: number,
+  payload: CapturePayload,
+  options: { allowReviewStatus?: boolean } = {}
+) {
   const draft = captureDrafts.get(captureId);
 
   if (!draft) {
     return undefined;
   }
 
-  if (!isEditableDraft(draft)) {
+  const canUpdateReviewDraft = options.allowReviewStatus && draft.estado === "en_revision";
+
+  if (!isEditableDraft(draft) && !canUpdateReviewDraft) {
     return undefined;
   }
 

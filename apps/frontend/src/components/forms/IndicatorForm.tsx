@@ -14,6 +14,7 @@ interface IndicatorFormProps {
   initialJustificacion?: string;
   existingEvidenceName?: string;
   canReview?: boolean;
+  canSaveReviewEdits?: boolean;
   captureStatus?: string;
   isReadOnly?: boolean;
   onBack?: () => void;
@@ -254,6 +255,7 @@ export const IndicatorForm = ({
   initialJustificacion,
   existingEvidenceName,
   canReview = false,
+  canSaveReviewEdits = false,
   captureStatus,
   isReadOnly = false,
   onSaveDraft,
@@ -638,8 +640,21 @@ export const IndicatorForm = ({
             </p>
           )}
         </div>
-        {canReview ? (canReviewCurrentCapture ? (
+        {canReview ? (
           <>
+            {canSaveReviewEdits && (
+              <Button
+                type="button"
+                variant="secondary"
+                className="text-xs py-1.5 px-4"
+                disabled={isBusy || isReadOnly}
+                onClick={() => void handleSaveDraft()}
+              >
+                Guardar cambios
+              </Button>
+            )}
+            {canReviewCurrentCapture && (
+              <>
             <Button
               type="button"
               variant="secondary"
@@ -658,8 +673,10 @@ export const IndicatorForm = ({
             >
               Aprobar indicador
             </Button>
+              </>
+            )}
           </>
-        ) : null) : (
+        ) : (
           <>
         <Button
           type="button"

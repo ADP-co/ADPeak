@@ -279,6 +279,7 @@ function normalizeStatus(value: string) {
 // Pantalla Principal de Reportes
 export const ReportsDashboard = () => {
   const { user } = useAuth();
+  const isResponsible = user?.role === 'responsable';
 
   // Estados para simular la carga del backend
   const [dateOptions] = useState(periodOptions);
@@ -438,7 +439,9 @@ export const ReportsDashboard = () => {
     ? plantelesFromReport
     : API_REQUESTS_ENABLED
       ? []
-      : fallbackPlanteles;
+      : isResponsible
+        ? []
+        : fallbackPlanteles;
 
   // Filtramos por progreso y siempre ordenamos alfabéticamente/numéricamente por plantel
   const visiblePlanteles = plantelRows.filter((item) => !selectedDate || item.periodos.includes(selectedDate));
@@ -521,7 +524,7 @@ export const ReportsDashboard = () => {
       <div className="mb-10">
         <div className="flex flex-wrap items-center justify-between mb-4">
           <h1 className="font-title text-3xl font-bold text-brand-Gris_oscuro">
-            Reportes Dinámicos
+            {isResponsible ? 'Reportes de mis indicadores' : 'Reportes Dinámicos'}
           </h1>
           <div className="flex gap-4">
             <Select
@@ -536,25 +539,33 @@ export const ReportsDashboard = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className={`grid grid-cols-1 gap-6 ${isResponsible ? 'md:grid-cols-4' : 'md:grid-cols-3'}`}>
           <DonutCard
-            title="Bachilleratos Completos"
+            title={isResponsible ? 'Aprobados' : 'Bachilleratos Completos'}
             percentage={completosPercentage}
             colorClass="bg-[#C1D82F]"
             strokeColor="#C1D82F"
           />
           <DonutCard
-            title="Bachilleratos Pendientes"
+            title={isResponsible ? 'Pendientes' : 'Bachilleratos Pendientes'}
             percentage={pendientesPercentage}
             colorClass="bg-[#FFD100]"
             strokeColor="#FFD100"
           />
           <DonutCard
-            title="Bachilleratos Rezagados"
+            title={isResponsible ? 'Con observación' : 'Bachilleratos Rezagados'}
             percentage={rezagadosPercentage}
             colorClass="bg-[#770F00]"
             strokeColor="#770F00"
           />
+          {isResponsible && (
+            <DonutCard
+              title="Asignados"
+              percentage={totalPlanteles > 0 ? 100 : 0}
+              colorClass="bg-[#00A4E4]"
+              strokeColor="#00A4E4"
+            />
+          )}
         </div>
       </div>
 
@@ -562,7 +573,7 @@ export const ReportsDashboard = () => {
       <div>
         <div className="flex flex-wrap items-center justify-between mb-4">
           <h2 className="font-title text-3xl font-bold text-brand-Gris_oscuro">
-            {user?.role === 'responsable' ? 'Progreso de Indicadores' : 'Progreso de los Planteles'}
+            {isResponsible ? 'Progreso de mis indicadores' : 'Progreso de los Planteles'}
           </h2>
           <div className="flex items-center gap-2">
             <label htmlFor="reports-status-filter" className="text-xs text-brand-Gris_oscuro font-bold font-accent">Filtrar por</label>
@@ -606,7 +617,7 @@ export const ReportsDashboard = () => {
 
             <thead>
               <tr className="bg-brand-Gris_bajo/35 text-brand-Gris_oscuro font-title font-bold text-sm select-none border-b border-brand-Gris_bajo/20">
-                <th className="py-4 px-6 w-[20%] text-left">{user?.role === 'responsable' ? 'Indicador' : 'Plantel'}</th>
+                <th className="py-4 px-6 w-[20%] text-left">{isResponsible ? 'Indicador' : 'Plantel'}</th>
                 <th className="py-4 px-6 w-[55%]">Progreso</th>
                 <th className="py-4 px-6 w-[25%]">Documentos</th>
               </tr>

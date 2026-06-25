@@ -710,8 +710,8 @@ export function templateForIndicator(indicator: SigiIndicator, session?: SigiSes
 
 export function assertCaptureAccess(
   session: SigiSession,
-  request: { plantelId: number; indicadorId: number; payload?: CapturePayload },
-  action: "draft" | "submit" | "read" | "review"
+  request: { plantelId: number; indicadorId: number; payload?: CapturePayload; estado?: CaptureDraft["estado"] },
+  action: "draft" | "submit" | "read" | "review" | "responsibleEdit"
 ) {
   const indicator = indicators.get(request.indicadorId);
 
@@ -725,6 +725,16 @@ export function assertCaptureAccess(
 
   if ((action === "draft" || action === "submit") && session.role !== "plantel") {
     throw new SigiForbiddenError("Solo el plantel puede capturar o enviar indicadores.");
+  }
+
+  if (action === "responsibleEdit") {
+    if (session.role !== "responsable") {
+      throw new SigiForbiddenError("Solo el responsable asignado puede editar capturas en revision.");
+    }
+
+    if (request.estado !== "en_revision") {
+      throw new SigiValidationError("Solo se pueden editar capturas que estan en revision.");
+    }
   }
 
   if (!canUseIndicatorForPlantel(indicator, request.plantelId)) {
@@ -742,6 +752,26 @@ export function assertCaptureAccess(
   if (request.payload) {
     validateCapturePayload(indicator, request.payload, action === "submit", session);
   }
+}
+
+export function recordResponsibleCaptureEdit(session: SigiSession, draft: CaptureDraft) {
+  if (session.role !== "responsable") {
+    return;
+  }
+
+  const indicator = indicators.get(draft.indicadorId);
+
+  if (!indicator || !isResponsibleAssigned(session, indicator)) {
+    return;
+  }
+
+  indicators.set(indicator.id, {
+    ...indicator,
+    updatedAt: draft.actualizadoEn,
+    updatedBy: actorNameForSession(session),
+    lastChange: "actualizado"
+  });
+  persistCatalogState();
 }
 
 export function validateCapturePayload(indicator: SigiIndicator, payload: CapturePayload, requireJustification: boolean, session?: SigiSession) {
@@ -807,6 +837,11 @@ export function buildReportPayload(
   const includeBaseRows = requestedPeriodoId === currentReportPeriodId();
   const normalizedStatusFilter = normalizeReportStatusFilter(filters.estado);
   const hasPlantelFilter = Boolean(filters.plantelId || filters.plantel);
+
+  if (session.role === "responsable" && hasPlantelFilter) {
+    throw new SigiForbiddenError("El responsable consulta reportes por indicadores asignados, no por plantel.");
+  }
+
   const plantelId = session.role === "plantel"
     ? session.plantelId
     : resolvePlantelId(filters.plantelId ?? filters.plantel);

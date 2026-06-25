@@ -50,6 +50,12 @@ export const IndicatorsTable = ({
 
   // Función para determinar el texto del botón de acción según el estatus
   const getActionLabel = (status: IndicatorStatus) => {
+    if (user?.role === 'responsable') {
+      if (status === 'En revisión') return 'Revisar / Editar';
+      if (status === 'Aprobado') return 'Ver aprobado';
+      return 'Ver datos';
+    }
+
     const isRestrictedRole = user?.role === 'admin' || user?.role === 'responsable';
     if (isRestrictedRole && (status === 'Corregir' || status === 'Pendiente')) {
       return 'Ver Datos';

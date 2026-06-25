@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { officialCatalogRows, officialCatalogStats, officialIndicatorPlantelScopes } from "./official-catalog.generated.js";
 import { officialDataSummary, officialWorkbookTemplates } from "./official-data.generated.js";
-import { createCaptureDraft, resetCaptureDraftsForTest } from "./capture-store.js";
+import { createCaptureDraft, resetCaptureDraftsForTest, sendCaptureToReview, updateCaptureDraft } from "./capture-store.js";
 import {
   assertCaptureAccess,
   authenticateUser,
@@ -293,6 +293,21 @@ describe("SIGI store and RBAC", () => {
     expect(report.indicadores.every((indicator) => assignedCodes.includes(indicator.id))).toBe(true);
   });
 
+  it("rejects plantel-scoped report filters for responsible users", () => {
+    const responsable = sessionFromHeaders({
+      "x-role": "responsable",
+      "x-responsable-id": "1"
+    });
+
+    expect(() =>
+      buildReportPayload(responsable, {
+        plantelId: "1",
+        cicloEscolar: "2025-2026",
+        periodo: "2026-2"
+      })
+    ).toThrow(SigiForbiddenError);
+  });
+
   it("keeps report filters explicit and includes capturable official indicators without explicit plantel scope", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const currentCycle = buildReportPayload(director, {
@@ -437,6 +452,56 @@ describe("SIGI store and RBAC", () => {
     expect(() =>
       assertCaptureAccess(unassignedResponsable, { plantelId: 1, indicadorId: indicator.id }, "review")
     ).toThrow(SigiForbiddenError);
+  });
+
+  it("allows assigned responsables to edit data for captures under review", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const indicator = saveIndicator(director, {
+      ...getIndicatorByCode("1.0.0.0.2")!,
+      plantelIds: [1]
+    });
+    const responsable = sessionFromHeaders({
+      "x-role": "responsable",
+      "x-responsable-id": String(indicator.responsibleIds[0])
+    });
+    const template = templateForIndicator(indicator, responsable);
+    const editableColumn = template.columns.find((column) => column.type === "number" || column.type === "text");
+
+    expect(editableColumn).toBeDefined();
+
+    const draft = createCaptureDraft({
+      plantelId: 1,
+      indicadorId: indicator.id,
+      actividadId: 1,
+      periodoId: 1,
+      responsableId: indicator.responsibleIds[0],
+      payload: {
+        rows: template.initialRows,
+        justificacion: "Captura enviada para revision."
+      }
+    });
+    const underReview = sendCaptureToReview(draft.id)!;
+    const payload = {
+      ...underReview.payload,
+      rows: underReview.payload.rows.map((row, index) =>
+        index === 0 && editableColumn
+          ? { ...row, [editableColumn.key]: editableColumn.type === "number" ? 99 : "Actualizado por responsable" }
+          : row
+      )
+    };
+
+    expect(() =>
+      assertCaptureAccess(responsable, { ...underReview, payload }, "responsibleEdit")
+    ).not.toThrow();
+    expect(() =>
+      assertCaptureAccess(responsable, { ...underReview, payload }, "draft")
+    ).toThrow(SigiForbiddenError);
+
+    const updated = updateCaptureDraft(underReview.id, payload, { allowReviewStatus: true });
+    expect(updated).toMatchObject({
+      estado: "en_revision",
+      versionActual: underReview.versionActual + 1
+    });
   });
 
   it("keeps academy workbook formats internal instead of exposing them as indicators", () => {

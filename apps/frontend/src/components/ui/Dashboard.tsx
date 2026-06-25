@@ -72,6 +72,7 @@ interface DashboardProps {
 
 export const Dashboard = ({ onSelectIndicator }: DashboardProps) => {
   const { user } = useAuth();
+  const isResponsible = user?.role === 'responsable';
   const [selectedCycle, setSelectedCycle] = useState(cycleOptions[0].value);
   const [selectedPlantel, setSelectedPlantel] = useState('todos');
   const [report, setReport] = useState<ExportReport | null>(null);
@@ -102,7 +103,7 @@ export const Dashboard = ({ onSelectIndicator }: DashboardProps) => {
     fetchExportReport({
       cicloEscolar: selectedCycle,
       periodo,
-      plantelId: selectedPlantel === 'todos' ? undefined : selectedPlantel,
+      plantelId: isResponsible || selectedPlantel === 'todos' ? undefined : selectedPlantel,
     })
       .then((nextReport) => {
         if (isMounted) {
@@ -124,7 +125,7 @@ export const Dashboard = ({ onSelectIndicator }: DashboardProps) => {
     return () => {
       isMounted = false;
     };
-  }, [selectedCycle, selectedPlantel, user?.id]);
+  }, [isResponsible, selectedCycle, selectedPlantel, user?.id]);
 
   const scopedIndicators = useMemo(() => reportToIndicators(report), [report]);
   const totalRows = useMemo(
@@ -134,11 +135,13 @@ export const Dashboard = ({ onSelectIndicator }: DashboardProps) => {
 
   const totalIndicators = scopedIndicators.length;
   const approvedCount = scopedIndicators.filter((indicator) => indicator.status === 'Aprobado').length;
-  const pendingCount = scopedIndicators.filter((indicator) => indicator.status === 'Pendiente' || indicator.status === 'Corregir').length;
+  const pendingCount = scopedIndicators.filter((indicator) => indicator.status === 'Pendiente').length;
+  const correctionCount = scopedIndicators.filter((indicator) => indicator.status === 'Corregir').length;
   const reviewCount = scopedIndicators.filter((indicator) => indicator.status === 'En revisión').length;
 
   const approvedPercentage = percentage(approvedCount, totalIndicators);
   const pendingPercentage = percentage(pendingCount, totalIndicators);
+  const correctionPercentage = percentage(correctionCount, totalIndicators);
   const reviewPercentage = percentage(reviewCount, totalIndicators);
   const selectedCycleLabel = cycleOptions.find((option) => option.value === selectedCycle)?.label ?? selectedCycle;
 
@@ -148,12 +151,14 @@ export const Dashboard = ({ onSelectIndicator }: DashboardProps) => {
         <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
           <div>
             <h1 className="font-title text-3xl font-bold text-brand-Gris_oscuro">
-              Progreso General
+              {isResponsible ? 'Mis indicadores en revisión' : 'Progreso General'}
             </h1>
             <p className="mt-1 text-sm font-body text-brand-Gris_oscuro/70">
               {isLoading
                 ? 'Actualizando alcance...'
-                : `${totalIndicators} indicadores y ${totalRows} registros visibles`}
+                : isResponsible
+                  ? `${totalIndicators} indicadores asignados y ${totalRows} registros de revisión`
+                  : `${totalIndicators} indicadores y ${totalRows} registros visibles`}
             </p>
           </div>
 
@@ -167,14 +172,16 @@ export const Dashboard = ({ onSelectIndicator }: DashboardProps) => {
               containerClassName="w-40"
             />
 
-            <Select
-              aria-label="Plantel"
-              value={selectedPlantel}
-              onChange={(event) => setSelectedPlantel(event.target.value)}
-              options={plantelOptions}
-              variant="solid"
-              containerClassName="w-44"
-            />
+            {!isResponsible && (
+              <Select
+                aria-label="Plantel"
+                value={selectedPlantel}
+                onChange={(event) => setSelectedPlantel(event.target.value)}
+                options={plantelOptions}
+                variant="solid"
+                containerClassName="w-44"
+              />
+            )}
           </div>
         </div>
 
@@ -184,32 +191,40 @@ export const Dashboard = ({ onSelectIndicator }: DashboardProps) => {
           </p>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className={`grid grid-cols-1 gap-6 ${isResponsible ? 'md:grid-cols-4' : 'md:grid-cols-3'}`}>
           <DonutCard
-            title="Indicadores Aprobados"
-            percentage={approvedPercentage}
-            colorClass="bg-[#c2d500]"
-            strokeColor="#C1D82F"
+            title={isResponsible ? 'Pendientes' : 'Indicadores Aprobados'}
+            percentage={isResponsible ? pendingPercentage : approvedPercentage}
+            colorClass={isResponsible ? 'bg-[#fcd34d]' : 'bg-[#c2d500]'}
+            strokeColor={isResponsible ? '#FFD100' : '#C1D82F'}
           />
           <DonutCard
-            title="Indicadores Pendientes"
-            percentage={pendingPercentage}
-            colorClass="bg-[#fcd34d]"
-            strokeColor="#FFD100"
+            title={isResponsible ? 'En revisión' : 'Indicadores Pendientes'}
+            percentage={isResponsible ? reviewPercentage : pendingPercentage}
+            colorClass={isResponsible ? 'bg-[#0ea5e9]' : 'bg-[#fcd34d]'}
+            strokeColor={isResponsible ? '#00A4E4' : '#FFD100'}
           />
           <DonutCard
-            title="Indicadores En Revisión"
-            percentage={reviewPercentage}
-            colorClass="bg-[#0ea5e9]"
-            strokeColor="#00A4E4"
+            title={isResponsible ? 'Con observación' : 'Indicadores En Revisión'}
+            percentage={isResponsible ? correctionPercentage : reviewPercentage}
+            colorClass={isResponsible ? 'bg-[#770F00]' : 'bg-[#0ea5e9]'}
+            strokeColor={isResponsible ? '#770F00' : '#00A4E4'}
           />
+          {isResponsible && (
+            <DonutCard
+              title="Aprobados"
+              percentage={approvedPercentage}
+              colorClass="bg-[#c2d500]"
+              strokeColor="#C1D82F"
+            />
+          )}
         </div>
       </div>
 
       <IndicatorsTable
         indicators={scopedIndicators}
         onSelectIndicator={onSelectIndicator}
-        showScopeColumns
+        showScopeColumns={!isResponsible}
         periodLabel={`Ciclo ${selectedCycleLabel}`}
       />
     </div>

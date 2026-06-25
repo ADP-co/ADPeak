@@ -432,6 +432,8 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
     () => mergeRowsWithTemplate(selectedTemplate, templateInitialRows, captureDraft.capture?.payload.rows),
     [captureDraft.capture?.payload.rows, selectedTemplate, templateInitialRows]
   );
+  const canPlantelEditCapture = user?.role === 'plantel' && isEditableCaptureStatus(captureDraft.capture?.estado);
+  const canResponsableEditCapture = user?.role === 'responsable' && captureDraft.capture?.estado === 'en_revision';
 
   if (isWaitingForCatalogIndicator) {
     return (
@@ -541,8 +543,9 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
       initialJustificacion={captureDraft.capture?.payload.justificacion}
       existingEvidenceName={captureDraft.capture?.payload.evidencia?.nombre}
       canReview={user?.role === 'responsable' || user?.role === 'admin'}
+      canSaveReviewEdits={canResponsableEditCapture}
       captureStatus={captureDraft.capture?.estado}
-      isReadOnly={user?.role !== 'plantel' || !isEditableCaptureStatus(captureDraft.capture?.estado)}
+      isReadOnly={!canPlantelEditCapture && !canResponsableEditCapture}
       onSaveDraft={handleSaveDraft}
       onSendReview={handleSendReview}
       onApprove={handleApprove}
@@ -550,7 +553,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
       isBusy={captureDraft.isBusy}
       statusMessage={captureDraft.statusMessage}
       errorMessage={captureDraft.errorMessage}
-      onBack={() => navigate('/indicadores')}
+      onBack={() => navigate(user?.role === 'responsable' ? '/revision' : '/indicadores')}
     />
   );
 }

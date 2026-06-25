@@ -30,6 +30,7 @@ import {
   listIndicators,
   listUsers,
   officialSourcesPayload,
+  recordResponsibleCaptureEdit,
   reloadSigiStateFromPersistence,
   saveIndicator,
   saveUser,
@@ -541,8 +542,11 @@ const server = createServer(async (request, response) => {
           return;
         }
 
-        assertCaptureAccess(session, { ...draft, payload }, "draft");
-        const updatedDraft = updateCaptureDraft(captureId, payload);
+        const accessAction = session.role === "responsable" ? "responsibleEdit" : "draft";
+        assertCaptureAccess(session, { ...draft, payload }, accessAction);
+        const updatedDraft = updateCaptureDraft(captureId, payload, {
+          allowReviewStatus: session.role === "responsable"
+        });
 
         if (!updatedDraft) {
           sendJson(response, 409, {
@@ -552,6 +556,7 @@ const server = createServer(async (request, response) => {
           return;
         }
 
+        recordResponsibleCaptureEdit(session, updatedDraft);
         await flushPersistedState();
         sendJson(response, 200, updatedDraft);
         return;
