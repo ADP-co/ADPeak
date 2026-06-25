@@ -454,6 +454,24 @@ describe("SIGI store and RBAC", () => {
     expect(adriana?.indicatorCodes).not.toContain("1.1.1.1.1");
   });
 
+  it("removes hidden or pending workbook codes from responsible assignments", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const user = saveUser(director, {
+      id: "responsable-hidden-codes",
+      name: "Responsable temporal",
+      role: "responsable",
+      responsableId: 1,
+      indicatorCodes: [
+        "1.0.0.0.2",
+        "1.1.1.1.1",
+        "1.1.1.1.1-FMT-489662BE",
+        "FMT-01-43FE55CA-formacion-docente-2026"
+      ]
+    });
+
+    expect(user.indicatorCodes).toEqual(["1.0.0.0.2"]);
+  });
+
   it("does not treat manual empty plantel scope as global access", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
 

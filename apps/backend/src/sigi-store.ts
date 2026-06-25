@@ -367,7 +367,7 @@ export function saveUser(session: SigiSession, input: Partial<SigiUser> & { pass
     role,
     plantelId: role === "plantel" ? input.plantelId ?? existing?.plantelId ?? 1 : undefined,
     responsableId: role === "responsable" ? input.responsableId ?? existing?.responsableId ?? 1 : undefined,
-    indicatorCodes: role === "responsable" ? input.indicatorCodes ?? existing?.indicatorCodes ?? [] : [],
+    indicatorCodes: sanitizeUserIndicatorCodes(role, input.indicatorCodes ?? existing?.indicatorCodes ?? []),
     active: input.active ?? existing?.active ?? true,
     passwordHash: input.password ? hashPassword(input.password) : existing?.passwordHash ?? defaultPasswordHashForRole(role)
   };
@@ -1224,9 +1224,23 @@ function normalizePersistedUser(user: SigiUser): SigiUser {
     role,
     username: normalizeUsername(user.username || usernameForUser(user.id, user.name, role)),
     passwordHash: user.passwordHash || defaultPasswordHashForRole(role),
-    indicatorCodes: user.indicatorCodes ?? [],
+    indicatorCodes: sanitizeUserIndicatorCodes(role, user.indicatorCodes ?? []),
     active: user.active ?? true
   };
+}
+
+function sanitizeUserIndicatorCodes(role: SystemRole, indicatorCodes: string[]) {
+  if (role !== "responsable") {
+    return [];
+  }
+
+  const assignableCodes = new Set(
+    Array.from(indicators.values())
+      .filter((indicator) => isVisibleOperationalIndicatorCode(indicator.code))
+      .map((indicator) => indicator.code)
+  );
+
+  return uniqueStrings(indicatorCodes.filter((code) => assignableCodes.has(code)));
 }
 
 function normalizePersistedIndicator(indicator: SigiIndicator): SigiIndicator {
