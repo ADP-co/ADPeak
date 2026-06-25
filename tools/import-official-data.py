@@ -139,10 +139,11 @@ def write_text(path: Path, text: str) -> None:
 
 
 def catalog_stats(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    operational_rows = [row for row in rows if row.get("classification") == "operational"]
     contributors = sorted(
         {
             person.strip()
-            for row in rows
+            for row in operational_rows
             for person in row["contributors"].split(",")
             if person.strip()
         },
@@ -153,10 +154,15 @@ def catalog_stats(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "sourceRows": len(rows),
         "uniqueRows": len({row["dedupeKey"] for row in rows}),
         "duplicateRows": sum(1 for row in rows if row["isDuplicate"]),
-        "uniqueIndicators": len({row["code"] for row in rows if row["code"]}),
-        "uniqueResponsibles": len({row["responsible"] for row in rows if row["responsible"]}),
+        "uniqueSourceCodes": len({row["sourceCode"] for row in rows if row.get("sourceCode")}),
+        "uniqueIndicators": len({row["code"] for row in operational_rows if row["code"]}),
+        "operationalRows": len(operational_rows),
+        "templateRows": sum(1 for row in rows if row.get("classification") == "template"),
+        "templateVariantRows": sum(1 for row in rows if row.get("classification") == "template_variant"),
+        "pendingMappingRows": sum(1 for row in rows if row.get("classification") == "pending_mapping"),
+        "uniqueResponsibles": len({row["responsible"] for row in operational_rows if row["responsible"]}),
         "uniqueContributors": len(contributors),
-        "uniqueActivities": len({row["activity"] for row in rows if row["activity"]}),
+        "uniqueActivities": len({row["activity"] for row in operational_rows if row["activity"]}),
         "blankActivities": sum(1 for row in rows if not row["activity"]),
         "workbookOnlyIndicators": sum(1 for row in rows if "workbook_only_indicator" in row["dataQuality"]),
     }
@@ -196,7 +202,7 @@ def split_people(value: str) -> list[str]:
 
 
 def catalog_plantel_scopes(rows: list[dict[str, Any]], detected_scopes: dict[str, list[int]]) -> dict[str, list[int]]:
-    catalog_codes = {row["code"] for row in rows if row["code"]}
+    catalog_codes = {row["code"] for row in rows if row["code"] and row.get("classification") == "operational"}
     scopes: dict[str, set[int]] = {}
 
     for code, plantel_ids in detected_scopes.items():
@@ -207,6 +213,42 @@ def catalog_plantel_scopes(rows: list[dict[str, Any]], detected_scopes: dict[str
         code: sorted(plantel_ids)
         for code, plantel_ids in sorted(scopes.items(), key=lambda item: normalize_key(item[0]))
     }
+
+
+def is_format_source(source_path: str, source_label: str = "", activity: str = "") -> bool:
+    normalized_path = unicodedata.normalize("NFC", source_path)
+    parts = [normalize_key(part) for part in normalized_path.split("/") if part]
+    stem = normalize_key(Path(normalized_path).stem)
+    label = normalize_key(source_label)
+    activity_key = normalize_key(activity)
+
+    if "formatos" in parts:
+        return True
+    if "formato" in stem.split() or stem.startswith("formato "):
+        return True
+    if "formato" in label.split() or label.startswith("formato "):
+        return True
+    if "opcion de llenado" in stem or "opcion de llenado" in label or "opcion de llenado" in activity_key:
+        return True
+    return False
+
+
+def classify_catalog_source(source_code: str, official_code: str, source_path: str, source_label: str, activity: str) -> tuple[str, list[str]]:
+    reasons: list[str] = []
+    if source_code.startswith("FMT-"):
+        reasons.append("synthetic_code")
+    if "-FMT-" in source_code:
+        reasons.append("variant_source_code")
+    if is_format_source(source_path, source_label, activity):
+        reasons.append("format_source")
+    if not official_code:
+        reasons.append("no_official_code")
+        return "pending_mapping", reasons
+    if "format_source" in reasons:
+        return ("template_variant" if source_code != official_code or "-FMT-" in source_code else "template"), reasons
+    if source_code != official_code:
+        reasons.append("merged_to_official_code")
+    return "operational", reasons
 
 
 def plantel_id_from_name(name: str) -> int | None:
@@ -250,7 +292,7 @@ RESPONSIBLE_FOLDER_ALIASES = {
 def workbook_catalog_rows(workbook_templates: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
 
-    for source_row, (code, template) in enumerate(
+    for source_row, (source_code, template) in enumerate(
         sorted(workbook_templates.items(), key=lambda item: normalize_key(item[0])),
         start=2,
     ):
@@ -259,21 +301,36 @@ def workbook_catalog_rows(workbook_templates: dict[str, dict[str, Any]]) -> list
             continue
 
         responsible = responsible_from_source_path(source_path)
+        source_label = clean_text(template.get("sourceLabel"))
+        official_code = clean_text(template.get("officialCode"))
         activity = (
             clean_text(template.get("activityLabel"))
-            or clean_text(template.get("sourceLabel"))
+            or source_label
             or clean_text(Path(source_path).name)
             or "Formato oficial importado"
         )
-        name = clean_text(template.get("indicatorName")) or clean_text(template.get("officialCode")) or code
-        dedupe_key = "\u241f".join((code, name, responsible, "Planteles", activity))
+        classification, classification_reason = classify_catalog_source(
+            source_code,
+            official_code,
+            source_path,
+            source_label,
+            activity,
+        )
+        code = official_code if classification == "operational" and official_code else source_code
+        name = clean_text(template.get("indicatorName")) or official_code or source_code
+        dedupe_key = "\u241f".join((source_code, code, name, responsible, "Planteles", activity, classification))
         rows.append({
             "sourceRow": source_row,
             "code": code,
+            "sourceCode": source_code,
+            "officialCode": official_code or None,
             "name": name,
             "responsible": responsible,
             "contributors": "Planteles",
             "activity": activity,
+            "classification": classification,
+            "visible": classification == "operational",
+            "classificationReason": classification_reason,
             "dedupeKey": hashlib.sha256(dedupe_key.encode("utf-8")).hexdigest()[:16],
             "isDuplicate": False,
             "duplicateOfSourceRow": None,
@@ -281,6 +338,66 @@ def workbook_catalog_rows(workbook_templates: dict[str, dict[str, Any]]) -> list
         })
 
     return rows
+
+
+def canonicalize_workbook_templates(workbook_templates: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    canonical = dict(workbook_templates)
+    by_official_code: dict[str, list[tuple[str, dict[str, Any], str]]] = defaultdict(list)
+
+    for source_code, template in workbook_templates.items():
+        official_code = clean_text(template.get("officialCode"))
+        if not official_code:
+            continue
+        source_path = clean_text(template.get("sourcePath"))
+        source_label = clean_text(template.get("sourceLabel"))
+        activity = clean_text(template.get("activityLabel")) or source_label or clean_text(Path(source_path).name)
+        classification, _reason = classify_catalog_source(source_code, official_code, source_path, source_label, activity)
+        by_official_code[official_code].append((source_code, template, classification))
+
+    for official_code, templates in by_official_code.items():
+        operational_templates = [
+            (source_code, template)
+            for source_code, template, classification in templates
+            if classification == "operational"
+        ]
+        if not operational_templates:
+            continue
+
+        selected_code, selected_template = max(
+            operational_templates,
+            key=lambda item: (
+                item[0] == official_code,
+                len(item[1].get("initialRows") or []),
+                len(item[1].get("columns") or []),
+            ),
+        )
+        if selected_code == official_code:
+            continue
+
+        current_template = canonical.get(official_code)
+        if current_template is not None:
+            source_path = clean_text(current_template.get("sourcePath")) or official_code
+            hidden_suffix = hashlib.sha256(source_path.encode("utf-8")).hexdigest()[:8].upper()
+            hidden_key = f"{official_code}-FMT-{hidden_suffix}"
+            while hidden_key in canonical and hidden_key != selected_code:
+                hidden_suffix = hashlib.sha256((source_path + hidden_key).encode("utf-8")).hexdigest()[:8].upper()
+                hidden_key = f"{official_code}-FMT-{hidden_suffix}"
+            hidden_template = dict(current_template)
+            hidden_template["indicatorCode"] = hidden_key
+            hidden_template["officialCode"] = official_code
+            hidden_template["quality"] = sorted(set(list(hidden_template.get("quality") or []) + ["canonical_format_hidden"]))
+            canonical[hidden_key] = hidden_template
+
+        promoted_template = dict(selected_template)
+        promoted_template["indicatorCode"] = official_code
+        promoted_template["officialCode"] = official_code
+        promoted_template["quality"] = sorted(set(list(promoted_template.get("quality") or []) + ["canonical_operational_template"]))
+        canonical[official_code] = promoted_template
+
+        if selected_code in canonical and selected_code != official_code:
+            del canonical[selected_code]
+
+    return canonical
 
 
 def responsible_from_source_path(source_path: str) -> str:
@@ -1334,10 +1451,15 @@ def generate_catalog_file(rows: list[dict[str, Any]], stats: dict[str, Any], sco
 export type OfficialCatalogRow = {{
   sourceRow: number;
   code: string;
+  sourceCode: string;
+  officialCode?: string | null;
   name: string;
   responsible: string;
   contributors: string;
   activity: string;
+  classification: "operational" | "template" | "template_variant" | "pending_mapping";
+  visible: boolean;
+  classificationReason: string[];
   dedupeKey: string;
   isDuplicate: boolean;
   duplicateOfSourceRow: number | null;
@@ -1513,6 +1635,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = {json_ts(sum
 
 def main() -> None:
     summaries, detected_scopes, evidence_groups, template_candidates, workbook_templates = workbook_summaries()
+    workbook_templates = canonicalize_workbook_templates(workbook_templates)
     rows = workbook_catalog_rows(workbook_templates)
     stats = catalog_stats(rows)
     scopes = catalog_plantel_scopes(rows, detected_scopes)

@@ -230,11 +230,17 @@ export const planteles: Plantel[] = [
 
 const unassignedPlantel: Plantel = { id: 0, key: "sin-plantel", name: "Sin plantel asignado" };
 const officialSourcePlantelIds: number[] = [];
-const officialCatalogImportVersion = "2026-06-23-indicadores-zip-only-v1";
+const officialCatalogImportVersion = "2026-06-25-operational-indicators-v1";
 const officialCatalogImportedAt = "2026-06-22T12:00:00.000-06:00";
+const operationalCatalogRows = officialCatalogRows.filter(isOperationalCatalogRow);
+const hiddenImportedIndicatorCodes = new Set(
+  officialCatalogRows
+    .filter((row) => !isOperationalCatalogRow(row))
+    .flatMap((row) => [row.code, row.sourceCode].filter(Boolean))
+);
 
 const responsibleNames = Array.from(
-  new Set(officialCatalogRows.map((row) => row.responsible).filter(Boolean))
+  new Set(operationalCatalogRows.map((row) => row.responsible).filter(Boolean))
 ).sort((a, b) => a.localeCompare(b, "es"));
 
 const responsibleIdByName = new Map(
@@ -469,7 +475,7 @@ export function createSessionToken(user: AuthenticatedSigiUser | SigiUser) {
 
 export function listIndicators(session: SigiSession, options: { includeInactive?: boolean } = {}): SigiIndicatorListItem[] {
   return Array.from(indicators.values())
-    .filter((indicator) => !isSyntheticIndicatorCode(indicator.code))
+    .filter((indicator) => isVisibleOperationalIndicatorCode(indicator.code))
     .filter((indicator) => options.includeInactive || indicator.active)
     .filter((indicator) => canReadIndicator(session, indicator))
     .map((indicator) => ({
@@ -1105,7 +1111,7 @@ function readableReportDetailLabel(key: string) {
 function buildIndicators() {
   const byCode = new Map<string, SigiIndicator>();
 
-  for (const row of officialCatalogRows) {
+  for (const row of operationalCatalogRows) {
     const responsibleId = responsibleIdByName.get(row.responsible) ?? 1;
     const contributors = splitNames(row.contributors);
     const existing = byCode.get(row.code);
@@ -1718,6 +1724,14 @@ function effectivePlantelIdsForIndicator(indicator: SigiIndicator) {
 
 function isSyntheticIndicatorCode(code: string) {
   return code.startsWith("FMT-") || code.includes("-FMT-");
+}
+
+function isOperationalCatalogRow(row: (typeof officialCatalogRows)[number]) {
+  return row.classification === "operational" && row.visible === true;
+}
+
+function isVisibleOperationalIndicatorCode(code: string) {
+  return !isSyntheticIndicatorCode(code) && !hiddenImportedIndicatorCodes.has(code);
 }
 
 function officialImportEvidencePlantelIds(code?: string) {

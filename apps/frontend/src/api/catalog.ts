@@ -309,12 +309,13 @@ export async function deactivateUser(id: string) {
 }
 
 function buildFallbackIndicators(): CatalogIndicator[] {
-  const responsibleNames = Array.from(new Set(officialCatalogRows.map((row) => row.responsible).filter(Boolean)))
+  const operationalRows = officialCatalogRows.filter(isOperationalCatalogRow);
+  const responsibleNames = Array.from(new Set(operationalRows.map((row) => row.responsible).filter(Boolean)))
     .sort((a, b) => a.localeCompare(b, 'es'));
   const responsibleIdByName = new Map(responsibleNames.map((name, index) => [name, index + 1]));
   const byCode = new Map<string, CatalogIndicator>();
 
-  officialCatalogRows.filter((row) => !isSyntheticIndicatorCode(row.code)).forEach((row) => {
+  operationalRows.forEach((row) => {
     const responsibleId = responsibleIdByName.get(row.responsible) ?? 1;
     const contributors = splitNames(row.contributors);
     const existing = byCode.get(row.code);
@@ -350,6 +351,10 @@ function buildFallbackIndicators(): CatalogIndicator[] {
 
 function isSyntheticIndicatorCode(code: string) {
   return code.startsWith('FMT-') || code.includes('-FMT-');
+}
+
+function isOperationalCatalogRow(row: (typeof officialCatalogRows)[number]) {
+  return row.classification === 'operational' && row.visible === true && !isSyntheticIndicatorCode(row.code);
 }
 
 function buildFallbackUsers(indicators: CatalogIndicator[]): CatalogUser[] {

@@ -24,7 +24,9 @@ const KNOWN_PLANTELES = catalogPlanteles.map((plantel) => ({
   name: plantel.name,
 }));
 const MOCK_PLANTELES = ['-', ...KNOWN_PLANTELES.map((plantel) => plantel.label)];
-const MOCK_INDICADORES = officialCatalogRows.map((indicator) => indicator.code);
+const MOCK_INDICADORES = officialCatalogRows
+  .filter((indicator) => indicator.classification === 'operational' && indicator.visible)
+  .map((indicator) => indicator.code);
 
 function normalizeSearch(value: string) {
   return value

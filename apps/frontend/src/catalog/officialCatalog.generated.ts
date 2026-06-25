@@ -4,10 +4,15 @@
 export type OfficialCatalogRow = {
   sourceRow: number;
   code: string;
+  sourceCode: string;
+  officialCode?: string | null;
   name: string;
   responsible: string;
   contributors: string;
   activity: string;
+  classification: "operational" | "template" | "template_variant" | "pending_mapping";
+  visible: boolean;
+  classificationReason: string[];
   dedupeKey: string;
   isDuplicate: boolean;
   duplicateOfSourceRow: number | null;
@@ -18,10 +23,15 @@ export const officialCatalogStats = {
   "sourceRows": 28,
   "uniqueRows": 28,
   "duplicateRows": 0,
-  "uniqueIndicators": 28,
-  "uniqueResponsibles": 10,
+  "uniqueSourceCodes": 28,
+  "uniqueIndicators": 14,
+  "operationalRows": 20,
+  "templateRows": 1,
+  "templateVariantRows": 3,
+  "pendingMappingRows": 4,
+  "uniqueResponsibles": 8,
   "uniqueContributors": 1,
-  "uniqueActivities": 28,
+  "uniqueActivities": 20,
   "blankActivities": 0,
   "workbookOnlyIndicators": 0
 } as const;
@@ -65,86 +75,7 @@ export const officialIndicatorPlantelScopes: Record<string, number[]> = {
     35,
     37
   ],
-  "1.0.0.0.2-FMT-7639E719": [
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    10,
-    11,
-    12,
-    13,
-    14,
-    15,
-    16,
-    17,
-    18,
-    19,
-    20,
-    21,
-    22,
-    23,
-    24,
-    25,
-    26,
-    27,
-    28,
-    29,
-    30,
-    31,
-    32,
-    33,
-    34,
-    35,
-    37
-  ],
-  "1.1.1.1.1": [
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    10,
-    11,
-    12,
-    13,
-    14,
-    15,
-    16,
-    17,
-    18,
-    19,
-    20,
-    21,
-    22,
-    23,
-    24,
-    25,
-    26,
-    27,
-    28,
-    29,
-    30,
-    31,
-    32,
-    33,
-    34,
-    35,
-    37
-  ],
   "1.1.2.0.3": [
-    3
-  ],
-  "1.1.2.0.3-FMT-EDABD54D": [
     3
   ],
   "1.1.2.5.3": [
@@ -194,11 +125,16 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   {
     "sourceRow": 2,
     "code": "1.0.0.0.2",
+    "sourceCode": "1.0.0.0.2",
+    "officialCode": "1.0.0.0.2",
     "name": "Porcentaje de titulación por cohorte del NMS",
     "responsible": "Responsable 01",
     "contributors": "Responsable 11",
     "activity": "1.0.0.0.2 Titulación por cohorte.xlsx",
-    "dedupeKey": "feaff05497009c42",
+    "classification": "operational",
+    "visible": true,
+    "classificationReason": [],
+    "dedupeKey": "28520ef8dfc2c601",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -211,11 +147,19 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   {
     "sourceRow": 3,
     "code": "1.0.0.0.2-FMT-7639E719",
+    "sourceCode": "1.0.0.0.2-FMT-7639E719",
+    "officialCode": "1.0.0.0.2",
     "name": "Porcentaje de titulación por cohorte del NMS",
     "responsible": "Responsable 01",
     "contributors": "Responsable 11",
     "activity": "Titulación por cohorte.xlsx",
-    "dedupeKey": "046d043f354a9df9",
+    "classification": "template_variant",
+    "visible": false,
+    "classificationReason": [
+      "variant_source_code",
+      "format_source"
+    ],
+    "dedupeKey": "ef8d4648d1a687f0",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -229,11 +173,18 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   {
     "sourceRow": 4,
     "code": "1.1.1.1.1",
+    "sourceCode": "1.1.1.1.1",
+    "officialCode": "1.1.1.1.1",
     "name": "Porcentaje de programas educativos de educación media superior nuevos, actualizados y reestructurados alineados al modelo educativo, incorporando formalmente el enfoque de sostenib",
     "responsible": "Responsable 01",
     "contributors": "Responsable 11",
     "activity": "Formato con OPCIONES de llenado de academias por plantel.xlsx",
-    "dedupeKey": "a50781535799b488",
+    "classification": "template",
+    "visible": false,
+    "classificationReason": [
+      "format_source"
+    ],
+    "dedupeKey": "7ca263e16298dcd3",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -246,11 +197,19 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   {
     "sourceRow": 5,
     "code": "1.1.1.1.1-FMT-489662BE",
+    "sourceCode": "1.1.1.1.1-FMT-489662BE",
+    "officialCode": "1.1.1.1.1",
     "name": "Porcentaje de programas educativos de educación media superior nuevos, actualizados y reestructurados alineados al modelo educativo, incorporando formalmente el enfoque de sostenib",
     "responsible": "Responsable 01",
     "contributors": "Responsable 11",
     "activity": "1.1.1.1.1 Formato conformación de academias por plantel.xlsx",
-    "dedupeKey": "d104d9c5b4f16e03",
+    "classification": "template_variant",
+    "visible": false,
+    "classificationReason": [
+      "variant_source_code",
+      "format_source"
+    ],
+    "dedupeKey": "632348b91837a35f",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -264,11 +223,16 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   {
     "sourceRow": 6,
     "code": "1.1.2.0.1",
+    "sourceCode": "1.1.2.0.1",
+    "officialCode": "1.1.2.0.1",
     "name": "Porcentaje retención escolar de educación media superior",
     "responsible": "Responsable 07",
     "contributors": "Responsable 11",
     "activity": "Indicador 1.1.2.0.1..xlsx",
-    "dedupeKey": "23f0ba9177c4c507",
+    "classification": "operational",
+    "visible": true,
+    "classificationReason": [],
+    "dedupeKey": "001f4b7ba0f71a11",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -280,12 +244,20 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   },
   {
     "sourceRow": 7,
-    "code": "1.1.2.0.1-FMT-4EB45B2E",
+    "code": "1.1.2.0.1",
+    "sourceCode": "1.1.2.0.1-FMT-4EB45B2E",
+    "officialCode": "1.1.2.0.1",
     "name": "PORCENTAJE DE RETENCIÓN ESCOLAR DE EMS",
     "responsible": "Responsable 05",
     "contributors": "Responsable 11",
     "activity": "1.1.2.0.1. porcentaje de retención escolar de EMS.xlsx",
-    "dedupeKey": "e275d69a4983c573",
+    "classification": "operational",
+    "visible": true,
+    "classificationReason": [
+      "variant_source_code",
+      "merged_to_official_code"
+    ],
+    "dedupeKey": "3492b2221b094c51",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -299,11 +271,16 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   {
     "sourceRow": 8,
     "code": "1.1.2.0.3",
+    "sourceCode": "1.1.2.0.3",
+    "officialCode": "1.1.2.0.3",
     "name": "TASA DE ABANDONO ESCOLAR DE EDUCACIÓN MEDIA SUPERIOR",
     "responsible": "Responsable 05",
     "contributors": "Responsable 11",
     "activity": "1.1.2.0.3.Estrategias para combatir el abandono escolar.xlsx",
-    "dedupeKey": "241bd2e3eff2f244",
+    "classification": "operational",
+    "visible": true,
+    "classificationReason": [],
+    "dedupeKey": "f8be59987b512348",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -315,12 +292,20 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   },
   {
     "sourceRow": 9,
-    "code": "1.1.2.0.3-FMT-EDABD54D",
+    "code": "1.1.2.0.3",
+    "sourceCode": "1.1.2.0.3-FMT-EDABD54D",
+    "officialCode": "1.1.2.0.3",
     "name": "Tasa de abadono escolar de educación media superior",
     "responsible": "Responsable 07",
     "contributors": "Responsable 11",
     "activity": "Indicador 1.1.2.0.3..xlsx",
-    "dedupeKey": "5bd61afce2162415",
+    "classification": "operational",
+    "visible": true,
+    "classificationReason": [
+      "variant_source_code",
+      "merged_to_official_code"
+    ],
+    "dedupeKey": "5b3f524c8b039516",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -334,11 +319,16 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   {
     "sourceRow": 10,
     "code": "1.1.2.1.4",
+    "sourceCode": "1.1.2.1.4",
+    "officialCode": "1.1.2.1.4",
     "name": "Porcentaje de estudiantes de educación media superior y superior atendidos en los servicios de salud integral",
     "responsible": "Responsable 04",
     "contributors": "Responsable 11",
     "activity": "PROMOCIÓN DE LA SALUD",
-    "dedupeKey": "c77d73de408927b9",
+    "classification": "operational",
+    "visible": true,
+    "classificationReason": [],
+    "dedupeKey": "34bba557a6dc75f1",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -351,11 +341,16 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   {
     "sourceRow": 11,
     "code": "1.1.2.2.10",
+    "sourceCode": "1.1.2.2.10",
+    "officialCode": "1.1.2.2.10",
     "name": "Porcentaje de estudiantes de educación media superior y superior que participan en acciones de sostenibilidad y medio ambiente para la acción climática",
     "responsible": "Responsable 10",
     "contributors": "Responsable 11",
     "activity": "1.1.2.2.10.xlsx",
-    "dedupeKey": "0964b03c8fae2015",
+    "classification": "operational",
+    "visible": true,
+    "classificationReason": [],
+    "dedupeKey": "6297e0e68afbe45d",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -368,11 +363,16 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   {
     "sourceRow": 12,
     "code": "1.1.2.2.11",
+    "sourceCode": "1.1.2.2.11",
+    "officialCode": "1.1.2.2.11",
     "name": "Porcentaje de estudiantes de educación media superior y superior que participan en acciones de igualdad de género",
     "responsible": "Responsable 03",
     "contributors": "Responsable 11",
     "activity": "1.1.2.2.11 Seguimiento capacitación en materia de género planteles.xlsx",
-    "dedupeKey": "ababc470d5ae1b26",
+    "classification": "operational",
+    "visible": true,
+    "classificationReason": [],
+    "dedupeKey": "79228afcf44daf12",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -385,11 +385,16 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   {
     "sourceRow": 13,
     "code": "1.1.2.3.1",
+    "sourceCode": "1.1.2.3.1",
+    "officialCode": "1.1.2.3.1",
     "name": "Porcentaje de estudiantes de NMS y NS participantes en las actividades de desarrollo y formación integral",
     "responsible": "Responsable 03",
     "contributors": "Responsable 11",
     "activity": "1.1.2.3.1 Programa Adopta una Prepa .xlsx",
-    "dedupeKey": "69aad894d8088a79",
+    "classification": "operational",
+    "visible": true,
+    "classificationReason": [],
+    "dedupeKey": "6da63f4e46e451b7",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -401,12 +406,20 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   },
   {
     "sourceRow": 14,
-    "code": "1.1.2.3.1-FMT-2A7229AD",
+    "code": "1.1.2.3.1",
+    "sourceCode": "1.1.2.3.1-FMT-2A7229AD",
+    "officialCode": "1.1.2.3.1",
     "name": "PORCENTAJE DE ESTUDIANTES DE MEDIA SUPERIOR QUE PARTICIPAN EN ACTIVIDADES DE FORMACIÓN INTEGRAL",
     "responsible": "Responsable 05",
     "contributors": "Responsable 11",
     "activity": "1.1.2.3.1.Convocatorias externas .xlsx",
-    "dedupeKey": "041e5531b647a06b",
+    "classification": "operational",
+    "visible": true,
+    "classificationReason": [
+      "variant_source_code",
+      "merged_to_official_code"
+    ],
+    "dedupeKey": "98e42af130c14ad0",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -419,12 +432,20 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   },
   {
     "sourceRow": 15,
-    "code": "1.1.2.3.1-FMT-6434504C",
+    "code": "1.1.2.3.1",
+    "sourceCode": "1.1.2.3.1-FMT-6434504C",
+    "officialCode": "1.1.2.3.1",
     "name": "Porcentaje de estudiantes de media superior que participan en actividades de formación integral",
     "responsible": "Responsable 04",
     "contributors": "Responsable 11",
     "activity": "VIAJES DE ESTUDIO",
-    "dedupeKey": "ecdacb921010908e",
+    "classification": "operational",
+    "visible": true,
+    "classificationReason": [
+      "variant_source_code",
+      "merged_to_official_code"
+    ],
+    "dedupeKey": "b3e9fe6077f6e334",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -437,12 +458,20 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   },
   {
     "sourceRow": 16,
-    "code": "1.1.2.3.1-FMT-AB95A3B8",
+    "code": "1.1.2.3.1",
+    "sourceCode": "1.1.2.3.1-FMT-AB95A3B8",
+    "officialCode": "1.1.2.3.1",
     "name": "Porcentaje de estudiantes de media superior que participan en actividades de formación integral",
     "responsible": "Responsable 10",
     "contributors": "Responsable 11",
     "activity": "1.1.2.3.1.xlsx",
-    "dedupeKey": "5501890dc37adf25",
+    "classification": "operational",
+    "visible": true,
+    "classificationReason": [
+      "variant_source_code",
+      "merged_to_official_code"
+    ],
+    "dedupeKey": "39cf91ad2401853e",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -455,12 +484,20 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   },
   {
     "sourceRow": 17,
-    "code": "1.1.2.3.1-FMT-FBF5B718",
+    "code": "1.1.2.3.1",
+    "sourceCode": "1.1.2.3.1-FMT-FBF5B718",
+    "officialCode": "1.1.2.3.1",
     "name": "PORCENTAJE DE ESTUDIANTES DE MEDIA SUPERIOR QUE PARTICIPAN EN ACTIVIDADES DE FORMACIÓN INTEGRAL",
     "responsible": "Responsable 05",
     "contributors": "Responsable 11",
     "activity": "1.1.2.3.1. Modelo de las Naciones Unidas.xlsx",
-    "dedupeKey": "1863e63fde864918",
+    "classification": "operational",
+    "visible": true,
+    "classificationReason": [
+      "variant_source_code",
+      "merged_to_official_code"
+    ],
+    "dedupeKey": "cb39dafb1f9b5c12",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -474,11 +511,16 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   {
     "sourceRow": 18,
     "code": "1.1.2.5.10",
+    "sourceCode": "1.1.2.5.10",
+    "officialCode": "1.1.2.5.10",
     "name": "Porcentaje de docentes de educación media superior y superior certificados en el dominio de una Lengua Extranjera",
     "responsible": "Responsable 06",
     "contributors": "Responsable 11",
     "activity": "1.1.2.5.10 - Porcentaje de docentes de educación media superior y superior certificados en el dominio de una Lengua Extranjera.xlsx",
-    "dedupeKey": "f7213ebaca0c60fb",
+    "classification": "operational",
+    "visible": true,
+    "classificationReason": [],
+    "dedupeKey": "a60da5bdb87b0899",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -491,31 +533,20 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   {
     "sourceRow": 19,
     "code": "1.1.2.5.3",
-    "name": "Porcentaje de PTC de educación media superior beneficiados en el programa de ESDEPED",
-    "responsible": "Responsable 01",
-    "contributors": "Responsable 11",
-    "activity": "Opción de llenado Seguimiento de PTC.xlsx",
-    "dedupeKey": "77b316d2ce80d604",
-    "isDuplicate": false,
-    "duplicateOfSourceRow": null,
-    "dataQuality": [
-      "official_code_detected",
-      "private_fields_blank",
-      "source_workbook_template",
-      "source_zip_indicator"
-    ]
-  },
-  {
-    "sourceRow": 20,
-    "code": "1.1.2.5.3-FMT-6D26FF23",
+    "sourceCode": "1.1.2.5.3",
+    "officialCode": "1.1.2.5.3",
     "name": "Porcentaje de PTC de educación media superior beneficiados en el programa de ESDEPED",
     "responsible": "Responsable 01",
     "contributors": "Responsable 11",
     "activity": "1.1.2.5.3 Seguimiento de PTC.xlsx",
-    "dedupeKey": "09fffdb2e7baf2a9",
+    "classification": "operational",
+    "visible": true,
+    "classificationReason": [],
+    "dedupeKey": "ce9dc01fea9b4a53",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
+      "canonical_operational_template",
       "official_code_detected",
       "private_fields_blank",
       "shared_official_code_split_by_source",
@@ -524,13 +555,44 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
+    "sourceRow": 20,
+    "code": "1.1.2.5.3-FMT-F28103DD",
+    "sourceCode": "1.1.2.5.3-FMT-F28103DD",
+    "officialCode": "1.1.2.5.3",
+    "name": "Porcentaje de PTC de educación media superior beneficiados en el programa de ESDEPED",
+    "responsible": "Responsable 01",
+    "contributors": "Responsable 11",
+    "activity": "Opción de llenado Seguimiento de PTC.xlsx",
+    "classification": "template_variant",
+    "visible": false,
+    "classificationReason": [
+      "variant_source_code",
+      "format_source"
+    ],
+    "dedupeKey": "b4427938444276b8",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "canonical_format_hidden",
+      "official_code_detected",
+      "private_fields_blank",
+      "source_workbook_template",
+      "source_zip_indicator"
+    ]
+  },
+  {
     "sourceRow": 21,
     "code": "2.1.4.1.2",
+    "sourceCode": "2.1.4.1.2",
+    "officialCode": "2.1.4.1.2",
     "name": "Número de estudiantes que colaboran en proyectos de investigación liderados por profesorado de tiempo completo",
     "responsible": "Responsable 03",
     "contributors": "Responsable 11",
     "activity": "2.1.4.1.2 Seguimiento a proyectos de investigación en planteles.xlsx",
-    "dedupeKey": "159ededf3336b707",
+    "classification": "operational",
+    "visible": true,
+    "classificationReason": [],
+    "dedupeKey": "e3f2e1d9d912c107",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -543,11 +605,16 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   {
     "sourceRow": 22,
     "code": "3.1.0.0.1",
+    "sourceCode": "3.1.0.0.1",
+    "officialCode": "3.1.0.0.1",
     "name": "Número de programas y proyectos de extensión y vinculación dirigidas al sector social y productivo",
     "responsible": "Responsable 10",
     "contributors": "Responsable 11",
     "activity": "3.1.0.0.1.xlsx",
-    "dedupeKey": "c6be483157d085b5",
+    "classification": "operational",
+    "visible": true,
+    "classificationReason": [],
+    "dedupeKey": "7eb2284c98d74ce9",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -560,11 +627,16 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   {
     "sourceRow": 23,
     "code": "3.1.1.3.6",
+    "sourceCode": "3.1.1.3.6",
+    "officialCode": "3.1.1.3.6",
     "name": "Número de participantes en actividades de sostenibilidad y medio ambiente convocadas por el SIGA",
     "responsible": "Responsable 10",
     "contributors": "Responsable 11",
     "activity": "3.1.1.3.6.xlsx",
-    "dedupeKey": "5f9569e2e5a45ab7",
+    "classification": "operational",
+    "visible": true,
+    "classificationReason": [],
+    "dedupeKey": "b6067952b350a8c9",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -577,11 +649,16 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   {
     "sourceRow": 24,
     "code": "4.1.1.0.1",
+    "sourceCode": "4.1.1.0.1",
+    "officialCode": "4.1.1.0.1",
     "name": "Número de Sistemas de Información Institucionales que interoperan",
     "responsible": "Responsable 02",
     "contributors": "Responsable 11",
     "activity": "4.1.1.0.1. Numero de Sistemas de Informacion Institucionales que interoperan.xlsx",
-    "dedupeKey": "04db0ba7b3ec2e39",
+    "classification": "operational",
+    "visible": true,
+    "classificationReason": [],
+    "dedupeKey": "3f2084b45468dec8",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -594,11 +671,16 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   {
     "sourceRow": 25,
     "code": "4.1.1.1.1",
+    "sourceCode": "4.1.1.1.1",
+    "officialCode": "4.1.1.1.1",
     "name": "Número de sistemas implementados y mejorados para fortalecer la gestión de procesos institucionales",
     "responsible": "Responsable 02",
     "contributors": "Responsable 11",
     "activity": "4.1.1.1.1. - Número de sistemas implementados y mejorados para fortalecer la gestión de procesos institucionales..xlsx",
-    "dedupeKey": "7ed01891822d834b",
+    "classification": "operational",
+    "visible": true,
+    "classificationReason": [],
+    "dedupeKey": "852e1d3591f842e4",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -611,11 +693,19 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   {
     "sourceRow": 26,
     "code": "FMT-01-43FE55CA-formacion-docente-2026",
+    "sourceCode": "FMT-01-43FE55CA-formacion-docente-2026",
+    "officialCode": null,
     "name": "Formación_docente_2026",
     "responsible": "Responsable 09",
     "contributors": "Responsable 11",
     "activity": "Formación_docente_2026.xlsx",
-    "dedupeKey": "1f33374d67ff3180",
+    "classification": "pending_mapping",
+    "visible": false,
+    "classificationReason": [
+      "synthetic_code",
+      "no_official_code"
+    ],
+    "dedupeKey": "32b5496e3123e427",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -628,11 +718,19 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   {
     "sourceRow": 27,
     "code": "FMT-01-D30B3A90-formacion-apoyo-academic",
+    "sourceCode": "FMT-01-D30B3A90-formacion-apoyo-academic",
+    "officialCode": null,
     "name": "Formación_apoyo académico_2026",
     "responsible": "Responsable 09",
     "contributors": "Responsable 11",
     "activity": "Formación_apoyo académico_2026.xlsx",
-    "dedupeKey": "6069d6c7262f6a88",
+    "classification": "pending_mapping",
+    "visible": false,
+    "classificationReason": [
+      "synthetic_code",
+      "no_official_code"
+    ],
+    "dedupeKey": "736f89c9d9ee3466",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -645,11 +743,19 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   {
     "sourceRow": 28,
     "code": "FMT-01-E81E8473-41221-porcentaje-de-uo-q",
+    "sourceCode": "FMT-01-E81E8473-41221-porcentaje-de-uo-q",
+    "officialCode": null,
     "name": "41221 - Porcentaje de UO que realizan acciones de actualización, mantenimiento preventivo o correctivo de la insfraestructura tecnologica",
     "responsible": "Responsable 02",
     "contributors": "Responsable 11",
     "activity": "41221 - Porcentaje de UO que realizan acciones de actualización, mantenimiento preventivo o correctivo de la insfraestructura tecnologica.xlsx",
-    "dedupeKey": "4a4d08643b7a2fef",
+    "classification": "pending_mapping",
+    "visible": false,
+    "classificationReason": [
+      "synthetic_code",
+      "no_official_code"
+    ],
+    "dedupeKey": "14ea03f1842b9d5d",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [
@@ -662,11 +768,19 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   {
     "sourceRow": 29,
     "code": "FMT-01-F2A88F7E-nivelacion-academica-ago",
+    "sourceCode": "FMT-01-F2A88F7E-nivelacion-academica-ago",
+    "officialCode": null,
     "name": "NIVELACION ACADEMICA_ agosto 2025_ENERO2026 (1)",
     "responsible": "Responsable 08",
     "contributors": "Responsable 11",
     "activity": "NIVELACION ACADEMICA_ agosto 2025_ENERO2026 (1).xlsx",
-    "dedupeKey": "ad2819175087d24c",
+    "classification": "pending_mapping",
+    "visible": false,
+    "classificationReason": [
+      "synthetic_code",
+      "no_official_code"
+    ],
+    "dedupeKey": "246cc0f0c53cedc2",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [

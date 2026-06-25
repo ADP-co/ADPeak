@@ -33,7 +33,9 @@ const plantelIndicatorScope: Pick<Indicator, 'plantel' | 'supervisor' | 'respons
   contribuidor: UNASSIGNED_PLANTEL_LABEL,
 };
 
-const mockupIndicatorsBase: Indicator[] = officialCatalogRows.map((indicator) => ({
+const mockupIndicatorsBase: Indicator[] = officialCatalogRows
+  .filter((indicator) => indicator.classification === 'operational' && indicator.visible)
+  .map((indicator) => ({
   code: indicator.code,
   name: indicator.name,
   status: 'Pendiente',

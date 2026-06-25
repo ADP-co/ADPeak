@@ -33,11 +33,17 @@ describe("SIGI store and RBAC", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const indicators = listIndicators(director);
 
-    expect(officialCatalogStats.uniqueIndicators).toBe(28);
+    expect(officialCatalogStats.uniqueIndicators).toBe(14);
+    expect(officialCatalogStats.operationalRows).toBe(20);
+    expect(officialCatalogStats.templateRows).toBe(1);
+    expect(officialCatalogStats.templateVariantRows).toBe(3);
+    expect(officialCatalogStats.pendingMappingRows).toBe(4);
     expect(officialDataSummary.workbookCount).toBe(30);
     expect(Object.keys(officialWorkbookTemplates)).toHaveLength(28);
+    expect(indicators).toHaveLength(14);
     expect(indicators.length).toBeGreaterThan(0);
     expect(indicators.every((indicator) => !indicator.code.startsWith("FMT-") && !indicator.code.includes("-FMT-"))).toBe(true);
+    expect(indicators.some((indicator) => indicator.code === "1.1.1.1.1")).toBe(false);
     expect(indicators.some((indicator) =>
       indicator.name.toLowerCase().includes("la tabla anterior incide")
     )).toBe(false);
@@ -53,13 +59,22 @@ describe("SIGI store and RBAC", () => {
   it("keeps official catalog indicators visible for plantel capture even when no detailed workbook exists", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const visibleCodes = new Set(listIndicators(director).map((indicator) => indicator.code));
-    const catalogCodes = Array.from(new Set(officialCatalogRows.map((row) => row.code).filter(Boolean)));
-    const publicCatalogCodes = catalogCodes.filter((code) => !code.startsWith("FMT-") && !code.includes("-FMT-"));
+    const catalogSourceCodes = Array.from(new Set(officialCatalogRows.map((row) => row.sourceCode).filter(Boolean)));
+    const operationalCodes = Array.from(new Set(
+      officialCatalogRows
+        .filter((row) => row.classification === "operational" && row.visible)
+        .map((row) => row.code)
+    ));
+    const hiddenCodes = new Set(
+      officialCatalogRows
+        .filter((row) => row.classification !== "operational" || !row.visible)
+        .flatMap((row) => [row.code, row.sourceCode])
+    );
 
-    expect(catalogCodes.length).toBe(28);
-    expect(publicCatalogCodes.length).toBeLessThan(catalogCodes.length);
-    expect(publicCatalogCodes.filter((code) => !visibleCodes.has(code))).toEqual([]);
-    expect(catalogCodes.filter((code) => code.startsWith("FMT-") || code.includes("-FMT-")).some((code) => visibleCodes.has(code))).toBe(false);
+    expect(catalogSourceCodes.length).toBe(28);
+    expect(operationalCodes).toHaveLength(14);
+    expect(operationalCodes.filter((code) => !visibleCodes.has(code))).toEqual([]);
+    expect(Array.from(hiddenCodes).some((code) => visibleCodes.has(code))).toBe(false);
   });
 
   it("converts official Excel attendance formulas into calculated template columns", () => {
@@ -424,28 +439,19 @@ describe("SIGI store and RBAC", () => {
     ).toThrow(SigiForbiddenError);
   });
 
-  it("preserves official plantel values for director and filters them for plantel sessions", () => {
+  it("keeps academy workbook formats internal instead of exposing them as indicators", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
-    const bachillerato16 = sessionFromHeaders({ "x-role": "plantel", "x-plantel-id": "1" });
-    const indicator = getIndicatorByCode("1.1.1.1.1");
+    const academyRows = officialCatalogRows.filter((row) => row.officialCode === "1.1.1.1.1");
+    const adriana = listUsers(director).find((user) => user.name === "Adriana Ruiz Rivera");
+    const visibleCodes = new Set(listIndicators(director).map((indicator) => indicator.code));
 
-    expect(indicator).toBeDefined();
-
-    const directorTemplate = templateForIndicator(indicator!, director);
-    const directorPlanteles = new Set(directorTemplate.initialRows.map((row) => row.plantel));
-
-    expect(directorPlanteles.size).toBeGreaterThan(1);
-    expect(Array.from(directorPlanteles).some((plantel) => String(plantel).includes("Bachillerato"))).toBe(true);
-    expect(directorTemplate.initialRows.some((row) => "nombre_del_programa" in row)).toBe(true);
-    expect(directorTemplate.infoBlocks ?? []).toHaveLength(0);
-    expect(directorTemplate.footerNote).toBeUndefined();
-    expect(directorTemplate.groups.some((group) => group.label === "Formato oficial importado")).toBe(false);
-
-    const plantelTemplate = templateForIndicator(indicator!, bachillerato16);
-
-    expect(plantelTemplate.initialRows.length).toBeGreaterThan(0);
-    expect(plantelTemplate.initialRows.every((row) => row.plantel === "Bachillerato 16")).toBe(true);
-    expect(plantelTemplate.initialRows.some((row) => "nombre_del_programa" in row)).toBe(true);
+    expect(academyRows).toHaveLength(2);
+    expect(academyRows.every((row) => row.classification !== "operational" && !row.visible)).toBe(true);
+    expect(officialWorkbookTemplates["1.1.1.1.1"]).toBeDefined();
+    expect(officialWorkbookTemplates["1.1.1.1.1-FMT-489662BE"]).toBeDefined();
+    expect(getIndicatorByCode("1.1.1.1.1")).toBeUndefined();
+    expect(visibleCodes.has("1.1.1.1.1")).toBe(false);
+    expect(adriana?.indicatorCodes).not.toContain("1.1.1.1.1");
   });
 
   it("does not treat manual empty plantel scope as global access", () => {
@@ -863,8 +869,19 @@ describe("SIGI store and RBAC", () => {
     ];
 
     cases.forEach(({ code, expectedKeys, sampleValues }) => {
+      const existingIndicator = getIndicatorByCode(code);
+      if (!existingIndicator) {
+        const internalTemplate = officialWorkbookTemplates[code];
+        const internalKeys = internalTemplate?.columns.map((column) => column.key) ?? [];
+
+        expect(internalTemplate).toBeDefined();
+        expectedKeys.forEach((key) => expect(internalKeys).toContain(key));
+        expect(listIndicators(director).some((indicator) => indicator.code === code)).toBe(false);
+        return;
+      }
+
       const indicator = saveIndicator(director, {
-        ...getIndicatorByCode(code)!,
+        ...existingIndicator,
         plantelIds: [1]
       });
       expect(indicator).toBeDefined();

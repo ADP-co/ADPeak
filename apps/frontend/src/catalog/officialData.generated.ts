@@ -3531,7 +3531,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
           "label": "PLANTEL"
         },
         {
-          "label": "No. PTC"
+          "label": "PTC"
         },
         {
           "label": "NOMBRE DEL DOCENTE"
@@ -3548,8 +3548,8 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "type": "readonly"
       },
       {
-        "key": "no_ptc",
-        "label": "No. PTC",
+        "key": "ptc",
+        "label": "PTC",
         "type": "text"
       },
       {
@@ -3565,10 +3565,10 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     ],
     "initialRows": [
       {
-        "plantel": "Bachillerato 1,2,3,4,5,6,7,8,9,10…....35, Instituto Universitario de Bellas Artes (IUBA), EscuelaTéctica de Enfermería(ETE)",
-        "no_ptc": "1,2,3,4,5",
+        "plantel": "",
+        "ptc": "",
         "nombre_del_docente": "",
-        "nivel": "1,2,3"
+        "nivel": ""
       }
     ],
     "showTotals": false,
@@ -3576,15 +3576,17 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "addRowLabel": "Agregar fila",
     "emptyRow": {
       "plantel": "",
-      "no_ptc": "",
+      "ptc": "",
       "nombre_del_docente": "",
       "nivel": ""
     },
     "footerNote": "",
     "quality": [
-      "source_workbook_template",
+      "canonical_operational_template",
+      "official_code_detected",
       "private_fields_blank",
-      "official_code_detected"
+      "shared_official_code_split_by_source",
+      "source_workbook_template"
     ]
   },
   "2.1.4.1.2": {
@@ -3734,78 +3736,6 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "source_workbook_template",
       "private_fields_blank",
       "official_code_detected"
-    ]
-  },
-  "1.1.2.5.3-FMT-6D26FF23": {
-    "indicatorCode": "1.1.2.5.3-FMT-6D26FF23",
-    "officialCode": "1.1.2.5.3",
-    "indicatorName": "Porcentaje de PTC de educación media superior beneficiados en el programa de ESDEPED",
-    "activityLabel": "",
-    "sourceLabel": "Formato oficial 1.1.2.5.3-FMT-6D26FF23",
-    "sourcePath": "private-workbook",
-    "sheetName": "PTC",
-    "groups": [],
-    "headerRows": [
-      [
-        {
-          "label": "PLANTEL"
-        },
-        {
-          "label": "PTC"
-        },
-        {
-          "label": "NOMBRE DEL DOCENTE"
-        },
-        {
-          "label": "NIVEL"
-        }
-      ]
-    ],
-    "columns": [
-      {
-        "key": "plantel",
-        "label": "PLANTEL",
-        "type": "readonly"
-      },
-      {
-        "key": "ptc",
-        "label": "PTC",
-        "type": "text"
-      },
-      {
-        "key": "nombre_del_docente",
-        "label": "NOMBRE DEL DOCENTE",
-        "type": "text"
-      },
-      {
-        "key": "nivel",
-        "label": "NIVEL",
-        "type": "text"
-      }
-    ],
-    "initialRows": [
-      {
-        "plantel": "",
-        "ptc": "",
-        "nombre_del_docente": "",
-        "nivel": ""
-      }
-    ],
-    "showTotals": false,
-    "allowAddRows": true,
-    "addRowLabel": "Agregar fila",
-    "emptyRow": {
-      "plantel": "",
-      "ptc": "",
-      "nombre_del_docente": "",
-      "nivel": ""
-    },
-    "footerNote": "",
-    "quality": [
-      "source_workbook_template",
-      "private_fields_blank",
-      "official_code_detected",
-      "shared_official_code_split_by_source"
     ]
   },
   "1.1.2.2.11": {
@@ -5201,6 +5131,78 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "source_workbook_template",
       "private_fields_blank",
       "pending_indicator_code"
+    ]
+  },
+  "1.1.2.5.3-FMT-F28103DD": {
+    "indicatorCode": "1.1.2.5.3-FMT-F28103DD",
+    "officialCode": "1.1.2.5.3",
+    "indicatorName": "Porcentaje de PTC de educación media superior beneficiados en el programa de ESDEPED",
+    "activityLabel": "",
+    "sourceLabel": "Formato oficial 1.1.2.5.3-FMT-F28103DD",
+    "sourcePath": "private-workbook",
+    "sheetName": "PTC",
+    "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "PLANTEL"
+        },
+        {
+          "label": "No. PTC"
+        },
+        {
+          "label": "NOMBRE DEL DOCENTE"
+        },
+        {
+          "label": "NIVEL"
+        }
+      ]
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "no_ptc",
+        "label": "No. PTC",
+        "type": "text"
+      },
+      {
+        "key": "nombre_del_docente",
+        "label": "NOMBRE DEL DOCENTE",
+        "type": "text"
+      },
+      {
+        "key": "nivel",
+        "label": "NIVEL",
+        "type": "text"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "Bachillerato 1,2,3,4,5,6,7,8,9,10…....35, Instituto Universitario de Bellas Artes (IUBA), EscuelaTéctica de Enfermería(ETE)",
+        "no_ptc": "1,2,3,4,5",
+        "nombre_del_docente": "",
+        "nivel": "1,2,3"
+      }
+    ],
+    "showTotals": false,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "no_ptc": "",
+      "nombre_del_docente": "",
+      "nivel": ""
+    },
+    "footerNote": "",
+    "quality": [
+      "canonical_format_hidden",
+      "official_code_detected",
+      "private_fields_blank",
+      "source_workbook_template"
     ]
   }
 };
