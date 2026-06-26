@@ -542,10 +542,10 @@ const server = createServer(async (request, response) => {
           return;
         }
 
-        const accessAction = session.role === "responsable" ? "responsibleEdit" : "draft";
+        const accessAction = session.role === "responsable" && draft.estado === "en_revision" ? "responsibleEdit" : "draft";
         assertCaptureAccess(session, { ...draft, payload }, accessAction);
         const updatedDraft = updateCaptureDraft(captureId, payload, {
-          allowReviewStatus: session.role === "responsable"
+          allowReviewStatus: accessAction === "responsibleEdit"
         });
 
         if (!updatedDraft) {

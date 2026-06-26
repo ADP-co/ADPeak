@@ -450,7 +450,7 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
         return;
       }
 
-      const accessAction = session.role === "responsable" ? "responsibleEdit" : "draft";
+      const accessAction = session.role === "responsable" && draft.estado === "en_revision" ? "responsibleEdit" : "draft";
       sigi.assertCaptureAccess(session, { ...draft, payload: body.payload }, accessAction);
       const updatedDraft = captures.updateCaptureDraft(id, body.payload, {
         allowReviewStatus: accessAction === "responsibleEdit"

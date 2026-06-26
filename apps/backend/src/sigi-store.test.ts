@@ -472,6 +472,49 @@ describe("SIGI store and RBAC", () => {
     ).toThrow(SigiForbiddenError);
   });
 
+  it("allows assigned responsables to fill and submit assigned indicators", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const indicator = saveIndicator(director, {
+      ...getIndicatorByCode("1.0.0.0.2")!,
+      plantelIds: [1]
+    });
+    const responsable = sessionFromHeaders({
+      "x-role": "responsable",
+      "x-responsable-id": String(indicator.responsibleIds[0])
+    });
+    const unassignedResponsable = sessionFromHeaders({
+      "x-role": "responsable",
+      "x-responsable-id": "99"
+    });
+    const template = templateForIndicator(indicator, responsable);
+    const payload = {
+      rows: template.initialRows,
+      justificacion: "Captura llenada por responsable asignado."
+    };
+
+    expect(() =>
+      assertCaptureAccess(responsable, { plantelId: 1, indicadorId: indicator.id, payload }, "draft")
+    ).not.toThrow();
+    expect(() =>
+      assertCaptureAccess(responsable, { plantelId: 1, indicadorId: indicator.id, payload }, "submit")
+    ).not.toThrow();
+    expect(() =>
+      assertCaptureAccess(unassignedResponsable, { plantelId: 1, indicadorId: indicator.id, payload }, "draft")
+    ).toThrow(SigiForbiddenError);
+
+    const draft = createCaptureDraft({
+      plantelId: 1,
+      indicadorId: indicator.id,
+      actividadId: 1,
+      periodoId: 1,
+      responsableId: indicator.responsibleIds[0],
+      payload
+    });
+    const reviewed = sendCaptureToReview(draft.id);
+
+    expect(reviewed).toMatchObject({ estado: "en_revision" });
+  });
+
   it("allows assigned responsables to edit data for captures under review", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const indicator = saveIndicator(director, {
@@ -513,7 +556,7 @@ describe("SIGI store and RBAC", () => {
     ).not.toThrow();
     expect(() =>
       assertCaptureAccess(responsable, { ...underReview, payload }, "draft")
-    ).toThrow(SigiForbiddenError);
+    ).toThrow(SigiValidationError);
 
     const updated = updateCaptureDraft(underReview.id, payload, { allowReviewStatus: true });
     expect(updated).toMatchObject({

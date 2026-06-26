@@ -171,11 +171,16 @@ function applySessionScope(indicator: Indicator, user?: User | null): Indicator 
 function catalogToIndicator(indicator: CatalogIndicator, user?: User | null): Indicator {
   const scope = indicator.responsibleNames.join(', ') || 'Responsable DGEMS';
   const plantelScope = user?.role === 'plantel' ? plantelNameFromId(user.plantelId) : plantelScopeLabelForIndicator(indicator);
+  const plantelIds = effectivePlantelIdsForCatalogIndicator(indicator);
+  const plantelId = user?.role === 'plantel'
+    ? user.plantelId
+    : plantelIds[0] ?? 1;
 
   return {
     code: indicator.code,
     name: indicator.name,
     status: indicator.status ?? (indicator.active ? 'Pendiente' : 'Corregir'),
+    plantelId,
     plantel: plantelScope,
     supervisor: scope,
     responsable: scope,
@@ -410,7 +415,9 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
     };
   }, [selectedCode, user?.id]);
 
-  const activePlantelId = user?.role === 'plantel' ? user.plantelId ?? 1 : requestedPlantelId ?? 1;
+  const activePlantelId = user?.role === 'plantel'
+    ? user.plantelId ?? 1
+    : requestedPlantelId ?? selectedCatalogIndicator?.plantelIds[0] ?? officialIndicatorPlantelScopes[selectedCode]?.[0] ?? 1;
   const activeActividadId = requestedActividadId ?? 1;
   const activePeriodoId = requestedPeriodoId ?? 1;
   const activeResponsableId = user?.role === 'responsable'
@@ -432,8 +439,10 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
     () => mergeRowsWithTemplate(selectedTemplate, templateInitialRows, captureDraft.capture?.payload.rows),
     [captureDraft.capture?.payload.rows, selectedTemplate, templateInitialRows]
   );
+  const isResponsibleReviewCapture = user?.role === 'responsable' && Boolean(requestedCaptureId);
   const canPlantelEditCapture = user?.role === 'plantel' && isEditableCaptureStatus(captureDraft.capture?.estado);
-  const canResponsableEditCapture = user?.role === 'responsable' && captureDraft.capture?.estado === 'en_revision';
+  const canResponsableFillCapture = user?.role === 'responsable' && !isResponsibleReviewCapture && isEditableCaptureStatus(captureDraft.capture?.estado);
+  const canResponsableEditCapture = isResponsibleReviewCapture && captureDraft.capture?.estado === 'en_revision';
 
   if (isWaitingForCatalogIndicator) {
     return (
@@ -542,10 +551,10 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
       initialData={formInitialData}
       initialJustificacion={captureDraft.capture?.payload.justificacion}
       existingEvidenceName={captureDraft.capture?.payload.evidencia?.nombre}
-      canReview={user?.role === 'responsable' || user?.role === 'admin'}
+      canReview={canResponsableEditCapture || user?.role === 'admin'}
       canSaveReviewEdits={canResponsableEditCapture}
       captureStatus={captureDraft.capture?.estado}
-      isReadOnly={!canPlantelEditCapture && !canResponsableEditCapture}
+      isReadOnly={!canPlantelEditCapture && !canResponsableFillCapture && !canResponsableEditCapture}
       onSaveDraft={handleSaveDraft}
       onSendReview={handleSendReview}
       onApprove={handleApprove}

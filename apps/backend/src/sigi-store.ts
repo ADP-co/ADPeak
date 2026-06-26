@@ -723,8 +723,14 @@ export function assertCaptureAccess(
     throw new SigiForbiddenError("El plantel solo puede operar su propio alcance.");
   }
 
-  if ((action === "draft" || action === "submit") && session.role !== "plantel") {
-    throw new SigiForbiddenError("Solo el plantel puede capturar o enviar indicadores.");
+  if (action === "draft" || action === "submit") {
+    if (session.role !== "plantel" && session.role !== "responsable") {
+      throw new SigiForbiddenError("Solo el plantel o responsable asignado puede capturar o enviar indicadores.");
+    }
+
+    if (session.role === "responsable" && action === "draft" && request.estado === "en_revision") {
+      throw new SigiValidationError("Las capturas en revision se actualizan desde la vista de revision.");
+    }
   }
 
   if (action === "responsibleEdit") {
