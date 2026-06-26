@@ -28,6 +28,9 @@ const sampleReport: ExportReport = {
           vencimiento: 'en_tiempo',
           detalle: [
             { campo: 'Mujeres', valor: '12' },
+            { campo: 'Hombres', valor: '10' },
+            { campo: 'Total', valor: '22' },
+            { campo: 'Programa', valor: 'Analista Programador' },
             { campo: 'Observaciones', valor: 'Dato importado y editable' },
           ],
         },
@@ -65,8 +68,16 @@ describe('report exports', () => {
     const pdfText = await (await reportToPdfBlob(sampleReport)).text();
 
     expect(pdfText).toContain('(Resumen) Tj');
+    expect(pdfText).toContain('Indicadores evaluados');
+    expect(pdfText).toContain('Resumen ejecutivo');
+    expect(pdfText).toContain('Detalle filtrado');
+    expect(pdfText).toContain('(Planteles) Tj');
+    expect(pdfText).toContain('(Responsables) Tj');
+    expect(pdfText).toContain('(Faltantes) Tj');
     expect(pdfText).toContain('Captura de egresados');
     expect(pdfText).toContain('titulados');
+    expect(pdfText).toContain('Programa:');
+    expect(pdfText).toContain('Analista Programador');
     expect(pdfText).toContain('Observaciones: Dato');
     expect(pdfText).toContain('importado y editable');
     expect(pdfText).not.toContain('Acad\u00c3\u0192');

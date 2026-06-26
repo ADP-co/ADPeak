@@ -148,6 +148,18 @@ type PdfTableColumn = {
   value: (row: ReportDataRow, report: ExportReport) => string;
 };
 
+type PdfExecutiveSummary = {
+  totalPlanteles: number;
+  totalResponsables: number;
+  totalIndicadores: number;
+  reportesEnviados: number;
+  reportesAprobados: number;
+  reportesObservados: number;
+  reportesAtrasados: number;
+  reportesFaltantes: number;
+  porcentajeAvance: number;
+};
+
 const PDF_WIDTH = 612;
 const PDF_HEIGHT = 792;
 const PDF_MARGIN_X = 42;
@@ -292,14 +304,14 @@ function formatDetailSummary(row: ReportDataRow) {
     return '';
   }
 
-  return details.slice(0, 4).join(' | ');
+  return details.join(' | ');
 }
 
 function renderPdfReport(report: ExportReport, hasHeaderImage: boolean) {
   const pages: PdfContentBuilder[] = [];
   let current = createPdfReportPage(pages, hasHeaderImage);
-  const allRows = report.indicadores.flatMap((indicator) => indicator.datos);
   const statusSummary = summarizeReport(report);
+  const executiveSummary = buildExecutiveSummary(report, statusSummary);
 
   const ensureSpace = (height: number) => {
     if (current.y - height < PDF_BOTTOM_Y) {
@@ -348,6 +360,47 @@ function renderPdfReport(report: ExportReport, hasHeaderImage: boolean) {
     current.y -= 3;
   };
 
+  const drawIndicatorList = (indicators: ExportReport['indicadores']) => {
+    if (indicators.length === 0) {
+      return;
+    }
+
+    drawSectionTitle('Indicadores evaluados');
+    indicators.forEach((indicator, index) => {
+      const lines = wrapPdfLine(`${index + 1}. ${indicator.nombre}`, 104);
+      ensureSpace(lines.length * 10 + 4);
+      lines.forEach((line) => {
+        current.content.textAt(line, PDF_MARGIN_X + 10, current.y, 8.5, 'F1', PDF_TEXT);
+        current.y -= 10;
+      });
+    });
+    current.y -= 8;
+  };
+
+  const drawProgressBar = (title: string, percentage: number) => {
+    ensureSpace(46);
+    current.content.textAt(title, PDF_MARGIN_X, current.y, 10.5, 'F2', PDF_TEXT);
+    current.content.textAt(`${percentage}%`, PDF_WIDTH - PDF_MARGIN_X - 30, current.y, 10.5, 'F2', PDF_DARK_GREEN);
+    current.y -= 14;
+    current.content.fillRect(PDF_MARGIN_X, current.y - 8, PDF_CONTENT_WIDTH, 8, PDF_LINE);
+    current.content.fillRect(PDF_MARGIN_X, current.y - 8, PDF_CONTENT_WIDTH * Math.min(Math.max(percentage, 0), 100) / 100, 8, PDF_GREEN);
+    current.y -= 24;
+  };
+
+  const drawExecutiveSummary = (summary: PdfExecutiveSummary) => {
+    ensureSpace(58);
+    current.content.textAt('Resumen ejecutivo', PDF_MARGIN_X, current.y, 10.5, 'F2', PDF_GREEN);
+    current.y -= 13;
+
+    const text = `Durante el periodo evaluado se registran ${summary.reportesEnviados} reportes enviados. De ellos, ${summary.reportesAprobados} han sido aprobados, ${summary.reportesObservados} presentan observaciones, ${summary.reportesAtrasados} se encuentran atrasados y ${summary.reportesFaltantes} continúan pendientes de entrega. El avance institucional acumulado es del ${summary.porcentajeAvance}% respecto al total esperado.`;
+    const lines = wrapPdfLine(text, 108);
+    lines.forEach((line) => {
+      ensureSpace(12);
+      current.content.textAt(line, PDF_MARGIN_X, current.y, 8.6, 'F1', PDF_MUTED);
+      current.y -= 11;
+    });
+  };
+
   current.content.textAt('Resumen', PDF_MARGIN_X, current.y, 20, 'F2', PDF_DARK_GREEN);
   current.y -= 24;
   current.content.textAt(
@@ -369,20 +422,24 @@ function renderPdfReport(report: ExportReport, hasHeaderImage: boolean) {
   );
   current.y -= 26;
 
+  drawIndicatorList(report.indicadores);
+
   drawSectionTitle('Resumen global');
   drawMetricGrid(current, [
-    ['Registros revisados', String(statusSummary.total)],
-    ['Avance promedio', averageProgress(allRows)],
-    ['Aprobados', String(statusSummary.approved)],
-    ['En revisión', String(statusSummary.inReview)],
-    ['Observados', String(statusSummary.observed)],
-    ['Pendientes', String(statusSummary.pending)],
-    ['Atrasados', String(statusSummary.late)],
-    ['Indicadores', String(report.indicadores.length)],
+    ['Planteles', String(executiveSummary.totalPlanteles)],
+    ['Responsables', String(executiveSummary.totalResponsables)],
+    ['Indicadores', String(executiveSummary.totalIndicadores)],
+    ['Enviados', String(executiveSummary.reportesEnviados)],
+    ['Aprobados', String(executiveSummary.reportesAprobados)],
+    ['Observados', String(executiveSummary.reportesObservados)],
+    ['Atrasados', String(executiveSummary.reportesAtrasados)],
+    ['Faltantes', String(executiveSummary.reportesFaltantes)],
   ]);
-  current.y -= 18;
+  drawProgressBar('Avance general institucional', executiveSummary.porcentajeAvance);
+  drawExecutiveSummary(executiveSummary);
+  current.y -= 14;
 
-  drawSectionTitle('Detalle por indicador');
+  drawSectionTitle('Detalle filtrado');
 
   if (report.indicadores.length === 0) {
     current.content.textAt('No hay indicadores disponibles para el alcance seleccionado.', PDF_MARGIN_X, current.y, 10, 'F1', PDF_MUTED);
@@ -456,7 +513,7 @@ function drawMetricGrid(page: PdfReportPage, metrics: Array<[string, string]>) {
     page.content.textAt(cleanExportText(value), x + 8, y - 31, 13, 'F2', PDF_DARK_GREEN);
   });
 
-  page.y -= Math.ceil(metrics.length / columns) * rowHeight + 2;
+  page.y -= Math.ceil(metrics.length / columns) * rowHeight + 12;
 }
 
 function drawIndicatorTable(
@@ -471,21 +528,24 @@ function drawIndicatorTable(
   const includePlantelColumn = shouldShowPlantelColumn(report);
   const columns: PdfTableColumn[] = includePlantelColumn
     ? [
-        { label: 'Actividad', width: 104, value: (row) => row.actividad },
-        { label: 'Responsable', width: 76, value: (row) => row.responsable },
-        { label: 'Plantel', width: 64, value: (row, currentReport) => row.plantel ?? currentReport.identidadReporte.nombre },
-        { label: 'Estado', width: 52, align: 'center', value: (row) => formatStatusLabel(row.estado) },
-        { label: 'Avance', width: 38, align: 'center', value: (row) => row.avance },
-        { label: 'Detalle', width: 154, value: (row) => formatDetailSummary(row) },
+        { label: 'Actividad', width: 88, value: (row) => row.actividad },
+        { label: 'Responsable', width: 68, value: (row) => row.responsable },
+        { label: 'Plantel', width: 58, value: (row, currentReport) => row.plantel ?? currentReport.identidadReporte.nombre },
+        { label: 'Estado', width: 48, align: 'center', value: (row) => formatStatusLabel(row.estado) },
+        { label: 'Avance', width: 35, align: 'center', value: (row) => row.avance },
+        { label: 'Meta', width: 34, align: 'center', value: (row) => (typeof row.meta === 'number' ? String(row.meta) : '') },
+        { label: 'Vence', width: 50, align: 'center', value: (row) => formatDeadline(row.vencimiento) },
+        { label: 'Detalle', width: 107, value: (row) => formatDetailSummary(row) },
         { label: 'Evid.', width: 40, align: 'center', value: (row) => (typeof row.evidencias === 'number' ? String(row.evidencias) : '') },
       ]
     : [
-        { label: 'Actividad', width: 120, value: (row) => row.actividad },
-        { label: 'Responsable', width: 88, value: (row) => row.responsable },
-        { label: 'Estado', width: 52, align: 'center', value: (row) => formatStatusLabel(row.estado) },
-        { label: 'Avance', width: 40, align: 'center', value: (row) => row.avance },
-        { label: 'Meta', width: 40, align: 'center', value: (row) => (typeof row.meta === 'number' ? String(row.meta) : '') },
-        { label: 'Detalle', width: 148, value: (row) => formatDetailSummary(row) },
+        { label: 'Actividad', width: 110, value: (row) => row.actividad },
+        { label: 'Responsable', width: 76, value: (row) => row.responsable },
+        { label: 'Estado', width: 50, align: 'center', value: (row) => formatStatusLabel(row.estado) },
+        { label: 'Avance', width: 38, align: 'center', value: (row) => row.avance },
+        { label: 'Meta', width: 36, align: 'center', value: (row) => (typeof row.meta === 'number' ? String(row.meta) : '') },
+        { label: 'Vence', width: 55, align: 'center', value: (row) => formatDeadline(row.vencimiento) },
+        { label: 'Detalle', width: 123, value: (row) => formatDetailSummary(row) },
         { label: 'Evid.', width: 40, align: 'center', value: (row) => (typeof row.evidencias === 'number' ? String(row.evidencias) : '') },
       ];
 
@@ -526,7 +586,7 @@ function drawIndicatorTable(
       const cellLines = wrappedCells[columnIndex];
       const textX = column.align === 'center' ? x + column.width / 2 : x + 5;
 
-      cellLines.slice(0, 3).forEach((line, lineIndex) => {
+      cellLines.forEach((line, lineIndex) => {
         page.content.textAt(
           line,
           textX,
@@ -1063,9 +1123,66 @@ function summarizeReport(report: ExportReport) {
   );
 }
 
+function buildExecutiveSummary(
+  report: ExportReport,
+  statusSummary: ReturnType<typeof summarizeReport>
+): PdfExecutiveSummary {
+  const rows = report.indicadores.flatMap((indicator) => indicator.datos);
+  const reportType = normalizeStatus(report.identidadReporte.tipo);
+  const plantelValues = rows.map((row) => row.plantel).filter((value): value is string => Boolean(value));
+  const responsableValues = rows.map((row) => row.responsable).filter((value): value is string => Boolean(value));
+  const totalPlanteles = uniqueCleanValues(
+    plantelValues.length > 0 || reportType !== 'plantel'
+      ? plantelValues
+      : [report.identidadReporte.nombre]
+  ).length;
+  const totalResponsables = uniqueCleanValues(
+    responsableValues.length > 0 || reportType !== 'responsable'
+      ? responsableValues
+      : [report.identidadReporte.nombre]
+  ).length;
+
+  return {
+    totalPlanteles,
+    totalResponsables,
+    totalIndicadores: report.indicadores.length,
+    reportesEnviados: Math.max(statusSummary.total - statusSummary.pending, 0),
+    reportesAprobados: statusSummary.approved,
+    reportesObservados: statusSummary.observed,
+    reportesAtrasados: statusSummary.late,
+    reportesFaltantes: statusSummary.pending,
+    porcentajeAvance: averageProgressNumber(rows),
+  };
+}
+
+function uniqueCleanValues(values: string[]) {
+  const seen = new Set<string>();
+
+  values.forEach((value) => {
+    const cleanedValue = cleanExportText(value);
+
+    if (cleanedValue) {
+      seen.add(normalizeStatus(cleanedValue));
+    }
+  });
+
+  return Array.from(seen);
+}
+
 function progressValue(value: string) {
   const numericValue = Number(value.replace('%', '').trim());
   return Number.isFinite(numericValue) ? numericValue : undefined;
+}
+
+function averageProgressNumber(rows: ReportDataRow[]) {
+  const values = rows.map((row) => progressValue(row.avance)).filter((value): value is number => value !== undefined);
+
+  if (values.length === 0) {
+    return 0;
+  }
+
+  const average = values.reduce((total, value) => total + value, 0) / values.length;
+  return Math.round(Math.max(0, Math.min(100, average)));
 }
 
 function averageProgress(rows: ReportDataRow[]) {
