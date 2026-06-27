@@ -171,7 +171,11 @@ function applySessionScope(indicator: Indicator, user?: User | null): Indicator 
 
 function catalogToIndicator(indicator: CatalogIndicator, user?: User | null): Indicator {
   const scope = indicator.responsibleNames.join(', ') || 'Responsable DGEMS';
-  const plantelScope = user?.role === 'plantel' ? plantelNameFromId(user.plantelId) : plantelScopeLabelForIndicator(indicator);
+  const plantelScope = user?.role === 'plantel'
+    ? plantelNameFromId(user.plantelId)
+    : indicator.plantelId
+      ? plantelNameFromId(indicator.plantelId)
+      : plantelScopeLabelForIndicator(indicator);
   const plantelIds = effectivePlantelIdsForCatalogIndicator(indicator);
   const plantelId = user?.role === 'plantel'
     ? user.plantelId
@@ -181,7 +185,15 @@ function catalogToIndicator(indicator: CatalogIndicator, user?: User | null): In
     code: indicator.code,
     name: indicator.name,
     status: indicator.status ?? (indicator.active ? 'Pendiente' : 'Corregir'),
-    plantelId,
+    plantelId: indicator.plantelId ?? plantelId,
+    captureId: indicator.captureId,
+    actividadId: indicator.actividadId,
+    periodoId: indicator.periodoId,
+    captureStatus: indicator.captureStatus,
+    canEdit: indicator.canEdit,
+    canReview: indicator.canReview,
+    isReadOnly: indicator.isReadOnly,
+    readOnlyReason: indicator.readOnlyReason,
     plantel: plantelScope,
     supervisor: scope,
     responsable: scope,
@@ -374,6 +386,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
   const requestedActividadId = positiveQueryParam(queryParams, 'actividadId');
   const requestedPeriodoId = positiveQueryParam(queryParams, 'periodoId');
   const requestedCaptureId = positiveQueryParam(queryParams, 'captureId');
+  const requestedSource = queryParams.get('source');
   const selectedCode = code ?? template1_0_0_0_2.indicatorCode;
   const selectedMockupIndicator = mockupIndicators.find((indicator) => indicator.code === selectedCode);
   const selectedCatalogIndicator = catalogIndicators.find((indicator) => indicator.code === selectedCode);
@@ -418,14 +431,15 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
 
   const activePlantelId = user?.role === 'plantel'
     ? user.plantelId ?? 1
-    : requestedPlantelId ?? selectedCatalogIndicator?.plantelIds[0] ?? officialIndicatorPlantelScopes[selectedCode]?.[0] ?? 1;
-  const activeActividadId = requestedActividadId ?? 1;
-  const activePeriodoId = requestedPeriodoId ?? 1;
+    : requestedPlantelId ?? selectedCatalogIndicator?.plantelId ?? selectedCatalogIndicator?.plantelIds[0] ?? officialIndicatorPlantelScopes[selectedCode]?.[0] ?? 1;
+  const activeActividadId = requestedActividadId ?? selectedCatalogIndicator?.actividadId ?? 1;
+  const activePeriodoId = requestedPeriodoId ?? selectedCatalogIndicator?.periodoId ?? 1;
   const activeResponsableId = user?.role === 'responsable'
     ? user.responsableId ?? 1
     : selectedCatalogIndicator?.primaryResponsibleId ?? selectedCatalogIndicator?.responsibleIds[0] ?? 1;
+  const effectiveCaptureId = requestedCaptureId ?? selectedCatalogIndicator?.captureId;
   const captureDraft = useCaptureDraft({
-    requestedCaptureId,
+    requestedCaptureId: effectiveCaptureId,
     plantelId: activePlantelId,
     indicadorId: resolvedIndicatorId,
     periodoId: activePeriodoId,
@@ -440,10 +454,13 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
     () => mergeRowsWithTemplate(selectedTemplate, templateInitialRows, captureDraft.capture?.payload.rows),
     [captureDraft.capture?.payload.rows, selectedTemplate, templateInitialRows]
   );
-  const isResponsibleReviewCapture = user?.role === 'responsable' && Boolean(requestedCaptureId);
+  const isResponsibleReviewCapture = user?.role === 'responsable' && captureDraft.capture?.estado === 'en_revision';
+  const isApprovedCapture = captureDraft.capture?.estado === 'aprobado' || selectedCatalogIndicator?.captureStatus === 'aprobado';
+  const catalogAllowsEdit = selectedCatalogIndicator?.canEdit ?? true;
   const canPlantelEditCapture = user?.role === 'plantel' && isEditableCaptureStatus(captureDraft.capture?.estado);
-  const canResponsableFillCapture = user?.role === 'responsable' && !isResponsibleReviewCapture && isEditableCaptureStatus(captureDraft.capture?.estado);
-  const canResponsableEditCapture = isResponsibleReviewCapture && captureDraft.capture?.estado === 'en_revision';
+  const canResponsableFillCapture = user?.role === 'responsable' && !isResponsibleReviewCapture && !isApprovedCapture && catalogAllowsEdit && isEditableCaptureStatus(captureDraft.capture?.estado);
+  const canResponsableEditCapture = isResponsibleReviewCapture && catalogAllowsEdit;
+  const isReadOnlyCapture = isApprovedCapture || (!canPlantelEditCapture && !canResponsableFillCapture && !canResponsableEditCapture);
 
   if (isWaitingForCatalogIndicator) {
     return (
@@ -555,7 +572,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
       canReview={canResponsableEditCapture || user?.role === 'admin'}
       canSaveReviewEdits={canResponsableEditCapture}
       captureStatus={captureDraft.capture?.estado}
-      isReadOnly={!canPlantelEditCapture && !canResponsableFillCapture && !canResponsableEditCapture}
+      isReadOnly={isReadOnlyCapture}
       onSaveDraft={handleSaveDraft}
       onSendReview={handleSendReview}
       onApprove={handleApprove}
@@ -563,7 +580,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
       isBusy={captureDraft.isBusy}
       statusMessage={captureDraft.statusMessage}
       errorMessage={captureDraft.errorMessage}
-      onBack={() => navigate(user?.role === 'responsable' ? (requestedCaptureId ? '/revision' : '/indicadores') : '/indicadores')}
+      onBack={() => navigate(user?.role === 'responsable' ? (requestedSource === 'revision' ? '/revision' : '/indicadores') : '/indicadores')}
     />
   );
 }
@@ -701,6 +718,7 @@ function AppContent() {
     if (indicator.actividadId) params.set('actividadId', String(indicator.actividadId));
     if (indicator.periodoId) params.set('periodoId', String(indicator.periodoId));
     if (indicator.captureId) params.set('captureId', String(indicator.captureId));
+    if (indicator.source) params.set('source', indicator.source);
 
     const query = params.toString();
     navigate(`/indicadores/captura/${indicator.code}${query ? `?${query}` : ''}`);

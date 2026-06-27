@@ -84,6 +84,15 @@ export type SigiIndicatorStatus = "Pendiente" | "En revisión" | "Corregir" | "A
 
 export type SigiIndicatorListItem = SigiIndicator & {
   status: SigiIndicatorStatus;
+  captureId?: number;
+  plantelId?: number;
+  actividadId?: number;
+  periodoId?: number;
+  captureStatus?: CaptureDraft["estado"];
+  canEdit?: boolean;
+  canReview?: boolean;
+  isReadOnly?: boolean;
+  readOnlyReason?: string;
 };
 
 export type SigiIndicatorHistoryEntry = {
@@ -494,7 +503,7 @@ export function listIndicators(session: SigiSession, options: { includeInactive?
     .filter((indicator) => canReadIndicator(session, indicator))
     .map((indicator) => ({
       ...indicator,
-      status: workflowStatusForIndicator(session, indicator)
+      ...workStateForIndicator(session, indicator)
     }))
     .sort((a, b) => a.code.localeCompare(b.code, "es", { numeric: true }));
 }
@@ -562,13 +571,92 @@ export function listReviewCaptures(session: SigiSession): SigiReviewCapture[] {
     );
 }
 
-function workflowStatusForIndicator(session: SigiSession, indicator: SigiIndicator): SigiIndicatorStatus {
+function workStateForIndicator(session: SigiSession, indicator: SigiIndicator): Pick<
+  SigiIndicatorListItem,
+  "status" | "captureId" | "plantelId" | "actividadId" | "periodoId" | "captureStatus" | "canEdit" | "canReview" | "isReadOnly" | "readOnlyReason"
+> {
   if (!indicator.active) {
-    return "Corregir";
+    return {
+      status: "Corregir",
+      canEdit: false,
+      canReview: false,
+      isReadOnly: true,
+      readOnlyReason: "El indicador esta desactivado."
+    };
   }
 
-  const relevantCaptures = listCaptureDrafts()
+  const relevantCaptures = relevantCapturesForIndicator(session, indicator);
+  const latest = relevantCaptures[0];
+  const canResponsibleEdit = session.role === "responsable" && isResponsibleAssigned(session, indicator);
+  const canActorDraft = session.role === "plantel" || canResponsibleEdit;
+  const baseState = {
+    captureId: latest?.id,
+    plantelId: latest?.plantelId ?? defaultPlantelIdForIndicator(session, indicator),
+    actividadId: latest?.actividadId ?? 1,
+    periodoId: latest?.periodoId ?? 1,
+    captureStatus: latest?.estado
+  };
+
+  if (!latest) {
+    return {
+      ...baseState,
+      status: "Pendiente",
+      canEdit: canActorDraft,
+      canReview: false,
+      isReadOnly: !canActorDraft,
+      readOnlyReason: canActorDraft ? undefined : "No hay una captura editable para este indicador."
+    };
+  }
+
+  if (latest.estado === "aprobado" || latest.estado === "cerrado") {
+    return {
+      ...baseState,
+      status: "Aprobado",
+      canEdit: false,
+      canReview: false,
+      isReadOnly: true,
+      readOnlyReason: "La captura ya fue aprobada."
+    };
+  }
+
+  if (latest.estado === "en_revision") {
+    const canReview = session.role === "director" || canResponsibleEdit;
+
+    return {
+      ...baseState,
+      status: "En revisión",
+      canEdit: canResponsibleEdit,
+      canReview,
+      isReadOnly: !canResponsibleEdit,
+      readOnlyReason: canResponsibleEdit ? undefined : "La captura esta en revision."
+    };
+  }
+
+  if (latest.estado === "correccion_solicitada") {
+    return {
+      ...baseState,
+      status: "Corregir",
+      canEdit: canActorDraft,
+      canReview: false,
+      isReadOnly: !canActorDraft,
+      readOnlyReason: canActorDraft ? undefined : "La captura requiere correccion fuera de tu alcance."
+    };
+  }
+
+  return {
+    ...baseState,
+    status: "Pendiente",
+    canEdit: canActorDraft,
+    canReview: false,
+    isReadOnly: !canActorDraft,
+    readOnlyReason: canActorDraft ? undefined : "La captura no esta disponible para edicion."
+  };
+}
+
+function relevantCapturesForIndicator(session: SigiSession, indicator: SigiIndicator) {
+  return listCaptureDrafts()
     .filter((draft) => draft.indicadorId === indicator.id && draft.estado !== "cerrado")
+    .filter((draft) => canUseIndicatorForPlantel(indicator, draft.plantelId))
     .filter((draft) => {
       if (session.role === "plantel") {
         return draft.plantelId === session.plantelId;
@@ -580,27 +668,15 @@ function workflowStatusForIndicator(session: SigiSession, indicator: SigiIndicat
 
       return true;
     })
-    .sort((a, b) => b.actualizadoEn.localeCompare(a.actualizadoEn));
+    .sort((a, b) => b.actualizadoEn.localeCompare(a.actualizadoEn) || b.id - a.id);
+}
 
-  const latest = relevantCaptures[0];
-
-  if (!latest) {
-    return "Pendiente";
+function defaultPlantelIdForIndicator(session: SigiSession, indicator: SigiIndicator) {
+  if (session.role === "plantel" && session.plantelId) {
+    return session.plantelId;
   }
 
-  if (latest.estado === "aprobado" || latest.estado === "cerrado") {
-    return "Aprobado";
-  }
-
-  if (latest.estado === "en_revision") {
-    return "En revisión";
-  }
-
-  if (latest.estado === "correccion_solicitada") {
-    return "Corregir";
-  }
-
-  return "Pendiente";
+  return indicator.plantelIds[0] ?? officialIndicatorPlantelScopes[indicator.code]?.[0] ?? 1;
 }
 
 export function getIndicatorById(id: number) {

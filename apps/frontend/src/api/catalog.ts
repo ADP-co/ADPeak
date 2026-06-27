@@ -24,6 +24,15 @@ export type CatalogIndicator = {
   code: string;
   name: string;
   status?: 'Corregir' | 'Pendiente' | 'En revisión' | 'Aprobado';
+  captureId?: number;
+  plantelId?: number;
+  actividadId?: number;
+  periodoId?: number;
+  captureStatus?: 'borrador' | 'en_revision' | 'correccion_solicitada' | 'aprobado' | 'cerrado';
+  canEdit?: boolean;
+  canReview?: boolean;
+  isReadOnly?: boolean;
+  readOnlyReason?: string;
   description: string;
   dataType: 'number' | 'percentage' | 'text';
   period: string;

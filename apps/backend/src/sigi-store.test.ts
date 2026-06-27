@@ -581,6 +581,69 @@ describe("SIGI store and RBAC", () => {
     expect(listReviewCaptures(director)).toHaveLength(0);
   });
 
+  it("returns actionable capture metadata for responsible assigned indicators", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const indicator = saveIndicator(director, {
+      ...getIndicatorByCode("1.0.0.0.2")!,
+      plantelIds: [1]
+    });
+    const responsable = sessionFromHeaders({
+      "x-role": "responsable",
+      "x-responsable-id": String(indicator.responsibleIds[0])
+    });
+    const template = templateForIndicator(indicator, responsable);
+    const pendingItem = listIndicators(responsable).find((item) => item.id === indicator.id);
+
+    expect(pendingItem).toMatchObject({
+      status: "Pendiente",
+      plantelId: 1,
+      actividadId: 1,
+      periodoId: 1,
+      canEdit: true,
+      canReview: false,
+      isReadOnly: false
+    });
+
+    const draft = createCaptureDraft({
+      plantelId: 1,
+      indicadorId: indicator.id,
+      actividadId: 1,
+      periodoId: 1,
+      responsableId: indicator.responsibleIds[0],
+      payload: {
+        rows: template.initialRows,
+        justificacion: "Captura usada para validar metadatos de trabajo."
+      }
+    });
+    const underReview = sendCaptureToReview(draft.id)!;
+    const reviewItem = listIndicators(responsable).find((item) => item.id === indicator.id);
+
+    expect(reviewItem).toMatchObject({
+      status: "En revisión",
+      captureId: underReview.id,
+      plantelId: 1,
+      actividadId: 1,
+      periodoId: 1,
+      captureStatus: "en_revision",
+      canEdit: true,
+      canReview: true,
+      isReadOnly: false
+    });
+
+    approveCapture(draft.id);
+    const approvedItem = listIndicators(responsable).find((item) => item.id === indicator.id);
+
+    expect(approvedItem).toMatchObject({
+      status: "Aprobado",
+      captureId: draft.id,
+      captureStatus: "aprobado",
+      canEdit: false,
+      canReview: false,
+      isReadOnly: true,
+      readOnlyReason: "La captura ya fue aprobada."
+    });
+  });
+
   it("allows assigned responsables to edit data for captures under review", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const indicator = saveIndicator(director, {

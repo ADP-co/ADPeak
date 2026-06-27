@@ -16,6 +16,12 @@ export interface Indicator {
   captureId?: number;
   actividadId?: number;
   periodoId?: number;
+  captureStatus?: 'borrador' | 'en_revision' | 'correccion_solicitada' | 'aprobado' | 'cerrado';
+  canEdit?: boolean;
+  canReview?: boolean;
+  isReadOnly?: boolean;
+  readOnlyReason?: string;
+  source?: 'indicadores' | 'revision';
   plantel?: string;
   supervisor?: string;
   responsable?: string;
