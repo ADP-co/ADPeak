@@ -3,6 +3,8 @@ import { IndicatorsTable, type Indicator, type IndicatorStatus } from './Indicat
 import { Select } from './Select';
 import { useAuth } from '../../context/AuthContext';
 import { catalogPlanteles } from '../../api/catalog';
+import { fetchReviewCaptures, type ReviewCapture } from '../../api/capturas';
+import { CAPTURE_CHANGED_EVENT } from '../../api/captureEvents';
 import { fetchExportReport, type ExportReport, type ReportDataRow } from '../../api/reportes';
 
 interface DonutCardProps {
@@ -78,6 +80,8 @@ export const Dashboard = ({ onSelectIndicator, mode = 'general' }: DashboardProp
   const [selectedCycle, setSelectedCycle] = useState(cycleOptions[0].value);
   const [selectedPlantel, setSelectedPlantel] = useState('todos');
   const [report, setReport] = useState<ExportReport | null>(null);
+  const [reviewCaptures, setReviewCaptures] = useState<ReviewCapture[]>([]);
+  const [refreshToken, setRefreshToken] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState('');
 
@@ -96,26 +100,48 @@ export const Dashboard = ({ onSelectIndicator, mode = 'general' }: DashboardProp
   );
 
   useEffect(() => {
+    const handleCaptureChanged = () => setRefreshToken((current) => current + 1);
+
+    window.addEventListener(CAPTURE_CHANGED_EVENT, handleCaptureChanged);
+    return () => window.removeEventListener(CAPTURE_CHANGED_EVENT, handleCaptureChanged);
+  }, []);
+
+  useEffect(() => {
     let isMounted = true;
     const periodo = periodByCycle[selectedCycle] ?? periodByCycle['2025-2026'];
 
     setIsLoading(true);
     setLoadError('');
 
-    fetchExportReport({
-      cicloEscolar: selectedCycle,
-      periodo,
-      plantelId: isResponsible || selectedPlantel === 'todos' ? undefined : selectedPlantel,
-    })
-      .then((nextReport) => {
-        if (isMounted) {
-          setReport(nextReport);
+    const request = isResponsibleReview
+      ? fetchReviewCaptures()
+      : fetchExportReport({
+          cicloEscolar: selectedCycle,
+          periodo,
+          plantelId: isResponsible || selectedPlantel === 'todos' ? undefined : selectedPlantel,
+        });
+
+    request
+      .then((data) => {
+        if (!isMounted) {
+          return;
+        }
+
+        if (isResponsibleReview) {
+          setReviewCaptures(data as ReviewCapture[]);
+          setReport(null);
+        } else {
+          setReport(data as ExportReport);
+          setReviewCaptures([]);
         }
       })
       .catch(() => {
         if (isMounted) {
           setReport(null);
-          setLoadError('No se pudo cargar la información del alcance seleccionado.');
+          setReviewCaptures([]);
+          setLoadError(isResponsibleReview
+            ? 'No se pudo cargar la bandeja de revisión.'
+            : 'No se pudo cargar la información del alcance seleccionado.');
         }
       })
       .finally(() => {
@@ -127,12 +153,11 @@ export const Dashboard = ({ onSelectIndicator, mode = 'general' }: DashboardProp
     return () => {
       isMounted = false;
     };
-  }, [isResponsible, selectedCycle, selectedPlantel, user?.id]);
+  }, [isResponsible, isResponsibleReview, refreshToken, selectedCycle, selectedPlantel, user?.id]);
 
   const scopedIndicators = useMemo(
-    () => reportToIndicators(report, { splitByCapture: isResponsibleReview })
-      .filter((indicator) => !isResponsibleReview || indicator.status === 'En revisión'),
-    [isResponsibleReview, report]
+    () => isResponsibleReview ? reviewCaptures.map(reviewCaptureToIndicator) : reportToIndicators(report),
+    [isResponsibleReview, report, reviewCaptures]
   );
   const totalRows = useMemo(
     () => report?.indicadores.flatMap((indicator) => indicator.datos).length ?? 0,
@@ -233,10 +258,28 @@ export const Dashboard = ({ onSelectIndicator, mode = 'general' }: DashboardProp
         showScopeColumns={!isResponsible || isResponsibleReview}
         title={isResponsibleReview ? 'Capturas recibidas' : 'Indicadores'}
         periodLabel={`Ciclo ${selectedCycleLabel}`}
+        emptyMessage={isResponsibleReview ? 'No hay capturas en revisión.' : 'No se encontraron indicadores.'}
       />
     </div>
   );
 };
+
+function reviewCaptureToIndicator(capture: ReviewCapture): Indicator {
+  return {
+    rowKey: `capture:${capture.captureId}`,
+    code: capture.code,
+    name: capture.name,
+    plantelId: capture.plantelId,
+    captureId: capture.captureId,
+    actividadId: capture.actividadId,
+    periodoId: capture.periodoId,
+    status: 'En revisión',
+    plantel: capture.plantel,
+    supervisor: 'Responsable asignado',
+    responsable: 'Responsable asignado',
+    contribuidor: capture.plantel,
+  };
+}
 
 function reportToIndicators(report: ExportReport | null, options: { splitByCapture?: boolean } = {}): Indicator[] {
   if (!report) {

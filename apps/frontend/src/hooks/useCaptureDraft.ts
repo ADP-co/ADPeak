@@ -13,6 +13,7 @@ import {
   type CaptureDraftRequest,
   type CapturePayload,
 } from '../api/capturas';
+import { notifyCaptureChanged } from '../api/captureEvents';
 
 const STORAGE_KEY_PREFIX = 'sigi-poa:capture-draft-id';
 
@@ -63,6 +64,13 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
     }
   };
 
+  const persistCaptureChange = (capture: CaptureDraft) => {
+    persistCapture(capture);
+    void queryClient.invalidateQueries({ queryKey: ['capture-draft'] });
+    void queryClient.invalidateQueries({ queryKey: ['capture-draft-scope'] });
+    notifyCaptureChanged();
+  };
+
   const scopedCaptureQuery = useQuery({
     queryKey: ['capture-draft-scope', storageKey],
     queryFn: () => findCaptureDraft(captureOptions),
@@ -103,7 +111,7 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
         motivoCambio: 'borrador desde frontend',
       });
     },
-    onSuccess: persistCapture,
+    onSuccess: persistCaptureChange,
   });
 
   const sendToReviewMutation = useMutation({
@@ -119,7 +127,7 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
       persistCapture(draft);
       return sendCaptureToReview(draft.id);
     },
-    onSuccess: persistCapture,
+    onSuccess: persistCaptureChange,
   });
 
   const requestCorrectionMutation = useMutation({
@@ -132,7 +140,7 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
 
       return requestCaptureCorrection(draftId, observacion);
     },
-    onSuccess: persistCapture,
+    onSuccess: persistCaptureChange,
   });
 
   const approveMutation = useMutation({
@@ -145,7 +153,7 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
 
       return approveCapture(draftId);
     },
-    onSuccess: persistCapture,
+    onSuccess: persistCaptureChange,
   });
 
   const statusMessage = useMemo(() => {

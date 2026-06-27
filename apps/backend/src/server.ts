@@ -28,6 +28,7 @@ import {
   getIndicatorById,
   listIndicatorHistory,
   listIndicators,
+  listReviewCaptures,
   listUsers,
   officialSourcesPayload,
   recordResponsibleCaptureEdit,
@@ -424,6 +425,19 @@ const server = createServer(async (request, response) => {
       }
 
       sendJson(response, 200, { capture: capture ?? null });
+      return;
+    } catch (error) {
+      if (sendError(response, error)) {
+        return;
+      }
+
+      throw error;
+    }
+  }
+
+  if (request.method === "GET" && url.pathname === "/api/v1/capturas/en-revision") {
+    try {
+      sendJson(response, 200, { captures: listReviewCaptures(sessionFromHeaders(request.headers)) });
       return;
     } catch (error) {
       if (sendError(response, error)) {

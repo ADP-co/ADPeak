@@ -20,6 +20,7 @@ import { AuthProvider, useAuth, type User } from './context/AuthContext';
 import { Login } from './components/ui/Login';
 import { Toaster, toast } from 'sonner';
 import { useCaptureDraft } from './hooks/useCaptureDraft';
+import { CAPTURE_CHANGED_EVENT } from './api/captureEvents';
 import { buildHealthIntegralTemplate, buildTemplateForCatalogIndicator, catalogPlanteles, fetchIndicatorTemplate, fetchIndicators, plantelScopeLabelForIndicator, type CatalogIndicator } from './api/catalog';
 import { API_REQUESTS_ENABLED } from './api/client';
 import { officialCatalogRows, officialIndicatorPlantelScopes } from './catalog/officialCatalog.generated';
@@ -662,6 +663,15 @@ function AppContent() {
     void loadCatalogIndicators();
   }, [loadCatalogIndicators]);
 
+  useEffect(() => {
+    const handleCaptureChanged = () => {
+      void loadCatalogIndicators();
+    };
+
+    window.addEventListener(CAPTURE_CHANGED_EVENT, handleCaptureChanged);
+    return () => window.removeEventListener(CAPTURE_CHANGED_EVENT, handleCaptureChanged);
+  }, [loadCatalogIndicators]);
+
   const indicators = useMemo(
     () =>
       (catalogIndicators.length > 0
@@ -701,6 +711,11 @@ function AppContent() {
   };
 
   const handleIndicatorStatusChange = (code: string, status: Indicator['status']) => {
+    if (API_REQUESTS_ENABLED) {
+      void loadCatalogIndicators();
+      return;
+    }
+
     setIndicatorStatusOverrides((current) => {
       const next = { ...current, [code]: status };
       window.localStorage.setItem(INDICATOR_STATUS_STORAGE_KEY, JSON.stringify(next));

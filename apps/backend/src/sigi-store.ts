@@ -98,6 +98,20 @@ export type SigiIndicatorHistoryEntry = {
   active: boolean;
 };
 
+export type SigiReviewCapture = {
+  captureId: number;
+  indicadorId: number;
+  code: string;
+  name: string;
+  plantelId: number;
+  plantel: string;
+  periodoId: number;
+  actividadId: number;
+  responsableId: number | null;
+  estado: "en_revision";
+  actualizadoEn: string;
+};
+
 export type Plantel = {
   id: number;
   key: string;
@@ -501,6 +515,50 @@ export function listIndicatorHistory(session: SigiSession): SigiIndicatorHistory
     .sort((a, b) =>
       b.updatedAt.localeCompare(a.updatedAt) ||
       a.code.localeCompare(b.code, "es", { numeric: true })
+    );
+}
+
+export function listReviewCaptures(session: SigiSession): SigiReviewCapture[] {
+  if (session.role === "plantel") {
+    throw new SigiForbiddenError("El plantel no puede revisar capturas.");
+  }
+
+  return listCaptureDrafts()
+    .filter((draft) => draft.estado === "en_revision")
+    .flatMap((draft) => {
+      const indicator = indicators.get(draft.indicadorId);
+      const plantel = planteles.find((item) => item.id === draft.plantelId);
+
+      if (!indicator || !indicator.active || !plantel) {
+        return [];
+      }
+
+      if (!canReadIndicator(session, indicator)) {
+        return [];
+      }
+
+      if (!canUseIndicatorForPlantel(indicator, draft.plantelId)) {
+        return [];
+      }
+
+      return [{
+        captureId: draft.id,
+        indicadorId: indicator.id,
+        code: indicator.code,
+        name: indicator.name,
+        plantelId: draft.plantelId,
+        plantel: plantel.name,
+        periodoId: draft.periodoId,
+        actividadId: draft.actividadId,
+        responsableId: draft.responsableId,
+        estado: "en_revision" as const,
+        actualizadoEn: draft.actualizadoEn
+      }];
+    })
+    .sort((a, b) =>
+      b.actualizadoEn.localeCompare(a.actualizadoEn) ||
+      a.code.localeCompare(b.code, "es", { numeric: true }) ||
+      a.plantel.localeCompare(b.plantel, "es", { numeric: true })
     );
 }
 

@@ -9,6 +9,7 @@ import {
   type ExportReport,
   type ReportDataRow,
 } from '../../api/reportes';
+import { CAPTURE_CHANGED_EVENT } from '../../api/captureEvents';
 import { API_REQUESTS_ENABLED } from '../../api/client';
 import {
   fallbackOfficialSources,
@@ -287,6 +288,7 @@ export const ReportsDashboard = () => {
   // Estados para simular la carga del backend
   const [dateOptions] = useState(periodOptions);
   const [selectedDate, setSelectedDate] = useState(periodOptions[0].value);
+  const [refreshToken, setRefreshToken] = useState(0);
   const [report, setReport] = useState<ExportReport | null>(null);
   const [isLoadingReport, setIsLoadingReport] = useState(false);
   const [loadError, setLoadError] = useState('');
@@ -305,6 +307,13 @@ export const ReportsDashboard = () => {
           setOfficialSources(fallbackOfficialSources);
         }
       });
+  }, []);
+
+  useEffect(() => {
+    const handleCaptureChanged = () => setRefreshToken((current) => current + 1);
+
+    window.addEventListener(CAPTURE_CHANGED_EVENT, handleCaptureChanged);
+    return () => window.removeEventListener(CAPTURE_CHANGED_EVENT, handleCaptureChanged);
   }, []);
 
   useEffect(() => {
@@ -338,7 +347,7 @@ export const ReportsDashboard = () => {
     return () => {
       isMounted = false;
     };
-  }, [dateOptions, selectedDate]);
+  }, [dateOptions, refreshToken, selectedDate]);
 
   const fallbackPlanteles: PlantelProgressRecord[] = [
     {

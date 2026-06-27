@@ -29,6 +29,7 @@ interface IndicatorsTableProps {
   showScopeColumns?: boolean;
   periodLabel?: string;
   title?: string;
+  emptyMessage?: string;
 }
 
 export const IndicatorsTable = ({
@@ -37,6 +38,7 @@ export const IndicatorsTable = ({
   showScopeColumns = true,
   periodLabel = 'Periodo 2025 - 2026',
   title = 'Indicadores',
+  emptyMessage = 'No se encontraron indicadores.',
 }: IndicatorsTableProps) => {
 
   const [filter, setFilter] = useState<string>('todos');
@@ -227,7 +229,7 @@ export const IndicatorsTable = ({
                     colSpan={showScopeColumns ? 6 : 4}
                     className="py-8 px-6 text-center text-brand-Gris_oscuro/60"
                   >
-                    No se encontraron indicadores.
+                    {emptyMessage}
                   </td>
                 </tr>
               )}

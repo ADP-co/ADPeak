@@ -60,6 +60,20 @@ export type CaptureDraft = {
   actualizadoEn: string;
 };
 
+export type ReviewCapture = {
+  captureId: number;
+  indicadorId: number;
+  code: string;
+  name: string;
+  plantelId: number;
+  plantel: string;
+  periodoId: number;
+  actividadId: number;
+  responsableId: number | null;
+  estado: 'en_revision';
+  actualizadoEn: string;
+};
+
 function captureError(error: unknown, fallbackMessage: string) {
   if (!axios.isAxiosError(error)) {
     return new CaptureRequestError(fallbackMessage);
@@ -138,6 +152,19 @@ export async function findCaptureDraft(request: Omit<CaptureDraftRequest, 'paylo
     return response.data.capture;
   } catch (error) {
     throw captureError(error, 'No se pudo consultar la captura.');
+  }
+}
+
+export async function fetchReviewCaptures() {
+  if (!API_REQUESTS_ENABLED) {
+    throw apiUnavailableCaptureError();
+  }
+
+  try {
+    const response = await api.get<{ captures: ReviewCapture[] }>('/capturas/en-revision');
+    return response.data.captures;
+  } catch (error) {
+    throw captureError(error, 'No se pudo cargar la bandeja de revisión.');
   }
 }
 

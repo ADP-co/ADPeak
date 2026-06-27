@@ -1,7 +1,14 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { officialCatalogRows, officialCatalogStats, officialIndicatorPlantelScopes } from "./official-catalog.generated.js";
 import { officialDataSummary, officialWorkbookTemplates } from "./official-data.generated.js";
-import { createCaptureDraft, resetCaptureDraftsForTest, sendCaptureToReview, updateCaptureDraft } from "./capture-store.js";
+import {
+  approveCapture,
+  createCaptureDraft,
+  requestCaptureCorrection,
+  resetCaptureDraftsForTest,
+  sendCaptureToReview,
+  updateCaptureDraft
+} from "./capture-store.js";
 import {
   assertCaptureAccess,
   authenticateUser,
@@ -11,6 +18,7 @@ import {
   getIndicatorByCode,
   listIndicators,
   listIndicatorHistory,
+  listReviewCaptures,
   listUsers,
   officialSourcesPayload,
   reloadSigiStateFromPersistence,
@@ -513,6 +521,64 @@ describe("SIGI store and RBAC", () => {
     const reviewed = sendCaptureToReview(draft.id);
 
     expect(reviewed).toMatchObject({ estado: "en_revision" });
+  });
+
+  it("lists review captures only for director and assigned responsables", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const indicator = saveIndicator(director, {
+      ...getIndicatorByCode("1.0.0.0.2")!,
+      plantelIds: [1]
+    });
+    const assignedResponsable = sessionFromHeaders({
+      "x-role": "responsable",
+      "x-responsable-id": String(indicator.responsibleIds[0])
+    });
+    const unassignedResponsable = sessionFromHeaders({
+      "x-role": "responsable",
+      "x-responsable-id": "99"
+    });
+    const plantel = sessionFromHeaders({
+      "x-role": "plantel",
+      "x-plantel-id": "1"
+    });
+    const template = templateForIndicator(indicator, assignedResponsable);
+    const draft = createCaptureDraft({
+      plantelId: 1,
+      indicadorId: indicator.id,
+      actividadId: 1,
+      periodoId: 1,
+      responsableId: indicator.responsibleIds[0],
+      payload: {
+        rows: template.initialRows,
+        justificacion: "Captura enviada para la bandeja de revision."
+      }
+    });
+
+    sendCaptureToReview(draft.id);
+
+    expect(listReviewCaptures(director)).toMatchObject([
+      {
+        captureId: draft.id,
+        indicadorId: indicator.id,
+        code: indicator.code,
+        plantelId: 1,
+        periodoId: 1,
+        actividadId: 1,
+        estado: "en_revision"
+      }
+    ]);
+    expect(listReviewCaptures(assignedResponsable)).toHaveLength(1);
+    expect(listReviewCaptures(unassignedResponsable)).toHaveLength(0);
+    expect(() => listReviewCaptures(plantel)).toThrow(SigiForbiddenError);
+
+    requestCaptureCorrection(draft.id, "Corregir evidencia.");
+    expect(listReviewCaptures(director)).toHaveLength(0);
+
+    sendCaptureToReview(draft.id);
+    expect(listReviewCaptures(assignedResponsable)).toHaveLength(1);
+
+    approveCapture(draft.id);
+    expect(listReviewCaptures(director)).toHaveLength(0);
   });
 
   it("allows assigned responsables to edit data for captures under review", () => {
