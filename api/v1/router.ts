@@ -1,5 +1,7 @@
 import {
+  handleCaptureAction,
   handleCaptureDrafts,
+  handleReviewCaptures,
   handleIndicatorAction,
   handleIndicatorHistory,
   handleIndicators,
@@ -73,9 +75,14 @@ export default async function handler(request: any, response: any) {
     return;
   }
 
+  if (path === "capturas/en-revision") {
+    await handleReviewCaptures(request, response);
+    return;
+  }
+
   const captureMatch = path.match(/^capturas\/(\d+)(?:\/(enviar-revision|observar|aprobar))?$/);
   if (captureMatch) {
-    await handleCaptureDrafts(withQuery(request, { id: captureMatch[1], action: captureMatch[2] }), response);
+    await handleCaptureAction(withQuery(request, { id: captureMatch[1], action: captureMatch[2] }), response);
     return;
   }
 

@@ -410,6 +410,23 @@ export async function handleCaptureDrafts(request: RequestLike, response: any) {
   methodNotAllowed(response, ["GET", "POST", "OPTIONS"]);
 }
 
+export async function handleReviewCaptures(request: RequestLike, response: any) {
+  if (prepare(request, response, ["GET", "OPTIONS"])) {
+    return;
+  }
+
+  try {
+    const sigi = await loadSigi();
+    const session = sigi.sessionFromHeaders(request.headers ?? {});
+
+    sendJson(response, 200, { captures: sigi.listReviewCaptures(session) });
+  } catch (error) {
+    if (!sendKnownError(response, error)) {
+      sendJson(response, 400, { error: "invalid_review_queue", message: "No se pudo cargar la bandeja de revisión." });
+    }
+  }
+}
+
 export async function handleCaptureAction(request: RequestLike, response: any) {
   if (handleOptions(request, response)) {
     return;
