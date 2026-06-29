@@ -1383,6 +1383,72 @@ describe("SIGI store and RBAC", () => {
     });
   });
 
+  it("normalizes official workbook table headers without duplicate or useless context columns", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const duplicatedPlantelCodes = ["3.1.0.0.1", "3.1.1.3.6", "1.1.2.2.10", "1.1.2.2.11"];
+
+    duplicatedPlantelCodes.forEach((code) => {
+      const indicator = getIndicatorByCode(code);
+      expect(indicator, code).toBeDefined();
+
+      const template = templateForIndicator(indicator!, director);
+      const plantelColumns = template.columns.filter((column) => column.label === "Plantel");
+      const rowKeys = new Set(template.initialRows.flatMap((row) => Object.keys(row)));
+
+      expect(plantelColumns, code).toHaveLength(1);
+      expect(rowKeys.has("plantel_2"), code).toBe(false);
+    });
+
+    const softwareTemplate = templateForIndicator(getIndicatorByCode("4.1.1.0.1")!, director);
+    expect(softwareTemplate.columns[0]).toMatchObject({ key: "registro", label: "Registro" });
+    expect(softwareTemplate.columns.some((column) => /^Columna\s+\d+$/i.test(column.label))).toBe(false);
+
+    const titulationTemplate = templateForIndicator(getIndicatorByCode("1.0.0.0.2")!, director);
+    expect(titulationTemplate.columns.some((column) => column.label === "Delegación")).toBe(false);
+    expect(titulationTemplate.columns.map((column) => column.label)).toEqual(
+      expect.arrayContaining([
+        "Plantel",
+        "Programa Educativo",
+        "Egresados Titulados En El Año 2025 Mujeres",
+        "Matrícula De Primer Ingreso De La Misma Cohorte Total"
+      ])
+    );
+
+    const adoptTemplate = templateForIndicator(getIndicatorByCode("1.1.2.3.1")!, director);
+    expect(adoptTemplate.columns[0]).toMatchObject({ key: "registro", label: "Registro" });
+    expect(adoptTemplate.columns.filter((column) => column.label === "Nombre de la charla")).toHaveLength(1);
+
+    const languageTemplate = templateForIndicator(getIndicatorByCode("1.1.2.5.10")!, director);
+    expect(languageTemplate.columns.map((column) => column.key)).toEqual(
+      expect.arrayContaining(["total_h", "total_h_2", "total_h_3"])
+    );
+    expect(languageTemplate.columns.length).toBeGreaterThanOrEqual(9);
+  });
+
+  it("ignores persisted captures whose rows belong to an older official template", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const indicator = getIndicatorByCode("1.0.0.0.2")!;
+
+    const staleCapture = createCaptureDraft({
+      plantelId: 1,
+      indicadorId: indicator.id,
+      actividadId: 1,
+      periodoId: 1,
+      responsableId: indicator.responsibleIds[0],
+      payload: {
+        rows: [{ delegacion: "Colima", plantel: "Bachillerato 16", campo_obsoleto: 1 }],
+        justificacion: "Captura de una plantilla anterior."
+      }
+    });
+    approveCapture(staleCapture.id);
+
+    const listed = listIndicators(director).find((item) => item.code === indicator.code);
+
+    expect(listed?.captureId).toBeUndefined();
+    expect(listed?.captureStatus).toBeUndefined();
+    expect(listed?.status).toBe("Pendiente");
+  });
+
   it("blocks captures for indicators that are not assigned to the requested plantel", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const plantel = sessionFromHeaders({

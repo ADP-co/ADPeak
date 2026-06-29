@@ -272,7 +272,7 @@ export const planteles: Plantel[] = [
 
 const unassignedPlantel: Plantel = { id: 0, key: "sin-plantel", name: "Sin plantel asignado" };
 const officialSourcePlantelIds: number[] = [];
-const officialCatalogImportVersion = "2026-06-25-operational-indicators-v1";
+const officialCatalogImportVersion = "2026-06-29-template-cleanup-v1";
 const officialCatalogImportedAt = "2026-06-22T12:00:00.000-06:00";
 const operationalCatalogRows = officialCatalogRows.filter(isOperationalCatalogRow);
 const hiddenImportedIndicatorCodes = new Set(
@@ -768,6 +768,7 @@ function relevantCapturesForIndicator(session: SigiSession, indicator: SigiIndic
   return listCaptureDrafts()
     .filter((draft) => draft.indicadorId === indicator.id && draft.estado !== "cerrado")
     .filter((draft) => !hasExplicitPlantelScope(indicator) || canUseIndicatorForPlantel(indicator, draft.plantelId))
+    .filter((draft) => isCaptureCompatibleWithCurrentTemplate(session, indicator, draft))
     .filter((draft) => {
       if (session.role === "plantel") {
         return draft.plantelId === session.plantelId;
@@ -780,6 +781,26 @@ function relevantCapturesForIndicator(session: SigiSession, indicator: SigiIndic
       return true;
     })
     .sort((a, b) => b.actualizadoEn.localeCompare(a.actualizadoEn) || b.id - a.id);
+}
+
+function isCaptureCompatibleWithCurrentTemplate(
+  session: SigiSession,
+  indicator: SigiIndicator,
+  draft: CaptureDraft
+) {
+  if (!Array.isArray(draft.payload.rows)) {
+    return false;
+  }
+
+  const template = templateForIndicator(indicator, session);
+  const columnKeys = new Set(template.columns.map((column) => column.key));
+
+  return draft.payload.rows.every((row) =>
+    typeof row === "object" &&
+    row !== null &&
+    !Array.isArray(row) &&
+    Object.keys(row).every((key) => columnKeys.has(key))
+  );
 }
 
 function defaultPlantelIdForIndicator(session: SigiSession, indicator: SigiIndicator) {

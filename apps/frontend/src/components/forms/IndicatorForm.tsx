@@ -432,7 +432,7 @@ export const IndicatorForm = ({
         )}
         <table className="w-full min-w-[980px] border-collapse text-center text-sm font-body">
           <thead className="bg-brand-Verde_oscuro text-brand-Blanco">
-            {template.headerRows ? (
+            {template.headerRows && template.headerRows.length > 0 ? (
               template.headerRows.map((row, rowIndex) => (
                 <tr key={`header-row-${rowIndex}`} className={rowIndex === 0 ? undefined : 'bg-brand-Verde_principal/90'}>
                   {row.map((cell, cellIndex) => (
@@ -449,17 +449,19 @@ export const IndicatorForm = ({
               ))
             ) : (
               <>
-                <tr>
-                  {template.groups.map((group) => (
-                    <th
-                      key={group.label}
-                      colSpan={group.colspan}
-                      className="border border-brand-Blanco/20 py-2 px-4 font-bold"
-                    >
-                      {group.label}
-                    </th>
-                  ))}
-                </tr>
+                {template.groups.length > 0 && (
+                  <tr>
+                    {template.groups.map((group) => (
+                      <th
+                        key={group.label}
+                        colSpan={group.colspan}
+                        className="border border-brand-Blanco/20 py-2 px-4 font-bold"
+                      >
+                        {group.label}
+                      </th>
+                    ))}
+                  </tr>
+                )}
                 <tr className="bg-brand-Verde_principal/90">
                   {template.columns.map((column) => (
                     <th

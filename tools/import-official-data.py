@@ -721,6 +721,130 @@ def trim_trailing_blanks(values: list[str]) -> list[str]:
     return trimmed
 
 
+def fallback_header_label(_index: int) -> str:
+    return "Registro"
+
+
+def strip_empty_header_rows(header_rows: list[list[dict[str, Any]]]) -> list[list[dict[str, Any]]]:
+    return [
+        row
+        for row in header_rows
+        if any(clean_text(cell.get("label", "")) for cell in row)
+    ]
+
+
+def values_for_column(rows: list[dict[str, Any]], key: str) -> list[str]:
+    return [clean_text(row.get(key, "")) for row in rows]
+
+
+def all_blank(values: list[str]) -> bool:
+    return all(not value for value in values)
+
+
+def is_blank_readonly_context_column(column: dict[str, Any], rows: list[dict[str, Any]]) -> bool:
+    if column.get("type") != "readonly":
+        return False
+
+    normalized = normalize_key(f"{column.get('label', '')} {column.get('key', '')}")
+    if "delegacion" not in normalized:
+        return False
+
+    return all_blank(values_for_column(rows, column["key"]))
+
+
+def readable_label_from_key(key: str) -> str:
+    label = re.sub(r"_\d+$", "", key).replace("_", " ").strip()
+    if not label:
+        return "Registro"
+    replacements = {
+        "ano": "año",
+        "matricula": "matrícula",
+        "titulacion": "titulación",
+        "descripcion": "descripción",
+        "capacitacion": "capacitación",
+    }
+    words = []
+    for word in label.split():
+        if word in {"m", "h", "t"}:
+            words.append(word.upper())
+        else:
+            words.append(replacements.get(word, word).capitalize())
+    return " ".join(words)
+
+
+def disambiguate_repeated_labels(columns: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    counts = Counter(normalize_key(column["label"]) for column in columns)
+    next_columns: list[dict[str, Any]] = []
+
+    for column in columns:
+        normalized = normalize_key(column["label"])
+        if counts[normalized] <= 1:
+            next_columns.append(column)
+            continue
+
+        replacement_label = readable_label_from_key(column["key"])
+        if normalize_key(column["label"]) not in normalize_key(replacement_label):
+            replacement_label = f"{replacement_label} {column['label']}"
+
+        next_columns.append({
+            **column,
+            "label": replacement_label,
+        })
+
+    return next_columns
+
+
+def normalize_extracted_table(
+    columns: list[dict[str, Any]],
+    initial_rows: list[dict[str, Any]],
+    header_rows: list[list[dict[str, Any]]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[list[dict[str, Any]]]]:
+    rows = [dict(row) for row in initial_rows]
+    kept_columns: list[dict[str, Any]] = []
+    kept_by_signature: dict[tuple[str, str], int] = {}
+    dropped_columns: set[str] = set()
+
+    for column in columns:
+        next_column = dict(column)
+        normalized_label = normalize_key(next_column["label"])
+        base_key = re.sub(r"_\d+$", "", next_column["key"])
+        signature = (normalized_label, base_key)
+        can_dedupe = next_column.get("type") in {"readonly", "text"}
+
+        if is_blank_readonly_context_column(next_column, rows):
+            dropped_columns.add(next_column["key"])
+            continue
+
+        existing_index = kept_by_signature.get(signature) if can_dedupe else None
+        if existing_index is not None:
+            existing_column = kept_columns[existing_index]
+            existing_values = values_for_column(rows, existing_column["key"])
+            candidate_values = values_for_column(rows, next_column["key"])
+
+            if all_blank(candidate_values) or candidate_values == existing_values:
+                dropped_columns.add(next_column["key"])
+                continue
+
+            if all_blank(existing_values):
+                dropped_columns.add(existing_column["key"])
+                kept_columns[existing_index] = next_column
+                continue
+
+        kept_by_signature[signature] = len(kept_columns)
+        kept_columns.append(next_column)
+
+    if dropped_columns:
+        for row in rows:
+            for key in dropped_columns:
+                row.pop(key, None)
+        header_rows = []
+        kept_columns = disambiguate_repeated_labels(kept_columns)
+    else:
+        header_rows = strip_empty_header_rows(header_rows)
+
+    return kept_columns, rows, header_rows
+
+
 def extract_table_from_rows(rows: list[dict[str, Any]], merged_ranges: list[dict[str, Any]] | None = None) -> dict[str, Any] | None:
     if not rows:
         return None
@@ -757,8 +881,10 @@ def extract_table_from_rows(rows: list[dict[str, Any]], merged_ranges: list[dict
     seen_keys: set[str] = set()
     for index, label in enumerate(header_values):
         if not label:
-            label = f"Columna {index + 1}"
+            label = fallback_header_label(index)
         display_label = column_labels[index] if index < len(column_labels) and column_labels[index] else label
+        if normalize_key(display_label).startswith("columna"):
+            display_label = fallback_header_label(index)
         columns.append(column_from_label(display_label, seen_keys, key_label=label))
     apply_official_calculated_columns(columns)
 
@@ -782,6 +908,8 @@ def extract_table_from_rows(rows: list[dict[str, Any]], merged_ranges: list[dict
 
     if not initial_rows:
         initial_rows = [{column["key"]: "" for column in columns}]
+
+    columns, initial_rows, header_rows = normalize_extracted_table(columns, initial_rows, header_rows)
 
     return {
         "headerRow": rows[best_index]["row"],
@@ -861,7 +989,7 @@ def combined_header_labels(
                 continue
             parts.append(label)
             normalized_parts.add(normalized)
-        labels.append(" ".join(parts) or f"Columna {col_index + 1}")
+        labels.append(" ".join(parts) or fallback_header_label(col_index))
 
     return labels
 
@@ -889,7 +1017,7 @@ def display_column_labels(
             if value:
                 label = value
                 break
-        labels.append(label or f"Columna {col_index + 1}")
+        labels.append(label or fallback_header_label(col_index))
 
     return labels
 
@@ -1076,7 +1204,7 @@ def structured_header_rows(
                 cells.append(cell)
                 continue
 
-            label = clean_text(grid[row_index][column_number - 1] if column_number <= len(grid[row_index]) else "") or f"Columna {column_number}"
+            label = clean_text(grid[row_index][column_number - 1] if column_number <= len(grid[row_index]) else "") or fallback_header_label(column_number - 1)
             row_span = 1
             for next_row_index in range(row_index + 1, len(header_row_numbers)):
                 next_row_number = header_row_numbers[next_row_index]
@@ -1121,7 +1249,7 @@ def merge_header_rows(header_rows: list[list[str]]) -> list[str]:
                 continue
             parts.append(label)
             normalized_parts.add(normalized)
-        labels.append(" ".join(parts) or f"Columna {index + 1}")
+        labels.append(" ".join(parts) or fallback_header_label(index))
 
     return labels
 
@@ -1347,6 +1475,11 @@ def template_from_workbook_sheets(
         {key: value for key, value in column.items() if key != "private"}
         for column in table["columns"]
     ]
+    columns, initial_rows, header_rows = normalize_extracted_table(
+        columns,
+        table["initialRows"],
+        table.get("headerRows") or [],
+    )
     source_label = unicodedata.normalize("NFC", Path(source_path).name)
 
     return {
@@ -1358,9 +1491,9 @@ def template_from_workbook_sheets(
         "sourcePath": unicodedata.normalize("NFC", source_path),
         "sheetName": selected["name"],
         "groups": [],
-        "headerRows": table.get("headerRows") or [],
+        "headerRows": header_rows,
         "columns": columns,
-        "initialRows": table["initialRows"],
+        "initialRows": initial_rows,
         "showTotals": any(column["type"] in ("number", "calculated") for column in columns),
         "allowAddRows": True,
         "addRowLabel": "Agregar fila",

@@ -29,6 +29,11 @@ function initialCaptureId(storageKey: string) {
   return parsed && Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
 }
 
+function isRecoverableCaptureLookupError(error: unknown) {
+  return error instanceof CaptureRequestError &&
+    (error.code === 'capture_not_found' || error.status === 400 || error.status === 403);
+}
+
 export function useCaptureDraft(options: UseCaptureDraftOptions) {
   const queryClient = useQueryClient();
   const { requestedCaptureId, storageScope, enabled = true, ...captureOptions } = options;
@@ -53,6 +58,7 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
     queryKey: ['capture-draft', storageKey, captureId],
     queryFn: () => getCaptureDraft(captureId as number),
     enabled: enabled && Boolean(captureId),
+    retry: (_failureCount, error) => !isRecoverableCaptureLookupError(error),
   });
 
   const persistCapture = (capture: CaptureDraft) => {
@@ -86,10 +92,7 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
 
   useEffect(() => {
     if (
-      captureQuery.error instanceof CaptureRequestError &&
-      (captureQuery.error.code === 'capture_not_found' ||
-        captureQuery.error.status === 400 ||
-        captureQuery.error.status === 403)
+      isRecoverableCaptureLookupError(captureQuery.error)
     ) {
       window.localStorage.removeItem(storageKey);
       if (requestedCaptureId) {
@@ -198,7 +201,7 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
     capture: captureQuery.data ?? scopedCapture,
     statusMessage,
     errorMessage:
-      captureQuery.error instanceof Error
+      captureQuery.error instanceof Error && !isRecoverableCaptureLookupError(captureQuery.error)
         ? captureQuery.error.message
         : !hasRequestedCapture && scopedCaptureQuery.error instanceof Error
           ? scopedCaptureQuery.error.message

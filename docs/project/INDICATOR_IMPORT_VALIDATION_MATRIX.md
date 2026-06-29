@@ -1,6 +1,6 @@
 # Matriz de validacion de indicadores oficiales
 
-Fecha de revision: 2026-06-22
+Fecha de revision: 2026-06-29
 
 ## Alcance validado
 
@@ -28,7 +28,7 @@ Fuentes generadas y versionadas:
 | Mision | Evidencia | Resultado |
 |---|---|---|
 | Analista | ZIP vigente con 32 archivos: 30 Excel, 1 PDF y 1 DOCX | Cumple |
-| Implementador | 28 indicadores visibles generados y 28 plantillas oficiales disponibles desde el paquete vigente | Cumple |
+| Implementador | 14 indicadores operativos visibles y 28 plantillas oficiales tecnicas disponibles desde el paquete vigente | Cumple |
 | Validador | Pruebas unitarias, typecheck, build y flujo API por rol despues de los ajustes finales | En verificacion final |
 
 ## Reglas de calidad aplicadas
@@ -43,11 +43,24 @@ Fuentes generadas y versionadas:
 
 | Grupo | Cantidad | Criterio de implementacion | Verificacion |
 |---|---:|---|---|
-| Indicadores totales visibles | 28 | Catalogo oficial derivado del ZIP `indicadores-20260622T210134Z-3-001.zip` | API `/api/v1/indicadores` con Director |
+| Indicadores operativos visibles | 14 | Catalogo oficial derivado del ZIP `indicadores-20260622T210134Z-3-001.zip`; formatos internos ocultos | API `/api/v1/indicadores` con Director |
 | Formatos con Excel oficial | 28 | Plantilla generada desde encabezados/filas del libro | Auditoria de `/indicadores/:code/template` |
 | Libros Excel revisados | 30 | Paquete vigente local, sin versionar binarios | Importador oficial |
 | Grupos de evidencia oficial | 30 | Resumen agregado de libros oficiales, sin exponer rutas privadas | Reporte Director |
-| Falsos positivos retirados | 0 visibles | Notas tipo `La tabla anterior incide...` quedan fuera de catalogo y plantillas | `rg` sobre generados |
+| Falsos positivos retirados | 0 visibles | `FMT-*`, variantes `*-FMT-*` y notas tipo `La tabla anterior incide...` quedan fuera del flujo operativo | `rg` sobre generados y pruebas unitarias |
+
+## Revision de plantillas visuales 2026-06-29
+
+| Indicador | Hallazgo QA | Correccion aplicada | Veredicto |
+|---|---|---|---|
+| `3.1.0.0.1` | `Plantel` aparecia duplicado y repetia Bachillerato 16 | Se elimino la columna contextual redundante y se conservaron columnas de participantes | Cumple |
+| `3.1.1.3.6` | `Plantel` aparecia duplicado y repetia Bachillerato 16 | Misma regla central de deduplicacion de contexto | Cumple |
+| `1.1.2.2.10` | `Plantel` aparecia duplicado y repetia Bachillerato 16 | Misma regla central de deduplicacion de contexto | Cumple |
+| `1.1.2.2.11` | `Plantel` aparecia duplicado y repetia Bachillerato 16 | Misma regla central de deduplicacion de contexto | Cumple |
+| `4.1.1.0.1` | Encabezado generico `Columna 1` | Se normalizo como `Registro` cuando el Excel no trae encabezado confiable | Cumple |
+| `1.0.0.0.2` | `Delegacion` aparecia vacia como columna de solo lectura | Se oculto la columna readonly sin dato oficial y se mantuvo `Plantel`/`Programa Educativo` | Cumple |
+| `1.1.2.3.1` | Primera columna vacia y duplicado de `Nombre de la charla` | Se normalizo la columna vacia como `Registro` y se elimino el duplicado sin dato | Cumple |
+| `1.1.2.5.10` | No aparecia encabezado de columna cuando `headerRows` venia vacio | El frontend ahora renderiza `columns` cuando no hay encabezados agrupados | Cumple |
 
 ## Regresion funcional requerida
 
@@ -59,4 +72,4 @@ Fuentes generadas y versionadas:
 
 ## Veredicto
 
-Los indicadores disponibles en el paquete nuevo quedaron importados de forma reproducible desde `indicadores-20260622T210134Z-3-001.zip`. La validacion final debe confirmar en produccion que Postgres migro a `2026-06-23-indicadores-zip-only-v1` y que la API publica devuelve los 28 indicadores visibles esperados.
+Los indicadores disponibles en el paquete nuevo quedaron importados de forma reproducible desde `indicadores-20260622T210134Z-3-001.zip`. La validacion final debe confirmar en produccion que Postgres migro a `2026-06-29-template-cleanup-v1` y que la API publica devuelve 14 indicadores operativos visibles, sin formatos internos como indicadores.
