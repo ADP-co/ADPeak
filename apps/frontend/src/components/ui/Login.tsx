@@ -67,7 +67,7 @@ export const Login = () => {
       return;
     } catch (error) {
       if (!canUseLocalFallback(error)) {
-        setLoginError('Usuario o contraseña incorrectos.');
+        setLoginError(error instanceof Error ? error.message : 'Usuario o contraseña incorrectos.');
         setIsSubmitting(false);
         return;
       }

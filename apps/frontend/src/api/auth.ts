@@ -1,4 +1,4 @@
-import { API_BASE_URL, API_REQUESTS_ENABLED, apiJson, sessionHeaders } from './client';
+import { API_BASE_URL, API_REQUESTS_ENABLED, sessionHeaders } from './client';
 import type { User } from '../context/AuthContext';
 
 type LoginResponse = {
@@ -9,17 +9,32 @@ type LoginResponse = {
 };
 
 export async function loginWithCredentials(username: string, password: string) {
-  const response = await apiJson<LoginResponse>('/auth/login', {
+  if (!API_REQUESTS_ENABLED) {
+    throw new Error('api_unavailable');
+  }
+
+  const response = await fetch(`${API_BASE_URL}/auth/login`, {
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...sessionHeaders(),
+    },
     body: JSON.stringify({
       username,
       password,
     }),
   });
 
+  if (!response.ok) {
+    const payload = await response.json().catch(() => undefined) as { message?: string } | undefined;
+    throw new Error(payload?.message ?? 'Usuario o contraseña incorrectos.');
+  }
+
+  const payload = await response.json() as LoginResponse;
+
   return {
-    ...response.user,
-    sessionToken: response.sessionToken,
+    ...payload.user,
+    sessionToken: payload.sessionToken,
   };
 }
 

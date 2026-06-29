@@ -51,6 +51,13 @@ export type AuthenticatedSigiUser = {
   responsableId?: number;
 };
 
+export type AuthenticationFailureReason = "invalid_credentials" | "inactive_user";
+
+export type AuthenticationResult = {
+  user?: AuthenticatedSigiUser;
+  reason?: AuthenticationFailureReason;
+};
+
 type SessionTokenPayload = {
   sub: string;
   role: SystemRole;
@@ -449,17 +456,25 @@ export function deactivateUser(session: SigiSession, id: string) {
   return publicUser(updated);
 }
 
-export function authenticateUser(username: string, password: string): AuthenticatedSigiUser | undefined {
+export function authenticateUserResult(username: string, password: string): AuthenticationResult {
   const normalizedUsername = normalizeUsername(username);
   const user = Array.from(users.values()).find((candidate) =>
-    candidate.active && matchesLoginUsername(candidate, normalizedUsername)
+    matchesLoginUsername(candidate, normalizedUsername)
   );
 
   if (!user || user.passwordHash !== hashPassword(password)) {
-    return undefined;
+    return { reason: "invalid_credentials" };
   }
 
-  return authenticatedUser(user);
+  if (!user.active) {
+    return { reason: "inactive_user" };
+  }
+
+  return { user: authenticatedUser(user) };
+}
+
+export function authenticateUser(username: string, password: string): AuthenticatedSigiUser | undefined {
+  return authenticateUserResult(username, password).user;
 }
 
 export function updateOwnPassword(
@@ -2199,7 +2214,7 @@ function rowForOfficialWorkbookColumns(
     const sourceValue = sourceRow[column.key];
 
     if (normalizedLabel.includes("plantel")) {
-      row[column.key] = plantel?.name || sourceValue || "";
+      row[column.key] = officialWorkbookPlantelValue(sourceValue, plantel);
       continue;
     }
 
@@ -2207,6 +2222,21 @@ function rowForOfficialWorkbookColumns(
   }
 
   return row;
+}
+
+function officialWorkbookPlantelValue(sourceValue: unknown, plantel?: Plantel) {
+  if (plantel?.name && plantel.name !== unassignedPlantel.name) {
+    return plantel.name;
+  }
+
+  const text = String(sourceValue ?? "").trim();
+  const normalized = normalizeKey(text);
+
+  if (!text || normalized === "bachillerato" || normalized === "bach") {
+    return planteles[0].name;
+  }
+
+  return text;
 }
 
 function rowsForOfficialWorkbookSession(

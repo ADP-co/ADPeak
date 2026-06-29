@@ -12,6 +12,7 @@ import {
 import {
   assertCaptureAccess,
   authenticateUser,
+  authenticateUserResult,
   buildReportPayload,
   deactivateIndicator,
   deactivateUser,
@@ -242,6 +243,28 @@ describe("SIGI store and RBAC", () => {
     })).toMatchObject({ role: "responsable" });
   });
 
+  it("reports blocked users separately from invalid credentials", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const blocked = saveUser(director, {
+      name: "Responsable bloqueado",
+      username: "resp-bloqueado",
+      role: "responsable",
+      responsableId: 98,
+      indicatorCodes: ["1.0.0.0.2"],
+      password: "Resp2026!"
+    });
+
+    deactivateUser(director, blocked.id);
+
+    expect(authenticateUser("resp-bloqueado", "Resp2026!")).toBeUndefined();
+    expect(authenticateUserResult("resp-bloqueado", "Resp2026!")).toMatchObject({
+      reason: "inactive_user"
+    });
+    expect(authenticateUserResult("resp-bloqueado", "incorrecta")).toMatchObject({
+      reason: "invalid_credentials"
+    });
+  });
+
   it("scopes indicators for responsible users", () => {
     const responsable = sessionFromHeaders({
       "x-role": "responsable",
@@ -458,9 +481,6 @@ describe("SIGI store and RBAC", () => {
     expect(listIndicators(responsable).some((item) => item.code === unassigned.code)).toBe(true);
     expect(listIndicators(bachillerato16).some((item) => item.code === unassigned.code)).toBe(false);
     expect(listIndicators(bachillerato4).some((item) => item.code === unassigned.code)).toBe(false);
-    expect(templateForIndicator(unassigned, director).initialRows.some((row) => row.plantel === "Bachillerato 16")).toBe(false);
-    expect(templateForIndicator(unassigned, responsable).initialRows.some((row) => row.plantel === "Bachillerato 16")).toBe(false);
-
     expect(() =>
       assertCaptureAccess(
         responsable,
@@ -1397,6 +1417,23 @@ describe("SIGI store and RBAC", () => {
 
       expect(plantelColumns, code).toHaveLength(1);
       expect(rowKeys.has("plantel_2"), code).toBe(false);
+    });
+
+    const plantelValueCodes = [
+      ...duplicatedPlantelCodes,
+      "1.0.0.0.2",
+      "1.1.2.0.3",
+      "1.1.2.5.3",
+      "1.1.2.1.4"
+    ];
+
+    plantelValueCodes.forEach((code) => {
+      const template = templateForIndicator(getIndicatorByCode(code)!, director);
+      const plantelColumn = template.columns.find((column) => column.label.toLowerCase() === "plantel");
+
+      expect(plantelColumn, code).toBeDefined();
+      expect(template.initialRows[0]?.[plantelColumn!.key], code).toBe("Bachillerato 16");
+      expect(template.initialRows.some((row) => row[plantelColumn!.key] === "Bachillerato"), code).toBe(false);
     });
 
     const softwareTemplate = templateForIndicator(getIndicatorByCode("4.1.1.0.1")!, director);
