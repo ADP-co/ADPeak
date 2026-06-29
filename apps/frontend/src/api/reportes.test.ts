@@ -3,6 +3,7 @@ import { reportToCsv, reportToPdfBlob, type ExportReport } from './reportes';
 
 const sampleReport: ExportReport = {
   tipoReporte: 'plantel',
+  vistaReporte: 'avance',
   periodo: '2026-2',
   cicloEscolar: '2025-2026',
   fechaGeneracion: '2026-06-12',
@@ -85,6 +86,20 @@ describe('report exports', () => {
     expect(pdfText).not.toContain('registro_id');
     expect(pdfText).not.toContain('tipoReporte');
     expect(pdfText).not.toContain('indicadores[].datos[]');
+  });
+
+  it('builds a detailed PDF centered on stored indicator information', async () => {
+    const pdfText = await (await reportToPdfBlob({
+      ...sampleReport,
+      vistaReporte: 'detalle',
+    })).text();
+
+    expect(pdfText).toContain('capturada');
+    expect(pdfText).not.toContain('Resumen ejecutivo');
+    expect(pdfText).toContain('Programa:');
+    expect(pdfText).toContain('Analista Programador');
+    expect(pdfText).toContain('Observaciones: Dato');
+    expect(pdfText).toContain('importado y editable');
   });
 
   it('wraps long PDF indicator titles instead of drawing them as one overflowing line', async () => {

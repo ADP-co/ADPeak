@@ -121,6 +121,24 @@ export type SigiReviewCapture = {
   actualizadoEn: string;
 };
 
+export type SigiNotification = {
+  id: number;
+  rolDestino: SystemRole;
+  usuarioDestino: string;
+  indicadorId: number;
+  indicadorCodigo: string;
+  indicadorNombre: string;
+  captureId: number;
+  plantelId?: number;
+  plantel?: string;
+  estado: CaptureDraft["estado"];
+  mensaje: string;
+  createdAt: string;
+  readAt: string | null;
+  actorUserId: string;
+  actorRole: SystemRole;
+};
+
 export type Plantel = {
   id: number;
   key: string;
@@ -158,6 +176,7 @@ export type IndicatorTemplate = {
 
 export type SigiReportPayload = {
   tipoReporte: "plantel" | "institucional" | "responsable";
+  vistaReporte?: "detalle" | "avance";
   periodo: string;
   cicloEscolar: string;
   fechaGeneracion: string;
@@ -273,6 +292,8 @@ const responsibleIdByName = new Map(
 const initialIndicators = buildIndicators();
 const indicators = new Map<number, SigiIndicator>();
 const users = new Map<string, SigiUser>();
+const notifications = new Map<number, SigiNotification>();
+let nextNotificationId = 1;
 
 reloadSigiStateFromPersistence();
 
@@ -309,6 +330,7 @@ export function sessionFromHeaders(headers: Record<string, string | string[] | u
 export function reloadSigiStateFromPersistence() {
   const persistedIndicators = readPersistedCollection<SigiIndicator>("indicators");
   const persistedUsers = readPersistedCollection<SigiUser>("users");
+  const persistedNotifications = readPersistedCollection<SigiNotification>("notifications") ?? [];
   const needsCatalogMigration = readPersistedValue<string>("catalogImportVersion") !== officialCatalogImportVersion;
 
   indicators.clear();
@@ -322,10 +344,19 @@ export function reloadSigiStateFromPersistence() {
     users.set(normalizedUser.id, normalizedUser);
   }
 
+  notifications.clear();
+  for (const notification of persistedNotifications) {
+    notifications.set(notification.id, notification);
+  }
+  nextNotificationId = readPersistedValue<number>("nextNotificationId") ??
+    Math.max(0, ...Array.from(notifications.keys())) + 1;
+
   if (needsCatalogMigration) {
     persistState({
       indicators: Array.from(indicators.values()),
       users: Array.from(users.values()),
+      notifications: Array.from(notifications.values()),
+      nextNotificationId,
       catalogImportVersion: officialCatalogImportVersion
     });
   }
@@ -546,7 +577,7 @@ export function listReviewCaptures(session: SigiSession): SigiReviewCapture[] {
         return [];
       }
 
-      if (!canUseIndicatorForPlantel(indicator, draft.plantelId)) {
+      if (hasExplicitPlantelScope(indicator) && !canUseIndicatorForPlantel(indicator, draft.plantelId)) {
         return [];
       }
 
@@ -569,6 +600,86 @@ export function listReviewCaptures(session: SigiSession): SigiReviewCapture[] {
       a.code.localeCompare(b.code, "es", { numeric: true }) ||
       a.plantel.localeCompare(b.plantel, "es", { numeric: true })
     );
+}
+
+export function listNotifications(session: SigiSession): SigiNotification[] {
+  return Array.from(notifications.values())
+    .filter((notification) => notification.usuarioDestino === session.userId)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt) || b.id - a.id);
+}
+
+export function markNotificationRead(session: SigiSession, notificationId: number) {
+  const notification = notifications.get(notificationId);
+
+  if (!notification) {
+    return undefined;
+  }
+
+  if (notification.usuarioDestino !== session.userId) {
+    throw new SigiForbiddenError("No tienes permiso para modificar esta notificación.");
+  }
+
+  if (notification.readAt) {
+    return notification;
+  }
+
+  const updated = { ...notification, readAt: new Date().toISOString() };
+  notifications.set(notificationId, updated);
+  persistNotificationState();
+  return updated;
+}
+
+export function resetNotificationsForTest() {
+  notifications.clear();
+  nextNotificationId = 1;
+  persistNotificationState();
+}
+
+export function recordCaptureNotification(
+  event: "submitted" | "correction_requested" | "approved",
+  actor: SigiSession,
+  draft: CaptureDraft
+) {
+  const indicator = indicators.get(draft.indicadorId);
+
+  if (!indicator) {
+    return [];
+  }
+
+  const plantel = planteles.find((item) => item.id === draft.plantelId);
+  const targetUsers = notificationTargetsForCapture(event, indicator, draft);
+  const createdAt = new Date().toISOString();
+  const created: SigiNotification[] = [];
+
+  for (const targetUser of targetUsers) {
+    const notification: SigiNotification = {
+      id: nextNotificationId,
+      rolDestino: targetUser.role,
+      usuarioDestino: targetUser.id,
+      indicadorId: indicator.id,
+      indicadorCodigo: indicator.code,
+      indicadorNombre: indicator.name,
+      captureId: draft.id,
+      plantelId: draft.plantelId,
+      plantel: plantel?.name,
+      estado: draft.estado,
+      mensaje: notificationMessage(event, indicator, plantel?.name),
+      createdAt,
+      readAt: null,
+      actorUserId: actor.userId,
+      actorRole: actor.role
+    };
+
+    nextNotificationId += 1;
+    notifications.set(notification.id, notification);
+    created.push(notification);
+  }
+
+  if (created.length > 0) {
+    persistNotificationState();
+  }
+
+  return created;
 }
 
 function workStateForIndicator(session: SigiSession, indicator: SigiIndicator): Pick<
@@ -656,7 +767,7 @@ function workStateForIndicator(session: SigiSession, indicator: SigiIndicator): 
 function relevantCapturesForIndicator(session: SigiSession, indicator: SigiIndicator) {
   return listCaptureDrafts()
     .filter((draft) => draft.indicadorId === indicator.id && draft.estado !== "cerrado")
-    .filter((draft) => canUseIndicatorForPlantel(indicator, draft.plantelId))
+    .filter((draft) => !hasExplicitPlantelScope(indicator) || canUseIndicatorForPlantel(indicator, draft.plantelId))
     .filter((draft) => {
       if (session.role === "plantel") {
         return draft.plantelId === session.plantelId;
@@ -676,7 +787,7 @@ function defaultPlantelIdForIndicator(session: SigiSession, indicator: SigiIndic
     return session.plantelId;
   }
 
-  return indicator.plantelIds[0] ?? officialIndicatorPlantelScopes[indicator.code]?.[0] ?? 1;
+  return indicator.plantelIds[0] ?? officialIndicatorPlantelScopes[indicator.code]?.[0];
 }
 
 export function getIndicatorById(id: number) {
@@ -877,7 +988,7 @@ export function assertCaptureAccess(
     }
   }
 
-  if (!canUseIndicatorForPlantel(indicator, request.plantelId)) {
+  if (requiresPlantelScope(session, indicator) && !canUseIndicatorForPlantel(indicator, request.plantelId)) {
     throw new SigiForbiddenError("El indicador no esta asignado a este plantel.");
   }
 
@@ -969,7 +1080,7 @@ export function officialSourcesPayload(session: SigiSession): OfficialSourcesPay
 
 export function buildReportPayload(
   session: SigiSession,
-  filters: { plantelId?: string; plantel?: string; periodo?: string; cicloEscolar?: string; estado?: string; now?: Date } = {}
+  filters: { plantelId?: string; plantel?: string; periodo?: string; cicloEscolar?: string; estado?: string; tipo?: string; now?: Date } = {}
 ): SigiReportPayload {
   const cicloEscolar = filters.cicloEscolar ?? "2025-2026";
   const periodo = filters.periodo ?? "2026-A";
@@ -1049,6 +1160,7 @@ export function buildReportPayload(
 
   return {
     tipoReporte: identityPlantel ? "plantel" : session.role === "responsable" ? "responsable" : "institucional",
+    vistaReporte: normalizeReportView(filters.tipo, session.role),
     periodo,
     cicloEscolar,
     fechaGeneracion: (filters.now ?? new Date()).toISOString().slice(0, 10),
@@ -1064,14 +1176,6 @@ function plantelesForReport(indicator: SigiIndicator, scopedPlanteles: Plantel[]
   const effectivePlantelIds = effectivePlantelIdsForIndicator(indicator);
 
   if (effectivePlantelIds.length === 0) {
-    if (
-      indicator.plantelScopeSource === "official-import" &&
-      indicator.plantelIds.length === 0 &&
-      !officialIndicatorPlantelScopes[indicator.code]?.length
-    ) {
-      return scopedPlanteles.filter((plantel) => canUseIndicatorForPlantel(indicator, plantel.id));
-    }
-
     return hasPlantelFilter ? [] : [unassignedPlantel];
   }
 
@@ -1100,7 +1204,7 @@ function rowsFromCaptureDrafts({
   return captureDrafts
     .filter((draft) =>
       draft.indicadorId === indicator.id &&
-      draft.plantelId === plantel.id &&
+      (plantel.id === unassignedPlantel.id || draft.plantelId === plantel.id) &&
       draft.actividadId === activityIndex + 1 &&
       draft.periodoId === periodoId
     )
@@ -1115,7 +1219,7 @@ function rowsFromCaptureDrafts({
         responsable: indicator.responsibleNames.join(", "),
         estado: reportStatusForCapture(draft.estado),
         avance: progressForCapturedRow(row, draft.estado),
-        plantel: readableValue(row.plantel) || plantel.name,
+        plantel: readableValue(row.plantel) || (plantel.id === unassignedPlantel.id ? "Responsable" : plantel.name),
         plantelId: String(plantel.id),
         periodo,
         periodoId: draft.periodoId,
@@ -1201,7 +1305,10 @@ function reportDetailsFromCapturedRow(row: Record<string, unknown>, indicator: S
   const details: Array<{ campo: string; valor: string }> = [];
   const templateColumns = templateForIndicator(indicator).columns;
   const labelsByKey = new Map(templateColumns.map((column) => [column.key, column.label]));
-  const orderedKeys = templateColumns.map((column) => column.key);
+  const orderedKeys = Array.from(new Set([
+    ...templateColumns.map((column) => column.key),
+    ...Object.keys(row)
+  ]));
   const seenLabels = new Set<string>();
 
   for (const key of orderedKeys) {
@@ -1794,6 +1901,51 @@ function persistCatalogState() {
   });
 }
 
+function persistNotificationState() {
+  persistState({
+    notifications: Array.from(notifications.values()),
+    nextNotificationId
+  });
+}
+
+function notificationTargetsForCapture(
+  event: "submitted" | "correction_requested" | "approved",
+  indicator: SigiIndicator,
+  draft: CaptureDraft
+) {
+  if (event === "submitted") {
+    return Array.from(users.values())
+      .filter((user) =>
+        user.active &&
+        (
+          user.role === "director" ||
+          (user.role === "responsable" && indicator.responsibleIds.includes(user.responsableId ?? -1))
+        )
+      );
+  }
+
+  return Array.from(users.values())
+    .filter((user) => user.active && user.role === "plantel" && user.plantelId === draft.plantelId);
+}
+
+function notificationMessage(
+  event: "submitted" | "correction_requested" | "approved",
+  indicator: SigiIndicator,
+  plantelName?: string
+) {
+  const scope = plantelName ? ` de ${plantelName}` : "";
+
+  if (event === "submitted") {
+    return `Nueva captura en revisión${scope}: ${indicator.code}.`;
+  }
+
+  if (event === "correction_requested") {
+    return `Se solicitó corrección${scope}: ${indicator.code}.`;
+  }
+
+  return `Captura aprobada${scope}: ${indicator.code}.`;
+}
+
 function requireDirector(session: SigiSession) {
   if (session.role !== "director") {
     throw new SigiForbiddenError("Solo dirección puede administrar este recurso.");
@@ -1806,7 +1958,7 @@ function canReadIndicator(session: SigiSession, indicator: SigiIndicator) {
   }
 
   if (session.role === "plantel") {
-    return canUseIndicatorForPlantel(indicator, session.plantelId ?? -1);
+    return hasExplicitPlantelScope(indicator) && canUseIndicatorForPlantel(indicator, session.plantelId ?? -1);
   }
 
   return isResponsibleAssigned(session, indicator);
@@ -1824,15 +1976,15 @@ function isResponsibleAssigned(session: SigiSession, indicator: SigiIndicator) {
 }
 
 function canUseIndicatorForPlantel(indicator: SigiIndicator, plantelId: number) {
-  if (
-    indicator.plantelScopeSource === "official-import" &&
-    indicator.plantelIds.length === 0 &&
-    !officialIndicatorPlantelScopes[indicator.code]?.length
-  ) {
-    return planteles.some((plantel) => plantel.id === plantelId);
-  }
-
   return effectivePlantelIdsForIndicator(indicator).includes(plantelId);
+}
+
+function hasExplicitPlantelScope(indicator: SigiIndicator) {
+  return effectivePlantelIdsForIndicator(indicator).length > 0;
+}
+
+function requiresPlantelScope(session: SigiSession, indicator: SigiIndicator) {
+  return session.role === "plantel" || hasExplicitPlantelScope(indicator);
 }
 
 function indicatorChangeLabel(change: SigiIndicator["lastChange"]) {
@@ -1879,7 +2031,7 @@ function plantelScopeLabel(indicator: SigiIndicator) {
     indicator.plantelIds.length === 0 &&
     !officialIndicatorPlantelScopes[indicator.code]?.length
   ) {
-    return "Todos los planteles";
+    return "Responsable";
   }
 
   const effectivePlantelIds = effectivePlantelIdsForIndicator(indicator);
@@ -2797,6 +2949,20 @@ function normalizeReportStatusFilter(status?: string) {
   }
 
   return normalized;
+}
+
+function normalizeReportView(tipo: string | undefined, role: SystemRole): "detalle" | "avance" {
+  const normalized = normalizeKey(tipo ?? "");
+
+  if (normalized === "avance") {
+    return "avance";
+  }
+
+  if (normalized === "detalle") {
+    return "detalle";
+  }
+
+  return role === "director" ? "avance" : "detalle";
 }
 
 function filterReportRowsByStatus(

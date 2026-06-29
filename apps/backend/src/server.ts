@@ -28,9 +28,12 @@ import {
   getIndicatorById,
   listIndicatorHistory,
   listIndicators,
+  listNotifications,
   listReviewCaptures,
   listUsers,
+  markNotificationRead,
   officialSourcesPayload,
+  recordCaptureNotification,
   recordResponsibleCaptureEdit,
   reloadSigiStateFromPersistence,
   saveIndicator,
@@ -182,7 +185,7 @@ const server = createServer(async (request, response) => {
     } catch {
       sendJson(response, 400, {
         error: "invalid_json",
-        message: "El cuerpo de la solicitud debe ser JSON valido."
+        message: "El cuerpo de la solicitud debe ser JSON válido."
       });
       return;
     }
@@ -202,7 +205,7 @@ const server = createServer(async (request, response) => {
 
       sendJson(response, 400, {
         error: "invalid_json",
-        message: "El cuerpo de la solicitud debe ser JSON valido."
+        message: "El cuerpo de la solicitud debe ser JSON válido."
       });
       return;
     }
@@ -230,7 +233,7 @@ const server = createServer(async (request, response) => {
 
       sendJson(response, 400, {
         error: "invalid_json",
-        message: "El cuerpo de la solicitud debe ser JSON valido."
+        message: "El cuerpo de la solicitud debe ser JSON válido."
       });
       return;
     }
@@ -268,7 +271,7 @@ const server = createServer(async (request, response) => {
         return;
       }
 
-      sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON valido." });
+      sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON válido." });
       return;
     }
   }
@@ -293,7 +296,7 @@ const server = createServer(async (request, response) => {
         return;
       }
 
-      sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON valido." });
+      sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON válido." });
       return;
     }
   }
@@ -364,7 +367,7 @@ const server = createServer(async (request, response) => {
         return;
       }
 
-      sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON valido." });
+      sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON válido." });
       return;
     }
   }
@@ -448,6 +451,47 @@ const server = createServer(async (request, response) => {
     }
   }
 
+  if (request.method === "GET" && url.pathname === "/api/v1/notificaciones") {
+    try {
+      sendJson(response, 200, { notifications: listNotifications(sessionFromHeaders(request.headers)) });
+      return;
+    } catch (error) {
+      if (sendError(response, error)) {
+        return;
+      }
+
+      throw error;
+    }
+  }
+
+  const notificationMatch = url.pathname.match(/^\/api\/v1\/notificaciones\/(\d+)\/leida$/);
+
+  if (notificationMatch && request.method === "PATCH") {
+    try {
+      const session = sessionFromHeaders(request.headers);
+      const notificationId = Number(notificationMatch[1]);
+      const notification = markNotificationRead(session, notificationId);
+
+      if (!notification) {
+        sendJson(response, 404, {
+          error: "notification_not_found",
+          message: "No existe una notificación con ese ID."
+        });
+        return;
+      }
+
+      await flushPersistedState();
+      sendJson(response, 200, notification);
+      return;
+    } catch (error) {
+      if (sendError(response, error)) {
+        return;
+      }
+
+      throw error;
+    }
+  }
+
   if (request.method === "POST" && url.pathname === "/api/v1/capturas/borradores") {
     try {
       const session = sessionFromHeaders(request.headers);
@@ -483,7 +527,7 @@ const server = createServer(async (request, response) => {
 
       sendJson(response, 400, {
         error: "invalid_json",
-        message: "El cuerpo de la solicitud debe ser JSON valido."
+        message: "El cuerpo de la solicitud debe ser JSON válido."
       });
       return;
     }
@@ -581,7 +625,7 @@ const server = createServer(async (request, response) => {
 
         sendJson(response, 400, {
           error: "invalid_json",
-          message: "El cuerpo de la solicitud debe ser JSON valido."
+          message: "El cuerpo de la solicitud debe ser JSON válido."
         });
         return;
       }
@@ -610,6 +654,7 @@ const server = createServer(async (request, response) => {
           return;
         }
 
+        recordCaptureNotification("submitted", session, updatedDraft);
         await flushPersistedState();
         sendJson(response, 200, updatedDraft);
         return;
@@ -660,6 +705,7 @@ const server = createServer(async (request, response) => {
           return;
         }
 
+        recordCaptureNotification("correction_requested", session, updatedDraft);
         await flushPersistedState();
         sendJson(response, 200, updatedDraft);
         return;
@@ -670,7 +716,7 @@ const server = createServer(async (request, response) => {
 
         sendJson(response, 400, {
           error: "invalid_json",
-          message: "El cuerpo de la solicitud debe ser JSON valido."
+          message: "El cuerpo de la solicitud debe ser JSON válido."
         });
         return;
       }
@@ -680,25 +726,26 @@ const server = createServer(async (request, response) => {
       try {
         const draft = getCaptureDraft(captureId);
 
-      if (!draft) {
-        sendJson(response, 404, {
-          error: "capture_not_found",
-          message: "No existe una captura con ese ID."
-        });
-        return;
-      }
+        if (!draft) {
+          sendJson(response, 404, {
+            error: "capture_not_found",
+            message: "No existe una captura con ese ID."
+          });
+          return;
+        }
 
-      assertCaptureAccess(session, draft, "review");
-      const updatedDraft = approveCapture(captureId);
+        assertCaptureAccess(session, draft, "review");
+        const updatedDraft = approveCapture(captureId);
 
-      if (!updatedDraft) {
-        sendJson(response, 409, {
-          error: "invalid_capture_status",
-          message: "La captura debe estar en revisión para aprobarse."
-        });
-        return;
-      }
+        if (!updatedDraft) {
+          sendJson(response, 409, {
+            error: "invalid_capture_status",
+            message: "La captura debe estar en revisión para aprobarse."
+          });
+          return;
+        }
 
+        recordCaptureNotification("approved", session, updatedDraft);
         await flushPersistedState();
         sendJson(response, 200, updatedDraft);
       } catch (error) {
@@ -790,7 +837,7 @@ const server = createServer(async (request, response) => {
     } catch {
       sendJson(response, 400, {
         error: "invalid_json",
-        message: "El cuerpo de la solicitud debe ser JSON valido."
+        message: "El cuerpo de la solicitud debe ser JSON válido."
       });
       return;
     }
@@ -814,6 +861,7 @@ function reportFiltersFromUrl(url: URL) {
     periodo: url.searchParams.get("periodo") ?? undefined,
     plantel: url.searchParams.get("plantel") ?? undefined,
     plantelId: url.searchParams.get("plantelId") ?? undefined,
+    tipo: url.searchParams.get("tipo") ?? undefined,
     estado: url.searchParams.get("estado") ?? url.searchParams.get("status") ?? undefined
   };
 }

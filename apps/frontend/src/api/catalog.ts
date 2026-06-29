@@ -118,7 +118,7 @@ export function plantelScopeLabelForIndicator(
     indicator.plantelIds.length === 0 &&
     effectivePlantelIds.length === 0
   ) {
-    return 'Todos los planteles';
+    return 'Responsable';
   }
 
   if (effectivePlantelIds.length === 0) {

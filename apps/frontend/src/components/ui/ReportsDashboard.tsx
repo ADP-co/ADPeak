@@ -326,6 +326,7 @@ export const ReportsDashboard = () => {
     fetchExportReport({
       cicloEscolar: selectedOption.cicloEscolar,
       periodo: selectedOption.value,
+      tipo: user?.role === 'admin' ? 'avance' : 'detalle',
     })
       .then((nextReport) => {
         if (isMounted) {
@@ -347,7 +348,7 @@ export const ReportsDashboard = () => {
     return () => {
       isMounted = false;
     };
-  }, [dateOptions, refreshToken, selectedDate]);
+  }, [dateOptions, refreshToken, selectedDate, user?.role]);
 
   const fallbackPlanteles: PlantelProgressRecord[] = [
     {
@@ -369,6 +370,7 @@ export const ReportsDashboard = () => {
       const report = await fetchExportReport({
         cicloEscolar: selectedOption.cicloEscolar,
         periodo: selectedOption.value,
+        tipo: 'detalle',
         plantelId: item.kind === 'plantel' ? item.plantelId : undefined,
       });
       const scopedReport = item.kind === 'indicador'

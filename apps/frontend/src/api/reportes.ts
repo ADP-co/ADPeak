@@ -31,6 +31,7 @@ export type ReportIndicator = {
 
 export type ExportReport = {
   tipoReporte: string;
+  vistaReporte?: 'detalle' | 'avance';
   periodo: string;
   cicloEscolar: string;
   fechaGeneracion: string;
@@ -46,6 +47,7 @@ export type ReportRequest = {
   plantelId?: string;
   periodo?: string;
   cicloEscolar?: string;
+  tipo?: 'detalle' | 'avance';
 };
 
 export async function fetchExportReport(request: ReportRequest) {
@@ -422,24 +424,26 @@ function renderPdfReport(report: ExportReport, hasHeaderImage: boolean) {
   );
   current.y -= 26;
 
-  drawIndicatorList(report.indicadores);
+  if (report.vistaReporte !== 'detalle') {
+    drawIndicatorList(report.indicadores);
 
-  drawSectionTitle('Resumen global');
-  drawMetricGrid(current, [
-    ['Planteles', String(executiveSummary.totalPlanteles)],
-    ['Responsables', String(executiveSummary.totalResponsables)],
-    ['Indicadores', String(executiveSummary.totalIndicadores)],
-    ['Enviados', String(executiveSummary.reportesEnviados)],
-    ['Aprobados', String(executiveSummary.reportesAprobados)],
-    ['Observados', String(executiveSummary.reportesObservados)],
-    ['Atrasados', String(executiveSummary.reportesAtrasados)],
-    ['Faltantes', String(executiveSummary.reportesFaltantes)],
-  ]);
-  drawProgressBar('Avance general institucional', executiveSummary.porcentajeAvance);
-  drawExecutiveSummary(executiveSummary);
-  current.y -= 14;
+    drawSectionTitle('Resumen global');
+    drawMetricGrid(current, [
+      ['Planteles', String(executiveSummary.totalPlanteles)],
+      ['Responsables', String(executiveSummary.totalResponsables)],
+      ['Indicadores', String(executiveSummary.totalIndicadores)],
+      ['Enviados', String(executiveSummary.reportesEnviados)],
+      ['Aprobados', String(executiveSummary.reportesAprobados)],
+      ['Observados', String(executiveSummary.reportesObservados)],
+      ['Atrasados', String(executiveSummary.reportesAtrasados)],
+      ['Faltantes', String(executiveSummary.reportesFaltantes)],
+    ]);
+    drawProgressBar('Avance general institucional', executiveSummary.porcentajeAvance);
+    drawExecutiveSummary(executiveSummary);
+    current.y -= 14;
+  }
 
-  drawSectionTitle('Detalle filtrado');
+  drawSectionTitle(report.vistaReporte === 'detalle' ? 'Información capturada' : 'Detalle filtrado');
 
   if (report.indicadores.length === 0) {
     current.content.textAt('No hay indicadores disponibles para el alcance seleccionado.', PDF_MARGIN_X, current.y, 10, 'F1', PDF_MUTED);

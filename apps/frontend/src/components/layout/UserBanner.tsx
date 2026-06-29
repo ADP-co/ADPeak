@@ -1,4 +1,5 @@
-import { User } from 'lucide-react';
+import { Bell, User } from 'lucide-react';
+import type { SigiNotification } from '../../api/notificaciones';
 
 // Roles del sistema
 export type UserRole = 'plantel' | 'admin' | 'responsable';
@@ -9,6 +10,8 @@ interface UserBannerProps {
   description?: string;
   onNavigate?: (view: string) => void;
   currentView?: string;
+  notifications?: SigiNotification[];
+  onReadNotification?: (id: number) => void;
 }
 
 // Diccionario de enlaces
@@ -32,8 +35,10 @@ const navLinksByRole: Record<UserRole, { label: string; href: string }[]> = {
   ]
 };
 
-export const UserBanner = ({ role, name, description, onNavigate, currentView }: UserBannerProps) => {
+export const UserBanner = ({ role, name, description, onNavigate, currentView, notifications = [], onReadNotification }: UserBannerProps) => {
   const currentLinks = navLinksByRole[role] || [];
+  const unreadCount = notifications.filter((notification) => !notification.readAt).length;
+  const recentNotifications = notifications.slice(0, 5);
 
   return (
     <div className="w-full min-h-[70px] bg-brand-Verde_oscuro text-brand-Blanco px-4 sm:px-6 shadow-md z-40 relative">
@@ -95,6 +100,44 @@ export const UserBanner = ({ role, name, description, onNavigate, currentView }:
               </a>
             );
           })}
+          <details className="relative">
+            <summary className="list-none min-h-10 flex items-center gap-1 cursor-pointer rounded-md px-2 hover:bg-brand-Blanco/10" aria-label="Notificaciones">
+              <Bell size={18} aria-hidden="true" />
+              {unreadCount > 0 && (
+                <span className="min-w-5 rounded-full bg-brand-Status_rojo px-1.5 py-0.5 text-center text-[10px] font-bold text-brand-Blanco">
+                  {unreadCount}
+                </span>
+              )}
+            </summary>
+            <div className="absolute right-0 top-11 z-50 w-80 max-w-[calc(100vw-2rem)] rounded-md border border-brand-Gris_bajo/30 bg-brand-Blanco p-3 text-brand-Gris_oscuro shadow-lg">
+              <p className="mb-2 font-title text-sm font-bold">Notificaciones</p>
+              {recentNotifications.length === 0 ? (
+                <p className="font-body text-xs text-brand-Gris_oscuro/70">Sin novedades.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {recentNotifications.map((notification) => (
+                    <li key={notification.id} className="rounded border border-brand-Gris_bajo/30 p-2">
+                      <p className="font-body text-xs leading-snug">{notification.mensaje}</p>
+                      <div className="mt-2 flex items-center justify-between gap-2">
+                        <span className="font-accent text-[10px] text-brand-Gris_oscuro/60">
+                          {new Date(notification.createdAt).toLocaleString('es-MX')}
+                        </span>
+                        {!notification.readAt && (
+                          <button
+                            type="button"
+                            onClick={() => onReadNotification?.(notification.id)}
+                            className="font-accent text-[10px] font-bold text-brand-Verde_oscuro underline-offset-2 hover:underline"
+                          >
+                            Marcar leída
+                          </button>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </details>
         </nav>
 
       </div>

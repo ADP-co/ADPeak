@@ -18,10 +18,14 @@ import {
   getIndicatorByCode,
   listIndicators,
   listIndicatorHistory,
+  listNotifications,
   listReviewCaptures,
   listUsers,
+  markNotificationRead,
   officialSourcesPayload,
+  recordCaptureNotification,
   reloadSigiStateFromPersistence,
+  resetNotificationsForTest,
   saveIndicator,
   saveUser,
   sessionFromHeaders,
@@ -34,6 +38,7 @@ import {
 describe("SIGI store and RBAC", () => {
   beforeEach(() => {
     resetCaptureDraftsForTest();
+    resetNotificationsForTest();
     reloadSigiStateFromPersistence();
   });
 
@@ -334,7 +339,50 @@ describe("SIGI store and RBAC", () => {
     ).toThrow(SigiForbiddenError);
   });
 
-  it("keeps report filters explicit and includes capturable official indicators without explicit plantel scope", () => {
+  it("builds detailed reports from captured row values, including non-template fields", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const indicator = saveIndicator(director, {
+      ...getIndicatorByCode("1.0.0.0.2")!,
+      plantelIds: [1]
+    });
+
+    createCaptureDraft({
+      plantelId: 1,
+      indicadorId: indicator.id,
+      actividadId: 1,
+      periodoId: 1,
+      responsableId: indicator.responsibleIds[0],
+      payload: {
+        rows: [{
+          plantel: "Bachillerato 16",
+          actividad: "Captura de egresados titulados",
+          programa: "Técnico Analista Programador",
+          egresados_mujeres: 12,
+          egresados_hombres: 10,
+          observacion_especial: "Dato almacenado en la captura"
+        }],
+        justificacion: "Datos completos para reporte detallado."
+      }
+    });
+
+    const report = buildReportPayload(director, {
+      plantelId: "1",
+      cicloEscolar: "2025-2026",
+      periodo: "2026-2",
+      tipo: "detalle"
+    });
+    const row = report.indicadores.find((item) => item.id === indicator.code)?.datos[0];
+
+    expect(report.vistaReporte).toBe("detalle");
+    expect(row?.detalle).toEqual(expect.arrayContaining([
+      { campo: "Programa", valor: "Técnico Analista Programador" },
+      { campo: "Egresados Mujeres", valor: "12" },
+      { campo: "Egresados Hombres", valor: "10" },
+      { campo: "Observacion Especial", valor: "Dato almacenado en la captura" }
+    ]));
+  });
+
+  it("keeps report filters explicit and respects official plantel scope", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const currentCycle = buildReportPayload(director, {
       cicloEscolar: "2025-2026",
@@ -372,7 +420,7 @@ describe("SIGI store and RBAC", () => {
     );
     expect(currentCycle.indicadores.flatMap((indicator) => indicator.datos).some((row) => row.plantel === "Bachillerato 16")).toBe(true);
     expect(bachillerato16.indicadores.some((indicator) => indicator.id === "1.0.0.0.2")).toBe(true);
-    expect(bachillerato4.indicadores.some((indicator) => indicator.id === "1.0.0.0.2")).toBe(true);
+    expect(bachillerato4.indicadores.some((indicator) => indicator.id === "1.0.0.0.2")).toBe(false);
     expect(() => buildReportPayload(director, { plantelId: "999", periodo: "2026-2" })).toThrow(SigiValidationError);
   });
 
@@ -386,11 +434,20 @@ describe("SIGI store and RBAC", () => {
     expect(drafts.indicadores.flatMap((indicator) => indicator.datos).every((row) => row.estado === "Borrador")).toBe(true);
   });
 
-  it("keeps imported official indicators unassigned while allowing plantel capture until director narrows the scope", () => {
+  it("keeps imported official indicators out of plantel scope until director assigns one", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const bachillerato16 = sessionFromHeaders({ "x-role": "plantel", "x-plantel-id": "1" });
     const bachillerato4 = sessionFromHeaders({ "x-role": "plantel", "x-plantel-id": "2" });
-    const indicator = getIndicatorByCode("1.0.0.0.2");
+    const indicator = listIndicators(director).find((item) =>
+      item.plantelScopeSource === "official-import" &&
+      item.plantelIds.length === 0 &&
+      !officialIndicatorPlantelScopes[item.code]?.length
+    );
+    expect(indicator).toBeDefined();
+    const responsable = sessionFromHeaders({
+      "x-role": "responsable",
+      "x-responsable-id": String(indicator?.responsibleIds[0] ?? 1)
+    });
     const unassigned = saveIndicator(director, {
       ...indicator!,
       plantelIds: []
@@ -398,22 +455,30 @@ describe("SIGI store and RBAC", () => {
 
     expect(indicator?.plantelIds).toEqual([]);
     expect(unassigned.plantelScopeSource).toBe("official-import");
-    expect(listIndicators(bachillerato16).some((item) => item.code === "1.0.0.0.2")).toBe(true);
-    expect(listIndicators(bachillerato4).some((item) => item.code === "1.0.0.0.2")).toBe(true);
-    expect(templateForIndicator(unassigned, director).initialRows.every((row) => typeof row.plantel === "string")).toBe(true);
-    expect(templateForIndicator(unassigned, bachillerato16).initialRows.every((row) => row.plantel === "Bachillerato 16")).toBe(true);
+    expect(listIndicators(responsable).some((item) => item.code === unassigned.code)).toBe(true);
+    expect(listIndicators(bachillerato16).some((item) => item.code === unassigned.code)).toBe(false);
+    expect(listIndicators(bachillerato4).some((item) => item.code === unassigned.code)).toBe(false);
+    expect(templateForIndicator(unassigned, director).initialRows.some((row) => row.plantel === "Bachillerato 16")).toBe(false);
+    expect(templateForIndicator(unassigned, responsable).initialRows.some((row) => row.plantel === "Bachillerato 16")).toBe(false);
 
     expect(() =>
       assertCaptureAccess(
-        bachillerato16,
+        responsable,
         {
           plantelId: 1,
           indicadorId: unassigned.id,
-          payload: { rows: templateForIndicator(unassigned, bachillerato16).initialRows, justificacion: "Captura con fuente oficial" }
+          payload: { rows: templateForIndicator(unassigned, responsable).initialRows, justificacion: "Captura con fuente oficial" }
         },
         "submit"
       )
     ).not.toThrow();
+    expect(() =>
+      assertCaptureAccess(
+        bachillerato16,
+        { plantelId: 1, indicadorId: unassigned.id },
+        "read"
+      )
+    ).toThrow(SigiForbiddenError);
 
     const saved = saveIndicator(director, {
       ...unassigned,
@@ -421,11 +486,13 @@ describe("SIGI store and RBAC", () => {
     });
 
     expect(saved.plantelScopeSource).toBe("manual");
-    expect(listIndicators(bachillerato16).some((item) => item.code === "1.0.0.0.2")).toBe(true);
-    expect(listIndicators(bachillerato4).some((item) => item.code === "1.0.0.0.2")).toBe(false);
+    expect(listIndicators(bachillerato16).some((item) => item.code === unassigned.code)).toBe(true);
+    expect(listIndicators(bachillerato4).some((item) => item.code === unassigned.code)).toBe(false);
     const template = templateForIndicator(saved, bachillerato16);
 
-    expect(template.initialRows.every((row) => row.plantel === "Bachillerato 16")).toBe(true);
+    if (template.columns.some((column) => column.key === "plantel")) {
+      expect(template.initialRows.every((row) => row.plantel === "Bachillerato 16")).toBe(true);
+    }
     expect(() =>
       assertCaptureAccess(
         bachillerato16,
@@ -579,6 +646,59 @@ describe("SIGI store and RBAC", () => {
 
     approveCapture(draft.id);
     expect(listReviewCaptures(director)).toHaveLength(0);
+  });
+
+  it("creates internal notifications when captures move through review", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const indicator = saveIndicator(director, {
+      ...getIndicatorByCode("1.0.0.0.2")!,
+      plantelIds: [1]
+    });
+    const responsable = sessionFromHeaders({
+      "x-role": "responsable",
+      "x-responsable-id": String(indicator.responsibleIds[0])
+    });
+    const plantel = sessionFromHeaders({
+      "x-role": "plantel",
+      "x-plantel-id": "1",
+      "x-user-id": "plantel-1"
+    });
+    const template = templateForIndicator(indicator, plantel);
+    const draft = createCaptureDraft({
+      plantelId: 1,
+      indicadorId: indicator.id,
+      actividadId: 1,
+      periodoId: 1,
+      responsableId: indicator.responsibleIds[0],
+      payload: {
+        rows: template.initialRows,
+        justificacion: "Captura con notificación interna."
+      }
+    });
+
+    const submitted = sendCaptureToReview(draft.id)!;
+    recordCaptureNotification("submitted", plantel, submitted);
+
+    const responsableNotifications = listNotifications(responsable);
+    expect(responsableNotifications).toHaveLength(1);
+    expect(responsableNotifications[0]).toMatchObject({
+      captureId: draft.id,
+      estado: "en_revision",
+      rolDestino: "responsable",
+      readAt: null
+    });
+
+    const read = markNotificationRead(responsable, responsableNotifications[0].id);
+    expect(read?.readAt).toBeTruthy();
+
+    const observed = requestCaptureCorrection(draft.id, "Ajustar evidencia.")!;
+    recordCaptureNotification("correction_requested", responsable, observed);
+    expect(listNotifications(plantel).some((notification) => notification.estado === "correccion_solicitada")).toBe(true);
+
+    const resent = sendCaptureToReview(draft.id)!;
+    const approved = approveCapture(resent.id)!;
+    recordCaptureNotification("approved", responsable, approved);
+    expect(listNotifications(plantel).some((notification) => notification.estado === "aprobado")).toBe(true);
   });
 
   it("returns actionable capture metadata for responsible assigned indicators", () => {
@@ -1196,7 +1316,7 @@ describe("SIGI store and RBAC", () => {
     });
   });
 
-  it("generates readable official templates and allows plantel capture when the official import has no narrower scope", () => {
+  it("generates readable official templates and allows plantel capture only when scoped to that plantel", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const plantel = sessionFromHeaders({
       "x-role": "plantel",
@@ -1210,8 +1330,7 @@ describe("SIGI store and RBAC", () => {
       const importedScope = officialIndicatorPlantelScopes[indicator.code] ?? [];
       const allowsPlantel =
         indicator.plantelIds.includes(1) ||
-        importedScope.includes(1) ||
-        (indicator.plantelScopeSource === "official-import" && indicator.plantelIds.length === 0 && importedScope.length === 0);
+        importedScope.includes(1);
 
       expect(template.columns.length, indicator.code).toBeGreaterThan(0);
       expect(template.initialRows.length, indicator.code).toBeGreaterThan(0);

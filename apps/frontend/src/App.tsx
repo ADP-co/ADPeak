@@ -21,6 +21,7 @@ import { Login } from './components/ui/Login';
 import { Toaster, toast } from 'sonner';
 import { useCaptureDraft } from './hooks/useCaptureDraft';
 import { CAPTURE_CHANGED_EVENT } from './api/captureEvents';
+import { fetchNotifications, markNotificationRead, type SigiNotification } from './api/notificaciones';
 import { buildHealthIntegralTemplate, buildTemplateForCatalogIndicator, catalogPlanteles, fetchIndicatorTemplate, fetchIndicators, plantelScopeLabelForIndicator, type CatalogIndicator } from './api/catalog';
 import { API_REQUESTS_ENABLED } from './api/client';
 import { officialCatalogRows, officialIndicatorPlantelScopes } from './catalog/officialCatalog.generated';
@@ -177,15 +178,15 @@ function catalogToIndicator(indicator: CatalogIndicator, user?: User | null): In
       ? plantelNameFromId(indicator.plantelId)
       : plantelScopeLabelForIndicator(indicator);
   const plantelIds = effectivePlantelIdsForCatalogIndicator(indicator);
-  const plantelId = user?.role === 'plantel'
+  const defaultPlantelId = user?.role === 'plantel'
     ? user.plantelId
-    : plantelIds[0] ?? 1;
+    : plantelIds[0];
 
   return {
     code: indicator.code,
     name: indicator.name,
     status: indicator.status ?? (indicator.active ? 'Pendiente' : 'Corregir'),
-    plantelId: indicator.plantelId ?? plantelId,
+    plantelId: indicator.plantelId ?? defaultPlantelId,
     captureId: indicator.captureId,
     actividadId: indicator.actividadId,
     periodoId: indicator.periodoId,
@@ -207,14 +208,6 @@ function canDisplayCatalogIndicatorForUser(indicator: CatalogIndicator, user?: U
   }
 
   if (user.role === 'plantel') {
-    if (
-      indicator.plantelScopeSource === 'official-import' &&
-      indicator.plantelIds.length === 0 &&
-      !(officialIndicatorPlantelScopes[indicator.code]?.length)
-    ) {
-      return true;
-    }
-
     return effectivePlantelIdsForCatalogIndicator(indicator).includes(user.plantelId ?? -1);
   }
 
@@ -589,6 +582,42 @@ function ProtectedLayout() {
   const { isAuthenticated, user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const [notifications, setNotifications] = useState<SigiNotification[]>([]);
+
+  const loadNotifications = useCallback(async () => {
+    if (!isAuthenticated || !user) {
+      setNotifications([]);
+      return;
+    }
+
+    try {
+      setNotifications(await fetchNotifications());
+    } catch {
+      setNotifications([]);
+    }
+  }, [isAuthenticated, user]);
+
+  useEffect(() => {
+    void loadNotifications();
+  }, [loadNotifications]);
+
+  useEffect(() => {
+    const handleCaptureChanged = () => {
+      void loadNotifications();
+    };
+
+    window.addEventListener(CAPTURE_CHANGED_EVENT, handleCaptureChanged);
+    return () => window.removeEventListener(CAPTURE_CHANGED_EVENT, handleCaptureChanged);
+  }, [loadNotifications]);
+
+  const handleReadNotification = async (id: number) => {
+    try {
+      await markNotificationRead(id);
+      await loadNotifications();
+    } catch {
+      toast.error('No se pudo actualizar la notificación');
+    }
+  };
 
   // Si no está logueado, lo mandamos directo al login
   if (!isAuthenticated) {
@@ -612,6 +641,8 @@ function ProtectedLayout() {
           description={user.description}
           onNavigate={handleNavigate}
           currentView={currentView}
+          notifications={notifications}
+          onReadNotification={handleReadNotification}
         />
       )}
 
