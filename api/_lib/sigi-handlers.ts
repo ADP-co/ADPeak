@@ -60,14 +60,14 @@ export async function handleLogin(request: RequestLike, response: any) {
     const user = sigi.authenticateUser(username, password);
 
     if (!user) {
-      sendJson(response, 401, { error: "invalid_credentials", message: "Usuario o contrasena incorrectos." });
+      sendJson(response, 401, { error: "invalid_credentials", message: "Usuario o contraseña incorrectos." });
       return;
     }
 
     sendJson(response, 200, { user, sessionToken: sigi.createSessionToken(user) });
   } catch (error) {
     if (!sendKnownError(response, error)) {
-      sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON valido." });
+      sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON válido." });
     }
   }
 }
@@ -86,7 +86,7 @@ export async function handleUpdatePassword(request: RequestLike, response: any) 
     sendJson(response, 200, { user });
   } catch (error) {
     if (!sendKnownError(response, error)) {
-      sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON valido." });
+      sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON válido." });
     }
   }
 }
@@ -118,7 +118,7 @@ export async function handleUsers(request: RequestLike, response: any) {
       return;
     }
 
-    sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON valido." });
+    sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON válido." });
     return;
   }
 
@@ -169,7 +169,7 @@ export async function handleUserAction(request: RequestLike, response: any) {
       return;
     }
 
-    sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON valido." });
+    sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON válido." });
     return;
   }
 
@@ -203,7 +203,7 @@ export async function handleIndicators(request: RequestLike, response: any) {
       return;
     }
 
-    sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON valido." });
+    sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON válido." });
     return;
   }
 
@@ -249,7 +249,7 @@ export async function handleIndicatorAction(request: RequestLike, response: any)
 
     if (request.method === "GET" && action === "template") {
       if (!indicator || !sigi.listIndicators(session, { includeInactive: session.role === "director" }).some((item: any) => item.id === indicator.id)) {
-        sendJson(response, 404, { error: "indicator_not_found", message: "No existe un indicador con ese ID o codigo." });
+        sendJson(response, 404, { error: "indicator_not_found", message: "No existe un indicador con ese ID o código." });
         return;
       }
 
@@ -266,7 +266,7 @@ export async function handleIndicatorAction(request: RequestLike, response: any)
 
     if (request.method === "PATCH" && action === "desactivar") {
       if (!Number.isInteger(indicatorId)) {
-        sendJson(response, 400, { error: "invalid_indicator_id", message: "El ID del indicador debe ser numerico." });
+        sendJson(response, 400, { error: "invalid_indicator_id", message: "El ID del indicador debe ser numérico." });
         return;
       }
 
@@ -286,7 +286,7 @@ export async function handleIndicatorAction(request: RequestLike, response: any)
       return;
     }
 
-    sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON valido." });
+    sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON válido." });
     return;
   }
 
@@ -319,6 +319,54 @@ export async function handleOfficialSources(request: RequestLike, response: any)
   } catch (error) {
     if (!sendKnownError(response, error)) {
       sendJson(response, 500, { error: "official_sources_error" });
+    }
+  }
+}
+
+export async function handleNotifications(request: RequestLike, response: any) {
+  if (prepare(request, response, ["GET", "OPTIONS"])) {
+    return;
+  }
+
+  try {
+    const sigi = await loadSigi();
+    const session = sigi.sessionFromHeaders(request.headers ?? {});
+
+    sendJson(response, 200, { notifications: sigi.listNotifications(session) });
+  } catch (error) {
+    if (!sendKnownError(response, error)) {
+      sendJson(response, 400, { error: "notifications_error", message: "No se pudieron cargar las notificaciones." });
+    }
+  }
+}
+
+export async function handleNotificationAction(request: RequestLike, response: any) {
+  if (prepare(request, response, ["PATCH", "OPTIONS"])) {
+    return;
+  }
+
+  try {
+    const sigi = await loadSigi();
+    const session = sigi.sessionFromHeaders(request.headers ?? {});
+    const notificationId = positiveNumber(request.query?.id);
+
+    if (!notificationId) {
+      sendJson(response, 400, { error: "invalid_notification_id", message: "El ID de la notificación no es válido." });
+      return;
+    }
+
+    const notification = sigi.markNotificationRead(session, notificationId);
+
+    if (!notification) {
+      sendJson(response, 404, { error: "notification_not_found", message: "No existe una notificación con ese ID." });
+      return;
+    }
+
+    await flushRuntimeState();
+    sendJson(response, 200, notification);
+  } catch (error) {
+    if (!sendKnownError(response, error)) {
+      sendJson(response, 400, { error: "notification_update_error", message: "No se pudo actualizar la notificación." });
     }
   }
 }
@@ -482,6 +530,7 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
       }
 
       sigi.recordResponsibleCaptureEdit(session, updatedDraft);
+      sigi.recordCaptureNotification("submitted", session, updatedDraft);
       await flushRuntimeState();
       sendJson(response, 200, updatedDraft);
       return;
@@ -499,6 +548,7 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
         return;
       }
 
+      sigi.recordCaptureNotification("approved", session, updatedDraft);
       await flushRuntimeState();
       sendJson(response, 200, updatedDraft);
       return;
@@ -516,6 +566,7 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
         return;
       }
 
+      sigi.recordCaptureNotification("correction_requested", session, updatedDraft);
       await flushRuntimeState();
       sendJson(response, 200, updatedDraft);
       return;
@@ -550,7 +601,7 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
       return;
     }
 
-    sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON valido." });
+    sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON válido." });
     return;
   }
 
@@ -603,6 +654,7 @@ function filtersFromRequest(request: RequestLike) {
     periodo: queryValue(query.periodo),
     plantel: queryValue(query.plantel),
     plantelId: queryValue(query.plantelId),
+    tipo: queryValue(query.tipo),
     estado: queryValue(query.estado) ?? queryValue(query.status)
   };
 }

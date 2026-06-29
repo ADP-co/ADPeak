@@ -6,6 +6,8 @@ import {
   handleIndicatorHistory,
   handleIndicators,
   handleLogin,
+  handleNotificationAction,
+  handleNotifications,
   handleOfficialSources,
   handleReports,
   handleUpdatePassword,
@@ -67,6 +69,17 @@ export default async function handler(request: any, response: any) {
 
   if (path === "fuentes-oficiales") {
     await handleOfficialSources(request, response);
+    return;
+  }
+
+  if (path === "notificaciones") {
+    await handleNotifications(request, response);
+    return;
+  }
+
+  const notificationMatch = path.match(/^notificaciones\/(\d+)\/leida$/);
+  if (notificationMatch) {
+    await handleNotificationAction(withQuery(request, { id: notificationMatch[1] }), response);
     return;
   }
 
