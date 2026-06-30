@@ -284,7 +284,7 @@ export const planteles: Plantel[] = [
 
 const unassignedPlantel: Plantel = { id: 0, key: "sin-plantel", name: "Sin plantel asignado" };
 const officialSourcePlantelIds: number[] = [];
-const officialCatalogImportVersion = "2026-06-30-indicadores-20260628-default-v1";
+const officialCatalogImportVersion = "2026-06-30-indicadores-20260628-default-v2";
 const officialCatalogImportedAt = "2026-06-30T00:00:00.000-06:00";
 const operationalCatalogRows = officialCatalogRows.filter(isOperationalCatalogRow);
 const hiddenImportedIndicatorCodes = new Set(
@@ -351,7 +351,7 @@ export function reloadSigiStateFromPersistence() {
   }
 
   users.clear();
-  for (const user of mergeInitialUsers(persistedUsers)) {
+  for (const user of mergeInitialUsers(persistedUsers, needsCatalogMigration)) {
     const normalizedUser = normalizePersistedUser(user);
     users.set(normalizedUser.id, normalizedUser);
   }
@@ -1797,8 +1797,12 @@ function ensureUniqueIndicatorIds(items: SigiIndicator[]) {
     });
 }
 
-function mergeInitialUsers(persisted?: SigiUser[]) {
+function mergeInitialUsers(persisted?: SigiUser[], resetToInitial = false) {
   const byId = new Map(buildInitialUsers().map((user) => [user.id, user]));
+
+  if (resetToInitial) {
+    return Array.from(byId.values());
+  }
 
   for (const user of persisted ?? []) {
     const normalizedUser = normalizePersistedUser(user);
