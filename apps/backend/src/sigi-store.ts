@@ -1137,7 +1137,8 @@ export function buildReportPayload(
   const cicloEscolar = filters.cicloEscolar ?? "2025-2026";
   const periodo = filters.periodo ?? "2026-A";
   const requestedPeriodoId = periodIdFromReportPeriod(`${periodo} ${cicloEscolar}`);
-  const includeBaseRows = session.role === "responsable" ? false : requestedPeriodoId === currentReportPeriodId();
+  const reportView = normalizeReportView(filters.tipo, session.role);
+  const includeBaseRows = reportView === "avance" && session.role !== "responsable" && requestedPeriodoId === currentReportPeriodId();
   const normalizedStatusFilter = normalizeReportStatusFilter(filters.estado);
   const hasPlantelFilter = Boolean(filters.plantelId || filters.plantel);
 
@@ -1212,7 +1213,7 @@ export function buildReportPayload(
 
   return {
     tipoReporte: identityPlantel ? "plantel" : session.role === "responsable" ? "responsable" : "institucional",
-    vistaReporte: normalizeReportView(filters.tipo, session.role),
+    vistaReporte: reportView,
     periodo,
     cicloEscolar,
     fechaGeneracion: (filters.now ?? new Date()).toISOString().slice(0, 10),
