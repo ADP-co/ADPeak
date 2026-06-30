@@ -57,10 +57,18 @@ export async function handleLogin(request: RequestLike, response: any) {
       : typeof payload.contrasena === "string"
         ? payload.contrasena
         : "";
-    const user = sigi.authenticateUser(username, password);
+    const authResult = sigi.authenticateUserResult(username, password);
+    const user = authResult.user;
 
     if (!user) {
-      sendJson(response, 401, { error: "invalid_credentials", message: "Usuario o contraseña incorrectos." });
+      const inactiveUser = authResult.reason === "inactive_user";
+
+      sendJson(response, inactiveUser ? 403 : 401, {
+        error: inactiveUser ? "user_inactive" : "invalid_credentials",
+        message: inactiveUser
+          ? "El usuario está bloqueado. Contacta al administrador."
+          : "Usuario o contraseña incorrectos."
+      });
       return;
     }
 
