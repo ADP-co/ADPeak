@@ -843,7 +843,9 @@ describe("SIGI store and RBAC", () => {
     expect(academyRows).toHaveLength(2);
     expect(academyRows.every((row) => row.classification !== "operational" && !row.visible)).toBe(true);
     expect(officialWorkbookTemplates["1.1.1.1.1"]).toBeDefined();
-    expect(officialWorkbookTemplates["1.1.1.1.1-FMT-489662BE"]).toBeDefined();
+    expect(
+      Object.keys(officialWorkbookTemplates).some((key) => key.startsWith("1.1.1.1.1-FMT-"))
+    ).toBe(true);
     expect(getIndicatorByCode("1.1.1.1.1")).toBeUndefined();
     expect(visibleCodes.has("1.1.1.1.1")).toBe(false);
     expect(adriana?.indicatorCodes).not.toContain("1.1.1.1.1");
@@ -1422,7 +1424,6 @@ describe("SIGI store and RBAC", () => {
     const plantelValueCodes = [
       ...duplicatedPlantelCodes,
       "1.0.0.0.2",
-      "1.1.2.0.3",
       "1.1.2.5.3",
       "1.1.2.1.4"
     ];

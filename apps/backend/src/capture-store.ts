@@ -81,6 +81,11 @@ export function resetCaptureDraftsForTest() {
   nextCaptureId = 1;
 }
 
+export function resetCaptureDraftsToInitialState() {
+  captureDrafts.clear();
+  nextCaptureId = 1;
+}
+
 export function reloadCaptureDraftsFromState() {
   const persistedCaptureDrafts = readPersistedCollection<CaptureDraft>("captureDrafts") ?? [];
   captureDrafts.clear();

@@ -11,7 +11,12 @@ import {
   officialWorkbookSummaries,
   officialWorkbookTemplates
 } from "./official-data.generated.js";
-import { listCaptureDrafts, type CaptureDraft, type CapturePayload } from "./capture-store.js";
+import {
+  listCaptureDrafts,
+  resetCaptureDraftsToInitialState,
+  type CaptureDraft,
+  type CapturePayload
+} from "./capture-store.js";
 import {
   persistState,
   readPersistedCollection,
@@ -279,8 +284,8 @@ export const planteles: Plantel[] = [
 
 const unassignedPlantel: Plantel = { id: 0, key: "sin-plantel", name: "Sin plantel asignado" };
 const officialSourcePlantelIds: number[] = [];
-const officialCatalogImportVersion = "2026-06-29-template-cleanup-v1";
-const officialCatalogImportedAt = "2026-06-22T12:00:00.000-06:00";
+const officialCatalogImportVersion = "2026-06-30-indicadores-20260628-default-v1";
+const officialCatalogImportedAt = "2026-06-30T00:00:00.000-06:00";
 const operationalCatalogRows = officialCatalogRows.filter(isOperationalCatalogRow);
 const hiddenImportedIndicatorCodes = new Set(
   officialCatalogRows
@@ -359,11 +364,16 @@ export function reloadSigiStateFromPersistence() {
     Math.max(0, ...Array.from(notifications.keys())) + 1;
 
   if (needsCatalogMigration) {
+    notifications.clear();
+    nextNotificationId = 1;
+    resetCaptureDraftsToInitialState();
     persistState({
       indicators: Array.from(indicators.values()),
       users: Array.from(users.values()),
-      notifications: Array.from(notifications.values()),
+      notifications: [],
       nextNotificationId,
+      captureDrafts: [],
+      nextCaptureId: 1,
       catalogImportVersion: officialCatalogImportVersion
     });
   }

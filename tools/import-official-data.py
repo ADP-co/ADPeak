@@ -1623,7 +1623,7 @@ def generate_data_file(
     summary = {
         "sourcePackage": ", ".join(source_packages) or INDICADORES_ZIP.name,
         "plantel": "Indicadores oficiales",
-        "generatedAt": "2026-06-22",
+        "generatedAt": "2026-06-30",
         "topLevelFiles": 3 + (1 if INDICADORES_ZIP.exists() else 0),
         "nestedFiles": nested_file_count,
         "nestedTotalBytes": nested_total_bytes,

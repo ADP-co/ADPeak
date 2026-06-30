@@ -119,9 +119,9 @@ export type OfficialDataSummary = {
 };
 
 export const officialDataSummary: OfficialDataSummary = {
-  "sourcePackage": "indicadores-20260622T210134Z-3-001.zip",
+  "sourcePackage": "indicadores-20260628T002121Z-3-001.zip",
   "plantel": "Indicadores oficiales",
-  "generatedAt": "2026-06-22",
+  "generatedAt": "2026-06-30",
   "topLevelFiles": 4,
   "nestedFiles": 32,
   "nestedTotalBytes": 1304887,
@@ -261,18 +261,73 @@ export const officialEvidenceGroups: OfficialEvidenceGroup[] = [
 
 export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
-    "indicatorCode": "1.0.0.0.2",
-    "officialCode": "1.0.0.0.2",
+    "indicatorCode": "1.1.1.1.1",
+    "officialCode": "1.1.1.1.1",
     "sourcePath": "private-workbook-01",
+    "planteles": [],
+    "classification": "official_table",
+    "confidence": "detected-code",
+    "headerRows": []
+  },
+  {
+    "indicatorCode": "1.1.2.0.1",
+    "officialCode": "1.1.2.0.1",
+    "sourcePath": "private-workbook-02",
     "planteles": [],
     "classification": "matrix_gender_totals",
     "confidence": "detected-code",
     "headerRows": []
   },
   {
-    "indicatorCode": "1.1.2.3.1",
-    "officialCode": "1.1.2.3.1",
-    "sourcePath": "private-workbook-02",
+    "indicatorCode": "1.0.0.0.2",
+    "officialCode": "1.0.0.0.2",
+    "sourcePath": "private-workbook-03",
+    "planteles": [
+      "Bachillerato 1",
+      "Bachillerato 10",
+      "Bachillerato 11",
+      "Bachillerato 12",
+      "Bachillerato 13",
+      "Bachillerato 14",
+      "Bachillerato 15",
+      "Bachillerato 16",
+      "Bachillerato 17",
+      "Bachillerato 18",
+      "Bachillerato 19",
+      "Bachillerato 2",
+      "Bachillerato 20",
+      "Bachillerato 21",
+      "Bachillerato 22",
+      "Bachillerato 23",
+      "Bachillerato 24",
+      "Bachillerato 25",
+      "Bachillerato 26",
+      "Bachillerato 27",
+      "Bachillerato 28",
+      "Bachillerato 29",
+      "Bachillerato 3",
+      "Bachillerato 30",
+      "Bachillerato 31",
+      "Bachillerato 32",
+      "Bachillerato 33",
+      "Bachillerato 34",
+      "Bachillerato 35",
+      "Bachillerato 4",
+      "Bachillerato 5",
+      "Bachillerato 6",
+      "Bachillerato 7",
+      "Bachillerato 8",
+      "Bachillerato 9",
+      "IUBA Bachillerato"
+    ],
+    "classification": "matrix_gender_totals",
+    "confidence": "detected-code",
+    "headerRows": []
+  },
+  {
+    "indicatorCode": "3.1.0.0.1",
+    "officialCode": "3.1.0.0.1",
+    "sourcePath": "private-workbook-04",
     "planteles": [],
     "classification": "matrix_gender_totals",
     "confidence": "detected-code",
@@ -281,7 +336,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "4.1.5.3.3",
     "officialCode": "4.1.5.3.3",
-    "sourcePath": "private-workbook-03",
+    "sourcePath": "private-workbook-05",
     "planteles": [],
     "classification": "official_table",
     "confidence": "detected-code",
@@ -289,24 +344,6 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   },
   {
     "indicatorCode": "1.1.2.0.3",
-    "officialCode": "1.1.2.0.3",
-    "sourcePath": "private-workbook-04",
-    "planteles": [],
-    "classification": "matrix_gender_totals",
-    "confidence": "detected-code",
-    "headerRows": []
-  },
-  {
-    "indicatorCode": "FMT-01-E81E8473-41221-porcentaje-de-uo-q",
-    "officialCode": null,
-    "sourcePath": "private-workbook-05",
-    "planteles": [],
-    "classification": "official_table",
-    "confidence": "source-table-pending-code",
-    "headerRows": []
-  },
-  {
-    "indicatorCode": "1.1.2.0.3-FMT-EDABD54D",
     "officialCode": "1.1.2.0.3",
     "sourcePath": "private-workbook-06",
     "planteles": [
@@ -317,17 +354,17 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
     "headerRows": []
   },
   {
-    "indicatorCode": "1.1.2.0.1",
-    "officialCode": "1.1.2.0.1",
+    "indicatorCode": "FMT-01-E81E8473-41221-porcentaje-de-uo-q",
+    "officialCode": null,
     "sourcePath": "private-workbook-07",
     "planteles": [],
-    "classification": "matrix_gender_totals",
-    "confidence": "detected-code",
+    "classification": "official_table",
+    "confidence": "source-table-pending-code",
     "headerRows": []
   },
   {
-    "indicatorCode": "4.1.1.0.1",
-    "officialCode": "4.1.1.0.1",
+    "indicatorCode": "1.1.2.5.10",
+    "officialCode": "1.1.2.5.10",
     "sourcePath": "private-workbook-08",
     "planteles": [],
     "classification": "official_table",
@@ -335,63 +372,26 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
     "headerRows": []
   },
   {
-    "indicatorCode": "4.1.1.1.1",
-    "officialCode": "4.1.1.1.1",
+    "indicatorCode": "FMT-01-D30B3A90-formacion-apoyo-academic",
+    "officialCode": null,
     "sourcePath": "private-workbook-09",
     "planteles": [],
     "classification": "official_table",
-    "confidence": "detected-code",
+    "confidence": "source-table-pending-code",
     "headerRows": []
   },
   {
-    "indicatorCode": "1.1.1.1.1",
-    "officialCode": "1.1.1.1.1",
+    "indicatorCode": "1.1.2.3.1",
+    "officialCode": "1.1.2.3.1",
     "sourcePath": "private-workbook-10",
-    "planteles": [
-      "Bachillerato 1",
-      "Bachillerato 10",
-      "Bachillerato 11",
-      "Bachillerato 12",
-      "Bachillerato 13",
-      "Bachillerato 14",
-      "Bachillerato 15",
-      "Bachillerato 16",
-      "Bachillerato 17",
-      "Bachillerato 18",
-      "Bachillerato 19",
-      "Bachillerato 2",
-      "Bachillerato 20",
-      "Bachillerato 21",
-      "Bachillerato 22",
-      "Bachillerato 23",
-      "Bachillerato 24",
-      "Bachillerato 25",
-      "Bachillerato 26",
-      "Bachillerato 27",
-      "Bachillerato 28",
-      "Bachillerato 29",
-      "Bachillerato 3",
-      "Bachillerato 30",
-      "Bachillerato 31",
-      "Bachillerato 32",
-      "Bachillerato 33",
-      "Bachillerato 34",
-      "Bachillerato 35",
-      "Bachillerato 4",
-      "Bachillerato 5",
-      "Bachillerato 6",
-      "Bachillerato 7",
-      "Bachillerato 8",
-      "Bachillerato 9",
-      "IUBA Bachillerato"
-    ],
-    "classification": "official_table",
+    "planteles": [],
+    "classification": "matrix_gender_totals",
     "confidence": "detected-code",
     "headerRows": []
   },
   {
-    "indicatorCode": "1.1.1.1.1-FMT-489662BE",
-    "officialCode": "1.1.1.1.1",
+    "indicatorCode": "4.1.1.1.1",
+    "officialCode": "4.1.1.1.1",
     "sourcePath": "private-workbook-11",
     "planteles": [],
     "classification": "official_table",
@@ -399,48 +399,11 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
     "headerRows": []
   },
   {
-    "indicatorCode": "1.0.0.0.2-FMT-7639E719",
-    "officialCode": "1.0.0.0.2",
+    "indicatorCode": "1.1.2.1.4",
+    "officialCode": "1.1.2.1.4",
     "sourcePath": "private-workbook-12",
-    "planteles": [
-      "Bachillerato 1",
-      "Bachillerato 10",
-      "Bachillerato 11",
-      "Bachillerato 12",
-      "Bachillerato 13",
-      "Bachillerato 14",
-      "Bachillerato 15",
-      "Bachillerato 16",
-      "Bachillerato 17",
-      "Bachillerato 18",
-      "Bachillerato 19",
-      "Bachillerato 2",
-      "Bachillerato 20",
-      "Bachillerato 21",
-      "Bachillerato 22",
-      "Bachillerato 23",
-      "Bachillerato 24",
-      "Bachillerato 25",
-      "Bachillerato 26",
-      "Bachillerato 27",
-      "Bachillerato 28",
-      "Bachillerato 29",
-      "Bachillerato 3",
-      "Bachillerato 30",
-      "Bachillerato 31",
-      "Bachillerato 32",
-      "Bachillerato 33",
-      "Bachillerato 34",
-      "Bachillerato 35",
-      "Bachillerato 4",
-      "Bachillerato 5",
-      "Bachillerato 6",
-      "Bachillerato 7",
-      "Bachillerato 8",
-      "Bachillerato 9",
-      "IUBA Bachillerato"
-    ],
-    "classification": "matrix_gender_totals",
+    "planteles": [],
+    "classification": "official_table",
     "confidence": "detected-code",
     "headerRows": []
   },
@@ -454,36 +417,18 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
     "headerRows": []
   },
   {
-    "indicatorCode": "1.1.2.3.1-FMT-6434504C",
-    "officialCode": "1.1.2.3.1",
+    "indicatorCode": "1.0.0.0.2-FMT-D70EF8E9",
+    "officialCode": "1.0.0.0.2",
     "sourcePath": "private-workbook-14",
-    "planteles": [],
-    "classification": "official_table",
-    "confidence": "detected-code",
-    "headerRows": []
-  },
-  {
-    "indicatorCode": "1.1.2.0.1-FMT-4EB45B2E",
-    "officialCode": "1.1.2.0.1",
-    "sourcePath": "private-workbook-15",
-    "planteles": [],
-    "classification": "official_table",
-    "confidence": "detected-code",
-    "headerRows": []
-  },
-  {
-    "indicatorCode": "3.1.0.0.1",
-    "officialCode": "3.1.0.0.1",
-    "sourcePath": "private-workbook-16",
     "planteles": [],
     "classification": "matrix_gender_totals",
     "confidence": "detected-code",
     "headerRows": []
   },
   {
-    "indicatorCode": "1.1.2.1.4",
-    "officialCode": "1.1.2.1.4",
-    "sourcePath": "private-workbook-17",
+    "indicatorCode": "4.1.1.0.1",
+    "officialCode": "4.1.1.0.1",
+    "sourcePath": "private-workbook-15",
     "planteles": [],
     "classification": "official_table",
     "confidence": "detected-code",
@@ -492,16 +437,72 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
   {
     "indicatorCode": "1.1.2.3.1-FMT-AB95A3B8",
     "officialCode": "1.1.2.3.1",
-    "sourcePath": "private-workbook-18",
+    "sourcePath": "private-workbook-16",
     "planteles": [],
     "classification": "matrix_gender_totals",
     "confidence": "detected-code",
     "headerRows": []
   },
   {
+    "indicatorCode": "1.1.2.2.11",
+    "officialCode": "1.1.2.2.11",
+    "sourcePath": "private-workbook-17",
+    "planteles": [],
+    "classification": "matrix_gender_totals",
+    "confidence": "detected-code",
+    "headerRows": []
+  },
+  {
+    "indicatorCode": "1.1.2.3.1-FMT-FBF5B718",
+    "officialCode": "1.1.2.3.1",
+    "sourcePath": "private-workbook-18",
+    "planteles": [],
+    "classification": "official_table",
+    "confidence": "detected-code",
+    "headerRows": []
+  },
+  {
+    "indicatorCode": "3.1.1.3.6",
+    "officialCode": "3.1.1.3.6",
+    "sourcePath": "private-workbook-19",
+    "planteles": [],
+    "classification": "matrix_gender_totals",
+    "confidence": "detected-code",
+    "headerRows": []
+  },
+  {
+    "indicatorCode": "FMT-01-43FE55CA-formacion-docente-2026",
+    "officialCode": null,
+    "sourcePath": "private-workbook-20",
+    "planteles": [],
+    "classification": "official_table",
+    "confidence": "source-table-pending-code",
+    "headerRows": []
+  },
+  {
+    "indicatorCode": "2.1.4.1.2",
+    "officialCode": "2.1.4.1.2",
+    "sourcePath": "private-workbook-21",
+    "planteles": [
+      "Bachillerato 15"
+    ],
+    "classification": "official_table",
+    "confidence": "detected-code",
+    "headerRows": []
+  },
+  {
+    "indicatorCode": "1.1.2.0.1-FMT-4EB45B2E",
+    "officialCode": "1.1.2.0.1",
+    "sourcePath": "private-workbook-22",
+    "planteles": [],
+    "classification": "official_table",
+    "confidence": "detected-code",
+    "headerRows": []
+  },
+  {
     "indicatorCode": "1.1.2.5.3",
     "officialCode": "1.1.2.5.3",
-    "sourcePath": "private-workbook-19",
+    "sourcePath": "private-workbook-23",
     "planteles": [
       "Bachillerato 1",
       "Bachillerato 10",
@@ -545,73 +546,72 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
     "headerRows": []
   },
   {
-    "indicatorCode": "2.1.4.1.2",
-    "officialCode": "2.1.4.1.2",
-    "sourcePath": "private-workbook-20",
+    "indicatorCode": "1.1.2.0.3-FMT-A2A43E4E",
+    "officialCode": "1.1.2.0.3",
+    "sourcePath": "private-workbook-24",
+    "planteles": [],
+    "classification": "matrix_gender_totals",
+    "confidence": "detected-code",
+    "headerRows": []
+  },
+  {
+    "indicatorCode": "1.1.1.1.1-FMT-DD82C972",
+    "officialCode": "1.1.1.1.1",
+    "sourcePath": "private-workbook-25",
     "planteles": [
-      "Bachillerato 15"
+      "Bachillerato 1",
+      "Bachillerato 10",
+      "Bachillerato 11",
+      "Bachillerato 12",
+      "Bachillerato 13",
+      "Bachillerato 14",
+      "Bachillerato 15",
+      "Bachillerato 16",
+      "Bachillerato 17",
+      "Bachillerato 18",
+      "Bachillerato 19",
+      "Bachillerato 2",
+      "Bachillerato 20",
+      "Bachillerato 21",
+      "Bachillerato 22",
+      "Bachillerato 23",
+      "Bachillerato 24",
+      "Bachillerato 25",
+      "Bachillerato 26",
+      "Bachillerato 27",
+      "Bachillerato 28",
+      "Bachillerato 29",
+      "Bachillerato 3",
+      "Bachillerato 30",
+      "Bachillerato 31",
+      "Bachillerato 32",
+      "Bachillerato 33",
+      "Bachillerato 34",
+      "Bachillerato 35",
+      "Bachillerato 4",
+      "Bachillerato 5",
+      "Bachillerato 6",
+      "Bachillerato 7",
+      "Bachillerato 8",
+      "Bachillerato 9",
+      "IUBA Bachillerato"
     ],
     "classification": "official_table",
     "confidence": "detected-code",
     "headerRows": []
   },
   {
-    "indicatorCode": "1.1.2.5.3-FMT-6D26FF23",
-    "officialCode": "1.1.2.5.3",
-    "sourcePath": "private-workbook-21",
-    "planteles": [],
-    "classification": "official_table",
-    "confidence": "detected-code",
-    "headerRows": []
-  },
-  {
-    "indicatorCode": "1.1.2.2.11",
-    "officialCode": "1.1.2.2.11",
-    "sourcePath": "private-workbook-22",
-    "planteles": [],
-    "classification": "matrix_gender_totals",
-    "confidence": "detected-code",
-    "headerRows": []
-  },
-  {
-    "indicatorCode": "1.1.2.5.10",
-    "officialCode": "1.1.2.5.10",
-    "sourcePath": "private-workbook-23",
-    "planteles": [],
-    "classification": "official_table",
-    "confidence": "detected-code",
-    "headerRows": []
-  },
-  {
-    "indicatorCode": "FMT-01-F2A88F7E-nivelacion-academica-ago",
-    "officialCode": null,
-    "sourcePath": "private-workbook-24",
-    "planteles": [],
-    "classification": "official_table",
-    "confidence": "source-table-pending-code",
-    "headerRows": []
-  },
-  {
     "indicatorCode": "1.1.2.2.10",
     "officialCode": "1.1.2.2.10",
-    "sourcePath": "private-workbook-25",
+    "sourcePath": "private-workbook-26",
     "planteles": [],
     "classification": "matrix_gender_totals",
     "confidence": "detected-code",
     "headerRows": []
   },
   {
-    "indicatorCode": "4.1.2.1.3",
-    "officialCode": "4.1.2.1.3",
-    "sourcePath": "private-workbook-26",
-    "planteles": [],
-    "classification": "official_table",
-    "confidence": "detected-code",
-    "headerRows": []
-  },
-  {
-    "indicatorCode": "4.1.2.1.6",
-    "officialCode": "4.1.2.1.6",
+    "indicatorCode": "1.1.2.5.3-FMT-6D26FF23",
+    "officialCode": "1.1.2.5.3",
     "sourcePath": "private-workbook-27",
     "planteles": [],
     "classification": "official_table",
@@ -619,7 +619,7 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
     "headerRows": []
   },
   {
-    "indicatorCode": "1.1.2.3.1-FMT-FBF5B718",
+    "indicatorCode": "1.1.2.3.1-FMT-6434504C",
     "officialCode": "1.1.2.3.1",
     "sourcePath": "private-workbook-28",
     "planteles": [],
@@ -628,25 +628,25 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
     "headerRows": []
   },
   {
-    "indicatorCode": "FMT-01-43FE55CA-formacion-docente-2026",
-    "officialCode": null,
+    "indicatorCode": "4.1.2.1.3",
+    "officialCode": "4.1.2.1.3",
     "sourcePath": "private-workbook-29",
     "planteles": [],
     "classification": "official_table",
-    "confidence": "source-table-pending-code",
-    "headerRows": []
-  },
-  {
-    "indicatorCode": "3.1.1.3.6",
-    "officialCode": "3.1.1.3.6",
-    "sourcePath": "private-workbook-30",
-    "planteles": [],
-    "classification": "matrix_gender_totals",
     "confidence": "detected-code",
     "headerRows": []
   },
   {
-    "indicatorCode": "FMT-01-D30B3A90-formacion-apoyo-academic",
+    "indicatorCode": "4.1.2.1.6",
+    "officialCode": "4.1.2.1.6",
+    "sourcePath": "private-workbook-30",
+    "planteles": [],
+    "classification": "official_table",
+    "confidence": "detected-code",
+    "headerRows": []
+  },
+  {
+    "indicatorCode": "FMT-01-F2A88F7E-nivelacion-academica-ago",
     "officialCode": null,
     "sourcePath": "private-workbook-31",
     "planteles": [],
@@ -657,6 +657,482 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
 ];
 
 export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate> = {
+  "1.1.1.1.1": {
+    "indicatorCode": "1.1.1.1.1",
+    "officialCode": "1.1.1.1.1",
+    "indicatorName": "Porcentaje de programas educativos de educación media superior nuevos, actualizados y reestructurados alineados al modelo educativo, incorporando formalmente el enfoque de sostenib",
+    "activityLabel": "",
+    "sourceLabel": "Formato oficial 1.1.1.1.1",
+    "sourcePath": "private-workbook",
+    "sheetName": "INFORME SEMESTRAL FEBRERO",
+    "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "PLANTEL",
+          "rowspan": 2
+        },
+        {
+          "label": "NOMBRE DEL PROGRAMA",
+          "rowspan": 2
+        },
+        {
+          "label": "No. DE ACADEMIAS POR PLANTEL",
+          "rowspan": 2
+        },
+        {
+          "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS",
+          "colspan": 3
+        },
+        {
+          "label": "No. DE SESIONES ORDINARIAS",
+          "rowspan": 2
+        },
+        {
+          "label": "No. SESIONES EXTRAORDINARIAS",
+          "rowspan": 2
+        },
+        {
+          "label": "ACTIVIDADES DE TRABAJO REALIZADAS (mencionar la actividad)",
+          "rowspan": 2
+        },
+        {
+          "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL",
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "ÁREA DE FORMACIÓN"
+        },
+        {
+          "label": "SEMESTRE"
+        },
+        {
+          "label": "CAMPO DISCIPLINAR"
+        },
+        {
+          "label": "H"
+        },
+        {
+          "label": "M"
+        }
+      ]
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "nombre_del_programa",
+        "label": "NOMBRE DEL PROGRAMA",
+        "type": "readonly"
+      },
+      {
+        "key": "no_de_academias_por_plantel",
+        "label": "No. DE ACADEMIAS POR PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "tipo_de_integracion_de_academias_area_de_formaci",
+        "label": "ÁREA DE FORMACIÓN",
+        "type": "text"
+      },
+      {
+        "key": "tipo_de_integracion_de_academias_semestre",
+        "label": "SEMESTRE",
+        "type": "readonly"
+      },
+      {
+        "key": "tipo_de_integracion_de_academias_campo_disciplin",
+        "label": "CAMPO DISCIPLINAR",
+        "type": "text"
+      },
+      {
+        "key": "no_de_sesiones_ordinarias",
+        "label": "No. DE SESIONES ORDINARIAS",
+        "type": "text"
+      },
+      {
+        "key": "no_sesiones_extraordinarias",
+        "label": "No. SESIONES EXTRAORDINARIAS",
+        "type": "text"
+      },
+      {
+        "key": "actividades_de_trabajo_realizadas_mencionar_la_a",
+        "label": "ACTIVIDADES DE TRABAJO REALIZADAS (mencionar la actividad)",
+        "type": "text"
+      },
+      {
+        "key": "docentes_que_participaron_en_las_academias_h",
+        "label": "H",
+        "type": "number"
+      },
+      {
+        "key": "docentes_que_participaron_en_las_academias_m",
+        "label": "M",
+        "type": "number"
+      },
+      {
+        "key": "total",
+        "label": "TOTAL",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "INDICACIONES PARA EL LLENADO DEL FORMATO DE CONCENTRADO DE ACADEMIAS POR PLANTEL",
+        "nombre_del_programa": "",
+        "no_de_academias_por_plantel": "",
+        "tipo_de_integracion_de_academias_area_de_formaci": "",
+        "tipo_de_integracion_de_academias_semestre": "",
+        "tipo_de_integracion_de_academias_campo_disciplin": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
+        "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+        "docentes_que_participaron_en_las_academias_h": "",
+        "docentes_que_participaron_en_las_academias_m": "",
+        "total": ""
+      },
+      {
+        "plantel": "DATOS DE IDENTIFICACIÓN DE ACADEMIAS",
+        "nombre_del_programa": "",
+        "no_de_academias_por_plantel": "",
+        "tipo_de_integracion_de_academias_area_de_formaci": "",
+        "tipo_de_integracion_de_academias_semestre": "",
+        "tipo_de_integracion_de_academias_campo_disciplin": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
+        "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+        "docentes_que_participaron_en_las_academias_h": "",
+        "docentes_que_participaron_en_las_academias_m": "",
+        "total": ""
+      },
+      {
+        "plantel": "Periodo escolar: Señalar el periodo y año en el que se ubica la academia",
+        "nombre_del_programa": "",
+        "no_de_academias_por_plantel": "",
+        "tipo_de_integracion_de_academias_area_de_formaci": "",
+        "tipo_de_integracion_de_academias_semestre": "",
+        "tipo_de_integracion_de_academias_campo_disciplin": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
+        "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+        "docentes_que_participaron_en_las_academias_h": "",
+        "docentes_que_participaron_en_las_academias_m": "",
+        "total": ""
+      },
+      {
+        "plantel": "Plantel: Escribir el nombre del plantel en el cual se encuentran conformadas las academias.",
+        "nombre_del_programa": "",
+        "no_de_academias_por_plantel": "",
+        "tipo_de_integracion_de_academias_area_de_formaci": "",
+        "tipo_de_integracion_de_academias_semestre": "",
+        "tipo_de_integracion_de_academias_campo_disciplin": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
+        "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+        "docentes_que_participaron_en_las_academias_h": "",
+        "docentes_que_participaron_en_las_academias_m": "",
+        "total": ""
+      },
+      {
+        "plantel": "Programa educativo: Escribir el nombre del plan de estudios correspondiente.",
+        "nombre_del_programa": "",
+        "no_de_academias_por_plantel": "",
+        "tipo_de_integracion_de_academias_area_de_formaci": "",
+        "tipo_de_integracion_de_academias_semestre": "",
+        "tipo_de_integracion_de_academias_campo_disciplin": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
+        "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+        "docentes_que_participaron_en_las_academias_h": "",
+        "docentes_que_participaron_en_las_academias_m": "",
+        "total": ""
+      },
+      {
+        "plantel": "Tipos de integración de academias: Marcar los tipos de academias implementadas en el plantel por programa educativo.",
+        "nombre_del_programa": "",
+        "no_de_academias_por_plantel": "",
+        "tipo_de_integracion_de_academias_area_de_formaci": "",
+        "tipo_de_integracion_de_academias_semestre": "",
+        "tipo_de_integracion_de_academias_campo_disciplin": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
+        "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+        "docentes_que_participaron_en_las_academias_h": "",
+        "docentes_que_participaron_en_las_academias_m": "",
+        "total": ""
+      },
+      {
+        "plantel": "Sesiones ordinarias: Escribir el número de sesiones realizadas durante el semestre de manera habitual.",
+        "nombre_del_programa": "",
+        "no_de_academias_por_plantel": "",
+        "tipo_de_integracion_de_academias_area_de_formaci": "",
+        "tipo_de_integracion_de_academias_semestre": "",
+        "tipo_de_integracion_de_academias_campo_disciplin": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
+        "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+        "docentes_que_participaron_en_las_academias_h": "",
+        "docentes_que_participaron_en_las_academias_m": "",
+        "total": ""
+      },
+      {
+        "plantel": "Sesiones extraordinarias: Escribir el número de sesiones realizadas para asuntos especiales o urgentes.",
+        "nombre_del_programa": "",
+        "no_de_academias_por_plantel": "",
+        "tipo_de_integracion_de_academias_area_de_formaci": "",
+        "tipo_de_integracion_de_academias_semestre": "",
+        "tipo_de_integracion_de_academias_campo_disciplin": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
+        "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+        "docentes_que_participaron_en_las_academias_h": "",
+        "docentes_que_participaron_en_las_academias_m": "",
+        "total": ""
+      },
+      {
+        "plantel": "Actividades de trabajo realizadas: Rde a cuerdo a las necesidades del plantel, registrar las actividades que se realizaron durante el semestre.",
+        "nombre_del_programa": "",
+        "no_de_academias_por_plantel": "",
+        "tipo_de_integracion_de_academias_area_de_formaci": "",
+        "tipo_de_integracion_de_academias_semestre": "",
+        "tipo_de_integracion_de_academias_campo_disciplin": "",
+        "no_de_sesiones_ordinarias": "",
+        "no_sesiones_extraordinarias": "",
+        "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+        "docentes_que_participaron_en_las_academias_h": "",
+        "docentes_que_participaron_en_las_academias_m": "",
+        "total": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "nombre_del_programa": "",
+      "no_de_academias_por_plantel": "",
+      "tipo_de_integracion_de_academias_area_de_formaci": "",
+      "tipo_de_integracion_de_academias_semestre": "",
+      "tipo_de_integracion_de_academias_campo_disciplin": "",
+      "no_de_sesiones_ordinarias": "",
+      "no_sesiones_extraordinarias": "",
+      "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+      "docentes_que_participaron_en_las_academias_h": "",
+      "docentes_que_participaron_en_las_academias_m": "",
+      "total": ""
+    },
+    "footerNote": "",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "official_code_detected"
+    ]
+  },
+  "1.1.2.0.1": {
+    "indicatorCode": "1.1.2.0.1",
+    "officialCode": "1.1.2.0.1",
+    "indicatorName": "Porcentaje retención escolar de educación media superior",
+    "activityLabel": "",
+    "sourceLabel": "Formato oficial 1.1.2.0.1",
+    "sourcePath": "private-workbook",
+    "sheetName": "Indicador 1.1.2.0.1.",
+    "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "Semestre",
+          "rowspan": 2
+        },
+        {
+          "label": "Ago 2025-Ene 2026",
+          "colspan": 3
+        },
+        {
+          "label": "Semestre",
+          "rowspan": 2
+        },
+        {
+          "label": "Feb 2026-Ago 2026",
+          "colspan": 3
+        },
+        {
+          "label": "Semestre",
+          "rowspan": 2
+        },
+        {
+          "label": "Ago 2026-Ene 2027",
+          "colspan": 3
+        }
+      ],
+      [
+        {
+          "label": "Hombres"
+        },
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Total"
+        },
+        {
+          "label": "Hombres"
+        },
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Total"
+        },
+        {
+          "label": "Hombres"
+        },
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Total"
+        }
+      ]
+    ],
+    "columns": [
+      {
+        "key": "semestre",
+        "label": "Semestre",
+        "type": "readonly"
+      },
+      {
+        "key": "ago_2025_ene_2026_hombres",
+        "label": "Hombres",
+        "type": "number"
+      },
+      {
+        "key": "ago_2025_ene_2026_mujeres",
+        "label": "Mujeres",
+        "type": "number"
+      },
+      {
+        "key": "ago_2025_ene_2026_total",
+        "label": "Total",
+        "type": "number"
+      },
+      {
+        "key": "semestre_2",
+        "label": "Semestre",
+        "type": "readonly"
+      },
+      {
+        "key": "feb_2026_ago_2026_hombres",
+        "label": "Hombres",
+        "type": "number"
+      },
+      {
+        "key": "feb_2026_ago_2026_mujeres",
+        "label": "Mujeres",
+        "type": "number"
+      },
+      {
+        "key": "feb_2026_ago_2026_total",
+        "label": "Total",
+        "type": "number"
+      },
+      {
+        "key": "semestre_3",
+        "label": "Semestre",
+        "type": "readonly"
+      },
+      {
+        "key": "ago_2026_ene_2027_hombres",
+        "label": "Hombres",
+        "type": "number"
+      },
+      {
+        "key": "ago_2026_ene_2027_mujeres",
+        "label": "Mujeres",
+        "type": "number"
+      },
+      {
+        "key": "ago_2026_ene_2027_total",
+        "label": "Total",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "semestre": "Primero",
+        "ago_2025_ene_2026_hombres": "",
+        "ago_2025_ene_2026_mujeres": "",
+        "ago_2025_ene_2026_total": "",
+        "semestre_2": "Segundo",
+        "feb_2026_ago_2026_hombres": "",
+        "feb_2026_ago_2026_mujeres": "",
+        "feb_2026_ago_2026_total": "",
+        "semestre_3": "Primero",
+        "ago_2026_ene_2027_hombres": "",
+        "ago_2026_ene_2027_mujeres": "",
+        "ago_2026_ene_2027_total": ""
+      },
+      {
+        "semestre": "Tercero",
+        "ago_2025_ene_2026_hombres": "",
+        "ago_2025_ene_2026_mujeres": "",
+        "ago_2025_ene_2026_total": "",
+        "semestre_2": "Cuarto",
+        "feb_2026_ago_2026_hombres": "",
+        "feb_2026_ago_2026_mujeres": "",
+        "feb_2026_ago_2026_total": "",
+        "semestre_3": "Tercero",
+        "ago_2026_ene_2027_hombres": "",
+        "ago_2026_ene_2027_mujeres": "",
+        "ago_2026_ene_2027_total": ""
+      },
+      {
+        "semestre": "Quinto",
+        "ago_2025_ene_2026_hombres": "",
+        "ago_2025_ene_2026_mujeres": "",
+        "ago_2025_ene_2026_total": "",
+        "semestre_2": "Sexto",
+        "feb_2026_ago_2026_hombres": "",
+        "feb_2026_ago_2026_mujeres": "",
+        "feb_2026_ago_2026_total": "",
+        "semestre_3": "Quinto",
+        "ago_2026_ene_2027_hombres": "",
+        "ago_2026_ene_2027_mujeres": "",
+        "ago_2026_ene_2027_total": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "semestre": "",
+      "ago_2025_ene_2026_hombres": "",
+      "ago_2025_ene_2026_mujeres": "",
+      "ago_2025_ene_2026_total": "",
+      "semestre_2": "",
+      "feb_2026_ago_2026_hombres": "",
+      "feb_2026_ago_2026_mujeres": "",
+      "feb_2026_ago_2026_total": "",
+      "semestre_3": "",
+      "ago_2026_ene_2027_hombres": "",
+      "ago_2026_ene_2027_mujeres": "",
+      "ago_2026_ene_2027_total": ""
+    },
+    "footerNote": "",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "official_code_detected"
+    ]
+  },
   "1.0.0.0.2": {
     "indicatorCode": "1.0.0.0.2",
     "officialCode": "1.0.0.0.2",
@@ -743,87 +1219,103 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     },
     "footerNote": "",
     "quality": [
-      "source_workbook_template",
+      "canonical_operational_template",
+      "official_code_detected",
       "private_fields_blank",
-      "official_code_detected"
+      "shared_official_code_split_by_source",
+      "source_workbook_template"
     ]
   },
-  "1.1.2.3.1": {
-    "indicatorCode": "1.1.2.3.1",
-    "officialCode": "1.1.2.3.1",
-    "indicatorName": "Porcentaje de estudiantes de NMS y NS participantes en las actividades de desarrollo y formación integral",
+  "3.1.0.0.1": {
+    "indicatorCode": "3.1.0.0.1",
+    "officialCode": "3.1.0.0.1",
+    "indicatorName": "Número de programas y proyectos de extensión y vinculación dirigidas al sector social y productivo",
     "activityLabel": "",
-    "sourceLabel": "Formato oficial 1.1.2.3.1",
+    "sourceLabel": "Formato oficial 3.1.0.0.1",
     "sourcePath": "private-workbook",
-    "sheetName": "1.1.2.3.1",
+    "sheetName": "Hoja1",
     "groups": [],
     "headerRows": [],
     "columns": [
       {
-        "key": "registro",
-        "label": "Registro",
+        "key": "plantel",
+        "label": "Plantel",
+        "type": "readonly"
+      },
+      {
+        "key": "nombre_de_la_actividad",
+        "label": "Nombre de la actividad",
         "type": "text"
       },
       {
-        "key": "nombre_de_la_charla",
-        "label": "Nombre de la charla",
+        "key": "descripcion_de_la_actividad",
+        "label": "Descripción de la actividad",
         "type": "text"
       },
       {
-        "key": "ponente",
-        "label": "Ponente",
-        "type": "text"
-      },
-      {
-        "key": "fecha_de_la_actividad",
-        "label": "Fecha de la actividad",
-        "type": "text"
-      },
-      {
-        "key": "total_estudiantes_asistentes_mujeres",
-        "label": "Total Estudiantes Asistentes Mujeres",
+        "key": "total_estudiantes_mujeres",
+        "label": "Total Estudiantes Mujeres",
         "type": "number"
       },
       {
-        "key": "total_estudiantes_asistentes_hombres",
-        "label": "Total Estudiantes Asistentes Hombres",
+        "key": "total_estudiantes_hombres",
+        "label": "Total Estudiantes Hombres",
         "type": "number"
       },
       {
-        "key": "total_docentes_asistentes_mujeres",
-        "label": "Total Docentes Asistentes Mujeres",
+        "key": "total_docentes_mujeres",
+        "label": "Total Docentes Mujeres",
         "type": "number"
       },
       {
-        "key": "total_docentes_asistentes_hombres",
-        "label": "Total Docentes Asistentes Hombres",
+        "key": "total_docentes_hombres",
+        "label": "Total Docentes Hombres",
+        "type": "number"
+      },
+      {
+        "key": "total_personal_administrativo_mujeres",
+        "label": "Total Personal Administrativo Mujeres",
+        "type": "number"
+      },
+      {
+        "key": "total_personal_administrativo_hombres",
+        "label": "Total Personal Administrativo Hombres",
+        "type": "number"
+      },
+      {
+        "key": "total_de_participantes",
+        "label": "TOTAL DE PARTICIPANTES",
         "type": "number"
       }
     ],
     "initialRows": [
       {
-        "registro": "",
-        "nombre_de_la_charla": "",
-        "ponente": "",
-        "fecha_de_la_actividad": "",
-        "total_estudiantes_asistentes_mujeres": "",
-        "total_estudiantes_asistentes_hombres": "",
-        "total_docentes_asistentes_mujeres": "",
-        "total_docentes_asistentes_hombres": ""
+        "plantel": "Bachillerato",
+        "nombre_de_la_actividad": "",
+        "descripcion_de_la_actividad": "",
+        "total_estudiantes_mujeres": "",
+        "total_estudiantes_hombres": "",
+        "total_docentes_mujeres": "",
+        "total_docentes_hombres": "",
+        "total_personal_administrativo_mujeres": "",
+        "total_personal_administrativo_hombres": "",
+        "total_de_participantes": ""
       }
     ],
     "showTotals": true,
     "allowAddRows": true,
     "addRowLabel": "Agregar fila",
     "emptyRow": {
-      "registro": "",
-      "nombre_de_la_charla": "",
-      "ponente": "",
-      "fecha_de_la_actividad": "",
-      "total_estudiantes_asistentes_mujeres": "",
-      "total_estudiantes_asistentes_hombres": "",
-      "total_docentes_asistentes_mujeres": "",
-      "total_docentes_asistentes_hombres": ""
+      "plantel": "",
+      "nombre_de_la_actividad": "",
+      "descripcion_de_la_actividad": "",
+      "total_estudiantes_mujeres": "",
+      "total_estudiantes_hombres": "",
+      "total_docentes_mujeres": "",
+      "total_docentes_hombres": "",
+      "total_personal_administrativo_mujeres": "",
+      "total_personal_administrativo_hombres": "",
+      "total_de_participantes": ""
     },
     "footerNote": "",
     "quality": [
@@ -835,84 +1327,199 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
   "1.1.2.0.3": {
     "indicatorCode": "1.1.2.0.3",
     "officialCode": "1.1.2.0.3",
-    "indicatorName": "TASA DE ABANDONO ESCOLAR DE EDUCACIÓN MEDIA SUPERIOR",
+    "indicatorName": "Tasa de abadono escolar de educación media superior",
     "activityLabel": "",
     "sourceLabel": "Formato oficial 1.1.2.0.3",
     "sourcePath": "private-workbook",
-    "sheetName": "Hoja1",
+    "sheetName": "Indicador 1.1.2.0.3",
     "groups": [],
-    "headerRows": [
-      [
-        {
-          "label": "PLANTEL",
-          "rowspan": 2
-        },
-        {
-          "label": "ESTRATEGIAS PARA COMBATIR EL ABANDONO ESCOLAR",
-          "rowspan": 2
-        },
-        {
-          "label": "CANTIDAD DE ALUMNOS",
-          "colspan": 3
-        }
-      ],
-      [
-        {
-          "label": "MUJERES"
-        },
-        {
-          "label": "HOMBRES"
-        },
-        {
-          "label": "TOTAL"
-        }
-      ]
-    ],
+    "headerRows": [],
     "columns": [
       {
-        "key": "plantel",
-        "label": "PLANTEL",
-        "type": "readonly"
-      },
-      {
-        "key": "estrategias_para_combatir_el_abandono_escolar",
-        "label": "ESTRATEGIAS PARA COMBATIR EL ABANDONO ESCOLAR",
+        "key": "escuela",
+        "label": "Escuela",
         "type": "text"
       },
       {
-        "key": "cantidad_de_alumnos_mujeres",
-        "label": "MUJERES",
-        "type": "number"
+        "key": "semestre",
+        "label": "Semestre",
+        "type": "readonly"
       },
       {
-        "key": "cantidad_de_alumnos_hombres",
-        "label": "HOMBRES",
-        "type": "number"
+        "key": "programa_educativo",
+        "label": "Programa Educativo",
+        "type": "readonly"
       },
       {
-        "key": "cantidad_de_alumnos_total",
-        "label": "TOTAL",
-        "type": "number"
+        "key": "matr",
+        "label": "Matr.",
+        "type": "text"
+      },
+      {
+        "key": "tasa_de_reprobacion",
+        "label": "Tasa De Reprobacion",
+        "type": "text"
+      },
+      {
+        "key": "tasa_de_reprobacion_2",
+        "label": "Tasa De Reprobacion",
+        "type": "text"
+      },
+      {
+        "key": "tasa_de_aprobacion",
+        "label": "Tasa De Aprobacion",
+        "type": "text"
+      },
+      {
+        "key": "tasa_de_aprobacion_2",
+        "label": "Tasa De Aprobacion",
+        "type": "text"
+      },
+      {
+        "key": "tasa_de_desercion",
+        "label": "Tasa De Desercion",
+        "type": "text"
+      },
+      {
+        "key": "tasa_de_desercion_2",
+        "label": "Tasa De Desercion",
+        "type": "text"
+      },
+      {
+        "key": "semestre_2",
+        "label": "Semestre",
+        "type": "readonly"
+      },
+      {
+        "key": "tasa_de_reprobacion_3",
+        "label": "Tasa De Reprobacion",
+        "type": "text"
+      },
+      {
+        "key": "tasa_de_reprobacion_4",
+        "label": "Tasa De Reprobacion",
+        "type": "text"
+      },
+      {
+        "key": "tasa_de_aprobacion_3",
+        "label": "Tasa De Aprobacion",
+        "type": "text"
+      },
+      {
+        "key": "tasa_de_aprobacion_4",
+        "label": "Tasa De Aprobacion",
+        "type": "text"
+      },
+      {
+        "key": "tasa_de_desercion_3",
+        "label": "Tasa De Desercion",
+        "type": "text"
+      },
+      {
+        "key": "tasa_de_desercion_4",
+        "label": "Tasa De Desercion",
+        "type": "text"
       }
     ],
     "initialRows": [
       {
-        "plantel": "",
-        "estrategias_para_combatir_el_abandono_escolar": "",
-        "cantidad_de_alumnos_mujeres": "",
-        "cantidad_de_alumnos_hombres": "",
-        "cantidad_de_alumnos_total": ""
+        "escuela": "",
+        "semestre": "",
+        "programa_educativo": "",
+        "matr": "",
+        "tasa_de_reprobacion": "No",
+        "tasa_de_reprobacion_2": "%",
+        "tasa_de_aprobacion": "No",
+        "tasa_de_aprobacion_2": "%",
+        "tasa_de_desercion": "No",
+        "tasa_de_desercion_2": "%",
+        "semestre_2": "",
+        "tasa_de_reprobacion_3": "No",
+        "tasa_de_reprobacion_4": "%",
+        "tasa_de_aprobacion_3": "No",
+        "tasa_de_aprobacion_4": "%",
+        "tasa_de_desercion_3": "No",
+        "tasa_de_desercion_4": "%"
+      },
+      {
+        "escuela": "Bachillerato 1",
+        "semestre": "Segundo",
+        "programa_educativo": "Bachillerato general",
+        "matr": "",
+        "tasa_de_reprobacion": "",
+        "tasa_de_reprobacion_2": "",
+        "tasa_de_aprobacion": "",
+        "tasa_de_aprobacion_2": "",
+        "tasa_de_desercion": "",
+        "tasa_de_desercion_2": "",
+        "semestre_2": "Primero",
+        "tasa_de_reprobacion_3": "",
+        "tasa_de_reprobacion_4": "",
+        "tasa_de_aprobacion_3": "",
+        "tasa_de_aprobacion_4": "",
+        "tasa_de_desercion_3": "",
+        "tasa_de_desercion_4": ""
+      },
+      {
+        "escuela": "Bachillerato 1",
+        "semestre": "Cuarto",
+        "programa_educativo": "Bachillerato general",
+        "matr": "",
+        "tasa_de_reprobacion": "",
+        "tasa_de_reprobacion_2": "",
+        "tasa_de_aprobacion": "",
+        "tasa_de_aprobacion_2": "",
+        "tasa_de_desercion": "",
+        "tasa_de_desercion_2": "",
+        "semestre_2": "Tercero",
+        "tasa_de_reprobacion_3": "",
+        "tasa_de_reprobacion_4": "",
+        "tasa_de_aprobacion_3": "",
+        "tasa_de_aprobacion_4": "",
+        "tasa_de_desercion_3": "",
+        "tasa_de_desercion_4": ""
+      },
+      {
+        "escuela": "Bachillerato 1",
+        "semestre": "Sexto",
+        "programa_educativo": "Bachillerato general",
+        "matr": "",
+        "tasa_de_reprobacion": "",
+        "tasa_de_reprobacion_2": "",
+        "tasa_de_aprobacion": "",
+        "tasa_de_aprobacion_2": "",
+        "tasa_de_desercion": "",
+        "tasa_de_desercion_2": "",
+        "semestre_2": "Quinto",
+        "tasa_de_reprobacion_3": "",
+        "tasa_de_reprobacion_4": "",
+        "tasa_de_aprobacion_3": "",
+        "tasa_de_aprobacion_4": "",
+        "tasa_de_desercion_3": "",
+        "tasa_de_desercion_4": ""
       }
     ],
-    "showTotals": true,
+    "showTotals": false,
     "allowAddRows": true,
     "addRowLabel": "Agregar fila",
     "emptyRow": {
-      "plantel": "",
-      "estrategias_para_combatir_el_abandono_escolar": "",
-      "cantidad_de_alumnos_mujeres": "",
-      "cantidad_de_alumnos_hombres": "",
-      "cantidad_de_alumnos_total": ""
+      "escuela": "",
+      "semestre": "",
+      "programa_educativo": "",
+      "matr": "",
+      "tasa_de_reprobacion": "",
+      "tasa_de_reprobacion_2": "",
+      "tasa_de_aprobacion": "",
+      "tasa_de_aprobacion_2": "",
+      "tasa_de_desercion": "",
+      "tasa_de_desercion_2": "",
+      "semestre_2": "",
+      "tasa_de_reprobacion_3": "",
+      "tasa_de_reprobacion_4": "",
+      "tasa_de_aprobacion_3": "",
+      "tasa_de_aprobacion_4": "",
+      "tasa_de_desercion_3": "",
+      "tasa_de_desercion_4": ""
     },
     "footerNote": "",
     "quality": [
@@ -1127,399 +1734,89 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "pending_indicator_code"
     ]
   },
-  "1.1.2.0.3-FMT-EDABD54D": {
-    "indicatorCode": "1.1.2.0.3-FMT-EDABD54D",
-    "officialCode": "1.1.2.0.3",
-    "indicatorName": "Tasa de abadono escolar de educación media superior",
+  "1.1.2.5.10": {
+    "indicatorCode": "1.1.2.5.10",
+    "officialCode": "1.1.2.5.10",
+    "indicatorName": "Porcentaje de docentes de educación media superior y superior certificados en el dominio de una Lengua Extranjera",
     "activityLabel": "",
-    "sourceLabel": "Formato oficial 1.1.2.0.3-FMT-EDABD54D",
+    "sourceLabel": "Formato oficial 1.1.2.5.10",
     "sourcePath": "private-workbook",
-    "sheetName": "Indicador 1.1.2.0.3",
+    "sheetName": "Hoja1",
     "groups": [],
     "headerRows": [],
     "columns": [
       {
-        "key": "escuela",
-        "label": "Escuela",
-        "type": "text"
-      },
-      {
-        "key": "semestre",
-        "label": "Semestre",
-        "type": "readonly"
-      },
-      {
-        "key": "programa_educativo",
-        "label": "Programa Educativo",
-        "type": "readonly"
-      },
-      {
-        "key": "matr",
-        "label": "Matr.",
-        "type": "text"
-      },
-      {
-        "key": "tasa_de_reprobacion",
-        "label": "Tasa De Reprobacion",
-        "type": "text"
-      },
-      {
-        "key": "tasa_de_reprobacion_2",
-        "label": "Tasa De Reprobacion",
-        "type": "text"
-      },
-      {
-        "key": "tasa_de_aprobacion",
-        "label": "Tasa De Aprobacion",
-        "type": "text"
-      },
-      {
-        "key": "tasa_de_aprobacion_2",
-        "label": "Tasa De Aprobacion",
-        "type": "text"
-      },
-      {
-        "key": "tasa_de_desercion",
-        "label": "Tasa De Desercion",
-        "type": "text"
-      },
-      {
-        "key": "tasa_de_desercion_2",
-        "label": "Tasa De Desercion",
-        "type": "text"
-      },
-      {
-        "key": "semestre_2",
-        "label": "Semestre",
-        "type": "readonly"
-      },
-      {
-        "key": "tasa_de_reprobacion_3",
-        "label": "Tasa De Reprobacion",
-        "type": "text"
-      },
-      {
-        "key": "tasa_de_reprobacion_4",
-        "label": "Tasa De Reprobacion",
-        "type": "text"
-      },
-      {
-        "key": "tasa_de_aprobacion_3",
-        "label": "Tasa De Aprobacion",
-        "type": "text"
-      },
-      {
-        "key": "tasa_de_aprobacion_4",
-        "label": "Tasa De Aprobacion",
-        "type": "text"
-      },
-      {
-        "key": "tasa_de_desercion_3",
-        "label": "Tasa De Desercion",
-        "type": "text"
-      },
-      {
-        "key": "tasa_de_desercion_4",
-        "label": "Tasa De Desercion",
-        "type": "text"
-      }
-    ],
-    "initialRows": [
-      {
-        "escuela": "",
-        "semestre": "",
-        "programa_educativo": "",
-        "matr": "",
-        "tasa_de_reprobacion": "No",
-        "tasa_de_reprobacion_2": "%",
-        "tasa_de_aprobacion": "No",
-        "tasa_de_aprobacion_2": "%",
-        "tasa_de_desercion": "No",
-        "tasa_de_desercion_2": "%",
-        "semestre_2": "",
-        "tasa_de_reprobacion_3": "No",
-        "tasa_de_reprobacion_4": "%",
-        "tasa_de_aprobacion_3": "No",
-        "tasa_de_aprobacion_4": "%",
-        "tasa_de_desercion_3": "No",
-        "tasa_de_desercion_4": "%"
-      },
-      {
-        "escuela": "Bachillerato 1",
-        "semestre": "Segundo",
-        "programa_educativo": "Bachillerato general",
-        "matr": "",
-        "tasa_de_reprobacion": "",
-        "tasa_de_reprobacion_2": "",
-        "tasa_de_aprobacion": "",
-        "tasa_de_aprobacion_2": "",
-        "tasa_de_desercion": "",
-        "tasa_de_desercion_2": "",
-        "semestre_2": "Primero",
-        "tasa_de_reprobacion_3": "",
-        "tasa_de_reprobacion_4": "",
-        "tasa_de_aprobacion_3": "",
-        "tasa_de_aprobacion_4": "",
-        "tasa_de_desercion_3": "",
-        "tasa_de_desercion_4": ""
-      },
-      {
-        "escuela": "Bachillerato 1",
-        "semestre": "Cuarto",
-        "programa_educativo": "Bachillerato general",
-        "matr": "",
-        "tasa_de_reprobacion": "",
-        "tasa_de_reprobacion_2": "",
-        "tasa_de_aprobacion": "",
-        "tasa_de_aprobacion_2": "",
-        "tasa_de_desercion": "",
-        "tasa_de_desercion_2": "",
-        "semestre_2": "Tercero",
-        "tasa_de_reprobacion_3": "",
-        "tasa_de_reprobacion_4": "",
-        "tasa_de_aprobacion_3": "",
-        "tasa_de_aprobacion_4": "",
-        "tasa_de_desercion_3": "",
-        "tasa_de_desercion_4": ""
-      },
-      {
-        "escuela": "Bachillerato 1",
-        "semestre": "Sexto",
-        "programa_educativo": "Bachillerato general",
-        "matr": "",
-        "tasa_de_reprobacion": "",
-        "tasa_de_reprobacion_2": "",
-        "tasa_de_aprobacion": "",
-        "tasa_de_aprobacion_2": "",
-        "tasa_de_desercion": "",
-        "tasa_de_desercion_2": "",
-        "semestre_2": "Quinto",
-        "tasa_de_reprobacion_3": "",
-        "tasa_de_reprobacion_4": "",
-        "tasa_de_aprobacion_3": "",
-        "tasa_de_aprobacion_4": "",
-        "tasa_de_desercion_3": "",
-        "tasa_de_desercion_4": ""
-      }
-    ],
-    "showTotals": false,
-    "allowAddRows": true,
-    "addRowLabel": "Agregar fila",
-    "emptyRow": {
-      "escuela": "",
-      "semestre": "",
-      "programa_educativo": "",
-      "matr": "",
-      "tasa_de_reprobacion": "",
-      "tasa_de_reprobacion_2": "",
-      "tasa_de_aprobacion": "",
-      "tasa_de_aprobacion_2": "",
-      "tasa_de_desercion": "",
-      "tasa_de_desercion_2": "",
-      "semestre_2": "",
-      "tasa_de_reprobacion_3": "",
-      "tasa_de_reprobacion_4": "",
-      "tasa_de_aprobacion_3": "",
-      "tasa_de_aprobacion_4": "",
-      "tasa_de_desercion_3": "",
-      "tasa_de_desercion_4": ""
-    },
-    "footerNote": "",
-    "quality": [
-      "source_workbook_template",
-      "private_fields_blank",
-      "official_code_detected",
-      "shared_official_code_split_by_source"
-    ]
-  },
-  "1.1.2.0.1": {
-    "indicatorCode": "1.1.2.0.1",
-    "officialCode": "1.1.2.0.1",
-    "indicatorName": "Porcentaje retención escolar de educación media superior",
-    "activityLabel": "",
-    "sourceLabel": "Formato oficial 1.1.2.0.1",
-    "sourcePath": "private-workbook",
-    "sheetName": "Indicador 1.1.2.0.1.",
-    "groups": [],
-    "headerRows": [
-      [
-        {
-          "label": "Semestre",
-          "rowspan": 2
-        },
-        {
-          "label": "Ago 2025-Ene 2026",
-          "colspan": 3
-        },
-        {
-          "label": "Semestre",
-          "rowspan": 2
-        },
-        {
-          "label": "Feb 2026-Ago 2026",
-          "colspan": 3
-        },
-        {
-          "label": "Semestre",
-          "rowspan": 2
-        },
-        {
-          "label": "Ago 2026-Ene 2027",
-          "colspan": 3
-        }
-      ],
-      [
-        {
-          "label": "Hombres"
-        },
-        {
-          "label": "Mujeres"
-        },
-        {
-          "label": "Total"
-        },
-        {
-          "label": "Hombres"
-        },
-        {
-          "label": "Mujeres"
-        },
-        {
-          "label": "Total"
-        },
-        {
-          "label": "Hombres"
-        },
-        {
-          "label": "Mujeres"
-        },
-        {
-          "label": "Total"
-        }
-      ]
-    ],
-    "columns": [
-      {
-        "key": "semestre",
-        "label": "Semestre",
-        "type": "readonly"
-      },
-      {
-        "key": "ago_2025_ene_2026_hombres",
-        "label": "Hombres",
+        "key": "agosto_2025_enero_2026_m",
+        "label": "Agosto 2025-Enero 2026 M",
         "type": "number"
       },
       {
-        "key": "ago_2025_ene_2026_mujeres",
-        "label": "Mujeres",
+        "key": "agosto_2025_enero_2026_h",
+        "label": "Agosto 2025-Enero 2026 H",
         "type": "number"
       },
       {
-        "key": "ago_2025_ene_2026_total",
-        "label": "Total",
+        "key": "total_h",
+        "label": "Total H",
         "type": "number"
       },
       {
-        "key": "semestre_2",
-        "label": "Semestre",
-        "type": "readonly"
-      },
-      {
-        "key": "feb_2026_ago_2026_hombres",
-        "label": "Hombres",
+        "key": "enero_2026_junio_2026_m",
+        "label": "Enero 2026-Junio 2026 M",
         "type": "number"
       },
       {
-        "key": "feb_2026_ago_2026_mujeres",
-        "label": "Mujeres",
+        "key": "enero_2026_junio_2026_h",
+        "label": "Enero 2026-Junio 2026 H",
         "type": "number"
       },
       {
-        "key": "feb_2026_ago_2026_total",
-        "label": "Total",
+        "key": "total_h_2",
+        "label": "Total H",
         "type": "number"
       },
       {
-        "key": "semestre_3",
-        "label": "Semestre",
-        "type": "readonly"
-      },
-      {
-        "key": "ago_2026_ene_2027_hombres",
-        "label": "Hombres",
+        "key": "agosto_2026_enero_2027_m",
+        "label": "Agosto 2026- Enero 2027 M",
         "type": "number"
       },
       {
-        "key": "ago_2026_ene_2027_mujeres",
-        "label": "Mujeres",
+        "key": "agosto_2026_enero_2027_h",
+        "label": "Agosto 2026- Enero 2027 H",
         "type": "number"
       },
       {
-        "key": "ago_2026_ene_2027_total",
-        "label": "Total",
+        "key": "total_h_3",
+        "label": "Total H",
         "type": "number"
       }
     ],
     "initialRows": [
       {
-        "semestre": "Primero",
-        "ago_2025_ene_2026_hombres": "",
-        "ago_2025_ene_2026_mujeres": "",
-        "ago_2025_ene_2026_total": "",
-        "semestre_2": "Segundo",
-        "feb_2026_ago_2026_hombres": "",
-        "feb_2026_ago_2026_mujeres": "",
-        "feb_2026_ago_2026_total": "",
-        "semestre_3": "Primero",
-        "ago_2026_ene_2027_hombres": "",
-        "ago_2026_ene_2027_mujeres": "",
-        "ago_2026_ene_2027_total": ""
-      },
-      {
-        "semestre": "Tercero",
-        "ago_2025_ene_2026_hombres": "",
-        "ago_2025_ene_2026_mujeres": "",
-        "ago_2025_ene_2026_total": "",
-        "semestre_2": "Cuarto",
-        "feb_2026_ago_2026_hombres": "",
-        "feb_2026_ago_2026_mujeres": "",
-        "feb_2026_ago_2026_total": "",
-        "semestre_3": "Tercero",
-        "ago_2026_ene_2027_hombres": "",
-        "ago_2026_ene_2027_mujeres": "",
-        "ago_2026_ene_2027_total": ""
-      },
-      {
-        "semestre": "Quinto",
-        "ago_2025_ene_2026_hombres": "",
-        "ago_2025_ene_2026_mujeres": "",
-        "ago_2025_ene_2026_total": "",
-        "semestre_2": "Sexto",
-        "feb_2026_ago_2026_hombres": "",
-        "feb_2026_ago_2026_mujeres": "",
-        "feb_2026_ago_2026_total": "",
-        "semestre_3": "Quinto",
-        "ago_2026_ene_2027_hombres": "",
-        "ago_2026_ene_2027_mujeres": "",
-        "ago_2026_ene_2027_total": ""
+        "agosto_2025_enero_2026_m": "",
+        "agosto_2025_enero_2026_h": "",
+        "total_h": "",
+        "enero_2026_junio_2026_m": "",
+        "enero_2026_junio_2026_h": "",
+        "total_h_2": "",
+        "agosto_2026_enero_2027_m": "",
+        "agosto_2026_enero_2027_h": "",
+        "total_h_3": ""
       }
     ],
     "showTotals": true,
     "allowAddRows": true,
     "addRowLabel": "Agregar fila",
     "emptyRow": {
-      "semestre": "",
-      "ago_2025_ene_2026_hombres": "",
-      "ago_2025_ene_2026_mujeres": "",
-      "ago_2025_ene_2026_total": "",
-      "semestre_2": "",
-      "feb_2026_ago_2026_hombres": "",
-      "feb_2026_ago_2026_mujeres": "",
-      "feb_2026_ago_2026_total": "",
-      "semestre_3": "",
-      "ago_2026_ene_2027_hombres": "",
-      "ago_2026_ene_2027_mujeres": "",
-      "ago_2026_ene_2027_total": ""
+      "agosto_2025_enero_2026_m": "",
+      "agosto_2025_enero_2026_h": "",
+      "total_h": "",
+      "enero_2026_junio_2026_m": "",
+      "enero_2026_junio_2026_h": "",
+      "total_h_2": "",
+      "agosto_2026_enero_2027_m": "",
+      "agosto_2026_enero_2027_h": "",
+      "total_h_3": ""
     },
     "footerNote": "",
     "quality": [
@@ -1528,28 +1825,196 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "official_code_detected"
     ]
   },
-  "4.1.1.0.1": {
-    "indicatorCode": "4.1.1.0.1",
-    "officialCode": "4.1.1.0.1",
-    "indicatorName": "Número de Sistemas de Información Institucionales que interoperan",
+  "FMT-01-D30B3A90-formacion-apoyo-academic": {
+    "indicatorCode": "FMT-01-D30B3A90-formacion-apoyo-academic",
+    "officialCode": null,
+    "indicatorName": "Formación_apoyo académico_2026",
     "activityLabel": "",
-    "sourceLabel": "Formato oficial 4.1.1.0.1",
+    "sourceLabel": "Formato oficial FMT-01-D30B3A90-formacion-apoyo-academic",
     "sourcePath": "private-workbook",
-    "sheetName": "Hoja1",
+    "sheetName": "PERSONAL DE APOYO",
     "groups": [],
     "headerRows": [
       [
         {
-          "label": "Registro"
+          "label": "No.",
+          "rowspan": 2
         },
         {
-          "label": "Nombre del Software"
+          "label": "Tipo de evento",
+          "rowspan": 2
         },
         {
-          "label": "Aspecto de la formación integral del estudiantado a la que da seguimiento"
+          "label": "Nombre del evento",
+          "rowspan": 2
+        },
+        {
+          "label": "Duración en horas",
+          "rowspan": 2
+        },
+        {
+          "label": "Modalidad",
+          "rowspan": 2
+        },
+        {
+          "label": "Competencias desarrolladas",
+          "rowspan": 2
+        },
+        {
+          "label": "Evento organizado por:",
+          "rowspan": 2
+        },
+        {
+          "label": "Personal de apoyo académico NMS",
+          "colspan": 3
+        }
+      ],
+      [
+        {
+          "label": "H"
+        },
+        {
+          "label": "M"
+        },
+        {
+          "label": "Total"
         }
       ]
     ],
+    "columns": [
+      {
+        "key": "no",
+        "label": "No.",
+        "type": "text"
+      },
+      {
+        "key": "tipo_de_evento",
+        "label": "Tipo de evento",
+        "type": "text"
+      },
+      {
+        "key": "nombre_del_evento",
+        "label": "Nombre del evento",
+        "type": "text"
+      },
+      {
+        "key": "duracion_en_horas",
+        "label": "Duración en horas",
+        "type": "text"
+      },
+      {
+        "key": "modalidad",
+        "label": "Modalidad",
+        "type": "text"
+      },
+      {
+        "key": "competencias_desarrolladas",
+        "label": "Competencias desarrolladas",
+        "type": "text"
+      },
+      {
+        "key": "evento_organizado_por",
+        "label": "Evento organizado por:",
+        "type": "text"
+      },
+      {
+        "key": "personal_de_apoyo_academico_nms_h",
+        "label": "H",
+        "type": "number"
+      },
+      {
+        "key": "personal_de_apoyo_academico_nms_m",
+        "label": "M",
+        "type": "number"
+      },
+      {
+        "key": "personal_de_apoyo_academico_nms_total",
+        "label": "Total",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "no": "1.1.2.5.1",
+        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que cumple con perfil docente idóneo de acuerdo con el modelo educativo institucional",
+        "nombre_del_evento": "",
+        "duracion_en_horas": "",
+        "modalidad": "",
+        "competencias_desarrolladas": "",
+        "evento_organizado_por": "",
+        "personal_de_apoyo_academico_nms_h": "",
+        "personal_de_apoyo_academico_nms_m": "",
+        "personal_de_apoyo_academico_nms_total": ""
+      },
+      {
+        "no": "1.1.2.5.5",
+        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocionales, inclusión, investigación, internacionalización, arte, cultura, innovación, igualdad género, sustentabilidad, sostenibilidad y medio ambiente, con enfoque interseccional y de interculturalidad",
+        "nombre_del_evento": "",
+        "duracion_en_horas": "",
+        "modalidad": "",
+        "competencias_desarrolladas": "",
+        "evento_organizado_por": "",
+        "personal_de_apoyo_academico_nms_h": "",
+        "personal_de_apoyo_academico_nms_m": "",
+        "personal_de_apoyo_academico_nms_total": ""
+      },
+      {
+        "no": "1.1.2.5.7",
+        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
+        "nombre_del_evento": "",
+        "duracion_en_horas": "",
+        "modalidad": "",
+        "competencias_desarrolladas": "",
+        "evento_organizado_por": "",
+        "personal_de_apoyo_academico_nms_h": "",
+        "personal_de_apoyo_academico_nms_m": "",
+        "personal_de_apoyo_academico_nms_total": ""
+      },
+      {
+        "no": "1.1.2.5.8",
+        "tipo_de_evento": "Porcentaje de personal de apoyo académico de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
+        "nombre_del_evento": "",
+        "duracion_en_horas": "",
+        "modalidad": "",
+        "competencias_desarrolladas": "",
+        "evento_organizado_por": "",
+        "personal_de_apoyo_academico_nms_h": "",
+        "personal_de_apoyo_academico_nms_m": "",
+        "personal_de_apoyo_academico_nms_total": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "no": "",
+      "tipo_de_evento": "",
+      "nombre_del_evento": "",
+      "duracion_en_horas": "",
+      "modalidad": "",
+      "competencias_desarrolladas": "",
+      "evento_organizado_por": "",
+      "personal_de_apoyo_academico_nms_h": "",
+      "personal_de_apoyo_academico_nms_m": "",
+      "personal_de_apoyo_academico_nms_total": ""
+    },
+    "footerNote": "",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "1.1.2.3.1": {
+    "indicatorCode": "1.1.2.3.1",
+    "officialCode": "1.1.2.3.1",
+    "indicatorName": "Porcentaje de estudiantes de NMS y NS participantes en las actividades de desarrollo y formación integral",
+    "activityLabel": "",
+    "sourceLabel": "Formato oficial 1.1.2.3.1",
+    "sourcePath": "private-workbook",
+    "sheetName": "1.1.2.3.1",
+    "groups": [],
+    "headerRows": [],
     "columns": [
       {
         "key": "registro",
@@ -1557,30 +2022,65 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         "type": "text"
       },
       {
-        "key": "nombre_del_software",
-        "label": "Nombre del Software",
+        "key": "nombre_de_la_charla",
+        "label": "Nombre de la charla",
         "type": "text"
       },
       {
-        "key": "aspecto_de_la_formacion_integral_del_estudiantad",
-        "label": "Aspecto de la formación integral del estudiantado a la que da seguimiento",
+        "key": "ponente",
+        "label": "Ponente",
         "type": "text"
+      },
+      {
+        "key": "fecha_de_la_actividad",
+        "label": "Fecha de la actividad",
+        "type": "text"
+      },
+      {
+        "key": "total_estudiantes_asistentes_mujeres",
+        "label": "Total Estudiantes Asistentes Mujeres",
+        "type": "number"
+      },
+      {
+        "key": "total_estudiantes_asistentes_hombres",
+        "label": "Total Estudiantes Asistentes Hombres",
+        "type": "number"
+      },
+      {
+        "key": "total_docentes_asistentes_mujeres",
+        "label": "Total Docentes Asistentes Mujeres",
+        "type": "number"
+      },
+      {
+        "key": "total_docentes_asistentes_hombres",
+        "label": "Total Docentes Asistentes Hombres",
+        "type": "number"
       }
     ],
     "initialRows": [
       {
         "registro": "",
-        "nombre_del_software": "",
-        "aspecto_de_la_formacion_integral_del_estudiantad": ""
+        "nombre_de_la_charla": "",
+        "ponente": "",
+        "fecha_de_la_actividad": "",
+        "total_estudiantes_asistentes_mujeres": "",
+        "total_estudiantes_asistentes_hombres": "",
+        "total_docentes_asistentes_mujeres": "",
+        "total_docentes_asistentes_hombres": ""
       }
     ],
-    "showTotals": false,
+    "showTotals": true,
     "allowAddRows": true,
     "addRowLabel": "Agregar fila",
     "emptyRow": {
       "registro": "",
-      "nombre_del_software": "",
-      "aspecto_de_la_formacion_integral_del_estudiantad": ""
+      "nombre_de_la_charla": "",
+      "ponente": "",
+      "fecha_de_la_actividad": "",
+      "total_estudiantes_asistentes_mujeres": "",
+      "total_estudiantes_asistentes_hombres": "",
+      "total_docentes_asistentes_mujeres": "",
+      "total_docentes_asistentes_hombres": ""
     },
     "footerNote": "",
     "quality": [
@@ -1690,12 +2190,1291 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "official_code_detected"
     ]
   },
-  "1.1.1.1.1": {
-    "indicatorCode": "1.1.1.1.1",
+  "1.1.2.1.4": {
+    "indicatorCode": "1.1.2.1.4",
+    "officialCode": "1.1.2.1.4",
+    "indicatorName": "Porcentaje de estudiantes de educación media superior y superior atendidos en los servicios de salud integral",
+    "activityLabel": "PROMOCIÓN DE LA SALUD",
+    "sourceLabel": "Formato oficial 1.1.2.1.4",
+    "sourcePath": "private-workbook",
+    "sheetName": "Table 1",
+    "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "Plantel",
+          "rowspan": 2
+        },
+        {
+          "label": "Nota: anotar solo la actividad desarrollada. Unidades de salud integral",
+          "colspan": 3
+        },
+        {
+          "label": "Febrero– Agosto 2026",
+          "colspan": 3
+        },
+        {
+          "label": "Agosto- Enero 2027",
+          "colspan": 3
+        }
+      ],
+      [
+        {
+          "label": "SERVICIOS MEDICOS"
+        },
+        {
+          "label": "DGDI"
+        },
+        {
+          "label": "CUAP"
+        },
+        {
+          "label": "M"
+        },
+        {
+          "label": "H"
+        },
+        {
+          "label": "T"
+        },
+        {
+          "label": "M"
+        },
+        {
+          "label": "H"
+        },
+        {
+          "label": "T"
+        }
+      ]
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "Plantel",
+        "type": "readonly"
+      },
+      {
+        "key": "nota_anotar_solo_la_actividad_desarrollada_unida",
+        "label": "SERVICIOS MEDICOS",
+        "type": "text"
+      },
+      {
+        "key": "nota_anotar_solo_la_actividad_desarrollada_unida_2",
+        "label": "DGDI",
+        "type": "text"
+      },
+      {
+        "key": "nota_anotar_solo_la_actividad_desarrollada_unida_3",
+        "label": "CUAP",
+        "type": "text"
+      },
+      {
+        "key": "febrero_agosto_2026_m",
+        "label": "M",
+        "type": "number"
+      },
+      {
+        "key": "febrero_agosto_2026_h",
+        "label": "H",
+        "type": "number"
+      },
+      {
+        "key": "febrero_agosto_2026_t",
+        "label": "T",
+        "type": "number"
+      },
+      {
+        "key": "agosto_enero_2027_m",
+        "label": "M",
+        "type": "number"
+      },
+      {
+        "key": "agosto_enero_2027_h",
+        "label": "H",
+        "type": "number"
+      },
+      {
+        "key": "agosto_enero_2027_t",
+        "label": "T",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "",
+        "nota_anotar_solo_la_actividad_desarrollada_unida": "",
+        "nota_anotar_solo_la_actividad_desarrollada_unida_2": "",
+        "nota_anotar_solo_la_actividad_desarrollada_unida_3": "",
+        "febrero_agosto_2026_m": "",
+        "febrero_agosto_2026_h": "",
+        "febrero_agosto_2026_t": "",
+        "agosto_enero_2027_m": "",
+        "agosto_enero_2027_h": "",
+        "agosto_enero_2027_t": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "nota_anotar_solo_la_actividad_desarrollada_unida": "",
+      "nota_anotar_solo_la_actividad_desarrollada_unida_2": "",
+      "nota_anotar_solo_la_actividad_desarrollada_unida_3": "",
+      "febrero_agosto_2026_m": "",
+      "febrero_agosto_2026_h": "",
+      "febrero_agosto_2026_t": "",
+      "agosto_enero_2027_m": "",
+      "agosto_enero_2027_h": "",
+      "agosto_enero_2027_t": ""
+    },
+    "footerNote": "",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "official_code_detected"
+    ]
+  },
+  "1.1.2.3.1-FMT-2A7229AD": {
+    "indicatorCode": "1.1.2.3.1-FMT-2A7229AD",
+    "officialCode": "1.1.2.3.1",
+    "indicatorName": "PORCENTAJE DE ESTUDIANTES DE MEDIA SUPERIOR QUE PARTICIPAN EN ACTIVIDADES DE FORMACIÓN INTEGRAL",
+    "activityLabel": "",
+    "sourceLabel": "Formato oficial 1.1.2.3.1-FMT-2A7229AD",
+    "sourcePath": "private-workbook",
+    "sheetName": "Hoja1",
+    "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "PLANTEL",
+          "rowspan": 2
+        },
+        {
+          "label": "NOMBRE DE LA CONVOCATORIA REALIZADA",
+          "rowspan": 2
+        },
+        {
+          "label": "CANTIDAD DE PARTICIPANTES",
+          "colspan": 5
+        },
+        {
+          "label": "CANTIDAD DE ALUMNOS PARTICIPANTES",
+          "colspan": 3
+        }
+      ],
+      [
+        {
+          "label": "DOCENTES"
+        },
+        {
+          "label": "ADMINISTRATIVOS"
+        },
+        {
+          "label": "COORDINADORES ACADÉMICOS"
+        },
+        {
+          "label": "ASESORES PEDAGÓGICOS"
+        },
+        {
+          "label": "OTRO PERSONAL"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "TOTAL"
+        }
+      ]
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "nombre_de_la_convocatoria_realizada",
+        "label": "NOMBRE DE LA CONVOCATORIA REALIZADA",
+        "type": "text"
+      },
+      {
+        "key": "cantidad_de_participantes_docentes",
+        "label": "DOCENTES",
+        "type": "number"
+      },
+      {
+        "key": "cantidad_de_participantes_administrativos",
+        "label": "ADMINISTRATIVOS",
+        "type": "number"
+      },
+      {
+        "key": "cantidad_de_participantes_coordinadores_academic",
+        "label": "COORDINADORES ACADÉMICOS",
+        "type": "number"
+      },
+      {
+        "key": "cantidad_de_participantes_asesores_pedagogicos",
+        "label": "ASESORES PEDAGÓGICOS",
+        "type": "number"
+      },
+      {
+        "key": "cantidad_de_participantes_otro_personal",
+        "label": "OTRO PERSONAL",
+        "type": "number"
+      },
+      {
+        "key": "cantidad_de_alumnos_participantes_hombres",
+        "label": "HOMBRES",
+        "type": "number"
+      },
+      {
+        "key": "cantidad_de_alumnos_participantes_mujeres",
+        "label": "MUJERES",
+        "type": "number"
+      },
+      {
+        "key": "cantidad_de_alumnos_participantes_total",
+        "label": "TOTAL",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "",
+        "nombre_de_la_convocatoria_realizada": "",
+        "cantidad_de_participantes_docentes": "",
+        "cantidad_de_participantes_administrativos": "",
+        "cantidad_de_participantes_coordinadores_academic": "",
+        "cantidad_de_participantes_asesores_pedagogicos": "",
+        "cantidad_de_participantes_otro_personal": "",
+        "cantidad_de_alumnos_participantes_hombres": "",
+        "cantidad_de_alumnos_participantes_mujeres": "",
+        "cantidad_de_alumnos_participantes_total": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "nombre_de_la_convocatoria_realizada": "",
+      "cantidad_de_participantes_docentes": "",
+      "cantidad_de_participantes_administrativos": "",
+      "cantidad_de_participantes_coordinadores_academic": "",
+      "cantidad_de_participantes_asesores_pedagogicos": "",
+      "cantidad_de_participantes_otro_personal": "",
+      "cantidad_de_alumnos_participantes_hombres": "",
+      "cantidad_de_alumnos_participantes_mujeres": "",
+      "cantidad_de_alumnos_participantes_total": ""
+    },
+    "footerNote": "",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "official_code_detected",
+      "shared_official_code_split_by_source"
+    ]
+  },
+  "4.1.1.0.1": {
+    "indicatorCode": "4.1.1.0.1",
+    "officialCode": "4.1.1.0.1",
+    "indicatorName": "Número de Sistemas de Información Institucionales que interoperan",
+    "activityLabel": "",
+    "sourceLabel": "Formato oficial 4.1.1.0.1",
+    "sourcePath": "private-workbook",
+    "sheetName": "Hoja1",
+    "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "Registro"
+        },
+        {
+          "label": "Nombre del Software"
+        },
+        {
+          "label": "Aspecto de la formación integral del estudiantado a la que da seguimiento"
+        }
+      ]
+    ],
+    "columns": [
+      {
+        "key": "registro",
+        "label": "Registro",
+        "type": "text"
+      },
+      {
+        "key": "nombre_del_software",
+        "label": "Nombre del Software",
+        "type": "text"
+      },
+      {
+        "key": "aspecto_de_la_formacion_integral_del_estudiantad",
+        "label": "Aspecto de la formación integral del estudiantado a la que da seguimiento",
+        "type": "text"
+      }
+    ],
+    "initialRows": [
+      {
+        "registro": "",
+        "nombre_del_software": "",
+        "aspecto_de_la_formacion_integral_del_estudiantad": ""
+      }
+    ],
+    "showTotals": false,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "registro": "",
+      "nombre_del_software": "",
+      "aspecto_de_la_formacion_integral_del_estudiantad": ""
+    },
+    "footerNote": "",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "official_code_detected"
+    ]
+  },
+  "1.1.2.3.1-FMT-AB95A3B8": {
+    "indicatorCode": "1.1.2.3.1-FMT-AB95A3B8",
+    "officialCode": "1.1.2.3.1",
+    "indicatorName": "Porcentaje de estudiantes de media superior que participan en actividades de formación integral",
+    "activityLabel": "",
+    "sourceLabel": "Formato oficial 1.1.2.3.1-FMT-AB95A3B8",
+    "sourcePath": "private-workbook",
+    "sheetName": "Hoja1",
+    "groups": [],
+    "headerRows": [],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "Plantel",
+        "type": "readonly"
+      },
+      {
+        "key": "nombre_de_la_actividad",
+        "label": "Nombre de la actividad",
+        "type": "text"
+      },
+      {
+        "key": "descripcion_de_la_actividad",
+        "label": "Descripción de la actividad",
+        "type": "text"
+      },
+      {
+        "key": "total_estudiantes_mujeres",
+        "label": "Total Estudiantes Mujeres",
+        "type": "number"
+      },
+      {
+        "key": "total_estudiantes_hombres",
+        "label": "Total Estudiantes Hombres",
+        "type": "number"
+      },
+      {
+        "key": "total_docentes_mujeres",
+        "label": "Total Docentes Mujeres",
+        "type": "number"
+      },
+      {
+        "key": "total_docentes_hombres",
+        "label": "Total Docentes Hombres",
+        "type": "number"
+      },
+      {
+        "key": "total_personal_administrativo_mujeres",
+        "label": "Total Personal Administrativo Mujeres",
+        "type": "number"
+      },
+      {
+        "key": "total_personal_administrativo_hombres",
+        "label": "Total Personal Administrativo Hombres",
+        "type": "number"
+      },
+      {
+        "key": "total_de_participantes",
+        "label": "TOTAL DE PARTICIPANTES",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "Bachillerato",
+        "nombre_de_la_actividad": "",
+        "descripcion_de_la_actividad": "",
+        "total_estudiantes_mujeres": "",
+        "total_estudiantes_hombres": "",
+        "total_docentes_mujeres": "",
+        "total_docentes_hombres": "",
+        "total_personal_administrativo_mujeres": "",
+        "total_personal_administrativo_hombres": "",
+        "total_de_participantes": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "nombre_de_la_actividad": "",
+      "descripcion_de_la_actividad": "",
+      "total_estudiantes_mujeres": "",
+      "total_estudiantes_hombres": "",
+      "total_docentes_mujeres": "",
+      "total_docentes_hombres": "",
+      "total_personal_administrativo_mujeres": "",
+      "total_personal_administrativo_hombres": "",
+      "total_de_participantes": ""
+    },
+    "footerNote": "",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "official_code_detected",
+      "shared_official_code_split_by_source"
+    ]
+  },
+  "1.1.2.2.11": {
+    "indicatorCode": "1.1.2.2.11",
+    "officialCode": "1.1.2.2.11",
+    "indicatorName": "Porcentaje de estudiantes de educación media superior y superior que participan en acciones de igualdad de género",
+    "activityLabel": "",
+    "sourceLabel": "Formato oficial 1.1.2.2.11",
+    "sourcePath": "private-workbook",
+    "sheetName": "1.1.2.2.11",
+    "groups": [],
+    "headerRows": [],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "Plantel",
+        "type": "readonly"
+      },
+      {
+        "key": "nombre_de_la_capacitacion_y_o_actividades_format",
+        "label": "Nombre de la capacitación y /o actividades formativas",
+        "type": "text"
+      },
+      {
+        "key": "total_estudiantes_mujeres",
+        "label": "Total Estudiantes Mujeres",
+        "type": "number"
+      },
+      {
+        "key": "total_estudiantes_hombres",
+        "label": "Total Estudiantes Hombres",
+        "type": "number"
+      },
+      {
+        "key": "total_docentes_mujeres",
+        "label": "Total Docentes Mujeres",
+        "type": "number"
+      },
+      {
+        "key": "total_docentes_hombres",
+        "label": "Total Docentes Hombres",
+        "type": "number"
+      },
+      {
+        "key": "total_personal_administrativo_mujeres",
+        "label": "Total Personal Administrativo Mujeres",
+        "type": "number"
+      },
+      {
+        "key": "total_personal_administrativo_hombres",
+        "label": "Total Personal Administrativo Hombres",
+        "type": "number"
+      },
+      {
+        "key": "temas_que_se_abordaron",
+        "label": "TEMAS QUE SE ABORDARON",
+        "type": "text"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "Bachillerato",
+        "nombre_de_la_capacitacion_y_o_actividades_format": "",
+        "total_estudiantes_mujeres": "",
+        "total_estudiantes_hombres": "",
+        "total_docentes_mujeres": "",
+        "total_docentes_hombres": "",
+        "total_personal_administrativo_mujeres": "",
+        "total_personal_administrativo_hombres": "",
+        "temas_que_se_abordaron": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "nombre_de_la_capacitacion_y_o_actividades_format": "",
+      "total_estudiantes_mujeres": "",
+      "total_estudiantes_hombres": "",
+      "total_docentes_mujeres": "",
+      "total_docentes_hombres": "",
+      "total_personal_administrativo_mujeres": "",
+      "total_personal_administrativo_hombres": "",
+      "temas_que_se_abordaron": ""
+    },
+    "footerNote": "",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "official_code_detected"
+    ]
+  },
+  "1.1.2.3.1-FMT-FBF5B718": {
+    "indicatorCode": "1.1.2.3.1-FMT-FBF5B718",
+    "officialCode": "1.1.2.3.1",
+    "indicatorName": "PORCENTAJE DE ESTUDIANTES DE MEDIA SUPERIOR QUE PARTICIPAN EN ACTIVIDADES DE FORMACIÓN INTEGRAL",
+    "activityLabel": "",
+    "sourceLabel": "Formato oficial 1.1.2.3.1-FMT-FBF5B718",
+    "sourcePath": "private-workbook",
+    "sheetName": "Hoja1",
+    "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "PLANTEL",
+          "rowspan": 2
+        },
+        {
+          "label": "NOMBRE DEL ALUMNADO PARTICIPANTE",
+          "rowspan": 2
+        },
+        {
+          "label": "NÚMERO DE CUENTA",
+          "rowspan": 2
+        },
+        {
+          "label": "NOMBRE DEL PROFESORADO ACOMPAÑANTE",
+          "rowspan": 2
+        },
+        {
+          "label": "Registro",
+          "rowspan": 2
+        },
+        {
+          "label": "CANTIDAD DE ALUMNOS PARTICIPANTES",
+          "colspan": 2
+        }
+      ],
+      [
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        }
+      ]
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "nombre_del_alumnado_participante",
+        "label": "NOMBRE DEL ALUMNADO PARTICIPANTE",
+        "type": "number"
+      },
+      {
+        "key": "numero_de_cuenta",
+        "label": "NÚMERO DE CUENTA",
+        "type": "number"
+      },
+      {
+        "key": "nombre_del_profesorado_acompanante",
+        "label": "NOMBRE DEL PROFESORADO ACOMPAÑANTE",
+        "type": "text"
+      },
+      {
+        "key": "registro",
+        "label": "Registro",
+        "type": "text"
+      },
+      {
+        "key": "cantidad_de_alumnos_participantes_hombres",
+        "label": "HOMBRES",
+        "type": "number"
+      },
+      {
+        "key": "cantidad_de_alumnos_participantes_mujeres",
+        "label": "MUJERES",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "",
+        "nombre_del_alumnado_participante": "",
+        "numero_de_cuenta": "",
+        "nombre_del_profesorado_acompanante": "",
+        "registro": "",
+        "cantidad_de_alumnos_participantes_hombres": "",
+        "cantidad_de_alumnos_participantes_mujeres": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "nombre_del_alumnado_participante": "",
+      "numero_de_cuenta": "",
+      "nombre_del_profesorado_acompanante": "",
+      "registro": "",
+      "cantidad_de_alumnos_participantes_hombres": "",
+      "cantidad_de_alumnos_participantes_mujeres": ""
+    },
+    "footerNote": "",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "official_code_detected",
+      "shared_official_code_split_by_source"
+    ]
+  },
+  "3.1.1.3.6": {
+    "indicatorCode": "3.1.1.3.6",
+    "officialCode": "3.1.1.3.6",
+    "indicatorName": "Número de participantes en actividades de sostenibilidad y medio ambiente convocadas por el SIGA",
+    "activityLabel": "",
+    "sourceLabel": "Formato oficial 3.1.1.3.6",
+    "sourcePath": "private-workbook",
+    "sheetName": "Hoja1",
+    "groups": [],
+    "headerRows": [],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "Plantel",
+        "type": "readonly"
+      },
+      {
+        "key": "nombre_de_la_actividad",
+        "label": "Nombre de la actividad",
+        "type": "text"
+      },
+      {
+        "key": "descripcion_de_la_actividad",
+        "label": "Descripción de la actividad",
+        "type": "text"
+      },
+      {
+        "key": "total_estudiantes_mujeres",
+        "label": "Total Estudiantes Mujeres",
+        "type": "number"
+      },
+      {
+        "key": "total_estudiantes_hombres",
+        "label": "Total Estudiantes Hombres",
+        "type": "number"
+      },
+      {
+        "key": "total_docentes_mujeres",
+        "label": "Total Docentes Mujeres",
+        "type": "number"
+      },
+      {
+        "key": "total_docentes_hombres",
+        "label": "Total Docentes Hombres",
+        "type": "number"
+      },
+      {
+        "key": "total_personal_administrativo_mujeres",
+        "label": "Total Personal Administrativo Mujeres",
+        "type": "number"
+      },
+      {
+        "key": "total_personal_administrativo_hombres",
+        "label": "Total Personal Administrativo Hombres",
+        "type": "number"
+      },
+      {
+        "key": "total_de_participantes",
+        "label": "TOTAL DE PARTICIPANTES",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "Bachillerato",
+        "nombre_de_la_actividad": "",
+        "descripcion_de_la_actividad": "",
+        "total_estudiantes_mujeres": "",
+        "total_estudiantes_hombres": "",
+        "total_docentes_mujeres": "",
+        "total_docentes_hombres": "",
+        "total_personal_administrativo_mujeres": "",
+        "total_personal_administrativo_hombres": "",
+        "total_de_participantes": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "nombre_de_la_actividad": "",
+      "descripcion_de_la_actividad": "",
+      "total_estudiantes_mujeres": "",
+      "total_estudiantes_hombres": "",
+      "total_docentes_mujeres": "",
+      "total_docentes_hombres": "",
+      "total_personal_administrativo_mujeres": "",
+      "total_personal_administrativo_hombres": "",
+      "total_de_participantes": ""
+    },
+    "footerNote": "",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "official_code_detected"
+    ]
+  },
+  "FMT-01-43FE55CA-formacion-docente-2026": {
+    "indicatorCode": "FMT-01-43FE55CA-formacion-docente-2026",
+    "officialCode": null,
+    "indicatorName": "Formación_docente_2026",
+    "activityLabel": "",
+    "sourceLabel": "Formato oficial FMT-01-43FE55CA-formacion-docente-2026",
+    "sourcePath": "private-workbook",
+    "sheetName": "DOCENTES",
+    "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "No.",
+          "rowspan": 2
+        },
+        {
+          "label": "Tipo de evento",
+          "rowspan": 2
+        },
+        {
+          "label": "Nombre del evento",
+          "rowspan": 2
+        },
+        {
+          "label": "Duración en horas",
+          "rowspan": 2
+        },
+        {
+          "label": "Modalidad",
+          "rowspan": 2
+        },
+        {
+          "label": "Competencias desarrolladas",
+          "rowspan": 2
+        },
+        {
+          "label": "Evento organizado por:",
+          "rowspan": 2
+        },
+        {
+          "label": "Población docente NMS",
+          "colspan": 3
+        }
+      ],
+      [
+        {
+          "label": "H"
+        },
+        {
+          "label": "M"
+        },
+        {
+          "label": "Total"
+        }
+      ]
+    ],
+    "columns": [
+      {
+        "key": "no",
+        "label": "No.",
+        "type": "text"
+      },
+      {
+        "key": "tipo_de_evento",
+        "label": "Tipo de evento",
+        "type": "text"
+      },
+      {
+        "key": "nombre_del_evento",
+        "label": "Nombre del evento",
+        "type": "text"
+      },
+      {
+        "key": "duracion_en_horas",
+        "label": "Duración en horas",
+        "type": "text"
+      },
+      {
+        "key": "modalidad",
+        "label": "Modalidad",
+        "type": "text"
+      },
+      {
+        "key": "competencias_desarrolladas",
+        "label": "Competencias desarrolladas",
+        "type": "text"
+      },
+      {
+        "key": "evento_organizado_por",
+        "label": "Evento organizado por:",
+        "type": "text"
+      },
+      {
+        "key": "poblacion_docente_nms_h",
+        "label": "H",
+        "type": "number"
+      },
+      {
+        "key": "poblacion_docente_nms_m",
+        "label": "M",
+        "type": "number"
+      },
+      {
+        "key": "poblacion_docente_nms_total",
+        "label": "Total",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "no": "1.1.2.5.1",
+        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que cumple con perfil docente idóneo de acuerdo con el modelo educativo institucional",
+        "nombre_del_evento": "",
+        "duracion_en_horas": "",
+        "modalidad": "",
+        "competencias_desarrolladas": "",
+        "evento_organizado_por": "",
+        "poblacion_docente_nms_h": "",
+        "poblacion_docente_nms_m": "",
+        "poblacion_docente_nms_total": ""
+      },
+      {
+        "no": "1.1.2.5.5",
+        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocionales, inclusión, investigación, internacionalización, arte, cultura, innovación, igualdad género, sustentabilidad, sostenibilidad y medio ambiente, con enfoque interseccional y de interculturalidad",
+        "nombre_del_evento": "",
+        "duracion_en_horas": "",
+        "modalidad": "",
+        "competencias_desarrolladas": "",
+        "evento_organizado_por": "",
+        "poblacion_docente_nms_h": "",
+        "poblacion_docente_nms_m": "",
+        "poblacion_docente_nms_total": ""
+      },
+      {
+        "no": "1.1.2.5.7",
+        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
+        "nombre_del_evento": "",
+        "duracion_en_horas": "",
+        "modalidad": "",
+        "competencias_desarrolladas": "",
+        "evento_organizado_por": "",
+        "poblacion_docente_nms_h": "",
+        "poblacion_docente_nms_m": "",
+        "poblacion_docente_nms_total": ""
+      },
+      {
+        "no": "3.1.1.2.2",
+        "tipo_de_evento": "Número de eventos de educación continua",
+        "nombre_del_evento": "",
+        "duracion_en_horas": "",
+        "modalidad": "",
+        "competencias_desarrolladas": "",
+        "evento_organizado_por": "",
+        "poblacion_docente_nms_h": "",
+        "poblacion_docente_nms_m": "",
+        "poblacion_docente_nms_total": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "no": "",
+      "tipo_de_evento": "",
+      "nombre_del_evento": "",
+      "duracion_en_horas": "",
+      "modalidad": "",
+      "competencias_desarrolladas": "",
+      "evento_organizado_por": "",
+      "poblacion_docente_nms_h": "",
+      "poblacion_docente_nms_m": "",
+      "poblacion_docente_nms_total": ""
+    },
+    "footerNote": "",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "pending_indicator_code"
+    ]
+  },
+  "2.1.4.1.2": {
+    "indicatorCode": "2.1.4.1.2",
+    "officialCode": "2.1.4.1.2",
+    "indicatorName": "Número de estudiantes que colaboran en proyectos de investigación liderados por profesorado de tiempo completo",
+    "activityLabel": "",
+    "sourceLabel": "Formato oficial 2.1.4.1.2",
+    "sourcePath": "private-workbook",
+    "sheetName": "2.1.4.1.2",
+    "groups": [],
+    "headerRows": [],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "nombre_de_los_proyectos_de_investigacion",
+        "label": "Nombre de /los proyectos de investigación",
+        "type": "text"
+      },
+      {
+        "key": "numero_de_estudiantes_mujeres",
+        "label": "Mujeres",
+        "type": "number"
+      },
+      {
+        "key": "numero_de_estudiantes_hombres",
+        "label": "Hombres",
+        "type": "number"
+      },
+      {
+        "key": "observaciones_indicar_el_periodo_del_proyecto",
+        "label": "Observaciones (indicar el periodo del proyecto)",
+        "type": "text"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "Bachillerato 15",
+        "nombre_de_los_proyectos_de_investigacion": "",
+        "numero_de_estudiantes_mujeres": "",
+        "numero_de_estudiantes_hombres": "",
+        "observaciones_indicar_el_periodo_del_proyecto": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "nombre_de_los_proyectos_de_investigacion": "",
+      "numero_de_estudiantes_mujeres": "",
+      "numero_de_estudiantes_hombres": "",
+      "observaciones_indicar_el_periodo_del_proyecto": ""
+    },
+    "footerNote": "",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "official_code_detected"
+    ]
+  },
+  "1.1.2.0.1-FMT-4EB45B2E": {
+    "indicatorCode": "1.1.2.0.1-FMT-4EB45B2E",
+    "officialCode": "1.1.2.0.1",
+    "indicatorName": "PORCENTAJE DE RETENCIÓN ESCOLAR DE EMS",
+    "activityLabel": "",
+    "sourceLabel": "Formato oficial 1.1.2.0.1-FMT-4EB45B2E",
+    "sourcePath": "private-workbook",
+    "sheetName": "Hoja1",
+    "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "Nombre de la actividad",
+          "rowspan": 3
+        },
+        {
+          "label": "Responsable",
+          "rowspan": 3
+        },
+        {
+          "label": "Cantidad de participantes",
+          "colspan": 4
+        },
+        {
+          "label": "Periodo de realización",
+          "rowspan": 3
+        }
+      ],
+      [
+        {
+          "label": "Alumnado",
+          "colspan": 2
+        },
+        {
+          "label": "Padres, madres y/o tutores",
+          "colspan": 2
+        }
+      ],
+      [
+        {
+          "label": "M"
+        },
+        {
+          "label": "H"
+        },
+        {
+          "label": "M"
+        },
+        {
+          "label": "H"
+        }
+      ]
+    ],
+    "columns": [
+      {
+        "key": "nombre_de_la_actividad",
+        "label": "Nombre de la actividad",
+        "type": "text"
+      },
+      {
+        "key": "responsable",
+        "label": "Responsable",
+        "type": "text"
+      },
+      {
+        "key": "cantidad_de_participantes_alumnado_m",
+        "label": "M",
+        "type": "number"
+      },
+      {
+        "key": "cantidad_de_participantes_alumnado_h",
+        "label": "H",
+        "type": "number"
+      },
+      {
+        "key": "cantidad_de_participantes_padres_madres_y_o_tuto",
+        "label": "M",
+        "type": "number"
+      },
+      {
+        "key": "cantidad_de_participantes_padres_madres_y_o_tuto_2",
+        "label": "H",
+        "type": "number"
+      },
+      {
+        "key": "periodo_de_realizacion",
+        "label": "Periodo de realización",
+        "type": "text"
+      }
+    ],
+    "initialRows": [
+      {
+        "nombre_de_la_actividad": "",
+        "responsable": "",
+        "cantidad_de_participantes_alumnado_m": "",
+        "cantidad_de_participantes_alumnado_h": "",
+        "cantidad_de_participantes_padres_madres_y_o_tuto": "",
+        "cantidad_de_participantes_padres_madres_y_o_tuto_2": "",
+        "periodo_de_realizacion": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "nombre_de_la_actividad": "",
+      "responsable": "",
+      "cantidad_de_participantes_alumnado_m": "",
+      "cantidad_de_participantes_alumnado_h": "",
+      "cantidad_de_participantes_padres_madres_y_o_tuto": "",
+      "cantidad_de_participantes_padres_madres_y_o_tuto_2": "",
+      "periodo_de_realizacion": ""
+    },
+    "footerNote": "",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "official_code_detected",
+      "shared_official_code_split_by_source"
+    ]
+  },
+  "1.1.2.5.3": {
+    "indicatorCode": "1.1.2.5.3",
+    "officialCode": "1.1.2.5.3",
+    "indicatorName": "Porcentaje de PTC de educación media superior beneficiados en el programa de ESDEPED",
+    "activityLabel": "",
+    "sourceLabel": "Formato oficial 1.1.2.5.3",
+    "sourcePath": "private-workbook",
+    "sheetName": "PTC",
+    "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "PLANTEL"
+        },
+        {
+          "label": "PTC"
+        },
+        {
+          "label": "NOMBRE DEL DOCENTE"
+        },
+        {
+          "label": "NIVEL"
+        }
+      ]
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "ptc",
+        "label": "PTC",
+        "type": "text"
+      },
+      {
+        "key": "nombre_del_docente",
+        "label": "NOMBRE DEL DOCENTE",
+        "type": "text"
+      },
+      {
+        "key": "nivel",
+        "label": "NIVEL",
+        "type": "text"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "",
+        "ptc": "",
+        "nombre_del_docente": "",
+        "nivel": ""
+      }
+    ],
+    "showTotals": false,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "ptc": "",
+      "nombre_del_docente": "",
+      "nivel": ""
+    },
+    "footerNote": "",
+    "quality": [
+      "canonical_operational_template",
+      "official_code_detected",
+      "private_fields_blank",
+      "shared_official_code_split_by_source",
+      "source_workbook_template"
+    ]
+  },
+  "1.1.2.0.3-FMT-A2A43E4E": {
+    "indicatorCode": "1.1.2.0.3-FMT-A2A43E4E",
+    "officialCode": "1.1.2.0.3",
+    "indicatorName": "TASA DE ABANDONO ESCOLAR DE EDUCACIÓN MEDIA SUPERIOR",
+    "activityLabel": "",
+    "sourceLabel": "Formato oficial 1.1.2.0.3-FMT-A2A43E4E",
+    "sourcePath": "private-workbook",
+    "sheetName": "Hoja1",
+    "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "PLANTEL",
+          "rowspan": 2
+        },
+        {
+          "label": "ESTRATEGIAS PARA COMBATIR EL ABANDONO ESCOLAR",
+          "rowspan": 2
+        },
+        {
+          "label": "CANTIDAD DE ALUMNOS",
+          "colspan": 3
+        }
+      ],
+      [
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "TOTAL"
+        }
+      ]
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "estrategias_para_combatir_el_abandono_escolar",
+        "label": "ESTRATEGIAS PARA COMBATIR EL ABANDONO ESCOLAR",
+        "type": "text"
+      },
+      {
+        "key": "cantidad_de_alumnos_mujeres",
+        "label": "MUJERES",
+        "type": "number"
+      },
+      {
+        "key": "cantidad_de_alumnos_hombres",
+        "label": "HOMBRES",
+        "type": "number"
+      },
+      {
+        "key": "cantidad_de_alumnos_total",
+        "label": "TOTAL",
+        "type": "number"
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "",
+        "estrategias_para_combatir_el_abandono_escolar": "",
+        "cantidad_de_alumnos_mujeres": "",
+        "cantidad_de_alumnos_hombres": "",
+        "cantidad_de_alumnos_total": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "estrategias_para_combatir_el_abandono_escolar": "",
+      "cantidad_de_alumnos_mujeres": "",
+      "cantidad_de_alumnos_hombres": "",
+      "cantidad_de_alumnos_total": ""
+    },
+    "footerNote": "",
+    "quality": [
+      "source_workbook_template",
+      "private_fields_blank",
+      "official_code_detected",
+      "shared_official_code_split_by_source"
+    ]
+  },
+  "1.1.1.1.1-FMT-DD82C972": {
+    "indicatorCode": "1.1.1.1.1-FMT-DD82C972",
     "officialCode": "1.1.1.1.1",
     "indicatorName": "Porcentaje de programas educativos de educación media superior nuevos, actualizados y reestructurados alineados al modelo educativo, incorporando formalmente el enfoque de sostenib",
     "activityLabel": "",
-    "sourceLabel": "Formato oficial 1.1.1.1.1",
+    "sourceLabel": "Formato oficial 1.1.1.1.1-FMT-DD82C972",
     "sourcePath": "private-workbook",
     "sheetName": "INFORME SEMESTRAL FEBRERO",
     "groups": [],
@@ -1995,617 +3774,84 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
-      "official_code_detected"
-    ]
-  },
-  "1.1.1.1.1-FMT-489662BE": {
-    "indicatorCode": "1.1.1.1.1-FMT-489662BE",
-    "officialCode": "1.1.1.1.1",
-    "indicatorName": "Porcentaje de programas educativos de educación media superior nuevos, actualizados y reestructurados alineados al modelo educativo, incorporando formalmente el enfoque de sostenib",
-    "activityLabel": "",
-    "sourceLabel": "Formato oficial 1.1.1.1.1-FMT-489662BE",
-    "sourcePath": "private-workbook",
-    "sheetName": "INFORME SEMESTRAL FEBRERO",
-    "groups": [],
-    "headerRows": [
-      [
-        {
-          "label": "PLANTEL",
-          "rowspan": 2
-        },
-        {
-          "label": "NOMBRE DEL PROGRAMA",
-          "rowspan": 2
-        },
-        {
-          "label": "No. DE ACADEMIAS POR PLANTEL",
-          "rowspan": 2
-        },
-        {
-          "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS",
-          "colspan": 3
-        },
-        {
-          "label": "No. DE SESIONES ORDINARIAS",
-          "rowspan": 2
-        },
-        {
-          "label": "No. SESIONES EXTRAORDINARIAS",
-          "rowspan": 2
-        },
-        {
-          "label": "ACTIVIDADES DE TRABAJO REALIZADAS (mencionar la actividad)",
-          "rowspan": 2
-        },
-        {
-          "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS",
-          "colspan": 2
-        },
-        {
-          "label": "TOTAL",
-          "rowspan": 2
-        }
-      ],
-      [
-        {
-          "label": "ÁREA DE FORMACIÓN"
-        },
-        {
-          "label": "SEMESTRE"
-        },
-        {
-          "label": "CAMPO DISCIPLINAR"
-        },
-        {
-          "label": "H"
-        },
-        {
-          "label": "M"
-        }
-      ]
-    ],
-    "columns": [
-      {
-        "key": "plantel",
-        "label": "PLANTEL",
-        "type": "readonly"
-      },
-      {
-        "key": "nombre_del_programa",
-        "label": "NOMBRE DEL PROGRAMA",
-        "type": "readonly"
-      },
-      {
-        "key": "no_de_academias_por_plantel",
-        "label": "No. DE ACADEMIAS POR PLANTEL",
-        "type": "readonly"
-      },
-      {
-        "key": "tipo_de_integracion_de_academias_area_de_formaci",
-        "label": "ÁREA DE FORMACIÓN",
-        "type": "text"
-      },
-      {
-        "key": "tipo_de_integracion_de_academias_semestre",
-        "label": "SEMESTRE",
-        "type": "readonly"
-      },
-      {
-        "key": "tipo_de_integracion_de_academias_campo_disciplin",
-        "label": "CAMPO DISCIPLINAR",
-        "type": "text"
-      },
-      {
-        "key": "no_de_sesiones_ordinarias",
-        "label": "No. DE SESIONES ORDINARIAS",
-        "type": "text"
-      },
-      {
-        "key": "no_sesiones_extraordinarias",
-        "label": "No. SESIONES EXTRAORDINARIAS",
-        "type": "text"
-      },
-      {
-        "key": "actividades_de_trabajo_realizadas_mencionar_la_a",
-        "label": "ACTIVIDADES DE TRABAJO REALIZADAS (mencionar la actividad)",
-        "type": "text"
-      },
-      {
-        "key": "docentes_que_participaron_en_las_academias_h",
-        "label": "H",
-        "type": "number"
-      },
-      {
-        "key": "docentes_que_participaron_en_las_academias_m",
-        "label": "M",
-        "type": "number"
-      },
-      {
-        "key": "total",
-        "label": "TOTAL",
-        "type": "number"
-      }
-    ],
-    "initialRows": [
-      {
-        "plantel": "INDICACIONES PARA EL LLENADO DEL FORMATO DE CONCENTRADO DE ACADEMIAS POR PLANTEL",
-        "nombre_del_programa": "",
-        "no_de_academias_por_plantel": "",
-        "tipo_de_integracion_de_academias_area_de_formaci": "",
-        "tipo_de_integracion_de_academias_semestre": "",
-        "tipo_de_integracion_de_academias_campo_disciplin": "",
-        "no_de_sesiones_ordinarias": "",
-        "no_sesiones_extraordinarias": "",
-        "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-        "docentes_que_participaron_en_las_academias_h": "",
-        "docentes_que_participaron_en_las_academias_m": "",
-        "total": ""
-      },
-      {
-        "plantel": "DATOS DE IDENTIFICACIÓN DE ACADEMIAS",
-        "nombre_del_programa": "",
-        "no_de_academias_por_plantel": "",
-        "tipo_de_integracion_de_academias_area_de_formaci": "",
-        "tipo_de_integracion_de_academias_semestre": "",
-        "tipo_de_integracion_de_academias_campo_disciplin": "",
-        "no_de_sesiones_ordinarias": "",
-        "no_sesiones_extraordinarias": "",
-        "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-        "docentes_que_participaron_en_las_academias_h": "",
-        "docentes_que_participaron_en_las_academias_m": "",
-        "total": ""
-      },
-      {
-        "plantel": "Periodo escolar: Señalar el periodo y año en el que se ubica la academia",
-        "nombre_del_programa": "",
-        "no_de_academias_por_plantel": "",
-        "tipo_de_integracion_de_academias_area_de_formaci": "",
-        "tipo_de_integracion_de_academias_semestre": "",
-        "tipo_de_integracion_de_academias_campo_disciplin": "",
-        "no_de_sesiones_ordinarias": "",
-        "no_sesiones_extraordinarias": "",
-        "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-        "docentes_que_participaron_en_las_academias_h": "",
-        "docentes_que_participaron_en_las_academias_m": "",
-        "total": ""
-      },
-      {
-        "plantel": "Plantel: Escribir el nombre del plantel en el cual se encuentran conformadas las academias.",
-        "nombre_del_programa": "",
-        "no_de_academias_por_plantel": "",
-        "tipo_de_integracion_de_academias_area_de_formaci": "",
-        "tipo_de_integracion_de_academias_semestre": "",
-        "tipo_de_integracion_de_academias_campo_disciplin": "",
-        "no_de_sesiones_ordinarias": "",
-        "no_sesiones_extraordinarias": "",
-        "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-        "docentes_que_participaron_en_las_academias_h": "",
-        "docentes_que_participaron_en_las_academias_m": "",
-        "total": ""
-      },
-      {
-        "plantel": "Programa educativo: Escribir el nombre del plan de estudios correspondiente.",
-        "nombre_del_programa": "",
-        "no_de_academias_por_plantel": "",
-        "tipo_de_integracion_de_academias_area_de_formaci": "",
-        "tipo_de_integracion_de_academias_semestre": "",
-        "tipo_de_integracion_de_academias_campo_disciplin": "",
-        "no_de_sesiones_ordinarias": "",
-        "no_sesiones_extraordinarias": "",
-        "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-        "docentes_que_participaron_en_las_academias_h": "",
-        "docentes_que_participaron_en_las_academias_m": "",
-        "total": ""
-      },
-      {
-        "plantel": "Tipos de integración de academias: Marcar los tipos de academias implementadas en el plantel por programa educativo.",
-        "nombre_del_programa": "",
-        "no_de_academias_por_plantel": "",
-        "tipo_de_integracion_de_academias_area_de_formaci": "",
-        "tipo_de_integracion_de_academias_semestre": "",
-        "tipo_de_integracion_de_academias_campo_disciplin": "",
-        "no_de_sesiones_ordinarias": "",
-        "no_sesiones_extraordinarias": "",
-        "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-        "docentes_que_participaron_en_las_academias_h": "",
-        "docentes_que_participaron_en_las_academias_m": "",
-        "total": ""
-      },
-      {
-        "plantel": "Sesiones ordinarias: Escribir el número de sesiones realizadas durante el semestre de manera habitual.",
-        "nombre_del_programa": "",
-        "no_de_academias_por_plantel": "",
-        "tipo_de_integracion_de_academias_area_de_formaci": "",
-        "tipo_de_integracion_de_academias_semestre": "",
-        "tipo_de_integracion_de_academias_campo_disciplin": "",
-        "no_de_sesiones_ordinarias": "",
-        "no_sesiones_extraordinarias": "",
-        "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-        "docentes_que_participaron_en_las_academias_h": "",
-        "docentes_que_participaron_en_las_academias_m": "",
-        "total": ""
-      },
-      {
-        "plantel": "Sesiones extraordinarias: Escribir el número de sesiones realizadas para asuntos especiales o urgentes.",
-        "nombre_del_programa": "",
-        "no_de_academias_por_plantel": "",
-        "tipo_de_integracion_de_academias_area_de_formaci": "",
-        "tipo_de_integracion_de_academias_semestre": "",
-        "tipo_de_integracion_de_academias_campo_disciplin": "",
-        "no_de_sesiones_ordinarias": "",
-        "no_sesiones_extraordinarias": "",
-        "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-        "docentes_que_participaron_en_las_academias_h": "",
-        "docentes_que_participaron_en_las_academias_m": "",
-        "total": ""
-      },
-      {
-        "plantel": "Actividades de trabajo realizadas: Rde a cuerdo a las necesidades del plantel, registrar las actividades que se realizaron durante el semestre.",
-        "nombre_del_programa": "",
-        "no_de_academias_por_plantel": "",
-        "tipo_de_integracion_de_academias_area_de_formaci": "",
-        "tipo_de_integracion_de_academias_semestre": "",
-        "tipo_de_integracion_de_academias_campo_disciplin": "",
-        "no_de_sesiones_ordinarias": "",
-        "no_sesiones_extraordinarias": "",
-        "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-        "docentes_que_participaron_en_las_academias_h": "",
-        "docentes_que_participaron_en_las_academias_m": "",
-        "total": ""
-      }
-    ],
-    "showTotals": true,
-    "allowAddRows": true,
-    "addRowLabel": "Agregar fila",
-    "emptyRow": {
-      "plantel": "",
-      "nombre_del_programa": "",
-      "no_de_academias_por_plantel": "",
-      "tipo_de_integracion_de_academias_area_de_formaci": "",
-      "tipo_de_integracion_de_academias_semestre": "",
-      "tipo_de_integracion_de_academias_campo_disciplin": "",
-      "no_de_sesiones_ordinarias": "",
-      "no_sesiones_extraordinarias": "",
-      "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-      "docentes_que_participaron_en_las_academias_h": "",
-      "docentes_que_participaron_en_las_academias_m": "",
-      "total": ""
-    },
-    "footerNote": "",
-    "quality": [
-      "source_workbook_template",
-      "private_fields_blank",
       "official_code_detected",
       "shared_official_code_split_by_source"
     ]
   },
-  "1.0.0.0.2-FMT-7639E719": {
-    "indicatorCode": "1.0.0.0.2-FMT-7639E719",
-    "officialCode": "1.0.0.0.2",
-    "indicatorName": "Porcentaje de titulación por cohorte del NMS",
+  "1.1.2.2.10": {
+    "indicatorCode": "1.1.2.2.10",
+    "officialCode": "1.1.2.2.10",
+    "indicatorName": "Porcentaje de estudiantes de educación media superior y superior que participan en acciones de sostenibilidad y medio ambiente para la acción climática",
     "activityLabel": "",
-    "sourceLabel": "Formato oficial 1.0.0.0.2-FMT-7639E719",
+    "sourceLabel": "Formato oficial 1.1.2.2.10",
     "sourcePath": "private-workbook",
-    "sheetName": "Titulación",
+    "sheetName": "1.1.2.2.10",
     "groups": [],
-    "headerRows": [
-      [
-        {
-          "label": "Delegación",
-          "rowspan": 3
-        },
-        {
-          "label": "Plantel",
-          "rowspan": 3
-        },
-        {
-          "label": "Programa Educativo",
-          "rowspan": 3
-        },
-        {
-          "label": "Egresados titulados en el año 2025",
-          "colspan": 3,
-          "rowspan": 2
-        },
-        {
-          "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas",
-          "colspan": 3,
-          "rowspan": 2
-        },
-        {
-          "label": "% de titulación por cohorte",
-          "rowspan": 3
-        }
-      ],
-      [
-        {
-          "label": "Mujeres"
-        },
-        {
-          "label": "Hombres"
-        },
-        {
-          "label": "Total"
-        },
-        {
-          "label": "Mujeres"
-        },
-        {
-          "label": "Hombres"
-        },
-        {
-          "label": "Total"
-        }
-      ]
-    ],
+    "headerRows": [],
     "columns": [
-      {
-        "key": "delegacion",
-        "label": "Delegación",
-        "type": "readonly"
-      },
       {
         "key": "plantel",
         "label": "Plantel",
         "type": "readonly"
       },
       {
-        "key": "programa_educativo",
-        "label": "Programa Educativo",
-        "type": "readonly"
-      },
-      {
-        "key": "egresados_titulados_en_el_ano_2025_mujeres",
-        "label": "Mujeres",
-        "type": "number"
-      },
-      {
-        "key": "egresados_titulados_en_el_ano_2025_hombres",
-        "label": "Hombres",
-        "type": "number"
-      },
-      {
-        "key": "egresados_titulados_en_el_ano_2025_total",
-        "label": "Total",
-        "type": "number"
-      },
-      {
-        "key": "matricula_de_primer_ingreso_de_la_misma_cohorte_",
-        "label": "Mujeres",
-        "type": "number"
-      },
-      {
-        "key": "matricula_de_primer_ingreso_de_la_misma_cohorte__2",
-        "label": "Hombres",
-        "type": "number"
-      },
-      {
-        "key": "matricula_de_primer_ingreso_de_la_misma_cohorte__3",
-        "label": "Total",
-        "type": "number"
-      },
-      {
-        "key": "de_titulacion_por_cohorte",
-        "label": "% de titulación por cohorte",
-        "type": "text"
-      }
-    ],
-    "initialRows": [
-      {
-        "delegacion": "1,2,3,4,5",
-        "plantel": "Bachillerato 1,2,3,4,5,6,7,8,9,10…....35, Instituto Universitario de Bellas Artes (IUBA), EscuelaTéctica de Enfermería(ETE)",
-        "programa_educativo": "Bachilerato Técnico Analista Químico.",
-        "egresados_titulados_en_el_ano_2025_mujeres": "",
-        "egresados_titulados_en_el_ano_2025_hombres": "",
-        "egresados_titulados_en_el_ano_2025_total": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-        "de_titulacion_por_cohorte": ""
-      },
-      {
-        "delegacion": "",
-        "plantel": "",
-        "programa_educativo": "Bachillerato Tpecnico Analista Programador",
-        "egresados_titulados_en_el_ano_2025_mujeres": "",
-        "egresados_titulados_en_el_ano_2025_hombres": "",
-        "egresados_titulados_en_el_ano_2025_total": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-        "de_titulacion_por_cohorte": "Egresados titulados / Matrícula de primer ingreso*100"
-      },
-      {
-        "delegacion": "",
-        "plantel": "",
-        "programa_educativo": "Bachillerato Técnico en Dibujo",
-        "egresados_titulados_en_el_ano_2025_mujeres": "",
-        "egresados_titulados_en_el_ano_2025_hombres": "",
-        "egresados_titulados_en_el_ano_2025_total": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-        "de_titulacion_por_cohorte": ""
-      },
-      {
-        "delegacion": "",
-        "plantel": "",
-        "programa_educativo": "Bachillerato Técnico en Electromecánica",
-        "egresados_titulados_en_el_ano_2025_mujeres": "",
-        "egresados_titulados_en_el_ano_2025_hombres": "",
-        "egresados_titulados_en_el_ano_2025_total": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-        "de_titulacion_por_cohorte": ""
-      },
-      {
-        "delegacion": "",
-        "plantel": "",
-        "programa_educativo": "Bachillerato Técnico en Música",
-        "egresados_titulados_en_el_ano_2025_mujeres": "",
-        "egresados_titulados_en_el_ano_2025_hombres": "",
-        "egresados_titulados_en_el_ano_2025_total": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-        "de_titulacion_por_cohorte": ""
-      },
-      {
-        "delegacion": "",
-        "plantel": "",
-        "programa_educativo": "Bachillerato Técnico en Enfermería General",
-        "egresados_titulados_en_el_ano_2025_mujeres": "",
-        "egresados_titulados_en_el_ano_2025_hombres": "",
-        "egresados_titulados_en_el_ano_2025_total": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
-        "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-        "de_titulacion_por_cohorte": ""
-      }
-    ],
-    "showTotals": true,
-    "allowAddRows": true,
-    "addRowLabel": "Agregar fila",
-    "emptyRow": {
-      "delegacion": "",
-      "plantel": "",
-      "programa_educativo": "",
-      "egresados_titulados_en_el_ano_2025_mujeres": "",
-      "egresados_titulados_en_el_ano_2025_hombres": "",
-      "egresados_titulados_en_el_ano_2025_total": "",
-      "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
-      "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
-      "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-      "de_titulacion_por_cohorte": ""
-    },
-    "footerNote": "",
-    "quality": [
-      "source_workbook_template",
-      "private_fields_blank",
-      "official_code_detected",
-      "shared_official_code_split_by_source"
-    ]
-  },
-  "1.1.2.3.1-FMT-2A7229AD": {
-    "indicatorCode": "1.1.2.3.1-FMT-2A7229AD",
-    "officialCode": "1.1.2.3.1",
-    "indicatorName": "PORCENTAJE DE ESTUDIANTES DE MEDIA SUPERIOR QUE PARTICIPAN EN ACTIVIDADES DE FORMACIÓN INTEGRAL",
-    "activityLabel": "",
-    "sourceLabel": "Formato oficial 1.1.2.3.1-FMT-2A7229AD",
-    "sourcePath": "private-workbook",
-    "sheetName": "Hoja1",
-    "groups": [],
-    "headerRows": [
-      [
-        {
-          "label": "PLANTEL",
-          "rowspan": 2
-        },
-        {
-          "label": "NOMBRE DE LA CONVOCATORIA REALIZADA",
-          "rowspan": 2
-        },
-        {
-          "label": "CANTIDAD DE PARTICIPANTES",
-          "colspan": 5
-        },
-        {
-          "label": "CANTIDAD DE ALUMNOS PARTICIPANTES",
-          "colspan": 3
-        }
-      ],
-      [
-        {
-          "label": "DOCENTES"
-        },
-        {
-          "label": "ADMINISTRATIVOS"
-        },
-        {
-          "label": "COORDINADORES ACADÉMICOS"
-        },
-        {
-          "label": "ASESORES PEDAGÓGICOS"
-        },
-        {
-          "label": "OTRO PERSONAL"
-        },
-        {
-          "label": "HOMBRES"
-        },
-        {
-          "label": "MUJERES"
-        },
-        {
-          "label": "TOTAL"
-        }
-      ]
-    ],
-    "columns": [
-      {
-        "key": "plantel",
-        "label": "PLANTEL",
-        "type": "readonly"
-      },
-      {
-        "key": "nombre_de_la_convocatoria_realizada",
-        "label": "NOMBRE DE LA CONVOCATORIA REALIZADA",
+        "key": "nombre_de_la_actividad",
+        "label": "Nombre de la actividad",
         "type": "text"
       },
       {
-        "key": "cantidad_de_participantes_docentes",
-        "label": "DOCENTES",
+        "key": "descripcion_de_la_actividad",
+        "label": "Descripción de la actividad",
+        "type": "text"
+      },
+      {
+        "key": "total_estudiantes_mujeres",
+        "label": "Total Estudiantes Mujeres",
         "type": "number"
       },
       {
-        "key": "cantidad_de_participantes_administrativos",
-        "label": "ADMINISTRATIVOS",
+        "key": "total_estudiantes_hombres",
+        "label": "Total Estudiantes Hombres",
         "type": "number"
       },
       {
-        "key": "cantidad_de_participantes_coordinadores_academic",
-        "label": "COORDINADORES ACADÉMICOS",
+        "key": "total_docentes_mujeres",
+        "label": "Total Docentes Mujeres",
         "type": "number"
       },
       {
-        "key": "cantidad_de_participantes_asesores_pedagogicos",
-        "label": "ASESORES PEDAGÓGICOS",
+        "key": "total_docentes_hombres",
+        "label": "Total Docentes Hombres",
         "type": "number"
       },
       {
-        "key": "cantidad_de_participantes_otro_personal",
-        "label": "OTRO PERSONAL",
+        "key": "total_personal_administrativo_mujeres",
+        "label": "Total Personal Administrativo Mujeres",
         "type": "number"
       },
       {
-        "key": "cantidad_de_alumnos_participantes_hombres",
-        "label": "HOMBRES",
+        "key": "total_personal_administrativo_hombres",
+        "label": "Total Personal Administrativo Hombres",
         "type": "number"
       },
       {
-        "key": "cantidad_de_alumnos_participantes_mujeres",
-        "label": "MUJERES",
-        "type": "number"
-      },
-      {
-        "key": "cantidad_de_alumnos_participantes_total",
-        "label": "TOTAL",
+        "key": "total_de_participantes",
+        "label": "TOTAL DE PARTICIPANTES",
         "type": "number"
       }
     ],
     "initialRows": [
       {
-        "plantel": "",
-        "nombre_de_la_convocatoria_realizada": "",
-        "cantidad_de_participantes_docentes": "",
-        "cantidad_de_participantes_administrativos": "",
-        "cantidad_de_participantes_coordinadores_academic": "",
-        "cantidad_de_participantes_asesores_pedagogicos": "",
-        "cantidad_de_participantes_otro_personal": "",
-        "cantidad_de_alumnos_participantes_hombres": "",
-        "cantidad_de_alumnos_participantes_mujeres": "",
-        "cantidad_de_alumnos_participantes_total": ""
+        "plantel": "Bachillerato",
+        "nombre_de_la_actividad": "",
+        "descripcion_de_la_actividad": "",
+        "total_estudiantes_mujeres": "",
+        "total_estudiantes_hombres": "",
+        "total_docentes_mujeres": "",
+        "total_docentes_hombres": "",
+        "total_personal_administrativo_mujeres": "",
+        "total_personal_administrativo_hombres": "",
+        "total_de_participantes": ""
       }
     ],
     "showTotals": true,
@@ -2613,22 +3859,21 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "addRowLabel": "Agregar fila",
     "emptyRow": {
       "plantel": "",
-      "nombre_de_la_convocatoria_realizada": "",
-      "cantidad_de_participantes_docentes": "",
-      "cantidad_de_participantes_administrativos": "",
-      "cantidad_de_participantes_coordinadores_academic": "",
-      "cantidad_de_participantes_asesores_pedagogicos": "",
-      "cantidad_de_participantes_otro_personal": "",
-      "cantidad_de_alumnos_participantes_hombres": "",
-      "cantidad_de_alumnos_participantes_mujeres": "",
-      "cantidad_de_alumnos_participantes_total": ""
+      "nombre_de_la_actividad": "",
+      "descripcion_de_la_actividad": "",
+      "total_estudiantes_mujeres": "",
+      "total_estudiantes_hombres": "",
+      "total_docentes_mujeres": "",
+      "total_docentes_hombres": "",
+      "total_personal_administrativo_mujeres": "",
+      "total_personal_administrativo_hombres": "",
+      "total_de_participantes": ""
     },
     "footerNote": "",
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
-      "official_code_detected",
-      "shared_official_code_split_by_source"
+      "official_code_detected"
     ]
   },
   "1.1.2.3.1-FMT-6434504C": {
@@ -2744,788 +3989,6 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "private_fields_blank",
       "official_code_detected",
       "shared_official_code_split_by_source"
-    ]
-  },
-  "1.1.2.0.1-FMT-4EB45B2E": {
-    "indicatorCode": "1.1.2.0.1-FMT-4EB45B2E",
-    "officialCode": "1.1.2.0.1",
-    "indicatorName": "PORCENTAJE DE RETENCIÓN ESCOLAR DE EMS",
-    "activityLabel": "",
-    "sourceLabel": "Formato oficial 1.1.2.0.1-FMT-4EB45B2E",
-    "sourcePath": "private-workbook",
-    "sheetName": "Hoja1",
-    "groups": [],
-    "headerRows": [
-      [
-        {
-          "label": "Nombre de la actividad",
-          "rowspan": 3
-        },
-        {
-          "label": "Responsable",
-          "rowspan": 3
-        },
-        {
-          "label": "Cantidad de participantes",
-          "colspan": 4
-        },
-        {
-          "label": "Periodo de realización",
-          "rowspan": 3
-        }
-      ],
-      [
-        {
-          "label": "Alumnado",
-          "colspan": 2
-        },
-        {
-          "label": "Padres, madres y/o tutores",
-          "colspan": 2
-        }
-      ],
-      [
-        {
-          "label": "M"
-        },
-        {
-          "label": "H"
-        },
-        {
-          "label": "M"
-        },
-        {
-          "label": "H"
-        }
-      ]
-    ],
-    "columns": [
-      {
-        "key": "nombre_de_la_actividad",
-        "label": "Nombre de la actividad",
-        "type": "text"
-      },
-      {
-        "key": "responsable",
-        "label": "Responsable",
-        "type": "text"
-      },
-      {
-        "key": "cantidad_de_participantes_alumnado_m",
-        "label": "M",
-        "type": "number"
-      },
-      {
-        "key": "cantidad_de_participantes_alumnado_h",
-        "label": "H",
-        "type": "number"
-      },
-      {
-        "key": "cantidad_de_participantes_padres_madres_y_o_tuto",
-        "label": "M",
-        "type": "number"
-      },
-      {
-        "key": "cantidad_de_participantes_padres_madres_y_o_tuto_2",
-        "label": "H",
-        "type": "number"
-      },
-      {
-        "key": "periodo_de_realizacion",
-        "label": "Periodo de realización",
-        "type": "text"
-      }
-    ],
-    "initialRows": [
-      {
-        "nombre_de_la_actividad": "",
-        "responsable": "",
-        "cantidad_de_participantes_alumnado_m": "",
-        "cantidad_de_participantes_alumnado_h": "",
-        "cantidad_de_participantes_padres_madres_y_o_tuto": "",
-        "cantidad_de_participantes_padres_madres_y_o_tuto_2": "",
-        "periodo_de_realizacion": ""
-      }
-    ],
-    "showTotals": true,
-    "allowAddRows": true,
-    "addRowLabel": "Agregar fila",
-    "emptyRow": {
-      "nombre_de_la_actividad": "",
-      "responsable": "",
-      "cantidad_de_participantes_alumnado_m": "",
-      "cantidad_de_participantes_alumnado_h": "",
-      "cantidad_de_participantes_padres_madres_y_o_tuto": "",
-      "cantidad_de_participantes_padres_madres_y_o_tuto_2": "",
-      "periodo_de_realizacion": ""
-    },
-    "footerNote": "",
-    "quality": [
-      "source_workbook_template",
-      "private_fields_blank",
-      "official_code_detected",
-      "shared_official_code_split_by_source"
-    ]
-  },
-  "3.1.0.0.1": {
-    "indicatorCode": "3.1.0.0.1",
-    "officialCode": "3.1.0.0.1",
-    "indicatorName": "Número de programas y proyectos de extensión y vinculación dirigidas al sector social y productivo",
-    "activityLabel": "",
-    "sourceLabel": "Formato oficial 3.1.0.0.1",
-    "sourcePath": "private-workbook",
-    "sheetName": "Hoja1",
-    "groups": [],
-    "headerRows": [],
-    "columns": [
-      {
-        "key": "plantel",
-        "label": "Plantel",
-        "type": "readonly"
-      },
-      {
-        "key": "nombre_de_la_actividad",
-        "label": "Nombre de la actividad",
-        "type": "text"
-      },
-      {
-        "key": "descripcion_de_la_actividad",
-        "label": "Descripción de la actividad",
-        "type": "text"
-      },
-      {
-        "key": "total_estudiantes_mujeres",
-        "label": "Total Estudiantes Mujeres",
-        "type": "number"
-      },
-      {
-        "key": "total_estudiantes_hombres",
-        "label": "Total Estudiantes Hombres",
-        "type": "number"
-      },
-      {
-        "key": "total_docentes_mujeres",
-        "label": "Total Docentes Mujeres",
-        "type": "number"
-      },
-      {
-        "key": "total_docentes_hombres",
-        "label": "Total Docentes Hombres",
-        "type": "number"
-      },
-      {
-        "key": "total_personal_administrativo_mujeres",
-        "label": "Total Personal Administrativo Mujeres",
-        "type": "number"
-      },
-      {
-        "key": "total_personal_administrativo_hombres",
-        "label": "Total Personal Administrativo Hombres",
-        "type": "number"
-      },
-      {
-        "key": "total_de_participantes",
-        "label": "TOTAL DE PARTICIPANTES",
-        "type": "number"
-      }
-    ],
-    "initialRows": [
-      {
-        "plantel": "Bachillerato",
-        "nombre_de_la_actividad": "",
-        "descripcion_de_la_actividad": "",
-        "total_estudiantes_mujeres": "",
-        "total_estudiantes_hombres": "",
-        "total_docentes_mujeres": "",
-        "total_docentes_hombres": "",
-        "total_personal_administrativo_mujeres": "",
-        "total_personal_administrativo_hombres": "",
-        "total_de_participantes": ""
-      }
-    ],
-    "showTotals": true,
-    "allowAddRows": true,
-    "addRowLabel": "Agregar fila",
-    "emptyRow": {
-      "plantel": "",
-      "nombre_de_la_actividad": "",
-      "descripcion_de_la_actividad": "",
-      "total_estudiantes_mujeres": "",
-      "total_estudiantes_hombres": "",
-      "total_docentes_mujeres": "",
-      "total_docentes_hombres": "",
-      "total_personal_administrativo_mujeres": "",
-      "total_personal_administrativo_hombres": "",
-      "total_de_participantes": ""
-    },
-    "footerNote": "",
-    "quality": [
-      "source_workbook_template",
-      "private_fields_blank",
-      "official_code_detected"
-    ]
-  },
-  "1.1.2.1.4": {
-    "indicatorCode": "1.1.2.1.4",
-    "officialCode": "1.1.2.1.4",
-    "indicatorName": "Porcentaje de estudiantes de educación media superior y superior atendidos en los servicios de salud integral",
-    "activityLabel": "PROMOCIÓN DE LA SALUD",
-    "sourceLabel": "Formato oficial 1.1.2.1.4",
-    "sourcePath": "private-workbook",
-    "sheetName": "Table 1",
-    "groups": [],
-    "headerRows": [
-      [
-        {
-          "label": "Plantel",
-          "rowspan": 2
-        },
-        {
-          "label": "Nota: anotar solo la actividad desarrollada. Unidades de salud integral",
-          "colspan": 3
-        },
-        {
-          "label": "Febrero– Agosto 2026",
-          "colspan": 3
-        },
-        {
-          "label": "Agosto- Enero 2027",
-          "colspan": 3
-        }
-      ],
-      [
-        {
-          "label": "SERVICIOS MEDICOS"
-        },
-        {
-          "label": "DGDI"
-        },
-        {
-          "label": "CUAP"
-        },
-        {
-          "label": "M"
-        },
-        {
-          "label": "H"
-        },
-        {
-          "label": "T"
-        },
-        {
-          "label": "M"
-        },
-        {
-          "label": "H"
-        },
-        {
-          "label": "T"
-        }
-      ]
-    ],
-    "columns": [
-      {
-        "key": "plantel",
-        "label": "Plantel",
-        "type": "readonly"
-      },
-      {
-        "key": "nota_anotar_solo_la_actividad_desarrollada_unida",
-        "label": "SERVICIOS MEDICOS",
-        "type": "text"
-      },
-      {
-        "key": "nota_anotar_solo_la_actividad_desarrollada_unida_2",
-        "label": "DGDI",
-        "type": "text"
-      },
-      {
-        "key": "nota_anotar_solo_la_actividad_desarrollada_unida_3",
-        "label": "CUAP",
-        "type": "text"
-      },
-      {
-        "key": "febrero_agosto_2026_m",
-        "label": "M",
-        "type": "number"
-      },
-      {
-        "key": "febrero_agosto_2026_h",
-        "label": "H",
-        "type": "number"
-      },
-      {
-        "key": "febrero_agosto_2026_t",
-        "label": "T",
-        "type": "number"
-      },
-      {
-        "key": "agosto_enero_2027_m",
-        "label": "M",
-        "type": "number"
-      },
-      {
-        "key": "agosto_enero_2027_h",
-        "label": "H",
-        "type": "number"
-      },
-      {
-        "key": "agosto_enero_2027_t",
-        "label": "T",
-        "type": "number"
-      }
-    ],
-    "initialRows": [
-      {
-        "plantel": "",
-        "nota_anotar_solo_la_actividad_desarrollada_unida": "",
-        "nota_anotar_solo_la_actividad_desarrollada_unida_2": "",
-        "nota_anotar_solo_la_actividad_desarrollada_unida_3": "",
-        "febrero_agosto_2026_m": "",
-        "febrero_agosto_2026_h": "",
-        "febrero_agosto_2026_t": "",
-        "agosto_enero_2027_m": "",
-        "agosto_enero_2027_h": "",
-        "agosto_enero_2027_t": ""
-      }
-    ],
-    "showTotals": true,
-    "allowAddRows": true,
-    "addRowLabel": "Agregar fila",
-    "emptyRow": {
-      "plantel": "",
-      "nota_anotar_solo_la_actividad_desarrollada_unida": "",
-      "nota_anotar_solo_la_actividad_desarrollada_unida_2": "",
-      "nota_anotar_solo_la_actividad_desarrollada_unida_3": "",
-      "febrero_agosto_2026_m": "",
-      "febrero_agosto_2026_h": "",
-      "febrero_agosto_2026_t": "",
-      "agosto_enero_2027_m": "",
-      "agosto_enero_2027_h": "",
-      "agosto_enero_2027_t": ""
-    },
-    "footerNote": "",
-    "quality": [
-      "source_workbook_template",
-      "private_fields_blank",
-      "official_code_detected"
-    ]
-  },
-  "1.1.2.3.1-FMT-AB95A3B8": {
-    "indicatorCode": "1.1.2.3.1-FMT-AB95A3B8",
-    "officialCode": "1.1.2.3.1",
-    "indicatorName": "Porcentaje de estudiantes de media superior que participan en actividades de formación integral",
-    "activityLabel": "",
-    "sourceLabel": "Formato oficial 1.1.2.3.1-FMT-AB95A3B8",
-    "sourcePath": "private-workbook",
-    "sheetName": "Hoja1",
-    "groups": [],
-    "headerRows": [],
-    "columns": [
-      {
-        "key": "plantel",
-        "label": "Plantel",
-        "type": "readonly"
-      },
-      {
-        "key": "nombre_de_la_actividad",
-        "label": "Nombre de la actividad",
-        "type": "text"
-      },
-      {
-        "key": "descripcion_de_la_actividad",
-        "label": "Descripción de la actividad",
-        "type": "text"
-      },
-      {
-        "key": "total_estudiantes_mujeres",
-        "label": "Total Estudiantes Mujeres",
-        "type": "number"
-      },
-      {
-        "key": "total_estudiantes_hombres",
-        "label": "Total Estudiantes Hombres",
-        "type": "number"
-      },
-      {
-        "key": "total_docentes_mujeres",
-        "label": "Total Docentes Mujeres",
-        "type": "number"
-      },
-      {
-        "key": "total_docentes_hombres",
-        "label": "Total Docentes Hombres",
-        "type": "number"
-      },
-      {
-        "key": "total_personal_administrativo_mujeres",
-        "label": "Total Personal Administrativo Mujeres",
-        "type": "number"
-      },
-      {
-        "key": "total_personal_administrativo_hombres",
-        "label": "Total Personal Administrativo Hombres",
-        "type": "number"
-      },
-      {
-        "key": "total_de_participantes",
-        "label": "TOTAL DE PARTICIPANTES",
-        "type": "number"
-      }
-    ],
-    "initialRows": [
-      {
-        "plantel": "Bachillerato",
-        "nombre_de_la_actividad": "",
-        "descripcion_de_la_actividad": "",
-        "total_estudiantes_mujeres": "",
-        "total_estudiantes_hombres": "",
-        "total_docentes_mujeres": "",
-        "total_docentes_hombres": "",
-        "total_personal_administrativo_mujeres": "",
-        "total_personal_administrativo_hombres": "",
-        "total_de_participantes": ""
-      }
-    ],
-    "showTotals": true,
-    "allowAddRows": true,
-    "addRowLabel": "Agregar fila",
-    "emptyRow": {
-      "plantel": "",
-      "nombre_de_la_actividad": "",
-      "descripcion_de_la_actividad": "",
-      "total_estudiantes_mujeres": "",
-      "total_estudiantes_hombres": "",
-      "total_docentes_mujeres": "",
-      "total_docentes_hombres": "",
-      "total_personal_administrativo_mujeres": "",
-      "total_personal_administrativo_hombres": "",
-      "total_de_participantes": ""
-    },
-    "footerNote": "",
-    "quality": [
-      "source_workbook_template",
-      "private_fields_blank",
-      "official_code_detected",
-      "shared_official_code_split_by_source"
-    ]
-  },
-  "1.1.2.5.3": {
-    "indicatorCode": "1.1.2.5.3",
-    "officialCode": "1.1.2.5.3",
-    "indicatorName": "Porcentaje de PTC de educación media superior beneficiados en el programa de ESDEPED",
-    "activityLabel": "",
-    "sourceLabel": "Formato oficial 1.1.2.5.3",
-    "sourcePath": "private-workbook",
-    "sheetName": "PTC",
-    "groups": [],
-    "headerRows": [
-      [
-        {
-          "label": "PLANTEL"
-        },
-        {
-          "label": "PTC"
-        },
-        {
-          "label": "NOMBRE DEL DOCENTE"
-        },
-        {
-          "label": "NIVEL"
-        }
-      ]
-    ],
-    "columns": [
-      {
-        "key": "plantel",
-        "label": "PLANTEL",
-        "type": "readonly"
-      },
-      {
-        "key": "ptc",
-        "label": "PTC",
-        "type": "text"
-      },
-      {
-        "key": "nombre_del_docente",
-        "label": "NOMBRE DEL DOCENTE",
-        "type": "text"
-      },
-      {
-        "key": "nivel",
-        "label": "NIVEL",
-        "type": "text"
-      }
-    ],
-    "initialRows": [
-      {
-        "plantel": "",
-        "ptc": "",
-        "nombre_del_docente": "",
-        "nivel": ""
-      }
-    ],
-    "showTotals": false,
-    "allowAddRows": true,
-    "addRowLabel": "Agregar fila",
-    "emptyRow": {
-      "plantel": "",
-      "ptc": "",
-      "nombre_del_docente": "",
-      "nivel": ""
-    },
-    "footerNote": "",
-    "quality": [
-      "canonical_operational_template",
-      "official_code_detected",
-      "private_fields_blank",
-      "shared_official_code_split_by_source",
-      "source_workbook_template"
-    ]
-  },
-  "2.1.4.1.2": {
-    "indicatorCode": "2.1.4.1.2",
-    "officialCode": "2.1.4.1.2",
-    "indicatorName": "Número de estudiantes que colaboran en proyectos de investigación liderados por profesorado de tiempo completo",
-    "activityLabel": "",
-    "sourceLabel": "Formato oficial 2.1.4.1.2",
-    "sourcePath": "private-workbook",
-    "sheetName": "2.1.4.1.2",
-    "groups": [],
-    "headerRows": [],
-    "columns": [
-      {
-        "key": "plantel",
-        "label": "PLANTEL",
-        "type": "readonly"
-      },
-      {
-        "key": "nombre_de_los_proyectos_de_investigacion",
-        "label": "Nombre de /los proyectos de investigación",
-        "type": "text"
-      },
-      {
-        "key": "numero_de_estudiantes_mujeres",
-        "label": "Mujeres",
-        "type": "number"
-      },
-      {
-        "key": "numero_de_estudiantes_hombres",
-        "label": "Hombres",
-        "type": "number"
-      },
-      {
-        "key": "observaciones_indicar_el_periodo_del_proyecto",
-        "label": "Observaciones (indicar el periodo del proyecto)",
-        "type": "text"
-      }
-    ],
-    "initialRows": [
-      {
-        "plantel": "Bachillerato 15",
-        "nombre_de_los_proyectos_de_investigacion": "",
-        "numero_de_estudiantes_mujeres": "",
-        "numero_de_estudiantes_hombres": "",
-        "observaciones_indicar_el_periodo_del_proyecto": ""
-      }
-    ],
-    "showTotals": true,
-    "allowAddRows": true,
-    "addRowLabel": "Agregar fila",
-    "emptyRow": {
-      "plantel": "",
-      "nombre_de_los_proyectos_de_investigacion": "",
-      "numero_de_estudiantes_mujeres": "",
-      "numero_de_estudiantes_hombres": "",
-      "observaciones_indicar_el_periodo_del_proyecto": ""
-    },
-    "footerNote": "",
-    "quality": [
-      "source_workbook_template",
-      "private_fields_blank",
-      "official_code_detected"
-    ]
-  },
-  "1.1.2.2.11": {
-    "indicatorCode": "1.1.2.2.11",
-    "officialCode": "1.1.2.2.11",
-    "indicatorName": "Porcentaje de estudiantes de educación media superior y superior que participan en acciones de igualdad de género",
-    "activityLabel": "",
-    "sourceLabel": "Formato oficial 1.1.2.2.11",
-    "sourcePath": "private-workbook",
-    "sheetName": "1.1.2.2.11",
-    "groups": [],
-    "headerRows": [],
-    "columns": [
-      {
-        "key": "plantel",
-        "label": "Plantel",
-        "type": "readonly"
-      },
-      {
-        "key": "nombre_de_la_capacitacion_y_o_actividades_format",
-        "label": "Nombre de la capacitación y /o actividades formativas",
-        "type": "text"
-      },
-      {
-        "key": "total_estudiantes_mujeres",
-        "label": "Total Estudiantes Mujeres",
-        "type": "number"
-      },
-      {
-        "key": "total_estudiantes_hombres",
-        "label": "Total Estudiantes Hombres",
-        "type": "number"
-      },
-      {
-        "key": "total_docentes_mujeres",
-        "label": "Total Docentes Mujeres",
-        "type": "number"
-      },
-      {
-        "key": "total_docentes_hombres",
-        "label": "Total Docentes Hombres",
-        "type": "number"
-      },
-      {
-        "key": "total_personal_administrativo_mujeres",
-        "label": "Total Personal Administrativo Mujeres",
-        "type": "number"
-      },
-      {
-        "key": "total_personal_administrativo_hombres",
-        "label": "Total Personal Administrativo Hombres",
-        "type": "number"
-      },
-      {
-        "key": "temas_que_se_abordaron",
-        "label": "TEMAS QUE SE ABORDARON",
-        "type": "text"
-      }
-    ],
-    "initialRows": [
-      {
-        "plantel": "Bachillerato",
-        "nombre_de_la_capacitacion_y_o_actividades_format": "",
-        "total_estudiantes_mujeres": "",
-        "total_estudiantes_hombres": "",
-        "total_docentes_mujeres": "",
-        "total_docentes_hombres": "",
-        "total_personal_administrativo_mujeres": "",
-        "total_personal_administrativo_hombres": "",
-        "temas_que_se_abordaron": ""
-      }
-    ],
-    "showTotals": true,
-    "allowAddRows": true,
-    "addRowLabel": "Agregar fila",
-    "emptyRow": {
-      "plantel": "",
-      "nombre_de_la_capacitacion_y_o_actividades_format": "",
-      "total_estudiantes_mujeres": "",
-      "total_estudiantes_hombres": "",
-      "total_docentes_mujeres": "",
-      "total_docentes_hombres": "",
-      "total_personal_administrativo_mujeres": "",
-      "total_personal_administrativo_hombres": "",
-      "temas_que_se_abordaron": ""
-    },
-    "footerNote": "",
-    "quality": [
-      "source_workbook_template",
-      "private_fields_blank",
-      "official_code_detected"
-    ]
-  },
-  "1.1.2.5.10": {
-    "indicatorCode": "1.1.2.5.10",
-    "officialCode": "1.1.2.5.10",
-    "indicatorName": "Porcentaje de docentes de educación media superior y superior certificados en el dominio de una Lengua Extranjera",
-    "activityLabel": "",
-    "sourceLabel": "Formato oficial 1.1.2.5.10",
-    "sourcePath": "private-workbook",
-    "sheetName": "Hoja1",
-    "groups": [],
-    "headerRows": [],
-    "columns": [
-      {
-        "key": "agosto_2025_enero_2026_m",
-        "label": "Agosto 2025-Enero 2026 M",
-        "type": "number"
-      },
-      {
-        "key": "agosto_2025_enero_2026_h",
-        "label": "Agosto 2025-Enero 2026 H",
-        "type": "number"
-      },
-      {
-        "key": "total_h",
-        "label": "Total H",
-        "type": "number"
-      },
-      {
-        "key": "enero_2026_junio_2026_m",
-        "label": "Enero 2026-Junio 2026 M",
-        "type": "number"
-      },
-      {
-        "key": "enero_2026_junio_2026_h",
-        "label": "Enero 2026-Junio 2026 H",
-        "type": "number"
-      },
-      {
-        "key": "total_h_2",
-        "label": "Total H",
-        "type": "number"
-      },
-      {
-        "key": "agosto_2026_enero_2027_m",
-        "label": "Agosto 2026- Enero 2027 M",
-        "type": "number"
-      },
-      {
-        "key": "agosto_2026_enero_2027_h",
-        "label": "Agosto 2026- Enero 2027 H",
-        "type": "number"
-      },
-      {
-        "key": "total_h_3",
-        "label": "Total H",
-        "type": "number"
-      }
-    ],
-    "initialRows": [
-      {
-        "agosto_2025_enero_2026_m": "",
-        "agosto_2025_enero_2026_h": "",
-        "total_h": "",
-        "enero_2026_junio_2026_m": "",
-        "enero_2026_junio_2026_h": "",
-        "total_h_2": "",
-        "agosto_2026_enero_2027_m": "",
-        "agosto_2026_enero_2027_h": "",
-        "total_h_3": ""
-      }
-    ],
-    "showTotals": true,
-    "allowAddRows": true,
-    "addRowLabel": "Agregar fila",
-    "emptyRow": {
-      "agosto_2025_enero_2026_m": "",
-      "agosto_2025_enero_2026_h": "",
-      "total_h": "",
-      "enero_2026_junio_2026_m": "",
-      "enero_2026_junio_2026_h": "",
-      "total_h_2": "",
-      "agosto_2026_enero_2027_m": "",
-      "agosto_2026_enero_2027_h": "",
-      "total_h_3": ""
-    },
-    "footerNote": "",
-    "quality": [
-      "source_workbook_template",
-      "private_fields_blank",
-      "official_code_detected"
     ]
   },
   "FMT-01-F2A88F7E-nivelacion-academica-ago": {
@@ -3899,673 +4362,212 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "pending_indicator_code"
     ]
   },
-  "1.1.2.2.10": {
-    "indicatorCode": "1.1.2.2.10",
-    "officialCode": "1.1.2.2.10",
-    "indicatorName": "Porcentaje de estudiantes de educación media superior y superior que participan en acciones de sostenibilidad y medio ambiente para la acción climática",
+  "1.0.0.0.2-FMT-23CFCBF2": {
+    "indicatorCode": "1.0.0.0.2-FMT-23CFCBF2",
+    "officialCode": "1.0.0.0.2",
+    "indicatorName": "Porcentaje de titulación por cohorte del NMS",
     "activityLabel": "",
-    "sourceLabel": "Formato oficial 1.1.2.2.10",
+    "sourceLabel": "Formato oficial 1.0.0.0.2-FMT-23CFCBF2",
     "sourcePath": "private-workbook",
-    "sheetName": "1.1.2.2.10",
+    "sheetName": "Titulación",
     "groups": [],
-    "headerRows": [],
+    "headerRows": [
+      [
+        {
+          "label": "Delegación",
+          "rowspan": 3
+        },
+        {
+          "label": "Plantel",
+          "rowspan": 3
+        },
+        {
+          "label": "Programa Educativo",
+          "rowspan": 3
+        },
+        {
+          "label": "Egresados titulados en el año 2025",
+          "colspan": 3,
+          "rowspan": 2
+        },
+        {
+          "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas",
+          "colspan": 3,
+          "rowspan": 2
+        },
+        {
+          "label": "% de titulación por cohorte",
+          "rowspan": 3
+        }
+      ],
+      [
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Hombres"
+        },
+        {
+          "label": "Total"
+        },
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Hombres"
+        },
+        {
+          "label": "Total"
+        }
+      ]
+    ],
     "columns": [
+      {
+        "key": "delegacion",
+        "label": "Delegación",
+        "type": "readonly"
+      },
       {
         "key": "plantel",
         "label": "Plantel",
         "type": "readonly"
       },
       {
-        "key": "nombre_de_la_actividad",
-        "label": "Nombre de la actividad",
-        "type": "text"
-      },
-      {
-        "key": "descripcion_de_la_actividad",
-        "label": "Descripción de la actividad",
-        "type": "text"
-      },
-      {
-        "key": "total_estudiantes_mujeres",
-        "label": "Total Estudiantes Mujeres",
-        "type": "number"
-      },
-      {
-        "key": "total_estudiantes_hombres",
-        "label": "Total Estudiantes Hombres",
-        "type": "number"
-      },
-      {
-        "key": "total_docentes_mujeres",
-        "label": "Total Docentes Mujeres",
-        "type": "number"
-      },
-      {
-        "key": "total_docentes_hombres",
-        "label": "Total Docentes Hombres",
-        "type": "number"
-      },
-      {
-        "key": "total_personal_administrativo_mujeres",
-        "label": "Total Personal Administrativo Mujeres",
-        "type": "number"
-      },
-      {
-        "key": "total_personal_administrativo_hombres",
-        "label": "Total Personal Administrativo Hombres",
-        "type": "number"
-      },
-      {
-        "key": "total_de_participantes",
-        "label": "TOTAL DE PARTICIPANTES",
-        "type": "number"
-      }
-    ],
-    "initialRows": [
-      {
-        "plantel": "Bachillerato",
-        "nombre_de_la_actividad": "",
-        "descripcion_de_la_actividad": "",
-        "total_estudiantes_mujeres": "",
-        "total_estudiantes_hombres": "",
-        "total_docentes_mujeres": "",
-        "total_docentes_hombres": "",
-        "total_personal_administrativo_mujeres": "",
-        "total_personal_administrativo_hombres": "",
-        "total_de_participantes": ""
-      }
-    ],
-    "showTotals": true,
-    "allowAddRows": true,
-    "addRowLabel": "Agregar fila",
-    "emptyRow": {
-      "plantel": "",
-      "nombre_de_la_actividad": "",
-      "descripcion_de_la_actividad": "",
-      "total_estudiantes_mujeres": "",
-      "total_estudiantes_hombres": "",
-      "total_docentes_mujeres": "",
-      "total_docentes_hombres": "",
-      "total_personal_administrativo_mujeres": "",
-      "total_personal_administrativo_hombres": "",
-      "total_de_participantes": ""
-    },
-    "footerNote": "",
-    "quality": [
-      "source_workbook_template",
-      "private_fields_blank",
-      "official_code_detected"
-    ]
-  },
-  "1.1.2.3.1-FMT-FBF5B718": {
-    "indicatorCode": "1.1.2.3.1-FMT-FBF5B718",
-    "officialCode": "1.1.2.3.1",
-    "indicatorName": "PORCENTAJE DE ESTUDIANTES DE MEDIA SUPERIOR QUE PARTICIPAN EN ACTIVIDADES DE FORMACIÓN INTEGRAL",
-    "activityLabel": "",
-    "sourceLabel": "Formato oficial 1.1.2.3.1-FMT-FBF5B718",
-    "sourcePath": "private-workbook",
-    "sheetName": "Hoja1",
-    "groups": [],
-    "headerRows": [
-      [
-        {
-          "label": "PLANTEL",
-          "rowspan": 2
-        },
-        {
-          "label": "NOMBRE DEL ALUMNADO PARTICIPANTE",
-          "rowspan": 2
-        },
-        {
-          "label": "NÚMERO DE CUENTA",
-          "rowspan": 2
-        },
-        {
-          "label": "NOMBRE DEL PROFESORADO ACOMPAÑANTE",
-          "rowspan": 2
-        },
-        {
-          "label": "Registro",
-          "rowspan": 2
-        },
-        {
-          "label": "CANTIDAD DE ALUMNOS PARTICIPANTES",
-          "colspan": 2
-        }
-      ],
-      [
-        {
-          "label": "HOMBRES"
-        },
-        {
-          "label": "MUJERES"
-        }
-      ]
-    ],
-    "columns": [
-      {
-        "key": "plantel",
-        "label": "PLANTEL",
+        "key": "programa_educativo",
+        "label": "Programa Educativo",
         "type": "readonly"
       },
       {
-        "key": "nombre_del_alumnado_participante",
-        "label": "NOMBRE DEL ALUMNADO PARTICIPANTE",
+        "key": "egresados_titulados_en_el_ano_2025_mujeres",
+        "label": "Mujeres",
         "type": "number"
       },
       {
-        "key": "numero_de_cuenta",
-        "label": "NÚMERO DE CUENTA",
+        "key": "egresados_titulados_en_el_ano_2025_hombres",
+        "label": "Hombres",
         "type": "number"
       },
       {
-        "key": "nombre_del_profesorado_acompanante",
-        "label": "NOMBRE DEL PROFESORADO ACOMPAÑANTE",
+        "key": "egresados_titulados_en_el_ano_2025_total",
+        "label": "Total",
+        "type": "number"
+      },
+      {
+        "key": "matricula_de_primer_ingreso_de_la_misma_cohorte_",
+        "label": "Mujeres",
+        "type": "number"
+      },
+      {
+        "key": "matricula_de_primer_ingreso_de_la_misma_cohorte__2",
+        "label": "Hombres",
+        "type": "number"
+      },
+      {
+        "key": "matricula_de_primer_ingreso_de_la_misma_cohorte__3",
+        "label": "Total",
+        "type": "number"
+      },
+      {
+        "key": "de_titulacion_por_cohorte",
+        "label": "% de titulación por cohorte",
         "type": "text"
-      },
-      {
-        "key": "registro",
-        "label": "Registro",
-        "type": "text"
-      },
-      {
-        "key": "cantidad_de_alumnos_participantes_hombres",
-        "label": "HOMBRES",
-        "type": "number"
-      },
-      {
-        "key": "cantidad_de_alumnos_participantes_mujeres",
-        "label": "MUJERES",
-        "type": "number"
       }
     ],
     "initialRows": [
       {
+        "delegacion": "1,2,3,4,5",
+        "plantel": "Bachillerato 1,2,3,4,5,6,7,8,9,10…....35, Instituto Universitario de Bellas Artes (IUBA), EscuelaTéctica de Enfermería(ETE)",
+        "programa_educativo": "Bachilerato Técnico Analista Químico.",
+        "egresados_titulados_en_el_ano_2025_mujeres": "",
+        "egresados_titulados_en_el_ano_2025_hombres": "",
+        "egresados_titulados_en_el_ano_2025_total": "",
+        "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
+        "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
+        "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
+        "de_titulacion_por_cohorte": ""
+      },
+      {
+        "delegacion": "",
         "plantel": "",
-        "nombre_del_alumnado_participante": "",
-        "numero_de_cuenta": "",
-        "nombre_del_profesorado_acompanante": "",
-        "registro": "",
-        "cantidad_de_alumnos_participantes_hombres": "",
-        "cantidad_de_alumnos_participantes_mujeres": ""
+        "programa_educativo": "Bachillerato Tpecnico Analista Programador",
+        "egresados_titulados_en_el_ano_2025_mujeres": "",
+        "egresados_titulados_en_el_ano_2025_hombres": "",
+        "egresados_titulados_en_el_ano_2025_total": "",
+        "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
+        "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
+        "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
+        "de_titulacion_por_cohorte": "Egresados titulados / Matrícula de primer ingreso*100"
+      },
+      {
+        "delegacion": "",
+        "plantel": "",
+        "programa_educativo": "Bachillerato Técnico en Dibujo",
+        "egresados_titulados_en_el_ano_2025_mujeres": "",
+        "egresados_titulados_en_el_ano_2025_hombres": "",
+        "egresados_titulados_en_el_ano_2025_total": "",
+        "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
+        "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
+        "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
+        "de_titulacion_por_cohorte": ""
+      },
+      {
+        "delegacion": "",
+        "plantel": "",
+        "programa_educativo": "Bachillerato Técnico en Electromecánica",
+        "egresados_titulados_en_el_ano_2025_mujeres": "",
+        "egresados_titulados_en_el_ano_2025_hombres": "",
+        "egresados_titulados_en_el_ano_2025_total": "",
+        "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
+        "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
+        "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
+        "de_titulacion_por_cohorte": ""
+      },
+      {
+        "delegacion": "",
+        "plantel": "",
+        "programa_educativo": "Bachillerato Técnico en Música",
+        "egresados_titulados_en_el_ano_2025_mujeres": "",
+        "egresados_titulados_en_el_ano_2025_hombres": "",
+        "egresados_titulados_en_el_ano_2025_total": "",
+        "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
+        "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
+        "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
+        "de_titulacion_por_cohorte": ""
+      },
+      {
+        "delegacion": "",
+        "plantel": "",
+        "programa_educativo": "Bachillerato Técnico en Enfermería General",
+        "egresados_titulados_en_el_ano_2025_mujeres": "",
+        "egresados_titulados_en_el_ano_2025_hombres": "",
+        "egresados_titulados_en_el_ano_2025_total": "",
+        "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
+        "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
+        "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
+        "de_titulacion_por_cohorte": ""
       }
     ],
     "showTotals": true,
     "allowAddRows": true,
     "addRowLabel": "Agregar fila",
     "emptyRow": {
+      "delegacion": "",
       "plantel": "",
-      "nombre_del_alumnado_participante": "",
-      "numero_de_cuenta": "",
-      "nombre_del_profesorado_acompanante": "",
-      "registro": "",
-      "cantidad_de_alumnos_participantes_hombres": "",
-      "cantidad_de_alumnos_participantes_mujeres": ""
+      "programa_educativo": "",
+      "egresados_titulados_en_el_ano_2025_mujeres": "",
+      "egresados_titulados_en_el_ano_2025_hombres": "",
+      "egresados_titulados_en_el_ano_2025_total": "",
+      "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
+      "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
+      "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
+      "de_titulacion_por_cohorte": ""
     },
     "footerNote": "",
     "quality": [
-      "source_workbook_template",
-      "private_fields_blank",
+      "canonical_format_hidden",
       "official_code_detected",
-      "shared_official_code_split_by_source"
-    ]
-  },
-  "FMT-01-43FE55CA-formacion-docente-2026": {
-    "indicatorCode": "FMT-01-43FE55CA-formacion-docente-2026",
-    "officialCode": null,
-    "indicatorName": "Formación_docente_2026",
-    "activityLabel": "",
-    "sourceLabel": "Formato oficial FMT-01-43FE55CA-formacion-docente-2026",
-    "sourcePath": "private-workbook",
-    "sheetName": "DOCENTES",
-    "groups": [],
-    "headerRows": [
-      [
-        {
-          "label": "No.",
-          "rowspan": 2
-        },
-        {
-          "label": "Tipo de evento",
-          "rowspan": 2
-        },
-        {
-          "label": "Nombre del evento",
-          "rowspan": 2
-        },
-        {
-          "label": "Duración en horas",
-          "rowspan": 2
-        },
-        {
-          "label": "Modalidad",
-          "rowspan": 2
-        },
-        {
-          "label": "Competencias desarrolladas",
-          "rowspan": 2
-        },
-        {
-          "label": "Evento organizado por:",
-          "rowspan": 2
-        },
-        {
-          "label": "Población docente NMS",
-          "colspan": 3
-        }
-      ],
-      [
-        {
-          "label": "H"
-        },
-        {
-          "label": "M"
-        },
-        {
-          "label": "Total"
-        }
-      ]
-    ],
-    "columns": [
-      {
-        "key": "no",
-        "label": "No.",
-        "type": "text"
-      },
-      {
-        "key": "tipo_de_evento",
-        "label": "Tipo de evento",
-        "type": "text"
-      },
-      {
-        "key": "nombre_del_evento",
-        "label": "Nombre del evento",
-        "type": "text"
-      },
-      {
-        "key": "duracion_en_horas",
-        "label": "Duración en horas",
-        "type": "text"
-      },
-      {
-        "key": "modalidad",
-        "label": "Modalidad",
-        "type": "text"
-      },
-      {
-        "key": "competencias_desarrolladas",
-        "label": "Competencias desarrolladas",
-        "type": "text"
-      },
-      {
-        "key": "evento_organizado_por",
-        "label": "Evento organizado por:",
-        "type": "text"
-      },
-      {
-        "key": "poblacion_docente_nms_h",
-        "label": "H",
-        "type": "number"
-      },
-      {
-        "key": "poblacion_docente_nms_m",
-        "label": "M",
-        "type": "number"
-      },
-      {
-        "key": "poblacion_docente_nms_total",
-        "label": "Total",
-        "type": "number"
-      }
-    ],
-    "initialRows": [
-      {
-        "no": "1.1.2.5.1",
-        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que cumple con perfil docente idóneo de acuerdo con el modelo educativo institucional",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms_h": "",
-        "poblacion_docente_nms_m": "",
-        "poblacion_docente_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.5",
-        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocionales, inclusión, investigación, internacionalización, arte, cultura, innovación, igualdad género, sustentabilidad, sostenibilidad y medio ambiente, con enfoque interseccional y de interculturalidad",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms_h": "",
-        "poblacion_docente_nms_m": "",
-        "poblacion_docente_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.7",
-        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms_h": "",
-        "poblacion_docente_nms_m": "",
-        "poblacion_docente_nms_total": ""
-      },
-      {
-        "no": "3.1.1.2.2",
-        "tipo_de_evento": "Número de eventos de educación continua",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "poblacion_docente_nms_h": "",
-        "poblacion_docente_nms_m": "",
-        "poblacion_docente_nms_total": ""
-      }
-    ],
-    "showTotals": true,
-    "allowAddRows": true,
-    "addRowLabel": "Agregar fila",
-    "emptyRow": {
-      "no": "",
-      "tipo_de_evento": "",
-      "nombre_del_evento": "",
-      "duracion_en_horas": "",
-      "modalidad": "",
-      "competencias_desarrolladas": "",
-      "evento_organizado_por": "",
-      "poblacion_docente_nms_h": "",
-      "poblacion_docente_nms_m": "",
-      "poblacion_docente_nms_total": ""
-    },
-    "footerNote": "",
-    "quality": [
-      "source_workbook_template",
       "private_fields_blank",
-      "pending_indicator_code"
-    ]
-  },
-  "3.1.1.3.6": {
-    "indicatorCode": "3.1.1.3.6",
-    "officialCode": "3.1.1.3.6",
-    "indicatorName": "Número de participantes en actividades de sostenibilidad y medio ambiente convocadas por el SIGA",
-    "activityLabel": "",
-    "sourceLabel": "Formato oficial 3.1.1.3.6",
-    "sourcePath": "private-workbook",
-    "sheetName": "Hoja1",
-    "groups": [],
-    "headerRows": [],
-    "columns": [
-      {
-        "key": "plantel",
-        "label": "Plantel",
-        "type": "readonly"
-      },
-      {
-        "key": "nombre_de_la_actividad",
-        "label": "Nombre de la actividad",
-        "type": "text"
-      },
-      {
-        "key": "descripcion_de_la_actividad",
-        "label": "Descripción de la actividad",
-        "type": "text"
-      },
-      {
-        "key": "total_estudiantes_mujeres",
-        "label": "Total Estudiantes Mujeres",
-        "type": "number"
-      },
-      {
-        "key": "total_estudiantes_hombres",
-        "label": "Total Estudiantes Hombres",
-        "type": "number"
-      },
-      {
-        "key": "total_docentes_mujeres",
-        "label": "Total Docentes Mujeres",
-        "type": "number"
-      },
-      {
-        "key": "total_docentes_hombres",
-        "label": "Total Docentes Hombres",
-        "type": "number"
-      },
-      {
-        "key": "total_personal_administrativo_mujeres",
-        "label": "Total Personal Administrativo Mujeres",
-        "type": "number"
-      },
-      {
-        "key": "total_personal_administrativo_hombres",
-        "label": "Total Personal Administrativo Hombres",
-        "type": "number"
-      },
-      {
-        "key": "total_de_participantes",
-        "label": "TOTAL DE PARTICIPANTES",
-        "type": "number"
-      }
-    ],
-    "initialRows": [
-      {
-        "plantel": "Bachillerato",
-        "nombre_de_la_actividad": "",
-        "descripcion_de_la_actividad": "",
-        "total_estudiantes_mujeres": "",
-        "total_estudiantes_hombres": "",
-        "total_docentes_mujeres": "",
-        "total_docentes_hombres": "",
-        "total_personal_administrativo_mujeres": "",
-        "total_personal_administrativo_hombres": "",
-        "total_de_participantes": ""
-      }
-    ],
-    "showTotals": true,
-    "allowAddRows": true,
-    "addRowLabel": "Agregar fila",
-    "emptyRow": {
-      "plantel": "",
-      "nombre_de_la_actividad": "",
-      "descripcion_de_la_actividad": "",
-      "total_estudiantes_mujeres": "",
-      "total_estudiantes_hombres": "",
-      "total_docentes_mujeres": "",
-      "total_docentes_hombres": "",
-      "total_personal_administrativo_mujeres": "",
-      "total_personal_administrativo_hombres": "",
-      "total_de_participantes": ""
-    },
-    "footerNote": "",
-    "quality": [
-      "source_workbook_template",
-      "private_fields_blank",
-      "official_code_detected"
-    ]
-  },
-  "FMT-01-D30B3A90-formacion-apoyo-academic": {
-    "indicatorCode": "FMT-01-D30B3A90-formacion-apoyo-academic",
-    "officialCode": null,
-    "indicatorName": "Formación_apoyo académico_2026",
-    "activityLabel": "",
-    "sourceLabel": "Formato oficial FMT-01-D30B3A90-formacion-apoyo-academic",
-    "sourcePath": "private-workbook",
-    "sheetName": "PERSONAL DE APOYO",
-    "groups": [],
-    "headerRows": [
-      [
-        {
-          "label": "No.",
-          "rowspan": 2
-        },
-        {
-          "label": "Tipo de evento",
-          "rowspan": 2
-        },
-        {
-          "label": "Nombre del evento",
-          "rowspan": 2
-        },
-        {
-          "label": "Duración en horas",
-          "rowspan": 2
-        },
-        {
-          "label": "Modalidad",
-          "rowspan": 2
-        },
-        {
-          "label": "Competencias desarrolladas",
-          "rowspan": 2
-        },
-        {
-          "label": "Evento organizado por:",
-          "rowspan": 2
-        },
-        {
-          "label": "Personal de apoyo académico NMS",
-          "colspan": 3
-        }
-      ],
-      [
-        {
-          "label": "H"
-        },
-        {
-          "label": "M"
-        },
-        {
-          "label": "Total"
-        }
-      ]
-    ],
-    "columns": [
-      {
-        "key": "no",
-        "label": "No.",
-        "type": "text"
-      },
-      {
-        "key": "tipo_de_evento",
-        "label": "Tipo de evento",
-        "type": "text"
-      },
-      {
-        "key": "nombre_del_evento",
-        "label": "Nombre del evento",
-        "type": "text"
-      },
-      {
-        "key": "duracion_en_horas",
-        "label": "Duración en horas",
-        "type": "text"
-      },
-      {
-        "key": "modalidad",
-        "label": "Modalidad",
-        "type": "text"
-      },
-      {
-        "key": "competencias_desarrolladas",
-        "label": "Competencias desarrolladas",
-        "type": "text"
-      },
-      {
-        "key": "evento_organizado_por",
-        "label": "Evento organizado por:",
-        "type": "text"
-      },
-      {
-        "key": "personal_de_apoyo_academico_nms_h",
-        "label": "H",
-        "type": "number"
-      },
-      {
-        "key": "personal_de_apoyo_academico_nms_m",
-        "label": "M",
-        "type": "number"
-      },
-      {
-        "key": "personal_de_apoyo_academico_nms_total",
-        "label": "Total",
-        "type": "number"
-      }
-    ],
-    "initialRows": [
-      {
-        "no": "1.1.2.5.1",
-        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que cumple con perfil docente idóneo de acuerdo con el modelo educativo institucional",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "personal_de_apoyo_academico_nms_h": "",
-        "personal_de_apoyo_academico_nms_m": "",
-        "personal_de_apoyo_academico_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.5",
-        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocionales, inclusión, investigación, internacionalización, arte, cultura, innovación, igualdad género, sustentabilidad, sostenibilidad y medio ambiente, con enfoque interseccional y de interculturalidad",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "personal_de_apoyo_academico_nms_h": "",
-        "personal_de_apoyo_academico_nms_m": "",
-        "personal_de_apoyo_academico_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.7",
-        "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "personal_de_apoyo_academico_nms_h": "",
-        "personal_de_apoyo_academico_nms_m": "",
-        "personal_de_apoyo_academico_nms_total": ""
-      },
-      {
-        "no": "1.1.2.5.8",
-        "tipo_de_evento": "Porcentaje de personal de apoyo académico de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
-        "nombre_del_evento": "",
-        "duracion_en_horas": "",
-        "modalidad": "",
-        "competencias_desarrolladas": "",
-        "evento_organizado_por": "",
-        "personal_de_apoyo_academico_nms_h": "",
-        "personal_de_apoyo_academico_nms_m": "",
-        "personal_de_apoyo_academico_nms_total": ""
-      }
-    ],
-    "showTotals": true,
-    "allowAddRows": true,
-    "addRowLabel": "Agregar fila",
-    "emptyRow": {
-      "no": "",
-      "tipo_de_evento": "",
-      "nombre_del_evento": "",
-      "duracion_en_horas": "",
-      "modalidad": "",
-      "competencias_desarrolladas": "",
-      "evento_organizado_por": "",
-      "personal_de_apoyo_academico_nms_h": "",
-      "personal_de_apoyo_academico_nms_m": "",
-      "personal_de_apoyo_academico_nms_total": ""
-    },
-    "footerNote": "",
-    "quality": [
-      "source_workbook_template",
-      "private_fields_blank",
-      "pending_indicator_code"
+      "source_workbook_template"
     ]
   },
   "1.1.2.5.3-FMT-F28103DD": {
@@ -4644,13 +4646,576 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
 
 export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
   {
-    "id": "d70ef8e9af133290",
+    "id": "489662be6eddbf28",
     "sourceLabel": "Indicadores / Adriana Ruiz / workbook 01",
-    "sourcePathHash": "d70ef8e9af133290db3c5b7f1f406b660ec29de9c8f64f344c47ebfd71cfe607",
+    "sourcePathHash": "489662be6eddbf285ccac58f1981a97b32692033158ca682bd7129090f2467e8",
     "category": "Indicadores / Adriana Ruiz",
-    "sizeBytes": 14675,
+    "sizeBytes": 21023,
     "detectedIndicatorCodes": [
-      "1.0.0.0.2"
+      "1.1.1.1.1"
+    ],
+    "detectedReferenceCodes": [],
+    "detectedPlanteles": [],
+    "formulaCells": 0,
+    "sheets": [
+      {
+        "name": "Sheet 01",
+        "nonEmptyRows": 22,
+        "columnsObserved": 12,
+        "sampleHeaders": [],
+        "headerRows": [],
+        "numericCells": 0,
+        "textCells": 34,
+        "formulaCells": 0,
+        "table": {
+          "headerRow": 9,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL",
+                "rowspan": 2
+              },
+              {
+                "label": "NOMBRE DEL PROGRAMA",
+                "rowspan": 2
+              },
+              {
+                "label": "No. DE ACADEMIAS POR PLANTEL",
+                "rowspan": 2
+              },
+              {
+                "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS",
+                "colspan": 3
+              },
+              {
+                "label": "No. DE SESIONES ORDINARIAS",
+                "rowspan": 2
+              },
+              {
+                "label": "No. SESIONES EXTRAORDINARIAS",
+                "rowspan": 2
+              },
+              {
+                "label": "ACTIVIDADES DE TRABAJO REALIZADAS (mencionar la actividad)",
+                "rowspan": 2
+              },
+              {
+                "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL",
+                "rowspan": 2
+              }
+            ],
+            [
+              {
+                "label": "ÁREA DE FORMACIÓN"
+              },
+              {
+                "label": "SEMESTRE"
+              },
+              {
+                "label": "CAMPO DISCIPLINAR"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              }
+            ]
+          ],
+          "columns": [
+            {
+              "key": "plantel",
+              "label": "PLANTEL",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "nombre_del_programa",
+              "label": "NOMBRE DEL PROGRAMA",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "no_de_academias_por_plantel",
+              "label": "No. DE ACADEMIAS POR PLANTEL",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "tipo_de_integracion_de_academias_area_de_formaci",
+              "label": "ÁREA DE FORMACIÓN",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "tipo_de_integracion_de_academias_semestre",
+              "label": "SEMESTRE",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "tipo_de_integracion_de_academias_campo_disciplin",
+              "label": "CAMPO DISCIPLINAR",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "no_de_sesiones_ordinarias",
+              "label": "No. DE SESIONES ORDINARIAS",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "no_sesiones_extraordinarias",
+              "label": "No. SESIONES EXTRAORDINARIAS",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "actividades_de_trabajo_realizadas_mencionar_la_a",
+              "label": "ACTIVIDADES DE TRABAJO REALIZADAS (mencionar la actividad)",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "docentes_que_participaron_en_las_academias_h",
+              "label": "H",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "docentes_que_participaron_en_las_academias_m",
+              "label": "M",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total",
+              "label": "TOTAL",
+              "type": "number",
+              "private": false
+            }
+          ],
+          "initialRows": [
+            {
+              "plantel": "INDICACIONES PARA EL LLENADO DEL FORMATO DE CONCENTRADO DE ACADEMIAS POR PLANTEL",
+              "nombre_del_programa": "",
+              "no_de_academias_por_plantel": "",
+              "tipo_de_integracion_de_academias_area_de_formaci": "",
+              "tipo_de_integracion_de_academias_semestre": "",
+              "tipo_de_integracion_de_academias_campo_disciplin": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
+              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+              "docentes_que_participaron_en_las_academias_h": "",
+              "docentes_que_participaron_en_las_academias_m": "",
+              "total": ""
+            },
+            {
+              "plantel": "DATOS DE IDENTIFICACIÓN DE ACADEMIAS",
+              "nombre_del_programa": "",
+              "no_de_academias_por_plantel": "",
+              "tipo_de_integracion_de_academias_area_de_formaci": "",
+              "tipo_de_integracion_de_academias_semestre": "",
+              "tipo_de_integracion_de_academias_campo_disciplin": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
+              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+              "docentes_que_participaron_en_las_academias_h": "",
+              "docentes_que_participaron_en_las_academias_m": "",
+              "total": ""
+            },
+            {
+              "plantel": "Periodo escolar: Señalar el periodo y año en el que se ubica la academia",
+              "nombre_del_programa": "",
+              "no_de_academias_por_plantel": "",
+              "tipo_de_integracion_de_academias_area_de_formaci": "",
+              "tipo_de_integracion_de_academias_semestre": "",
+              "tipo_de_integracion_de_academias_campo_disciplin": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
+              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+              "docentes_que_participaron_en_las_academias_h": "",
+              "docentes_que_participaron_en_las_academias_m": "",
+              "total": ""
+            },
+            {
+              "plantel": "Plantel: Escribir el nombre del plantel en el cual se encuentran conformadas las academias.",
+              "nombre_del_programa": "",
+              "no_de_academias_por_plantel": "",
+              "tipo_de_integracion_de_academias_area_de_formaci": "",
+              "tipo_de_integracion_de_academias_semestre": "",
+              "tipo_de_integracion_de_academias_campo_disciplin": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
+              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+              "docentes_que_participaron_en_las_academias_h": "",
+              "docentes_que_participaron_en_las_academias_m": "",
+              "total": ""
+            },
+            {
+              "plantel": "Programa educativo: Escribir el nombre del plan de estudios correspondiente.",
+              "nombre_del_programa": "",
+              "no_de_academias_por_plantel": "",
+              "tipo_de_integracion_de_academias_area_de_formaci": "",
+              "tipo_de_integracion_de_academias_semestre": "",
+              "tipo_de_integracion_de_academias_campo_disciplin": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
+              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+              "docentes_que_participaron_en_las_academias_h": "",
+              "docentes_que_participaron_en_las_academias_m": "",
+              "total": ""
+            },
+            {
+              "plantel": "Tipos de integración de academias: Marcar los tipos de academias implementadas en el plantel por programa educativo.",
+              "nombre_del_programa": "",
+              "no_de_academias_por_plantel": "",
+              "tipo_de_integracion_de_academias_area_de_formaci": "",
+              "tipo_de_integracion_de_academias_semestre": "",
+              "tipo_de_integracion_de_academias_campo_disciplin": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
+              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+              "docentes_que_participaron_en_las_academias_h": "",
+              "docentes_que_participaron_en_las_academias_m": "",
+              "total": ""
+            },
+            {
+              "plantel": "Sesiones ordinarias: Escribir el número de sesiones realizadas durante el semestre de manera habitual.",
+              "nombre_del_programa": "",
+              "no_de_academias_por_plantel": "",
+              "tipo_de_integracion_de_academias_area_de_formaci": "",
+              "tipo_de_integracion_de_academias_semestre": "",
+              "tipo_de_integracion_de_academias_campo_disciplin": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
+              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+              "docentes_que_participaron_en_las_academias_h": "",
+              "docentes_que_participaron_en_las_academias_m": "",
+              "total": ""
+            },
+            {
+              "plantel": "Sesiones extraordinarias: Escribir el número de sesiones realizadas para asuntos especiales o urgentes.",
+              "nombre_del_programa": "",
+              "no_de_academias_por_plantel": "",
+              "tipo_de_integracion_de_academias_area_de_formaci": "",
+              "tipo_de_integracion_de_academias_semestre": "",
+              "tipo_de_integracion_de_academias_campo_disciplin": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
+              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+              "docentes_que_participaron_en_las_academias_h": "",
+              "docentes_que_participaron_en_las_academias_m": "",
+              "total": ""
+            }
+          ]
+        },
+        "codeDescriptions": [],
+        "activityDescriptions": []
+      },
+      {
+        "name": "Sheet 02",
+        "nonEmptyRows": 23,
+        "columnsObserved": 12,
+        "sampleHeaders": [],
+        "headerRows": [],
+        "numericCells": 0,
+        "textCells": 35,
+        "formulaCells": 0,
+        "table": {
+          "headerRow": 10,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL",
+                "rowspan": 2
+              },
+              {
+                "label": "NOMBRE DEL PROGRAMA",
+                "rowspan": 2
+              },
+              {
+                "label": "No. DE ACADEMIAS POR PLANTEL",
+                "rowspan": 2
+              },
+              {
+                "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS",
+                "colspan": 3
+              },
+              {
+                "label": "No. DE SESIONES ORDINARIAS",
+                "rowspan": 2
+              },
+              {
+                "label": "No. SESIONES EXTRAORDINARIAS",
+                "rowspan": 2
+              },
+              {
+                "label": "ACTIVIDADES DE TRABAJO REALIZADAS (mencionar la actividad)",
+                "rowspan": 2
+              },
+              {
+                "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL",
+                "rowspan": 2
+              }
+            ],
+            [
+              {
+                "label": "ÁREA DE FORMACIÓN"
+              },
+              {
+                "label": "SEMESTRE"
+              },
+              {
+                "label": "CAMPO DISCIPLINAR"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              }
+            ]
+          ],
+          "columns": [
+            {
+              "key": "plantel",
+              "label": "PLANTEL",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "nombre_del_programa",
+              "label": "NOMBRE DEL PROGRAMA",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "no_de_academias_por_plantel",
+              "label": "No. DE ACADEMIAS POR PLANTEL",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "tipo_de_integracion_de_academias_area_de_formaci",
+              "label": "ÁREA DE FORMACIÓN",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "tipo_de_integracion_de_academias_semestre",
+              "label": "SEMESTRE",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "tipo_de_integracion_de_academias_campo_disciplin",
+              "label": "CAMPO DISCIPLINAR",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "no_de_sesiones_ordinarias",
+              "label": "No. DE SESIONES ORDINARIAS",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "no_sesiones_extraordinarias",
+              "label": "No. SESIONES EXTRAORDINARIAS",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "actividades_de_trabajo_realizadas_mencionar_la_a",
+              "label": "ACTIVIDADES DE TRABAJO REALIZADAS (mencionar la actividad)",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "docentes_que_participaron_en_las_academias_h",
+              "label": "H",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "docentes_que_participaron_en_las_academias_m",
+              "label": "M",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total",
+              "label": "TOTAL",
+              "type": "number",
+              "private": false
+            }
+          ],
+          "initialRows": [
+            {
+              "plantel": "INDICACIONES PARA EL LLENADO DEL FORMATO DE CONCENTRADO DE ACADEMIAS POR PLANTEL",
+              "nombre_del_programa": "",
+              "no_de_academias_por_plantel": "",
+              "tipo_de_integracion_de_academias_area_de_formaci": "",
+              "tipo_de_integracion_de_academias_semestre": "",
+              "tipo_de_integracion_de_academias_campo_disciplin": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
+              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+              "docentes_que_participaron_en_las_academias_h": "",
+              "docentes_que_participaron_en_las_academias_m": "",
+              "total": ""
+            },
+            {
+              "plantel": "DATOS DE IDENTIFICACIÓN DE ACADEMIAS",
+              "nombre_del_programa": "",
+              "no_de_academias_por_plantel": "",
+              "tipo_de_integracion_de_academias_area_de_formaci": "",
+              "tipo_de_integracion_de_academias_semestre": "",
+              "tipo_de_integracion_de_academias_campo_disciplin": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
+              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+              "docentes_que_participaron_en_las_academias_h": "",
+              "docentes_que_participaron_en_las_academias_m": "",
+              "total": ""
+            },
+            {
+              "plantel": "Periodo escolar: Señalar el periodo y año en el que se ubica la academia",
+              "nombre_del_programa": "",
+              "no_de_academias_por_plantel": "",
+              "tipo_de_integracion_de_academias_area_de_formaci": "",
+              "tipo_de_integracion_de_academias_semestre": "",
+              "tipo_de_integracion_de_academias_campo_disciplin": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
+              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+              "docentes_que_participaron_en_las_academias_h": "",
+              "docentes_que_participaron_en_las_academias_m": "",
+              "total": ""
+            },
+            {
+              "plantel": "Plantel: Escribir el nombre del plantel en el cual se encuentran conformadas las academias.",
+              "nombre_del_programa": "",
+              "no_de_academias_por_plantel": "",
+              "tipo_de_integracion_de_academias_area_de_formaci": "",
+              "tipo_de_integracion_de_academias_semestre": "",
+              "tipo_de_integracion_de_academias_campo_disciplin": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
+              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+              "docentes_que_participaron_en_las_academias_h": "",
+              "docentes_que_participaron_en_las_academias_m": "",
+              "total": ""
+            },
+            {
+              "plantel": "Programa educativo: Escribir el nombre del plan de estudios correspondiente.",
+              "nombre_del_programa": "",
+              "no_de_academias_por_plantel": "",
+              "tipo_de_integracion_de_academias_area_de_formaci": "",
+              "tipo_de_integracion_de_academias_semestre": "",
+              "tipo_de_integracion_de_academias_campo_disciplin": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
+              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+              "docentes_que_participaron_en_las_academias_h": "",
+              "docentes_que_participaron_en_las_academias_m": "",
+              "total": ""
+            },
+            {
+              "plantel": "Tipos de integración de academias: Marcar los tipos de academias implementadas en el plantel por programa educativo.",
+              "nombre_del_programa": "",
+              "no_de_academias_por_plantel": "",
+              "tipo_de_integracion_de_academias_area_de_formaci": "",
+              "tipo_de_integracion_de_academias_semestre": "",
+              "tipo_de_integracion_de_academias_campo_disciplin": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
+              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+              "docentes_que_participaron_en_las_academias_h": "",
+              "docentes_que_participaron_en_las_academias_m": "",
+              "total": ""
+            },
+            {
+              "plantel": "Sesiones ordinarias: Escribir el número de sesiones realizadas durante el semestre de manera habitual.",
+              "nombre_del_programa": "",
+              "no_de_academias_por_plantel": "",
+              "tipo_de_integracion_de_academias_area_de_formaci": "",
+              "tipo_de_integracion_de_academias_semestre": "",
+              "tipo_de_integracion_de_academias_campo_disciplin": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
+              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+              "docentes_que_participaron_en_las_academias_h": "",
+              "docentes_que_participaron_en_las_academias_m": "",
+              "total": ""
+            },
+            {
+              "plantel": "Sesiones extraordinarias: Escribir el número de sesiones realizadas para asuntos especiales o urgentes.",
+              "nombre_del_programa": "",
+              "no_de_academias_por_plantel": "",
+              "tipo_de_integracion_de_academias_area_de_formaci": "",
+              "tipo_de_integracion_de_academias_semestre": "",
+              "tipo_de_integracion_de_academias_campo_disciplin": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
+              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+              "docentes_que_participaron_en_las_academias_h": "",
+              "docentes_que_participaron_en_las_academias_m": "",
+              "total": ""
+            },
+            {
+              "plantel": "Actividades de trabajo realizadas: Rde a cuerdo a las necesidades del plantel, registrar las actividades que se realizaron durante el semestre.",
+              "nombre_del_programa": "",
+              "no_de_academias_por_plantel": "",
+              "tipo_de_integracion_de_academias_area_de_formaci": "",
+              "tipo_de_integracion_de_academias_semestre": "",
+              "tipo_de_integracion_de_academias_campo_disciplin": "",
+              "no_de_sesiones_ordinarias": "",
+              "no_sesiones_extraordinarias": "",
+              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
+              "docentes_que_participaron_en_las_academias_h": "",
+              "docentes_que_participaron_en_las_academias_m": "",
+              "total": ""
+            }
+          ]
+        },
+        "codeDescriptions": [],
+        "activityDescriptions": []
+      },
+      {
+        "name": "Sheet 03",
+        "nonEmptyRows": 0,
+        "columnsObserved": 0,
+        "sampleHeaders": [],
+        "headerRows": [],
+        "numericCells": 0,
+        "textCells": 0,
+        "formulaCells": 0,
+        "table": null,
+        "codeDescriptions": [],
+        "activityDescriptions": []
+      }
+    ],
+    "privacy": "Frontend fallback exposes aggregate workbook structure only."
+  },
+  {
+    "id": "57af41454a5d778e",
+    "sourceLabel": "Indicadores / Liliana Rojas / workbook 02",
+    "sourcePathHash": "57af41454a5d778efa99c6802fc01c5d4b9a638e63a3802421c779039326c8b8",
+    "category": "Indicadores / Liliana Rojas",
+    "sizeBytes": 10309,
+    "detectedIndicatorCodes": [
+      "1.1.2.0.1"
     ],
     "detectedReferenceCodes": [],
     "detectedPlanteles": [],
@@ -4659,16 +5224,314 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
       {
         "name": "Sheet 01",
         "nonEmptyRows": 8,
+        "columnsObserved": 12,
+        "sampleHeaders": [],
+        "headerRows": [],
+        "numericCells": 0,
+        "textCells": 27,
+        "formulaCells": 0,
+        "table": {
+          "headerRow": 4,
+          "headerRows": [
+            [
+              {
+                "label": "Semestre",
+                "rowspan": 2
+              },
+              {
+                "label": "Ago 2025-Ene 2026",
+                "colspan": 3
+              },
+              {
+                "label": "Semestre",
+                "rowspan": 2
+              },
+              {
+                "label": "Feb 2026-Ago 2026",
+                "colspan": 3
+              },
+              {
+                "label": "Semestre",
+                "rowspan": 2
+              },
+              {
+                "label": "Ago 2026-Ene 2027",
+                "colspan": 3
+              }
+            ],
+            [
+              {
+                "label": "Hombres"
+              },
+              {
+                "label": "Mujeres"
+              },
+              {
+                "label": "Total"
+              },
+              {
+                "label": "Hombres"
+              },
+              {
+                "label": "Mujeres"
+              },
+              {
+                "label": "Total"
+              },
+              {
+                "label": "Hombres"
+              },
+              {
+                "label": "Mujeres"
+              },
+              {
+                "label": "Total"
+              }
+            ]
+          ],
+          "columns": [
+            {
+              "key": "semestre",
+              "label": "Semestre",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "ago_2025_ene_2026_hombres",
+              "label": "Hombres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "ago_2025_ene_2026_mujeres",
+              "label": "Mujeres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "ago_2025_ene_2026_total",
+              "label": "Total",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "semestre_2",
+              "label": "Semestre",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "feb_2026_ago_2026_hombres",
+              "label": "Hombres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "feb_2026_ago_2026_mujeres",
+              "label": "Mujeres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "feb_2026_ago_2026_total",
+              "label": "Total",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "semestre_3",
+              "label": "Semestre",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "ago_2026_ene_2027_hombres",
+              "label": "Hombres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "ago_2026_ene_2027_mujeres",
+              "label": "Mujeres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "ago_2026_ene_2027_total",
+              "label": "Total",
+              "type": "number",
+              "private": false
+            }
+          ],
+          "initialRows": [
+            {
+              "semestre": "Primero",
+              "ago_2025_ene_2026_hombres": "",
+              "ago_2025_ene_2026_mujeres": "",
+              "ago_2025_ene_2026_total": "",
+              "semestre_2": "Segundo",
+              "feb_2026_ago_2026_hombres": "",
+              "feb_2026_ago_2026_mujeres": "",
+              "feb_2026_ago_2026_total": "",
+              "semestre_3": "Primero",
+              "ago_2026_ene_2027_hombres": "",
+              "ago_2026_ene_2027_mujeres": "",
+              "ago_2026_ene_2027_total": ""
+            },
+            {
+              "semestre": "Tercero",
+              "ago_2025_ene_2026_hombres": "",
+              "ago_2025_ene_2026_mujeres": "",
+              "ago_2025_ene_2026_total": "",
+              "semestre_2": "Cuarto",
+              "feb_2026_ago_2026_hombres": "",
+              "feb_2026_ago_2026_mujeres": "",
+              "feb_2026_ago_2026_total": "",
+              "semestre_3": "Tercero",
+              "ago_2026_ene_2027_hombres": "",
+              "ago_2026_ene_2027_mujeres": "",
+              "ago_2026_ene_2027_total": ""
+            },
+            {
+              "semestre": "Quinto",
+              "ago_2025_ene_2026_hombres": "",
+              "ago_2025_ene_2026_mujeres": "",
+              "ago_2025_ene_2026_total": "",
+              "semestre_2": "Sexto",
+              "feb_2026_ago_2026_hombres": "",
+              "feb_2026_ago_2026_mujeres": "",
+              "feb_2026_ago_2026_total": "",
+              "semestre_3": "Quinto",
+              "ago_2026_ene_2027_hombres": "",
+              "ago_2026_ene_2027_mujeres": "",
+              "ago_2026_ene_2027_total": ""
+            }
+          ]
+        },
+        "codeDescriptions": [],
+        "activityDescriptions": []
+      }
+    ],
+    "privacy": "Frontend fallback exposes aggregate workbook structure only."
+  },
+  {
+    "id": "7639e7192d5d8ccf",
+    "sourceLabel": "Indicadores / Adriana Ruiz / workbook 03",
+    "sourcePathHash": "7639e7192d5d8ccf6e1ede08a97aecfabf76ce23f7414d7f6413aa4f99c024a1",
+    "category": "Indicadores / Adriana Ruiz",
+    "sizeBytes": 12716,
+    "detectedIndicatorCodes": [
+      "1.0.0.0.2"
+    ],
+    "detectedReferenceCodes": [],
+    "detectedPlanteles": [
+      "Bachillerato 1",
+      "Bachillerato 10",
+      "Bachillerato 11",
+      "Bachillerato 12",
+      "Bachillerato 13",
+      "Bachillerato 14",
+      "Bachillerato 15",
+      "Bachillerato 16",
+      "Bachillerato 17",
+      "Bachillerato 18",
+      "Bachillerato 19",
+      "Bachillerato 2",
+      "Bachillerato 20",
+      "Bachillerato 21",
+      "Bachillerato 22",
+      "Bachillerato 23",
+      "Bachillerato 24",
+      "Bachillerato 25",
+      "Bachillerato 26",
+      "Bachillerato 27",
+      "Bachillerato 28",
+      "Bachillerato 29",
+      "Bachillerato 3",
+      "Bachillerato 30",
+      "Bachillerato 31",
+      "Bachillerato 32",
+      "Bachillerato 33",
+      "Bachillerato 34",
+      "Bachillerato 35",
+      "Bachillerato 4",
+      "Bachillerato 5",
+      "Bachillerato 6",
+      "Bachillerato 7",
+      "Bachillerato 8",
+      "Bachillerato 9",
+      "IUBA Bachillerato"
+    ],
+    "formulaCells": 0,
+    "sheets": [
+      {
+        "name": "Sheet 01",
+        "nonEmptyRows": 14,
         "columnsObserved": 10,
         "sampleHeaders": [],
         "headerRows": [],
         "numericCells": 0,
-        "textCells": 17,
+        "textCells": 27,
         "formulaCells": 0,
         "table": {
           "headerRow": 8,
-          "headerRows": [],
+          "headerRows": [
+            [
+              {
+                "label": "Delegación",
+                "rowspan": 3
+              },
+              {
+                "label": "Plantel",
+                "rowspan": 3
+              },
+              {
+                "label": "Programa Educativo",
+                "rowspan": 3
+              },
+              {
+                "label": "Egresados titulados en el año 2025",
+                "colspan": 3,
+                "rowspan": 2
+              },
+              {
+                "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas",
+                "colspan": 3,
+                "rowspan": 2
+              },
+              {
+                "label": "% de titulación por cohorte",
+                "rowspan": 3
+              }
+            ],
+            [
+              {
+                "label": "Mujeres"
+              },
+              {
+                "label": "Hombres"
+              },
+              {
+                "label": "Total"
+              },
+              {
+                "label": "Mujeres"
+              },
+              {
+                "label": "Hombres"
+              },
+              {
+                "label": "Total"
+              }
+            ]
+          ],
           "columns": [
+            {
+              "key": "delegacion",
+              "label": "Delegación",
+              "type": "readonly",
+              "private": false
+            },
             {
               "key": "plantel",
               "label": "Plantel",
@@ -4683,37 +5546,37 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             },
             {
               "key": "egresados_titulados_en_el_ano_2025_mujeres",
-              "label": "Egresados Titulados En El Año 2025 Mujeres",
+              "label": "Mujeres",
               "type": "number",
               "private": false
             },
             {
               "key": "egresados_titulados_en_el_ano_2025_hombres",
-              "label": "Egresados Titulados En El Año 2025 Hombres",
+              "label": "Hombres",
               "type": "number",
               "private": false
             },
             {
               "key": "egresados_titulados_en_el_ano_2025_total",
-              "label": "Egresados Titulados En El Año 2025 Total",
+              "label": "Total",
               "type": "number",
               "private": false
             },
             {
               "key": "matricula_de_primer_ingreso_de_la_misma_cohorte_",
-              "label": "Matrícula De Primer Ingreso De La Misma Cohorte Mujeres",
+              "label": "Mujeres",
               "type": "number",
               "private": false
             },
             {
               "key": "matricula_de_primer_ingreso_de_la_misma_cohorte__2",
-              "label": "Matrícula De Primer Ingreso De La Misma Cohorte Hombres",
+              "label": "Hombres",
               "type": "number",
               "private": false
             },
             {
               "key": "matricula_de_primer_ingreso_de_la_misma_cohorte__3",
-              "label": "Matrícula De Primer Ingreso De La Misma Cohorte Total",
+              "label": "Total",
               "type": "number",
               "private": false
             },
@@ -4726,8 +5589,69 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
           ],
           "initialRows": [
             {
+              "delegacion": "1,2,3,4,5",
+              "plantel": "Bachillerato 1,2,3,4,5,6,7,8,9,10…....35, Instituto Universitario de Bellas Artes (IUBA), EscuelaTéctica de Enfermería(ETE)",
+              "programa_educativo": "Bachilerato Técnico Analista Químico.",
+              "egresados_titulados_en_el_ano_2025_mujeres": "",
+              "egresados_titulados_en_el_ano_2025_hombres": "",
+              "egresados_titulados_en_el_ano_2025_total": "",
+              "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
+              "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
+              "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
+              "de_titulacion_por_cohorte": ""
+            },
+            {
+              "delegacion": "",
               "plantel": "",
-              "programa_educativo": "",
+              "programa_educativo": "Bachillerato Tpecnico Analista Programador",
+              "egresados_titulados_en_el_ano_2025_mujeres": "",
+              "egresados_titulados_en_el_ano_2025_hombres": "",
+              "egresados_titulados_en_el_ano_2025_total": "",
+              "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
+              "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
+              "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
+              "de_titulacion_por_cohorte": "Egresados titulados / Matrícula de primer ingreso*100"
+            },
+            {
+              "delegacion": "",
+              "plantel": "",
+              "programa_educativo": "Bachillerato Técnico en Dibujo",
+              "egresados_titulados_en_el_ano_2025_mujeres": "",
+              "egresados_titulados_en_el_ano_2025_hombres": "",
+              "egresados_titulados_en_el_ano_2025_total": "",
+              "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
+              "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
+              "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
+              "de_titulacion_por_cohorte": ""
+            },
+            {
+              "delegacion": "",
+              "plantel": "",
+              "programa_educativo": "Bachillerato Técnico en Electromecánica",
+              "egresados_titulados_en_el_ano_2025_mujeres": "",
+              "egresados_titulados_en_el_ano_2025_hombres": "",
+              "egresados_titulados_en_el_ano_2025_total": "",
+              "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
+              "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
+              "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
+              "de_titulacion_por_cohorte": ""
+            },
+            {
+              "delegacion": "",
+              "plantel": "",
+              "programa_educativo": "Bachillerato Técnico en Música",
+              "egresados_titulados_en_el_ano_2025_mujeres": "",
+              "egresados_titulados_en_el_ano_2025_hombres": "",
+              "egresados_titulados_en_el_ano_2025_total": "",
+              "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
+              "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
+              "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
+              "de_titulacion_por_cohorte": ""
+            },
+            {
+              "delegacion": "",
+              "plantel": "",
+              "programa_educativo": "Bachillerato Técnico en Enfermería General",
               "egresados_titulados_en_el_ano_2025_mujeres": "",
               "egresados_titulados_en_el_ano_2025_hombres": "",
               "egresados_titulados_en_el_ano_2025_total": "",
@@ -4743,17 +5667,41 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
       },
       {
         "name": "Sheet 02",
-        "nonEmptyRows": 6,
+        "nonEmptyRows": 13,
         "columnsObserved": 5,
         "sampleHeaders": [],
         "headerRows": [],
         "numericCells": 0,
-        "textCells": 10,
+        "textCells": 20,
         "formulaCells": 0,
         "table": {
           "headerRow": 8,
-          "headerRows": [],
+          "headerRows": [
+            [
+              {
+                "label": "Delegación"
+              },
+              {
+                "label": "Plantel"
+              },
+              {
+                "label": "Programa Educativo"
+              },
+              {
+                "label": "Estrategias"
+              },
+              {
+                "label": "Acciones implementadas"
+              }
+            ]
+          ],
           "columns": [
+            {
+              "key": "delegacion",
+              "label": "Delegación",
+              "type": "readonly",
+              "private": false
+            },
             {
               "key": "plantel",
               "label": "Plantel",
@@ -4781,8 +5729,44 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
           ],
           "initialRows": [
             {
+              "delegacion": "1,2,3,4,5",
+              "plantel": "Bachillerato 1,2,3,4,5,6,7,8,9,10…....35, Instituto Universitario de Bellas Artes (IUBA), EscuelaTéctica de Enfermería(ETE)",
+              "programa_educativo": "Bachilerato Técnico Analista Químico.",
+              "estrategias": "",
+              "acciones_implementadas": ""
+            },
+            {
+              "delegacion": "",
               "plantel": "",
-              "programa_educativo": "",
+              "programa_educativo": "Bachillerato Tpecnico Analista Programador",
+              "estrategias": "",
+              "acciones_implementadas": ""
+            },
+            {
+              "delegacion": "",
+              "plantel": "",
+              "programa_educativo": "Bachillerato Técnico en Dibujo",
+              "estrategias": "",
+              "acciones_implementadas": ""
+            },
+            {
+              "delegacion": "",
+              "plantel": "",
+              "programa_educativo": "Bachillerato Técnico en Electromecánica",
+              "estrategias": "",
+              "acciones_implementadas": ""
+            },
+            {
+              "delegacion": "",
+              "plantel": "",
+              "programa_educativo": "Bachillerato Técnico en Música",
+              "estrategias": "",
+              "acciones_implementadas": ""
+            },
+            {
+              "delegacion": "",
+              "plantel": "",
+              "programa_educativo": "Bachillerato Técnico en Enfermería General",
               "estrategias": "",
               "acciones_implementadas": ""
             }
@@ -4795,13 +5779,13 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
   },
   {
-    "id": "ad15269193785ff5",
-    "sourceLabel": "Indicadores / Ariadna Zuñiga / workbook 02",
-    "sourcePathHash": "ad15269193785ff50b7b06628483549bc3a85f5fd891073e04cdab077908e886",
-    "category": "Indicadores / Ariadna Zuñiga",
-    "sizeBytes": 37436,
+    "id": "1e04cc2a766fb1a1",
+    "sourceLabel": "Indicadores / Oscar Mendoza / workbook 04",
+    "sourcePathHash": "1e04cc2a766fb1a1d4ea54fc481b850605747bbcbd7edaf113a205d05a43984f",
+    "category": "Indicadores / Oscar Mendoza",
+    "sizeBytes": 40035,
     "detectedIndicatorCodes": [
-      "1.1.2.3.1"
+      "3.1.0.0.1"
     ],
     "detectedReferenceCodes": [],
     "detectedPlanteles": [],
@@ -4809,76 +5793,90 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "sheets": [
       {
         "name": "Sheet 01",
-        "nonEmptyRows": 7,
-        "columnsObserved": 9,
+        "nonEmptyRows": 6,
+        "columnsObserved": 11,
         "sampleHeaders": [],
         "headerRows": [],
         "numericCells": 0,
-        "textCells": 14,
+        "textCells": 17,
         "formulaCells": 0,
         "table": {
-          "headerRow": 8,
+          "headerRow": 5,
           "headerRows": [],
           "columns": [
             {
-              "key": "registro",
-              "label": "Registro",
+              "key": "plantel",
+              "label": "Plantel",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "nombre_de_la_actividad",
+              "label": "Nombre de la actividad",
               "type": "text",
               "private": false
             },
             {
-              "key": "nombre_de_la_charla",
-              "label": "Nombre de la charla",
+              "key": "descripcion_de_la_actividad",
+              "label": "Descripción de la actividad",
               "type": "text",
               "private": false
             },
             {
-              "key": "ponente",
-              "label": "Ponente",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "fecha_de_la_actividad",
-              "label": "Fecha de la actividad",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "total_estudiantes_asistentes_mujeres",
-              "label": "Total Estudiantes Asistentes Mujeres",
+              "key": "total_estudiantes_mujeres",
+              "label": "Total Estudiantes Mujeres",
               "type": "number",
               "private": false
             },
             {
-              "key": "total_estudiantes_asistentes_hombres",
-              "label": "Total Estudiantes Asistentes Hombres",
+              "key": "total_estudiantes_hombres",
+              "label": "Total Estudiantes Hombres",
               "type": "number",
               "private": false
             },
             {
-              "key": "total_docentes_asistentes_mujeres",
-              "label": "Total Docentes Asistentes Mujeres",
+              "key": "total_docentes_mujeres",
+              "label": "Total Docentes Mujeres",
               "type": "number",
               "private": false
             },
             {
-              "key": "total_docentes_asistentes_hombres",
-              "label": "Total Docentes Asistentes Hombres",
+              "key": "total_docentes_hombres",
+              "label": "Total Docentes Hombres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_personal_administrativo_mujeres",
+              "label": "Total Personal Administrativo Mujeres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_personal_administrativo_hombres",
+              "label": "Total Personal Administrativo Hombres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_de_participantes",
+              "label": "TOTAL DE PARTICIPANTES",
               "type": "number",
               "private": false
             }
           ],
           "initialRows": [
             {
-              "registro": "",
-              "nombre_de_la_charla": "",
-              "ponente": "",
-              "fecha_de_la_actividad": "",
-              "total_estudiantes_asistentes_mujeres": "",
-              "total_estudiantes_asistentes_hombres": "",
-              "total_docentes_asistentes_mujeres": "",
-              "total_docentes_asistentes_hombres": ""
+              "plantel": "Bachillerato",
+              "nombre_de_la_actividad": "",
+              "descripcion_de_la_actividad": "",
+              "total_estudiantes_mujeres": "",
+              "total_estudiantes_hombres": "",
+              "total_docentes_mujeres": "",
+              "total_docentes_hombres": "",
+              "total_personal_administrativo_mujeres": "",
+              "total_personal_administrativo_hombres": "",
+              "total_de_participantes": ""
             }
           ]
         },
@@ -4890,7 +5888,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
   },
   {
     "id": "973ed8631b80a311",
-    "sourceLabel": "Indicadores / Angel Ordoñez / workbook 03",
+    "sourceLabel": "Indicadores / Angel Ordoñez / workbook 05",
     "sourcePathHash": "973ed8631b80a3111296834c649431b021499a425860e21294d253822302fe58",
     "category": "Indicadores / Angel Ordoñez",
     "sizeBytes": 10357,
@@ -4911,319 +5909,6 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "textCells": 4,
         "formulaCells": 0,
         "table": null,
-        "codeDescriptions": [],
-        "activityDescriptions": []
-      }
-    ],
-    "privacy": "Frontend fallback exposes aggregate workbook structure only."
-  },
-  {
-    "id": "a2a43e4eeb788e8a",
-    "sourceLabel": "Indicadores / Daniela Navarro / workbook 04",
-    "sourcePathHash": "a2a43e4eeb788e8a41aaece62f16dab30fd86d0af4a9f820c63312e7ce0e8330",
-    "category": "Indicadores / Daniela Navarro",
-    "sizeBytes": 9878,
-    "detectedIndicatorCodes": [
-      "1.1.2.0.3"
-    ],
-    "detectedReferenceCodes": [],
-    "detectedPlanteles": [],
-    "formulaCells": 0,
-    "sheets": [
-      {
-        "name": "Sheet 01",
-        "nonEmptyRows": 5,
-        "columnsObserved": 5,
-        "sampleHeaders": [],
-        "headerRows": [],
-        "numericCells": 0,
-        "textCells": 9,
-        "formulaCells": 0,
-        "table": {
-          "headerRow": 4,
-          "headerRows": [
-            [
-              {
-                "label": "PLANTEL",
-                "rowspan": 2
-              },
-              {
-                "label": "ESTRATEGIAS PARA COMBATIR EL ABANDONO ESCOLAR",
-                "rowspan": 2
-              },
-              {
-                "label": "CANTIDAD DE ALUMNOS",
-                "colspan": 3
-              }
-            ],
-            [
-              {
-                "label": "MUJERES"
-              },
-              {
-                "label": "HOMBRES"
-              },
-              {
-                "label": "TOTAL"
-              }
-            ]
-          ],
-          "columns": [
-            {
-              "key": "plantel",
-              "label": "PLANTEL",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "estrategias_para_combatir_el_abandono_escolar",
-              "label": "ESTRATEGIAS PARA COMBATIR EL ABANDONO ESCOLAR",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "cantidad_de_alumnos_mujeres",
-              "label": "MUJERES",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "cantidad_de_alumnos_hombres",
-              "label": "HOMBRES",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "cantidad_de_alumnos_total",
-              "label": "TOTAL",
-              "type": "number",
-              "private": false
-            }
-          ],
-          "initialRows": [
-            {
-              "plantel": "",
-              "estrategias_para_combatir_el_abandono_escolar": "",
-              "cantidad_de_alumnos_mujeres": "",
-              "cantidad_de_alumnos_hombres": "",
-              "cantidad_de_alumnos_total": ""
-            }
-          ]
-        },
-        "codeDescriptions": [],
-        "activityDescriptions": []
-      }
-    ],
-    "privacy": "Frontend fallback exposes aggregate workbook structure only."
-  },
-  {
-    "id": "e81e84739d6e3df2",
-    "sourceLabel": "Indicadores / Angel Ordoñez / workbook 05",
-    "sourcePathHash": "e81e84739d6e3df2f9f937ae8dfff654a616da7107f406f5f6cce9b2efd994fe",
-    "category": "Indicadores / Angel Ordoñez",
-    "sizeBytes": 11561,
-    "detectedIndicatorCodes": [],
-    "detectedReferenceCodes": [],
-    "detectedPlanteles": [],
-    "formulaCells": 0,
-    "sheets": [
-      {
-        "name": "Sheet 01",
-        "nonEmptyRows": 10,
-        "columnsObserved": 11,
-        "sampleHeaders": [],
-        "headerRows": [],
-        "numericCells": 0,
-        "textCells": 28,
-        "formulaCells": 0,
-        "table": {
-          "headerRow": 4,
-          "headerRows": [
-            [
-              {
-                "label": "Registro"
-              },
-              {
-                "label": "Dependencia / Área"
-              },
-              {
-                "label": "Responsable"
-              },
-              {
-                "label": "Actividad"
-              },
-              {
-                "label": "Descripción"
-              },
-              {
-                "label": "Fecha"
-              },
-              {
-                "label": "Estatus"
-              },
-              {
-                "label": "Total de Equipos"
-              },
-              {
-                "label": "Equipos Atendidos"
-              },
-              {
-                "label": "% de equipos atendidos"
-              },
-              {
-                "label": "Observaciones"
-              }
-            ]
-          ],
-          "columns": [
-            {
-              "key": "registro",
-              "label": "Registro",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "dependencia_area",
-              "label": "Dependencia / Área",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "responsable",
-              "label": "Responsable",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "actividad",
-              "label": "Actividad",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "descripcion",
-              "label": "Descripción",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "fecha",
-              "label": "Fecha",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "estatus",
-              "label": "Estatus",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "total_de_equipos",
-              "label": "Total de Equipos",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "equipos_atendidos",
-              "label": "Equipos Atendidos",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "de_equipos_atendidos",
-              "label": "% de equipos atendidos",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "observaciones",
-              "label": "Observaciones",
-              "type": "text",
-              "private": false
-            }
-          ],
-          "initialRows": [
-            {
-              "registro": "",
-              "dependencia_area": "",
-              "responsable": "",
-              "actividad": "Actividad",
-              "descripcion": "Descripción",
-              "fecha": "",
-              "estatus": "Estatus",
-              "total_de_equipos": "",
-              "equipos_atendidos": "",
-              "de_equipos_atendidos": "",
-              "observaciones": ""
-            },
-            {
-              "registro": "",
-              "dependencia_area": "",
-              "responsable": "",
-              "actividad": "Actualización de software",
-              "descripcion": "Instalación de actualizaciones, parches y mejoras de seguridad",
-              "fecha": "",
-              "estatus": "Concluida",
-              "total_de_equipos": "",
-              "equipos_atendidos": "",
-              "de_equipos_atendidos": "",
-              "observaciones": ""
-            },
-            {
-              "registro": "",
-              "dependencia_area": "",
-              "responsable": "",
-              "actividad": "Mantenimiento preventivo",
-              "descripcion": "Limpieza física, revisión y optimización de equipos",
-              "fecha": "",
-              "estatus": "Pendiente",
-              "total_de_equipos": "",
-              "equipos_atendidos": "",
-              "de_equipos_atendidos": "",
-              "observaciones": ""
-            },
-            {
-              "registro": "",
-              "dependencia_area": "",
-              "responsable": "",
-              "actividad": "Respaldo de información",
-              "descripcion": "Ejecución y validación de respaldos institucionales",
-              "fecha": "",
-              "estatus": "",
-              "total_de_equipos": "",
-              "equipos_atendidos": "",
-              "de_equipos_atendidos": "",
-              "observaciones": ""
-            },
-            {
-              "registro": "",
-              "dependencia_area": "",
-              "responsable": "",
-              "actividad": "Optimización de red",
-              "descripcion": "Validación y configuración de conectividad y rendimiento",
-              "fecha": "",
-              "estatus": "",
-              "total_de_equipos": "",
-              "equipos_atendidos": "",
-              "de_equipos_atendidos": "",
-              "observaciones": ""
-            },
-            {
-              "registro": "",
-              "dependencia_area": "",
-              "responsable": "",
-              "actividad": "Corrección de incidencias",
-              "descripcion": "Atención y solución de fallas detectadas",
-              "fecha": "",
-              "estatus": "",
-              "total_de_equipos": "",
-              "equipos_atendidos": "",
-              "de_equipos_atendidos": "",
-              "observaciones": ""
-            }
-          ]
-        },
         "codeDescriptions": [],
         "activityDescriptions": []
       }
@@ -5602,232 +6287,24 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
   },
   {
-    "id": "57af41454a5d778e",
-    "sourceLabel": "Indicadores / Liliana Rojas / workbook 07",
-    "sourcePathHash": "57af41454a5d778efa99c6802fc01c5d4b9a638e63a3802421c779039326c8b8",
-    "category": "Indicadores / Liliana Rojas",
-    "sizeBytes": 10309,
-    "detectedIndicatorCodes": [
-      "1.1.2.0.1"
-    ],
-    "detectedReferenceCodes": [],
-    "detectedPlanteles": [],
-    "formulaCells": 0,
-    "sheets": [
-      {
-        "name": "Sheet 01",
-        "nonEmptyRows": 8,
-        "columnsObserved": 12,
-        "sampleHeaders": [],
-        "headerRows": [],
-        "numericCells": 0,
-        "textCells": 27,
-        "formulaCells": 0,
-        "table": {
-          "headerRow": 4,
-          "headerRows": [
-            [
-              {
-                "label": "Semestre",
-                "rowspan": 2
-              },
-              {
-                "label": "Ago 2025-Ene 2026",
-                "colspan": 3
-              },
-              {
-                "label": "Semestre",
-                "rowspan": 2
-              },
-              {
-                "label": "Feb 2026-Ago 2026",
-                "colspan": 3
-              },
-              {
-                "label": "Semestre",
-                "rowspan": 2
-              },
-              {
-                "label": "Ago 2026-Ene 2027",
-                "colspan": 3
-              }
-            ],
-            [
-              {
-                "label": "Hombres"
-              },
-              {
-                "label": "Mujeres"
-              },
-              {
-                "label": "Total"
-              },
-              {
-                "label": "Hombres"
-              },
-              {
-                "label": "Mujeres"
-              },
-              {
-                "label": "Total"
-              },
-              {
-                "label": "Hombres"
-              },
-              {
-                "label": "Mujeres"
-              },
-              {
-                "label": "Total"
-              }
-            ]
-          ],
-          "columns": [
-            {
-              "key": "semestre",
-              "label": "Semestre",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "ago_2025_ene_2026_hombres",
-              "label": "Hombres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "ago_2025_ene_2026_mujeres",
-              "label": "Mujeres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "ago_2025_ene_2026_total",
-              "label": "Total",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "semestre_2",
-              "label": "Semestre",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "feb_2026_ago_2026_hombres",
-              "label": "Hombres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "feb_2026_ago_2026_mujeres",
-              "label": "Mujeres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "feb_2026_ago_2026_total",
-              "label": "Total",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "semestre_3",
-              "label": "Semestre",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "ago_2026_ene_2027_hombres",
-              "label": "Hombres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "ago_2026_ene_2027_mujeres",
-              "label": "Mujeres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "ago_2026_ene_2027_total",
-              "label": "Total",
-              "type": "number",
-              "private": false
-            }
-          ],
-          "initialRows": [
-            {
-              "semestre": "Primero",
-              "ago_2025_ene_2026_hombres": "",
-              "ago_2025_ene_2026_mujeres": "",
-              "ago_2025_ene_2026_total": "",
-              "semestre_2": "Segundo",
-              "feb_2026_ago_2026_hombres": "",
-              "feb_2026_ago_2026_mujeres": "",
-              "feb_2026_ago_2026_total": "",
-              "semestre_3": "Primero",
-              "ago_2026_ene_2027_hombres": "",
-              "ago_2026_ene_2027_mujeres": "",
-              "ago_2026_ene_2027_total": ""
-            },
-            {
-              "semestre": "Tercero",
-              "ago_2025_ene_2026_hombres": "",
-              "ago_2025_ene_2026_mujeres": "",
-              "ago_2025_ene_2026_total": "",
-              "semestre_2": "Cuarto",
-              "feb_2026_ago_2026_hombres": "",
-              "feb_2026_ago_2026_mujeres": "",
-              "feb_2026_ago_2026_total": "",
-              "semestre_3": "Tercero",
-              "ago_2026_ene_2027_hombres": "",
-              "ago_2026_ene_2027_mujeres": "",
-              "ago_2026_ene_2027_total": ""
-            },
-            {
-              "semestre": "Quinto",
-              "ago_2025_ene_2026_hombres": "",
-              "ago_2025_ene_2026_mujeres": "",
-              "ago_2025_ene_2026_total": "",
-              "semestre_2": "Sexto",
-              "feb_2026_ago_2026_hombres": "",
-              "feb_2026_ago_2026_mujeres": "",
-              "feb_2026_ago_2026_total": "",
-              "semestre_3": "Quinto",
-              "ago_2026_ene_2027_hombres": "",
-              "ago_2026_ene_2027_mujeres": "",
-              "ago_2026_ene_2027_total": ""
-            }
-          ]
-        },
-        "codeDescriptions": [],
-        "activityDescriptions": []
-      }
-    ],
-    "privacy": "Frontend fallback exposes aggregate workbook structure only."
-  },
-  {
-    "id": "64e229a5039178fc",
-    "sourceLabel": "Indicadores / Angel Ordoñez / workbook 08",
-    "sourcePathHash": "64e229a5039178fc7ce9a4cc34083fcc5e639cab818f815717357a179915e0d2",
+    "id": "e81e84739d6e3df2",
+    "sourceLabel": "Indicadores / Angel Ordoñez / workbook 07",
+    "sourcePathHash": "e81e84739d6e3df2f9f937ae8dfff654a616da7107f406f5f6cce9b2efd994fe",
     "category": "Indicadores / Angel Ordoñez",
-    "sizeBytes": 9567,
-    "detectedIndicatorCodes": [
-      "4.1.1.0.1"
-    ],
+    "sizeBytes": 11561,
+    "detectedIndicatorCodes": [],
     "detectedReferenceCodes": [],
     "detectedPlanteles": [],
     "formulaCells": 0,
     "sheets": [
       {
         "name": "Sheet 01",
-        "nonEmptyRows": 3,
-        "columnsObserved": 3,
+        "nonEmptyRows": 10,
+        "columnsObserved": 11,
         "sampleHeaders": [],
         "headerRows": [],
         "numericCells": 0,
-        "textCells": 4,
+        "textCells": 28,
         "formulaCells": 0,
         "table": {
           "headerRow": 4,
@@ -5837,10 +6314,34 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
                 "label": "Registro"
               },
               {
-                "label": "Nombre del Software"
+                "label": "Dependencia / Área"
               },
               {
-                "label": "Aspecto de la formación integral del estudiantado a la que da seguimiento"
+                "label": "Responsable"
+              },
+              {
+                "label": "Actividad"
+              },
+              {
+                "label": "Descripción"
+              },
+              {
+                "label": "Fecha"
+              },
+              {
+                "label": "Estatus"
+              },
+              {
+                "label": "Total de Equipos"
+              },
+              {
+                "label": "Equipos Atendidos"
+              },
+              {
+                "label": "% de equipos atendidos"
+              },
+              {
+                "label": "Observaciones"
               }
             ]
           ],
@@ -5852,14 +6353,62 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "private": false
             },
             {
-              "key": "nombre_del_software",
-              "label": "Nombre del Software",
+              "key": "dependencia_area",
+              "label": "Dependencia / Área",
               "type": "text",
               "private": false
             },
             {
-              "key": "aspecto_de_la_formacion_integral_del_estudiantad",
-              "label": "Aspecto de la formación integral del estudiantado a la que da seguimiento",
+              "key": "responsable",
+              "label": "Responsable",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "actividad",
+              "label": "Actividad",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "descripcion",
+              "label": "Descripción",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "fecha",
+              "label": "Fecha",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "estatus",
+              "label": "Estatus",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "total_de_equipos",
+              "label": "Total de Equipos",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "equipos_atendidos",
+              "label": "Equipos Atendidos",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "de_equipos_atendidos",
+              "label": "% de equipos atendidos",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "observaciones",
+              "label": "Observaciones",
               "type": "text",
               "private": false
             }
@@ -5867,8 +6416,549 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
           "initialRows": [
             {
               "registro": "",
-              "nombre_del_software": "",
-              "aspecto_de_la_formacion_integral_del_estudiantad": ""
+              "dependencia_area": "",
+              "responsable": "",
+              "actividad": "Actividad",
+              "descripcion": "Descripción",
+              "fecha": "",
+              "estatus": "Estatus",
+              "total_de_equipos": "",
+              "equipos_atendidos": "",
+              "de_equipos_atendidos": "",
+              "observaciones": ""
+            },
+            {
+              "registro": "",
+              "dependencia_area": "",
+              "responsable": "",
+              "actividad": "Actualización de software",
+              "descripcion": "Instalación de actualizaciones, parches y mejoras de seguridad",
+              "fecha": "",
+              "estatus": "Concluida",
+              "total_de_equipos": "",
+              "equipos_atendidos": "",
+              "de_equipos_atendidos": "",
+              "observaciones": ""
+            },
+            {
+              "registro": "",
+              "dependencia_area": "",
+              "responsable": "",
+              "actividad": "Mantenimiento preventivo",
+              "descripcion": "Limpieza física, revisión y optimización de equipos",
+              "fecha": "",
+              "estatus": "Pendiente",
+              "total_de_equipos": "",
+              "equipos_atendidos": "",
+              "de_equipos_atendidos": "",
+              "observaciones": ""
+            },
+            {
+              "registro": "",
+              "dependencia_area": "",
+              "responsable": "",
+              "actividad": "Respaldo de información",
+              "descripcion": "Ejecución y validación de respaldos institucionales",
+              "fecha": "",
+              "estatus": "",
+              "total_de_equipos": "",
+              "equipos_atendidos": "",
+              "de_equipos_atendidos": "",
+              "observaciones": ""
+            },
+            {
+              "registro": "",
+              "dependencia_area": "",
+              "responsable": "",
+              "actividad": "Optimización de red",
+              "descripcion": "Validación y configuración de conectividad y rendimiento",
+              "fecha": "",
+              "estatus": "",
+              "total_de_equipos": "",
+              "equipos_atendidos": "",
+              "de_equipos_atendidos": "",
+              "observaciones": ""
+            },
+            {
+              "registro": "",
+              "dependencia_area": "",
+              "responsable": "",
+              "actividad": "Corrección de incidencias",
+              "descripcion": "Atención y solución de fallas detectadas",
+              "fecha": "",
+              "estatus": "",
+              "total_de_equipos": "",
+              "equipos_atendidos": "",
+              "de_equipos_atendidos": "",
+              "observaciones": ""
+            }
+          ]
+        },
+        "codeDescriptions": [],
+        "activityDescriptions": []
+      }
+    ],
+    "privacy": "Frontend fallback exposes aggregate workbook structure only."
+  },
+  {
+    "id": "a31e8100ce08ef08",
+    "sourceLabel": "Indicadores / Laura Calvario - solo responsable / workbook 08",
+    "sourcePathHash": "a31e8100ce08ef080463a4d0b9b47cbfffa7542c2a47be54718e3fa17eb2c1b1",
+    "category": "Indicadores / Laura Calvario - solo responsable",
+    "sizeBytes": 10617,
+    "detectedIndicatorCodes": [
+      "1.1.2.5.10"
+    ],
+    "detectedReferenceCodes": [],
+    "detectedPlanteles": [],
+    "formulaCells": 0,
+    "sheets": [
+      {
+        "name": "Sheet 01",
+        "nonEmptyRows": 4,
+        "columnsObserved": 9,
+        "sampleHeaders": [],
+        "headerRows": [],
+        "numericCells": 0,
+        "textCells": 15,
+        "formulaCells": 0,
+        "table": {
+          "headerRow": 3,
+          "headerRows": [],
+          "columns": [
+            {
+              "key": "agosto_2025_enero_2026_m",
+              "label": "Agosto 2025-Enero 2026 M",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "agosto_2025_enero_2026_h",
+              "label": "Agosto 2025-Enero 2026 H",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_h",
+              "label": "Total H",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "enero_2026_junio_2026_m",
+              "label": "Enero 2026-Junio 2026 M",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "enero_2026_junio_2026_h",
+              "label": "Enero 2026-Junio 2026 H",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_h_2",
+              "label": "Total H",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "agosto_2026_enero_2027_m",
+              "label": "Agosto 2026- Enero 2027 M",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "agosto_2026_enero_2027_h",
+              "label": "Agosto 2026- Enero 2027 H",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_h_3",
+              "label": "Total H",
+              "type": "number",
+              "private": false
+            }
+          ],
+          "initialRows": [
+            {
+              "agosto_2025_enero_2026_m": "",
+              "agosto_2025_enero_2026_h": "",
+              "total_h": "",
+              "enero_2026_junio_2026_m": "",
+              "enero_2026_junio_2026_h": "",
+              "total_h_2": "",
+              "agosto_2026_enero_2027_m": "",
+              "agosto_2026_enero_2027_h": "",
+              "total_h_3": ""
+            }
+          ]
+        },
+        "codeDescriptions": [],
+        "activityDescriptions": []
+      },
+      {
+        "name": "Sheet 02",
+        "nonEmptyRows": 3,
+        "columnsObserved": 9,
+        "sampleHeaders": [],
+        "headerRows": [],
+        "numericCells": 0,
+        "textCells": 8,
+        "formulaCells": 0,
+        "table": {
+          "headerRow": 3,
+          "headerRows": [],
+          "columns": [
+            {
+              "key": "agosto_2025_enero_2026",
+              "label": "Agosto 2025-Enero 2026",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "agosto_2025_enero_2026_2",
+              "label": "Agosto 2025-Enero 2026",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "total",
+              "label": "Total",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "enero_2026_junio_2026",
+              "label": "Enero 2026-Junio 2026",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "enero_2026_junio_2026_2",
+              "label": "Enero 2026-Junio 2026",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "total_2",
+              "label": "Total",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "agosto_2026_enero_2027",
+              "label": "Agosto 2026- Enero 2027",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "agosto_2026_enero_2027_2",
+              "label": "Agosto 2026- Enero 2027",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "total_3",
+              "label": "Total",
+              "type": "number",
+              "private": false
+            }
+          ],
+          "initialRows": [
+            {
+              "agosto_2025_enero_2026": "",
+              "agosto_2025_enero_2026_2": "",
+              "total": "",
+              "enero_2026_junio_2026": "",
+              "enero_2026_junio_2026_2": "",
+              "total_2": "",
+              "agosto_2026_enero_2027": "",
+              "agosto_2026_enero_2027_2": "",
+              "total_3": ""
+            }
+          ]
+        },
+        "codeDescriptions": [],
+        "activityDescriptions": []
+      }
+    ],
+    "privacy": "Frontend fallback exposes aggregate workbook structure only."
+  },
+  {
+    "id": "d30b3a90f8c8007a",
+    "sourceLabel": "Indicadores / Oscar Delgado / workbook 09",
+    "sourcePathHash": "d30b3a90f8c8007ad4be2fdd1da9bdc2d70b7f31f944c55986da5a16dbc888a6",
+    "category": "Indicadores / Oscar Delgado",
+    "sizeBytes": 22967,
+    "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
+    "detectedPlanteles": [],
+    "formulaCells": 0,
+    "sheets": [
+      {
+        "name": "Sheet 01",
+        "nonEmptyRows": 22,
+        "columnsObserved": 20,
+        "sampleHeaders": [],
+        "headerRows": [],
+        "numericCells": 0,
+        "textCells": 48,
+        "formulaCells": 0,
+        "table": {
+          "headerRow": 12,
+          "headerRows": [
+            [
+              {
+                "label": "No.",
+                "rowspan": 2
+              },
+              {
+                "label": "Tipo de evento",
+                "rowspan": 2
+              },
+              {
+                "label": "Nombre del evento",
+                "rowspan": 2
+              },
+              {
+                "label": "Duración en horas",
+                "rowspan": 2
+              },
+              {
+                "label": "Modalidad",
+                "rowspan": 2
+              },
+              {
+                "label": "Competencias desarrolladas",
+                "rowspan": 2
+              },
+              {
+                "label": "Evento organizado por:",
+                "rowspan": 2
+              },
+              {
+                "label": "Personal de apoyo académico NMS",
+                "colspan": 3
+              }
+            ],
+            [
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "Total"
+              }
+            ]
+          ],
+          "columns": [
+            {
+              "key": "no",
+              "label": "No.",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "tipo_de_evento",
+              "label": "Tipo de evento",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "nombre_del_evento",
+              "label": "Nombre del evento",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "duracion_en_horas",
+              "label": "Duración en horas",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "modalidad",
+              "label": "Modalidad",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "competencias_desarrolladas",
+              "label": "Competencias desarrolladas",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "evento_organizado_por",
+              "label": "Evento organizado por:",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "personal_de_apoyo_academico_nms_h",
+              "label": "H",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "personal_de_apoyo_academico_nms_m",
+              "label": "M",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "personal_de_apoyo_academico_nms_total",
+              "label": "Total",
+              "type": "number",
+              "private": false
+            }
+          ],
+          "initialRows": [
+            {
+              "no": "1.1.2.5.1",
+              "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que cumple con perfil docente idóneo de acuerdo con el modelo educativo institucional",
+              "nombre_del_evento": "",
+              "duracion_en_horas": "",
+              "modalidad": "",
+              "competencias_desarrolladas": "",
+              "evento_organizado_por": "",
+              "personal_de_apoyo_academico_nms_h": "",
+              "personal_de_apoyo_academico_nms_m": "",
+              "personal_de_apoyo_academico_nms_total": ""
+            },
+            {
+              "no": "1.1.2.5.5",
+              "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocionales, inclusión, investigación, internacionalización, arte, cultura, innovación, igualdad género, sustentabilidad, sostenibilidad y medio ambiente, con enfoque interseccional y de interculturalidad",
+              "nombre_del_evento": "",
+              "duracion_en_horas": "",
+              "modalidad": "",
+              "competencias_desarrolladas": "",
+              "evento_organizado_por": "",
+              "personal_de_apoyo_academico_nms_h": "",
+              "personal_de_apoyo_academico_nms_m": "",
+              "personal_de_apoyo_academico_nms_total": ""
+            },
+            {
+              "no": "1.1.2.5.7",
+              "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
+              "nombre_del_evento": "",
+              "duracion_en_horas": "",
+              "modalidad": "",
+              "competencias_desarrolladas": "",
+              "evento_organizado_por": "",
+              "personal_de_apoyo_academico_nms_h": "",
+              "personal_de_apoyo_academico_nms_m": "",
+              "personal_de_apoyo_academico_nms_total": ""
+            },
+            {
+              "no": "1.1.2.5.8",
+              "tipo_de_evento": "Porcentaje de personal de apoyo académico de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
+              "nombre_del_evento": "",
+              "duracion_en_horas": "",
+              "modalidad": "",
+              "competencias_desarrolladas": "",
+              "evento_organizado_por": "",
+              "personal_de_apoyo_academico_nms_h": "",
+              "personal_de_apoyo_academico_nms_m": "",
+              "personal_de_apoyo_academico_nms_total": ""
+            }
+          ]
+        },
+        "codeDescriptions": [],
+        "activityDescriptions": []
+      }
+    ],
+    "privacy": "Frontend fallback exposes aggregate workbook structure only."
+  },
+  {
+    "id": "ad15269193785ff5",
+    "sourceLabel": "Indicadores / Ariadna Zuñiga / workbook 10",
+    "sourcePathHash": "ad15269193785ff50b7b06628483549bc3a85f5fd891073e04cdab077908e886",
+    "category": "Indicadores / Ariadna Zuñiga",
+    "sizeBytes": 37436,
+    "detectedIndicatorCodes": [
+      "1.1.2.3.1"
+    ],
+    "detectedReferenceCodes": [],
+    "detectedPlanteles": [],
+    "formulaCells": 0,
+    "sheets": [
+      {
+        "name": "Sheet 01",
+        "nonEmptyRows": 7,
+        "columnsObserved": 9,
+        "sampleHeaders": [],
+        "headerRows": [],
+        "numericCells": 0,
+        "textCells": 14,
+        "formulaCells": 0,
+        "table": {
+          "headerRow": 8,
+          "headerRows": [],
+          "columns": [
+            {
+              "key": "registro",
+              "label": "Registro",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "nombre_de_la_charla",
+              "label": "Nombre de la charla",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "ponente",
+              "label": "Ponente",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "fecha_de_la_actividad",
+              "label": "Fecha de la actividad",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "total_estudiantes_asistentes_mujeres",
+              "label": "Total Estudiantes Asistentes Mujeres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_estudiantes_asistentes_hombres",
+              "label": "Total Estudiantes Asistentes Hombres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_docentes_asistentes_mujeres",
+              "label": "Total Docentes Asistentes Mujeres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_docentes_asistentes_hombres",
+              "label": "Total Docentes Asistentes Hombres",
+              "type": "number",
+              "private": false
+            }
+          ],
+          "initialRows": [
+            {
+              "registro": "",
+              "nombre_de_la_charla": "",
+              "ponente": "",
+              "fecha_de_la_actividad": "",
+              "total_estudiantes_asistentes_mujeres": "",
+              "total_estudiantes_asistentes_hombres": "",
+              "total_docentes_asistentes_mujeres": "",
+              "total_docentes_asistentes_hombres": ""
             }
           ]
         },
@@ -5880,7 +6970,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
   },
   {
     "id": "e8dba518a24c4861",
-    "sourceLabel": "Indicadores / Angel Ordoñez / workbook 09",
+    "sourceLabel": "Indicadores / Angel Ordoñez / workbook 11",
     "sourcePathHash": "e8dba518a24c48613eeb719b0823879ddcc6d2754747b8904e0badba43e0239e",
     "category": "Indicadores / Angel Ordoñez",
     "sizeBytes": 10748,
@@ -5990,8 +7080,1700 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
   },
   {
+    "id": "b15f0f9bef98d736",
+    "sourceLabel": "Indicadores / Carlos Nava / workbook 12",
+    "sourcePathHash": "b15f0f9bef98d736ba87fb14004289d68d4e8a4282063a27f44fd603550a1c3b",
+    "category": "Indicadores / Carlos Nava",
+    "sizeBytes": 10610,
+    "detectedIndicatorCodes": [
+      "1.1.2.1.4"
+    ],
+    "detectedReferenceCodes": [],
+    "detectedPlanteles": [],
+    "formulaCells": 0,
+    "sheets": [
+      {
+        "name": "Sheet 01",
+        "nonEmptyRows": 7,
+        "columnsObserved": 10,
+        "sampleHeaders": [],
+        "headerRows": [],
+        "numericCells": 0,
+        "textCells": 18,
+        "formulaCells": 0,
+        "table": {
+          "headerRow": 4,
+          "headerRows": [
+            [
+              {
+                "label": "Plantel",
+                "rowspan": 2
+              },
+              {
+                "label": "Nota: anotar solo la actividad desarrollada. Unidades de salud integral",
+                "colspan": 3
+              },
+              {
+                "label": "Febrero– Agosto 2026",
+                "colspan": 3
+              },
+              {
+                "label": "Agosto- Enero 2027",
+                "colspan": 3
+              }
+            ],
+            [
+              {
+                "label": "SERVICIOS MEDICOS"
+              },
+              {
+                "label": "DGDI"
+              },
+              {
+                "label": "CUAP"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "T"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "T"
+              }
+            ]
+          ],
+          "columns": [
+            {
+              "key": "plantel",
+              "label": "Plantel",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "nota_anotar_solo_la_actividad_desarrollada_unida",
+              "label": "SERVICIOS MEDICOS",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "nota_anotar_solo_la_actividad_desarrollada_unida_2",
+              "label": "DGDI",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "nota_anotar_solo_la_actividad_desarrollada_unida_3",
+              "label": "CUAP",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "febrero_agosto_2026_m",
+              "label": "M",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "febrero_agosto_2026_h",
+              "label": "H",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "febrero_agosto_2026_t",
+              "label": "T",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "agosto_enero_2027_m",
+              "label": "M",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "agosto_enero_2027_h",
+              "label": "H",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "agosto_enero_2027_t",
+              "label": "T",
+              "type": "number",
+              "private": false
+            }
+          ],
+          "initialRows": [
+            {
+              "plantel": "",
+              "nota_anotar_solo_la_actividad_desarrollada_unida": "",
+              "nota_anotar_solo_la_actividad_desarrollada_unida_2": "",
+              "nota_anotar_solo_la_actividad_desarrollada_unida_3": "",
+              "febrero_agosto_2026_m": "",
+              "febrero_agosto_2026_h": "",
+              "febrero_agosto_2026_t": "",
+              "agosto_enero_2027_m": "",
+              "agosto_enero_2027_h": "",
+              "agosto_enero_2027_t": ""
+            }
+          ]
+        },
+        "codeDescriptions": [],
+        "activityDescriptions": [
+          "PROMOCIÓN DE LA SALUD"
+        ]
+      }
+    ],
+    "privacy": "Frontend fallback exposes aggregate workbook structure only."
+  },
+  {
+    "id": "2a7229ad36bbc3c2",
+    "sourceLabel": "Indicadores / Daniela Navarro / workbook 13",
+    "sourcePathHash": "2a7229ad36bbc3c237708338f144440471a96dccc18bc0a66e801e7e277bc375",
+    "category": "Indicadores / Daniela Navarro",
+    "sizeBytes": 10148,
+    "detectedIndicatorCodes": [
+      "1.1.2.3.1"
+    ],
+    "detectedReferenceCodes": [],
+    "detectedPlanteles": [],
+    "formulaCells": 0,
+    "sheets": [
+      {
+        "name": "Sheet 01",
+        "nonEmptyRows": 5,
+        "columnsObserved": 10,
+        "sampleHeaders": [],
+        "headerRows": [],
+        "numericCells": 0,
+        "textCells": 15,
+        "formulaCells": 0,
+        "table": {
+          "headerRow": 4,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL",
+                "rowspan": 2
+              },
+              {
+                "label": "NOMBRE DE LA CONVOCATORIA REALIZADA",
+                "rowspan": 2
+              },
+              {
+                "label": "CANTIDAD DE PARTICIPANTES",
+                "colspan": 5
+              },
+              {
+                "label": "CANTIDAD DE ALUMNOS PARTICIPANTES",
+                "colspan": 3
+              }
+            ],
+            [
+              {
+                "label": "DOCENTES"
+              },
+              {
+                "label": "ADMINISTRATIVOS"
+              },
+              {
+                "label": "COORDINADORES ACADÉMICOS"
+              },
+              {
+                "label": "ASESORES PEDAGÓGICOS"
+              },
+              {
+                "label": "OTRO PERSONAL"
+              },
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "TOTAL"
+              }
+            ]
+          ],
+          "columns": [
+            {
+              "key": "plantel",
+              "label": "PLANTEL",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "nombre_de_la_convocatoria_realizada",
+              "label": "NOMBRE DE LA CONVOCATORIA REALIZADA",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "cantidad_de_participantes_docentes",
+              "label": "DOCENTES",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "cantidad_de_participantes_administrativos",
+              "label": "ADMINISTRATIVOS",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "cantidad_de_participantes_coordinadores_academic",
+              "label": "COORDINADORES ACADÉMICOS",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "cantidad_de_participantes_asesores_pedagogicos",
+              "label": "ASESORES PEDAGÓGICOS",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "cantidad_de_participantes_otro_personal",
+              "label": "OTRO PERSONAL",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "cantidad_de_alumnos_participantes_hombres",
+              "label": "HOMBRES",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "cantidad_de_alumnos_participantes_mujeres",
+              "label": "MUJERES",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "cantidad_de_alumnos_participantes_total",
+              "label": "TOTAL",
+              "type": "number",
+              "private": false
+            }
+          ],
+          "initialRows": [
+            {
+              "plantel": "",
+              "nombre_de_la_convocatoria_realizada": "",
+              "cantidad_de_participantes_docentes": "",
+              "cantidad_de_participantes_administrativos": "",
+              "cantidad_de_participantes_coordinadores_academic": "",
+              "cantidad_de_participantes_asesores_pedagogicos": "",
+              "cantidad_de_participantes_otro_personal": "",
+              "cantidad_de_alumnos_participantes_hombres": "",
+              "cantidad_de_alumnos_participantes_mujeres": "",
+              "cantidad_de_alumnos_participantes_total": ""
+            }
+          ]
+        },
+        "codeDescriptions": [],
+        "activityDescriptions": []
+      }
+    ],
+    "privacy": "Frontend fallback exposes aggregate workbook structure only."
+  },
+  {
+    "id": "d70ef8e9af133290",
+    "sourceLabel": "Indicadores / Adriana Ruiz / workbook 14",
+    "sourcePathHash": "d70ef8e9af133290db3c5b7f1f406b660ec29de9c8f64f344c47ebfd71cfe607",
+    "category": "Indicadores / Adriana Ruiz",
+    "sizeBytes": 14675,
+    "detectedIndicatorCodes": [
+      "1.0.0.0.2"
+    ],
+    "detectedReferenceCodes": [],
+    "detectedPlanteles": [],
+    "formulaCells": 0,
+    "sheets": [
+      {
+        "name": "Sheet 01",
+        "nonEmptyRows": 8,
+        "columnsObserved": 10,
+        "sampleHeaders": [],
+        "headerRows": [],
+        "numericCells": 0,
+        "textCells": 17,
+        "formulaCells": 0,
+        "table": {
+          "headerRow": 8,
+          "headerRows": [],
+          "columns": [
+            {
+              "key": "plantel",
+              "label": "Plantel",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "programa_educativo",
+              "label": "Programa Educativo",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "egresados_titulados_en_el_ano_2025_mujeres",
+              "label": "Egresados Titulados En El Año 2025 Mujeres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "egresados_titulados_en_el_ano_2025_hombres",
+              "label": "Egresados Titulados En El Año 2025 Hombres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "egresados_titulados_en_el_ano_2025_total",
+              "label": "Egresados Titulados En El Año 2025 Total",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "matricula_de_primer_ingreso_de_la_misma_cohorte_",
+              "label": "Matrícula De Primer Ingreso De La Misma Cohorte Mujeres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "matricula_de_primer_ingreso_de_la_misma_cohorte__2",
+              "label": "Matrícula De Primer Ingreso De La Misma Cohorte Hombres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "matricula_de_primer_ingreso_de_la_misma_cohorte__3",
+              "label": "Matrícula De Primer Ingreso De La Misma Cohorte Total",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "de_titulacion_por_cohorte",
+              "label": "% de titulación por cohorte",
+              "type": "text",
+              "private": false
+            }
+          ],
+          "initialRows": [
+            {
+              "plantel": "",
+              "programa_educativo": "",
+              "egresados_titulados_en_el_ano_2025_mujeres": "",
+              "egresados_titulados_en_el_ano_2025_hombres": "",
+              "egresados_titulados_en_el_ano_2025_total": "",
+              "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
+              "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
+              "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
+              "de_titulacion_por_cohorte": ""
+            }
+          ]
+        },
+        "codeDescriptions": [],
+        "activityDescriptions": []
+      },
+      {
+        "name": "Sheet 02",
+        "nonEmptyRows": 6,
+        "columnsObserved": 5,
+        "sampleHeaders": [],
+        "headerRows": [],
+        "numericCells": 0,
+        "textCells": 10,
+        "formulaCells": 0,
+        "table": {
+          "headerRow": 8,
+          "headerRows": [],
+          "columns": [
+            {
+              "key": "plantel",
+              "label": "Plantel",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "programa_educativo",
+              "label": "Programa Educativo",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "estrategias",
+              "label": "Estrategias",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "acciones_implementadas",
+              "label": "Acciones implementadas",
+              "type": "text",
+              "private": false
+            }
+          ],
+          "initialRows": [
+            {
+              "plantel": "",
+              "programa_educativo": "",
+              "estrategias": "",
+              "acciones_implementadas": ""
+            }
+          ]
+        },
+        "codeDescriptions": [],
+        "activityDescriptions": []
+      }
+    ],
+    "privacy": "Frontend fallback exposes aggregate workbook structure only."
+  },
+  {
+    "id": "64e229a5039178fc",
+    "sourceLabel": "Indicadores / Angel Ordoñez / workbook 15",
+    "sourcePathHash": "64e229a5039178fc7ce9a4cc34083fcc5e639cab818f815717357a179915e0d2",
+    "category": "Indicadores / Angel Ordoñez",
+    "sizeBytes": 9567,
+    "detectedIndicatorCodes": [
+      "4.1.1.0.1"
+    ],
+    "detectedReferenceCodes": [],
+    "detectedPlanteles": [],
+    "formulaCells": 0,
+    "sheets": [
+      {
+        "name": "Sheet 01",
+        "nonEmptyRows": 3,
+        "columnsObserved": 3,
+        "sampleHeaders": [],
+        "headerRows": [],
+        "numericCells": 0,
+        "textCells": 4,
+        "formulaCells": 0,
+        "table": {
+          "headerRow": 4,
+          "headerRows": [
+            [
+              {
+                "label": "Registro"
+              },
+              {
+                "label": "Nombre del Software"
+              },
+              {
+                "label": "Aspecto de la formación integral del estudiantado a la que da seguimiento"
+              }
+            ]
+          ],
+          "columns": [
+            {
+              "key": "registro",
+              "label": "Registro",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "nombre_del_software",
+              "label": "Nombre del Software",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "aspecto_de_la_formacion_integral_del_estudiantad",
+              "label": "Aspecto de la formación integral del estudiantado a la que da seguimiento",
+              "type": "text",
+              "private": false
+            }
+          ],
+          "initialRows": [
+            {
+              "registro": "",
+              "nombre_del_software": "",
+              "aspecto_de_la_formacion_integral_del_estudiantad": ""
+            }
+          ]
+        },
+        "codeDescriptions": [],
+        "activityDescriptions": []
+      }
+    ],
+    "privacy": "Frontend fallback exposes aggregate workbook structure only."
+  },
+  {
+    "id": "ab95a3b877794d54",
+    "sourceLabel": "Indicadores / Oscar Mendoza / workbook 16",
+    "sourcePathHash": "ab95a3b877794d54b3203d99a34fb81d732a7af9b929ab527b3b1dc283803109",
+    "category": "Indicadores / Oscar Mendoza",
+    "sizeBytes": 40025,
+    "detectedIndicatorCodes": [
+      "1.1.2.3.1"
+    ],
+    "detectedReferenceCodes": [],
+    "detectedPlanteles": [],
+    "formulaCells": 0,
+    "sheets": [
+      {
+        "name": "Sheet 01",
+        "nonEmptyRows": 6,
+        "columnsObserved": 11,
+        "sampleHeaders": [],
+        "headerRows": [],
+        "numericCells": 0,
+        "textCells": 17,
+        "formulaCells": 0,
+        "table": {
+          "headerRow": 5,
+          "headerRows": [],
+          "columns": [
+            {
+              "key": "plantel",
+              "label": "Plantel",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "nombre_de_la_actividad",
+              "label": "Nombre de la actividad",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "descripcion_de_la_actividad",
+              "label": "Descripción de la actividad",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "total_estudiantes_mujeres",
+              "label": "Total Estudiantes Mujeres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_estudiantes_hombres",
+              "label": "Total Estudiantes Hombres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_docentes_mujeres",
+              "label": "Total Docentes Mujeres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_docentes_hombres",
+              "label": "Total Docentes Hombres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_personal_administrativo_mujeres",
+              "label": "Total Personal Administrativo Mujeres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_personal_administrativo_hombres",
+              "label": "Total Personal Administrativo Hombres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_de_participantes",
+              "label": "TOTAL DE PARTICIPANTES",
+              "type": "number",
+              "private": false
+            }
+          ],
+          "initialRows": [
+            {
+              "plantel": "Bachillerato",
+              "nombre_de_la_actividad": "",
+              "descripcion_de_la_actividad": "",
+              "total_estudiantes_mujeres": "",
+              "total_estudiantes_hombres": "",
+              "total_docentes_mujeres": "",
+              "total_docentes_hombres": "",
+              "total_personal_administrativo_mujeres": "",
+              "total_personal_administrativo_hombres": "",
+              "total_de_participantes": ""
+            }
+          ]
+        },
+        "codeDescriptions": [],
+        "activityDescriptions": []
+      }
+    ],
+    "privacy": "Frontend fallback exposes aggregate workbook structure only."
+  },
+  {
+    "id": "d055e9faf256b34d",
+    "sourceLabel": "Indicadores / Ariadna Zuñiga / workbook 17",
+    "sourcePathHash": "d055e9faf256b34d8d02944be938507c4c9379d45936fe4cc4d79628792feefb",
+    "category": "Indicadores / Ariadna Zuñiga",
+    "sizeBytes": 42215,
+    "detectedIndicatorCodes": [
+      "1.1.2.2.11"
+    ],
+    "detectedReferenceCodes": [],
+    "detectedPlanteles": [],
+    "formulaCells": 0,
+    "sheets": [
+      {
+        "name": "Sheet 01",
+        "nonEmptyRows": 5,
+        "columnsObserved": 10,
+        "sampleHeaders": [],
+        "headerRows": [],
+        "numericCells": 0,
+        "textCells": 15,
+        "formulaCells": 0,
+        "table": {
+          "headerRow": 5,
+          "headerRows": [],
+          "columns": [
+            {
+              "key": "plantel",
+              "label": "Plantel",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "nombre_de_la_capacitacion_y_o_actividades_format",
+              "label": "Nombre de la capacitación y /o actividades formativas",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "total_estudiantes_mujeres",
+              "label": "Total Estudiantes Mujeres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_estudiantes_hombres",
+              "label": "Total Estudiantes Hombres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_docentes_mujeres",
+              "label": "Total Docentes Mujeres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_docentes_hombres",
+              "label": "Total Docentes Hombres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_personal_administrativo_mujeres",
+              "label": "Total Personal Administrativo Mujeres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_personal_administrativo_hombres",
+              "label": "Total Personal Administrativo Hombres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "temas_que_se_abordaron",
+              "label": "TEMAS QUE SE ABORDARON",
+              "type": "text",
+              "private": false
+            }
+          ],
+          "initialRows": [
+            {
+              "plantel": "Bachillerato",
+              "nombre_de_la_capacitacion_y_o_actividades_format": "",
+              "total_estudiantes_mujeres": "",
+              "total_estudiantes_hombres": "",
+              "total_docentes_mujeres": "",
+              "total_docentes_hombres": "",
+              "total_personal_administrativo_mujeres": "",
+              "total_personal_administrativo_hombres": "",
+              "temas_que_se_abordaron": ""
+            }
+          ]
+        },
+        "codeDescriptions": [],
+        "activityDescriptions": []
+      }
+    ],
+    "privacy": "Frontend fallback exposes aggregate workbook structure only."
+  },
+  {
+    "id": "fbf5b7183a98e6ae",
+    "sourceLabel": "Indicadores / Daniela Navarro / workbook 18",
+    "sourcePathHash": "fbf5b7183a98e6ae3a8e65ea259e64e529254bd74158d0098a28c95a191d39cf",
+    "category": "Indicadores / Daniela Navarro",
+    "sizeBytes": 10481,
+    "detectedIndicatorCodes": [
+      "1.1.2.3.1"
+    ],
+    "detectedReferenceCodes": [],
+    "detectedPlanteles": [],
+    "formulaCells": 0,
+    "sheets": [
+      {
+        "name": "Sheet 01",
+        "nonEmptyRows": 6,
+        "columnsObserved": 7,
+        "sampleHeaders": [],
+        "headerRows": [],
+        "numericCells": 0,
+        "textCells": 11,
+        "formulaCells": 0,
+        "table": {
+          "headerRow": 5,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL",
+                "rowspan": 2
+              },
+              {
+                "label": "NOMBRE DEL ALUMNADO PARTICIPANTE",
+                "rowspan": 2
+              },
+              {
+                "label": "NÚMERO DE CUENTA",
+                "rowspan": 2
+              },
+              {
+                "label": "NOMBRE DEL PROFESORADO ACOMPAÑANTE",
+                "rowspan": 2
+              },
+              {
+                "label": "Registro",
+                "rowspan": 2
+              },
+              {
+                "label": "CANTIDAD DE ALUMNOS PARTICIPANTES",
+                "colspan": 2
+              }
+            ],
+            [
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "MUJERES"
+              }
+            ]
+          ],
+          "columns": [
+            {
+              "key": "plantel",
+              "label": "PLANTEL",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "nombre_del_alumnado_participante",
+              "label": "NOMBRE DEL ALUMNADO PARTICIPANTE",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "numero_de_cuenta",
+              "label": "NÚMERO DE CUENTA",
+              "type": "number",
+              "private": true
+            },
+            {
+              "key": "nombre_del_profesorado_acompanante",
+              "label": "NOMBRE DEL PROFESORADO ACOMPAÑANTE",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "registro",
+              "label": "Registro",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "cantidad_de_alumnos_participantes_hombres",
+              "label": "HOMBRES",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "cantidad_de_alumnos_participantes_mujeres",
+              "label": "MUJERES",
+              "type": "number",
+              "private": false
+            }
+          ],
+          "initialRows": [
+            {
+              "plantel": "",
+              "nombre_del_alumnado_participante": "",
+              "numero_de_cuenta": "",
+              "nombre_del_profesorado_acompanante": "",
+              "registro": "",
+              "cantidad_de_alumnos_participantes_hombres": "",
+              "cantidad_de_alumnos_participantes_mujeres": ""
+            }
+          ]
+        },
+        "codeDescriptions": [],
+        "activityDescriptions": []
+      }
+    ],
+    "privacy": "Frontend fallback exposes aggregate workbook structure only."
+  },
+  {
+    "id": "d6d521c8175d849f",
+    "sourceLabel": "Indicadores / Oscar Mendoza / workbook 19",
+    "sourcePathHash": "d6d521c8175d849f32359f92b35b9f3f1a1c9c9ae0b6d563b9dd147573af68fd",
+    "category": "Indicadores / Oscar Mendoza",
+    "sizeBytes": 40026,
+    "detectedIndicatorCodes": [
+      "3.1.1.3.6"
+    ],
+    "detectedReferenceCodes": [],
+    "detectedPlanteles": [],
+    "formulaCells": 0,
+    "sheets": [
+      {
+        "name": "Sheet 01",
+        "nonEmptyRows": 6,
+        "columnsObserved": 11,
+        "sampleHeaders": [],
+        "headerRows": [],
+        "numericCells": 0,
+        "textCells": 17,
+        "formulaCells": 0,
+        "table": {
+          "headerRow": 5,
+          "headerRows": [],
+          "columns": [
+            {
+              "key": "plantel",
+              "label": "Plantel",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "nombre_de_la_actividad",
+              "label": "Nombre de la actividad",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "descripcion_de_la_actividad",
+              "label": "Descripción de la actividad",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "total_estudiantes_mujeres",
+              "label": "Total Estudiantes Mujeres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_estudiantes_hombres",
+              "label": "Total Estudiantes Hombres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_docentes_mujeres",
+              "label": "Total Docentes Mujeres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_docentes_hombres",
+              "label": "Total Docentes Hombres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_personal_administrativo_mujeres",
+              "label": "Total Personal Administrativo Mujeres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_personal_administrativo_hombres",
+              "label": "Total Personal Administrativo Hombres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "total_de_participantes",
+              "label": "TOTAL DE PARTICIPANTES",
+              "type": "number",
+              "private": false
+            }
+          ],
+          "initialRows": [
+            {
+              "plantel": "Bachillerato",
+              "nombre_de_la_actividad": "",
+              "descripcion_de_la_actividad": "",
+              "total_estudiantes_mujeres": "",
+              "total_estudiantes_hombres": "",
+              "total_docentes_mujeres": "",
+              "total_docentes_hombres": "",
+              "total_personal_administrativo_mujeres": "",
+              "total_personal_administrativo_hombres": "",
+              "total_de_participantes": ""
+            }
+          ]
+        },
+        "codeDescriptions": [],
+        "activityDescriptions": []
+      }
+    ],
+    "privacy": "Frontend fallback exposes aggregate workbook structure only."
+  },
+  {
+    "id": "43fe55caf0bb52db",
+    "sourceLabel": "Indicadores / Oscar Delgado / workbook 20",
+    "sourcePathHash": "43fe55caf0bb52dbd821e66b2d4305fc8b877ac6b680fb28d34f76728d5d807e",
+    "category": "Indicadores / Oscar Delgado",
+    "sizeBytes": 22252,
+    "detectedIndicatorCodes": [],
+    "detectedReferenceCodes": [],
+    "detectedPlanteles": [],
+    "formulaCells": 0,
+    "sheets": [
+      {
+        "name": "Sheet 01",
+        "nonEmptyRows": 22,
+        "columnsObserved": 20,
+        "sampleHeaders": [],
+        "headerRows": [],
+        "numericCells": 0,
+        "textCells": 48,
+        "formulaCells": 0,
+        "table": {
+          "headerRow": 12,
+          "headerRows": [
+            [
+              {
+                "label": "No.",
+                "rowspan": 2
+              },
+              {
+                "label": "Tipo de evento",
+                "rowspan": 2
+              },
+              {
+                "label": "Nombre del evento",
+                "rowspan": 2
+              },
+              {
+                "label": "Duración en horas",
+                "rowspan": 2
+              },
+              {
+                "label": "Modalidad",
+                "rowspan": 2
+              },
+              {
+                "label": "Competencias desarrolladas",
+                "rowspan": 2
+              },
+              {
+                "label": "Evento organizado por:",
+                "rowspan": 2
+              },
+              {
+                "label": "Población docente NMS",
+                "colspan": 3
+              }
+            ],
+            [
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "Total"
+              }
+            ]
+          ],
+          "columns": [
+            {
+              "key": "no",
+              "label": "No.",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "tipo_de_evento",
+              "label": "Tipo de evento",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "nombre_del_evento",
+              "label": "Nombre del evento",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "duracion_en_horas",
+              "label": "Duración en horas",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "modalidad",
+              "label": "Modalidad",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "competencias_desarrolladas",
+              "label": "Competencias desarrolladas",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "evento_organizado_por",
+              "label": "Evento organizado por:",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "poblacion_docente_nms_h",
+              "label": "H",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "poblacion_docente_nms_m",
+              "label": "M",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "poblacion_docente_nms_total",
+              "label": "Total",
+              "type": "number",
+              "private": false
+            }
+          ],
+          "initialRows": [
+            {
+              "no": "1.1.2.5.1",
+              "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que cumple con perfil docente idóneo de acuerdo con el modelo educativo institucional",
+              "nombre_del_evento": "",
+              "duracion_en_horas": "",
+              "modalidad": "",
+              "competencias_desarrolladas": "",
+              "evento_organizado_por": "",
+              "poblacion_docente_nms_h": "",
+              "poblacion_docente_nms_m": "",
+              "poblacion_docente_nms_total": ""
+            },
+            {
+              "no": "1.1.2.5.5",
+              "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocionales, inclusión, investigación, internacionalización, arte, cultura, innovación, igualdad género, sustentabilidad, sostenibilidad y medio ambiente, con enfoque interseccional y de interculturalidad",
+              "nombre_del_evento": "",
+              "duracion_en_horas": "",
+              "modalidad": "",
+              "competencias_desarrolladas": "",
+              "evento_organizado_por": "",
+              "poblacion_docente_nms_h": "",
+              "poblacion_docente_nms_m": "",
+              "poblacion_docente_nms_total": ""
+            },
+            {
+              "no": "1.1.2.5.7",
+              "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
+              "nombre_del_evento": "",
+              "duracion_en_horas": "",
+              "modalidad": "",
+              "competencias_desarrolladas": "",
+              "evento_organizado_por": "",
+              "poblacion_docente_nms_h": "",
+              "poblacion_docente_nms_m": "",
+              "poblacion_docente_nms_total": ""
+            },
+            {
+              "no": "3.1.1.2.2",
+              "tipo_de_evento": "Número de eventos de educación continua",
+              "nombre_del_evento": "",
+              "duracion_en_horas": "",
+              "modalidad": "",
+              "competencias_desarrolladas": "",
+              "evento_organizado_por": "",
+              "poblacion_docente_nms_h": "",
+              "poblacion_docente_nms_m": "",
+              "poblacion_docente_nms_total": ""
+            }
+          ]
+        },
+        "codeDescriptions": [],
+        "activityDescriptions": []
+      }
+    ],
+    "privacy": "Frontend fallback exposes aggregate workbook structure only."
+  },
+  {
+    "id": "e8ebfaa5f4a11362",
+    "sourceLabel": "Indicadores / Ariadna Zuñiga / workbook 21",
+    "sourcePathHash": "e8ebfaa5f4a11362a45348bd460d2d00c1e54c7eebffb2d9a9a5645cf7a537ff",
+    "category": "Indicadores / Ariadna Zuñiga",
+    "sizeBytes": 41454,
+    "detectedIndicatorCodes": [
+      "2.1.4.1.2"
+    ],
+    "detectedReferenceCodes": [],
+    "detectedPlanteles": [
+      "Bachillerato 15"
+    ],
+    "formulaCells": 0,
+    "sheets": [
+      {
+        "name": "Sheet 01",
+        "nonEmptyRows": 5,
+        "columnsObserved": 11,
+        "sampleHeaders": [],
+        "headerRows": [],
+        "numericCells": 0,
+        "textCells": 9,
+        "formulaCells": 0,
+        "table": {
+          "headerRow": 5,
+          "headerRows": [],
+          "columns": [
+            {
+              "key": "plantel",
+              "label": "PLANTEL",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "nombre_de_los_proyectos_de_investigacion",
+              "label": "Nombre de /los proyectos de investigación",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "numero_de_estudiantes_mujeres",
+              "label": "Mujeres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "numero_de_estudiantes_hombres",
+              "label": "Hombres",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "observaciones_indicar_el_periodo_del_proyecto",
+              "label": "Observaciones (indicar el periodo del proyecto)",
+              "type": "text",
+              "private": false
+            }
+          ],
+          "initialRows": [
+            {
+              "plantel": "Bachillerato 15",
+              "nombre_de_los_proyectos_de_investigacion": "",
+              "numero_de_estudiantes_mujeres": "",
+              "numero_de_estudiantes_hombres": "",
+              "observaciones_indicar_el_periodo_del_proyecto": ""
+            }
+          ]
+        },
+        "codeDescriptions": [],
+        "activityDescriptions": []
+      }
+    ],
+    "privacy": "Frontend fallback exposes aggregate workbook structure only."
+  },
+  {
+    "id": "4eb45b2e86e4f3bd",
+    "sourceLabel": "Indicadores / Daniela Navarro / workbook 22",
+    "sourcePathHash": "4eb45b2e86e4f3bd12ccab84a202ac96c4479e31107d2783ec60534206d5d639",
+    "category": "Indicadores / Daniela Navarro",
+    "sizeBytes": 10314,
+    "detectedIndicatorCodes": [
+      "1.1.2.0.1"
+    ],
+    "detectedReferenceCodes": [],
+    "detectedPlanteles": [],
+    "formulaCells": 0,
+    "sheets": [
+      {
+        "name": "Sheet 01",
+        "nonEmptyRows": 6,
+        "columnsObserved": 7,
+        "sampleHeaders": [],
+        "headerRows": [],
+        "numericCells": 0,
+        "textCells": 13,
+        "formulaCells": 0,
+        "table": {
+          "headerRow": 5,
+          "headerRows": [
+            [
+              {
+                "label": "Nombre de la actividad",
+                "rowspan": 3
+              },
+              {
+                "label": "Responsable",
+                "rowspan": 3
+              },
+              {
+                "label": "Cantidad de participantes",
+                "colspan": 4
+              },
+              {
+                "label": "Periodo de realización",
+                "rowspan": 3
+              }
+            ],
+            [
+              {
+                "label": "Alumnado",
+                "colspan": 2
+              },
+              {
+                "label": "Padres, madres y/o tutores",
+                "colspan": 2
+              }
+            ],
+            [
+              {
+                "label": "M"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "H"
+              }
+            ]
+          ],
+          "columns": [
+            {
+              "key": "nombre_de_la_actividad",
+              "label": "Nombre de la actividad",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "responsable",
+              "label": "Responsable",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "cantidad_de_participantes_alumnado_m",
+              "label": "M",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "cantidad_de_participantes_alumnado_h",
+              "label": "H",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "cantidad_de_participantes_padres_madres_y_o_tuto",
+              "label": "M",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "cantidad_de_participantes_padres_madres_y_o_tuto_2",
+              "label": "H",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "periodo_de_realizacion",
+              "label": "Periodo de realización",
+              "type": "text",
+              "private": false
+            }
+          ],
+          "initialRows": [
+            {
+              "nombre_de_la_actividad": "",
+              "responsable": "",
+              "cantidad_de_participantes_alumnado_m": "",
+              "cantidad_de_participantes_alumnado_h": "",
+              "cantidad_de_participantes_padres_madres_y_o_tuto": "",
+              "cantidad_de_participantes_padres_madres_y_o_tuto_2": "",
+              "periodo_de_realizacion": ""
+            }
+          ]
+        },
+        "codeDescriptions": [],
+        "activityDescriptions": []
+      }
+    ],
+    "privacy": "Frontend fallback exposes aggregate workbook structure only."
+  },
+  {
+    "id": "f254c847107dd47b",
+    "sourceLabel": "Indicadores / Adriana Ruiz / workbook 23",
+    "sourcePathHash": "f254c847107dd47b5e199b9bbd7080db62bebf4e00a40245a021c531d75c33d3",
+    "category": "Indicadores / Adriana Ruiz",
+    "sizeBytes": 12824,
+    "detectedIndicatorCodes": [
+      "1.1.2.5.3"
+    ],
+    "detectedReferenceCodes": [],
+    "detectedPlanteles": [
+      "Bachillerato 1",
+      "Bachillerato 10",
+      "Bachillerato 11",
+      "Bachillerato 12",
+      "Bachillerato 13",
+      "Bachillerato 14",
+      "Bachillerato 15",
+      "Bachillerato 16",
+      "Bachillerato 17",
+      "Bachillerato 18",
+      "Bachillerato 19",
+      "Bachillerato 2",
+      "Bachillerato 20",
+      "Bachillerato 21",
+      "Bachillerato 22",
+      "Bachillerato 23",
+      "Bachillerato 24",
+      "Bachillerato 25",
+      "Bachillerato 26",
+      "Bachillerato 27",
+      "Bachillerato 28",
+      "Bachillerato 29",
+      "Bachillerato 3",
+      "Bachillerato 30",
+      "Bachillerato 31",
+      "Bachillerato 32",
+      "Bachillerato 33",
+      "Bachillerato 34",
+      "Bachillerato 35",
+      "Bachillerato 4",
+      "Bachillerato 5",
+      "Bachillerato 6",
+      "Bachillerato 7",
+      "Bachillerato 8",
+      "Bachillerato 9",
+      "IUBA Bachillerato"
+    ],
+    "formulaCells": 0,
+    "sheets": [
+      {
+        "name": "Sheet 01",
+        "nonEmptyRows": 7,
+        "columnsObserved": 4,
+        "sampleHeaders": [],
+        "headerRows": [],
+        "numericCells": 0,
+        "textCells": 12,
+        "formulaCells": 0,
+        "table": {
+          "headerRow": 7,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL"
+              },
+              {
+                "label": "No. PTC"
+              },
+              {
+                "label": "NOMBRE DEL DOCENTE"
+              },
+              {
+                "label": "NIVEL"
+              }
+            ]
+          ],
+          "columns": [
+            {
+              "key": "plantel",
+              "label": "PLANTEL",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "no_ptc",
+              "label": "No. PTC",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "nombre_del_docente",
+              "label": "NOMBRE DEL DOCENTE",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "nivel",
+              "label": "NIVEL",
+              "type": "text",
+              "private": false
+            }
+          ],
+          "initialRows": [
+            {
+              "plantel": "Bachillerato 1,2,3,4,5,6,7,8,9,10…....35, Instituto Universitario de Bellas Artes (IUBA), EscuelaTéctica de Enfermería(ETE)",
+              "no_ptc": "1,2,3,4,5",
+              "nombre_del_docente": "",
+              "nivel": "1,2,3"
+            }
+          ]
+        },
+        "codeDescriptions": [],
+        "activityDescriptions": []
+      },
+      {
+        "name": "Sheet 02",
+        "nonEmptyRows": 7,
+        "columnsObserved": 3,
+        "sampleHeaders": [],
+        "headerRows": [],
+        "numericCells": 0,
+        "textCells": 10,
+        "formulaCells": 0,
+        "table": {
+          "headerRow": 7,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL"
+              },
+              {
+                "label": "No. de Docentes"
+              },
+              {
+                "label": "NOMBRE DEL DOCENTE"
+              }
+            ]
+          ],
+          "columns": [
+            {
+              "key": "plantel",
+              "label": "PLANTEL",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "no_de_docentes",
+              "label": "No. de Docentes",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "nombre_del_docente",
+              "label": "NOMBRE DEL DOCENTE",
+              "type": "text",
+              "private": false
+            }
+          ],
+          "initialRows": [
+            {
+              "plantel": "Bachillerato 1,2,3,4,5,6,7,8,9,10…....35, Instituto Universitario de Bellas Artes (IUBA), EscuelaTéctica de Enfermería(ETE)",
+              "no_de_docentes": "1,2,3,4,5",
+              "nombre_del_docente": ""
+            }
+          ]
+        },
+        "codeDescriptions": [],
+        "activityDescriptions": []
+      },
+      {
+        "name": "Sheet 03",
+        "nonEmptyRows": 7,
+        "columnsObserved": 3,
+        "sampleHeaders": [],
+        "headerRows": [],
+        "numericCells": 0,
+        "textCells": 10,
+        "formulaCells": 0,
+        "table": {
+          "headerRow": 7,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL"
+              },
+              {
+                "label": "No. de Docentes"
+              },
+              {
+                "label": "NOMBRE DEL DOCENTE"
+              }
+            ]
+          ],
+          "columns": [
+            {
+              "key": "plantel",
+              "label": "PLANTEL",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "no_de_docentes",
+              "label": "No. de Docentes",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "nombre_del_docente",
+              "label": "NOMBRE DEL DOCENTE",
+              "type": "text",
+              "private": false
+            }
+          ],
+          "initialRows": [
+            {
+              "plantel": "Bachillerato 1,2,3,4,5,6,7,8,9,10…....35, Instituto Universitario de Bellas Artes (IUBA), EscuelaTéctica de Enfermería(ETE)",
+              "no_de_docentes": "1,2,3,4,5",
+              "nombre_del_docente": ""
+            }
+          ]
+        },
+        "codeDescriptions": [],
+        "activityDescriptions": []
+      }
+    ],
+    "privacy": "Frontend fallback exposes aggregate workbook structure only."
+  },
+  {
+    "id": "a2a43e4eeb788e8a",
+    "sourceLabel": "Indicadores / Daniela Navarro / workbook 24",
+    "sourcePathHash": "a2a43e4eeb788e8a41aaece62f16dab30fd86d0af4a9f820c63312e7ce0e8330",
+    "category": "Indicadores / Daniela Navarro",
+    "sizeBytes": 9878,
+    "detectedIndicatorCodes": [
+      "1.1.2.0.3"
+    ],
+    "detectedReferenceCodes": [],
+    "detectedPlanteles": [],
+    "formulaCells": 0,
+    "sheets": [
+      {
+        "name": "Sheet 01",
+        "nonEmptyRows": 5,
+        "columnsObserved": 5,
+        "sampleHeaders": [],
+        "headerRows": [],
+        "numericCells": 0,
+        "textCells": 9,
+        "formulaCells": 0,
+        "table": {
+          "headerRow": 4,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL",
+                "rowspan": 2
+              },
+              {
+                "label": "ESTRATEGIAS PARA COMBATIR EL ABANDONO ESCOLAR",
+                "rowspan": 2
+              },
+              {
+                "label": "CANTIDAD DE ALUMNOS",
+                "colspan": 3
+              }
+            ],
+            [
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "TOTAL"
+              }
+            ]
+          ],
+          "columns": [
+            {
+              "key": "plantel",
+              "label": "PLANTEL",
+              "type": "readonly",
+              "private": false
+            },
+            {
+              "key": "estrategias_para_combatir_el_abandono_escolar",
+              "label": "ESTRATEGIAS PARA COMBATIR EL ABANDONO ESCOLAR",
+              "type": "text",
+              "private": false
+            },
+            {
+              "key": "cantidad_de_alumnos_mujeres",
+              "label": "MUJERES",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "cantidad_de_alumnos_hombres",
+              "label": "HOMBRES",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "cantidad_de_alumnos_total",
+              "label": "TOTAL",
+              "type": "number",
+              "private": false
+            }
+          ],
+          "initialRows": [
+            {
+              "plantel": "",
+              "estrategias_para_combatir_el_abandono_escolar": "",
+              "cantidad_de_alumnos_mujeres": "",
+              "cantidad_de_alumnos_hombres": "",
+              "cantidad_de_alumnos_total": ""
+            }
+          ]
+        },
+        "codeDescriptions": [],
+        "activityDescriptions": []
+      }
+    ],
+    "privacy": "Frontend fallback exposes aggregate workbook structure only."
+  },
+  {
     "id": "dd82c9722fbd33a6",
-    "sourceLabel": "Indicadores / Adriana Ruiz / workbook 10",
+    "sourceLabel": "Indicadores / Adriana Ruiz / workbook 25",
     "sourcePathHash": "dd82c9722fbd33a68fc5dfb57a707abbaad8b3eb6db81f5b3563aaea18ee943a",
     "category": "Indicadores / Adriana Ruiz",
     "sizeBytes": 21227,
@@ -6646,1349 +9428,13 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
   },
   {
-    "id": "489662be6eddbf28",
-    "sourceLabel": "Indicadores / Adriana Ruiz / workbook 11",
-    "sourcePathHash": "489662be6eddbf285ccac58f1981a97b32692033158ca682bd7129090f2467e8",
-    "category": "Indicadores / Adriana Ruiz",
-    "sizeBytes": 21023,
-    "detectedIndicatorCodes": [
-      "1.1.1.1.1"
-    ],
-    "detectedReferenceCodes": [],
-    "detectedPlanteles": [],
-    "formulaCells": 0,
-    "sheets": [
-      {
-        "name": "Sheet 01",
-        "nonEmptyRows": 22,
-        "columnsObserved": 12,
-        "sampleHeaders": [],
-        "headerRows": [],
-        "numericCells": 0,
-        "textCells": 34,
-        "formulaCells": 0,
-        "table": {
-          "headerRow": 9,
-          "headerRows": [
-            [
-              {
-                "label": "PLANTEL",
-                "rowspan": 2
-              },
-              {
-                "label": "NOMBRE DEL PROGRAMA",
-                "rowspan": 2
-              },
-              {
-                "label": "No. DE ACADEMIAS POR PLANTEL",
-                "rowspan": 2
-              },
-              {
-                "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS",
-                "colspan": 3
-              },
-              {
-                "label": "No. DE SESIONES ORDINARIAS",
-                "rowspan": 2
-              },
-              {
-                "label": "No. SESIONES EXTRAORDINARIAS",
-                "rowspan": 2
-              },
-              {
-                "label": "ACTIVIDADES DE TRABAJO REALIZADAS (mencionar la actividad)",
-                "rowspan": 2
-              },
-              {
-                "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS",
-                "colspan": 2
-              },
-              {
-                "label": "TOTAL",
-                "rowspan": 2
-              }
-            ],
-            [
-              {
-                "label": "ÁREA DE FORMACIÓN"
-              },
-              {
-                "label": "SEMESTRE"
-              },
-              {
-                "label": "CAMPO DISCIPLINAR"
-              },
-              {
-                "label": "H"
-              },
-              {
-                "label": "M"
-              }
-            ]
-          ],
-          "columns": [
-            {
-              "key": "plantel",
-              "label": "PLANTEL",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "nombre_del_programa",
-              "label": "NOMBRE DEL PROGRAMA",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "no_de_academias_por_plantel",
-              "label": "No. DE ACADEMIAS POR PLANTEL",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "tipo_de_integracion_de_academias_area_de_formaci",
-              "label": "ÁREA DE FORMACIÓN",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "tipo_de_integracion_de_academias_semestre",
-              "label": "SEMESTRE",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "tipo_de_integracion_de_academias_campo_disciplin",
-              "label": "CAMPO DISCIPLINAR",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "no_de_sesiones_ordinarias",
-              "label": "No. DE SESIONES ORDINARIAS",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "no_sesiones_extraordinarias",
-              "label": "No. SESIONES EXTRAORDINARIAS",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "actividades_de_trabajo_realizadas_mencionar_la_a",
-              "label": "ACTIVIDADES DE TRABAJO REALIZADAS (mencionar la actividad)",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "docentes_que_participaron_en_las_academias_h",
-              "label": "H",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "docentes_que_participaron_en_las_academias_m",
-              "label": "M",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total",
-              "label": "TOTAL",
-              "type": "number",
-              "private": false
-            }
-          ],
-          "initialRows": [
-            {
-              "plantel": "INDICACIONES PARA EL LLENADO DEL FORMATO DE CONCENTRADO DE ACADEMIAS POR PLANTEL",
-              "nombre_del_programa": "",
-              "no_de_academias_por_plantel": "",
-              "tipo_de_integracion_de_academias_area_de_formaci": "",
-              "tipo_de_integracion_de_academias_semestre": "",
-              "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias": "",
-              "no_sesiones_extraordinarias": "",
-              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-              "docentes_que_participaron_en_las_academias_h": "",
-              "docentes_que_participaron_en_las_academias_m": "",
-              "total": ""
-            },
-            {
-              "plantel": "DATOS DE IDENTIFICACIÓN DE ACADEMIAS",
-              "nombre_del_programa": "",
-              "no_de_academias_por_plantel": "",
-              "tipo_de_integracion_de_academias_area_de_formaci": "",
-              "tipo_de_integracion_de_academias_semestre": "",
-              "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias": "",
-              "no_sesiones_extraordinarias": "",
-              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-              "docentes_que_participaron_en_las_academias_h": "",
-              "docentes_que_participaron_en_las_academias_m": "",
-              "total": ""
-            },
-            {
-              "plantel": "Periodo escolar: Señalar el periodo y año en el que se ubica la academia",
-              "nombre_del_programa": "",
-              "no_de_academias_por_plantel": "",
-              "tipo_de_integracion_de_academias_area_de_formaci": "",
-              "tipo_de_integracion_de_academias_semestre": "",
-              "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias": "",
-              "no_sesiones_extraordinarias": "",
-              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-              "docentes_que_participaron_en_las_academias_h": "",
-              "docentes_que_participaron_en_las_academias_m": "",
-              "total": ""
-            },
-            {
-              "plantel": "Plantel: Escribir el nombre del plantel en el cual se encuentran conformadas las academias.",
-              "nombre_del_programa": "",
-              "no_de_academias_por_plantel": "",
-              "tipo_de_integracion_de_academias_area_de_formaci": "",
-              "tipo_de_integracion_de_academias_semestre": "",
-              "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias": "",
-              "no_sesiones_extraordinarias": "",
-              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-              "docentes_que_participaron_en_las_academias_h": "",
-              "docentes_que_participaron_en_las_academias_m": "",
-              "total": ""
-            },
-            {
-              "plantel": "Programa educativo: Escribir el nombre del plan de estudios correspondiente.",
-              "nombre_del_programa": "",
-              "no_de_academias_por_plantel": "",
-              "tipo_de_integracion_de_academias_area_de_formaci": "",
-              "tipo_de_integracion_de_academias_semestre": "",
-              "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias": "",
-              "no_sesiones_extraordinarias": "",
-              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-              "docentes_que_participaron_en_las_academias_h": "",
-              "docentes_que_participaron_en_las_academias_m": "",
-              "total": ""
-            },
-            {
-              "plantel": "Tipos de integración de academias: Marcar los tipos de academias implementadas en el plantel por programa educativo.",
-              "nombre_del_programa": "",
-              "no_de_academias_por_plantel": "",
-              "tipo_de_integracion_de_academias_area_de_formaci": "",
-              "tipo_de_integracion_de_academias_semestre": "",
-              "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias": "",
-              "no_sesiones_extraordinarias": "",
-              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-              "docentes_que_participaron_en_las_academias_h": "",
-              "docentes_que_participaron_en_las_academias_m": "",
-              "total": ""
-            },
-            {
-              "plantel": "Sesiones ordinarias: Escribir el número de sesiones realizadas durante el semestre de manera habitual.",
-              "nombre_del_programa": "",
-              "no_de_academias_por_plantel": "",
-              "tipo_de_integracion_de_academias_area_de_formaci": "",
-              "tipo_de_integracion_de_academias_semestre": "",
-              "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias": "",
-              "no_sesiones_extraordinarias": "",
-              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-              "docentes_que_participaron_en_las_academias_h": "",
-              "docentes_que_participaron_en_las_academias_m": "",
-              "total": ""
-            },
-            {
-              "plantel": "Sesiones extraordinarias: Escribir el número de sesiones realizadas para asuntos especiales o urgentes.",
-              "nombre_del_programa": "",
-              "no_de_academias_por_plantel": "",
-              "tipo_de_integracion_de_academias_area_de_formaci": "",
-              "tipo_de_integracion_de_academias_semestre": "",
-              "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias": "",
-              "no_sesiones_extraordinarias": "",
-              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-              "docentes_que_participaron_en_las_academias_h": "",
-              "docentes_que_participaron_en_las_academias_m": "",
-              "total": ""
-            }
-          ]
-        },
-        "codeDescriptions": [],
-        "activityDescriptions": []
-      },
-      {
-        "name": "Sheet 02",
-        "nonEmptyRows": 23,
-        "columnsObserved": 12,
-        "sampleHeaders": [],
-        "headerRows": [],
-        "numericCells": 0,
-        "textCells": 35,
-        "formulaCells": 0,
-        "table": {
-          "headerRow": 10,
-          "headerRows": [
-            [
-              {
-                "label": "PLANTEL",
-                "rowspan": 2
-              },
-              {
-                "label": "NOMBRE DEL PROGRAMA",
-                "rowspan": 2
-              },
-              {
-                "label": "No. DE ACADEMIAS POR PLANTEL",
-                "rowspan": 2
-              },
-              {
-                "label": "TIPO DE INTEGRACIÓN DE ACADEMIAS",
-                "colspan": 3
-              },
-              {
-                "label": "No. DE SESIONES ORDINARIAS",
-                "rowspan": 2
-              },
-              {
-                "label": "No. SESIONES EXTRAORDINARIAS",
-                "rowspan": 2
-              },
-              {
-                "label": "ACTIVIDADES DE TRABAJO REALIZADAS (mencionar la actividad)",
-                "rowspan": 2
-              },
-              {
-                "label": "DOCENTES QUE PARTICIPARON EN LAS ACADEMIAS",
-                "colspan": 2
-              },
-              {
-                "label": "TOTAL",
-                "rowspan": 2
-              }
-            ],
-            [
-              {
-                "label": "ÁREA DE FORMACIÓN"
-              },
-              {
-                "label": "SEMESTRE"
-              },
-              {
-                "label": "CAMPO DISCIPLINAR"
-              },
-              {
-                "label": "H"
-              },
-              {
-                "label": "M"
-              }
-            ]
-          ],
-          "columns": [
-            {
-              "key": "plantel",
-              "label": "PLANTEL",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "nombre_del_programa",
-              "label": "NOMBRE DEL PROGRAMA",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "no_de_academias_por_plantel",
-              "label": "No. DE ACADEMIAS POR PLANTEL",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "tipo_de_integracion_de_academias_area_de_formaci",
-              "label": "ÁREA DE FORMACIÓN",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "tipo_de_integracion_de_academias_semestre",
-              "label": "SEMESTRE",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "tipo_de_integracion_de_academias_campo_disciplin",
-              "label": "CAMPO DISCIPLINAR",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "no_de_sesiones_ordinarias",
-              "label": "No. DE SESIONES ORDINARIAS",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "no_sesiones_extraordinarias",
-              "label": "No. SESIONES EXTRAORDINARIAS",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "actividades_de_trabajo_realizadas_mencionar_la_a",
-              "label": "ACTIVIDADES DE TRABAJO REALIZADAS (mencionar la actividad)",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "docentes_que_participaron_en_las_academias_h",
-              "label": "H",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "docentes_que_participaron_en_las_academias_m",
-              "label": "M",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total",
-              "label": "TOTAL",
-              "type": "number",
-              "private": false
-            }
-          ],
-          "initialRows": [
-            {
-              "plantel": "INDICACIONES PARA EL LLENADO DEL FORMATO DE CONCENTRADO DE ACADEMIAS POR PLANTEL",
-              "nombre_del_programa": "",
-              "no_de_academias_por_plantel": "",
-              "tipo_de_integracion_de_academias_area_de_formaci": "",
-              "tipo_de_integracion_de_academias_semestre": "",
-              "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias": "",
-              "no_sesiones_extraordinarias": "",
-              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-              "docentes_que_participaron_en_las_academias_h": "",
-              "docentes_que_participaron_en_las_academias_m": "",
-              "total": ""
-            },
-            {
-              "plantel": "DATOS DE IDENTIFICACIÓN DE ACADEMIAS",
-              "nombre_del_programa": "",
-              "no_de_academias_por_plantel": "",
-              "tipo_de_integracion_de_academias_area_de_formaci": "",
-              "tipo_de_integracion_de_academias_semestre": "",
-              "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias": "",
-              "no_sesiones_extraordinarias": "",
-              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-              "docentes_que_participaron_en_las_academias_h": "",
-              "docentes_que_participaron_en_las_academias_m": "",
-              "total": ""
-            },
-            {
-              "plantel": "Periodo escolar: Señalar el periodo y año en el que se ubica la academia",
-              "nombre_del_programa": "",
-              "no_de_academias_por_plantel": "",
-              "tipo_de_integracion_de_academias_area_de_formaci": "",
-              "tipo_de_integracion_de_academias_semestre": "",
-              "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias": "",
-              "no_sesiones_extraordinarias": "",
-              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-              "docentes_que_participaron_en_las_academias_h": "",
-              "docentes_que_participaron_en_las_academias_m": "",
-              "total": ""
-            },
-            {
-              "plantel": "Plantel: Escribir el nombre del plantel en el cual se encuentran conformadas las academias.",
-              "nombre_del_programa": "",
-              "no_de_academias_por_plantel": "",
-              "tipo_de_integracion_de_academias_area_de_formaci": "",
-              "tipo_de_integracion_de_academias_semestre": "",
-              "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias": "",
-              "no_sesiones_extraordinarias": "",
-              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-              "docentes_que_participaron_en_las_academias_h": "",
-              "docentes_que_participaron_en_las_academias_m": "",
-              "total": ""
-            },
-            {
-              "plantel": "Programa educativo: Escribir el nombre del plan de estudios correspondiente.",
-              "nombre_del_programa": "",
-              "no_de_academias_por_plantel": "",
-              "tipo_de_integracion_de_academias_area_de_formaci": "",
-              "tipo_de_integracion_de_academias_semestre": "",
-              "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias": "",
-              "no_sesiones_extraordinarias": "",
-              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-              "docentes_que_participaron_en_las_academias_h": "",
-              "docentes_que_participaron_en_las_academias_m": "",
-              "total": ""
-            },
-            {
-              "plantel": "Tipos de integración de academias: Marcar los tipos de academias implementadas en el plantel por programa educativo.",
-              "nombre_del_programa": "",
-              "no_de_academias_por_plantel": "",
-              "tipo_de_integracion_de_academias_area_de_formaci": "",
-              "tipo_de_integracion_de_academias_semestre": "",
-              "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias": "",
-              "no_sesiones_extraordinarias": "",
-              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-              "docentes_que_participaron_en_las_academias_h": "",
-              "docentes_que_participaron_en_las_academias_m": "",
-              "total": ""
-            },
-            {
-              "plantel": "Sesiones ordinarias: Escribir el número de sesiones realizadas durante el semestre de manera habitual.",
-              "nombre_del_programa": "",
-              "no_de_academias_por_plantel": "",
-              "tipo_de_integracion_de_academias_area_de_formaci": "",
-              "tipo_de_integracion_de_academias_semestre": "",
-              "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias": "",
-              "no_sesiones_extraordinarias": "",
-              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-              "docentes_que_participaron_en_las_academias_h": "",
-              "docentes_que_participaron_en_las_academias_m": "",
-              "total": ""
-            },
-            {
-              "plantel": "Sesiones extraordinarias: Escribir el número de sesiones realizadas para asuntos especiales o urgentes.",
-              "nombre_del_programa": "",
-              "no_de_academias_por_plantel": "",
-              "tipo_de_integracion_de_academias_area_de_formaci": "",
-              "tipo_de_integracion_de_academias_semestre": "",
-              "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias": "",
-              "no_sesiones_extraordinarias": "",
-              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-              "docentes_que_participaron_en_las_academias_h": "",
-              "docentes_que_participaron_en_las_academias_m": "",
-              "total": ""
-            },
-            {
-              "plantel": "Actividades de trabajo realizadas: Rde a cuerdo a las necesidades del plantel, registrar las actividades que se realizaron durante el semestre.",
-              "nombre_del_programa": "",
-              "no_de_academias_por_plantel": "",
-              "tipo_de_integracion_de_academias_area_de_formaci": "",
-              "tipo_de_integracion_de_academias_semestre": "",
-              "tipo_de_integracion_de_academias_campo_disciplin": "",
-              "no_de_sesiones_ordinarias": "",
-              "no_sesiones_extraordinarias": "",
-              "actividades_de_trabajo_realizadas_mencionar_la_a": "",
-              "docentes_que_participaron_en_las_academias_h": "",
-              "docentes_que_participaron_en_las_academias_m": "",
-              "total": ""
-            }
-          ]
-        },
-        "codeDescriptions": [],
-        "activityDescriptions": []
-      },
-      {
-        "name": "Sheet 03",
-        "nonEmptyRows": 0,
-        "columnsObserved": 0,
-        "sampleHeaders": [],
-        "headerRows": [],
-        "numericCells": 0,
-        "textCells": 0,
-        "formulaCells": 0,
-        "table": null,
-        "codeDescriptions": [],
-        "activityDescriptions": []
-      }
-    ],
-    "privacy": "Frontend fallback exposes aggregate workbook structure only."
-  },
-  {
-    "id": "7639e7192d5d8ccf",
-    "sourceLabel": "Indicadores / Adriana Ruiz / workbook 12",
-    "sourcePathHash": "7639e7192d5d8ccf6e1ede08a97aecfabf76ce23f7414d7f6413aa4f99c024a1",
-    "category": "Indicadores / Adriana Ruiz",
-    "sizeBytes": 12716,
-    "detectedIndicatorCodes": [
-      "1.0.0.0.2"
-    ],
-    "detectedReferenceCodes": [],
-    "detectedPlanteles": [
-      "Bachillerato 1",
-      "Bachillerato 10",
-      "Bachillerato 11",
-      "Bachillerato 12",
-      "Bachillerato 13",
-      "Bachillerato 14",
-      "Bachillerato 15",
-      "Bachillerato 16",
-      "Bachillerato 17",
-      "Bachillerato 18",
-      "Bachillerato 19",
-      "Bachillerato 2",
-      "Bachillerato 20",
-      "Bachillerato 21",
-      "Bachillerato 22",
-      "Bachillerato 23",
-      "Bachillerato 24",
-      "Bachillerato 25",
-      "Bachillerato 26",
-      "Bachillerato 27",
-      "Bachillerato 28",
-      "Bachillerato 29",
-      "Bachillerato 3",
-      "Bachillerato 30",
-      "Bachillerato 31",
-      "Bachillerato 32",
-      "Bachillerato 33",
-      "Bachillerato 34",
-      "Bachillerato 35",
-      "Bachillerato 4",
-      "Bachillerato 5",
-      "Bachillerato 6",
-      "Bachillerato 7",
-      "Bachillerato 8",
-      "Bachillerato 9",
-      "IUBA Bachillerato"
-    ],
-    "formulaCells": 0,
-    "sheets": [
-      {
-        "name": "Sheet 01",
-        "nonEmptyRows": 14,
-        "columnsObserved": 10,
-        "sampleHeaders": [],
-        "headerRows": [],
-        "numericCells": 0,
-        "textCells": 27,
-        "formulaCells": 0,
-        "table": {
-          "headerRow": 8,
-          "headerRows": [
-            [
-              {
-                "label": "Delegación",
-                "rowspan": 3
-              },
-              {
-                "label": "Plantel",
-                "rowspan": 3
-              },
-              {
-                "label": "Programa Educativo",
-                "rowspan": 3
-              },
-              {
-                "label": "Egresados titulados en el año 2025",
-                "colspan": 3,
-                "rowspan": 2
-              },
-              {
-                "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas",
-                "colspan": 3,
-                "rowspan": 2
-              },
-              {
-                "label": "% de titulación por cohorte",
-                "rowspan": 3
-              }
-            ],
-            [
-              {
-                "label": "Mujeres"
-              },
-              {
-                "label": "Hombres"
-              },
-              {
-                "label": "Total"
-              },
-              {
-                "label": "Mujeres"
-              },
-              {
-                "label": "Hombres"
-              },
-              {
-                "label": "Total"
-              }
-            ]
-          ],
-          "columns": [
-            {
-              "key": "delegacion",
-              "label": "Delegación",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "plantel",
-              "label": "Plantel",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "programa_educativo",
-              "label": "Programa Educativo",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "egresados_titulados_en_el_ano_2025_mujeres",
-              "label": "Mujeres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "egresados_titulados_en_el_ano_2025_hombres",
-              "label": "Hombres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "egresados_titulados_en_el_ano_2025_total",
-              "label": "Total",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "matricula_de_primer_ingreso_de_la_misma_cohorte_",
-              "label": "Mujeres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "matricula_de_primer_ingreso_de_la_misma_cohorte__2",
-              "label": "Hombres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "matricula_de_primer_ingreso_de_la_misma_cohorte__3",
-              "label": "Total",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "de_titulacion_por_cohorte",
-              "label": "% de titulación por cohorte",
-              "type": "text",
-              "private": false
-            }
-          ],
-          "initialRows": [
-            {
-              "delegacion": "1,2,3,4,5",
-              "plantel": "Bachillerato 1,2,3,4,5,6,7,8,9,10…....35, Instituto Universitario de Bellas Artes (IUBA), EscuelaTéctica de Enfermería(ETE)",
-              "programa_educativo": "Bachilerato Técnico Analista Químico.",
-              "egresados_titulados_en_el_ano_2025_mujeres": "",
-              "egresados_titulados_en_el_ano_2025_hombres": "",
-              "egresados_titulados_en_el_ano_2025_total": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-              "de_titulacion_por_cohorte": ""
-            },
-            {
-              "delegacion": "",
-              "plantel": "",
-              "programa_educativo": "Bachillerato Tpecnico Analista Programador",
-              "egresados_titulados_en_el_ano_2025_mujeres": "",
-              "egresados_titulados_en_el_ano_2025_hombres": "",
-              "egresados_titulados_en_el_ano_2025_total": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-              "de_titulacion_por_cohorte": "Egresados titulados / Matrícula de primer ingreso*100"
-            },
-            {
-              "delegacion": "",
-              "plantel": "",
-              "programa_educativo": "Bachillerato Técnico en Dibujo",
-              "egresados_titulados_en_el_ano_2025_mujeres": "",
-              "egresados_titulados_en_el_ano_2025_hombres": "",
-              "egresados_titulados_en_el_ano_2025_total": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-              "de_titulacion_por_cohorte": ""
-            },
-            {
-              "delegacion": "",
-              "plantel": "",
-              "programa_educativo": "Bachillerato Técnico en Electromecánica",
-              "egresados_titulados_en_el_ano_2025_mujeres": "",
-              "egresados_titulados_en_el_ano_2025_hombres": "",
-              "egresados_titulados_en_el_ano_2025_total": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-              "de_titulacion_por_cohorte": ""
-            },
-            {
-              "delegacion": "",
-              "plantel": "",
-              "programa_educativo": "Bachillerato Técnico en Música",
-              "egresados_titulados_en_el_ano_2025_mujeres": "",
-              "egresados_titulados_en_el_ano_2025_hombres": "",
-              "egresados_titulados_en_el_ano_2025_total": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-              "de_titulacion_por_cohorte": ""
-            },
-            {
-              "delegacion": "",
-              "plantel": "",
-              "programa_educativo": "Bachillerato Técnico en Enfermería General",
-              "egresados_titulados_en_el_ano_2025_mujeres": "",
-              "egresados_titulados_en_el_ano_2025_hombres": "",
-              "egresados_titulados_en_el_ano_2025_total": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte_": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte__2": "",
-              "matricula_de_primer_ingreso_de_la_misma_cohorte__3": "",
-              "de_titulacion_por_cohorte": ""
-            }
-          ]
-        },
-        "codeDescriptions": [],
-        "activityDescriptions": []
-      },
-      {
-        "name": "Sheet 02",
-        "nonEmptyRows": 13,
-        "columnsObserved": 5,
-        "sampleHeaders": [],
-        "headerRows": [],
-        "numericCells": 0,
-        "textCells": 20,
-        "formulaCells": 0,
-        "table": {
-          "headerRow": 8,
-          "headerRows": [
-            [
-              {
-                "label": "Delegación"
-              },
-              {
-                "label": "Plantel"
-              },
-              {
-                "label": "Programa Educativo"
-              },
-              {
-                "label": "Estrategias"
-              },
-              {
-                "label": "Acciones implementadas"
-              }
-            ]
-          ],
-          "columns": [
-            {
-              "key": "delegacion",
-              "label": "Delegación",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "plantel",
-              "label": "Plantel",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "programa_educativo",
-              "label": "Programa Educativo",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "estrategias",
-              "label": "Estrategias",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "acciones_implementadas",
-              "label": "Acciones implementadas",
-              "type": "text",
-              "private": false
-            }
-          ],
-          "initialRows": [
-            {
-              "delegacion": "1,2,3,4,5",
-              "plantel": "Bachillerato 1,2,3,4,5,6,7,8,9,10…....35, Instituto Universitario de Bellas Artes (IUBA), EscuelaTéctica de Enfermería(ETE)",
-              "programa_educativo": "Bachilerato Técnico Analista Químico.",
-              "estrategias": "",
-              "acciones_implementadas": ""
-            },
-            {
-              "delegacion": "",
-              "plantel": "",
-              "programa_educativo": "Bachillerato Tpecnico Analista Programador",
-              "estrategias": "",
-              "acciones_implementadas": ""
-            },
-            {
-              "delegacion": "",
-              "plantel": "",
-              "programa_educativo": "Bachillerato Técnico en Dibujo",
-              "estrategias": "",
-              "acciones_implementadas": ""
-            },
-            {
-              "delegacion": "",
-              "plantel": "",
-              "programa_educativo": "Bachillerato Técnico en Electromecánica",
-              "estrategias": "",
-              "acciones_implementadas": ""
-            },
-            {
-              "delegacion": "",
-              "plantel": "",
-              "programa_educativo": "Bachillerato Técnico en Música",
-              "estrategias": "",
-              "acciones_implementadas": ""
-            },
-            {
-              "delegacion": "",
-              "plantel": "",
-              "programa_educativo": "Bachillerato Técnico en Enfermería General",
-              "estrategias": "",
-              "acciones_implementadas": ""
-            }
-          ]
-        },
-        "codeDescriptions": [],
-        "activityDescriptions": []
-      }
-    ],
-    "privacy": "Frontend fallback exposes aggregate workbook structure only."
-  },
-  {
-    "id": "2a7229ad36bbc3c2",
-    "sourceLabel": "Indicadores / Daniela Navarro / workbook 13",
-    "sourcePathHash": "2a7229ad36bbc3c237708338f144440471a96dccc18bc0a66e801e7e277bc375",
-    "category": "Indicadores / Daniela Navarro",
-    "sizeBytes": 10148,
-    "detectedIndicatorCodes": [
-      "1.1.2.3.1"
-    ],
-    "detectedReferenceCodes": [],
-    "detectedPlanteles": [],
-    "formulaCells": 0,
-    "sheets": [
-      {
-        "name": "Sheet 01",
-        "nonEmptyRows": 5,
-        "columnsObserved": 10,
-        "sampleHeaders": [],
-        "headerRows": [],
-        "numericCells": 0,
-        "textCells": 15,
-        "formulaCells": 0,
-        "table": {
-          "headerRow": 4,
-          "headerRows": [
-            [
-              {
-                "label": "PLANTEL",
-                "rowspan": 2
-              },
-              {
-                "label": "NOMBRE DE LA CONVOCATORIA REALIZADA",
-                "rowspan": 2
-              },
-              {
-                "label": "CANTIDAD DE PARTICIPANTES",
-                "colspan": 5
-              },
-              {
-                "label": "CANTIDAD DE ALUMNOS PARTICIPANTES",
-                "colspan": 3
-              }
-            ],
-            [
-              {
-                "label": "DOCENTES"
-              },
-              {
-                "label": "ADMINISTRATIVOS"
-              },
-              {
-                "label": "COORDINADORES ACADÉMICOS"
-              },
-              {
-                "label": "ASESORES PEDAGÓGICOS"
-              },
-              {
-                "label": "OTRO PERSONAL"
-              },
-              {
-                "label": "HOMBRES"
-              },
-              {
-                "label": "MUJERES"
-              },
-              {
-                "label": "TOTAL"
-              }
-            ]
-          ],
-          "columns": [
-            {
-              "key": "plantel",
-              "label": "PLANTEL",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "nombre_de_la_convocatoria_realizada",
-              "label": "NOMBRE DE LA CONVOCATORIA REALIZADA",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "cantidad_de_participantes_docentes",
-              "label": "DOCENTES",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "cantidad_de_participantes_administrativos",
-              "label": "ADMINISTRATIVOS",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "cantidad_de_participantes_coordinadores_academic",
-              "label": "COORDINADORES ACADÉMICOS",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "cantidad_de_participantes_asesores_pedagogicos",
-              "label": "ASESORES PEDAGÓGICOS",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "cantidad_de_participantes_otro_personal",
-              "label": "OTRO PERSONAL",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "cantidad_de_alumnos_participantes_hombres",
-              "label": "HOMBRES",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "cantidad_de_alumnos_participantes_mujeres",
-              "label": "MUJERES",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "cantidad_de_alumnos_participantes_total",
-              "label": "TOTAL",
-              "type": "number",
-              "private": false
-            }
-          ],
-          "initialRows": [
-            {
-              "plantel": "",
-              "nombre_de_la_convocatoria_realizada": "",
-              "cantidad_de_participantes_docentes": "",
-              "cantidad_de_participantes_administrativos": "",
-              "cantidad_de_participantes_coordinadores_academic": "",
-              "cantidad_de_participantes_asesores_pedagogicos": "",
-              "cantidad_de_participantes_otro_personal": "",
-              "cantidad_de_alumnos_participantes_hombres": "",
-              "cantidad_de_alumnos_participantes_mujeres": "",
-              "cantidad_de_alumnos_participantes_total": ""
-            }
-          ]
-        },
-        "codeDescriptions": [],
-        "activityDescriptions": []
-      }
-    ],
-    "privacy": "Frontend fallback exposes aggregate workbook structure only."
-  },
-  {
-    "id": "6434504c6768b0fb",
-    "sourceLabel": "Indicadores / Carlos Nava / workbook 14",
-    "sourcePathHash": "6434504c6768b0fb41d06d7b583da7f1d1d0ed360ea1f93f29908539f635c840",
-    "category": "Indicadores / Carlos Nava",
-    "sizeBytes": 10472,
-    "detectedIndicatorCodes": [
-      "1.1.2.3.1"
-    ],
-    "detectedReferenceCodes": [],
-    "detectedPlanteles": [],
-    "formulaCells": 0,
-    "sheets": [
-      {
-        "name": "Sheet 01",
-        "nonEmptyRows": 11,
-        "columnsObserved": 7,
-        "sampleHeaders": [],
-        "headerRows": [],
-        "numericCells": 0,
-        "textCells": 21,
-        "formulaCells": 0,
-        "table": {
-          "headerRow": 8,
-          "headerRows": [
-            [
-              {
-                "label": "PLANTEL",
-                "rowspan": 2
-              },
-              {
-                "label": "ESTUDIANTES",
-                "colspan": 2
-              },
-              {
-                "label": "DOCENTES",
-                "colspan": 2
-              },
-              {
-                "label": "institución educativa, otro.",
-                "rowspan": 2
-              },
-              {
-                "label": "la formación del estudiante.",
-                "rowspan": 2
-              }
-            ],
-            [
-              {
-                "label": "M"
-              },
-              {
-                "label": "H"
-              },
-              {
-                "label": "M"
-              },
-              {
-                "label": "H"
-              }
-            ]
-          ],
-          "columns": [
-            {
-              "key": "plantel",
-              "label": "PLANTEL",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "estudiantes_m",
-              "label": "M",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "estudiantes_h",
-              "label": "H",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "docentes_m",
-              "label": "M",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "docentes_h",
-              "label": "H",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "institucion_educativa_otro",
-              "label": "institución educativa, otro.",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "la_formacion_del_estudiante",
-              "label": "la formación del estudiante.",
-              "type": "text",
-              "private": false
-            }
-          ],
-          "initialRows": [
-            {
-              "plantel": "",
-              "estudiantes_m": "",
-              "estudiantes_h": "",
-              "docentes_m": "",
-              "docentes_h": "",
-              "institucion_educativa_otro": "",
-              "la_formacion_del_estudiante": ""
-            }
-          ]
-        },
-        "codeDescriptions": [],
-        "activityDescriptions": [
-          "VIAJES DE ESTUDIO"
-        ]
-      }
-    ],
-    "privacy": "Frontend fallback exposes aggregate workbook structure only."
-  },
-  {
-    "id": "4eb45b2e86e4f3bd",
-    "sourceLabel": "Indicadores / Daniela Navarro / workbook 15",
-    "sourcePathHash": "4eb45b2e86e4f3bd12ccab84a202ac96c4479e31107d2783ec60534206d5d639",
-    "category": "Indicadores / Daniela Navarro",
-    "sizeBytes": 10314,
-    "detectedIndicatorCodes": [
-      "1.1.2.0.1"
-    ],
-    "detectedReferenceCodes": [],
-    "detectedPlanteles": [],
-    "formulaCells": 0,
-    "sheets": [
-      {
-        "name": "Sheet 01",
-        "nonEmptyRows": 6,
-        "columnsObserved": 7,
-        "sampleHeaders": [],
-        "headerRows": [],
-        "numericCells": 0,
-        "textCells": 13,
-        "formulaCells": 0,
-        "table": {
-          "headerRow": 5,
-          "headerRows": [
-            [
-              {
-                "label": "Nombre de la actividad",
-                "rowspan": 3
-              },
-              {
-                "label": "Responsable",
-                "rowspan": 3
-              },
-              {
-                "label": "Cantidad de participantes",
-                "colspan": 4
-              },
-              {
-                "label": "Periodo de realización",
-                "rowspan": 3
-              }
-            ],
-            [
-              {
-                "label": "Alumnado",
-                "colspan": 2
-              },
-              {
-                "label": "Padres, madres y/o tutores",
-                "colspan": 2
-              }
-            ],
-            [
-              {
-                "label": "M"
-              },
-              {
-                "label": "H"
-              },
-              {
-                "label": "M"
-              },
-              {
-                "label": "H"
-              }
-            ]
-          ],
-          "columns": [
-            {
-              "key": "nombre_de_la_actividad",
-              "label": "Nombre de la actividad",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "responsable",
-              "label": "Responsable",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "cantidad_de_participantes_alumnado_m",
-              "label": "M",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "cantidad_de_participantes_alumnado_h",
-              "label": "H",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "cantidad_de_participantes_padres_madres_y_o_tuto",
-              "label": "M",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "cantidad_de_participantes_padres_madres_y_o_tuto_2",
-              "label": "H",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "periodo_de_realizacion",
-              "label": "Periodo de realización",
-              "type": "text",
-              "private": false
-            }
-          ],
-          "initialRows": [
-            {
-              "nombre_de_la_actividad": "",
-              "responsable": "",
-              "cantidad_de_participantes_alumnado_m": "",
-              "cantidad_de_participantes_alumnado_h": "",
-              "cantidad_de_participantes_padres_madres_y_o_tuto": "",
-              "cantidad_de_participantes_padres_madres_y_o_tuto_2": "",
-              "periodo_de_realizacion": ""
-            }
-          ]
-        },
-        "codeDescriptions": [],
-        "activityDescriptions": []
-      }
-    ],
-    "privacy": "Frontend fallback exposes aggregate workbook structure only."
-  },
-  {
-    "id": "1e04cc2a766fb1a1",
-    "sourceLabel": "Indicadores / Oscar Mendoza / workbook 16",
-    "sourcePathHash": "1e04cc2a766fb1a1d4ea54fc481b850605747bbcbd7edaf113a205d05a43984f",
+    "id": "df9cd1a2149f78b0",
+    "sourceLabel": "Indicadores / Oscar Mendoza / workbook 26",
+    "sourcePathHash": "df9cd1a2149f78b0031c723318ddd36177315b134f29d453f5f32fd2fcca5df8",
     "category": "Indicadores / Oscar Mendoza",
-    "sizeBytes": 40035,
+    "sizeBytes": 39928,
     "detectedIndicatorCodes": [
-      "3.1.0.0.1"
+      "1.1.2.2.10"
     ],
     "detectedReferenceCodes": [],
     "detectedPlanteles": [],
@@ -8080,575 +9526,6 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "total_personal_administrativo_mujeres": "",
               "total_personal_administrativo_hombres": "",
               "total_de_participantes": ""
-            }
-          ]
-        },
-        "codeDescriptions": [],
-        "activityDescriptions": []
-      }
-    ],
-    "privacy": "Frontend fallback exposes aggregate workbook structure only."
-  },
-  {
-    "id": "b15f0f9bef98d736",
-    "sourceLabel": "Indicadores / Carlos Nava / workbook 17",
-    "sourcePathHash": "b15f0f9bef98d736ba87fb14004289d68d4e8a4282063a27f44fd603550a1c3b",
-    "category": "Indicadores / Carlos Nava",
-    "sizeBytes": 10610,
-    "detectedIndicatorCodes": [
-      "1.1.2.1.4"
-    ],
-    "detectedReferenceCodes": [],
-    "detectedPlanteles": [],
-    "formulaCells": 0,
-    "sheets": [
-      {
-        "name": "Sheet 01",
-        "nonEmptyRows": 7,
-        "columnsObserved": 10,
-        "sampleHeaders": [],
-        "headerRows": [],
-        "numericCells": 0,
-        "textCells": 18,
-        "formulaCells": 0,
-        "table": {
-          "headerRow": 4,
-          "headerRows": [
-            [
-              {
-                "label": "Plantel",
-                "rowspan": 2
-              },
-              {
-                "label": "Nota: anotar solo la actividad desarrollada. Unidades de salud integral",
-                "colspan": 3
-              },
-              {
-                "label": "Febrero– Agosto 2026",
-                "colspan": 3
-              },
-              {
-                "label": "Agosto- Enero 2027",
-                "colspan": 3
-              }
-            ],
-            [
-              {
-                "label": "SERVICIOS MEDICOS"
-              },
-              {
-                "label": "DGDI"
-              },
-              {
-                "label": "CUAP"
-              },
-              {
-                "label": "M"
-              },
-              {
-                "label": "H"
-              },
-              {
-                "label": "T"
-              },
-              {
-                "label": "M"
-              },
-              {
-                "label": "H"
-              },
-              {
-                "label": "T"
-              }
-            ]
-          ],
-          "columns": [
-            {
-              "key": "plantel",
-              "label": "Plantel",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "nota_anotar_solo_la_actividad_desarrollada_unida",
-              "label": "SERVICIOS MEDICOS",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "nota_anotar_solo_la_actividad_desarrollada_unida_2",
-              "label": "DGDI",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "nota_anotar_solo_la_actividad_desarrollada_unida_3",
-              "label": "CUAP",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "febrero_agosto_2026_m",
-              "label": "M",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "febrero_agosto_2026_h",
-              "label": "H",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "febrero_agosto_2026_t",
-              "label": "T",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "agosto_enero_2027_m",
-              "label": "M",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "agosto_enero_2027_h",
-              "label": "H",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "agosto_enero_2027_t",
-              "label": "T",
-              "type": "number",
-              "private": false
-            }
-          ],
-          "initialRows": [
-            {
-              "plantel": "",
-              "nota_anotar_solo_la_actividad_desarrollada_unida": "",
-              "nota_anotar_solo_la_actividad_desarrollada_unida_2": "",
-              "nota_anotar_solo_la_actividad_desarrollada_unida_3": "",
-              "febrero_agosto_2026_m": "",
-              "febrero_agosto_2026_h": "",
-              "febrero_agosto_2026_t": "",
-              "agosto_enero_2027_m": "",
-              "agosto_enero_2027_h": "",
-              "agosto_enero_2027_t": ""
-            }
-          ]
-        },
-        "codeDescriptions": [],
-        "activityDescriptions": [
-          "PROMOCIÓN DE LA SALUD"
-        ]
-      }
-    ],
-    "privacy": "Frontend fallback exposes aggregate workbook structure only."
-  },
-  {
-    "id": "ab95a3b877794d54",
-    "sourceLabel": "Indicadores / Oscar Mendoza / workbook 18",
-    "sourcePathHash": "ab95a3b877794d54b3203d99a34fb81d732a7af9b929ab527b3b1dc283803109",
-    "category": "Indicadores / Oscar Mendoza",
-    "sizeBytes": 40025,
-    "detectedIndicatorCodes": [
-      "1.1.2.3.1"
-    ],
-    "detectedReferenceCodes": [],
-    "detectedPlanteles": [],
-    "formulaCells": 0,
-    "sheets": [
-      {
-        "name": "Sheet 01",
-        "nonEmptyRows": 6,
-        "columnsObserved": 11,
-        "sampleHeaders": [],
-        "headerRows": [],
-        "numericCells": 0,
-        "textCells": 17,
-        "formulaCells": 0,
-        "table": {
-          "headerRow": 5,
-          "headerRows": [],
-          "columns": [
-            {
-              "key": "plantel",
-              "label": "Plantel",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "nombre_de_la_actividad",
-              "label": "Nombre de la actividad",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "descripcion_de_la_actividad",
-              "label": "Descripción de la actividad",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "total_estudiantes_mujeres",
-              "label": "Total Estudiantes Mujeres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_estudiantes_hombres",
-              "label": "Total Estudiantes Hombres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_docentes_mujeres",
-              "label": "Total Docentes Mujeres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_docentes_hombres",
-              "label": "Total Docentes Hombres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_personal_administrativo_mujeres",
-              "label": "Total Personal Administrativo Mujeres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_personal_administrativo_hombres",
-              "label": "Total Personal Administrativo Hombres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_de_participantes",
-              "label": "TOTAL DE PARTICIPANTES",
-              "type": "number",
-              "private": false
-            }
-          ],
-          "initialRows": [
-            {
-              "plantel": "Bachillerato",
-              "nombre_de_la_actividad": "",
-              "descripcion_de_la_actividad": "",
-              "total_estudiantes_mujeres": "",
-              "total_estudiantes_hombres": "",
-              "total_docentes_mujeres": "",
-              "total_docentes_hombres": "",
-              "total_personal_administrativo_mujeres": "",
-              "total_personal_administrativo_hombres": "",
-              "total_de_participantes": ""
-            }
-          ]
-        },
-        "codeDescriptions": [],
-        "activityDescriptions": []
-      }
-    ],
-    "privacy": "Frontend fallback exposes aggregate workbook structure only."
-  },
-  {
-    "id": "f254c847107dd47b",
-    "sourceLabel": "Indicadores / Adriana Ruiz / workbook 19",
-    "sourcePathHash": "f254c847107dd47b5e199b9bbd7080db62bebf4e00a40245a021c531d75c33d3",
-    "category": "Indicadores / Adriana Ruiz",
-    "sizeBytes": 12824,
-    "detectedIndicatorCodes": [
-      "1.1.2.5.3"
-    ],
-    "detectedReferenceCodes": [],
-    "detectedPlanteles": [
-      "Bachillerato 1",
-      "Bachillerato 10",
-      "Bachillerato 11",
-      "Bachillerato 12",
-      "Bachillerato 13",
-      "Bachillerato 14",
-      "Bachillerato 15",
-      "Bachillerato 16",
-      "Bachillerato 17",
-      "Bachillerato 18",
-      "Bachillerato 19",
-      "Bachillerato 2",
-      "Bachillerato 20",
-      "Bachillerato 21",
-      "Bachillerato 22",
-      "Bachillerato 23",
-      "Bachillerato 24",
-      "Bachillerato 25",
-      "Bachillerato 26",
-      "Bachillerato 27",
-      "Bachillerato 28",
-      "Bachillerato 29",
-      "Bachillerato 3",
-      "Bachillerato 30",
-      "Bachillerato 31",
-      "Bachillerato 32",
-      "Bachillerato 33",
-      "Bachillerato 34",
-      "Bachillerato 35",
-      "Bachillerato 4",
-      "Bachillerato 5",
-      "Bachillerato 6",
-      "Bachillerato 7",
-      "Bachillerato 8",
-      "Bachillerato 9",
-      "IUBA Bachillerato"
-    ],
-    "formulaCells": 0,
-    "sheets": [
-      {
-        "name": "Sheet 01",
-        "nonEmptyRows": 7,
-        "columnsObserved": 4,
-        "sampleHeaders": [],
-        "headerRows": [],
-        "numericCells": 0,
-        "textCells": 12,
-        "formulaCells": 0,
-        "table": {
-          "headerRow": 7,
-          "headerRows": [
-            [
-              {
-                "label": "PLANTEL"
-              },
-              {
-                "label": "No. PTC"
-              },
-              {
-                "label": "NOMBRE DEL DOCENTE"
-              },
-              {
-                "label": "NIVEL"
-              }
-            ]
-          ],
-          "columns": [
-            {
-              "key": "plantel",
-              "label": "PLANTEL",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "no_ptc",
-              "label": "No. PTC",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "nombre_del_docente",
-              "label": "NOMBRE DEL DOCENTE",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "nivel",
-              "label": "NIVEL",
-              "type": "text",
-              "private": false
-            }
-          ],
-          "initialRows": [
-            {
-              "plantel": "Bachillerato 1,2,3,4,5,6,7,8,9,10…....35, Instituto Universitario de Bellas Artes (IUBA), EscuelaTéctica de Enfermería(ETE)",
-              "no_ptc": "1,2,3,4,5",
-              "nombre_del_docente": "",
-              "nivel": "1,2,3"
-            }
-          ]
-        },
-        "codeDescriptions": [],
-        "activityDescriptions": []
-      },
-      {
-        "name": "Sheet 02",
-        "nonEmptyRows": 7,
-        "columnsObserved": 3,
-        "sampleHeaders": [],
-        "headerRows": [],
-        "numericCells": 0,
-        "textCells": 10,
-        "formulaCells": 0,
-        "table": {
-          "headerRow": 7,
-          "headerRows": [
-            [
-              {
-                "label": "PLANTEL"
-              },
-              {
-                "label": "No. de Docentes"
-              },
-              {
-                "label": "NOMBRE DEL DOCENTE"
-              }
-            ]
-          ],
-          "columns": [
-            {
-              "key": "plantel",
-              "label": "PLANTEL",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "no_de_docentes",
-              "label": "No. de Docentes",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "nombre_del_docente",
-              "label": "NOMBRE DEL DOCENTE",
-              "type": "text",
-              "private": false
-            }
-          ],
-          "initialRows": [
-            {
-              "plantel": "Bachillerato 1,2,3,4,5,6,7,8,9,10…....35, Instituto Universitario de Bellas Artes (IUBA), EscuelaTéctica de Enfermería(ETE)",
-              "no_de_docentes": "1,2,3,4,5",
-              "nombre_del_docente": ""
-            }
-          ]
-        },
-        "codeDescriptions": [],
-        "activityDescriptions": []
-      },
-      {
-        "name": "Sheet 03",
-        "nonEmptyRows": 7,
-        "columnsObserved": 3,
-        "sampleHeaders": [],
-        "headerRows": [],
-        "numericCells": 0,
-        "textCells": 10,
-        "formulaCells": 0,
-        "table": {
-          "headerRow": 7,
-          "headerRows": [
-            [
-              {
-                "label": "PLANTEL"
-              },
-              {
-                "label": "No. de Docentes"
-              },
-              {
-                "label": "NOMBRE DEL DOCENTE"
-              }
-            ]
-          ],
-          "columns": [
-            {
-              "key": "plantel",
-              "label": "PLANTEL",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "no_de_docentes",
-              "label": "No. de Docentes",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "nombre_del_docente",
-              "label": "NOMBRE DEL DOCENTE",
-              "type": "text",
-              "private": false
-            }
-          ],
-          "initialRows": [
-            {
-              "plantel": "Bachillerato 1,2,3,4,5,6,7,8,9,10…....35, Instituto Universitario de Bellas Artes (IUBA), EscuelaTéctica de Enfermería(ETE)",
-              "no_de_docentes": "1,2,3,4,5",
-              "nombre_del_docente": ""
-            }
-          ]
-        },
-        "codeDescriptions": [],
-        "activityDescriptions": []
-      }
-    ],
-    "privacy": "Frontend fallback exposes aggregate workbook structure only."
-  },
-  {
-    "id": "e8ebfaa5f4a11362",
-    "sourceLabel": "Indicadores / Ariadna Zuñiga / workbook 20",
-    "sourcePathHash": "e8ebfaa5f4a11362a45348bd460d2d00c1e54c7eebffb2d9a9a5645cf7a537ff",
-    "category": "Indicadores / Ariadna Zuñiga",
-    "sizeBytes": 41454,
-    "detectedIndicatorCodes": [
-      "2.1.4.1.2"
-    ],
-    "detectedReferenceCodes": [],
-    "detectedPlanteles": [
-      "Bachillerato 15"
-    ],
-    "formulaCells": 0,
-    "sheets": [
-      {
-        "name": "Sheet 01",
-        "nonEmptyRows": 5,
-        "columnsObserved": 11,
-        "sampleHeaders": [],
-        "headerRows": [],
-        "numericCells": 0,
-        "textCells": 9,
-        "formulaCells": 0,
-        "table": {
-          "headerRow": 5,
-          "headerRows": [],
-          "columns": [
-            {
-              "key": "plantel",
-              "label": "PLANTEL",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "nombre_de_los_proyectos_de_investigacion",
-              "label": "Nombre de /los proyectos de investigación",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "numero_de_estudiantes_mujeres",
-              "label": "Mujeres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "numero_de_estudiantes_hombres",
-              "label": "Hombres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "observaciones_indicar_el_periodo_del_proyecto",
-              "label": "Observaciones (indicar el periodo del proyecto)",
-              "type": "text",
-              "private": false
-            }
-          ],
-          "initialRows": [
-            {
-              "plantel": "Bachillerato 15",
-              "nombre_de_los_proyectos_de_investigacion": "",
-              "numero_de_estudiantes_mujeres": "",
-              "numero_de_estudiantes_hombres": "",
-              "observaciones_indicar_el_periodo_del_proyecto": ""
             }
           ]
         },
@@ -8660,7 +9537,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
   },
   {
     "id": "6d26ff2363c5975b",
-    "sourceLabel": "Indicadores / Adriana Ruiz / workbook 21",
+    "sourceLabel": "Indicadores / Adriana Ruiz / workbook 27",
     "sourcePathHash": "6d26ff2363c5975b5db6ab1f760f13cde1a5b45de132189e892f4f607d362974",
     "category": "Indicadores / Adriana Ruiz",
     "sizeBytes": 12343,
@@ -8850,13 +9727,13 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
   },
   {
-    "id": "d055e9faf256b34d",
-    "sourceLabel": "Indicadores / Ariadna Zuñiga / workbook 22",
-    "sourcePathHash": "d055e9faf256b34d8d02944be938507c4c9379d45936fe4cc4d79628792feefb",
-    "category": "Indicadores / Ariadna Zuñiga",
-    "sizeBytes": 42215,
+    "id": "6434504c6768b0fb",
+    "sourceLabel": "Indicadores / Carlos Nava / workbook 28",
+    "sourcePathHash": "6434504c6768b0fb41d06d7b583da7f1d1d0ed360ea1f93f29908539f635c840",
+    "category": "Indicadores / Carlos Nava",
+    "sizeBytes": 10472,
     "detectedIndicatorCodes": [
-      "1.1.2.2.11"
+      "1.1.2.3.1"
     ],
     "detectedReferenceCodes": [],
     "detectedPlanteles": [],
@@ -8864,100 +9741,126 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "sheets": [
       {
         "name": "Sheet 01",
-        "nonEmptyRows": 5,
-        "columnsObserved": 10,
+        "nonEmptyRows": 11,
+        "columnsObserved": 7,
         "sampleHeaders": [],
         "headerRows": [],
         "numericCells": 0,
-        "textCells": 15,
+        "textCells": 21,
         "formulaCells": 0,
         "table": {
-          "headerRow": 5,
-          "headerRows": [],
+          "headerRow": 8,
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL",
+                "rowspan": 2
+              },
+              {
+                "label": "ESTUDIANTES",
+                "colspan": 2
+              },
+              {
+                "label": "DOCENTES",
+                "colspan": 2
+              },
+              {
+                "label": "institución educativa, otro.",
+                "rowspan": 2
+              },
+              {
+                "label": "la formación del estudiante.",
+                "rowspan": 2
+              }
+            ],
+            [
+              {
+                "label": "M"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "H"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
-              "label": "Plantel",
+              "label": "PLANTEL",
               "type": "readonly",
               "private": false
             },
             {
-              "key": "nombre_de_la_capacitacion_y_o_actividades_format",
-              "label": "Nombre de la capacitación y /o actividades formativas",
+              "key": "estudiantes_m",
+              "label": "M",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "estudiantes_h",
+              "label": "H",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "docentes_m",
+              "label": "M",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "docentes_h",
+              "label": "H",
+              "type": "number",
+              "private": false
+            },
+            {
+              "key": "institucion_educativa_otro",
+              "label": "institución educativa, otro.",
               "type": "text",
               "private": false
             },
             {
-              "key": "total_estudiantes_mujeres",
-              "label": "Total Estudiantes Mujeres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_estudiantes_hombres",
-              "label": "Total Estudiantes Hombres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_docentes_mujeres",
-              "label": "Total Docentes Mujeres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_docentes_hombres",
-              "label": "Total Docentes Hombres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_personal_administrativo_mujeres",
-              "label": "Total Personal Administrativo Mujeres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_personal_administrativo_hombres",
-              "label": "Total Personal Administrativo Hombres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "temas_que_se_abordaron",
-              "label": "TEMAS QUE SE ABORDARON",
+              "key": "la_formacion_del_estudiante",
+              "label": "la formación del estudiante.",
               "type": "text",
               "private": false
             }
           ],
           "initialRows": [
             {
-              "plantel": "Bachillerato",
-              "nombre_de_la_capacitacion_y_o_actividades_format": "",
-              "total_estudiantes_mujeres": "",
-              "total_estudiantes_hombres": "",
-              "total_docentes_mujeres": "",
-              "total_docentes_hombres": "",
-              "total_personal_administrativo_mujeres": "",
-              "total_personal_administrativo_hombres": "",
-              "temas_que_se_abordaron": ""
+              "plantel": "",
+              "estudiantes_m": "",
+              "estudiantes_h": "",
+              "docentes_m": "",
+              "docentes_h": "",
+              "institucion_educativa_otro": "",
+              "la_formacion_del_estudiante": ""
             }
           ]
         },
         "codeDescriptions": [],
-        "activityDescriptions": []
+        "activityDescriptions": [
+          "VIAJES DE ESTUDIO"
+        ]
       }
     ],
     "privacy": "Frontend fallback exposes aggregate workbook structure only."
   },
   {
-    "id": "a31e8100ce08ef08",
-    "sourceLabel": "Indicadores / Laura Calvario - solo responsable / workbook 23",
-    "sourcePathHash": "a31e8100ce08ef080463a4d0b9b47cbfffa7542c2a47be54718e3fa17eb2c1b1",
-    "category": "Indicadores / Laura Calvario - solo responsable",
-    "sizeBytes": 10617,
+    "id": "b8783406137c26fa",
+    "sourceLabel": "Indicadores / Oscar Pedraza / workbook 29",
+    "sourcePathHash": "b8783406137c26fa094ed8e00a402dd44322433249254d68b50f5876d7ba7aa8",
+    "category": "Indicadores / Oscar Pedraza",
+    "sizeBytes": 9296,
     "detectedIndicatorCodes": [
-      "1.1.2.5.10"
+      "4.1.2.1.3",
+      "4.1.2.1.6"
     ],
     "detectedReferenceCodes": [],
     "detectedPlanteles": [],
@@ -8965,171 +9868,14 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "sheets": [
       {
         "name": "Sheet 01",
-        "nonEmptyRows": 4,
-        "columnsObserved": 9,
-        "sampleHeaders": [],
-        "headerRows": [],
-        "numericCells": 0,
-        "textCells": 15,
-        "formulaCells": 0,
-        "table": {
-          "headerRow": 3,
-          "headerRows": [],
-          "columns": [
-            {
-              "key": "agosto_2025_enero_2026_m",
-              "label": "Agosto 2025-Enero 2026 M",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "agosto_2025_enero_2026_h",
-              "label": "Agosto 2025-Enero 2026 H",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_h",
-              "label": "Total H",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "enero_2026_junio_2026_m",
-              "label": "Enero 2026-Junio 2026 M",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "enero_2026_junio_2026_h",
-              "label": "Enero 2026-Junio 2026 H",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_h_2",
-              "label": "Total H",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "agosto_2026_enero_2027_m",
-              "label": "Agosto 2026- Enero 2027 M",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "agosto_2026_enero_2027_h",
-              "label": "Agosto 2026- Enero 2027 H",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_h_3",
-              "label": "Total H",
-              "type": "number",
-              "private": false
-            }
-          ],
-          "initialRows": [
-            {
-              "agosto_2025_enero_2026_m": "",
-              "agosto_2025_enero_2026_h": "",
-              "total_h": "",
-              "enero_2026_junio_2026_m": "",
-              "enero_2026_junio_2026_h": "",
-              "total_h_2": "",
-              "agosto_2026_enero_2027_m": "",
-              "agosto_2026_enero_2027_h": "",
-              "total_h_3": ""
-            }
-          ]
-        },
-        "codeDescriptions": [],
-        "activityDescriptions": []
-      },
-      {
-        "name": "Sheet 02",
-        "nonEmptyRows": 3,
-        "columnsObserved": 9,
+        "nonEmptyRows": 8,
+        "columnsObserved": 1,
         "sampleHeaders": [],
         "headerRows": [],
         "numericCells": 0,
         "textCells": 8,
         "formulaCells": 0,
-        "table": {
-          "headerRow": 3,
-          "headerRows": [],
-          "columns": [
-            {
-              "key": "agosto_2025_enero_2026",
-              "label": "Agosto 2025-Enero 2026",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "agosto_2025_enero_2026_2",
-              "label": "Agosto 2025-Enero 2026",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "total",
-              "label": "Total",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "enero_2026_junio_2026",
-              "label": "Enero 2026-Junio 2026",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "enero_2026_junio_2026_2",
-              "label": "Enero 2026-Junio 2026",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "total_2",
-              "label": "Total",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "agosto_2026_enero_2027",
-              "label": "Agosto 2026- Enero 2027",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "agosto_2026_enero_2027_2",
-              "label": "Agosto 2026- Enero 2027",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "total_3",
-              "label": "Total",
-              "type": "number",
-              "private": false
-            }
-          ],
-          "initialRows": [
-            {
-              "agosto_2025_enero_2026": "",
-              "agosto_2025_enero_2026_2": "",
-              "total": "",
-              "enero_2026_junio_2026": "",
-              "enero_2026_junio_2026_2": "",
-              "total_2": "",
-              "agosto_2026_enero_2027": "",
-              "agosto_2026_enero_2027_2": "",
-              "total_3": ""
-            }
-          ]
-        },
+        "table": null,
         "codeDescriptions": [],
         "activityDescriptions": []
       }
@@ -9138,7 +9884,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
   },
   {
     "id": "f2a88f7ed8a1cb14",
-    "sourceLabel": "Indicadores / Marcial Aviña / workbook 24",
+    "sourceLabel": "Indicadores / Marcial Aviña / workbook 30",
     "sourcePathHash": "f2a88f7ed8a1cb1402515937492dbedebbbb6d1d0e297faf9f8410c351f6814c",
     "category": "Indicadores / Marcial Aviña",
     "sizeBytes": 114667,
@@ -10239,750 +10985,6 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               "cantidad_estudiantes_que_asistieron_m": 0.0,
               "cantidad_estudiantes_que_asistieron_t": "",
               "atencion": ""
-            }
-          ]
-        },
-        "codeDescriptions": [],
-        "activityDescriptions": []
-      }
-    ],
-    "privacy": "Frontend fallback exposes aggregate workbook structure only."
-  },
-  {
-    "id": "df9cd1a2149f78b0",
-    "sourceLabel": "Indicadores / Oscar Mendoza / workbook 25",
-    "sourcePathHash": "df9cd1a2149f78b0031c723318ddd36177315b134f29d453f5f32fd2fcca5df8",
-    "category": "Indicadores / Oscar Mendoza",
-    "sizeBytes": 39928,
-    "detectedIndicatorCodes": [
-      "1.1.2.2.10"
-    ],
-    "detectedReferenceCodes": [],
-    "detectedPlanteles": [],
-    "formulaCells": 0,
-    "sheets": [
-      {
-        "name": "Sheet 01",
-        "nonEmptyRows": 6,
-        "columnsObserved": 11,
-        "sampleHeaders": [],
-        "headerRows": [],
-        "numericCells": 0,
-        "textCells": 17,
-        "formulaCells": 0,
-        "table": {
-          "headerRow": 5,
-          "headerRows": [],
-          "columns": [
-            {
-              "key": "plantel",
-              "label": "Plantel",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "nombre_de_la_actividad",
-              "label": "Nombre de la actividad",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "descripcion_de_la_actividad",
-              "label": "Descripción de la actividad",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "total_estudiantes_mujeres",
-              "label": "Total Estudiantes Mujeres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_estudiantes_hombres",
-              "label": "Total Estudiantes Hombres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_docentes_mujeres",
-              "label": "Total Docentes Mujeres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_docentes_hombres",
-              "label": "Total Docentes Hombres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_personal_administrativo_mujeres",
-              "label": "Total Personal Administrativo Mujeres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_personal_administrativo_hombres",
-              "label": "Total Personal Administrativo Hombres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_de_participantes",
-              "label": "TOTAL DE PARTICIPANTES",
-              "type": "number",
-              "private": false
-            }
-          ],
-          "initialRows": [
-            {
-              "plantel": "Bachillerato",
-              "nombre_de_la_actividad": "",
-              "descripcion_de_la_actividad": "",
-              "total_estudiantes_mujeres": "",
-              "total_estudiantes_hombres": "",
-              "total_docentes_mujeres": "",
-              "total_docentes_hombres": "",
-              "total_personal_administrativo_mujeres": "",
-              "total_personal_administrativo_hombres": "",
-              "total_de_participantes": ""
-            }
-          ]
-        },
-        "codeDescriptions": [],
-        "activityDescriptions": []
-      }
-    ],
-    "privacy": "Frontend fallback exposes aggregate workbook structure only."
-  },
-  {
-    "id": "b8783406137c26fa",
-    "sourceLabel": "Indicadores / Oscar Pedraza / workbook 26",
-    "sourcePathHash": "b8783406137c26fa094ed8e00a402dd44322433249254d68b50f5876d7ba7aa8",
-    "category": "Indicadores / Oscar Pedraza",
-    "sizeBytes": 9296,
-    "detectedIndicatorCodes": [
-      "4.1.2.1.3",
-      "4.1.2.1.6"
-    ],
-    "detectedReferenceCodes": [],
-    "detectedPlanteles": [],
-    "formulaCells": 0,
-    "sheets": [
-      {
-        "name": "Sheet 01",
-        "nonEmptyRows": 8,
-        "columnsObserved": 1,
-        "sampleHeaders": [],
-        "headerRows": [],
-        "numericCells": 0,
-        "textCells": 8,
-        "formulaCells": 0,
-        "table": null,
-        "codeDescriptions": [],
-        "activityDescriptions": []
-      }
-    ],
-    "privacy": "Frontend fallback exposes aggregate workbook structure only."
-  },
-  {
-    "id": "fbf5b7183a98e6ae",
-    "sourceLabel": "Indicadores / Daniela Navarro / workbook 27",
-    "sourcePathHash": "fbf5b7183a98e6ae3a8e65ea259e64e529254bd74158d0098a28c95a191d39cf",
-    "category": "Indicadores / Daniela Navarro",
-    "sizeBytes": 10481,
-    "detectedIndicatorCodes": [
-      "1.1.2.3.1"
-    ],
-    "detectedReferenceCodes": [],
-    "detectedPlanteles": [],
-    "formulaCells": 0,
-    "sheets": [
-      {
-        "name": "Sheet 01",
-        "nonEmptyRows": 6,
-        "columnsObserved": 7,
-        "sampleHeaders": [],
-        "headerRows": [],
-        "numericCells": 0,
-        "textCells": 11,
-        "formulaCells": 0,
-        "table": {
-          "headerRow": 5,
-          "headerRows": [
-            [
-              {
-                "label": "PLANTEL",
-                "rowspan": 2
-              },
-              {
-                "label": "NOMBRE DEL ALUMNADO PARTICIPANTE",
-                "rowspan": 2
-              },
-              {
-                "label": "NÚMERO DE CUENTA",
-                "rowspan": 2
-              },
-              {
-                "label": "NOMBRE DEL PROFESORADO ACOMPAÑANTE",
-                "rowspan": 2
-              },
-              {
-                "label": "Registro",
-                "rowspan": 2
-              },
-              {
-                "label": "CANTIDAD DE ALUMNOS PARTICIPANTES",
-                "colspan": 2
-              }
-            ],
-            [
-              {
-                "label": "HOMBRES"
-              },
-              {
-                "label": "MUJERES"
-              }
-            ]
-          ],
-          "columns": [
-            {
-              "key": "plantel",
-              "label": "PLANTEL",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "nombre_del_alumnado_participante",
-              "label": "NOMBRE DEL ALUMNADO PARTICIPANTE",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "numero_de_cuenta",
-              "label": "NÚMERO DE CUENTA",
-              "type": "number",
-              "private": true
-            },
-            {
-              "key": "nombre_del_profesorado_acompanante",
-              "label": "NOMBRE DEL PROFESORADO ACOMPAÑANTE",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "registro",
-              "label": "Registro",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "cantidad_de_alumnos_participantes_hombres",
-              "label": "HOMBRES",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "cantidad_de_alumnos_participantes_mujeres",
-              "label": "MUJERES",
-              "type": "number",
-              "private": false
-            }
-          ],
-          "initialRows": [
-            {
-              "plantel": "",
-              "nombre_del_alumnado_participante": "",
-              "numero_de_cuenta": "",
-              "nombre_del_profesorado_acompanante": "",
-              "registro": "",
-              "cantidad_de_alumnos_participantes_hombres": "",
-              "cantidad_de_alumnos_participantes_mujeres": ""
-            }
-          ]
-        },
-        "codeDescriptions": [],
-        "activityDescriptions": []
-      }
-    ],
-    "privacy": "Frontend fallback exposes aggregate workbook structure only."
-  },
-  {
-    "id": "43fe55caf0bb52db",
-    "sourceLabel": "Indicadores / Oscar Delgado / workbook 28",
-    "sourcePathHash": "43fe55caf0bb52dbd821e66b2d4305fc8b877ac6b680fb28d34f76728d5d807e",
-    "category": "Indicadores / Oscar Delgado",
-    "sizeBytes": 22252,
-    "detectedIndicatorCodes": [],
-    "detectedReferenceCodes": [],
-    "detectedPlanteles": [],
-    "formulaCells": 0,
-    "sheets": [
-      {
-        "name": "Sheet 01",
-        "nonEmptyRows": 22,
-        "columnsObserved": 20,
-        "sampleHeaders": [],
-        "headerRows": [],
-        "numericCells": 0,
-        "textCells": 48,
-        "formulaCells": 0,
-        "table": {
-          "headerRow": 12,
-          "headerRows": [
-            [
-              {
-                "label": "No.",
-                "rowspan": 2
-              },
-              {
-                "label": "Tipo de evento",
-                "rowspan": 2
-              },
-              {
-                "label": "Nombre del evento",
-                "rowspan": 2
-              },
-              {
-                "label": "Duración en horas",
-                "rowspan": 2
-              },
-              {
-                "label": "Modalidad",
-                "rowspan": 2
-              },
-              {
-                "label": "Competencias desarrolladas",
-                "rowspan": 2
-              },
-              {
-                "label": "Evento organizado por:",
-                "rowspan": 2
-              },
-              {
-                "label": "Población docente NMS",
-                "colspan": 3
-              }
-            ],
-            [
-              {
-                "label": "H"
-              },
-              {
-                "label": "M"
-              },
-              {
-                "label": "Total"
-              }
-            ]
-          ],
-          "columns": [
-            {
-              "key": "no",
-              "label": "No.",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "tipo_de_evento",
-              "label": "Tipo de evento",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "nombre_del_evento",
-              "label": "Nombre del evento",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "duracion_en_horas",
-              "label": "Duración en horas",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "modalidad",
-              "label": "Modalidad",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "competencias_desarrolladas",
-              "label": "Competencias desarrolladas",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "evento_organizado_por",
-              "label": "Evento organizado por:",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "poblacion_docente_nms_h",
-              "label": "H",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "poblacion_docente_nms_m",
-              "label": "M",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "poblacion_docente_nms_total",
-              "label": "Total",
-              "type": "number",
-              "private": false
-            }
-          ],
-          "initialRows": [
-            {
-              "no": "1.1.2.5.1",
-              "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que cumple con perfil docente idóneo de acuerdo con el modelo educativo institucional",
-              "nombre_del_evento": "",
-              "duracion_en_horas": "",
-              "modalidad": "",
-              "competencias_desarrolladas": "",
-              "evento_organizado_por": "",
-              "poblacion_docente_nms_h": "",
-              "poblacion_docente_nms_m": "",
-              "poblacion_docente_nms_total": ""
-            },
-            {
-              "no": "1.1.2.5.5",
-              "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocionales, inclusión, investigación, internacionalización, arte, cultura, innovación, igualdad género, sustentabilidad, sostenibilidad y medio ambiente, con enfoque interseccional y de interculturalidad",
-              "nombre_del_evento": "",
-              "duracion_en_horas": "",
-              "modalidad": "",
-              "competencias_desarrolladas": "",
-              "evento_organizado_por": "",
-              "poblacion_docente_nms_h": "",
-              "poblacion_docente_nms_m": "",
-              "poblacion_docente_nms_total": ""
-            },
-            {
-              "no": "1.1.2.5.7",
-              "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
-              "nombre_del_evento": "",
-              "duracion_en_horas": "",
-              "modalidad": "",
-              "competencias_desarrolladas": "",
-              "evento_organizado_por": "",
-              "poblacion_docente_nms_h": "",
-              "poblacion_docente_nms_m": "",
-              "poblacion_docente_nms_total": ""
-            },
-            {
-              "no": "3.1.1.2.2",
-              "tipo_de_evento": "Número de eventos de educación continua",
-              "nombre_del_evento": "",
-              "duracion_en_horas": "",
-              "modalidad": "",
-              "competencias_desarrolladas": "",
-              "evento_organizado_por": "",
-              "poblacion_docente_nms_h": "",
-              "poblacion_docente_nms_m": "",
-              "poblacion_docente_nms_total": ""
-            }
-          ]
-        },
-        "codeDescriptions": [],
-        "activityDescriptions": []
-      }
-    ],
-    "privacy": "Frontend fallback exposes aggregate workbook structure only."
-  },
-  {
-    "id": "d6d521c8175d849f",
-    "sourceLabel": "Indicadores / Oscar Mendoza / workbook 29",
-    "sourcePathHash": "d6d521c8175d849f32359f92b35b9f3f1a1c9c9ae0b6d563b9dd147573af68fd",
-    "category": "Indicadores / Oscar Mendoza",
-    "sizeBytes": 40026,
-    "detectedIndicatorCodes": [
-      "3.1.1.3.6"
-    ],
-    "detectedReferenceCodes": [],
-    "detectedPlanteles": [],
-    "formulaCells": 0,
-    "sheets": [
-      {
-        "name": "Sheet 01",
-        "nonEmptyRows": 6,
-        "columnsObserved": 11,
-        "sampleHeaders": [],
-        "headerRows": [],
-        "numericCells": 0,
-        "textCells": 17,
-        "formulaCells": 0,
-        "table": {
-          "headerRow": 5,
-          "headerRows": [],
-          "columns": [
-            {
-              "key": "plantel",
-              "label": "Plantel",
-              "type": "readonly",
-              "private": false
-            },
-            {
-              "key": "nombre_de_la_actividad",
-              "label": "Nombre de la actividad",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "descripcion_de_la_actividad",
-              "label": "Descripción de la actividad",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "total_estudiantes_mujeres",
-              "label": "Total Estudiantes Mujeres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_estudiantes_hombres",
-              "label": "Total Estudiantes Hombres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_docentes_mujeres",
-              "label": "Total Docentes Mujeres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_docentes_hombres",
-              "label": "Total Docentes Hombres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_personal_administrativo_mujeres",
-              "label": "Total Personal Administrativo Mujeres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_personal_administrativo_hombres",
-              "label": "Total Personal Administrativo Hombres",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "total_de_participantes",
-              "label": "TOTAL DE PARTICIPANTES",
-              "type": "number",
-              "private": false
-            }
-          ],
-          "initialRows": [
-            {
-              "plantel": "Bachillerato",
-              "nombre_de_la_actividad": "",
-              "descripcion_de_la_actividad": "",
-              "total_estudiantes_mujeres": "",
-              "total_estudiantes_hombres": "",
-              "total_docentes_mujeres": "",
-              "total_docentes_hombres": "",
-              "total_personal_administrativo_mujeres": "",
-              "total_personal_administrativo_hombres": "",
-              "total_de_participantes": ""
-            }
-          ]
-        },
-        "codeDescriptions": [],
-        "activityDescriptions": []
-      }
-    ],
-    "privacy": "Frontend fallback exposes aggregate workbook structure only."
-  },
-  {
-    "id": "d30b3a90f8c8007a",
-    "sourceLabel": "Indicadores / Oscar Delgado / workbook 30",
-    "sourcePathHash": "d30b3a90f8c8007ad4be2fdd1da9bdc2d70b7f31f944c55986da5a16dbc888a6",
-    "category": "Indicadores / Oscar Delgado",
-    "sizeBytes": 22967,
-    "detectedIndicatorCodes": [],
-    "detectedReferenceCodes": [],
-    "detectedPlanteles": [],
-    "formulaCells": 0,
-    "sheets": [
-      {
-        "name": "Sheet 01",
-        "nonEmptyRows": 22,
-        "columnsObserved": 20,
-        "sampleHeaders": [],
-        "headerRows": [],
-        "numericCells": 0,
-        "textCells": 48,
-        "formulaCells": 0,
-        "table": {
-          "headerRow": 12,
-          "headerRows": [
-            [
-              {
-                "label": "No.",
-                "rowspan": 2
-              },
-              {
-                "label": "Tipo de evento",
-                "rowspan": 2
-              },
-              {
-                "label": "Nombre del evento",
-                "rowspan": 2
-              },
-              {
-                "label": "Duración en horas",
-                "rowspan": 2
-              },
-              {
-                "label": "Modalidad",
-                "rowspan": 2
-              },
-              {
-                "label": "Competencias desarrolladas",
-                "rowspan": 2
-              },
-              {
-                "label": "Evento organizado por:",
-                "rowspan": 2
-              },
-              {
-                "label": "Personal de apoyo académico NMS",
-                "colspan": 3
-              }
-            ],
-            [
-              {
-                "label": "H"
-              },
-              {
-                "label": "M"
-              },
-              {
-                "label": "Total"
-              }
-            ]
-          ],
-          "columns": [
-            {
-              "key": "no",
-              "label": "No.",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "tipo_de_evento",
-              "label": "Tipo de evento",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "nombre_del_evento",
-              "label": "Nombre del evento",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "duracion_en_horas",
-              "label": "Duración en horas",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "modalidad",
-              "label": "Modalidad",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "competencias_desarrolladas",
-              "label": "Competencias desarrolladas",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "evento_organizado_por",
-              "label": "Evento organizado por:",
-              "type": "text",
-              "private": false
-            },
-            {
-              "key": "personal_de_apoyo_academico_nms_h",
-              "label": "H",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "personal_de_apoyo_academico_nms_m",
-              "label": "M",
-              "type": "number",
-              "private": false
-            },
-            {
-              "key": "personal_de_apoyo_academico_nms_total",
-              "label": "Total",
-              "type": "number",
-              "private": false
-            }
-          ],
-          "initialRows": [
-            {
-              "no": "1.1.2.5.1",
-              "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que cumple con perfil docente idóneo de acuerdo con el modelo educativo institucional",
-              "nombre_del_evento": "",
-              "duracion_en_horas": "",
-              "modalidad": "",
-              "competencias_desarrolladas": "",
-              "evento_organizado_por": "",
-              "personal_de_apoyo_academico_nms_h": "",
-              "personal_de_apoyo_academico_nms_m": "",
-              "personal_de_apoyo_academico_nms_total": ""
-            },
-            {
-              "no": "1.1.2.5.5",
-              "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que reciben capacitación en competencias pedagógicas, didácticas, digitales e informacionales, socioemocionales, inclusión, investigación, internacionalización, arte, cultura, innovación, igualdad género, sustentabilidad, sostenibilidad y medio ambiente, con enfoque interseccional y de interculturalidad",
-              "nombre_del_evento": "",
-              "duracion_en_horas": "",
-              "modalidad": "",
-              "competencias_desarrolladas": "",
-              "evento_organizado_por": "",
-              "personal_de_apoyo_academico_nms_h": "",
-              "personal_de_apoyo_academico_nms_m": "",
-              "personal_de_apoyo_academico_nms_total": ""
-            },
-            {
-              "no": "1.1.2.5.7",
-              "tipo_de_evento": "Porcentaje de docentes de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
-              "nombre_del_evento": "",
-              "duracion_en_horas": "",
-              "modalidad": "",
-              "competencias_desarrolladas": "",
-              "evento_organizado_por": "",
-              "personal_de_apoyo_academico_nms_h": "",
-              "personal_de_apoyo_academico_nms_m": "",
-              "personal_de_apoyo_academico_nms_total": ""
-            },
-            {
-              "no": "1.1.2.5.8",
-              "tipo_de_evento": "Porcentaje de personal de apoyo académico de educación media superior y superior que recibe capacitación disciplinar pertinente en su área de desempeño",
-              "nombre_del_evento": "",
-              "duracion_en_horas": "",
-              "modalidad": "",
-              "competencias_desarrolladas": "",
-              "evento_organizado_por": "",
-              "personal_de_apoyo_academico_nms_h": "",
-              "personal_de_apoyo_academico_nms_m": "",
-              "personal_de_apoyo_academico_nms_total": ""
             }
           ]
         },
