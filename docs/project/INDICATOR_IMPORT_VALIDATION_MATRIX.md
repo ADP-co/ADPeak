@@ -29,7 +29,7 @@ Fuentes generadas y versionadas:
 |---|---|---|
 | Analista | ZIP vigente con 32 archivos: 30 Excel, 1 PDF y 1 DOCX | Cumple |
 | Implementador | 14 indicadores operativos visibles y 28 plantillas oficiales tecnicas disponibles desde el paquete vigente | Cumple |
-| Validador | Pruebas unitarias, typecheck, build y flujo API por rol despues de los ajustes finales | En verificacion final |
+| Validador | Pruebas unitarias, typecheck, build, flujo API por rol y regresion empresarial de plantillas visibles | Cumple |
 
 ## Reglas de calidad aplicadas
 
@@ -69,7 +69,8 @@ Fuentes generadas y versionadas:
 - Director: administrar catalogo, revisar reportes, exportar CSV/PDF y consultar fuentes oficiales.
 - Permisos negativos: Plantel no accede a reportes institucionales, no guarda por otro plantel, responsable no asignado no aprueba.
 - Exportaciones: CSV/PDF usan el mismo objeto `reporte.indicadores[].datos[]`.
+- Regresion empresarial: cada indicador visible debe tener columnas, filas, encabezados legibles y plantel completo cuando la plantilla lo requiere.
 
 ## Veredicto
 
-Los indicadores disponibles en el paquete nuevo quedaron importados de forma reproducible desde `indicadores-20260622T210134Z-3-001.zip`. La validacion final debe confirmar en produccion que Postgres migro a `2026-06-29-template-cleanup-v1` y que la API publica devuelve 14 indicadores operativos visibles, sin formatos internos como indicadores.
+Los indicadores disponibles en el paquete nuevo quedaron importados de forma reproducible desde `indicadores-20260622T210134Z-3-001.zip`. La validacion final confirma que la suite automatizada cubre indicadores visibles, plantillas oficiales, falsos positivos, encabezados genericos y planteles incompletos antes de cada entrega.

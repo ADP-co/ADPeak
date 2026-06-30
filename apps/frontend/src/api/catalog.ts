@@ -1197,13 +1197,17 @@ function readStorage<T>(key: string, fallback: T) {
   }
 }
 
-function shouldUseLocalWriteFallback(error: unknown) {
-  return error instanceof Error && error.message === 'api_unavailable';
+function shouldUseLocalWriteFallback(_error: unknown) {
+  return false;
 }
 
 function catalogWriteError(error: unknown, fallbackMessage: string) {
   if (error instanceof Error && error.message.startsWith('api_error_')) {
-    return new Error(`${fallbackMessage} Codigo ${error.message.replace('api_error_', '')}.`);
+    return new Error(`${fallbackMessage} Código ${error.message.replace('api_error_', '')}.`);
+  }
+
+  if (error instanceof Error && error.message === 'api_unavailable') {
+    return new Error('El sistema no está conectado. No se guardaron cambios locales.');
   }
 
   return error instanceof Error ? error : new Error(fallbackMessage);

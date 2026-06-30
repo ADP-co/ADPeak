@@ -91,6 +91,8 @@ Docker local ni tuneles temporales.
 - [Docker](docs/development/DOCKER.md)
 - [Demo](docs/development/DEMO.md)
 - [Checklist QA demo](docs/development/DEMO_QA_CHECKLIST.md)
+- [Cierre QA empresarial](docs/project/ENTERPRISE_QA_CLOSURE.md)
+- [Matriz de indicadores oficiales](docs/project/INDICATOR_IMPORT_VALIDATION_MATRIX.md)
 - [Requerimientos](docs/project/REQUIREMENTS.md)
 - [Resumen funcional](docs/project/PROJECT_BRIEF.md)
 - [Manejo de datos confidenciales](docs/security/DATA_HANDLING.md)
