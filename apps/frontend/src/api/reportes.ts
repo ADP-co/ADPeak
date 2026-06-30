@@ -18,6 +18,8 @@ export type ReportDataRow = {
   ciclo?: string;
   meta?: number;
   evidencias?: number;
+  justificacion?: string;
+  evidenciaNombre?: string;
   vencimiento?: string;
   detalle?: Array<{ campo: string; valor: string }>;
 };
@@ -91,6 +93,8 @@ export function reportToCsv(report: ExportReport) {
     'Avance',
     'Meta',
     'Evidencias',
+    'Justificación',
+    'Evidencia',
     'Vencimiento',
     ...detailHeaders,
   ];
@@ -104,6 +108,8 @@ export function reportToCsv(report: ExportReport) {
       dataRow.avance,
       dataRow.meta?.toString() ?? '',
       dataRow.evidencias?.toString() ?? '',
+      dataRow.justificacion ?? '',
+      dataRow.evidenciaNombre ?? '',
       formatDeadline(dataRow.vencimiento),
       ...detailHeaders.map((header) => detailValue(dataRow, header)),
     ])
@@ -459,9 +465,15 @@ function renderPdfReport(report: ExportReport, hasHeaderImage: boolean) {
       return;
     }
 
-    drawIndicatorTable(indicator.datos, report, () => current, ensureSpace, (nextPage) => {
-      current = nextPage;
-    }, hasHeaderImage, pages);
+    if (report.vistaReporte === 'detalle') {
+      drawDetailedIndicatorRows(indicator.datos, report, () => current, ensureSpace, (nextPage) => {
+        current = nextPage;
+      }, hasHeaderImage, pages);
+    } else {
+      drawIndicatorTable(indicator.datos, report, () => current, ensureSpace, (nextPage) => {
+        current = nextPage;
+      }, hasHeaderImage, pages);
+    }
     current.y -= 14;
   });
 
@@ -606,6 +618,120 @@ function drawIndicatorTable(
 
     page.y -= rowHeight;
   });
+}
+
+function drawDetailedIndicatorRows(
+  rows: ReportDataRow[],
+  report: ExportReport,
+  getCurrentPage: () => PdfReportPage,
+  ensureSpace: (height: number) => void,
+  setCurrentPage: (page: PdfReportPage) => void,
+  hasHeaderImage: boolean,
+  pages: PdfContentBuilder[]
+) {
+  rows.forEach((row, rowIndex) => {
+    const contextItems: Array<[string, string]> = [
+      ['Registro', String(row.registro_id ?? row.id ?? rowIndex + 1)],
+      ['Actividad', row.actividad],
+      ['Estado', formatStatusLabel(row.estado)],
+      ['Avance', row.avance],
+      ['Responsable', row.responsable],
+      ...(shouldShowPlantelColumn(report) ? [['Plantel', row.plantel ?? report.identidadReporte.nombre] as [string, string]] : []),
+      ['Evidencias', typeof row.evidencias === 'number' ? String(row.evidencias) : '0'],
+      ...(row.evidenciaNombre ? [['Archivo', row.evidenciaNombre] as [string, string]] : []),
+      ...(row.justificacion ? [['Justificación', row.justificacion] as [string, string]] : []),
+    ].filter((item): item is [string, string] => Boolean(cleanExportText(item[1])));
+    const detailItems = row.detalle
+      ?.map((detail) => [cleanExportText(detail.campo), cleanExportText(detail.valor)] as [string, string])
+      .filter(([campo, valor]) => campo && valor) ?? [];
+    const blocks = chunkDetailItems(detailItems, 4);
+
+    ensureSpace(72);
+    let page = getCurrentPage();
+    page.content.fillRect(PDF_MARGIN_X, page.y - 20, PDF_CONTENT_WIDTH, 20, PDF_DARK_GREEN);
+    page.content.textAt(`Registro ${rowIndex + 1}`, PDF_MARGIN_X + 8, page.y - 13, 7.8, 'F2', [255, 255, 255]);
+    page.y -= 24;
+
+    drawDetailKeyValueGrid(contextItems, getCurrentPage, ensureSpace, setCurrentPage, hasHeaderImage, pages);
+
+    if (blocks.length === 0) {
+      ensureSpace(20);
+      page = getCurrentPage();
+      page.content.textAt('Sin valores capturados adicionales.', PDF_MARGIN_X + 8, page.y, 8.2, 'F1', PDF_MUTED);
+      page.y -= 20;
+      return;
+    }
+
+    blocks.forEach((block, blockIndex) => {
+      ensureSpace(24);
+      page = getCurrentPage();
+      page.content.textAt(
+        blockIndex === 0 ? 'Información capturada' : 'Información capturada (continuación)',
+        PDF_MARGIN_X,
+        page.y,
+        8.8,
+        'F2',
+        PDF_GREEN
+      );
+      page.y -= 12;
+      drawDetailKeyValueGrid(block, getCurrentPage, ensureSpace, setCurrentPage, hasHeaderImage, pages);
+    });
+
+    getCurrentPage().y -= 8;
+  });
+}
+
+function drawDetailKeyValueGrid(
+  items: Array<[string, string]>,
+  getCurrentPage: () => PdfReportPage,
+  ensureSpace: (height: number) => void,
+  setCurrentPage: (page: PdfReportPage) => void,
+  hasHeaderImage: boolean,
+  pages: PdfContentBuilder[]
+) {
+  const labelWidth = 116;
+  const valueWidth = PDF_CONTENT_WIDTH - labelWidth;
+
+  items.forEach(([label, value], index) => {
+    let page = getCurrentPage();
+    const valueLines = wrapPdfLine(value, 82);
+    const labelLines = wrapPdfLine(label, 24);
+    const lineCount = Math.max(valueLines.length, labelLines.length, 1);
+    const rowHeight = Math.max(24, lineCount * 9.5 + 10);
+
+    if (page.y - rowHeight < PDF_BOTTOM_Y) {
+      const nextPage = createPdfReportPage(pages, hasHeaderImage);
+      setCurrentPage(nextPage);
+      page = getCurrentPage();
+    } else {
+      ensureSpace(rowHeight);
+      page = getCurrentPage();
+    }
+
+    const fill = index % 2 === 0 ? [255, 255, 255] as PdfColor : PDF_LIGHT_GRAY;
+    page.content.fillRect(PDF_MARGIN_X, page.y - rowHeight, PDF_CONTENT_WIDTH, rowHeight, fill);
+    page.content.strokeRect(PDF_MARGIN_X, page.y - rowHeight, PDF_CONTENT_WIDTH, rowHeight, PDF_LINE);
+    page.content.strokeLine(PDF_MARGIN_X + labelWidth, page.y, PDF_MARGIN_X + labelWidth, page.y - rowHeight, PDF_LINE);
+
+    labelLines.forEach((line, lineIndex) => {
+      page.content.textAt(line, PDF_MARGIN_X + 6, page.y - 12 - lineIndex * 9.5, 7.2, 'F2', PDF_DARK_GREEN);
+    });
+    valueLines.forEach((line, lineIndex) => {
+      page.content.textAt(line, PDF_MARGIN_X + labelWidth + 7, page.y - 12 - lineIndex * 9.5, 7.2, 'F1', PDF_TEXT);
+    });
+
+    page.y -= rowHeight;
+  });
+}
+
+function chunkDetailItems(items: Array<[string, string]>, size: number) {
+  const chunks: Array<Array<[string, string]>> = [];
+
+  for (let index = 0; index < items.length; index += size) {
+    chunks.push(items.slice(index, index + size));
+  }
+
+  return chunks;
 }
 
 function buildPdfLines(report: ExportReport) {

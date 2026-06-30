@@ -387,10 +387,9 @@ export const ReportsDashboard = () => {
       }
 
       return scopedReport;
-    } catch {
-      if (!API_REQUESTS_ENABLED) {
-        setReportMessage(`Preparando información disponible para ${item.plantel}.`);
-        return buildFallbackReport(item, selectedDate, officialSources);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('No hay registros')) {
+        throw error;
       }
 
       throw new Error(`No se pudo preparar la descarga de ${item.plantel}.`);
@@ -449,13 +448,7 @@ export const ReportsDashboard = () => {
       ? buildIndicatorProgress(report, selectedDate)
       : buildPlantelProgress(report, selectedDate)
     : [];
-  const plantelRows = plantelesFromReport.length > 0
-    ? plantelesFromReport
-    : API_REQUESTS_ENABLED
-      ? []
-      : isResponsible
-        ? []
-        : fallbackPlanteles;
+  const plantelRows = plantelesFromReport.length > 0 ? plantelesFromReport : [];
 
   // Filtramos por progreso y siempre ordenamos alfabéticamente/numéricamente por plantel
   const visiblePlanteles = plantelRows.filter((item) => !selectedDate || item.periodos.includes(selectedDate));

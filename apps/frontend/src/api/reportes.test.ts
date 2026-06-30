@@ -26,6 +26,8 @@ const sampleReport: ExportReport = {
           plantel: 'Bachillerato 16',
           meta: 100,
           evidencias: 2,
+          justificacion: 'Se capturó avance parcial por validación documental.',
+          evidenciaNombre: 'evidencia-titulacion.pdf',
           vencimiento: 'en_tiempo',
           detalle: [
             { campo: 'Mujeres', valor: '12' },
@@ -54,10 +56,14 @@ describe('report exports', () => {
     expect(header).not.toContain('"Plantel"');
     expect(header).not.toContain('"Periodo"');
     expect(header).toContain('"Meta"');
+    expect(header).toContain('"Justificación"');
+    expect(header).toContain('"Evidencia"');
     expect(header).toContain('"Mujeres"');
     expect(header).toContain('"Observaciones"');
     expect(csv).toContain('"Captura de egresados titulados"');
     expect(csv).toContain('"Dato importado y editable"');
+    expect(csv).toContain('"Se capturó avance parcial por validación documental."');
+    expect(csv).toContain('"evidencia-titulacion.pdf"');
     expect(csv).toContain('"Concursos Académicos"');
     expect(csv).not.toContain('Acad\u00c3\u0192');
     expect(csv).not.toContain('tipo_reporte');
@@ -96,10 +102,13 @@ describe('report exports', () => {
 
     expect(pdfText).toContain('capturada');
     expect(pdfText).not.toContain('Resumen ejecutivo');
-    expect(pdfText).toContain('Programa:');
+    expect(pdfText).toContain('(Programa) Tj');
     expect(pdfText).toContain('Analista Programador');
-    expect(pdfText).toContain('Observaciones: Dato');
+    expect(pdfText).toContain('(Observaciones) Tj');
     expect(pdfText).toContain('importado y editable');
+    expect(pdfText).toContain('Justificaci');
+    expect(pdfText).toContain('validaci');
+    expect(pdfText).toContain('evidencia-titulacion.pdf');
   });
 
   it('wraps long PDF indicator titles instead of drawing them as one overflowing line', async () => {

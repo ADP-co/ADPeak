@@ -1048,7 +1048,13 @@ describe("SIGI store and RBAC", () => {
           mujeres: 12,
           hombres: 10,
           observaciones: "Dato importado y editable"
-        }]
+        }],
+        justificacion: "Justificación capturada para el reporte.",
+        evidencia: {
+          nombre: "evidencia-detalle.pdf",
+          tipo: "application/pdf",
+          tamanoBytes: 2048
+        }
       }
     });
 
@@ -1070,6 +1076,11 @@ describe("SIGI store and RBAC", () => {
       { campo: "Hombres", valor: "10" },
       { campo: "Observaciones", valor: "Dato importado y editable" }
     ]));
+    expect(reportRow).toMatchObject({
+      justificacion: "Justificación capturada para el reporte.",
+      evidenciaNombre: "evidencia-detalle.pdf",
+      evidencias: 1
+    });
     expect(previousPeriodRow?.captureId).toBeUndefined();
   });
 

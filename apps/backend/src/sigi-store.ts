@@ -215,6 +215,8 @@ export type SigiReportPayload = {
       ciclo: string;
       meta: number;
       evidencias: number;
+      justificacion?: string;
+      evidenciaNombre?: string;
       vencimiento: "en_tiempo" | "atrasado";
       detalle?: Array<{ campo: string; valor: string }>;
     }>;
@@ -1276,6 +1278,8 @@ function rowsFromCaptureDrafts({
         ciclo: cicloEscolar,
         meta: numberValue(row.meta) ?? 100,
         evidencias: draft.payload.evidencia ? 1 : 0,
+        justificacion: cleanReportText(draft.payload.justificacion ?? ""),
+        evidenciaNombre: cleanReportText(draft.payload.evidencia?.nombre ?? ""),
         vencimiento: draft.estado === "borrador" ? "atrasado" as const : "en_tiempo" as const,
         detalle: reportDetailsFromCapturedRow(row, indicator)
       }));
