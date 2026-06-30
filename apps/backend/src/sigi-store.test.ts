@@ -261,7 +261,7 @@ describe("SIGI store and RBAC", () => {
       reason: "inactive_user"
     });
     expect(authenticateUserResult("resp-bloqueado", "incorrecta")).toMatchObject({
-      reason: "invalid_credentials"
+      reason: "inactive_user"
     });
   });
 

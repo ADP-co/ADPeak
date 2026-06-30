@@ -462,12 +462,16 @@ export function authenticateUserResult(username: string, password: string): Auth
     matchesLoginUsername(candidate, normalizedUsername)
   );
 
-  if (!user || user.passwordHash !== hashPassword(password)) {
+  if (!user) {
     return { reason: "invalid_credentials" };
   }
 
   if (!user.active) {
     return { reason: "inactive_user" };
+  }
+
+  if (user.passwordHash !== hashPassword(password)) {
+    return { reason: "invalid_credentials" };
   }
 
   return { user: authenticatedUser(user) };
