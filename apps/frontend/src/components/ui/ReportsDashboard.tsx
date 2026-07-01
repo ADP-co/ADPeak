@@ -10,12 +10,6 @@ import {
   type ReportDataRow,
 } from '../../api/reportes';
 import { CAPTURE_CHANGED_EVENT } from '../../api/captureEvents';
-import { API_REQUESTS_ENABLED } from '../../api/client';
-import {
-  fallbackOfficialSources,
-  fetchOfficialSources,
-  type OfficialSourcesPayload,
-} from '../../api/officialData';
 import { useAuth } from '../../context/AuthContext';
 
 // Tarjeta de Gráfica de Dona
@@ -74,102 +68,6 @@ const DonutCard = ({ title, percentage, colorClass, strokeColor }: DonutCardProp
     </div>
   );
 };
-
-function buildFallbackReport(
-  item: PlantelProgressRecord,
-  selectedDate: string,
-  officialSources: OfficialSourcesPayload
-): ExportReport {
-  const fechaGeneracion = new Date().toISOString().slice(0, 10);
-  const officialIndicator = item.plantelId === '1'
-    ? {
-        id: 'fuentes-oficiales-cargadas',
-        nombre: 'Fuentes oficiales cargadas',
-        descripcion: 'Inventario agregado del paquete oficial recibido.',
-        datos: officialSources.evidenceGroups.map((group, index) => ({
-          registro_id: `fuente-oficial-${index + 1}`,
-          actividad: group.category,
-          responsable: officialSources.summary.plantel,
-          estado: 'Aprobado',
-          avance: '100%',
-          plantel: officialSources.summary.plantel,
-          plantelId: '1',
-          periodo: selectedDate,
-          ciclo: '2025-2026',
-          meta: group.fileCount,
-          evidencias: group.fileCount,
-          vencimiento: 'en_tiempo',
-        })),
-      }
-    : undefined;
-
-  return {
-    tipoReporte: 'plantel',
-    periodo: selectedDate || '2026-A',
-    cicloEscolar: '2025-2026',
-    fechaGeneracion,
-    identidadReporte: {
-      tipo: 'Plantel',
-      nombre: item.plantel,
-    },
-    indicadores: [
-      {
-        id: 'porcentaje-titulacion-cohorte-nms',
-        nombre: 'Porcentaje de titulación por cohorte del NMS',
-        descripcion: 'Registros capturados por programa educativo del plantel.',
-        datos: [
-          {
-            registro_id: `${item.id}-titulacion-ap`,
-            actividad: 'Captura de egresados titulados',
-            responsable: 'Responsable académico',
-            estado: item.status,
-            avance: `${item.percentage}%`,
-            plantel: item.plantel,
-            periodo: selectedDate,
-            ciclo: 'POA 2026',
-            meta: 100,
-            evidencias: item.status === 'Rezagado' ? 0 : 1,
-            vencimiento: item.status === 'Rezagado' ? 'atrasado' : 'en_tiempo',
-          },
-          {
-            registro_id: `${item.id}-matricula-ap`,
-            actividad: 'Validación de matrícula de primer ingreso',
-            responsable: 'Coordinación de planeación',
-            estado: item.status,
-            avance: `${Math.max(item.percentage - 10, 0)}%`,
-            plantel: item.plantel,
-            periodo: selectedDate,
-            ciclo: 'POA 2026',
-            meta: 100,
-            evidencias: item.status === 'Completo' ? 2 : 1,
-            vencimiento: item.status === 'Rezagado' ? 'atrasado' : 'en_tiempo',
-          },
-        ],
-      },
-      {
-        id: 'seguimiento-evidencias-poa',
-        nombre: 'Seguimiento de evidencias POA',
-        descripcion: 'Detalle de evidencias asociadas al avance reportado.',
-        datos: [
-          {
-            registro_id: `${item.id}-evidencia-poa`,
-            actividad: 'Revisión documental de evidencias',
-            responsable: 'Responsable de indicador',
-            estado: item.status,
-            avance: `${item.percentage}%`,
-            plantel: item.plantel,
-            periodo: selectedDate,
-            ciclo: 'POA 2026',
-            meta: 100,
-            evidencias: item.status === 'Completo' ? 3 : 1,
-            vencimiento: item.status === 'Rezagado' ? 'atrasado' : 'en_tiempo',
-          },
-        ],
-      },
-      ...(officialIndicator ? [officialIndicator] : []),
-    ],
-  };
-}
 
 function slugify(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -285,7 +183,6 @@ export const ReportsDashboard = () => {
   const { user } = useAuth();
   const isResponsible = user?.role === 'responsable';
 
-  // Estados para simular la carga del backend
   const [dateOptions] = useState(periodOptions);
   const [selectedDate, setSelectedDate] = useState(periodOptions[0].value);
   const [refreshToken, setRefreshToken] = useState(0);
@@ -297,17 +194,6 @@ export const ReportsDashboard = () => {
   const [filterBy, setFilterBy] = useState('todos');
   const [reportMessage, setReportMessage] = useState('');
   const [generatingDocumentId, setGeneratingDocumentId] = useState<string | null>(null);
-  const [officialSources, setOfficialSources] = useState<OfficialSourcesPayload>(fallbackOfficialSources);
-
-  useEffect(() => {
-    fetchOfficialSources()
-      .then(setOfficialSources)
-      .catch(() => {
-        if (!API_REQUESTS_ENABLED) {
-          setOfficialSources(fallbackOfficialSources);
-        }
-      });
-  }, []);
 
   useEffect(() => {
     const handleCaptureChanged = () => setRefreshToken((current) => current + 1);
@@ -349,18 +235,6 @@ export const ReportsDashboard = () => {
       isMounted = false;
     };
   }, [dateOptions, refreshToken, selectedDate, user?.role]);
-
-  const fallbackPlanteles: PlantelProgressRecord[] = [
-    {
-      id: 'bach-16',
-      plantel: officialSources.summary.plantel,
-      plantelId: '1',
-      periodos: ['2026-1', '2026-2'],
-      percentage: 100,
-      status: 'Completo',
-      kind: 'plantel',
-    },
-  ];
 
   const loadReport = async (item: PlantelProgressRecord): Promise<ExportReport> => {
     setReportMessage(`Preparando ${item.plantel}...`);

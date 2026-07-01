@@ -1,8 +1,7 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { loginWithCredentials } from '../../api/auth';
-import { API_REQUESTS_ENABLED } from '../../api/client';
 import { Button } from './Button';
 import { Input } from './Input';
 import UDCBanner from '../../assets/Ucol_Banner.jpg';
@@ -14,47 +13,15 @@ export const Login = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'admin' | 'plantel' | 'responsable'>('admin');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginError, setLoginError] = useState('');
 
-  useEffect(() => {
-    const normalizedUsername = username.trim().toLowerCase();
-
-    if (normalizedUsername.includes('plantel') || normalizedUsername.includes('bach')) {
-      setRole('plantel');
-      return;
-    }
-
-    if (normalizedUsername.includes('responsable') || /^resp\d+/.test(normalizedUsername)) {
-      setRole('responsable');
-      return;
-    }
-
-    if (normalizedUsername.includes('admin') || normalizedUsername.includes('director')) {
-      setRole('admin');
-    }
-  }, [username]);
-
-  const roleProfiles = {
-    admin: {
-      description: 'Administrador',
-      redirectTo: '/analisis',
-      userId: 'director-1',
-    },
-    plantel: {
-      description: 'Plantel',
-      redirectTo: '/indicadores',
-      userId: 'plantel-1',
-      plantelId: 1,
-    },
-    responsable: {
-      description: 'Responsable de indicador',
-      redirectTo: '/revision',
-      userId: 'responsable-1',
-      responsableId: 1,
-    },
+  const redirectByRole = {
+    admin: '/analisis',
+    plantel: '/indicadores',
+    responsable: '/indicadores',
   } as const;
+
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -63,29 +30,12 @@ export const Login = () => {
     try {
       const authenticatedUser = await loginWithCredentials(username, password);
       login(authenticatedUser);
-      navigate(roleProfiles[authenticatedUser.role as keyof typeof roleProfiles]?.redirectTo ?? '/indicadores');
+      navigate(redirectByRole[authenticatedUser.role as keyof typeof redirectByRole] ?? '/indicadores');
       return;
     } catch (error) {
-      if (!canUseLocalFallback(error)) {
-        setLoginError(error instanceof Error ? error.message : 'Usuario o contraseña incorrectos.');
-        setIsSubmitting(false);
-        return;
-      }
+      setLoginError(error instanceof Error ? error.message : 'Usuario o contraseña incorrectos.');
+      setIsSubmitting(false);
     }
-
-    const selectedProfile = roleProfiles[role];
-
-    login({
-      id: selectedProfile.userId,
-      username: username || 'prueba',
-      name: username || 'Prueba',
-      role,
-      description: selectedProfile.description,
-      plantelId: 'plantelId' in selectedProfile ? selectedProfile.plantelId : undefined,
-      responsableId: 'responsableId' in selectedProfile ? selectedProfile.responsableId : undefined,
-    });
-    navigate(selectedProfile.redirectTo);
-    setIsSubmitting(false);
   };
 
   return (
@@ -156,15 +106,3 @@ export const Login = () => {
     </main>
   );
 };
-
-function canUseLocalFallback(error: unknown) {
-  if (API_REQUESTS_ENABLED) {
-    return false;
-  }
-
-  if (error instanceof TypeError) {
-    return true;
-  }
-
-  return error instanceof Error && error.message === 'api_unavailable';
-}
