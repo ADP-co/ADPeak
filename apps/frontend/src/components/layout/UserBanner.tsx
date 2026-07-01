@@ -18,6 +18,7 @@ interface UserBannerProps {
 const navLinksByRole: Record<UserRole, { label: string; href: string }[]> = {
   plantel: [
     { label: 'Indicadores', href: '/indicadores' },
+    { label: 'Historial', href: '/historial' },
     { label: 'Reportes', href: '/reportes' }
   ],
   admin: [

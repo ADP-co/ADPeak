@@ -831,6 +831,10 @@ function AppContent() {
           } />
         )}
 
+        {role === 'plantel' && (
+          <Route path="/historial" element={<IndicatorHistory />} />
+        )}
+
         {/* Formulario de captura accesible para quienes tengan acceso a indicadores */}
         <Route
           path="/indicadores/captura/:code"
