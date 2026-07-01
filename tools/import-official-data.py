@@ -33,6 +33,10 @@ EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+", re.I)
 CONTACT_RE = re.compile(r"\b(?:ext\.?|extension|tel(?:efono)?\.?|celular|correo)\b", re.I)
 PHONE_NUMBER_RE = re.compile(r"(?<!\d)(?:\+?52\s*)?(?:\d[\s().-]*){8,}\d(?:\.0)?(?!\d)")
 MOJIBAKE_MARKERS = ("\u00c3", "\u00c2", "\u00e2", "\ufffd")
+KNOWN_TEXT_FIXES = {
+    "abadono escolar": "abandono escolar",
+    "Abadono escolar": "Abandono escolar",
+}
 HEADER_TOKENS = {
     "accion",
     "actividad",
@@ -102,7 +106,12 @@ def clean_text(value: Any) -> str:
         return ""
     text = str(value).replace("\n", " ").strip()
     text = " ".join(text.split())
-    return unicodedata.normalize("NFC", repair_mojibake(text))
+    text = repair_mojibake(text)
+
+    for wrong, right in KNOWN_TEXT_FIXES.items():
+        text = text.replace(wrong, right)
+
+    return unicodedata.normalize("NFC", text)
 
 
 def repair_mojibake(value: str) -> str:
