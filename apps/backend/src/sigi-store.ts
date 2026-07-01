@@ -1605,9 +1605,16 @@ function normalizePersistedIndicator(indicator: SigiIndicator): SigiIndicator {
   const shouldUseSeededPlantelScope =
     Boolean(seededIndicator) &&
     ((plantelIds.length === 0 && indicator.plantelScopeSource !== "manual") || shouldResetLegacyOfficialScope);
+  const shouldUseSeededOfficialMetadata =
+    seededIndicator?.plantelScopeSource === "official-import" &&
+    indicator.plantelScopeSource !== "manual";
 
   return {
     ...indicator,
+    name: shouldUseSeededOfficialMetadata ? seededIndicator.name : indicator.name,
+    description: shouldUseSeededOfficialMetadata ? seededIndicator.description : indicator.description,
+    dataType: shouldUseSeededOfficialMetadata ? seededIndicator.dataType : indicator.dataType,
+    period: shouldUseSeededOfficialMetadata ? seededIndicator.period : indicator.period,
     plantelIds: shouldUseSeededPlantelScope ? seededIndicator!.plantelIds : plantelIds,
     plantelScopeSource: indicator.plantelScopeSource ?? seededIndicator?.plantelScopeSource ?? "manual",
     responsibleIds: indicator.responsibleIds?.length ? indicator.responsibleIds : seededIndicator?.responsibleIds ?? [1],
