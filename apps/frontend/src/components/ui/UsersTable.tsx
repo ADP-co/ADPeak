@@ -16,6 +16,7 @@ export interface UserRecord {
   plantelId?: number;
   responsableId?: number;
   isBlocked?: boolean;
+  password?: string;
 }
 
 const KNOWN_PLANTELES = catalogPlanteles.map((plantel) => ({
@@ -154,6 +155,7 @@ export const UsersTable = () => {
       plantel: '-',
       indicadores: '-',
       responsableId: undefined,
+      password: '',
     });
     setStatusMessage('');
   };
@@ -195,27 +197,37 @@ export const UsersTable = () => {
     }
 
     const isNew = !users.some((user) => user.id === normalizedUser.id);
+    const initialPassword = normalizedUser.password?.trim() ?? '';
+
+    if (isNew && normalizedUser.role === 'Responsable' && initialPassword.length < 8) {
+      setStatusMessage('Define una contraseña inicial de al menos 8 caracteres.');
+      return;
+    }
+
     try {
-      await saveUser({
+      const saved = await saveUser({
         id: normalizedUser.id.startsWith('local-') ? undefined : normalizedUser.id,
         name: normalizedUser.name,
         role: roleToCatalog(normalizedUser.role),
         plantelId: normalizedUser.role === 'Plantel' ? normalizedUser.plantelId : undefined,
-        responsableId: normalizedUser.role === 'Responsable' ? normalizedUser.responsableId ?? 1 : undefined,
+        responsableId: normalizedUser.role === 'Responsable' ? normalizedUser.responsableId : undefined,
         indicatorCodes: splitIndicators(normalizedUser.indicadores),
         active: !normalizedUser.isBlocked,
+        password: isNew ? initialPassword : undefined,
       });
-    } catch {
-      // La tabla conserva fallback local si no hay API disponible.
-    }
+      const savedRecord = fromCatalogUser(saved);
 
-    setUsers((current) =>
-      isNew
-        ? [normalizedUser, ...current]
-        : current.map((user) => (user.id === normalizedUser.id ? normalizedUser : user))
-    );
-    setEditingUser(null);
-    setStatusMessage(isNew ? 'Usuario agregado.' : 'Usuario actualizado.');
+      setUsers((current) =>
+        isNew
+          ? [savedRecord, ...current]
+          : current.map((user) => (user.id === normalizedUser.id ? savedRecord : user))
+      );
+      setEditingUser(null);
+      setStatusMessage(isNew ? `Usuario agregado: ${savedRecord.username ?? savedRecord.name}.` : 'Usuario actualizado.');
+    } catch (error) {
+      setStatusMessage(error instanceof Error ? error.message : 'No se pudo guardar el usuario.');
+      return;
+    }
   };
 
   const confirmDeleteUser = async () => {
@@ -224,18 +236,23 @@ export const UsersTable = () => {
     }
 
     try {
-      await deactivateUser(userToDelete.id);
-    } catch {
-      // Fallback local.
-    }
+      const updated = await deactivateUser(userToDelete.id);
 
-    setUsers((current) =>
-      current.map((item) =>
-        item.id === userToDelete.id ? { ...item, isBlocked: true } : item
-      )
-    );
-    setStatusMessage('Usuario desactivado.');
-    setUserToDelete(null);
+      if (!updated) {
+        setStatusMessage('No se encontró el usuario.');
+        setUserToDelete(null);
+        return;
+      }
+
+      const updatedRecord = fromCatalogUser(updated);
+      setUsers((current) => current.map((item) => (item.id === userToDelete.id ? updatedRecord : item)));
+      setStatusMessage('Usuario desactivado.');
+      setUserToDelete(null);
+    } catch (error) {
+      setStatusMessage(error instanceof Error ? error.message : 'No se pudo desactivar el usuario.');
+      setUserToDelete(null);
+      return;
+    }
   };
 
   const confirmToggleBlockUser = async () => {
@@ -244,30 +261,39 @@ export const UsersTable = () => {
     }
 
     try {
+      let saved: CatalogUser | undefined;
+
       if (userToToggleBlock.isBlocked) {
-        await saveUser({
+        saved = await saveUser({
           id: userToToggleBlock.id,
           name: userToToggleBlock.name,
           role: roleToCatalog(userToToggleBlock.role),
           plantelId: userToToggleBlock.role === 'Plantel' ? plantelIdFromLabel(userToToggleBlock.plantel) : undefined,
-          responsableId: userToToggleBlock.role === 'Responsable' ? userToToggleBlock.responsableId ?? 1 : undefined,
+          responsableId: userToToggleBlock.role === 'Responsable' ? userToToggleBlock.responsableId : undefined,
           indicatorCodes: splitIndicators(userToToggleBlock.indicadores),
           active: true,
         });
       } else {
-        await deactivateUser(userToToggleBlock.id);
+        saved = await deactivateUser(userToToggleBlock.id);
       }
-    } catch {
-      // Fallback local.
-    }
 
-    setUsers((current) =>
-      current.map((user) =>
-        user.id === userToToggleBlock.id ? { ...user, isBlocked: !user.isBlocked } : user
-      )
-    );
-    setStatusMessage(userToToggleBlock.isBlocked ? 'Usuario desbloqueado.' : 'Usuario bloqueado.');
-    setUserToToggleBlock(null);
+      if (!saved) {
+        setStatusMessage('No se encontró el usuario.');
+        setUserToToggleBlock(null);
+        return;
+      }
+
+      const savedRecord = fromCatalogUser(saved);
+      setUsers((current) =>
+        current.map((user) => (user.id === userToToggleBlock.id ? savedRecord : user))
+      );
+      setStatusMessage(userToToggleBlock.isBlocked ? 'Usuario desbloqueado.' : 'Usuario bloqueado.');
+      setUserToToggleBlock(null);
+    } catch (error) {
+      setStatusMessage(error instanceof Error ? error.message : 'No se pudo actualizar el usuario.');
+      setUserToToggleBlock(null);
+      return;
+    }
   };
 
   const normalizedSearch = normalizeSearch(activeSearch);
@@ -467,6 +493,23 @@ export const UsersTable = () => {
                   className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco disabled:bg-brand-Gris_bajo/10 disabled:opacity-70 disabled:cursor-not-allowed"
                 />
               </div>
+
+              {isCreatingUser && editingUser.role === 'Responsable' && (
+                <div>
+                  <label htmlFor="user-editor-password" className="block text-sm font-semibold text-brand-Gris_oscuro font-body">
+                    Contraseña inicial
+                  </label>
+                  <input
+                    id="user-editor-password"
+                    type="password"
+                    value={editingUser.password ?? ''}
+                    onChange={(event) => setEditingUser({ ...editingUser, password: event.target.value })}
+                    placeholder="Mínimo 8 caracteres"
+                    autoComplete="new-password"
+                    className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco"
+                  />
+                </div>
+              )}
 
               {!isCreatingUser && (
                 <div>

@@ -19,6 +19,10 @@ export type CatalogUser = {
   active: boolean;
 };
 
+export type CatalogUserInput = Partial<CatalogUser> & {
+  password?: string;
+};
+
 export type CatalogIndicator = {
   id: number;
   code: string;
@@ -245,7 +249,7 @@ export async function fetchUsers() {
   }
 }
 
-export async function saveUser(input: Partial<CatalogUser>) {
+export async function saveUser(input: CatalogUserInput) {
   const current = readStorage(USERS_STORAGE_KEY, fallbackUsers);
   const existing = current.find((user) => user.id === input.id);
   const nextRole = input.role ?? existing?.role ?? 'responsable';

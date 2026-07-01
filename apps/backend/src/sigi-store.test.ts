@@ -154,6 +154,77 @@ describe("SIGI store and RBAC", () => {
     expect(users.some((user) => "passwordHash" in user)).toBe(false);
   });
 
+  it("requires passwords for new responsible users and persists their indicator assignments", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const targetCode = "1.0.0.0.2";
+
+    expect(() => saveUser(director, {
+      name: "Responsable QA sin contraseña",
+      role: "responsable",
+      indicatorCodes: [targetCode]
+    })).toThrow(SigiValidationError);
+
+    const created = saveUser(director, {
+      name: "Responsable QA Temporal",
+      role: "responsable",
+      password: "Temporal2026!",
+      indicatorCodes: [targetCode]
+    });
+
+    expect(created.username).toMatch(/^resp\d+$/);
+    expect(authenticateUser(created.username ?? "", "Temporal2026!")).toMatchObject({
+      id: created.id,
+      role: "responsable"
+    });
+
+    const responsableSession = sessionFromHeaders({
+      "x-user-id": created.id,
+      "x-role": "responsable",
+      "x-responsable-id": String(created.responsableId)
+    });
+
+    expect(listIndicators(responsableSession).map((indicator) => indicator.code)).toContain(targetCode);
+    expect(getIndicatorByCode(targetCode)?.responsibleIds).toContain(created.responsableId);
+
+    saveUser(director, {
+      id: created.id,
+      name: created.name,
+      role: "responsable",
+      responsableId: created.responsableId,
+      indicatorCodes: [],
+      active: true
+    });
+
+    expect(listIndicators(responsableSession).map((indicator) => indicator.code)).not.toContain(targetCode);
+    expect(getIndicatorByCode(targetCode)?.responsibleIds).not.toContain(created.responsableId);
+  });
+
+  it("allows creating configurable temporary indicators from administration", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const indicator = saveIndicator(director, {
+      code: "TMP-QA-INDICADOR",
+      name: "Indicador QA configurable",
+      responsibleNames: ["Adriana Ruiz Rivera"],
+      contributorNames: ["Planteles"],
+      activities: ["Captura configurada"],
+      templateColumns: [
+        { key: "hombres_primer_ingreso", label: "Hombres primer ingreso", type: "number" },
+        { key: "mujeres_primer_ingreso", label: "Mujeres primer ingreso", type: "number" }
+      ]
+    });
+
+    expect(indicator).toMatchObject({
+      code: "TMP-QA-INDICADOR",
+      name: "Indicador QA configurable",
+      active: true
+    });
+    expect(indicator.plantelIds.length).toBeGreaterThan(0);
+    expect(templateForIndicator(indicator, director).columns.map((column) => column.label)).toEqual([
+      "Hombres primer ingreso",
+      "Mujeres primer ingreso"
+    ]);
+  });
+
   it("updates the active user's password only after validating the current password", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
 
@@ -239,7 +310,8 @@ describe("SIGI store and RBAC", () => {
       name: "Responsable QA",
       role: "responsable",
       responsableId: 99,
-      indicatorCodes: []
+      indicatorCodes: [],
+      password: "RespQA2026!"
     })).toMatchObject({ role: "responsable" });
   });
 
@@ -858,6 +930,7 @@ describe("SIGI store and RBAC", () => {
       name: "Responsable temporal",
       role: "responsable",
       responsableId: 1,
+      password: "RespQA2026!",
       indicatorCodes: [
         "1.0.0.0.2",
         "1.1.1.1.1",

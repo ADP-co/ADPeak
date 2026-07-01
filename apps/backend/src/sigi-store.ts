@@ -406,8 +406,7 @@ export function saveUser(session: SigiSession, input: Partial<SigiUser> & { pass
     throw new SigiValidationError("El usuario debe incluir nombre y rol valido.");
   }
 
-  const id = input.id || `user-${Date.now()}`;
-  const existing = users.get(id);
+  const existing = input.id ? users.get(input.id) : undefined;
 
   if (!existing && role !== "responsable") {
     throw new SigiValidationError("Solo se pueden crear cuentas de responsables.");
@@ -421,8 +420,18 @@ export function saveUser(session: SigiSession, input: Partial<SigiUser> & { pass
     throw new SigiValidationError("Las cuentas de plantel no pueden cambiar de rol.");
   }
 
+  const normalizedPassword = typeof input.password === "string" ? input.password.trim() : "";
+
+  if (!existing && normalizedPassword.length < 8) {
+    throw new SigiValidationError("Define una contraseña inicial de al menos 8 caracteres.");
+  }
+
+  if (existing && normalizedPassword && normalizedPassword.length < 8) {
+    throw new SigiValidationError("La nueva contraseña debe tener al menos 8 caracteres.");
+  }
+
   if (role === "director") {
-    const hasAnotherDirector = Array.from(users.values()).some((user) => user.role === "director" && user.id !== id);
+    const hasAnotherDirector = Array.from(users.values()).some((user) => user.role === "director" && user.id !== input.id);
 
     if (hasAnotherDirector) {
       throw new SigiValidationError("Solo puede existir un administrador.");
@@ -433,19 +442,25 @@ export function saveUser(session: SigiSession, input: Partial<SigiUser> & { pass
     }
   }
 
+  const responsableId = role === "responsable"
+    ? input.responsableId ?? existing?.responsableId ?? nextResponsableId()
+    : undefined;
+  const userId = input.id || (role === "responsable" ? `responsable-${responsableId}` : `user-${Date.now()}`);
+
   const user: SigiUser = {
-    id,
-    username: input.username?.trim().toLowerCase() || existing?.username || usernameForUser(id, input.name, role),
+    id: userId,
+    username: input.username?.trim().toLowerCase() || existing?.username || usernameForUser(userId, input.name, role),
     name: input.name.trim(),
     role,
     plantelId: role === "plantel" ? input.plantelId ?? existing?.plantelId ?? 1 : undefined,
-    responsableId: role === "responsable" ? input.responsableId ?? existing?.responsableId ?? 1 : undefined,
+    responsableId,
     indicatorCodes: sanitizeUserIndicatorCodes(role, input.indicatorCodes ?? existing?.indicatorCodes ?? []),
     active: input.active ?? existing?.active ?? true,
-    passwordHash: input.password ? hashPassword(input.password) : existing?.passwordHash ?? defaultPasswordHashForRole(role)
+    passwordHash: normalizedPassword ? hashPassword(normalizedPassword) : existing?.passwordHash ?? defaultPasswordHashForRole(role)
   };
 
-  users.set(id, user);
+  users.set(user.id, user);
+  syncIndicatorAssignmentsForUser(user, Object.prototype.hasOwnProperty.call(input, "indicatorCodes"));
   persistCatalogState();
   return publicUser(user);
 }
@@ -1960,6 +1975,45 @@ function persistCatalogState() {
   });
 }
 
+function syncIndicatorAssignmentsForUser(user: SigiUser, shouldSync: boolean) {
+  if (!shouldSync || user.role !== "responsable" || !user.responsableId) {
+    return;
+  }
+
+  const assignedCodes = new Set(user.indicatorCodes);
+  const now = new Date().toISOString();
+
+  indicators.forEach((indicator, indicatorId) => {
+    if (!isVisibleOperationalIndicatorCode(indicator.code)) {
+      return;
+    }
+
+    const hasResponsible = indicator.responsibleIds.includes(user.responsableId!);
+    const shouldHaveResponsible = assignedCodes.has(indicator.code);
+
+    if (hasResponsible === shouldHaveResponsible) {
+      return;
+    }
+
+    const responsibleIds = shouldHaveResponsible
+      ? uniqueNumbers([...indicator.responsibleIds, user.responsableId!])
+      : indicator.responsibleIds.filter((id) => id !== user.responsableId);
+    const primaryResponsibleId = responsibleIds.includes(indicator.primaryResponsibleId)
+      ? indicator.primaryResponsibleId
+      : responsibleIds[0] ?? indicator.primaryResponsibleId;
+
+    indicators.set(indicatorId, {
+      ...indicator,
+      primaryResponsibleId,
+      responsibleIds,
+      responsibleNames: namesForResponsibleIds(responsibleIds),
+      updatedAt: now,
+      updatedBy: "Administración de usuarios",
+      lastChange: "actualizado"
+    });
+  });
+}
+
 function persistNotificationState() {
   persistState({
     notifications: Array.from(notifications.values()),
@@ -2932,18 +2986,41 @@ function normalizeResponsibleIds(ids?: number[], names?: string[]) {
   }
 
   if (names?.length) {
-    return uniqueNumbers(names.map((name) => responsibleIdByName.get(name)).filter((id): id is number => Boolean(id)));
+    return uniqueNumbers(names.map((name) => {
+      const officialId = responsibleIdByName.get(name);
+
+      if (officialId) {
+        return officialId;
+      }
+
+      return Array.from(users.values()).find((user) =>
+        user.role === "responsable" &&
+        user.name.localeCompare(name, "es", { sensitivity: "accent" }) === 0
+      )?.responsableId;
+    }).filter((id): id is number => Boolean(id)));
   }
 
   return [1];
 }
 
 function namesForResponsibleIds(ids: number[]) {
-  return ids.map((id) => responsibleNames[id - 1]).filter(Boolean);
+  return ids.map((id) =>
+    responsibleNames[id - 1] ??
+    Array.from(users.values()).find((user) => user.role === "responsable" && user.responsableId === id)?.name
+  ).filter((name): name is string => Boolean(name));
 }
 
 function nextIndicatorId() {
   return Math.max(0, ...Array.from(indicators.keys())) + 1;
+}
+
+function nextResponsableId() {
+  return Math.max(
+    responsibleNames.length,
+    0,
+    ...Array.from(users.values())
+      .map((user) => user.role === "responsable" ? user.responsableId ?? 0 : 0)
+  ) + 1;
 }
 
 function sortUsers(a: SigiUser, b: SigiUser) {

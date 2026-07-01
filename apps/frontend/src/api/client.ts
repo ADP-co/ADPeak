@@ -69,7 +69,19 @@ export async function apiJson<T>(path: string, init: RequestInit = {}) {
   });
 
   if (!response.ok) {
-    throw new Error(`api_error_${response.status}`);
+    let message = `api_error_${response.status}`;
+
+    try {
+      const payload = await response.json() as { message?: unknown };
+
+      if (typeof payload.message === 'string' && payload.message.trim()) {
+        message = payload.message;
+      }
+    } catch {
+      // Keep the generic status code when the backend does not return JSON.
+    }
+
+    throw new Error(message);
   }
 
   return response.json() as Promise<T>;

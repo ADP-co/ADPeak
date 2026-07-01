@@ -219,7 +219,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
     try {
       await saveIndicator({
         id: editingIndicator?.id,
-        code: isNew ? undefined : editingIndicator?.code ?? code,
+        code: editingIndicator?.code ?? code,
         name: cleanedName,
         description:
           editingIndicator?.description && editingIndicator.description !== editingIndicator.name
@@ -242,8 +242,8 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
       });
       toast.success('Configuración guardada');
       handleBack();
-    } catch {
-      toast.error('No se pudo guardar');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'No se pudo guardar');
     }
   };
 
