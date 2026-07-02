@@ -786,7 +786,7 @@ function workStateForIndicator(session: SigiSession, indicator: SigiIndicator): 
   const relevantCaptures = relevantCapturesForIndicator(session, indicator);
   const latest = relevantCaptures[0];
   const canPlantelDraft = session.role === "plantel";
-  const canResponsibleReviewEdit = session.role === "responsable" && isResponsibleAssigned(session, indicator);
+  const canResponsibleReview = session.role === "responsable" && isResponsibleAssigned(session, indicator);
   const baseState = {
     captureId: latest?.id,
     plantelId: latest?.plantelId ?? defaultPlantelIdForIndicator(session, indicator),
@@ -820,15 +820,15 @@ function workStateForIndicator(session: SigiSession, indicator: SigiIndicator): 
   if (latest.estado === "en_revision") {
     const isOwnResponsibleSubmission =
       session.role === "responsable" && latest.submittedByUserId === session.userId;
-    const canReview = session.role === "director" || (canResponsibleReviewEdit && !isOwnResponsibleSubmission);
+    const canReview = session.role === "director" || (canResponsibleReview && !isOwnResponsibleSubmission);
 
     return {
       ...baseState,
       status: "En revisión",
-      canEdit: canResponsibleReviewEdit,
+      canEdit: false,
       canReview,
-      isReadOnly: !canResponsibleReviewEdit,
-      readOnlyReason: canResponsibleReviewEdit ? undefined : "La captura esta en revision."
+      isReadOnly: true,
+      readOnlyReason: canReview ? "La captura esta lista para revision." : "La captura esta en revision."
     };
   }
 
@@ -1075,7 +1075,7 @@ export function assertCaptureAccess(
     estado?: CaptureDraft["estado"];
     submittedByUserId?: string | null;
   },
-  action: "draft" | "submit" | "read" | "review" | "responsibleEdit"
+  action: "draft" | "submit" | "read" | "review"
 ) {
   const indicator = indicators.get(request.indicadorId);
 
@@ -1090,16 +1090,6 @@ export function assertCaptureAccess(
   if (action === "draft" || action === "submit") {
     if (session.role !== "plantel") {
       throw new SigiForbiddenError("Solo el plantel puede capturar o enviar indicadores a revision.");
-    }
-  }
-
-  if (action === "responsibleEdit") {
-    if (session.role !== "responsable") {
-      throw new SigiForbiddenError("Solo el responsable asignado puede editar capturas en revision.");
-    }
-
-    if (request.estado !== "en_revision") {
-      throw new SigiValidationError("Solo se pueden editar capturas que estan en revision.");
     }
   }
 
@@ -1122,26 +1112,6 @@ export function assertCaptureAccess(
   if (request.payload) {
     validateCapturePayload(indicator, request.payload, action === "submit", session);
   }
-}
-
-export function recordResponsibleCaptureEdit(session: SigiSession, draft: CaptureDraft) {
-  if (session.role !== "responsable") {
-    return;
-  }
-
-  const indicator = indicators.get(draft.indicadorId);
-
-  if (!indicator || !isResponsibleAssigned(session, indicator)) {
-    return;
-  }
-
-  indicators.set(indicator.id, {
-    ...indicator,
-    updatedAt: draft.actualizadoEn,
-    updatedBy: actorNameForSession(session),
-    lastChange: "actualizado"
-  });
-  persistCatalogState();
 }
 
 export function validateCapturePayload(indicator: SigiIndicator, payload: CapturePayload, requireJustification: boolean, session?: SigiSession) {

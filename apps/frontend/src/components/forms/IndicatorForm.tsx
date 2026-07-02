@@ -535,6 +535,8 @@ export const IndicatorForm = ({
                 <tr key={field.id} className="hover:bg-brand-Gris_bajo/10">
                   {template.columns.map((column) => {
                     const error = rowErrors?.[column.key]?.message;
+                    const fieldName = `rows.${rowIndex}.${column.key}` as const;
+                    const fieldRegistration = register(fieldName);
 
                     return (
                       <td key={column.key} className="border border-brand-Gris_bajo/20 p-2 align-middle">
@@ -547,11 +549,28 @@ export const IndicatorForm = ({
                         {column.type === 'number' && (
                           <Input
                             type="number"
+                            min={0}
+                            step="any"
+                            inputMode="decimal"
                             className="w-full min-w-[80px] text-center !p-1 h-8"
                             label=""
                             aria-label={`${column.label}, fila ${rowIndex + 1}`}
                             disabled={isReadOnly}
-                            {...register(`rows.${rowIndex}.${column.key}` as const)}
+                            {...fieldRegistration}
+                            onKeyDown={(event) => {
+                              if (['-', '+', 'e', 'E'].includes(event.key)) {
+                                event.preventDefault();
+                              }
+                            }}
+                            onChange={(event) => {
+                              const nextValue = event.currentTarget.value.trim();
+
+                              if (nextValue.startsWith('-') || Number(nextValue) < 0) {
+                                event.currentTarget.value = '';
+                              }
+
+                              void fieldRegistration.onChange(event);
+                            }}
                             error={error}
                           />
                         )}
@@ -563,7 +582,7 @@ export const IndicatorForm = ({
                             label=""
                             aria-label={`${column.label}, fila ${rowIndex + 1}`}
                             disabled={isReadOnly}
-                            {...register(`rows.${rowIndex}.${column.key}` as const)}
+                            {...fieldRegistration}
                             error={error}
                           />
                         )}

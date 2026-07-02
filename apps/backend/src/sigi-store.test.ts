@@ -945,9 +945,9 @@ describe("SIGI store and RBAC", () => {
       actividadId: 1,
       periodoId: 1,
       captureStatus: "en_revision",
-      canEdit: true,
+      canEdit: false,
       canReview: true,
-      isReadOnly: false
+      isReadOnly: true
     });
 
     approveCapture(draft.id);
@@ -964,7 +964,7 @@ describe("SIGI store and RBAC", () => {
     });
   });
 
-  it("allows assigned responsables to edit data for captures under review", () => {
+  it("blocks assigned responsables from editing captured data under review", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const indicator = saveIndicator(director, {
       ...getIndicatorByCode("1.0.0.0.2")!,
@@ -1001,17 +1001,12 @@ describe("SIGI store and RBAC", () => {
     };
 
     expect(() =>
-      assertCaptureAccess(responsable, { ...underReview, payload }, "responsibleEdit")
-    ).not.toThrow();
-    expect(() =>
       assertCaptureAccess(responsable, { ...underReview, payload }, "draft")
     ).toThrow(SigiForbiddenError);
-
-    const updated = updateCaptureDraft(underReview.id, payload, { allowReviewStatus: true });
-    expect(updated).toMatchObject({
-      estado: "en_revision",
-      versionActual: underReview.versionActual + 1
-    });
+    expect(() =>
+      assertCaptureAccess(responsable, underReview, "review")
+    ).not.toThrow();
+    expect(updateCaptureDraft(underReview.id, payload)).toBeUndefined();
   });
 
   it("keeps academy workbook formats internal instead of exposing them as indicators", () => {

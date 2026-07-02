@@ -34,7 +34,6 @@ import {
   markNotificationRead,
   officialSourcesPayload,
   recordCaptureNotification,
-  recordResponsibleCaptureEdit,
   reloadSigiStateFromPersistence,
   resetUserPassword,
   saveIndicator,
@@ -619,11 +618,8 @@ const server = createServer(async (request, response) => {
           return;
         }
 
-        const accessAction = session.role === "responsable" && draft.estado === "en_revision" ? "responsibleEdit" : "draft";
-        assertCaptureAccess(session, { ...draft, payload }, accessAction);
-        const updatedDraft = updateCaptureDraft(captureId, payload, {
-          allowReviewStatus: accessAction === "responsibleEdit"
-        });
+        assertCaptureAccess(session, { ...draft, payload }, "draft");
+        const updatedDraft = updateCaptureDraft(captureId, payload);
 
         if (!updatedDraft) {
           sendJson(response, 409, {
@@ -633,7 +629,6 @@ const server = createServer(async (request, response) => {
           return;
         }
 
-        recordResponsibleCaptureEdit(session, updatedDraft);
         await flushPersistedState();
         sendJson(response, 200, updatedDraft);
         return;
