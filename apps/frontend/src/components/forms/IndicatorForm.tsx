@@ -689,7 +689,11 @@ export const IndicatorForm = ({
             </p>
           )}
         </div>
-        {canSaveReviewEdits || canReviewCurrentCapture ? (
+        {isReadOnly && !canSaveReviewEdits && !canReviewCurrentCapture ? (
+          <p className="rounded-md border border-brand-Gris_bajo/30 bg-brand-Gris_bajo/10 px-3 py-2 text-sm font-body font-semibold text-brand-Gris_oscuro" role="status">
+            Consulta en solo lectura.
+          </p>
+        ) : canSaveReviewEdits || canReviewCurrentCapture ? (
           <>
             {canSaveReviewEdits && (
               <Button
