@@ -1211,6 +1211,20 @@ describe("SIGI store and RBAC", () => {
         "draft"
       )
     ).toThrow(SigiValidationError);
+    expect(() =>
+      assertCaptureAccess(
+        plantel,
+        {
+          plantelId: 1,
+          indicadorId: indicator.id,
+          payload: {
+            rows,
+            justificacion: "Captura historica con totales por recalcular."
+          }
+        },
+        "read"
+      )
+    ).not.toThrow();
   });
 
   it("persists manual template columns with formula calculations", () => {

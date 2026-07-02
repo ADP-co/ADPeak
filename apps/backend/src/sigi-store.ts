@@ -1109,7 +1109,7 @@ export function assertCaptureAccess(
     throw new SigiForbiddenError("El responsable no puede aprobar u observar una captura enviada por su misma cuenta.");
   }
 
-  if (request.payload) {
+  if (request.payload && action !== "read") {
     validateCapturePayload(indicator, request.payload, action === "submit", session);
   }
 }
