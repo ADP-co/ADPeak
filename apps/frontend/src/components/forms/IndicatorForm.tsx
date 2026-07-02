@@ -356,9 +356,12 @@ export const IndicatorForm = ({
   const handleRequestCorrection = () => {
     const observacion = window.prompt('Observación para el plantel');
 
-    if (observacion?.trim()) {
+    if (observacion?.trim() && observacion.trim().length >= 10) {
       onRequestCorrection?.(observacion.trim());
+      return;
     }
+
+    window.alert('Agrega una observación de al menos 10 caracteres.');
   };
 
   return (
@@ -642,7 +645,7 @@ export const IndicatorForm = ({
             </p>
           )}
         </div>
-        {canReview ? (
+        {canSaveReviewEdits || canReviewCurrentCapture ? (
           <>
             {canSaveReviewEdits && (
               <Button

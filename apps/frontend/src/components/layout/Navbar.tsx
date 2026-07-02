@@ -37,7 +37,7 @@ export const Navbar = () => {
         <div className="flex items-center">
           <button
             onClick={handleLogout}
-            className="p-2 text-brand-Gris_oscuro hover:text-brand-Status_rojo transition-colors duration-200 rounded-md hover:bg-brand-Fondo cursor-pointer"
+            className="min-h-11 min-w-11 p-2 text-brand-Gris_oscuro hover:text-brand-Status_rojo transition-colors duration-200 rounded-md hover:bg-brand-Fondo cursor-pointer flex items-center justify-center"
             title="Cerrar sesión"
             aria-label="Cerrar sesión"
           >

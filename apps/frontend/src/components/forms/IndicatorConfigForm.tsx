@@ -237,7 +237,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
           : configuredTemplateColumns.columns.length > 0
             ? ['Captura configurada']
             : ['Actividad general'],
-        plantelIds: editingIndicator?.plantelIds,
+        plantelIds: contributorType === 'responsables' ? [] : editingIndicator?.plantelIds,
         templateColumns: configuredTemplateColumns.columns,
       });
       toast.success('Configuración guardada');

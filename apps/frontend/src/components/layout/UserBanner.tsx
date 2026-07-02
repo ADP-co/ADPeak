@@ -38,8 +38,9 @@ const navLinksByRole: Record<UserRole, { label: string; href: string }[]> = {
 
 export const UserBanner = ({ role, name, description, onNavigate, currentView, notifications = [], onReadNotification }: UserBannerProps) => {
   const currentLinks = navLinksByRole[role] || [];
-  const unreadCount = notifications.filter((notification) => !notification.readAt).length;
-  const recentNotifications = notifications.slice(0, 5);
+  const unreadNotifications = notifications.filter((notification) => !notification.readAt);
+  const unreadCount = unreadNotifications.length;
+  const recentNotifications = unreadNotifications.slice(0, 5);
 
   return (
     <div className="w-full min-h-[70px] bg-brand-Verde_oscuro text-brand-Blanco px-4 sm:px-6 shadow-md z-40 relative">

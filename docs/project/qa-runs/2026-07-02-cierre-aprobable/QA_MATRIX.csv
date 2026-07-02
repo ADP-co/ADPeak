@@ -1,0 +1,12 @@
+test_id,module,role,action,expected_result,actual_result,status,severity,notes
+QA-API-001,Salud,publico,GET /health,status ok,status ok,passed,P0,Backend local con estado temporal
+QA-AUTH-001,Autenticacion,director,Login director,Inicia sesion,Inicia sesion,passed,P0,Sin guardar token en evidencia
+QA-DATA-001,Indicadores,director,Listar indicadores,Sin FMT ni TMP visibles,14 visibles y 0 FMT,passed,P0,Fuente indicadores-20260628T002121Z-3-001.zip
+QA-USR-001,Usuarios,director,Crear responsable sin contrasena,Rechaza solicitud,HTTP 400,passed,P1,Valida contrasena inicial obligatoria
+QA-USR-002,Usuarios,director,Crear responsable con contrasena,Permite login posterior,Login posterior exitoso,passed,P1,Usuario temporal en estado aislado
+QA-USR-003,Usuarios,director,Restablecer contrasena,Permite login con nueva clave,Login con nueva clave exitoso,passed,P1,Endpoint PATCH /usuarios/:id/password
+QA-CAP-001,Captura,plantel,Guardar numero negativo,Rechaza payload,Prueba backend pasa,passed,P0,Validacion server-side
+QA-CAP-002,Captura,plantel,Enviar sin evidencia,Rechaza envio,Prueba backend pasa,passed,P0,Evidencia PDF obligatoria
+QA-CALC-001,Indicador 1.0.0.0.2,plantel,Enviar total incoherente,Rechaza payload,Prueba backend pasa,passed,P1,Totales oficiales calculados
+QA-REP-001,Reportes,director,Filtrar estado inexistente,Devuelve cero filas,0 indicadores y 0 filas,passed,P1,No fallback global
+QA-REP-002,Reportes,director,Filtrar plantel invalido,Devuelve error,HTTP 400,passed,P1,No reporte global

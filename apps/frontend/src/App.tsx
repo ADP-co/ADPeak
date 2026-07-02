@@ -152,6 +152,11 @@ function positiveQueryParam(params: URLSearchParams, key: string) {
   return Number.isInteger(value) && value > 0 ? value : undefined;
 }
 
+function nonNegativeQueryParam(params: URLSearchParams, key: string) {
+  const value = Number(params.get(key));
+  return Number.isInteger(value) && value >= 0 ? value : undefined;
+}
+
 function isEditableCaptureStatus(status?: string) {
   return !status || status === 'borrador' || status === 'correccion_solicitada';
 }
@@ -375,7 +380,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
   const navigate = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const requestedPlantelId = positiveQueryParam(queryParams, 'plantelId');
+  const requestedPlantelId = nonNegativeQueryParam(queryParams, 'plantelId');
   const requestedActividadId = positiveQueryParam(queryParams, 'actividadId');
   const requestedPeriodoId = positiveQueryParam(queryParams, 'periodoId');
   const requestedCaptureId = positiveQueryParam(queryParams, 'captureId');
@@ -422,9 +427,12 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
     };
   }, [selectedCode, user?.id]);
 
+  const selectedIndicatorPlantelIds = selectedCatalogIndicator
+    ? effectivePlantelIdsForCatalogIndicator(selectedCatalogIndicator)
+    : [];
   const activePlantelId = user?.role === 'plantel'
     ? user.plantelId ?? 1
-    : requestedPlantelId ?? selectedCatalogIndicator?.plantelId ?? selectedCatalogIndicator?.plantelIds[0] ?? officialIndicatorPlantelScopes[selectedCode]?.[0] ?? 1;
+    : requestedPlantelId ?? selectedCatalogIndicator?.plantelId ?? selectedIndicatorPlantelIds[0] ?? 0;
   const activeActividadId = requestedActividadId ?? selectedCatalogIndicator?.actividadId ?? 1;
   const activePeriodoId = requestedPeriodoId ?? selectedCatalogIndicator?.periodoId ?? 1;
   const activeResponsableId = user?.role === 'responsable'
@@ -454,6 +462,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
   const canResponsableFillCapture = user?.role === 'responsable' && !isResponsibleReviewCapture && !isApprovedCapture && catalogAllowsEdit && isEditableCaptureStatus(captureDraft.capture?.estado);
   const canResponsableEditCapture = isResponsibleReviewCapture && catalogAllowsEdit;
   const isReadOnlyCapture = isApprovedCapture || (!canPlantelEditCapture && !canResponsableFillCapture && !canResponsableEditCapture);
+  const canReviewCurrentCapture = user?.role === 'admin' || Boolean(selectedCatalogIndicator?.canReview);
 
   if (isWaitingForCatalogIndicator) {
     return (
@@ -511,8 +520,21 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
 
   const handleSendReview = async (data: FormSubmission) => {
     try {
-      if (!data.justificacion?.trim() && hasBlankEditableCells(data.rows, selectedTemplate)) {
-        toast.error('Agrega una justificación antes de enviar.');
+      const justificacion = data.justificacion?.trim() ?? '';
+      const hasEvidence = Boolean(data.evidencia?.[0] || captureDraft.capture?.payload.evidencia?.nombre);
+
+      if (justificacion.length < 10) {
+        toast.error('Agrega una descripción o justificación de al menos 10 caracteres.');
+        return;
+      }
+
+      if (!hasEvidence) {
+        toast.error('Adjunta una evidencia PDF antes de enviar.');
+        return;
+      }
+
+      if (hasBlankEditableCells(data.rows, selectedTemplate)) {
+        toast.error('Completa los campos capturables antes de enviar.');
         return;
       }
 
@@ -562,7 +584,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
       initialData={formInitialData}
       initialJustificacion={captureDraft.capture?.payload.justificacion}
       existingEvidenceName={captureDraft.capture?.payload.evidencia?.nombre}
-      canReview={canResponsableEditCapture || user?.role === 'admin'}
+      canReview={canReviewCurrentCapture}
       canSaveReviewEdits={canResponsableEditCapture}
       captureStatus={captureDraft.capture?.estado}
       isReadOnly={isReadOnlyCapture}
@@ -745,7 +767,7 @@ function AppContent() {
   const handleSelectIndicator = (indicator: Indicator) => {
     const params = new URLSearchParams();
 
-    if (indicator.plantelId) params.set('plantelId', String(indicator.plantelId));
+    if (indicator.plantelId !== undefined) params.set('plantelId', String(indicator.plantelId));
     if (indicator.actividadId) params.set('actividadId', String(indicator.actividadId));
     if (indicator.periodoId) params.set('periodoId', String(indicator.periodoId));
     if (indicator.captureId) params.set('captureId', String(indicator.captureId));
@@ -808,6 +830,7 @@ function AppContent() {
                   onSelectIndicator={handleSelectIndicator}
                   showScopeColumns={false}
                   title="Mis indicadores"
+                  emptyMessage={catalogLoaded ? 'No hay indicadores asignados.' : 'Cargando indicadores...'}
                   periodLabel="Indicadores asignados"
                 />
               </>
@@ -825,7 +848,11 @@ function AppContent() {
             ) : (
               <>
                 <ProgressBar totalIndicators={indicators.length} completedIndicators={completedIndicatorCount} />
-                <IndicatorsTable indicators={indicators} onSelectIndicator={handleSelectIndicator} />
+                <IndicatorsTable
+                  indicators={indicators}
+                  onSelectIndicator={handleSelectIndicator}
+                  emptyMessage={catalogLoaded ? 'No hay indicadores asignados.' : 'Cargando indicadores...'}
+                />
               </>
             )
           } />

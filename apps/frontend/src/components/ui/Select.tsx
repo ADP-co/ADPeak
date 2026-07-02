@@ -55,12 +55,12 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             {...props}
           >
             {/* Opción por defecto (placeholder) */}
-            <option value="" disabled hidden>
+            <option value="" disabled hidden className="bg-brand-Blanco text-brand-Gris_oscuro">
               Seleccione una opción
             </option>
 
             {options.map((opt) => (
-              <option key={opt.value} value={opt.value}>
+              <option key={opt.value} value={opt.value} className="bg-brand-Blanco text-brand-Gris_oscuro">
                 {opt.label}
               </option>
             ))}

@@ -26,6 +26,8 @@ export type CaptureDraft = {
   versionActual: number;
   payload: CapturePayload;
   observacion: string | null;
+  submittedByUserId?: string | null;
+  submittedByRole?: "director" | "responsable" | "plantel" | null;
   cerradoEn: string | null;
   creadoEn: string;
   actualizadoEn: string;
@@ -58,13 +60,17 @@ function isPositiveInteger(value: unknown): value is number {
   return Number.isInteger(value) && Number(value) > 0;
 }
 
+function isNonNegativeInteger(value: unknown): value is number {
+  return Number.isInteger(value) && Number(value) >= 0;
+}
+
 export function isCaptureDraftRequest(value: unknown): value is CaptureDraftRequest {
   if (!isRecord(value) || !isRecord(value.payload) || !Array.isArray(value.payload.rows)) {
     return false;
   }
 
   return (
-    isPositiveInteger(value.plantelId) &&
+    isNonNegativeInteger(value.plantelId) &&
     isPositiveInteger(value.indicadorId) &&
     isPositiveInteger(value.actividadId) &&
     isPositiveInteger(value.periodoId) &&
@@ -109,11 +115,13 @@ export function createCaptureDraft(request: CaptureDraftRequest): CaptureDraft {
     const updatedDraft: CaptureDraft = {
       ...existingDraft,
       estado: existingDraft.estado === "cerrado" ? "borrador" : existingDraft.estado,
-      payload: request.payload,
-      responsableId: request.responsableId ?? existingDraft.responsableId,
-      observacion: null,
-      versionActual: existingDraft.versionActual + 1,
-      actualizadoEn: nowIso()
+    payload: request.payload,
+    responsableId: request.responsableId ?? existingDraft.responsableId,
+    observacion: null,
+    submittedByUserId: existingDraft.submittedByUserId ?? null,
+    submittedByRole: existingDraft.submittedByRole ?? null,
+    versionActual: existingDraft.versionActual + 1,
+    actualizadoEn: nowIso()
     };
 
     captureDrafts.set(updatedDraft.id, updatedDraft);
@@ -133,6 +141,8 @@ export function createCaptureDraft(request: CaptureDraftRequest): CaptureDraft {
     versionActual: 1,
     payload: request.payload,
     observacion: null,
+    submittedByUserId: null,
+    submittedByRole: null,
     cerradoEn: null,
     creadoEn: timestamp,
     actualizadoEn: timestamp
@@ -200,7 +210,10 @@ export function updateCaptureDraft(
   return updatedDraft;
 }
 
-export function sendCaptureToReview(captureId: number) {
+export function sendCaptureToReview(
+  captureId: number,
+  submittedBy?: { userId: string; role: CaptureDraft["submittedByRole"] }
+) {
   const draft = captureDrafts.get(captureId);
 
   if (!draft) {
@@ -214,6 +227,8 @@ export function sendCaptureToReview(captureId: number) {
   const updatedDraft: CaptureDraft = {
     ...draft,
     estado: "en_revision",
+    submittedByUserId: submittedBy?.userId ?? draft.submittedByUserId ?? null,
+    submittedByRole: submittedBy?.role ?? draft.submittedByRole ?? null,
     versionActual: draft.versionActual + 1,
     actualizadoEn: nowIso()
   };

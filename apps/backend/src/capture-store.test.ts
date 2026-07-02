@@ -101,6 +101,16 @@ describe("capture store", () => {
         periodoId: 1,
         payload: { rows: [] }
       })
+    ).toBe(true);
+
+    expect(
+      isCaptureDraftRequest({
+        plantelId: -1,
+        indicadorId: 1,
+        actividadId: 1,
+        periodoId: 1,
+        payload: { rows: [] }
+      })
     ).toBe(false);
   });
 

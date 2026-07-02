@@ -321,6 +321,19 @@ export async function deactivateUser(id: string) {
   }
 }
 
+export async function resetUserPassword(id: string, password: string, confirmPassword: string) {
+  try {
+    const response = await apiJson<CatalogUser>(`/usuarios/${encodeURIComponent(id)}/password`, {
+      method: 'PATCH',
+      body: JSON.stringify({ password, confirmPassword }),
+    });
+    mergeUser(response);
+    return response;
+  } catch (error) {
+    throw catalogWriteError(error, 'No se pudo actualizar la contraseña.');
+  }
+}
+
 function buildFallbackIndicators(): CatalogIndicator[] {
   const operationalRows = officialCatalogRows.filter(isOperationalCatalogRow);
   const responsibleNames = Array.from(new Set(operationalRows.map((row) => row.responsible).filter(Boolean)))

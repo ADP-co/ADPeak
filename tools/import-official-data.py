@@ -1345,6 +1345,13 @@ def apply_official_calculated_columns(columns: list[dict[str, Any]]) -> None:
     """Promote known Excel formula columns to reproducible web calculations."""
     keys = {column["key"] for column in columns}
 
+    def find_column(*tokens: str, exclude: tuple[str, ...] = ()) -> dict[str, Any] | None:
+        for column in columns:
+            text = normalize_key(f"{column.get('label', '')} {column.get('key', '')}")
+            if all(token in text for token in tokens) and not any(token in text for token in exclude):
+                return column
+        return None
+
     attendance_column = next(
         (
             column
@@ -1364,7 +1371,37 @@ def apply_official_calculated_columns(columns: list[dict[str, Any]]) -> None:
             "denominatorKey": "matricula_t",
             "decimals": 2,
         }
-        return
+
+    egresados_mujeres = find_column("egresados", "mujeres")
+    egresados_hombres = find_column("egresados", "hombres")
+    egresados_total = find_column("egresados", "total")
+    matricula_mujeres = find_column("matricula", "mujeres")
+    matricula_hombres = find_column("matricula", "hombres")
+    matricula_total = find_column("matricula", "total")
+    titulacion_porcentaje = find_column("titulacion", exclude=("titulados",))
+
+    if egresados_mujeres and egresados_hombres and egresados_total:
+        egresados_total["type"] = "calculated"
+        egresados_total["calculation"] = {
+            "type": "sum",
+            "sourceKeys": [egresados_mujeres["key"], egresados_hombres["key"]],
+        }
+
+    if matricula_mujeres and matricula_hombres and matricula_total:
+        matricula_total["type"] = "calculated"
+        matricula_total["calculation"] = {
+            "type": "sum",
+            "sourceKeys": [matricula_mujeres["key"], matricula_hombres["key"]],
+        }
+
+    if egresados_total and matricula_total and titulacion_porcentaje:
+        titulacion_porcentaje["type"] = "calculated"
+        titulacion_porcentaje["calculation"] = {
+            "type": "percentage",
+            "numeratorKey": egresados_total["key"],
+            "denominatorKey": matricula_total["key"],
+            "decimals": 2,
+        }
 
 
 def value_for_column(column: dict[str, Any], value: str) -> Any:

@@ -286,7 +286,7 @@ export const planteles: Plantel[] = [
 
 const unassignedPlantel: Plantel = { id: 0, key: "sin-plantel", name: "Sin plantel asignado" };
 const officialSourcePlantelIds: number[] = [];
-const officialCatalogImportVersion = "2026-06-30-indicadores-20260628-default-v2";
+const officialCatalogImportVersion = "2026-07-02-indicadores-20260628-default-v3";
 const officialCatalogImportedAt = "2026-06-30T00:00:00.000-06:00";
 const operationalCatalogRows = officialCatalogRows.filter(isOperationalCatalogRow);
 const hiddenImportedIndicatorCodes = new Set(
@@ -546,6 +546,46 @@ export function updateOwnPassword(
   return publicUser(updated);
 }
 
+export function resetUserPassword(
+  session: SigiSession,
+  id: string,
+  input: { password?: unknown; confirmPassword?: unknown }
+) {
+  requireDirector(session);
+
+  const user = users.get(id);
+  const password = typeof input.password === "string" ? input.password.trim() : "";
+  const confirmPassword = typeof input.confirmPassword === "string" ? input.confirmPassword.trim() : "";
+
+  if (!user) {
+    return undefined;
+  }
+
+  if (user.role === "director") {
+    throw new SigiValidationError("La contraseña del administrador se cambia desde Cuenta.");
+  }
+
+  if (!password || !confirmPassword) {
+    throw new SigiValidationError("Completa la nueva contraseña y su confirmación.");
+  }
+
+  if (password.length < 8) {
+    throw new SigiValidationError("La nueva contraseña debe tener al menos 8 caracteres.");
+  }
+
+  if (password !== confirmPassword) {
+    throw new SigiValidationError("La confirmación no coincide con la nueva contraseña.");
+  }
+
+  const updated = {
+    ...user,
+    passwordHash: hashPassword(password)
+  };
+  users.set(user.id, updated);
+  persistCatalogState();
+  return publicUser(updated);
+}
+
 function matchesLoginUsername(user: SigiUser, normalizedUsername: string) {
   if (user.username === normalizedUsername) {
     return true;
@@ -611,9 +651,10 @@ export function listReviewCaptures(session: SigiSession): SigiReviewCapture[] {
 
   return listCaptureDrafts()
     .filter((draft) => draft.estado === "en_revision")
+    .filter((draft) => session.role !== "responsable" || draft.submittedByUserId !== session.userId)
     .flatMap((draft) => {
       const indicator = indicators.get(draft.indicadorId);
-      const plantel = planteles.find((item) => item.id === draft.plantelId);
+      const plantel = planteles.find((item) => item.id === draft.plantelId) ?? unassignedPlantel;
 
       if (!indicator || !indicator.active || !plantel) {
         return [];
@@ -692,8 +733,8 @@ export function recordCaptureNotification(
     return [];
   }
 
-  const plantel = planteles.find((item) => item.id === draft.plantelId);
-  const targetUsers = notificationTargetsForCapture(event, indicator, draft);
+  const plantel = planteles.find((item) => item.id === draft.plantelId) ?? unassignedPlantel;
+  const targetUsers = notificationTargetsForCapture(event, indicator, draft, actor);
   const createdAt = new Date().toISOString();
   const created: SigiNotification[] = [];
 
@@ -707,9 +748,9 @@ export function recordCaptureNotification(
       indicadorNombre: indicator.name,
       captureId: draft.id,
       plantelId: draft.plantelId,
-      plantel: plantel?.name,
+      plantel: plantel.name,
       estado: draft.estado,
-      mensaje: notificationMessage(event, indicator, plantel?.name),
+      mensaje: notificationMessage(event, indicator, plantel.name === unassignedPlantel.name ? undefined : plantel.name),
       createdAt,
       readAt: null,
       actorUserId: actor.userId,
@@ -777,7 +818,9 @@ function workStateForIndicator(session: SigiSession, indicator: SigiIndicator): 
   }
 
   if (latest.estado === "en_revision") {
-    const canReview = session.role === "director" || canResponsibleEdit;
+    const isOwnResponsibleSubmission =
+      session.role === "responsable" && latest.submittedByUserId === session.userId;
+    const canReview = session.role === "director" || (canResponsibleEdit && !isOwnResponsibleSubmission);
 
     return {
       ...baseState,
@@ -881,6 +924,8 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
     ? "habilitado"
     : isNewIndicator ? "creado" : "actualizado";
   const nextContributorNames = input.contributorNames ?? existing?.contributorNames ?? [];
+  const targetsResponsibleContributors =
+    nextContributorNames.length > 0 && !targetsPlanteles(nextContributorNames);
   const inputHasPlantelIds = Object.prototype.hasOwnProperty.call(input, "plantelIds");
   const isOfficialImportedIndicator = Boolean(
     initialIndicators.find((indicator) => indicator.code === input.code && indicator.plantelScopeSource === "official-import")
@@ -895,7 +940,7 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
     isOfficialImportedIndicator &&
     nextPlantelIds.length === 0;
 
-  if (nextPlantelIds.length === 0 && !preservesOfficialImportedScope) {
+  if (nextPlantelIds.length === 0 && !preservesOfficialImportedScope && !targetsResponsibleContributors) {
     throw new SigiValidationError("Asigna al menos un plantel para habilitar captura.");
   }
 
@@ -1022,7 +1067,13 @@ export function templateForIndicator(indicator: SigiIndicator, session?: SigiSes
 
 export function assertCaptureAccess(
   session: SigiSession,
-  request: { plantelId: number; indicadorId: number; payload?: CapturePayload; estado?: CaptureDraft["estado"] },
+  request: {
+    plantelId: number;
+    indicadorId: number;
+    payload?: CapturePayload;
+    estado?: CaptureDraft["estado"];
+    submittedByUserId?: string | null;
+  },
   action: "draft" | "submit" | "read" | "review" | "responsibleEdit"
 ) {
   const indicator = indicators.get(request.indicadorId);
@@ -1065,6 +1116,10 @@ export function assertCaptureAccess(
 
   if (session.role === "plantel" && action === "review") {
     throw new SigiForbiddenError("El plantel no puede revisar capturas.");
+  }
+
+  if (session.role === "responsable" && action === "review" && request.submittedByUserId === session.userId) {
+    throw new SigiForbiddenError("El responsable no puede aprobar u observar una captura enviada por su misma cuenta.");
   }
 
   if (request.payload) {
@@ -1113,6 +1168,8 @@ export function validateCapturePayload(indicator: SigiIndicator, payload: Captur
     throw new SigiValidationError("La captura contiene campos de una plantilla anterior. Recarga el indicador y vuelve a guardar.");
   }
 
+  validateNumericColumns(indicator, template, payload);
+
   const missingValues = payload.rows.some((row) =>
     template.columns.some((column) => {
       if (column.type === "readonly" || column.type === "calculated") {
@@ -1124,9 +1181,158 @@ export function validateCapturePayload(indicator: SigiIndicator, payload: Captur
     })
   );
 
-  if (requireJustification && missingValues && !payload.justificacion?.trim()) {
-    throw new SigiValidationError("Agrega una justificación cuando existan datos pendientes.");
+  if (requireJustification) {
+    const justificacion = payload.justificacion?.trim() ?? "";
+
+    if (justificacion.length < 10) {
+      throw new SigiValidationError("Agrega una descripción o justificación de al menos 10 caracteres antes de enviar.");
+    }
+
+    if (!payload.evidencia?.nombre) {
+      throw new SigiValidationError("Adjunta una evidencia PDF antes de enviar a revisión.");
+    }
+
+    if (missingValues) {
+      throw new SigiValidationError("Completa los campos capturables o ajusta el formato antes de enviar.");
+    }
+
+    validateCalculatedColumns(indicator, template, payload);
+    validateDomainConsistency(indicator, payload);
   }
+}
+
+function validateNumericColumns(
+  indicator: SigiIndicator,
+  template: IndicatorTemplate,
+  payload: CapturePayload
+) {
+  const numericColumns = template.columns.filter((column) => column.type === "number" || column.type === "calculated");
+
+  for (const row of payload.rows) {
+    for (const column of numericColumns) {
+      const value = row[column.key];
+
+      if (value === "" || value === undefined || value === null) {
+        continue;
+      }
+
+      const numericValue = numberValue(value);
+
+      if (numericValue === undefined || Number.isNaN(numericValue)) {
+        throw new SigiValidationError(`El campo "${column.label}" de ${indicator.code} debe ser numérico.`);
+      }
+
+      if (numericValue < 0) {
+        throw new SigiValidationError(`El campo "${column.label}" de ${indicator.code} no puede ser negativo.`);
+      }
+    }
+  }
+}
+
+function validateCalculatedColumns(
+  indicator: SigiIndicator,
+  template: IndicatorTemplate,
+  payload: CapturePayload
+) {
+  for (const row of payload.rows) {
+    for (const column of template.columns) {
+      if (column.type !== "calculated" || !column.calculation) {
+        continue;
+      }
+
+      const actual = numberValue(row[column.key]);
+
+      if (actual === undefined) {
+        continue;
+      }
+
+      const expected = calculatedValueForRow(row, column);
+
+      if (expected === undefined) {
+        continue;
+      }
+
+      if (Math.abs(actual - expected) > 0.01) {
+        throw new SigiValidationError(
+          `El campo "${column.label}" de ${indicator.code} se calcula automáticamente. Recarga el indicador y vuelve a guardar.`
+        );
+      }
+    }
+  }
+}
+
+function calculatedValueForRow(row: Record<string, unknown>, column: TemplateColumn) {
+  if (!column.calculation) {
+    return undefined;
+  }
+
+  if (column.calculation.type === "sum") {
+    return column.calculation.sourceKeys.reduce((total, key) => total + (numberValue(row[key]) ?? 0), 0);
+  }
+
+  if (column.calculation.type === "percentage") {
+    const numerator = numberValue(row[column.calculation.numeratorKey]) ?? 0;
+    const denominator = numberValue(row[column.calculation.denominatorKey]) ?? 0;
+
+    if (denominator === 0) {
+      return 0;
+    }
+
+    const decimals = column.calculation.decimals ?? 2;
+    const factor = 10 ** decimals;
+    return Math.round((numerator / denominator) * 100 * factor) / factor;
+  }
+
+  return undefined;
+}
+
+function validateDomainConsistency(indicator: SigiIndicator, payload: CapturePayload) {
+  if (indicator.code !== "1.0.0.0.2") {
+    return;
+  }
+
+  for (const row of payload.rows) {
+    const egresados = firstNumericValue(row, [
+      "egresados_total",
+      "egresados_titulados_en_el_ano_2025_total"
+    ]) ?? sumNumericValues(row, [
+      "egresados_mujeres",
+      "egresados_hombres",
+      "egresados_titulados_en_el_ano_2025_mujeres",
+      "egresados_titulados_en_el_ano_2025_hombres"
+    ]);
+    const matricula = firstNumericValue(row, [
+      "matricula_total",
+      "matricula_de_primer_ingreso_de_la_misma_cohorte_3",
+      "matricula_de_primer_ingreso_de_la_misma_cohorte__3"
+    ]) ?? sumNumericValues(row, [
+      "matricula_mujeres",
+      "matricula_hombres",
+      "matricula_de_primer_ingreso_de_la_misma_cohorte_",
+      "matricula_de_primer_ingreso_de_la_misma_cohorte_2",
+      "matricula_de_primer_ingreso_de_la_misma_cohorte__2"
+    ]);
+
+    if (matricula > 0 && egresados > matricula) {
+      throw new SigiValidationError("Los egresados titulados no pueden ser mayores que la matrícula de la cohorte.");
+    }
+  }
+}
+
+function firstNumericValue(row: Record<string, unknown>, keys: string[]) {
+  for (const key of keys) {
+    const value = numberValue(row[key]);
+
+    if (value !== undefined) {
+      return value;
+    }
+  }
+
+  return undefined;
+}
+
+function sumNumericValues(row: Record<string, unknown>, keys: string[]) {
+  return keys.reduce((total, key) => total + (numberValue(row[key]) ?? 0), 0);
 }
 
 export function officialSourcesPayload(session: SigiSession): OfficialSourcesPayload {
@@ -2031,17 +2237,24 @@ function persistNotificationState() {
 function notificationTargetsForCapture(
   event: "submitted" | "correction_requested" | "approved",
   indicator: SigiIndicator,
-  draft: CaptureDraft
+  draft: CaptureDraft,
+  actor?: SigiSession
 ) {
   if (event === "submitted") {
     return Array.from(users.values())
       .filter((user) =>
         user.active &&
+        user.id !== actor?.userId &&
         (
           user.role === "director" ||
           (user.role === "responsable" && indicator.responsibleIds.includes(user.responsableId ?? -1))
         )
       );
+  }
+
+  if (draft.plantelId === unassignedPlantel.id && draft.submittedByUserId) {
+    return Array.from(users.values())
+      .filter((user) => user.active && user.id === draft.submittedByUserId);
   }
 
   return Array.from(users.values())

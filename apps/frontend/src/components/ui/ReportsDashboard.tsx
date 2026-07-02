@@ -293,7 +293,7 @@ export const ReportsDashboard = () => {
       const recordCount = countReportRows(report);
 
       downloadDocument(blob, `reporte-${slugify(item.plantel)}-${selectedDate}.csv`);
-      setReportMessage(`Listo: ${recordCount} registros.`);
+      setReportMessage(`Descarga iniciada: ${recordCount} registros.`);
     } catch (error) {
       setReportMessage(error instanceof Error ? error.message : 'No se pudo descargar el reporte.');
     } finally {
@@ -309,7 +309,7 @@ export const ReportsDashboard = () => {
       const recordCount = countReportRows(report);
 
       downloadDocument(pdf, `reporte-${slugify(item.plantel)}-${selectedDate}.pdf`);
-      setReportMessage(`Listo: ${recordCount} registros.`);
+      setReportMessage(`Descarga iniciada: ${recordCount} registros.`);
     } catch (error) {
       setReportMessage(error instanceof Error ? error.message : 'No se pudo descargar el reporte.');
     } finally {

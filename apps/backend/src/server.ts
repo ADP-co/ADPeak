@@ -36,6 +36,7 @@ import {
   recordCaptureNotification,
   recordResponsibleCaptureEdit,
   reloadSigiStateFromPersistence,
+  resetUserPassword,
   saveIndicator,
   saveUser,
   sessionFromHeaders,
@@ -244,7 +245,7 @@ const server = createServer(async (request, response) => {
     }
   }
 
-  const userMatch = url.pathname.match(/^\/api\/v1\/usuarios\/([^/]+)(?:\/(desactivar))?$/);
+  const userMatch = url.pathname.match(/^\/api\/v1\/usuarios\/([^/]+)(?:\/(desactivar|password))?$/);
 
   if (userMatch) {
     try {
@@ -261,6 +262,19 @@ const server = createServer(async (request, response) => {
 
       if (request.method === "PATCH" && action === "desactivar") {
         const updated = deactivateUser(session, userId);
+
+        if (!updated) {
+          sendJson(response, 404, { error: "user_not_found", message: "No existe un usuario con ese ID." });
+          return;
+        }
+
+        await flushPersistedState();
+        sendJson(response, 200, updated);
+        return;
+      }
+
+      if (request.method === "PATCH" && action === "password") {
+        const updated = resetUserPassword(session, userId, await readJsonBody(request));
 
         if (!updated) {
           sendJson(response, 404, { error: "user_not_found", message: "No existe un usuario con ese ID." });
@@ -649,7 +663,10 @@ const server = createServer(async (request, response) => {
         }
 
         assertCaptureAccess(session, { ...draft, payload: draft.payload }, "submit");
-        const updatedDraft = sendCaptureToReview(captureId);
+        const updatedDraft = sendCaptureToReview(captureId, {
+          userId: session.userId,
+          role: session.role
+        });
 
         if (!updatedDraft) {
           sendJson(response, 409, {
@@ -872,12 +889,12 @@ function reportFiltersFromUrl(url: URL) {
 }
 
 function captureScopeFromUrl(url: URL) {
-  const plantelId = positiveIntegerParam(url, "plantelId");
+  const plantelId = nonNegativeIntegerParam(url, "plantelId");
   const indicadorId = positiveIntegerParam(url, "indicadorId");
   const actividadId = positiveIntegerParam(url, "actividadId");
   const periodoId = positiveIntegerParam(url, "periodoId");
 
-  if (!plantelId || !indicadorId || !actividadId || !periodoId) {
+  if (plantelId === undefined || !indicadorId || !actividadId || !periodoId) {
     return undefined;
   }
 
@@ -892,6 +909,11 @@ function captureScopeFromUrl(url: URL) {
 function positiveIntegerParam(url: URL, key: string) {
   const value = Number(url.searchParams.get(key));
   return Number.isInteger(value) && value > 0 ? value : undefined;
+}
+
+function nonNegativeIntegerParam(url: URL, key: string) {
+  const value = Number(url.searchParams.get(key));
+  return Number.isInteger(value) && value >= 0 ? value : undefined;
 }
 
 function isEditableCaptureStatus(status: string) {

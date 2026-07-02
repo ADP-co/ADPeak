@@ -45,6 +45,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
   const [activeSearch, setActiveSearch] = useState('');
   const [statusMessage, setStatusMessage] = useState('');
   const [indicatorToDelete, setIndicatorToDelete] = useState<IndicatorRecord | null>(null);
+  const [indicatorToToggle, setIndicatorToToggle] = useState<IndicatorRecord | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -72,7 +73,12 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
     onEditIndicator?.(indicator.code);
   };
 
-  const handleToggleEnable = async (indicator: IndicatorRecord) => {
+  const confirmToggleIndicator = async () => {
+    if (!indicatorToToggle) {
+      return;
+    }
+
+    const indicator = indicatorToToggle;
     const nextEnabled = indicator.enabled === false;
 
     try {
@@ -98,6 +104,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
       )
     );
     setStatusMessage(nextEnabled ? 'Indicador habilitado.' : 'Indicador deshabilitado.');
+    setIndicatorToToggle(null);
   };
 
   const confirmDeleteIndicator = async () => {
@@ -151,7 +158,13 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
               aria-label="Filtro de indicadores por código, nombre, alcance, responsable o contribuidor"
               placeholder="Buscar por código, nombre, alcance, responsable o contribuidor..."
               value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
+              onChange={(event) => {
+                const value = event.target.value;
+                setSearchTerm(value);
+                if (!value.trim()) {
+                  setActiveSearch('');
+                }
+              }}
               onKeyDown={(event) => event.key === 'Enter' && setActiveSearch(searchTerm.trim())}
               className="w-full h-9 pl-4 pr-4 rounded-full border border-brand-Gris_bajo/50 focus:outline-none focus:border-brand-Verde_principal text-sm text-brand-Gris_oscuro"
             />
@@ -232,7 +245,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleToggleEnable(indicator)}
+                        onClick={() => setIndicatorToToggle(indicator)}
                         aria-label={indicator.enabled === false ? `Habilitar indicador ${indicator.code}` : `Deshabilitar indicador ${indicator.code}`}
                         className="text-brand-Verde_oscuro hover:text-brand-Status_amarillo transition-colors p-1 rounded-md hover:bg-brand-Status_amarillo/10 cursor-pointer"
                       >
@@ -269,6 +282,15 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
         onConfirm={confirmDeleteIndicator}
         onCancel={() => setIndicatorToDelete(null)}
         confirmText="Desactivar"
+      />
+      <ConfirmModal
+        isOpen={!!indicatorToToggle}
+        title={indicatorToToggle?.enabled === false ? 'Habilitar indicador' : 'Deshabilitar indicador'}
+        message={`¿Deseas ${indicatorToToggle?.enabled === false ? 'habilitar' : 'deshabilitar'} el indicador ${indicatorToToggle?.code}?`}
+        onConfirm={confirmToggleIndicator}
+        onCancel={() => setIndicatorToToggle(null)}
+        confirmText={indicatorToToggle?.enabled === false ? 'Habilitar' : 'Deshabilitar'}
+        isDestructive={indicatorToToggle?.enabled !== false}
       />
     </div>
   );

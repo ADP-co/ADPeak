@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Lock, PlusCircle, Search, Trash2, Unlock, X } from 'lucide-react';
+import { KeyRound, Lock, PlusCircle, Search, Trash2, Unlock, X } from 'lucide-react';
 import { ConfirmModal } from './ConfirmModal';
-import { catalogPlanteles, deactivateUser, fetchUsers, saveUser, type CatalogUser } from '../../api/catalog';
+import { catalogPlanteles, deactivateUser, fetchUsers, resetUserPassword, saveUser, type CatalogUser } from '../../api/catalog';
 import { officialCatalogRows } from '../../catalog/officialCatalog.generated';
 
 export type SystemRole = 'Administrador' | 'Responsable' | 'Plantel';
@@ -122,25 +122,52 @@ function fromCatalogUser(user: CatalogUser): UserRecord {
   };
 }
 
+function isStatusError(message: string) {
+  const normalized = normalizeSearch(message);
+  return [
+    'no se',
+    'define',
+    'completa',
+    'solo',
+    'desbloquea',
+    'contrasena',
+    'contraseña',
+    'error'
+  ].some((token) => normalized.includes(token));
+}
+
 export const UsersTable = () => {
   const [users, setUsers] = useState<UserRecord[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeSearch, setActiveSearch] = useState('');
   const [statusMessage, setStatusMessage] = useState('');
   const [editingUser, setEditingUser] = useState<UserRecord | null>(null);
   const [userToDelete, setUserToDelete] = useState<UserRecord | null>(null);
   const [userToToggleBlock, setUserToToggleBlock] = useState<UserRecord | null>(null);
+  const [userToResetPassword, setUserToResetPassword] = useState<UserRecord | null>(null);
+  const [passwordResetForm, setPasswordResetForm] = useState({ password: '', confirmPassword: '' });
 
   useEffect(() => {
     let isMounted = true;
 
+    setIsLoadingUsers(true);
     fetchUsers()
       .then((items) => {
         if (isMounted) {
           setUsers(items.map(fromCatalogUser));
         }
       })
-      .catch(() => undefined);
+      .catch((error) => {
+        if (isMounted) {
+          setStatusMessage(error instanceof Error ? error.message : 'No se pudieron cargar los usuarios.');
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoadingUsers(false);
+        }
+      });
 
     return () => {
       isMounted = false;
@@ -296,6 +323,46 @@ export const UsersTable = () => {
     }
   };
 
+  const openPasswordReset = (user: UserRecord) => {
+    setUserToResetPassword(user);
+    setPasswordResetForm({ password: '', confirmPassword: '' });
+    setStatusMessage('');
+  };
+
+  const confirmPasswordReset = async () => {
+    if (!userToResetPassword) {
+      return;
+    }
+
+    if (passwordResetForm.password.length < 8) {
+      setStatusMessage('La nueva contraseña debe tener al menos 8 caracteres.');
+      return;
+    }
+
+    if (passwordResetForm.password !== passwordResetForm.confirmPassword) {
+      setStatusMessage('La confirmación no coincide con la nueva contraseña.');
+      return;
+    }
+
+    try {
+      const updated = await resetUserPassword(
+        userToResetPassword.id,
+        passwordResetForm.password,
+        passwordResetForm.confirmPassword
+      );
+      const updatedRecord = fromCatalogUser(updated);
+
+      setUsers((current) =>
+        current.map((user) => (user.id === userToResetPassword.id ? updatedRecord : user))
+      );
+      setUserToResetPassword(null);
+      setPasswordResetForm({ password: '', confirmPassword: '' });
+      setStatusMessage('Contraseña actualizada.');
+    } catch (error) {
+      setStatusMessage(error instanceof Error ? error.message : 'No se pudo actualizar la contraseña.');
+    }
+  };
+
   const normalizedSearch = normalizeSearch(activeSearch);
   const filteredUsers = users
     .filter((user) => {
@@ -321,6 +388,7 @@ export const UsersTable = () => {
     });
 
   const isCreatingUser = editingUser ? !users.some((user) => user.id === editingUser.id) : false;
+  const statusIsError = isStatusError(statusMessage);
 
   return (
     <div className="w-full max-w-[1250px] mx-auto pt-8 pb-10">
@@ -336,7 +404,13 @@ export const UsersTable = () => {
               aria-label="Filtro de usuarios por nombre, rol, plantel o indicador"
               placeholder="Buscar por nombre, rol, plantel o indicador..."
               value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
+              onChange={(event) => {
+                const value = event.target.value;
+                setSearchTerm(value);
+                if (!value.trim()) {
+                  setActiveSearch('');
+                }
+              }}
               onKeyDown={(event) => event.key === 'Enter' && setActiveSearch(searchTerm.trim())}
               className="w-full h-9 pl-4 pr-4 rounded-full border border-brand-Gris_bajo/50 focus:outline-none focus:border-brand-Verde_principal text-sm text-brand-Gris_oscuro"
             />
@@ -362,7 +436,7 @@ export const UsersTable = () => {
         </div>
 
         {statusMessage && (
-          <p className="text-sm font-body font-semibold text-brand-Verde_oscuro" role="status">
+          <p className={`text-sm font-body font-semibold ${statusIsError ? 'text-brand-Status_rojo' : 'text-brand-Verde_oscuro'}`} role="status">
             {statusMessage}
           </p>
         )}
@@ -381,7 +455,14 @@ export const UsersTable = () => {
             </thead>
 
             <tbody className="divide-y divide-brand-Gris_bajo/20 font-body text-sm text-brand-Gris_oscuro">
-              {filteredUsers.map((user) => (
+              {isLoadingUsers && (
+                <tr>
+                  <td colSpan={4} className="py-8 px-6 text-center text-brand-Gris_oscuro/70">
+                    Cargando usuarios...
+                  </td>
+                </tr>
+              )}
+              {!isLoadingUsers && filteredUsers.map((user) => (
                 <tr
                   key={user.id}
                   className={`hover:bg-brand-Gris_bajo/15 transition-colors duration-150 ease-in-out ${
@@ -430,6 +511,14 @@ export const UsersTable = () => {
                         <>
                           <button
                             type="button"
+                            onClick={() => openPasswordReset(user)}
+                            aria-label={`Restablecer contraseña de ${user.name}`}
+                            className="text-brand-Verde_oscuro hover:text-brand-Verde_principal transition-colors p-1 rounded-md hover:bg-brand-Verde_principal/10 cursor-pointer"
+                          >
+                            <KeyRound size={20} />
+                          </button>
+                          <button
+                            type="button"
                             onClick={() => setUserToToggleBlock(user)}
                             aria-label={user.isBlocked ? `Desbloquear usuario ${user.name}` : `Bloquear usuario ${user.name}`}
                             className={`transition-colors p-1 rounded-md cursor-pointer ${
@@ -454,7 +543,7 @@ export const UsersTable = () => {
                   </td>
                 </tr>
               ))}
-              {filteredUsers.length === 0 && (
+              {!isLoadingUsers && filteredUsers.length === 0 && (
                 <tr>
                   <td colSpan={4} className="py-8 px-6 text-center text-brand-Gris_oscuro/70">
                     Sin resultados para la búsqueda actual.
@@ -639,6 +728,76 @@ export const UsersTable = () => {
                 className="px-5 py-2 rounded-md bg-brand-Verde_oscuro text-brand-Blanco text-sm font-bold hover:bg-brand-Verde_principal transition-colors"
               >
                 Guardar cambios
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {userToResetPassword && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-brand-Gris_oscuro/60 backdrop-blur-sm p-4">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="password-reset-title"
+            className="bg-brand-Blanco rounded-lg shadow-xl p-6 w-full max-w-md border border-brand-Gris_bajo/20"
+          >
+            <h2 id="password-reset-title" className="text-xl font-title font-bold text-brand-Gris_oscuro mb-2">
+              Restablecer contraseña
+            </h2>
+            <p className="text-sm text-brand-Gris_oscuro/70 mb-6">
+              {userToResetPassword.name}
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="reset-password" className="block text-sm font-semibold text-brand-Gris_oscuro font-body">
+                  Nueva contraseña
+                </label>
+                <input
+                  id="reset-password"
+                  type="password"
+                  value={passwordResetForm.password}
+                  onChange={(event) => setPasswordResetForm({ ...passwordResetForm, password: event.target.value })}
+                  placeholder="Mínimo 8 caracteres"
+                  autoComplete="new-password"
+                  className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="reset-password-confirm" className="block text-sm font-semibold text-brand-Gris_oscuro font-body">
+                  Confirmar contraseña
+                </label>
+                <input
+                  id="reset-password-confirm"
+                  type="password"
+                  value={passwordResetForm.confirmPassword}
+                  onChange={(event) => setPasswordResetForm({ ...passwordResetForm, confirmPassword: event.target.value })}
+                  placeholder="Repite la nueva contraseña"
+                  autoComplete="new-password"
+                  className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-8">
+              <button
+                type="button"
+                onClick={() => {
+                  setUserToResetPassword(null);
+                  setPasswordResetForm({ password: '', confirmPassword: '' });
+                }}
+                className="px-5 py-2 rounded-md border border-brand-Gris_bajo/50 text-brand-Gris_oscuro text-sm font-bold hover:bg-brand-Gris_bajo/10 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={confirmPasswordReset}
+                className="px-5 py-2 rounded-md bg-brand-Verde_oscuro text-brand-Blanco text-sm font-bold hover:bg-brand-Verde_principal transition-colors"
+              >
+                Actualizar
               </button>
             </div>
           </div>

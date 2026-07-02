@@ -26,6 +26,7 @@ import {
   officialSourcesPayload,
   recordCaptureNotification,
   reloadSigiStateFromPersistence,
+  resetUserPassword,
   resetNotificationsForTest,
   saveIndicator,
   saveUser,
@@ -41,6 +42,38 @@ describe("SIGI store and RBAC", () => {
     resetCaptureDraftsForTest();
     resetNotificationsForTest();
     reloadSigiStateFromPersistence();
+  });
+
+  const evidencePdf = () => ({
+    nombre: "evidencia-qa.pdf",
+    tipo: "application/pdf",
+    tamanoBytes: 128
+  });
+
+  const completedRowsForTemplate = (template: ReturnType<typeof templateForIndicator>) =>
+    template.initialRows.map((row, rowIndex) => {
+      const completed: Record<string, unknown> = { ...row };
+
+      for (const column of template.columns) {
+        if (column.type === "readonly" || column.type === "calculated") {
+          continue;
+        }
+
+        const value = completed[column.key];
+        if (value !== undefined && value !== null && String(value).trim() !== "") {
+          continue;
+        }
+
+        completed[column.key] = column.type === "number" ? 1 : `Dato ${rowIndex + 1}`;
+      }
+
+      return completed;
+    });
+
+  const completedReviewPayload = (template: ReturnType<typeof templateForIndicator>) => ({
+    rows: completedRowsForTemplate(template),
+    justificacion: "Captura completa con evidencia oficial.",
+    evidencia: evidencePdf()
   });
 
   it("loads official indicators and responsible assignments from the imported catalog", () => {
@@ -111,6 +144,37 @@ describe("SIGI store and RBAC", () => {
         Object.values(row).some((value) => String(value).trim().startsWith("="))
       )
     ).toBe(false);
+
+    const titulationTemplate = officialWorkbookTemplates["1.0.0.0.2"];
+    expect(titulationTemplate?.columns.find((column) => column.key === "egresados_titulados_en_el_ano_2025_total")).toMatchObject({
+      type: "calculated",
+      calculation: {
+        type: "sum",
+        sourceKeys: [
+          "egresados_titulados_en_el_ano_2025_mujeres",
+          "egresados_titulados_en_el_ano_2025_hombres"
+        ]
+      }
+    });
+    expect(titulationTemplate?.columns.find((column) => column.key === "matricula_de_primer_ingreso_de_la_misma_cohorte__3")).toMatchObject({
+      type: "calculated",
+      calculation: {
+        type: "sum",
+        sourceKeys: [
+          "matricula_de_primer_ingreso_de_la_misma_cohorte_",
+          "matricula_de_primer_ingreso_de_la_misma_cohorte__2"
+        ]
+      }
+    });
+    expect(titulationTemplate?.columns.find((column) => column.key === "de_titulacion_por_cohorte")).toMatchObject({
+      type: "calculated",
+      calculation: {
+        type: "percentage",
+        numeratorKey: "egresados_titulados_en_el_ano_2025_total",
+        denominatorKey: "matricula_de_primer_ingreso_de_la_misma_cohorte__3",
+        decimals: 2
+      }
+    });
   });
 
   it("authenticates delivery users without exposing password hashes", () => {
@@ -264,6 +328,47 @@ describe("SIGI store and RBAC", () => {
       newPassword: "Director2026!",
       confirmPassword: "Director2026!"
     });
+  });
+
+  it("lets the director reset non-admin passwords without changing assignments", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const created = saveUser(director, {
+      name: "Responsable QA Reset",
+      role: "responsable",
+      password: "Anterior2026!",
+      indicatorCodes: ["1.0.0.0.2"]
+    });
+
+    expect(() =>
+      resetUserPassword(director, created.id, {
+        password: "corta",
+        confirmPassword: "corta"
+      })
+    ).toThrow(SigiValidationError);
+    expect(() =>
+      resetUserPassword(director, created.id, {
+        password: "Nueva2026!",
+        confirmPassword: "Distinta2026!"
+      })
+    ).toThrow(SigiValidationError);
+
+    const updated = resetUserPassword(director, created.id, {
+      password: "Nueva2026!",
+      confirmPassword: "Nueva2026!"
+    });
+
+    expect(updated).toMatchObject({
+      id: created.id,
+      indicatorCodes: ["1.0.0.0.2"]
+    });
+    expect(authenticateUser(created.username ?? "", "Anterior2026!")).toBeUndefined();
+    expect(authenticateUser(created.username ?? "", "Nueva2026!")).toMatchObject({ id: created.id });
+    expect(() =>
+      resetUserPassword(director, "director-1", {
+        password: "Otra2026!",
+        confirmPassword: "Otra2026!"
+      })
+    ).toThrow(SigiValidationError);
   });
 
   it("seeds every Universidad de Colima bachillerato account", () => {
@@ -559,7 +664,7 @@ describe("SIGI store and RBAC", () => {
         {
           plantelId: 1,
           indicadorId: unassigned.id,
-          payload: { rows: templateForIndicator(unassigned, responsable).initialRows, justificacion: "Captura con fuente oficial" }
+          payload: completedReviewPayload(templateForIndicator(unassigned, responsable))
         },
         "submit"
       )
@@ -591,7 +696,7 @@ describe("SIGI store and RBAC", () => {
         {
           plantelId: 1,
           indicadorId: saved.id,
-          payload: { rows: template.initialRows, justificacion: "Captura con fuente oficial" }
+          payload: completedReviewPayload(template)
         },
         "submit"
       )
@@ -654,10 +759,7 @@ describe("SIGI store and RBAC", () => {
       "x-responsable-id": "99"
     });
     const template = templateForIndicator(indicator, responsable);
-    const payload = {
-      rows: template.initialRows,
-      justificacion: "Captura llenada por responsable asignado."
-    };
+    const payload = completedReviewPayload(template);
 
     expect(() =>
       assertCaptureAccess(responsable, { plantelId: 1, indicadorId: indicator.id, payload }, "draft")
@@ -677,9 +779,15 @@ describe("SIGI store and RBAC", () => {
       responsableId: indicator.responsibleIds[0],
       payload
     });
-    const reviewed = sendCaptureToReview(draft.id);
+    const reviewed = sendCaptureToReview(draft.id, {
+      userId: responsable.userId,
+      role: responsable.role
+    });
 
     expect(reviewed).toMatchObject({ estado: "en_revision" });
+    expect(() =>
+      assertCaptureAccess(responsable, { ...reviewed!, payload }, "review")
+    ).toThrow(SigiForbiddenError);
   });
 
   it("lists review captures only for director and assigned responsables", () => {
@@ -708,7 +816,7 @@ describe("SIGI store and RBAC", () => {
       periodoId: 1,
       responsableId: indicator.responsibleIds[0],
       payload: {
-        rows: template.initialRows,
+        ...completedReviewPayload(template),
         justificacion: "Captura enviada para la bandeja de revision."
       }
     });
@@ -763,7 +871,7 @@ describe("SIGI store and RBAC", () => {
       periodoId: 1,
       responsableId: indicator.responsibleIds[0],
       payload: {
-        rows: template.initialRows,
+        ...completedReviewPayload(template),
         justificacion: "Captura con notificación interna."
       }
     });
@@ -942,6 +1050,34 @@ describe("SIGI store and RBAC", () => {
     expect(user.indicatorCodes).toEqual(["1.0.0.0.2"]);
   });
 
+  it("removes indicators from responsible scope when admin updates assignments", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const responsable = listUsers(director).find((user) =>
+      user.role === "responsable" && user.indicatorCodes.length > 1
+    );
+
+    expect(responsable).toBeDefined();
+    const [keptCode, removedCode] = responsable!.indicatorCodes;
+
+    const updated = saveUser(director, {
+      id: responsable!.id,
+      name: responsable!.name,
+      role: "responsable",
+      responsableId: responsable!.responsableId,
+      indicatorCodes: [keptCode]
+    });
+    const responsableSession = sessionFromHeaders({
+      "x-role": "responsable",
+      "x-user-id": updated.id,
+      "x-responsable-id": String(updated.responsableId)
+    });
+    const visibleCodes = listIndicators(responsableSession).map((indicator) => indicator.code);
+
+    expect(updated.indicatorCodes).toEqual([keptCode]);
+    expect(visibleCodes).toContain(keptCode);
+    expect(visibleCodes).not.toContain(removedCode);
+  });
+
   it("does not treat manual empty plantel scope as global access", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
 
@@ -1046,6 +1182,36 @@ describe("SIGI store and RBAC", () => {
           plantelId: 1,
           indicadorId: indicator.id,
           payload: { rows: [{ columna_invalida: 1 }] }
+        },
+        "draft"
+      )
+    ).toThrow(SigiValidationError);
+  });
+
+  it("rejects negative values in numeric capture columns", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const plantel = sessionFromHeaders({
+      "x-role": "plantel",
+      "x-plantel-id": "1"
+    });
+    const indicator = saveIndicator(director, {
+      ...getIndicatorByCode("1.0.0.0.2")!,
+      plantelIds: [1]
+    });
+    const template = templateForIndicator(indicator, plantel);
+    const rows = completedRowsForTemplate(template);
+    const numericColumn = template.columns.find((column) => column.type === "number");
+
+    expect(numericColumn).toBeDefined();
+    rows[0][numericColumn!.key] = -1;
+
+    expect(() =>
+      assertCaptureAccess(
+        plantel,
+        {
+          plantelId: 1,
+          indicadorId: indicator.id,
+          payload: { rows }
         },
         "draft"
       )
@@ -1569,6 +1735,75 @@ describe("SIGI store and RBAC", () => {
     expect(listed?.captureId).toBeUndefined();
     expect(listed?.captureStatus).toBeUndefined();
     expect(listed?.status).toBe("Pendiente");
+  });
+
+  it("requires a PDF evidence before sending captures to review", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const plantel = sessionFromHeaders({
+      "x-role": "plantel",
+      "x-plantel-id": "1"
+    });
+    const indicator = saveIndicator(director, {
+      ...getIndicatorByCode("1.0.0.0.2")!,
+      plantelIds: [1]
+    });
+    const template = templateForIndicator(indicator, plantel);
+
+    expect(() =>
+      assertCaptureAccess(
+        plantel,
+        {
+          plantelId: 1,
+          indicadorId: indicator.id,
+          payload: {
+            rows: completedRowsForTemplate(template),
+            justificacion: "Captura completa sin evidencia."
+          }
+        },
+        "submit"
+      )
+    ).toThrow(SigiValidationError);
+  });
+
+  it("rejects incoherent official calculated totals for titulation captures", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const plantel = sessionFromHeaders({
+      "x-role": "plantel",
+      "x-plantel-id": "1"
+    });
+    const indicator = saveIndicator(director, {
+      ...getIndicatorByCode("1.0.0.0.2")!,
+      plantelIds: [1]
+    });
+    const template = templateForIndicator(indicator, plantel);
+    const rows = completedRowsForTemplate(template);
+
+    rows[0] = {
+      ...rows[0],
+      egresados_titulados_en_el_ano_2025_mujeres: 1,
+      egresados_titulados_en_el_ano_2025_hombres: 1,
+      egresados_titulados_en_el_ano_2025_total: 9,
+      matricula_de_primer_ingreso_de_la_misma_cohorte_: 2,
+      matricula_de_primer_ingreso_de_la_misma_cohorte__2: 2,
+      matricula_de_primer_ingreso_de_la_misma_cohorte__3: 4,
+      de_titulacion_por_cohorte: 225
+    };
+
+    expect(() =>
+      assertCaptureAccess(
+        plantel,
+        {
+          plantelId: 1,
+          indicadorId: indicator.id,
+          payload: {
+            rows,
+            justificacion: "Captura completa con evidencia oficial.",
+            evidencia: evidencePdf()
+          }
+        },
+        "submit"
+      )
+    ).toThrow(SigiValidationError);
   });
 
   it("blocks captures for indicators that are not assigned to the requested plantel", () => {
