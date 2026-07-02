@@ -459,9 +459,8 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
   const isApprovedCapture = captureDraft.capture?.estado === 'aprobado' || selectedCatalogIndicator?.captureStatus === 'aprobado';
   const catalogAllowsEdit = selectedCatalogIndicator?.canEdit ?? true;
   const canPlantelEditCapture = user?.role === 'plantel' && isEditableCaptureStatus(captureDraft.capture?.estado);
-  const canResponsableFillCapture = user?.role === 'responsable' && !isResponsibleReviewCapture && !isApprovedCapture && catalogAllowsEdit && isEditableCaptureStatus(captureDraft.capture?.estado);
   const canResponsableEditCapture = isResponsibleReviewCapture && catalogAllowsEdit;
-  const isReadOnlyCapture = isApprovedCapture || (!canPlantelEditCapture && !canResponsableFillCapture && !canResponsableEditCapture);
+  const isReadOnlyCapture = isApprovedCapture || (!canPlantelEditCapture && !canResponsableEditCapture);
   const canReviewCurrentCapture = user?.role === 'admin' || Boolean(selectedCatalogIndicator?.canReview);
 
   if (isWaitingForCatalogIndicator) {
@@ -586,6 +585,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
       existingEvidenceName={captureDraft.capture?.payload.evidencia?.nombre}
       canReview={canReviewCurrentCapture}
       canSaveReviewEdits={canResponsableEditCapture}
+      canModifyRows={user?.role !== 'responsable'}
       captureStatus={captureDraft.capture?.estado}
       isReadOnly={isReadOnlyCapture}
       onSaveDraft={handleSaveDraft}

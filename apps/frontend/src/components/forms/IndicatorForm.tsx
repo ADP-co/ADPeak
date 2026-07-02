@@ -15,6 +15,7 @@ interface IndicatorFormProps {
   existingEvidenceName?: string;
   canReview?: boolean;
   canSaveReviewEdits?: boolean;
+  canModifyRows?: boolean;
   captureStatus?: string;
   isReadOnly?: boolean;
   onBack?: () => void;
@@ -146,6 +147,31 @@ const toNumber = (value: unknown) => {
   return typeof parsedValue === 'number' && Number.isFinite(parsedValue) ? parsedValue : 0;
 };
 
+const normalizeReferenceKey = (value: string) =>
+  value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}_]+/gu, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '');
+
+const valueForCalculationKey = (row: Record<string, unknown>, key: string, columns: ColumnConfig[]) => {
+  if (Object.prototype.hasOwnProperty.call(row, key)) {
+    return row[key];
+  }
+
+  const normalizedKey = normalizeReferenceKey(key);
+  const matchingColumn = columns.find(
+    (column) =>
+      normalizeReferenceKey(column.key) === normalizedKey ||
+      normalizeReferenceKey(column.label) === normalizedKey
+  );
+
+  return matchingColumn ? row[matchingColumn.key] : undefined;
+};
+
 const formatCalculatedValue = (value: number) => {
   if (!Number.isFinite(value)) {
     return '0';
@@ -160,7 +186,10 @@ const calculateColumnValue = (row: Record<string, unknown>, column: ColumnConfig
   }
 
   if (column.calculation.type === 'sum') {
-    return column.calculation.sourceKeys.reduce((total, sourceKey) => total + toNumber(row[sourceKey]), 0);
+    return column.calculation.sourceKeys.reduce(
+      (total, sourceKey) => total + toNumber(valueForCalculationKey(row, sourceKey, columns)),
+      0
+    );
   }
 
   if (column.calculation.type === 'formula') {
@@ -169,8 +198,8 @@ const calculateColumnValue = (row: Record<string, unknown>, column: ColumnConfig
     return Number(value.toFixed(decimals));
   }
 
-  const numerator = toNumber(row[column.calculation.numeratorKey]);
-  const denominator = toNumber(row[column.calculation.denominatorKey]);
+  const numerator = toNumber(valueForCalculationKey(row, column.calculation.numeratorKey, columns));
+  const denominator = toNumber(valueForCalculationKey(row, column.calculation.denominatorKey, columns));
 
   if (denominator === 0) {
     return 0;
@@ -183,12 +212,26 @@ const calculateColumnValue = (row: Record<string, unknown>, column: ColumnConfig
 
 const enrichRowWithCalculatedValues = (row: Record<string, unknown>, columns: ColumnConfig[]) => {
   const enrichedRow = { ...row };
+  const calculatedColumns = columns.filter((column) => column.type === 'calculated');
 
-  columns.forEach((column) => {
-    if (column.type === 'calculated') {
-      enrichedRow[column.key] = calculateColumnValue(enrichedRow, column, columns);
+  for (let pass = 0; pass < Math.max(1, calculatedColumns.length); pass += 1) {
+    let changed = false;
+
+    calculatedColumns.forEach((column) => {
+      const nextValue = calculateColumnValue(enrichedRow, column, columns);
+      const previousValue = toNumber(enrichedRow[column.key]);
+
+      enrichedRow[column.key] = nextValue;
+
+      if (Math.abs(previousValue - nextValue) > 0.0001) {
+        changed = true;
+      }
+    });
+
+    if (!changed) {
+      break;
     }
-  });
+  }
 
   return enrichedRow;
 };
@@ -256,6 +299,7 @@ export const IndicatorForm = ({
   existingEvidenceName,
   canReview = false,
   canSaveReviewEdits = false,
+  canModifyRows = true,
   captureStatus,
   isReadOnly = false,
   onSaveDraft,
@@ -548,14 +592,14 @@ export const IndicatorForm = ({
             </tfoot>
           )}
         </table>
-        {template.allowAddRows && (
+        {template.allowAddRows && canModifyRows && (
           <div className="min-w-[980px] flex flex-wrap justify-end gap-3 border-t border-brand-Gris_bajo/30 bg-brand-Blanco px-3 py-3">
             {fields.length > 1 && (
               <Button
                 type="button"
                 variant="secondary"
                 onClick={() => remove(fields.length - 1)}
-                disabled={isReadOnly}
+                disabled={isReadOnly || isBusy}
                 className="flex items-center gap-2 text-xs py-1.5 px-4"
               >
                 <Trash2 size={15} />
@@ -565,7 +609,7 @@ export const IndicatorForm = ({
             <Button
               type="button"
               onClick={() => append(createEmptyRow() as FormData['rows'][number])}
-              disabled={isReadOnly}
+              disabled={isReadOnly || isBusy}
               className="flex items-center gap-2 text-xs py-1.5 px-4"
             >
               <Plus size={15} />
@@ -635,12 +679,12 @@ export const IndicatorForm = ({
       <div className="flex justify-end gap-4 mt-6">
         <div className="flex-1 min-h-8 text-left">
           {statusMessage && (
-            <p className="text-xs font-body text-brand-Verde_oscuro" role="status">
+            <p className="rounded-md border border-brand-Verde_principal/30 bg-brand-Verde_principal/10 px-3 py-2 text-sm font-body font-semibold text-brand-Verde_oscuro" role="status">
               {statusMessage}
             </p>
           )}
           {errorMessage && (
-            <p className="text-xs font-body text-brand-Status_rojo" role="alert">
+            <p className="rounded-md border border-brand-Status_rojo/30 bg-brand-Status_rojo/10 px-3 py-2 text-sm font-body font-semibold text-brand-Status_rojo" role="alert">
               {errorMessage}
             </p>
           )}

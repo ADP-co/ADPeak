@@ -668,7 +668,7 @@ describe("SIGI store and RBAC", () => {
         },
         "submit"
       )
-    ).not.toThrow();
+    ).toThrow(SigiForbiddenError);
     expect(() =>
       assertCaptureAccess(
         bachillerato16,
@@ -744,7 +744,7 @@ describe("SIGI store and RBAC", () => {
     ).toThrow(SigiForbiddenError);
   });
 
-  it("allows assigned responsables to fill and submit assigned indicators", () => {
+  it("prevents assigned responsables from creating and submitting captures as plantel", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const indicator = saveIndicator(director, {
       ...getIndicatorByCode("1.0.0.0.2")!,
@@ -763,10 +763,10 @@ describe("SIGI store and RBAC", () => {
 
     expect(() =>
       assertCaptureAccess(responsable, { plantelId: 1, indicadorId: indicator.id, payload }, "draft")
-    ).not.toThrow();
+    ).toThrow(SigiForbiddenError);
     expect(() =>
       assertCaptureAccess(responsable, { plantelId: 1, indicadorId: indicator.id, payload }, "submit")
-    ).not.toThrow();
+    ).toThrow(SigiForbiddenError);
     expect(() =>
       assertCaptureAccess(unassignedResponsable, { plantelId: 1, indicadorId: indicator.id, payload }, "draft")
     ).toThrow(SigiForbiddenError);
@@ -780,14 +780,14 @@ describe("SIGI store and RBAC", () => {
       payload
     });
     const reviewed = sendCaptureToReview(draft.id, {
-      userId: responsable.userId,
-      role: responsable.role
+      userId: "plantel-1",
+      role: "plantel"
     });
 
     expect(reviewed).toMatchObject({ estado: "en_revision" });
     expect(() =>
       assertCaptureAccess(responsable, { ...reviewed!, payload }, "review")
-    ).toThrow(SigiForbiddenError);
+    ).not.toThrow();
   });
 
   it("lists review captures only for director and assigned responsables", () => {
@@ -919,9 +919,9 @@ describe("SIGI store and RBAC", () => {
       plantelId: 1,
       actividadId: 1,
       periodoId: 1,
-      canEdit: true,
+      canEdit: false,
       canReview: false,
-      isReadOnly: false
+      isReadOnly: true
     });
 
     const draft = createCaptureDraft({
@@ -1005,7 +1005,7 @@ describe("SIGI store and RBAC", () => {
     ).not.toThrow();
     expect(() =>
       assertCaptureAccess(responsable, { ...underReview, payload }, "draft")
-    ).toThrow(SigiValidationError);
+    ).toThrow(SigiForbiddenError);
 
     const updated = updateCaptureDraft(underReview.id, payload, { allowReviewStatus: true });
     expect(updated).toMatchObject({
@@ -1802,6 +1802,20 @@ describe("SIGI store and RBAC", () => {
           }
         },
         "submit"
+      )
+    ).toThrow(SigiValidationError);
+    expect(() =>
+      assertCaptureAccess(
+        plantel,
+        {
+          plantelId: 1,
+          indicadorId: indicator.id,
+          payload: {
+            rows,
+            justificacion: "Borrador con totales incoherentes."
+          }
+        },
+        "draft"
       )
     ).toThrow(SigiValidationError);
   });

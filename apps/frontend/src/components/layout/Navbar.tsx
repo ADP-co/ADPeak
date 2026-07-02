@@ -37,11 +37,12 @@ export const Navbar = () => {
         <div className="flex items-center">
           <button
             onClick={handleLogout}
-            className="min-h-11 min-w-11 p-2 text-brand-Gris_oscuro hover:text-brand-Status_rojo transition-colors duration-200 rounded-md hover:bg-brand-Fondo cursor-pointer flex items-center justify-center"
+            className="min-h-12 min-w-[116px] px-4 py-2 text-brand-Gris_oscuro hover:text-brand-Status_rojo transition-colors duration-200 rounded-md hover:bg-brand-Fondo cursor-pointer flex items-center justify-center gap-2 font-accent text-sm font-bold"
             title="Cerrar sesión"
             aria-label="Cerrar sesión"
           >
             <LogOut size={22} strokeWidth={2} />
+            <span className="hidden sm:inline">Salir</span>
           </button>
         </div>
 

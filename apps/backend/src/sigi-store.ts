@@ -785,8 +785,8 @@ function workStateForIndicator(session: SigiSession, indicator: SigiIndicator): 
 
   const relevantCaptures = relevantCapturesForIndicator(session, indicator);
   const latest = relevantCaptures[0];
-  const canResponsibleEdit = session.role === "responsable" && isResponsibleAssigned(session, indicator);
-  const canActorDraft = session.role === "plantel" || canResponsibleEdit;
+  const canPlantelDraft = session.role === "plantel";
+  const canResponsibleReviewEdit = session.role === "responsable" && isResponsibleAssigned(session, indicator);
   const baseState = {
     captureId: latest?.id,
     plantelId: latest?.plantelId ?? defaultPlantelIdForIndicator(session, indicator),
@@ -799,10 +799,10 @@ function workStateForIndicator(session: SigiSession, indicator: SigiIndicator): 
     return {
       ...baseState,
       status: "Pendiente",
-      canEdit: canActorDraft,
+      canEdit: canPlantelDraft,
       canReview: false,
-      isReadOnly: !canActorDraft,
-      readOnlyReason: canActorDraft ? undefined : "No hay una captura editable para este indicador."
+      isReadOnly: !canPlantelDraft,
+      readOnlyReason: canPlantelDraft ? undefined : "No hay una captura editable para este indicador."
     };
   }
 
@@ -820,15 +820,15 @@ function workStateForIndicator(session: SigiSession, indicator: SigiIndicator): 
   if (latest.estado === "en_revision") {
     const isOwnResponsibleSubmission =
       session.role === "responsable" && latest.submittedByUserId === session.userId;
-    const canReview = session.role === "director" || (canResponsibleEdit && !isOwnResponsibleSubmission);
+    const canReview = session.role === "director" || (canResponsibleReviewEdit && !isOwnResponsibleSubmission);
 
     return {
       ...baseState,
       status: "En revisión",
-      canEdit: canResponsibleEdit,
+      canEdit: canResponsibleReviewEdit,
       canReview,
-      isReadOnly: !canResponsibleEdit,
-      readOnlyReason: canResponsibleEdit ? undefined : "La captura esta en revision."
+      isReadOnly: !canResponsibleReviewEdit,
+      readOnlyReason: canResponsibleReviewEdit ? undefined : "La captura esta en revision."
     };
   }
 
@@ -836,20 +836,20 @@ function workStateForIndicator(session: SigiSession, indicator: SigiIndicator): 
     return {
       ...baseState,
       status: "Corregir",
-      canEdit: canActorDraft,
+      canEdit: canPlantelDraft,
       canReview: false,
-      isReadOnly: !canActorDraft,
-      readOnlyReason: canActorDraft ? undefined : "La captura requiere correccion fuera de tu alcance."
+      isReadOnly: !canPlantelDraft,
+      readOnlyReason: canPlantelDraft ? undefined : "La captura requiere correccion fuera de tu alcance."
     };
   }
 
   return {
     ...baseState,
     status: "Pendiente",
-    canEdit: canActorDraft,
+    canEdit: canPlantelDraft,
     canReview: false,
-    isReadOnly: !canActorDraft,
-    readOnlyReason: canActorDraft ? undefined : "La captura no esta disponible para edicion."
+    isReadOnly: !canPlantelDraft,
+    readOnlyReason: canPlantelDraft ? undefined : "La captura no esta disponible para edicion."
   };
 }
 
@@ -968,6 +968,7 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
   };
 
   indicators.set(id, indicator);
+  syncUserAssignmentsForIndicator(indicator, existing?.responsibleIds ?? []);
   persistCatalogState();
   return indicator;
 }
@@ -1087,12 +1088,8 @@ export function assertCaptureAccess(
   }
 
   if (action === "draft" || action === "submit") {
-    if (session.role !== "plantel" && session.role !== "responsable") {
-      throw new SigiForbiddenError("Solo el plantel o responsable asignado puede capturar o enviar indicadores.");
-    }
-
-    if (session.role === "responsable" && action === "draft" && request.estado === "en_revision") {
-      throw new SigiValidationError("Las capturas en revision se actualizan desde la vista de revision.");
+    if (session.role !== "plantel") {
+      throw new SigiForbiddenError("Solo el plantel puede capturar o enviar indicadores a revision.");
     }
   }
 
@@ -1169,6 +1166,8 @@ export function validateCapturePayload(indicator: SigiIndicator, payload: Captur
   }
 
   validateNumericColumns(indicator, template, payload);
+  validateCalculatedColumns(indicator, template, payload);
+  validateDomainConsistency(indicator, payload);
 
   const missingValues = payload.rows.some((row) =>
     template.columns.some((column) => {
@@ -1196,8 +1195,6 @@ export function validateCapturePayload(indicator: SigiIndicator, payload: Captur
       throw new SigiValidationError("Completa los campos capturables o ajusta el formato antes de enviar.");
     }
 
-    validateCalculatedColumns(indicator, template, payload);
-    validateDomainConsistency(indicator, payload);
   }
 }
 
@@ -1246,7 +1243,7 @@ function validateCalculatedColumns(
         continue;
       }
 
-      const expected = calculatedValueForRow(row, column);
+      const expected = calculatedValueForRow(row, column, template.columns);
 
       if (expected === undefined) {
         continue;
@@ -1261,18 +1258,21 @@ function validateCalculatedColumns(
   }
 }
 
-function calculatedValueForRow(row: Record<string, unknown>, column: TemplateColumn) {
+function calculatedValueForRow(row: Record<string, unknown>, column: TemplateColumn, columns: TemplateColumn[]) {
   if (!column.calculation) {
     return undefined;
   }
 
   if (column.calculation.type === "sum") {
-    return column.calculation.sourceKeys.reduce((total, key) => total + (numberValue(row[key]) ?? 0), 0);
+    return column.calculation.sourceKeys.reduce(
+      (total, key) => total + (numberValue(valueForCalculationKey(row, key, columns)) ?? 0),
+      0
+    );
   }
 
   if (column.calculation.type === "percentage") {
-    const numerator = numberValue(row[column.calculation.numeratorKey]) ?? 0;
-    const denominator = numberValue(row[column.calculation.denominatorKey]) ?? 0;
+    const numerator = numberValue(valueForCalculationKey(row, column.calculation.numeratorKey, columns)) ?? 0;
+    const denominator = numberValue(valueForCalculationKey(row, column.calculation.denominatorKey, columns)) ?? 0;
 
     if (denominator === 0) {
       return 0;
@@ -1284,6 +1284,32 @@ function calculatedValueForRow(row: Record<string, unknown>, column: TemplateCol
   }
 
   return undefined;
+}
+
+function valueForCalculationKey(row: Record<string, unknown>, key: string, columns: TemplateColumn[]) {
+  if (Object.prototype.hasOwnProperty.call(row, key)) {
+    return row[key];
+  }
+
+  const normalizedKey = normalizeCalculationReference(key);
+  const matchingColumn = columns.find(
+    (column) =>
+      normalizeCalculationReference(column.key) === normalizedKey ||
+      normalizeCalculationReference(column.label) === normalizedKey
+  );
+
+  return matchingColumn ? row[matchingColumn.key] : undefined;
+}
+
+function normalizeCalculationReference(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}_]+/gu, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "");
 }
 
 function validateDomainConsistency(indicator: SigiIndicator, payload: CapturePayload) {
@@ -2227,6 +2253,35 @@ function syncIndicatorAssignmentsForUser(user: SigiUser, shouldSync: boolean) {
   });
 }
 
+function syncUserAssignmentsForIndicator(indicator: SigiIndicator, previousResponsibleIds: number[]) {
+  if (!isVisibleOperationalIndicatorCode(indicator.code)) {
+    return;
+  }
+
+  const nextResponsibleIds = new Set(indicator.responsibleIds);
+  const affectedResponsibleIds = new Set([...previousResponsibleIds, ...indicator.responsibleIds]);
+
+  users.forEach((user, userId) => {
+    if (user.role !== "responsable" || !user.responsableId || !affectedResponsibleIds.has(user.responsableId)) {
+      return;
+    }
+
+    const isAssigned = nextResponsibleIds.has(user.responsableId);
+    const hasCode = user.indicatorCodes.includes(indicator.code);
+
+    if (isAssigned === hasCode) {
+      return;
+    }
+
+    users.set(userId, {
+      ...user,
+      indicatorCodes: isAssigned
+        ? [...user.indicatorCodes, indicator.code].sort((a, b) => a.localeCompare(b, "es", { numeric: true }))
+        : user.indicatorCodes.filter((code) => code !== indicator.code)
+    });
+  });
+}
+
 function persistNotificationState() {
   persistState({
     notifications: Array.from(notifications.values()),
@@ -2299,13 +2354,13 @@ function canReadIndicator(session: SigiSession, indicator: SigiIndicator) {
 
 function isResponsibleAssigned(session: SigiSession, indicator: SigiIndicator) {
   const responsableId = session.responsableId ?? -1;
+  const user = users.get(session.userId);
 
-  if (indicator.responsibleIds.includes(responsableId)) {
-    return true;
+  if (session.role === "responsable" && user) {
+    return user.indicatorCodes.includes(indicator.code);
   }
 
-  const user = users.get(session.userId);
-  return Boolean(user?.indicatorCodes.includes(indicator.code));
+  return indicator.responsibleIds.includes(responsableId) || Boolean(user?.indicatorCodes.includes(indicator.code));
 }
 
 function canUseIndicatorForPlantel(indicator: SigiIndicator, plantelId: number) {

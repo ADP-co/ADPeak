@@ -207,8 +207,9 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
     }
 
     const configuredTemplateColumns = buildTemplateColumns(columns);
+    const canPersistTemplateColumns = !configuredTemplateColumns.error;
 
-    if (configuredTemplateColumns.error) {
+    if (configuredTemplateColumns.error && isNew) {
       toast.error(configuredTemplateColumns.error);
       return;
     }
@@ -238,7 +239,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
             ? ['Captura configurada']
             : ['Actividad general'],
         plantelIds: contributorType === 'responsables' ? [] : editingIndicator?.plantelIds,
-        templateColumns: configuredTemplateColumns.columns,
+        templateColumns: canPersistTemplateColumns ? configuredTemplateColumns.columns : undefined,
       });
       toast.success('Configuración guardada');
       handleBack();

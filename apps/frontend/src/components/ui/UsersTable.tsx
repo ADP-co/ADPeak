@@ -566,6 +566,18 @@ export const UsersTable = () => {
             <h2 id="user-editor-title" className="text-xl font-title font-bold text-brand-Gris_oscuro mb-6">
               {isCreatingUser ? 'Agregar usuario' : 'Modificar usuario'}
             </h2>
+            {statusMessage && (
+              <p
+                className={`mb-4 rounded-md border px-3 py-2 text-sm font-semibold ${
+                  statusIsError
+                    ? 'border-brand-Status_rojo/30 bg-brand-Status_rojo/10 text-brand-Status_rojo'
+                    : 'border-brand-Verde_principal/30 bg-brand-Verde_principal/10 text-brand-Verde_oscuro'
+                }`}
+                role={statusIsError ? 'alert' : 'status'}
+              >
+                {statusMessage}
+              </p>
+            )}
 
             <div className="space-y-4">
               <div>
@@ -582,6 +594,25 @@ export const UsersTable = () => {
                   className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco disabled:bg-brand-Gris_bajo/10 disabled:opacity-70 disabled:cursor-not-allowed"
                 />
               </div>
+
+              {isCreatingUser && (
+                <div>
+                  <label htmlFor="user-editor-role-create" className="block text-sm font-semibold text-brand-Gris_oscuro font-body">
+                    Rol
+                  </label>
+                  <select
+                    id="user-editor-role-create"
+                    value="Responsable"
+                    disabled
+                    className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none bg-brand-Gris_bajo/10 opacity-80 cursor-not-allowed"
+                  >
+                    <option value="Responsable">Responsable</option>
+                  </select>
+                  <p className="mt-1 text-xs text-brand-Gris_oscuro/60">
+                    El administrador y los planteles base ya están definidos; las altas nuevas son responsables.
+                  </p>
+                </div>
+              )}
 
               {isCreatingUser && editingUser.role === 'Responsable' && (
                 <div>
@@ -727,7 +758,7 @@ export const UsersTable = () => {
                 onClick={saveEditedUser}
                 className="px-5 py-2 rounded-md bg-brand-Verde_oscuro text-brand-Blanco text-sm font-bold hover:bg-brand-Verde_principal transition-colors"
               >
-                Guardar cambios
+                {isCreatingUser ? 'Crear usuario' : 'Guardar cambios'}
               </button>
             </div>
           </div>
@@ -748,6 +779,18 @@ export const UsersTable = () => {
             <p className="text-sm text-brand-Gris_oscuro/70 mb-6">
               {userToResetPassword.name}
             </p>
+            {statusMessage && (
+              <p
+                className={`mb-4 rounded-md border px-3 py-2 text-sm font-semibold ${
+                  statusIsError
+                    ? 'border-brand-Status_rojo/30 bg-brand-Status_rojo/10 text-brand-Status_rojo'
+                    : 'border-brand-Verde_principal/30 bg-brand-Verde_principal/10 text-brand-Verde_oscuro'
+                }`}
+                role={statusIsError ? 'alert' : 'status'}
+              >
+                {statusMessage}
+              </p>
+            )}
 
             <div className="space-y-4">
               <div>

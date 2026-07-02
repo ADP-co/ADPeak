@@ -182,6 +182,7 @@ function normalizeReference(value: string) {
     .trim()
     .toLowerCase()
     .replace(/[^\p{L}\p{N}_]+/gu, '_')
+    .replace(/_+/g, '_')
     .replace(/^_+|_+$/g, '');
 }
 
