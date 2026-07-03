@@ -170,6 +170,19 @@ export async function handleUserAction(request: RequestLike, response: any) {
       sendJson(response, 200, updated);
       return;
     }
+
+    if (request.method === "PATCH" && action === "password") {
+      const updated = sigi.resetUserPassword(session, userId, await readJsonBody(request));
+
+      if (!updated) {
+        sendJson(response, 404, { error: "user_not_found", message: "No existe un usuario con ese ID." });
+        return;
+      }
+
+      await flushRuntimeState();
+      sendJson(response, 200, updated);
+      return;
+    }
   } catch (error) {
     console.error("capture_drafts_error", error);
 

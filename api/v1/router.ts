@@ -40,7 +40,7 @@ export default async function handler(request: any, response: any) {
     return;
   }
 
-  const userMatch = path.match(/^usuarios\/([^/]+)(?:\/(desactivar))?$/);
+  const userMatch = path.match(/^usuarios\/([^/]+)(?:\/(desactivar|password))?$/);
   if (userMatch) {
     await handleUserAction(withQuery(request, { id: userMatch[1], action: userMatch[2] }), response);
     return;
