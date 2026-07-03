@@ -19,6 +19,12 @@ export interface ColumnConfig {
   label: string;
   type: FieldType;
   required?: boolean;
+  validation?: {
+    min?: number;
+    max?: number;
+    integer?: boolean;
+    decimals?: number;
+  };
   calculation?: CalculationConfig;
 }
 

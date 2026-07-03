@@ -120,6 +120,37 @@ function sendError(response: ServerResponse, error: unknown) {
   return false;
 }
 
+class InvalidJsonBodyError extends Error {
+  constructor() {
+    super("Invalid JSON body");
+    this.name = "InvalidJsonBodyError";
+  }
+}
+
+function sendInvalidJson(response: ServerResponse) {
+  sendJson(response, 400, {
+    error: "invalid_json",
+    message: "El cuerpo de la solicitud debe ser JSON valido."
+  });
+}
+
+function sendMutationError(response: ServerResponse, error: unknown) {
+  if (sendError(response, error)) {
+    return true;
+  }
+
+  if (error instanceof InvalidJsonBodyError) {
+    sendInvalidJson(response);
+    return true;
+  }
+
+  sendJson(response, 500, {
+    error: "server_error",
+    message: "No se pudo procesar la solicitud."
+  });
+  return true;
+}
+
 async function readJsonBody(request: IncomingMessage) {
   const chunks: Buffer[] = [];
 
@@ -131,7 +162,11 @@ async function readJsonBody(request: IncomingMessage) {
     return {};
   }
 
-  return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+  try {
+    return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+  } catch {
+    throw new InvalidJsonBodyError();
+  }
 }
 
 const server = createServer(async (request, response) => {
@@ -204,14 +239,7 @@ const server = createServer(async (request, response) => {
       sendJson(response, 200, { user });
       return;
     } catch (error) {
-      if (sendError(response, error)) {
-        return;
-      }
-
-      sendJson(response, 400, {
-        error: "invalid_json",
-        message: "El cuerpo de la solicitud debe ser JSON válido."
-      });
+      sendMutationError(response, error);
       return;
     }
   }
@@ -232,14 +260,7 @@ const server = createServer(async (request, response) => {
         return;
       }
     } catch (error) {
-      if (sendError(response, error)) {
-        return;
-      }
-
-      sendJson(response, 400, {
-        error: "invalid_json",
-        message: "El cuerpo de la solicitud debe ser JSON válido."
-      });
+      sendMutationError(response, error);
       return;
     }
   }
@@ -289,7 +310,7 @@ const server = createServer(async (request, response) => {
         return;
       }
 
-      sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON válido." });
+      sendMutationError(response, error);
       return;
     }
   }
@@ -310,11 +331,7 @@ const server = createServer(async (request, response) => {
         return;
       }
     } catch (error) {
-      if (sendError(response, error)) {
-        return;
-      }
-
-      sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON válido." });
+      sendMutationError(response, error);
       return;
     }
   }
@@ -385,7 +402,7 @@ const server = createServer(async (request, response) => {
         return;
       }
 
-      sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON válido." });
+      sendMutationError(response, error);
       return;
     }
   }
@@ -539,14 +556,7 @@ const server = createServer(async (request, response) => {
       sendJson(response, 201, created);
       return;
     } catch (error) {
-      if (sendError(response, error)) {
-        return;
-      }
-
-      sendJson(response, 400, {
-        error: "invalid_json",
-        message: "El cuerpo de la solicitud debe ser JSON válido."
-      });
+      sendMutationError(response, error);
       return;
     }
   }
@@ -633,14 +643,7 @@ const server = createServer(async (request, response) => {
         sendJson(response, 200, updatedDraft);
         return;
       } catch (error) {
-        if (sendError(response, error)) {
-          return;
-        }
-
-        sendJson(response, 400, {
-          error: "invalid_json",
-          message: "El cuerpo de la solicitud debe ser JSON válido."
-        });
+        sendMutationError(response, error);
         return;
       }
     }
@@ -727,14 +730,7 @@ const server = createServer(async (request, response) => {
         sendJson(response, 200, updatedDraft);
         return;
       } catch (error) {
-        if (sendError(response, error)) {
-          return;
-        }
-
-        sendJson(response, 400, {
-          error: "invalid_json",
-          message: "El cuerpo de la solicitud debe ser JSON válido."
-        });
+        sendMutationError(response, error);
         return;
       }
     }

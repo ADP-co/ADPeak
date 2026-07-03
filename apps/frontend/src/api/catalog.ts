@@ -44,6 +44,7 @@ export type CatalogIndicator = {
   primaryResponsibleId: number;
   responsibleIds: number[];
   responsibleNames: string[];
+  contributorResponsibleIds?: number[];
   contributorNames: string[];
   activities: string[];
   plantelIds: number[];
@@ -1268,6 +1269,7 @@ function buildEmptyIndicator(current: CatalogIndicator[]): CatalogIndicator {
     primaryResponsibleId: 1,
     responsibleIds: [1],
     responsibleNames: [],
+    contributorResponsibleIds: [],
     contributorNames: ['Planteles'],
     activities: [],
     plantelIds: allPlantelIds(),

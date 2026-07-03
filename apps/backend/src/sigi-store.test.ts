@@ -1073,6 +1073,47 @@ describe("SIGI store and RBAC", () => {
     expect(visibleCodes).not.toContain(removedCode);
   });
 
+  it("shows indicators configured for specific responsible contributors without capture permissions", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const resp01 = listUsers(director).find((user) => user.username === "resp01")!;
+    const resp02 = listUsers(director).find((user) => user.username === "resp02")!;
+    const baseIndicator = getIndicatorByCode("1.1.2.0.1")!;
+
+    const indicator = saveIndicator(director, {
+      ...baseIndicator,
+      responsibleIds: [resp02.responsableId!],
+      responsibleNames: [resp02.name],
+      contributorNames: [resp01.name],
+      contributorResponsibleIds: [resp01.responsableId!],
+      plantelIds: []
+    });
+    const resp01Session = sessionFromHeaders({
+      "x-user-id": resp01.id,
+      "x-role": "responsable",
+      "x-responsable-id": String(resp01.responsableId)
+    });
+    const visible = listIndicators(resp01Session).find((item) => item.code === indicator.code);
+
+    expect(resp01.indicatorCodes).not.toContain(indicator.code);
+    expect(visible).toMatchObject({
+      code: indicator.code,
+      canEdit: false,
+      canReview: false,
+      isReadOnly: true
+    });
+    expect(() =>
+      assertCaptureAccess(
+        resp01Session,
+        {
+          plantelId: 1,
+          indicadorId: indicator.id,
+          payload: completedReviewPayload(templateForIndicator(indicator, resp01Session))
+        },
+        "draft"
+      )
+    ).toThrow(SigiForbiddenError);
+  });
+
   it("does not treat manual empty plantel scope as global access", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
 
@@ -1225,6 +1266,38 @@ describe("SIGI store and RBAC", () => {
         "read"
       )
     ).not.toThrow();
+  });
+
+  it("rejects decimal values in integer capture columns", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const plantel = sessionFromHeaders({
+      "x-role": "plantel",
+      "x-plantel-id": "1"
+    });
+    const indicator = listIndicators(director).find((item) =>
+      item.name.toLowerCase().includes("abandono escolar")
+    )!;
+    const scopedIndicator = saveIndicator(director, {
+      ...indicator,
+      plantelIds: [1]
+    });
+    const template = templateForIndicator(scopedIndicator, plantel);
+    const rows = completedRowsForTemplate(template);
+    const numericColumn = template.columns.find((column) => column.type === "number")!;
+
+    rows[0][numericColumn.key] = 7.8;
+
+    expect(() =>
+      assertCaptureAccess(
+        plantel,
+        {
+          plantelId: 1,
+          indicadorId: scopedIndicator.id,
+          payload: { rows }
+        },
+        "draft"
+      )
+    ).toThrow(SigiValidationError);
   });
 
   it("persists manual template columns with formula calculations", () => {
@@ -1827,6 +1900,46 @@ describe("SIGI store and RBAC", () => {
         "draft"
       )
     ).toThrow(SigiValidationError);
+  });
+
+  it("accepts coherent titulation totals and percentage calculations", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const plantel = sessionFromHeaders({
+      "x-role": "plantel",
+      "x-plantel-id": "1"
+    });
+    const indicator = saveIndicator(director, {
+      ...getIndicatorByCode("1.0.0.0.2")!,
+      plantelIds: [1]
+    });
+    const template = templateForIndicator(indicator, plantel);
+    const rows = completedRowsForTemplate(template);
+
+    rows[0] = {
+      ...rows[0],
+      egresados_titulados_en_el_ano_2025_mujeres: 12,
+      egresados_titulados_en_el_ano_2025_hombres: 5,
+      egresados_titulados_en_el_ano_2025_total: 17,
+      matricula_de_primer_ingreso_de_la_misma_cohorte_: 20,
+      matricula_de_primer_ingreso_de_la_misma_cohorte_2: 10,
+      matricula_de_primer_ingreso_de_la_misma_cohorte_3: 30,
+      de_titulacion_por_cohorte: 56.67
+    };
+
+    expect(() =>
+      assertCaptureAccess(
+        plantel,
+        {
+          plantelId: 1,
+          indicadorId: indicator.id,
+          payload: {
+            rows,
+            justificacion: "Borrador con totales coherentes."
+          }
+        },
+        "draft"
+      )
+    ).not.toThrow();
   });
 
   it("blocks captures for indicators that are not assigned to the requested plantel", () => {

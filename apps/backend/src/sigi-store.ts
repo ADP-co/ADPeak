@@ -82,6 +82,7 @@ export type SigiIndicator = {
   primaryResponsibleId: number;
   responsibleIds: number[];
   responsibleNames: string[];
+  contributorResponsibleIds?: number[];
   contributorNames: string[];
   activities: string[];
   plantelIds: number[];
@@ -162,6 +163,12 @@ export type TemplateColumn = {
   label: string;
   type: "readonly" | "number" | "text" | "calculated";
   required?: boolean;
+  validation?: {
+    min?: number;
+    max?: number;
+    integer?: boolean;
+    decimals?: number;
+  };
   calculation?:
     | { type: "sum"; sourceKeys: string[] }
     | { type: "percentage"; numeratorKey: string; denominatorKey: string; decimals?: number }
@@ -926,6 +933,9 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
   const nextContributorNames = input.contributorNames ?? existing?.contributorNames ?? [];
   const targetsResponsibleContributors =
     nextContributorNames.length > 0 && !targetsPlanteles(nextContributorNames);
+  const contributorResponsibleIds = targetsResponsibleContributors
+    ? normalizeOptionalResponsibleIds(input.contributorResponsibleIds, nextContributorNames)
+    : [];
   const inputHasPlantelIds = Object.prototype.hasOwnProperty.call(input, "plantelIds");
   const isOfficialImportedIndicator = Boolean(
     initialIndicators.find((indicator) => indicator.code === input.code && indicator.plantelScopeSource === "official-import")
@@ -955,6 +965,7 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
     primaryResponsibleId,
     responsibleIds,
     responsibleNames: namesForResponsibleIds(responsibleIds),
+    contributorResponsibleIds,
     contributorNames: nextContributorNames,
     activities: input.activities?.filter(Boolean) ?? existing?.activities ?? ["Actividad general"],
     plantelIds: nextPlantelIds,
@@ -968,7 +979,7 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
   };
 
   indicators.set(id, indicator);
-  syncUserAssignmentsForIndicator(indicator, existing?.responsibleIds ?? []);
+  syncUserAssignmentsForIndicator(indicator, existing?.responsibleIds ?? [], existing?.contributorResponsibleIds ?? []);
   persistCatalogState();
   return indicator;
 }
@@ -1097,8 +1108,14 @@ export function assertCaptureAccess(
     throw new SigiForbiddenError("El indicador no esta asignado a este plantel.");
   }
 
-  if (session.role === "responsable" && !isResponsibleAssigned(session, indicator)) {
-    throw new SigiForbiddenError("El responsable no tiene asignado este indicador.");
+  if (session.role === "responsable") {
+    const hasResponsibleScope = action === "read"
+      ? isResponsibleRelated(session, indicator)
+      : isResponsibleAssigned(session, indicator);
+
+    if (!hasResponsibleScope) {
+      throw new SigiForbiddenError("El responsable no tiene asignado este indicador.");
+    }
   }
 
   if (session.role === "plantel" && action === "review") {
@@ -1192,8 +1209,42 @@ function validateNumericColumns(
       if (numericValue < 0) {
         throw new SigiValidationError(`El campo "${column.label}" de ${indicator.code} no puede ser negativo.`);
       }
+
+      const validation = numericValidationForColumn(column);
+
+      if (validation.min !== undefined && numericValue < validation.min) {
+        throw new SigiValidationError(`El campo "${column.label}" de ${indicator.code} debe ser mayor o igual a ${validation.min}.`);
+      }
+
+      if (validation.max !== undefined && numericValue > validation.max) {
+        throw new SigiValidationError(`El campo "${column.label}" de ${indicator.code} debe ser menor o igual a ${validation.max}.`);
+      }
+
+      if (validation.integer && !Number.isInteger(numericValue)) {
+        throw new SigiValidationError(`El campo "${column.label}" de ${indicator.code} debe ser un numero entero.`);
+      }
     }
   }
+}
+
+function numericValidationForColumn(column: Pick<TemplateColumn, "key" | "label" | "type" | "validation">) {
+  const normalized = normalizeCalculationReference(`${column.label} ${column.key}`);
+  const isPercentageLike =
+    normalized.includes("porcentaje") ||
+    normalized.includes("tasa") ||
+    normalized.includes("cumplimiento") ||
+    normalized.includes("titulacion") ||
+    column.label.includes("%");
+
+  return {
+    min: finiteNumber(column.validation?.min) ?? 0,
+    max: finiteNumber(column.validation?.max) ?? (isPercentageLike ? 100 : undefined),
+    integer: typeof column.validation?.integer === "boolean" ? column.validation.integer : column.type === "number"
+  };
+}
+
+function finiteNumber(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
 function validateCalculatedColumns(
@@ -1689,6 +1740,7 @@ function buildIndicators() {
       primaryResponsibleId: responsibleId,
       responsibleIds: [responsibleId],
       responsibleNames: [row.responsible],
+      contributorResponsibleIds: [],
       contributorNames: contributors,
       activities: [row.activity || "Actividad general"],
       plantelIds: [...officialSourcePlantelIds],
@@ -1821,6 +1873,7 @@ function normalizePersistedIndicator(indicator: SigiIndicator): SigiIndicator {
     plantelScopeSource: indicator.plantelScopeSource ?? seededIndicator?.plantelScopeSource ?? "manual",
     responsibleIds: indicator.responsibleIds?.length ? indicator.responsibleIds : seededIndicator?.responsibleIds ?? [1],
     responsibleNames: indicator.responsibleNames?.length ? indicator.responsibleNames : seededIndicator?.responsibleNames ?? namesForResponsibleIds([1]),
+    contributorResponsibleIds: normalizePersistedContributorResponsibleIds(indicator, seededIndicator),
     contributorNames: indicator.contributorNames ?? seededIndicator?.contributorNames ?? [],
     activities: indicator.activities?.length ? indicator.activities : seededIndicator?.activities ?? ["Actividad general"],
     templateColumns: sanitizeTemplateColumns(indicator.templateColumns ?? seededIndicator?.templateColumns),
@@ -1843,19 +1896,58 @@ function sanitizeTemplateColumns(columns?: TemplateColumn[]) {
           : label || `campo_${index + 1}`,
         seenKeys
       );
-      const type = ["readonly", "number", "text", "calculated"].includes(column.type)
+      const rawType = ["readonly", "number", "text", "calculated"].includes(column.type)
         ? column.type
         : "text";
+      const type = normalizeTemplateColumnType(rawType, label, key);
 
       return {
         key,
         label: label || `Campo ${index + 1}`,
         type,
         required: Boolean(column.required),
+        validation: sanitizeColumnValidation(column.validation, type, label || column.key),
         calculation: type === "calculated" ? sanitizeCalculation(column.calculation) : undefined
       } satisfies TemplateColumn;
     })
     .filter((column) => column.label.trim());
+}
+
+function normalizeTemplateColumnType(type: TemplateColumn["type"], label: string, key: string): TemplateColumn["type"] {
+  if (type !== "text") {
+    return type;
+  }
+
+  const normalized = normalizeCalculationReference(`${label} ${key}`);
+
+  if (/(observacion|descripcion|actividad|programa|plantel|delegacion|responsable|evidencia|nombre)/.test(normalized)) {
+    return type;
+  }
+
+  if (/(matr|matricula|alumn|mujeres|hombres|egresad|docent|cantidad|numero|sesion|accion|total|tasa|porcentaje|avance|meta)/.test(normalized)) {
+    return "number";
+  }
+
+  return type;
+}
+
+function sanitizeColumnValidation(
+  validation: TemplateColumn["validation"],
+  type: TemplateColumn["type"],
+  label: string
+) {
+  if (type !== "number" && type !== "calculated") {
+    return undefined;
+  }
+
+  const inferred = numericValidationForColumn({ key: label, label, type });
+
+  return {
+    min: finiteNumber(validation?.min) ?? inferred.min,
+    max: finiteNumber(validation?.max) ?? inferred.max,
+    integer: typeof validation?.integer === "boolean" ? validation?.integer : inferred.integer,
+    decimals: Number.isInteger(validation?.decimals) ? validation?.decimals : undefined
+  };
 }
 
 function sanitizeCalculation(calculation: TemplateColumn["calculation"]) {
@@ -2223,13 +2315,22 @@ function syncIndicatorAssignmentsForUser(user: SigiUser, shouldSync: boolean) {
   });
 }
 
-function syncUserAssignmentsForIndicator(indicator: SigiIndicator, previousResponsibleIds: number[]) {
+function syncUserAssignmentsForIndicator(
+  indicator: SigiIndicator,
+  previousResponsibleIds: number[],
+  previousContributorResponsibleIds: number[] = []
+) {
   if (!isVisibleOperationalIndicatorCode(indicator.code)) {
     return;
   }
 
   const nextResponsibleIds = new Set(indicator.responsibleIds);
-  const affectedResponsibleIds = new Set([...previousResponsibleIds, ...indicator.responsibleIds]);
+  const affectedResponsibleIds = new Set([
+    ...previousResponsibleIds,
+    ...previousContributorResponsibleIds,
+    ...indicator.responsibleIds,
+    ...(indicator.contributorResponsibleIds ?? [])
+  ]);
 
   users.forEach((user, userId) => {
     if (user.role !== "responsable" || !user.responsableId || !affectedResponsibleIds.has(user.responsableId)) {
@@ -2319,7 +2420,7 @@ function canReadIndicator(session: SigiSession, indicator: SigiIndicator) {
     return hasExplicitPlantelScope(indicator) && canUseIndicatorForPlantel(indicator, session.plantelId ?? -1);
   }
 
-  return isResponsibleAssigned(session, indicator);
+  return isResponsibleRelated(session, indicator);
 }
 
 function isResponsibleAssigned(session: SigiSession, indicator: SigiIndicator) {
@@ -2331,6 +2432,15 @@ function isResponsibleAssigned(session: SigiSession, indicator: SigiIndicator) {
   }
 
   return indicator.responsibleIds.includes(responsableId) || Boolean(user?.indicatorCodes.includes(indicator.code));
+}
+
+function isResponsibleContributor(session: SigiSession, indicator: SigiIndicator) {
+  const responsableId = session.responsableId ?? -1;
+  return (indicator.contributorResponsibleIds ?? []).includes(responsableId);
+}
+
+function isResponsibleRelated(session: SigiSession, indicator: SigiIndicator) {
+  return isResponsibleAssigned(session, indicator) || isResponsibleContributor(session, indicator);
 }
 
 function canUseIndicatorForPlantel(indicator: SigiIndicator, plantelId: number) {
@@ -3246,6 +3356,45 @@ function normalizeResponsibleIds(ids?: number[], names?: string[]) {
   }
 
   return [1];
+}
+
+function normalizeOptionalResponsibleIds(ids?: number[], names?: string[]) {
+  if (ids?.length) {
+    return uniqueNumbers(ids.filter((id) => Number.isInteger(id) && id > 0));
+  }
+
+  if (names?.length) {
+    return uniqueNumbers(names.map((name) => {
+      const officialId = responsibleIdByName.get(name);
+
+      if (officialId) {
+        return officialId;
+      }
+
+      return Array.from(users.values()).find((user) =>
+        user.role === "responsable" &&
+        user.name.localeCompare(name, "es", { sensitivity: "accent" }) === 0
+      )?.responsableId;
+    }).filter((id): id is number => Boolean(id)));
+  }
+
+  return [];
+}
+
+function normalizePersistedContributorResponsibleIds(indicator: SigiIndicator, seededIndicator?: SigiIndicator) {
+  const persistedIds = normalizeOptionalResponsibleIds(indicator.contributorResponsibleIds);
+
+  if (persistedIds.length > 0) {
+    return persistedIds;
+  }
+
+  const contributorNames = indicator.contributorNames ?? seededIndicator?.contributorNames ?? [];
+
+  if (contributorNames.length > 0 && !targetsPlanteles(contributorNames)) {
+    return normalizeOptionalResponsibleIds(undefined, contributorNames);
+  }
+
+  return seededIndicator?.contributorResponsibleIds ?? [];
 }
 
 function namesForResponsibleIds(ids: number[]) {

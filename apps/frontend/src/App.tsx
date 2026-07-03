@@ -216,7 +216,11 @@ function canDisplayCatalogIndicatorForUser(indicator: CatalogIndicator, user?: U
     return effectivePlantelIdsForCatalogIndicator(indicator).includes(user.plantelId ?? -1);
   }
 
-  return indicator.responsibleIds.includes(user.responsableId ?? -1);
+  const responsableId = user.responsableId ?? -1;
+  return (
+    indicator.responsibleIds.includes(responsableId) ||
+    (indicator.contributorResponsibleIds ?? []).includes(responsableId)
+  );
 }
 
 function effectivePlantelIdsForCatalogIndicator(indicator: CatalogIndicator) {

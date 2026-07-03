@@ -216,6 +216,11 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
 
     const responsibleIds = idsForUserNames(cleanedResponsables, catalogUsers);
     const canSendResponsibleIds = responsibleIds.length === cleanedResponsables.length;
+    const contributorResponsibleIds = contributorType === 'responsables'
+      ? idsForUserNames(cleanedContributors, catalogUsers)
+      : [];
+    const canSendContributorResponsibleIds =
+      contributorType !== 'responsables' || contributorResponsibleIds.length === cleanedContributors.length;
 
     try {
       await saveIndicator({
@@ -232,6 +237,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
         primaryResponsibleId: canSendResponsibleIds ? responsibleIds[0] : undefined,
         responsibleIds: canSendResponsibleIds ? responsibleIds : undefined,
         responsibleNames: cleanedResponsables,
+        contributorResponsibleIds: canSendContributorResponsibleIds ? contributorResponsibleIds : undefined,
         contributorNames: cleanedContributors,
         activities: editingIndicator?.activities?.length
           ? editingIndicator.activities

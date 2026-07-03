@@ -78,6 +78,64 @@ const createNumberSchema = (required = false) =>
     })
     .transform((value) => (typeof value === 'number' ? value : undefined));
 
+type ResolvedNumberValidation = {
+  min?: number;
+  max?: number;
+  integer?: boolean;
+};
+
+const numericValidationForColumn = (column: ColumnConfig): ResolvedNumberValidation => {
+  const normalized = normalizeReferenceKey(`${column.label} ${column.key}`);
+  const isPercentageLike =
+    normalized.includes('porcentaje') ||
+    normalized.includes('tasa') ||
+    normalized.includes('cumplimiento') ||
+    normalized.includes('titulacion') ||
+    column.label.includes('%');
+
+  return {
+    min: column.validation?.min ?? 0,
+    max: column.validation?.max ?? (isPercentageLike ? 100 : undefined),
+    integer: column.validation?.integer ?? true,
+  };
+};
+
+const createStrictNumberSchema = (column: ColumnConfig) => {
+  const validation = numericValidationForColumn(column);
+
+  return z
+    .preprocess(parseNumberInput, z.any())
+    .superRefine((value, ctx) => {
+      if (value === undefined) {
+        if (column.required) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Campo requerido' });
+        }
+        return;
+      }
+
+      if (typeof value !== 'number' || !Number.isFinite(value)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Debe ser un numero' });
+        return;
+      }
+
+      if (validation.min !== undefined && value < validation.min) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: validation.min === 0 ? 'No puede ser negativo' : `Debe ser mayor o igual a ${validation.min}`,
+        });
+      }
+
+      if (validation.max !== undefined && value > validation.max) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Debe ser menor o igual a ${validation.max}` });
+      }
+
+      if (validation.integer && !Number.isInteger(value)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Debe ser un numero entero' });
+      }
+    })
+    .transform((value) => (typeof value === 'number' ? value : undefined));
+};
+
 const createTextSchema = (required = false) => {
   if (required) {
     return z.preprocess(
@@ -101,7 +159,7 @@ const createDynamicSchema = (columns: ColumnConfig[]) => {
 
   columns.forEach((column) => {
     if (column.type === 'number') {
-      schemaShape[column.key] = createNumberSchema(column.required);
+      schemaShape[column.key] = createStrictNumberSchema(column);
       return;
     }
 
@@ -261,8 +319,14 @@ const totalForColumn = (rows: Record<string, unknown>[] | undefined, column: Col
 
   if (column.calculation?.type === 'percentage') {
     const calculation = column.calculation;
-    const numerator = enrichedRows.reduce((sum, row) => sum + toNumber(row[calculation.numeratorKey]), 0);
-    const denominator = enrichedRows.reduce((sum, row) => sum + toNumber(row[calculation.denominatorKey]), 0);
+    const numerator = enrichedRows.reduce(
+      (sum, row) => sum + toNumber(valueForCalculationKey(row, calculation.numeratorKey, columns)),
+      0
+    );
+    const denominator = enrichedRows.reduce(
+      (sum, row) => sum + toNumber(valueForCalculationKey(row, calculation.denominatorKey, columns)),
+      0
+    );
 
     if (denominator === 0) {
       return '0';
@@ -537,6 +601,7 @@ export const IndicatorForm = ({
                     const error = rowErrors?.[column.key]?.message;
                     const fieldName = `rows.${rowIndex}.${column.key}` as const;
                     const fieldRegistration = register(fieldName);
+                    const numberValidation = column.type === 'number' ? numericValidationForColumn(column) : undefined;
 
                     return (
                       <td key={column.key} className="border border-brand-Gris_bajo/20 p-2 align-middle">
@@ -550,8 +615,9 @@ export const IndicatorForm = ({
                           <Input
                             type="number"
                             min={0}
-                            step="any"
-                            inputMode="decimal"
+                            max={numberValidation?.max}
+                            step={numberValidation?.integer ? '1' : 'any'}
+                            inputMode={numberValidation?.integer ? 'numeric' : 'decimal'}
                             className="w-full min-w-[80px] text-center !p-1 h-8"
                             label=""
                             aria-label={`${column.label}, fila ${rowIndex + 1}`}
