@@ -1,4 +1,4 @@
-import { applyCors, handleOptions, methodNotAllowed, positiveInteger, readJsonBody } from "./http";
+import { applyCors, handleOptions, InvalidJsonBodyError, methodNotAllowed, positiveInteger, readJsonBody } from "./http";
 
 type RequestLike = {
   method?: string;
@@ -523,10 +523,9 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
         return;
       }
 
-      const accessAction = session.role === "responsable" && draft.estado === "en_revision" ? "responsibleEdit" : "draft";
-      sigi.assertCaptureAccess(session, { ...draft, payload: body.payload }, accessAction);
+      sigi.assertCaptureAccess(session, { ...draft, payload: body.payload }, "draft");
       const updatedDraft = captures.updateCaptureDraft(id, body.payload, {
-        allowReviewStatus: accessAction === "responsibleEdit"
+        allowReviewStatus: false
       });
 
       if (!updatedDraft) {
@@ -677,6 +676,11 @@ function sendJson(response: any, statusCode: number, payload: unknown) {
 }
 
 function sendKnownError(response: any, error: unknown) {
+  if (error instanceof InvalidJsonBodyError) {
+    sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON valido." });
+    return true;
+  }
+
   if (
     typeof error === "object" &&
     error !== null &&

@@ -20,18 +20,29 @@ export function methodNotAllowed(response: any, allowed: string[]) {
   response.status(405).json({ error: "method_not_allowed", allowed });
 }
 
+export class InvalidJsonBodyError extends Error {
+  constructor() {
+    super("Invalid JSON body");
+    this.name = "InvalidJsonBodyError";
+  }
+}
+
 export async function readJsonBody(request: any) {
-  if (request.body !== undefined) {
-    return typeof request.body === "string" ? JSON.parse(request.body || "{}") : request.body;
+  try {
+    if (request.body !== undefined) {
+      return typeof request.body === "string" ? JSON.parse(request.body || "{}") : request.body;
+    }
+
+    let rawBody = "";
+
+    for await (const chunk of request) {
+      rawBody += chunk;
+    }
+
+    return rawBody ? JSON.parse(rawBody) : {};
+  } catch {
+    throw new InvalidJsonBodyError();
   }
-
-  let rawBody = "";
-
-  for await (const chunk of request) {
-    rawBody += chunk;
-  }
-
-  return rawBody ? JSON.parse(rawBody) : {};
 }
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
