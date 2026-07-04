@@ -410,7 +410,7 @@ export function saveUser(session: SigiSession, input: Partial<SigiUser> & { pass
   const role = normalizeRole(input.role);
 
   if (!role || !input.name?.trim()) {
-    throw new SigiValidationError("El usuario debe incluir nombre y rol valido.");
+    throw new SigiValidationError("El usuario debe incluir nombre y rol válido.");
   }
 
   const existing = input.id ? users.get(input.id) : undefined;
@@ -835,7 +835,7 @@ function workStateForIndicator(session: SigiSession, indicator: SigiIndicator): 
       canEdit: false,
       canReview,
       isReadOnly: true,
-      readOnlyReason: canReview ? "La captura esta lista para revision." : "La captura esta en revision."
+      readOnlyReason: canReview ? "La captura está lista para revisión." : "La captura está en revisión."
     };
   }
 
@@ -846,7 +846,7 @@ function workStateForIndicator(session: SigiSession, indicator: SigiIndicator): 
       canEdit: canPlantelDraft,
       canReview: false,
       isReadOnly: !canPlantelDraft,
-      readOnlyReason: canPlantelDraft ? undefined : "La captura requiere correccion fuera de tu alcance."
+      readOnlyReason: canPlantelDraft ? undefined : "La captura requiere corrección fuera de tu alcance."
     };
   }
 
@@ -1100,7 +1100,7 @@ export function assertCaptureAccess(
 
   if (action === "draft" || action === "submit") {
     if (session.role !== "plantel") {
-      throw new SigiForbiddenError("Solo el plantel puede capturar o enviar indicadores a revision.");
+      throw new SigiForbiddenError("Solo el plantel puede capturar o enviar indicadores a revisión.");
     }
   }
 
@@ -1273,7 +1273,7 @@ function validateNumericColumns(
       }
 
       if (validation.integer && !Number.isInteger(numericValue)) {
-        throw new SigiValidationError(`El campo "${column.label}" de ${indicator.code} debe ser un numero entero.`);
+        throw new SigiValidationError(`El campo "${column.label}" de ${indicator.code} debe ser un número entero.`);
       }
     }
   }

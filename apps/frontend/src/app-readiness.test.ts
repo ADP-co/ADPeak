@@ -40,6 +40,14 @@ describe('frontend readiness invariants', () => {
     expect(source).not.toContain('Estados para simular');
   });
 
+  it('uses a searchable assignment list instead of a native indicator select', () => {
+    const source = readSource('components/ui/UsersTable.tsx');
+
+    expect(source).toContain('Buscar por código o nombre...');
+    expect(source).toContain('availableIndicatorOptions');
+    expect(source).not.toContain('Seleccione para agregar...');
+  });
+
   it('keeps production source free of mojibake and internal QA labels', () => {
     const forbiddenPattern = /Ã|Â|�|QA formal|mock report|reporte inventado/i;
 

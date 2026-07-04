@@ -119,7 +119,7 @@ const createStrictNumberSchema = (column: ColumnConfig) => {
       }
 
       if (typeof value !== 'number' || !Number.isFinite(value)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Debe ser un numero' });
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Debe ser un número' });
         return;
       }
 
@@ -135,7 +135,7 @@ const createStrictNumberSchema = (column: ColumnConfig) => {
       }
 
       if (validation.integer && !Number.isInteger(value)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Debe ser un numero entero' });
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Debe ser un número entero' });
       }
     })
     .transform((value) => (typeof value === 'number' ? value : undefined));

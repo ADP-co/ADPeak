@@ -130,7 +130,7 @@ class InvalidJsonBodyError extends Error {
 function sendInvalidJson(response: ServerResponse) {
   sendJson(response, 400, {
     error: "invalid_json",
-    message: "El cuerpo de la solicitud debe ser JSON valido."
+    message: "El cuerpo de la solicitud debe ser JSON válido."
   });
 }
 

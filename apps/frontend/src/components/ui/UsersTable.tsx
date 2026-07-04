@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { KeyRound, Lock, PlusCircle, Search, Trash2, Unlock, X } from 'lucide-react';
 import { ConfirmModal } from './ConfirmModal';
 import { catalogPlanteles, deactivateUser, fetchUsers, resetUserPassword, saveUser, type CatalogUser } from '../../api/catalog';
@@ -25,9 +25,10 @@ const KNOWN_PLANTELES = catalogPlanteles.map((plantel) => ({
   name: plantel.name,
 }));
 const MOCK_PLANTELES = ['-', ...KNOWN_PLANTELES.map((plantel) => plantel.label)];
-const MOCK_INDICADORES = officialCatalogRows
+const INDICATOR_OPTIONS = officialCatalogRows
   .filter((indicator) => indicator.classification === 'operational' && indicator.visible)
-  .map((indicator) => indicator.code);
+  .map((indicator) => ({ code: indicator.code, name: indicator.name }))
+  .sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }));
 
 function normalizeSearch(value: string) {
   return value
@@ -122,6 +123,11 @@ function fromCatalogUser(user: CatalogUser): UserRecord {
   };
 }
 
+function indicatorLabel(code: string) {
+  const option = INDICATOR_OPTIONS.find((indicator) => indicator.code === code);
+  return option ? `${option.code} - ${option.name}` : code;
+}
+
 function isStatusError(message: string) {
   const normalized = normalizeSearch(message);
   return [
@@ -147,6 +153,7 @@ export const UsersTable = () => {
   const [userToToggleBlock, setUserToToggleBlock] = useState<UserRecord | null>(null);
   const [userToResetPassword, setUserToResetPassword] = useState<UserRecord | null>(null);
   const [passwordResetForm, setPasswordResetForm] = useState({ password: '', confirmPassword: '' });
+  const [indicatorPickerSearch, setIndicatorPickerSearch] = useState('');
 
   useEffect(() => {
     let isMounted = true;
@@ -184,6 +191,7 @@ export const UsersTable = () => {
       responsableId: undefined,
       password: '',
     });
+    setIndicatorPickerSearch('');
     setStatusMessage('');
   };
 
@@ -194,6 +202,7 @@ export const UsersTable = () => {
     }
 
     setEditingUser(user);
+    setIndicatorPickerSearch('');
     setStatusMessage('');
   };
 
@@ -389,6 +398,24 @@ export const UsersTable = () => {
 
   const isCreatingUser = editingUser ? !users.some((user) => user.id === editingUser.id) : false;
   const statusIsError = isStatusError(statusMessage);
+  const editingIndicatorCodes = editingUser?.indicadores ?? '-';
+  const assignedIndicatorCodes = useMemo(() => splitIndicators(editingIndicatorCodes), [editingIndicatorCodes]);
+  const availableIndicatorOptions = useMemo(() => {
+    const assigned = new Set(assignedIndicatorCodes);
+    const normalizedFilter = normalizeSearch(indicatorPickerSearch);
+
+    return INDICATOR_OPTIONS.filter((indicator) => {
+      if (assigned.has(indicator.code)) {
+        return false;
+      }
+
+      if (!normalizedFilter) {
+        return true;
+      }
+
+      return normalizeSearch(`${indicator.code} ${indicator.name}`).includes(normalizedFilter);
+    }).slice(0, 40);
+  }, [assignedIndicatorCodes, indicatorPickerSearch]);
 
   return (
     <div className="w-full max-w-[1250px] mx-auto pt-8 pb-10">
@@ -695,37 +722,48 @@ export const UsersTable = () => {
                   <label htmlFor="user-indicator-select" className="block text-sm font-semibold text-brand-Gris_oscuro font-body mb-1">
                     Indicadores asignados
                   </label>
-                  <select
+                  <input
                     id="user-indicator-select"
-                    value=""
-                    onChange={(event) => {
-                      const selected = event.target.value;
-                      const assigned = splitIndicators(editingUser.indicadores);
-
-                      if (selected && !assigned.includes(selected)) {
-                        const next = [...assigned, selected].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-                        setEditingUser({ ...editingUser, indicadores: next.join(', ') });
-                      }
-                    }}
-                    className="w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco mb-3"
-                  >
-                    <option value="" disabled hidden>Seleccione para agregar...</option>
-                    {MOCK_INDICADORES
-                      .filter((indicator) => !splitIndicators(editingUser.indicadores).includes(indicator))
-                      .map((indicator) => (
-                        <option key={indicator} value={indicator}>{indicator}</option>
-                      ))}
-                  </select>
+                    type="search"
+                    value={indicatorPickerSearch}
+                    onChange={(event) => setIndicatorPickerSearch(event.target.value)}
+                    placeholder="Buscar por código o nombre..."
+                    className="w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco mb-2"
+                  />
+                  <div className="max-h-40 overflow-y-auto rounded-md border border-brand-Gris_bajo/30 bg-brand-Blanco mb-3">
+                    {availableIndicatorOptions.length > 0 ? (
+                      availableIndicatorOptions.map((indicator) => (
+                        <button
+                          key={indicator.code}
+                          type="button"
+                          onClick={() => {
+                            const next = [...assignedIndicatorCodes, indicator.code]
+                              .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+                            setEditingUser({ ...editingUser, indicadores: next.join(', ') });
+                            setIndicatorPickerSearch('');
+                          }}
+                          className="block w-full px-3 py-2 text-left text-sm text-brand-Gris_oscuro hover:bg-brand-Verde_principal/10 focus:bg-brand-Verde_principal/10 focus:outline-none"
+                        >
+                          <span className="font-mono font-semibold">{indicator.code}</span>
+                          <span className="ml-2 text-brand-Gris_oscuro/70">{indicator.name}</span>
+                        </button>
+                      ))
+                    ) : (
+                      <p className="px-3 py-3 text-center text-xs text-brand-Gris_oscuro/60">
+                        Sin indicadores disponibles para agregar.
+                      </p>
+                    )}
+                  </div>
 
                   <div className="flex flex-wrap gap-2 p-3 bg-brand-Gris_bajo/5 rounded-md border border-brand-Gris_bajo/20 min-h-[50px] items-center">
-                    {splitIndicators(editingUser.indicadores).length > 0 ? (
-                      splitIndicators(editingUser.indicadores).map((indicator) => (
-                        <span key={indicator} className="flex items-center gap-1.5 bg-brand-Verde_oscuro text-brand-Blanco px-2.5 py-1 rounded-full text-xs font-accent font-semibold shadow-sm">
+                    {assignedIndicatorCodes.length > 0 ? (
+                      assignedIndicatorCodes.map((indicator) => (
+                        <span key={indicator} title={indicatorLabel(indicator)} className="flex items-center gap-1.5 bg-brand-Verde_oscuro text-brand-Blanco px-2.5 py-1 rounded-full text-xs font-accent font-semibold shadow-sm">
                           {indicator}
                           <button
                             type="button"
                             onClick={() => {
-                              const next = splitIndicators(editingUser.indicadores).filter((item) => item !== indicator);
+                              const next = assignedIndicatorCodes.filter((item) => item !== indicator);
                               setEditingUser({ ...editingUser, indicadores: next.length > 0 ? next.join(', ') : '-' });
                             }}
                             className="hover:text-brand-Status_rojo transition-colors p-0.5 rounded-full hover:bg-brand-Blanco/20 cursor-pointer"
