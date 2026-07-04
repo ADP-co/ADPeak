@@ -287,7 +287,7 @@ export const ReportsDashboard = () => {
     if (typeof link.download === 'undefined') {
       window.open(url, '_blank', 'noopener,noreferrer');
     } else {
-      link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+      link.click();
     }
 
     window.setTimeout(() => {
@@ -305,7 +305,7 @@ export const ReportsDashboard = () => {
       const recordCount = countReportRows(report);
 
       downloadDocument(blob, `reporte-${slugify(item.plantel)}-${selectedDate}.csv`);
-      setReportMessage(`Descarga iniciada: ${recordCount} registros.`);
+      setReportMessage(`Archivo CSV generado: ${recordCount} registros.`);
     } catch (error) {
       setReportMessage(error instanceof Error ? error.message : 'No se pudo descargar el reporte.');
     } finally {
@@ -321,7 +321,7 @@ export const ReportsDashboard = () => {
       const recordCount = countReportRows(report);
 
       downloadDocument(pdf, `reporte-${slugify(item.plantel)}-${selectedDate}.pdf`);
-      setReportMessage(`Descarga iniciada: ${recordCount} registros.`);
+      setReportMessage(`Archivo PDF generado: ${recordCount} registros.`);
     } catch (error) {
       setReportMessage(error instanceof Error ? error.message : 'No se pudo descargar el reporte.');
     } finally {

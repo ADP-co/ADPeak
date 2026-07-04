@@ -443,6 +443,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
     ? user.responsableId ?? 1
     : selectedCatalogIndicator?.primaryResponsibleId ?? selectedCatalogIndicator?.responsibleIds[0] ?? 1;
   const effectiveCaptureId = requestedCaptureId ?? selectedCatalogIndicator?.captureId;
+  const shouldLoadCaptureDraft = user?.role !== 'responsable' || Boolean(effectiveCaptureId);
   const captureDraft = useCaptureDraft({
     requestedCaptureId: effectiveCaptureId,
     plantelId: activePlantelId,
@@ -451,7 +452,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
     actividadId: activeActividadId,
     responsableId: activeResponsableId,
     storageScope: `plantel-${activePlantelId}:${selectedCode}:periodo-${activePeriodoId}:actividad-${activeActividadId}`,
-    enabled: resolvedIndicatorId > 0 && Boolean(selectedCatalogIndicator || canUseMockupIndicatorId) && !isWaitingForCatalogIndicator && !isUnknownIndicator,
+    enabled: shouldLoadCaptureDraft && resolvedIndicatorId > 0 && Boolean(selectedCatalogIndicator || canUseMockupIndicatorId) && !isWaitingForCatalogIndicator && !isUnknownIndicator,
   });
 
   const templateInitialRows = remoteTemplate?.initialRows ?? fallbackTemplate.initialRows ?? mockInitialData;

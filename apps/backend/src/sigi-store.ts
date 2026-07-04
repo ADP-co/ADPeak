@@ -793,7 +793,7 @@ function workStateForIndicator(session: SigiSession, indicator: SigiIndicator): 
   const relevantCaptures = relevantCapturesForIndicator(session, indicator);
   const latest = relevantCaptures[0];
   const canPlantelDraft = session.role === "plantel";
-  const canResponsibleReview = session.role === "responsable" && isResponsibleAssigned(session, indicator);
+  const canResponsibleReview = session.role === "responsable" && isResponsibleReviewer(session, indicator);
   const baseState = {
     captureId: latest?.id,
     plantelId: latest?.plantelId ?? defaultPlantelIdForIndicator(session, indicator),
@@ -871,7 +871,7 @@ function relevantCapturesForIndicator(session: SigiSession, indicator: SigiIndic
       }
 
       if (session.role === "responsable") {
-        return isResponsibleAssigned(session, indicator);
+        return isResponsibleRelated(session, indicator);
       }
 
       return true;
@@ -1111,7 +1111,7 @@ export function assertCaptureAccess(
   if (session.role === "responsable") {
     const hasResponsibleScope = action === "read"
       ? isResponsibleRelated(session, indicator)
-      : isResponsibleAssigned(session, indicator);
+      : isResponsibleReviewer(session, indicator);
 
     if (!hasResponsibleScope) {
       throw new SigiForbiddenError("El responsable no tiene asignado este indicador.");
@@ -1128,7 +1128,59 @@ export function assertCaptureAccess(
 
   if (request.payload && action !== "read") {
     validateCapturePayload(indicator, request.payload, action === "submit", session);
+    normalizeCapturePayload(indicator, request.payload, session);
   }
+}
+
+function normalizeCapturePayload(indicator: SigiIndicator, payload: CapturePayload, session?: SigiSession) {
+  if (!Array.isArray(payload.rows)) {
+    return;
+  }
+
+  const template = templateForIndicator(indicator, session);
+  payload.rows = payload.rows.map((row) => {
+    const normalizedRow: Record<string, unknown> = {};
+
+    for (const column of template.columns) {
+      if (column.type === "calculated") {
+        continue;
+      }
+
+      const value = row[column.key];
+
+      if (column.type === "number") {
+        const numericValue = numberValue(value);
+        normalizedRow[column.key] = numericValue === undefined ? value ?? "" : numericValue;
+        continue;
+      }
+
+      normalizedRow[column.key] = value ?? "";
+    }
+
+    for (let pass = 0; pass < Math.max(1, template.columns.length); pass += 1) {
+      let changed = false;
+
+      for (const column of template.columns) {
+        if (column.type !== "calculated" || !column.calculation) {
+          continue;
+        }
+
+        const nextValue = calculatedValueForRow(normalizedRow, column, template.columns) ?? 0;
+        const previousValue = numberValue(normalizedRow[column.key]) ?? 0;
+        normalizedRow[column.key] = nextValue;
+
+        if (Math.abs(previousValue - nextValue) > 0.0001) {
+          changed = true;
+        }
+      }
+
+      if (!changed) {
+        break;
+      }
+    }
+
+    return normalizedRow;
+  });
 }
 
 export function validateCapturePayload(indicator: SigiIndicator, payload: CapturePayload, requireJustification: boolean, session?: SigiSession) {
@@ -2324,7 +2376,10 @@ function syncUserAssignmentsForIndicator(
     return;
   }
 
-  const nextResponsibleIds = new Set(indicator.responsibleIds);
+  const nextVisibleResponsibleIds = new Set([
+    ...indicator.responsibleIds,
+    ...(indicator.contributorResponsibleIds ?? [])
+  ]);
   const affectedResponsibleIds = new Set([
     ...previousResponsibleIds,
     ...previousContributorResponsibleIds,
@@ -2337,7 +2392,7 @@ function syncUserAssignmentsForIndicator(
       return;
     }
 
-    const isAssigned = nextResponsibleIds.has(user.responsableId);
+    const isAssigned = nextVisibleResponsibleIds.has(user.responsableId);
     const hasCode = user.indicatorCodes.includes(indicator.code);
 
     if (isAssigned === hasCode) {
@@ -2432,6 +2487,11 @@ function isResponsibleAssigned(session: SigiSession, indicator: SigiIndicator) {
   }
 
   return indicator.responsibleIds.includes(responsableId) || Boolean(user?.indicatorCodes.includes(indicator.code));
+}
+
+function isResponsibleReviewer(session: SigiSession, indicator: SigiIndicator) {
+  const responsableId = session.responsableId ?? -1;
+  return indicator.responsibleIds.includes(responsableId);
 }
 
 function isResponsibleContributor(session: SigiSession, indicator: SigiIndicator) {

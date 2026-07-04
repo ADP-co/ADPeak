@@ -472,7 +472,8 @@ export async function handleCaptureDrafts(request: RequestLike, response: any) {
       return;
     }
 
-    sendJson(response, 400, { error: "invalid_json_body", message: "El cuerpo de la solicitud debe ser JSON válido." });
+    console.error("capture_drafts_error", error);
+    sendJson(response, 500, { error: "capture_save_error", message: "No se pudo guardar la captura. Intenta de nuevo." });
     return;
   }
 
@@ -549,8 +550,6 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
         return;
       }
 
-      sigi.recordResponsibleCaptureEdit(session, updatedDraft);
-      sigi.recordCaptureNotification("submitted", session, updatedDraft);
       await flushRuntimeState();
       sendJson(response, 200, updatedDraft);
       return;
@@ -558,7 +557,7 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
 
     if (request.method === "POST" && action === "enviar-revision") {
       sigi.assertCaptureAccess(session, draft, "submit");
-      const updatedDraft = captures.sendCaptureToReview(id);
+      const updatedDraft = captures.sendCaptureToReview(id, { userId: session.userId, role: session.role });
 
       if (!updatedDraft) {
         sendJson(response, 409, {
@@ -568,7 +567,7 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
         return;
       }
 
-      sigi.recordCaptureNotification("approved", session, updatedDraft);
+      sigi.recordCaptureNotification("submitted", session, updatedDraft);
       await flushRuntimeState();
       sendJson(response, 200, updatedDraft);
       return;
@@ -586,7 +585,7 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
         return;
       }
 
-      sigi.recordCaptureNotification("correction_requested", session, updatedDraft);
+      sigi.recordCaptureNotification("approved", session, updatedDraft);
       await flushRuntimeState();
       sendJson(response, 200, updatedDraft);
       return;
@@ -612,6 +611,7 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
         return;
       }
 
+      sigi.recordCaptureNotification("correction_requested", session, updatedDraft);
       await flushRuntimeState();
       sendJson(response, 200, updatedDraft);
       return;
@@ -621,7 +621,8 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
       return;
     }
 
-    sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON válido." });
+    console.error("capture_action_error", error);
+    sendJson(response, 500, { error: "capture_update_error", message: "No se pudo actualizar la captura. Intenta de nuevo." });
     return;
   }
 
@@ -690,7 +691,7 @@ function sendJson(response: any, statusCode: number, payload: unknown) {
 
 function sendKnownError(response: any, error: unknown) {
   if (error instanceof InvalidJsonBodyError) {
-    sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON valido." });
+    sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON válido." });
     return true;
   }
 

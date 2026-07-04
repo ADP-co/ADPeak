@@ -84,6 +84,11 @@ type ResolvedNumberValidation = {
   integer?: boolean;
 };
 
+const parseNumberDraft = (value: unknown) => {
+  const parsedValue = parseNumberInput(value);
+  return typeof parsedValue === 'number' && Number.isFinite(parsedValue) ? parsedValue : undefined;
+};
+
 const numericValidationForColumn = (column: ColumnConfig): ResolvedNumberValidation => {
   const normalized = normalizeReferenceKey(`${column.label} ${column.key}`);
   const isPercentageLike =
@@ -205,6 +210,30 @@ const toNumber = (value: unknown) => {
   return typeof parsedValue === 'number' && Number.isFinite(parsedValue) ? parsedValue : 0;
 };
 
+const normalizeNumberInputValue = (value: string, validation: ResolvedNumberValidation) => {
+  const cleanedValue = value.replace(/[eE+]/g, '');
+
+  if (!cleanedValue.trim()) {
+    return '';
+  }
+
+  const parsedValue = Number(cleanedValue);
+
+  if (!Number.isFinite(parsedValue) || parsedValue < (validation.min ?? 0)) {
+    return '';
+  }
+
+  if (validation.integer && !Number.isInteger(parsedValue)) {
+    return '';
+  }
+
+  if (validation.max !== undefined && parsedValue > validation.max) {
+    return String(validation.max);
+  }
+
+  return cleanedValue;
+};
+
 const normalizeReferenceKey = (value: string) =>
   value
     .normalize('NFD')
@@ -301,6 +330,16 @@ const sanitizeRowForTemplate = (row: Record<string, unknown>, columns: ColumnCon
 
   columns.forEach((column) => {
     if (column.type === 'calculated') {
+      return;
+    }
+
+    if (column.type === 'number') {
+      const validation = numericValidationForColumn(column);
+      const numericValue = parseNumberDraft(row[column.key]);
+
+      sanitizedRow[column.key] = numericValue === undefined || numericValue < (validation.min ?? 0)
+        ? ''
+        : numericValue;
       return;
     }
 
@@ -629,11 +668,12 @@ export const IndicatorForm = ({
                               }
                             }}
                             onChange={(event) => {
-                              const nextValue = event.currentTarget.value.trim();
+                              const nextValue = normalizeNumberInputValue(
+                                event.currentTarget.value,
+                                numberValidation ?? { min: 0, integer: true }
+                              );
 
-                              if (nextValue.startsWith('-') || Number(nextValue) < 0) {
-                                event.currentTarget.value = '';
-                              }
+                              event.currentTarget.value = nextValue;
 
                               void fieldRegistration.onChange(event);
                             }}

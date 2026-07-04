@@ -427,10 +427,10 @@ export const UsersTable = () => {
           <button
             type="button"
             onClick={handleAddUser}
-            aria-label="Agregar usuario"
+            aria-label="Agregar responsable"
             className="h-9 flex items-center gap-2 bg-brand-Verde_oscuro text-brand-Blanco px-5 rounded-full font-bold text-sm hover:bg-brand-Verde_principal transition-colors"
           >
-            Agregar
+            Agregar responsable
             <PlusCircle size={18} strokeWidth={2.5} />
           </button>
         </div>
@@ -564,7 +564,7 @@ export const UsersTable = () => {
             className="bg-brand-Blanco rounded-lg shadow-xl p-6 w-full max-w-md border border-brand-Gris_bajo/20"
           >
             <h2 id="user-editor-title" className="text-xl font-title font-bold text-brand-Gris_oscuro mb-6">
-              {isCreatingUser ? 'Agregar usuario' : 'Modificar usuario'}
+              {isCreatingUser ? 'Agregar responsable' : 'Modificar usuario'}
             </h2>
             {statusMessage && (
               <p
@@ -758,7 +758,7 @@ export const UsersTable = () => {
                 onClick={saveEditedUser}
                 className="px-5 py-2 rounded-md bg-brand-Verde_oscuro text-brand-Blanco text-sm font-bold hover:bg-brand-Verde_principal transition-colors"
               >
-                {isCreatingUser ? 'Crear usuario' : 'Guardar cambios'}
+                {isCreatingUser ? 'Crear responsable' : 'Guardar cambios'}
               </button>
             </div>
           </div>
