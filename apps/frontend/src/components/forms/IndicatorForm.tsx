@@ -101,7 +101,7 @@ const numericValidationForColumn = (column: ColumnConfig): ResolvedNumberValidat
   return {
     min: column.validation?.min ?? 0,
     max: column.validation?.max ?? (isPercentageLike ? 100 : undefined),
-    integer: column.validation?.integer ?? true,
+    integer: column.validation?.integer ?? !isPercentageLike,
   };
 };
 
@@ -337,9 +337,13 @@ const sanitizeRowForTemplate = (row: Record<string, unknown>, columns: ColumnCon
       const validation = numericValidationForColumn(column);
       const numericValue = parseNumberDraft(row[column.key]);
 
-      sanitizedRow[column.key] = numericValue === undefined || numericValue < (validation.min ?? 0)
-        ? ''
-        : numericValue;
+      sanitizedRow[column.key] =
+        numericValue === undefined ||
+        numericValue < (validation.min ?? 0) ||
+        (validation.max !== undefined && numericValue > validation.max) ||
+        (validation.integer && !Number.isInteger(numericValue))
+          ? ''
+          : numericValue;
       return;
     }
 
@@ -355,6 +359,20 @@ const totalForColumn = (rows: Record<string, unknown>[] | undefined, column: Col
   }
 
   const enrichedRows = (rows ?? []).map((row) => enrichRowWithCalculatedValues(row, columns));
+
+  if (column.calculation?.type === 'sum') {
+    const total = column.calculation.sourceKeys.reduce(
+      (sourceTotal, sourceKey) =>
+        sourceTotal +
+        enrichedRows.reduce(
+          (rowTotal, row) => rowTotal + toNumber(valueForCalculationKey(row, sourceKey, columns)),
+          0
+        ),
+      0
+    );
+
+    return formatCalculatedValue(total);
+  }
 
   if (column.calculation?.type === 'percentage') {
     const calculation = column.calculation;
@@ -394,6 +412,13 @@ function hasTouchedFields(value: unknown): boolean {
 
   return Object.values(value).some(hasTouchedFields);
 }
+
+export const __indicatorFormTestUtils = {
+  numericValidationForColumn,
+  normalizeNumberInputValue,
+  enrichRowWithCalculatedValues,
+  totalForColumn,
+};
 
 export const IndicatorForm = ({
   template,

@@ -1300,6 +1300,100 @@ describe("SIGI store and RBAC", () => {
     ).toThrow(SigiValidationError);
   });
 
+  it("allows valid decimal percentages but rejects invalid percentage ranges", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const plantel = sessionFromHeaders({
+      "x-role": "plantel",
+      "x-plantel-id": "1"
+    });
+    const indicator = saveIndicator(director, {
+      ...getIndicatorByCode("1.1.2.0.3")!,
+      plantelIds: [1]
+    });
+    const template = templateForIndicator(indicator, plantel);
+    const rows = completedRowsForTemplate(template);
+    const tasaColumn = template.columns.find((column) =>
+      column.type === "number" && column.key.includes("tasa_de_reprobacion")
+    )!;
+
+    expect(tasaColumn).toBeDefined();
+    rows[0][tasaColumn.key] = 7.8;
+
+    expect(() =>
+      assertCaptureAccess(
+        plantel,
+        {
+          plantelId: 1,
+          indicadorId: indicator.id,
+          payload: { rows }
+        },
+        "draft"
+      )
+    ).not.toThrow();
+
+    rows[0][tasaColumn.key] = 120;
+
+    expect(() =>
+      assertCaptureAccess(
+        plantel,
+        {
+          plantelId: 1,
+          indicadorId: indicator.id,
+          payload: { rows }
+        },
+        "draft"
+      )
+    ).toThrow(SigiValidationError);
+  });
+
+  it("treats official PTC columns as integer non-negative numbers", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const plantel = sessionFromHeaders({
+      "x-role": "plantel",
+      "x-plantel-id": "1"
+    });
+    const indicator = saveIndicator(director, {
+      ...getIndicatorByCode("1.1.2.5.3")!,
+      plantelIds: [1]
+    });
+    const template = templateForIndicator(indicator, plantel);
+    const rows = completedRowsForTemplate(template);
+    const ptcColumn = template.columns.find((column) =>
+      column.key.includes("ptc") || column.label.toLowerCase().includes("ptc")
+    )!;
+
+    expect(ptcColumn).toMatchObject({
+      type: "number",
+      validation: expect.objectContaining({ min: 0, integer: true })
+    });
+
+    rows[0][ptcColumn.key] = -1;
+    expect(() =>
+      assertCaptureAccess(
+        plantel,
+        {
+          plantelId: 1,
+          indicadorId: indicator.id,
+          payload: { rows }
+        },
+        "draft"
+      )
+    ).toThrow(SigiValidationError);
+
+    rows[0][ptcColumn.key] = 3.5;
+    expect(() =>
+      assertCaptureAccess(
+        plantel,
+        {
+          plantelId: 1,
+          indicadorId: indicator.id,
+          payload: { rows }
+        },
+        "draft"
+      )
+    ).toThrow(SigiValidationError);
+  });
+
   it("persists manual template columns with formula calculations", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const indicator = saveIndicator(director, {
@@ -1866,8 +1960,8 @@ describe("SIGI store and RBAC", () => {
       egresados_titulados_en_el_ano_2025_hombres: 1,
       egresados_titulados_en_el_ano_2025_total: 9,
       matricula_de_primer_ingreso_de_la_misma_cohorte_: 2,
-      matricula_de_primer_ingreso_de_la_misma_cohorte__2: 2,
-      matricula_de_primer_ingreso_de_la_misma_cohorte__3: 4,
+      matricula_de_primer_ingreso_de_la_misma_cohorte_2: 2,
+      matricula_de_primer_ingreso_de_la_misma_cohorte_3: 4,
       de_titulacion_por_cohorte: 225
     };
 

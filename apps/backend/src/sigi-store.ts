@@ -1291,7 +1291,9 @@ function numericValidationForColumn(column: Pick<TemplateColumn, "key" | "label"
   return {
     min: finiteNumber(column.validation?.min) ?? 0,
     max: finiteNumber(column.validation?.max) ?? (isPercentageLike ? 100 : undefined),
-    integer: typeof column.validation?.integer === "boolean" ? column.validation.integer : column.type === "number"
+    integer: typeof column.validation?.integer === "boolean"
+      ? column.validation.integer
+      : column.type === "number" && !isPercentageLike
   };
 }
 
@@ -1669,7 +1671,13 @@ function numberValue(value: unknown) {
   }
 
   if (typeof value === "string" && value.trim()) {
-    const numeric = Number(value.replace("%", ""));
+    const normalizedValue = value.replace("%", "").trim();
+
+    if (!normalizedValue) {
+      return undefined;
+    }
+
+    const numeric = Number(normalizedValue);
     return Number.isFinite(numeric) ? numeric : undefined;
   }
 
@@ -1976,7 +1984,7 @@ function normalizeTemplateColumnType(type: TemplateColumn["type"], label: string
     return type;
   }
 
-  if (/(matr|matricula|alumn|mujeres|hombres|egresad|docent|cantidad|numero|sesion|accion|total|tasa|porcentaje|avance|meta)/.test(normalized)) {
+  if (/(matr|matricula|alumn|mujeres|hombres|egresad|docent|cantidad|numero|num|sesion|accion|total|tasa|porcentaje|avance|meta|ptc)/.test(normalized)) {
     return "number";
   }
 
@@ -2707,6 +2715,11 @@ function rowForOfficialWorkbookColumns(
 
     if (normalizedLabel.includes("plantel")) {
       row[column.key] = officialWorkbookPlantelValue(sourceValue, plantel);
+      continue;
+    }
+
+    if (column.type === "number" && sourceValue !== undefined && sourceValue !== null && String(sourceValue).trim() !== "") {
+      row[column.key] = numberValue(sourceValue) === undefined ? "" : sourceValue;
       continue;
     }
 

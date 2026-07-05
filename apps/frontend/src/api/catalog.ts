@@ -511,7 +511,7 @@ export function buildTemplateForCatalogIndicator(indicator: CatalogIndicator, pl
 
 function buildOfficialWorkbookTemplate(indicator: CatalogIndicator, plantelName: string): IndicatorTemplateResponse {
   const imported = officialWorkbookTemplates[indicator.code];
-  const columns = relaxBlankReadonlyColumns(imported.columns, imported.initialRows, imported.emptyRow);
+  const columns = relaxBlankReadonlyColumns(normalizeImportedColumns(imported.columns), imported.initialRows, imported.emptyRow);
   const displayCode = imported.officialCode || (indicator.code.startsWith('FMT-') ? 'Pendiente de mapeo' : indicator.code);
   const groups = imported.groups.filter((group) => group.label !== 'Formato oficial importado');
   const applyPlantel = (sourceRow: Record<string, unknown>) => {
@@ -523,7 +523,16 @@ function buildOfficialWorkbookTemplate(indicator: CatalogIndicator, plantelName:
         return;
       }
 
-      row[column.key] = sourceRow[column.key] ?? '';
+      const sourceValue = sourceRow[column.key];
+
+      if (column.type === 'number' && sourceValue !== undefined && sourceValue !== null && String(sourceValue).trim()) {
+        const normalizedValue = String(sourceValue).replace('%', '').trim();
+        const numericValue = Number(normalizedValue);
+        row[column.key] = normalizedValue && Number.isFinite(numericValue) ? sourceValue : '';
+        return;
+      }
+
+      row[column.key] = sourceValue ?? '';
     });
 
     return row;
@@ -547,6 +556,16 @@ function buildOfficialWorkbookTemplate(indicator: CatalogIndicator, plantelName:
     analysisLabel: 'Descripción y observaciones',
     analysisPlaceholder: 'Describe brevemente el avance, pendientes o comentarios del formato oficial.',
   };
+}
+
+function normalizeImportedColumns(columns: ColumnConfig[]) {
+  return columns.map((column) => {
+    if (column.type !== 'text') {
+      return column;
+    }
+
+    return shouldTreatImportedColumnAsNumber(column) ? { ...column, type: 'number' as const } : column;
+  });
 }
 
 function relaxBlankReadonlyColumns(
@@ -576,13 +595,36 @@ function isProtectedContextColumn(column: ColumnConfig) {
 }
 
 function editableTypeForBlankColumn(column: ColumnConfig): 'number' | 'text' {
-  const normalized = normalizeText(`${column.label} ${column.key}`);
-
-  if (/(^| )(no|num|numero|cantidad|sesiones|total)( |$)/.test(normalized)) {
+  if (shouldTreatImportedColumnAsNumber(column)) {
     return 'number';
   }
 
   return 'text';
+}
+
+function shouldTreatImportedColumnAsNumber(column: ColumnConfig) {
+  const normalized = normalizeText(`${column.label} ${column.key}`);
+  const protectedTextTokens = [
+    'actividad',
+    'programa',
+    'plantel',
+    'delegacion',
+    'responsable',
+    'evidencia',
+    'observacion',
+    'observaciones',
+    'descripcion',
+    'nombre',
+    'modalidad',
+    'estado',
+    'tipo',
+  ];
+
+  if (protectedTextTokens.some((token) => normalized.includes(token))) {
+    return false;
+  }
+
+  return /(matr|matricula|alumn|mujer|hombre|egresad|docent|cantidad|numero|num|sesion|accion|total|tasa|porcentaje|avance|meta|ptc)/.test(normalized);
 }
 
 function templateForIndicator(indicator: CatalogIndicator): IndicatorTemplateResponse {
