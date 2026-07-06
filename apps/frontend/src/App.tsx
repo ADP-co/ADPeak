@@ -577,6 +577,10 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
       },
     });
   };
+  const persistedEvidence = captureDraft.capture?.payload.evidencia;
+  const persistedEvidenceUrl = persistedEvidence?.contenidoBase64
+    ? `data:${persistedEvidence.tipo || 'application/pdf'};base64,${persistedEvidence.contenidoBase64}`
+    : undefined;
 
   return (
     <IndicatorForm
@@ -584,7 +588,8 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
       key={`${selectedCode}:${selectedTemplate.columns.map((column) => column.key).join('|')}`}
       initialData={formInitialData}
       initialJustificacion={captureDraft.capture?.payload.justificacion}
-      existingEvidenceName={captureDraft.capture?.payload.evidencia?.nombre}
+      existingEvidenceName={persistedEvidence?.nombre}
+      existingEvidenceUrl={persistedEvidenceUrl}
       canReview={canReviewCurrentCapture}
       canSaveReviewEdits={false}
       canModifyRows={user?.role !== 'responsable'}

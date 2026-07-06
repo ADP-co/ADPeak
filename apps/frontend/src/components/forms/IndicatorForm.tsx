@@ -13,6 +13,7 @@ interface IndicatorFormProps {
   initialData: Record<string, unknown>[];
   initialJustificacion?: string;
   existingEvidenceName?: string;
+  existingEvidenceUrl?: string;
   canReview?: boolean;
   canSaveReviewEdits?: boolean;
   canModifyRows?: boolean;
@@ -425,6 +426,7 @@ export const IndicatorForm = ({
   initialData,
   initialJustificacion,
   existingEvidenceName,
+  existingEvidenceUrl,
   canReview = false,
   canSaveReviewEdits = false,
   canModifyRows = true,
@@ -821,6 +823,17 @@ export const IndicatorForm = ({
               <span className="text-[11px] text-brand-Status_rojo font-accent font-bold mt-1.5 block">
                 {String(errors.evidencia.message)}
               </span>
+            )}
+            {existingEvidenceUrl && persistedEvidenceLabel && (
+              <a
+                href={existingEvidenceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Abrir evidencia ${persistedEvidenceLabel}`}
+                className="mt-3 inline-flex min-h-9 items-center justify-center rounded-md border border-brand-Verde_principal px-4 py-2 text-sm font-accent font-bold text-brand-Verde_oscuro transition-colors hover:bg-brand-Verde_principal hover:text-brand-Blanco focus:outline-none focus:ring-2 focus:ring-brand-Verde_principal focus:ring-offset-2"
+              >
+                Abrir evidencia
+              </a>
             )}
           </div>
         </div>

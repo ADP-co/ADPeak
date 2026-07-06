@@ -663,22 +663,51 @@ function drawDetailedIndicatorRows(
     }
 
     blocks.forEach((block, blockIndex) => {
-      ensureSpace(24);
-      page = getCurrentPage();
-      page.content.textAt(
+      drawDetailSubsectionTitle(
         blockIndex === 0 ? 'Información capturada' : 'Información capturada (continuación)',
-        PDF_MARGIN_X,
-        page.y,
-        8.8,
-        'F2',
-        PDF_GREEN
+        getCurrentPage,
+        ensureSpace,
+        setCurrentPage,
+        hasHeaderImage,
+        pages,
+        34
       );
-      page.y -= 12;
       drawDetailKeyValueGrid(block, getCurrentPage, ensureSpace, setCurrentPage, hasHeaderImage, pages);
     });
 
     getCurrentPage().y -= 8;
   });
+}
+
+function drawDetailSubsectionTitle(
+  title: string,
+  getCurrentPage: () => PdfReportPage,
+  ensureSpace: (height: number) => void,
+  setCurrentPage: (page: PdfReportPage) => void,
+  hasHeaderImage: boolean,
+  pages: PdfContentBuilder[],
+  minFollowingHeight = 24
+) {
+  const titleLines = wrapPdfLine(cleanExportText(title), 96).slice(0, 2);
+  const titleHeight = Math.max(24, titleLines.length * 10 + 12);
+  const requiredHeight = titleHeight + minFollowingHeight + 12;
+  let page = getCurrentPage();
+
+  if (page.y - requiredHeight < PDF_BOTTOM_Y) {
+    const nextPage = createPdfReportPage(pages, hasHeaderImage);
+    setCurrentPage(nextPage);
+    page = getCurrentPage();
+  } else {
+    ensureSpace(requiredHeight);
+    page = getCurrentPage();
+    page.y -= 6;
+  }
+
+  page.content.fillRect(PDF_MARGIN_X, page.y - titleHeight, PDF_CONTENT_WIDTH, titleHeight, PDF_LIGHT_GREEN);
+  titleLines.forEach((line, index) => {
+    page.content.textAt(line, PDF_MARGIN_X + 8, page.y - 14 - index * 10, 8.8, 'F2', PDF_DARK_GREEN);
+  });
+  page.y -= titleHeight + 8;
 }
 
 function drawDetailKeyValueGrid(
