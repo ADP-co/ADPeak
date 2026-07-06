@@ -17,6 +17,7 @@ export interface UserRecord {
   responsableId?: number;
   isBlocked?: boolean;
   password?: string;
+  confirmPassword?: string;
 }
 
 const KNOWN_PLANTELES = catalogPlanteles.map((plantel) => ({
@@ -142,6 +143,11 @@ function isStatusError(message: string) {
   ].some((token) => normalized.includes(token));
 }
 
+function isPasswordValidationMessage(message: string) {
+  const normalized = normalizeSearch(message);
+  return normalized.includes('contrasena') || normalized.includes('contraseña');
+}
+
 export const UsersTable = () => {
   const [users, setUsers] = useState<UserRecord[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
@@ -190,6 +196,7 @@ export const UsersTable = () => {
       indicadores: '-',
       responsableId: undefined,
       password: '',
+      confirmPassword: '',
     });
     setIndicatorPickerSearch('');
     setStatusMessage('');
@@ -234,9 +241,15 @@ export const UsersTable = () => {
 
     const isNew = !users.some((user) => user.id === normalizedUser.id);
     const initialPassword = normalizedUser.password?.trim() ?? '';
+    const initialConfirmPassword = normalizedUser.confirmPassword?.trim() ?? '';
 
     if (isNew && normalizedUser.role === 'Responsable' && initialPassword.length < 8) {
       setStatusMessage('Define una contraseña inicial de al menos 8 caracteres.');
+      return;
+    }
+
+    if (isNew && normalizedUser.role === 'Responsable' && initialPassword !== initialConfirmPassword) {
+      setStatusMessage('La confirmación no coincide con la contraseña inicial.');
       return;
     }
 
@@ -416,6 +429,11 @@ export const UsersTable = () => {
       return normalizeSearch(`${indicator.code} ${indicator.name}`).includes(normalizedFilter);
     }).slice(0, 40);
   }, [assignedIndicatorCodes, indicatorPickerSearch]);
+  const clearPasswordMessageIfValid = (password: string, confirmPassword: string) => {
+    if (password.length >= 8 && confirmPassword.length >= 8 && password === confirmPassword && isPasswordValidationMessage(statusMessage)) {
+      setStatusMessage('');
+    }
+  };
 
   return (
     <div className="w-full max-w-[1250px] mx-auto pt-8 pb-10">
@@ -650,8 +668,35 @@ export const UsersTable = () => {
                     id="user-editor-password"
                     type="password"
                     value={editingUser.password ?? ''}
-                    onChange={(event) => setEditingUser({ ...editingUser, password: event.target.value })}
+                    onChange={(event) => {
+                      const password = event.target.value;
+                      const confirmPassword = editingUser.confirmPassword ?? '';
+                      setEditingUser({ ...editingUser, password });
+                      clearPasswordMessageIfValid(password, confirmPassword);
+                    }}
                     placeholder="Mínimo 8 caracteres"
+                    autoComplete="new-password"
+                    className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco"
+                  />
+                </div>
+              )}
+
+              {isCreatingUser && editingUser.role === 'Responsable' && (
+                <div>
+                  <label htmlFor="user-editor-confirm-password" className="block text-sm font-semibold text-brand-Gris_oscuro font-body">
+                    Confirmar contraseña
+                  </label>
+                  <input
+                    id="user-editor-confirm-password"
+                    type="password"
+                    value={editingUser.confirmPassword ?? ''}
+                    onChange={(event) => {
+                      const confirmPassword = event.target.value;
+                      const password = editingUser.password ?? '';
+                      setEditingUser({ ...editingUser, confirmPassword });
+                      clearPasswordMessageIfValid(password, confirmPassword);
+                    }}
+                    placeholder="Repite la contraseña"
                     autoComplete="new-password"
                     className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco"
                   />

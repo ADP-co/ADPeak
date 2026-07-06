@@ -76,6 +76,20 @@ describe("SIGI store and RBAC", () => {
     evidencia: evidencePdf()
   });
 
+  const columnKeyByLabel = (template: ReturnType<typeof templateForIndicator>, ...tokens: string[]) => {
+    const normalizedTokens = tokens.map((token) => token.toLowerCase());
+    const column = template.columns.find((item) => {
+      const normalizedLabel = item.label.toLowerCase();
+      return normalizedTokens.every((token) => normalizedLabel.includes(token));
+    });
+
+    if (!column) {
+      throw new Error(`No se encontró columna para ${tokens.join(", ")}`);
+    }
+
+    return column.key;
+  };
+
   it("loads official indicators and responsible assignments from the imported catalog", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const indicators = listIndicators(director);
@@ -1953,16 +1967,23 @@ describe("SIGI store and RBAC", () => {
     });
     const template = templateForIndicator(indicator, plantel);
     const rows = completedRowsForTemplate(template);
+    const egresadasMujeres = columnKeyByLabel(template, "egresados", "mujeres");
+    const egresadosHombres = columnKeyByLabel(template, "egresados", "hombres");
+    const egresadosTotal = columnKeyByLabel(template, "egresados", "total");
+    const matriculaMujeres = columnKeyByLabel(template, "matrícula", "mujeres");
+    const matriculaHombres = columnKeyByLabel(template, "matrícula", "hombres");
+    const matriculaTotal = columnKeyByLabel(template, "matrícula", "total");
+    const porcentaje = columnKeyByLabel(template, "titulación");
 
     rows[0] = {
       ...rows[0],
-      egresados_titulados_en_el_ano_2025_mujeres: 1,
-      egresados_titulados_en_el_ano_2025_hombres: 1,
-      egresados_titulados_en_el_ano_2025_total: 9,
-      matricula_de_primer_ingreso_de_la_misma_cohorte_: 2,
-      matricula_de_primer_ingreso_de_la_misma_cohorte_2: 2,
-      matricula_de_primer_ingreso_de_la_misma_cohorte_3: 4,
-      de_titulacion_por_cohorte: 225
+      [egresadasMujeres]: 1,
+      [egresadosHombres]: 1,
+      [egresadosTotal]: 9,
+      [matriculaMujeres]: 2,
+      [matriculaHombres]: 2,
+      [matriculaTotal]: 4,
+      [porcentaje]: 225
     };
 
     expect(() =>
@@ -2008,16 +2029,23 @@ describe("SIGI store and RBAC", () => {
     });
     const template = templateForIndicator(indicator, plantel);
     const rows = completedRowsForTemplate(template);
+    const egresadasMujeres = columnKeyByLabel(template, "egresados", "mujeres");
+    const egresadosHombres = columnKeyByLabel(template, "egresados", "hombres");
+    const egresadosTotal = columnKeyByLabel(template, "egresados", "total");
+    const matriculaMujeres = columnKeyByLabel(template, "matrícula", "mujeres");
+    const matriculaHombres = columnKeyByLabel(template, "matrícula", "hombres");
+    const matriculaTotal = columnKeyByLabel(template, "matrícula", "total");
+    const porcentaje = columnKeyByLabel(template, "titulación");
 
     rows[0] = {
       ...rows[0],
-      egresados_titulados_en_el_ano_2025_mujeres: 12,
-      egresados_titulados_en_el_ano_2025_hombres: 5,
-      egresados_titulados_en_el_ano_2025_total: 17,
-      matricula_de_primer_ingreso_de_la_misma_cohorte_: 20,
-      matricula_de_primer_ingreso_de_la_misma_cohorte_2: 10,
-      matricula_de_primer_ingreso_de_la_misma_cohorte_3: 30,
-      de_titulacion_por_cohorte: 56.67
+      [egresadasMujeres]: 12,
+      [egresadosHombres]: 5,
+      [egresadosTotal]: 17,
+      [matriculaMujeres]: 20,
+      [matriculaHombres]: 10,
+      [matriculaTotal]: 30,
+      [porcentaje]: 56.67
     };
 
     expect(() =>
