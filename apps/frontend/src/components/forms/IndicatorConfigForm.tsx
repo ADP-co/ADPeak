@@ -23,7 +23,18 @@ interface ConfigColumn {
   label: string;
   type: ColumnType;
   formula?: string;
+  required?: boolean;
+  min?: string;
+  max?: string;
+  integer?: boolean;
+  qualityWarningMax?: string;
 }
+
+type EvidenceRulesConfig = {
+  required: boolean;
+  maxSizeMb: string;
+  requireOpenBeforeApproval: boolean;
+};
 
 const defaultColumns: ConfigColumn[] = [
   { id: 'delegacion', label: 'Delegación', type: 'readonly' },
@@ -42,6 +53,11 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
   const [contributorType, setContributorType] = useState<'planteles' | 'responsables'>('planteles');
   const [contributors, setContributors] = useState<string[]>(['']);
   const [columns, setColumns] = useState<ConfigColumn[]>(isNew ? [] : defaultColumns);
+  const [evidenceRules, setEvidenceRules] = useState<EvidenceRulesConfig>({
+    required: true,
+    maxSizeMb: '5',
+    requireOpenBeforeApproval: true,
+  });
   const [catalogUsers, setCatalogUsers] = useState<CatalogUser[]>([]);
   const [editingIndicator, setEditingIndicator] = useState<CatalogIndicator | null>(null);
   const [isLoading, setIsLoading] = useState(!isNew);
@@ -71,6 +87,11 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
           setContributorType('planteles');
           setContributors(['']);
           setColumns([]);
+          setEvidenceRules({
+            required: true,
+            maxSizeMb: '5',
+            requireOpenBeforeApproval: true,
+          });
           return;
         }
 
@@ -84,12 +105,22 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
           setContributorType('planteles');
           setContributors(['']);
           setColumns(defaultColumns);
+          setEvidenceRules({
+            required: true,
+            maxSizeMb: '5',
+            requireOpenBeforeApproval: true,
+          });
           setLoadError('No se encontró el indicador; revisa el código antes de guardar.');
           return;
         }
 
         setEditingIndicator(currentIndicator);
         setIndicatorName(currentIndicator.name);
+        setEvidenceRules({
+          required: currentIndicator.evidenceRules?.required ?? true,
+          maxSizeMb: String(currentIndicator.evidenceRules?.maxSizeMb ?? 5),
+          requireOpenBeforeApproval: currentIndicator.evidenceRules?.requireOpenBeforeApproval ?? true,
+        });
         setResponsables(nonEmptyList(currentResponsibleNames(currentIndicator.responsibleNames), ['']));
 
         const currentContributors = nonEmptyList(currentIndicator.contributorNames, ['Planteles']);
@@ -112,6 +143,11 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
                   label: column.label,
                   type: column.type,
                   formula: formulaFromCalculation(column, template.columns),
+                  required: column.required,
+                  min: column.validation?.min !== undefined ? String(column.validation.min) : '',
+                  max: column.validation?.max !== undefined ? String(column.validation.max) : '',
+                  integer: column.validation?.integer,
+                  qualityWarningMax: column.validation?.qualityWarningMax !== undefined ? String(column.validation.qualityWarningMax) : '',
                 }))
               : defaultColumns
           );
@@ -168,20 +204,10 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
     ]);
   };
 
-  const handleChangeColumn = (id: string, field: keyof ConfigColumn, value: string) => {
+  const handleChangeColumn = (id: string, field: keyof ConfigColumn, value: string | boolean) => {
     setColumns((current) =>
       current.map((column) =>
-        column.id === id
-          ? {
-              ...column,
-              [field]: value as ConfigColumn[keyof ConfigColumn],
-              formula: field === 'formula'
-                ? value
-                : field === 'type' && value !== 'calculated'
-                  ? undefined
-                  : column.formula,
-            }
-          : column
+        column.id === id ? updateConfigColumn(column, field, value) : column
       )
     );
   };
@@ -208,6 +234,12 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
 
     const configuredTemplateColumns = buildTemplateColumns(columns);
     const canPersistTemplateColumns = !configuredTemplateColumns.error;
+    const normalizedEvidenceRules = {
+      required: evidenceRules.required,
+      allowedTypes: ['application/pdf'],
+      maxSizeMb: positiveNumberOrDefault(evidenceRules.maxSizeMb, 5),
+      requireOpenBeforeApproval: evidenceRules.requireOpenBeforeApproval,
+    };
 
     if (configuredTemplateColumns.error && isNew) {
       toast.error(configuredTemplateColumns.error);
@@ -246,6 +278,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
             : ['Actividad general'],
         plantelIds: contributorType === 'responsables' ? [] : editingIndicator?.plantelIds,
         templateColumns: canPersistTemplateColumns ? configuredTemplateColumns.columns : undefined,
+        evidenceRules: normalizedEvidenceRules,
       });
       toast.success('Configuración guardada');
       handleBack();
@@ -409,6 +442,42 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
           </div>
         </div>
 
+        <div className="grid grid-cols-1 gap-4 rounded-lg border border-brand-Gris_bajo/40 bg-brand-Gris_bajo/5 p-6 md:grid-cols-[1fr_160px_1fr] md:items-end">
+          <div>
+            <h3 className="font-title font-bold text-brand-Gris_oscuro">Reglas de evidencia</h3>
+            <p className="mt-1 text-xs text-brand-Gris_oscuro/60">
+              Controla si el archivo PDF es obligatorio y si el revisor debe abrirlo antes de aprobar.
+            </p>
+            <label className="mt-4 flex items-center gap-2 text-sm font-semibold text-brand-Gris_oscuro">
+              <input
+                type="checkbox"
+                checked={evidenceRules.required}
+                onChange={(event) => setEvidenceRules((current) => ({ ...current, required: event.target.checked }))}
+                className="h-4 w-4 accent-brand-Verde_principal"
+              />
+              Evidencia PDF obligatoria
+            </label>
+          </div>
+          <Input
+            label="Tamaño máximo MB"
+            type="number"
+            min="1"
+            max="25"
+            value={evidenceRules.maxSizeMb}
+            onChange={(event) => setEvidenceRules((current) => ({ ...current, maxSizeMb: event.target.value }))}
+            className="h-10"
+          />
+          <label className="flex items-center gap-2 text-sm font-semibold text-brand-Gris_oscuro">
+            <input
+              type="checkbox"
+              checked={evidenceRules.requireOpenBeforeApproval}
+              onChange={(event) => setEvidenceRules((current) => ({ ...current, requireOpenBeforeApproval: event.target.checked }))}
+              className="h-4 w-4 accent-brand-Verde_principal"
+            />
+            Exigir abrir evidencia antes de aprobar
+          </label>
+        </div>
+
         <div className="border border-brand-Gris_bajo/40 rounded-lg p-6 bg-brand-Gris_bajo/5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-title font-bold text-brand-Gris_oscuro">Campos a capturar</h3>
@@ -462,6 +531,51 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
                     </p>
                   </div>
                 )}
+                <div className="grid w-full gap-3 rounded-md border border-brand-Gris_bajo/20 bg-brand-Gris_bajo/5 p-3 md:basis-full md:grid-cols-5 md:pl-9">
+                  <label className="flex items-center gap-2 text-xs font-bold text-brand-Gris_oscuro">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(column.required)}
+                      onChange={(event) => handleChangeColumn(column.id, 'required', event.target.checked)}
+                      className="h-4 w-4 accent-brand-Verde_principal"
+                    />
+                    Requerido
+                  </label>
+                  <label className="flex items-center gap-2 text-xs font-bold text-brand-Gris_oscuro">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(column.integer)}
+                      disabled={column.type !== 'number'}
+                      onChange={(event) => handleChangeColumn(column.id, 'integer', event.target.checked)}
+                      className="h-4 w-4 accent-brand-Verde_principal disabled:opacity-40"
+                    />
+                    Entero
+                  </label>
+                  <Input
+                    label="Mínimo"
+                    type="number"
+                    value={column.min ?? ''}
+                    disabled={column.type !== 'number'}
+                    onChange={(event) => handleChangeColumn(column.id, 'min', event.target.value)}
+                    className="h-9"
+                  />
+                  <Input
+                    label="Máximo"
+                    type="number"
+                    value={column.max ?? ''}
+                    disabled={column.type !== 'number'}
+                    onChange={(event) => handleChangeColumn(column.id, 'max', event.target.value)}
+                    className="h-9"
+                  />
+                  <Input
+                    label="Alerta si supera"
+                    type="number"
+                    value={column.qualityWarningMax ?? ''}
+                    disabled={column.type !== 'number'}
+                    onChange={(event) => handleChangeColumn(column.id, 'qualityWarningMax', event.target.value)}
+                    className="h-9"
+                  />
+                </div>
               </div>
             ))}
 
@@ -493,7 +607,14 @@ function buildTemplateColumns(columns: ConfigColumn[]) {
         key,
         label: column.label.trim(),
         type: column.type,
+        required: Boolean(column.required),
       };
+
+      const validation = validationFromConfigColumn(column);
+
+      if (validation) {
+        templateColumn.validation = validation;
+      }
 
       if (column.type === 'calculated') {
         templateColumn.calculation = {
@@ -523,6 +644,74 @@ function buildTemplateColumns(columns: ConfigColumn[]) {
   }
 
   return { columns: templateColumns, error: '' };
+}
+
+function updateConfigColumn(column: ConfigColumn, field: keyof ConfigColumn, value: string | boolean): ConfigColumn {
+  if (field === 'required' || field === 'integer') {
+    return { ...column, [field]: Boolean(value) };
+  }
+
+  if (field === 'type') {
+    const type = String(value) as ColumnType;
+    return {
+      ...column,
+      type,
+      formula: type === 'calculated' ? column.formula : undefined,
+      integer: type === 'number' ? column.integer : false,
+      min: type === 'number' ? column.min : '',
+      max: type === 'number' ? column.max : '',
+      qualityWarningMax: type === 'number' ? column.qualityWarningMax : '',
+    };
+  }
+
+  if (field === 'formula' || field === 'label' || field === 'min' || field === 'max' || field === 'qualityWarningMax') {
+    return { ...column, [field]: String(value) };
+  }
+
+  return column;
+}
+
+function validationFromConfigColumn(column: ConfigColumn): ColumnConfig['validation'] | undefined {
+  if (column.type !== 'number') {
+    return undefined;
+  }
+
+  const validation: NonNullable<ColumnConfig['validation']> = {};
+  const min = optionalNumber(column.min);
+  const max = optionalNumber(column.max);
+  const qualityWarningMax = optionalNumber(column.qualityWarningMax);
+
+  if (min !== undefined) {
+    validation.min = min;
+  }
+
+  if (max !== undefined) {
+    validation.max = max;
+  }
+
+  if (column.integer) {
+    validation.integer = true;
+  }
+
+  if (qualityWarningMax !== undefined) {
+    validation.qualityWarningMax = qualityWarningMax;
+  }
+
+  return Object.keys(validation).length > 0 ? validation : undefined;
+}
+
+function optionalNumber(value?: string) {
+  if (!value?.trim()) {
+    return undefined;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function positiveNumberOrDefault(value: string, fallback: number) {
+  const parsed = optionalNumber(value);
+  return parsed && parsed > 0 ? parsed : fallback;
 }
 
 function stableColumnKey(column: ConfigColumn, seenKeys: Set<string>) {

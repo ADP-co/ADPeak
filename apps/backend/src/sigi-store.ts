@@ -88,6 +88,7 @@ export type SigiIndicator = {
   plantelIds: number[];
   plantelScopeSource?: "official-import" | "manual";
   templateColumns?: TemplateColumn[];
+  evidenceRules?: EvidenceRules;
   updatedAt?: string;
   updatedBy?: string;
   lastChange?: "importado" | "creado" | "actualizado" | "desactivado" | "habilitado";
@@ -177,6 +178,13 @@ export type TemplateColumn = {
     | { type: "formula"; expression: string; decimals?: number };
 };
 
+export type EvidenceRules = {
+  required: boolean;
+  allowedTypes: string[];
+  maxSizeMb: number;
+  requireOpenBeforeApproval: boolean;
+};
+
 export type IndicatorTemplate = {
   indicatorCode: string;
   indicatorName: string;
@@ -204,6 +212,14 @@ export type SigiReportPayload = {
   identidadReporte: {
     tipo: "Plantel" | "Institucional" | "Responsable";
     nombre: string;
+  };
+  scopeSummary: string;
+  estadoConteos: {
+    total: number;
+    pendientes: number;
+    enRevision: number;
+    observados: number;
+    aprobados: number;
   };
   indicadores: Array<{
     id: string;
@@ -818,8 +834,19 @@ export function recordEvidenceOpened(session: SigiSession, draft: CaptureDraft, 
 }
 
 export function assertEvidenceOpenedBeforeApproval(session: SigiSession, draft: CaptureDraft) {
-  if (!draft.payload.evidencia?.nombre || !draft.payload.evidencia.contenidoBase64) {
+  const indicator = indicators.get(draft.indicadorId);
+  const evidenceRules = sanitizeEvidenceRules(indicator?.evidenceRules);
+
+  if (!evidenceRules.required && !evidenceRules.requireOpenBeforeApproval) {
+    return;
+  }
+
+  if (evidenceRules.required && (!draft.payload.evidencia?.nombre || !draft.payload.evidencia.contenidoBase64)) {
     throw new SigiValidationError("La evidencia no esta disponible. Solicita que el plantel reenvie el archivo antes de aprobar.");
+  }
+
+  if (!evidenceRules.requireOpenBeforeApproval) {
+    return;
   }
 
   const opened = Array.from(auditEvents.values()).some((event) =>
@@ -1079,6 +1106,7 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
       ? "official-import"
       : inputHasPlantelIds ? "manual" : existing?.plantelScopeSource ?? "manual",
     templateColumns: sanitizeTemplateColumns(input.templateColumns ?? existing?.templateColumns),
+    evidenceRules: sanitizeEvidenceRules(input.evidenceRules ?? existing?.evidenceRules),
     updatedAt: new Date().toISOString(),
     updatedBy: actorNameForSession(session),
     lastChange
@@ -1328,19 +1356,42 @@ export function validateCapturePayload(indicator: SigiIndicator, payload: Captur
 
   if (requireJustification) {
     const justificacion = payload.justificacion?.trim() ?? "";
+    const evidenceRules = sanitizeEvidenceRules(indicator.evidenceRules);
 
     if (justificacion.length < 10) {
       throw new SigiValidationError("Agrega una descripción o justificación de al menos 10 caracteres antes de enviar.");
     }
 
-    if (!payload.evidencia?.nombre) {
+    if (evidenceRules.required && !payload.evidencia?.nombre) {
       throw new SigiValidationError("Adjunta una evidencia PDF antes de enviar a revisión.");
+    }
+
+    if (payload.evidencia?.nombre) {
+      validateEvidenceMetadata(payload.evidencia, evidenceRules);
     }
 
     if (missingValues) {
       throw new SigiValidationError("Completa los campos capturables o ajusta el formato antes de enviar.");
     }
 
+  }
+}
+
+function validateEvidenceMetadata(evidence: NonNullable<CapturePayload["evidencia"]>, rules: EvidenceRules) {
+  const allowedTypes = new Set(rules.allowedTypes.map((type) => type.toLowerCase()));
+  const evidenceType = evidence.tipo?.toLowerCase() || "application/octet-stream";
+  const maxBytes = rules.maxSizeMb * 1024 * 1024;
+
+  if (allowedTypes.size > 0 && !allowedTypes.has(evidenceType)) {
+    throw new SigiValidationError("La evidencia debe ser un archivo PDF valido.");
+  }
+
+  if (!Number.isFinite(evidence.tamanoBytes) || evidence.tamanoBytes <= 0) {
+    throw new SigiValidationError("La evidencia no tiene un tamano valido.");
+  }
+
+  if (evidence.tamanoBytes > maxBytes) {
+    throw new SigiValidationError(`La evidencia no debe superar ${rules.maxSizeMb} MB.`);
   }
 }
 
@@ -1675,6 +1726,7 @@ export function buildReportPayload(
   const responsibleUser = session.role === "responsable"
     ? users.get(`responsable-${session.responsableId}`)
     : undefined;
+  const allRows = grouped.flatMap((indicator) => indicator.datos);
 
   return {
     tipoReporte: identityPlantel ? "plantel" : session.role === "responsable" ? "responsable" : "institucional",
@@ -1686,8 +1738,80 @@ export function buildReportPayload(
       tipo: identityPlantel ? "Plantel" : session.role === "responsable" ? "Responsable" : "Institucional",
       nombre: identityPlantel?.name ?? responsibleUser?.name ?? "DGEMS"
     },
+    scopeSummary: reportScopeSummary({
+      session,
+      identityPlantel,
+      responsibleUser,
+      rows: allRows,
+      reportView,
+      hasPlantelFilter
+    }),
+    estadoConteos: reportStateCounts(allRows),
     indicadores: grouped
   };
+}
+
+function reportStateCounts(rows: SigiReportPayload["indicadores"][number]["datos"]) {
+  return rows.reduce(
+    (counts, row) => {
+      counts.total += 1;
+
+      if (row.estado === "Aprobado") {
+        counts.aprobados += 1;
+      } else if (row.estado === "En revisión") {
+        counts.enRevision += 1;
+      } else if (row.estado === "Observado") {
+        counts.observados += 1;
+      } else {
+        counts.pendientes += 1;
+      }
+
+      return counts;
+    },
+    { total: 0, pendientes: 0, enRevision: 0, observados: 0, aprobados: 0 }
+  );
+}
+
+function reportScopeSummary({
+  session,
+  identityPlantel,
+  responsibleUser,
+  rows,
+  reportView,
+  hasPlantelFilter
+}: {
+  session: SigiSession;
+  identityPlantel?: Plantel;
+  responsibleUser?: SigiUser;
+  rows: SigiReportPayload["indicadores"][number]["datos"];
+  reportView: "detalle" | "avance";
+  hasPlantelFilter: boolean;
+}) {
+  if (identityPlantel) {
+    return `Plantel unico: ${identityPlantel.name}`;
+  }
+
+  if (session.role === "responsable") {
+    return `Responsable: ${responsibleUser?.name ?? `Responsable ${session.responsableId}`}`;
+  }
+
+  const rowPlanteles = uniqueStrings(rows.map((row) => row.plantel).filter(Boolean));
+
+  if (rowPlanteles.length === 1) {
+    return `Plantel unico: ${rowPlanteles[0]}`;
+  }
+
+  if (rowPlanteles.length > 1) {
+    return `Institucional multi-plantel: ${rowPlanteles.length} planteles`;
+  }
+
+  if (hasPlantelFilter) {
+    return "Plantel sin registros capturados";
+  }
+
+  return reportView === "detalle"
+    ? "Detalle institucional sin registros capturados"
+    : "Institucional multi-plantel";
 }
 
 function plantelesForReport(indicator: SigiIndicator, scopedPlanteles: Plantel[], hasPlantelFilter: boolean) {
@@ -2081,10 +2205,29 @@ function normalizePersistedIndicator(indicator: SigiIndicator): SigiIndicator {
     contributorNames: indicator.contributorNames ?? seededIndicator?.contributorNames ?? [],
     activities: indicator.activities?.length ? indicator.activities : seededIndicator?.activities ?? ["Actividad general"],
     templateColumns: sanitizeTemplateColumns(indicator.templateColumns ?? seededIndicator?.templateColumns),
+    evidenceRules: sanitizeEvidenceRules(indicator.evidenceRules ?? seededIndicator?.evidenceRules),
     active: indicator.active ?? true,
     updatedAt: indicator.updatedAt ?? seededIndicator?.updatedAt ?? officialCatalogImportedAt,
     updatedBy: indicator.updatedBy ?? seededIndicator?.updatedBy ?? "Sistema",
     lastChange: indicator.lastChange ?? seededIndicator?.lastChange ?? "importado"
+  };
+}
+
+function sanitizeEvidenceRules(rules?: Partial<EvidenceRules>): EvidenceRules {
+  const allowedTypes = Array.isArray(rules?.allowedTypes)
+    ? uniqueStrings(
+        rules.allowedTypes
+          .map((type) => typeof type === "string" ? type.trim().toLowerCase() : "")
+          .filter((type) => type && type.includes("/"))
+      )
+    : [];
+  const maxSizeMb = finiteNumber(rules?.maxSizeMb);
+
+  return {
+    required: rules?.required !== false,
+    allowedTypes: allowedTypes.length > 0 ? allowedTypes : ["application/pdf"],
+    maxSizeMb: maxSizeMb && maxSizeMb > 0 ? Math.min(maxSizeMb, 25) : 5,
+    requireOpenBeforeApproval: rules?.requireOpenBeforeApproval !== false
   };
 }
 

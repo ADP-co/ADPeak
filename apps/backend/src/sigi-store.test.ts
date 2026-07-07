@@ -1518,6 +1518,14 @@ describe("SIGI store and RBAC", () => {
       evidenciaNombre: "evidencia-detalle.pdf",
       evidencias: 1
     });
+    expect(report.scopeSummary).toBe("Plantel unico: Bachillerato 16");
+    expect(report.estadoConteos).toMatchObject({
+      total: expect.any(Number),
+      pendientes: expect.any(Number),
+      enRevision: expect.any(Number),
+      observados: expect.any(Number),
+      aprobados: expect.any(Number)
+    });
     expect(previousPeriodRow?.captureId).toBeUndefined();
   });
 
@@ -1999,6 +2007,48 @@ describe("SIGI store and RBAC", () => {
     expect(() => assertEvidenceOpenedBeforeApproval(reviewer, sent)).toThrow(SigiValidationError);
 
     recordEvidenceOpened(reviewer, sent, "qa-request");
+
+    expect(() => assertEvidenceOpenedBeforeApproval(reviewer, sent)).not.toThrow();
+  });
+
+  it("respects indicator evidence rules when opening evidence is not required before approval", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const plantel = sessionFromHeaders({
+      "x-role": "plantel",
+      "x-plantel-id": "1",
+      "x-user-id": "plantel-1"
+    });
+    const indicator = saveIndicator(director, {
+      ...getIndicatorByCode("1.0.0.0.2")!,
+      plantelIds: [1],
+      evidenceRules: {
+        required: true,
+        allowedTypes: ["application/pdf"],
+        maxSizeMb: 5,
+        requireOpenBeforeApproval: false
+      }
+    });
+    const reviewer = sessionFromHeaders({
+      "x-role": "responsable",
+      "x-responsable-id": String(indicator.responsibleIds[0]),
+      "x-user-id": `responsable-${indicator.responsibleIds[0]}`
+    });
+    const draft = createCaptureDraft({
+      plantelId: 1,
+      indicadorId: indicator.id,
+      actividadId: 1,
+      periodoId: 1,
+      responsableId: indicator.responsibleIds[0],
+      payload: {
+        rows: completedRowsForTemplate(templateForIndicator(indicator, plantel)),
+        justificacion: "Captura completa con evidencia oficial.",
+        evidencia: evidencePdfWithContent()
+      }
+    });
+    const sent = sendCaptureToReview(draft.id, {
+      userId: plantel.userId,
+      role: plantel.role
+    })!;
 
     expect(() => assertEvidenceOpenedBeforeApproval(reviewer, sent)).not.toThrow();
   });

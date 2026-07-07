@@ -42,6 +42,14 @@ export type ExportReport = {
     tipo: string;
     nombre: string;
   };
+  scopeSummary?: string;
+  estadoConteos?: {
+    total: number;
+    pendientes: number;
+    enRevision: number;
+    observados: number;
+    aprobados: number;
+  };
   indicadores: ReportIndicator[];
 };
 
@@ -122,7 +130,8 @@ export function reportToCsv(report: ExportReport) {
     ['Periodo', report.periodo],
     ['Ciclo escolar', report.cicloEscolar],
     ['Fecha de generación', formatReportDate(report.fechaGeneracion)],
-    ['Alcance', `${report.identidadReporte.tipo}: ${report.identidadReporte.nombre}`],
+    ['Alcance', report.scopeSummary ?? `${report.identidadReporte.tipo}: ${report.identidadReporte.nombre}`],
+    ...stateCountRows(report),
   ];
   const csvBody = [...summaryRows, [], headers, ...rows]
     .map((row) => row.map(escapeCsvCell).join(','))
@@ -138,6 +147,18 @@ function escapeCsvCell(cell: unknown) {
 
 function neutralizeCsvFormula(value: string) {
   return /^[=+\-@]/.test(value.trimStart()) ? `'${value}` : value;
+}
+
+function stateCountRows(report: ExportReport) {
+  const counts = stateCountsForReport(report);
+
+  return [
+    ['Registros totales', String(counts.total)],
+    ['Pendientes', String(counts.pendientes)],
+    ['En revisión', String(counts.enRevision)],
+    ['Observados', String(counts.observados)],
+    ['Aprobados', String(counts.aprobados)],
+  ];
 }
 
 type PdfStream = {
@@ -352,7 +373,7 @@ function renderPdfReport(report: ExportReport, hasHeaderImage: boolean) {
       ? wrapPdfLine(indicator.descripcion, 102).slice(0, 3)
       : [];
     const summaryLines = wrapPdfLine(
-      `${indicator.datos.length} registros | Avance promedio ${averageProgress(indicator.datos)} | Estado principal ${dominantStatus(indicator.datos)}`,
+      `${indicator.datos.length} registros | Avance promedio ${averageProgress(indicator.datos)} | ${statusCountsText(indicator.datos)}`,
       102
     );
     const titleHeight = titleLines.length * 13 + 16;
@@ -442,6 +463,15 @@ function renderPdfReport(report: ExportReport, hasHeaderImage: boolean) {
   );
   current.y -= 26;
 
+  const reportScope = report.scopeSummary ?? `${report.identidadReporte.tipo}: ${report.identidadReporte.nombre}`;
+  const scopeLines = wrapPdfLine(`Alcance: ${reportScope}`, 102);
+  scopeLines.forEach((line) => {
+    ensureSpace(12);
+    current.content.textAt(line, PDF_MARGIN_X, current.y, 8.8, 'F1', PDF_MUTED);
+    current.y -= 11;
+  });
+  current.y -= 10;
+
   if (report.vistaReporte !== 'detalle') {
     drawIndicatorList(report.indicadores);
 
@@ -450,6 +480,7 @@ function renderPdfReport(report: ExportReport, hasHeaderImage: boolean) {
       ['Planteles', String(executiveSummary.totalPlanteles)],
       ['Responsables', String(executiveSummary.totalResponsables)],
       ['Indicadores', String(executiveSummary.totalIndicadores)],
+      ['Total registros', String(statusSummary.total)],
       ['Enviados', String(executiveSummary.reportesEnviados)],
       ['Aprobados', String(executiveSummary.reportesAprobados)],
       ['Observados', String(executiveSummary.reportesObservados)],
@@ -641,6 +672,10 @@ function drawDetailedIndicatorRows(
   hasHeaderImage: boolean,
   pages: PdfContentBuilder[]
 ) {
+  if (rows.length > 1) {
+    drawDetailComparisonTable(rows, report, getCurrentPage, ensureSpace, setCurrentPage, hasHeaderImage, pages);
+  }
+
   rows.forEach((row, rowIndex) => {
     const contextItems: Array<[string, string]> = [
       ['Registro', String(row.registro_id ?? row.id ?? rowIndex + 1)],
@@ -689,6 +724,95 @@ function drawDetailedIndicatorRows(
 
     getCurrentPage().y -= 8;
   });
+}
+
+function drawDetailComparisonTable(
+  rows: ReportDataRow[],
+  report: ExportReport,
+  getCurrentPage: () => PdfReportPage,
+  ensureSpace: (height: number) => void,
+  setCurrentPage: (page: PdfReportPage) => void,
+  hasHeaderImage: boolean,
+  pages: PdfContentBuilder[]
+) {
+  const detailHeaders = reportDetailHeaders({ ...report, indicadores: [{ nombre: 'detalle', datos: rows }] }).slice(0, 4);
+  const columns = [
+    { label: 'Registro', width: 54, value: (_row: ReportDataRow, index: number) => String(index + 1) },
+    { label: 'Actividad', width: 118, value: (row: ReportDataRow) => row.actividad },
+    ...(shouldShowPlantelColumn(report) ? [{ label: 'Plantel', width: 80, value: (row: ReportDataRow) => row.plantel ?? report.identidadReporte.nombre }] : []),
+    { label: 'Estado', width: 64, value: (row: ReportDataRow) => formatStatusLabel(row.estado) },
+    ...detailHeaders.map((header) => ({
+      label: header,
+      width: Math.max(58, (PDF_CONTENT_WIDTH - 236 - (shouldShowPlantelColumn(report) ? 80 : 0)) / Math.max(detailHeaders.length, 1)),
+      value: (row: ReportDataRow) => detailValue(row, header),
+    })),
+  ];
+  const totalWidth = columns.reduce((total, column) => total + column.width, 0);
+  const widthScale = totalWidth > PDF_CONTENT_WIDTH ? PDF_CONTENT_WIDTH / totalWidth : 1;
+
+  drawDetailSubsectionTitle(
+    'Tabla comparativa de registros',
+    getCurrentPage,
+    ensureSpace,
+    setCurrentPage,
+    hasHeaderImage,
+    pages,
+    54
+  );
+
+  const drawHeader = () => {
+    let page = getCurrentPage();
+
+    if (page.y - 24 < PDF_BOTTOM_Y) {
+      const nextPage = createPdfReportPage(pages, hasHeaderImage);
+      setCurrentPage(nextPage);
+      page = getCurrentPage();
+    }
+
+    page.content.fillRect(PDF_MARGIN_X, page.y - 22, PDF_CONTENT_WIDTH, 22, PDF_DARK_GREEN);
+    let x = PDF_MARGIN_X;
+    columns.forEach((column) => {
+      const width = column.width * widthScale;
+      wrapPdfLine(column.label, Math.max(8, Math.floor(width / 4.5))).slice(0, 2).forEach((line, index) => {
+        page.content.textAt(line, x + 4, page.y - 8 - index * 8, 6.6, 'F2', [255, 255, 255]);
+      });
+      x += width;
+    });
+    page.y -= 22;
+  };
+
+  drawHeader();
+
+  rows.forEach((row, rowIndex) => {
+    let page = getCurrentPage();
+    const values = columns.map((column) => cleanExportText(column.value(row, rowIndex)));
+    const lineCounts = values.map((value, index) => wrapPdfLine(value, Math.max(10, Math.floor((columns[index].width * widthScale) / 4.8))).slice(0, 3).length);
+    const rowHeight = Math.max(28, Math.max(...lineCounts) * 9 + 10);
+
+    if (page.y - rowHeight < PDF_BOTTOM_Y) {
+      const nextPage = createPdfReportPage(pages, hasHeaderImage);
+      setCurrentPage(nextPage);
+      drawHeader();
+      page = getCurrentPage();
+    } else {
+      ensureSpace(rowHeight);
+      page = getCurrentPage();
+    }
+
+    page.content.fillRect(PDF_MARGIN_X, page.y - rowHeight, PDF_CONTENT_WIDTH, rowHeight, rowIndex % 2 === 0 ? [255, 255, 255] : PDF_LIGHT_GRAY);
+    page.content.strokeRect(PDF_MARGIN_X, page.y - rowHeight, PDF_CONTENT_WIDTH, rowHeight, PDF_LINE);
+    let x = PDF_MARGIN_X;
+    values.forEach((value, index) => {
+      const width = columns[index].width * widthScale;
+      wrapPdfLine(value, Math.max(10, Math.floor(width / 4.8))).slice(0, 3).forEach((line, lineIndex) => {
+        page.content.textAt(line, x + 4, page.y - 12 - lineIndex * 9, 6.8, 'F1', PDF_TEXT);
+      });
+      x += width;
+    });
+    page.y -= rowHeight;
+  });
+
+  getCurrentPage().y -= 10;
 }
 
 function drawDetailSubsectionTitle(
@@ -793,7 +917,7 @@ function buildPdfLines(report: ExportReport) {
 
   report.indicadores.forEach((indicator) => {
     lines.push(indicator.nombre);
-    lines.push(`${indicator.datos.length} registros | Avance promedio: ${averageProgress(indicator.datos)} | Estado principal: ${dominantStatus(indicator.datos)}`);
+    lines.push(`${indicator.datos.length} registros | Avance promedio: ${averageProgress(indicator.datos)} | ${statusCountsText(indicator.datos)}`);
 
     indicator.datos.forEach((dataRow) => {
       lines.push(buildRecordLine(dataRow, report));
@@ -1264,6 +1388,19 @@ function formatReportDate(value: string) {
 }
 
 function summarizeReport(report: ExportReport) {
+  const explicitCounts = report.estadoConteos;
+
+  if (explicitCounts) {
+    return {
+      total: explicitCounts.total,
+      approved: explicitCounts.aprobados,
+      inReview: explicitCounts.enRevision,
+      observed: explicitCounts.observados,
+      pending: explicitCounts.pendientes,
+      late: 0,
+    };
+  }
+
   const rows = report.indicadores.flatMap((indicator) => indicator.datos);
 
   return rows.reduce(
@@ -1292,6 +1429,22 @@ function summarizeReport(report: ExportReport) {
     },
     { total: 0, approved: 0, inReview: 0, observed: 0, pending: 0, late: 0 }
   );
+}
+
+function stateCountsForReport(report: ExportReport) {
+  if (report.estadoConteos) {
+    return report.estadoConteos;
+  }
+
+  const summary = summarizeReport(report);
+
+  return {
+    total: summary.total,
+    pendientes: summary.pending,
+    enRevision: summary.inReview,
+    observados: summary.observed,
+    aprobados: summary.approved,
+  };
 }
 
 function buildExecutiveSummary(
@@ -1379,6 +1532,33 @@ function dominantStatus(rows: ReportDataRow[]) {
   }, {});
 
   return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'Sin registros';
+}
+
+function statusCountsText(rows: ReportDataRow[]) {
+  if (rows.length === 0) {
+    return 'Sin registros';
+  }
+
+  const counts = rows.reduce(
+    (current, row) => {
+      const status = formatStatusLabel(row.estado);
+
+      if (status === 'Aprobado') {
+        current.aprobados += 1;
+      } else if (status === 'En revisión') {
+        current.enRevision += 1;
+      } else if (status === 'Observado') {
+        current.observados += 1;
+      } else {
+        current.pendientes += 1;
+      }
+
+      return current;
+    },
+    { pendientes: 0, enRevision: 0, observados: 0, aprobados: 0 }
+  );
+
+  return `Pendientes ${counts.pendientes} | En revisión ${counts.enRevision} | Observados ${counts.observados} | Aprobados ${counts.aprobados}`;
 }
 
 function buildRecordLine(dataRow: ReportDataRow, report: ExportReport) {

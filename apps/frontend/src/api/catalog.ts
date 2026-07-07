@@ -50,6 +50,12 @@ export type CatalogIndicator = {
   plantelIds: number[];
   plantelScopeSource?: 'manual' | 'official-import';
   templateColumns?: ColumnConfig[];
+  evidenceRules?: {
+    required: boolean;
+    allowedTypes: string[];
+    maxSizeMb: number;
+    requireOpenBeforeApproval: boolean;
+  };
 };
 
 export type IndicatorHistoryEntry = {
