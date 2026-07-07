@@ -243,8 +243,13 @@ export type SigiReportPayload = {
       justificacion?: string;
       evidenciaNombre?: string;
       vencimiento: "en_tiempo" | "atrasado";
+      exportable?: boolean;
+      blockingIssues?: string[];
       detalle?: Array<{ campo: string; valor: string }>;
       qualityWarnings?: string[];
+      capturadoEn?: string;
+      actualizadoEn?: string;
+      enviadoPor?: string;
     }>;
   }>;
 };
@@ -1362,6 +1367,10 @@ export function validateCapturePayload(indicator: SigiIndicator, payload: Captur
       throw new SigiValidationError("Agrega una descripción o justificación de al menos 10 caracteres antes de enviar.");
     }
 
+    if (!isMeaningfulJustification(justificacion)) {
+      throw new SigiValidationError("La justificación debe explicar el avance, la fuente de datos o la evidencia; no puede ser solo números.");
+    }
+
     if (evidenceRules.required && !payload.evidencia?.nombre) {
       throw new SigiValidationError("Adjunta una evidencia PDF antes de enviar a revisión.");
     }
@@ -1375,6 +1384,22 @@ export function validateCapturePayload(indicator: SigiIndicator, payload: Captur
     }
 
   }
+}
+
+function isMeaningfulJustification(value: string) {
+  const normalized = value.trim();
+
+  if (!normalized || isNumericOnlyText(normalized)) {
+    return false;
+  }
+
+  const words = normalized
+    .split(/\s+/)
+    .map((word) => word.replace(/[^\p{L}]/gu, ""))
+    .filter((word) => word.length >= 3);
+  const letterCount = words.join("").length;
+
+  return words.length >= 2 && letterCount >= 8;
 }
 
 function validateEvidenceMetadata(evidence: NonNullable<CapturePayload["evidencia"]>, rules: EvidenceRules) {
@@ -1413,11 +1438,11 @@ function validateTextColumns(
       }
 
       if (validation?.allowedValues?.length && value && !validation.allowedValues.includes(value)) {
-        throw new SigiValidationError(`El campo "${column.label}" de ${indicator.code} debe usar un valor del catÃ¡logo permitido.`);
+        throw new SigiValidationError(`El campo "${column.label}" de ${indicator.code} debe usar un valor del catálogo permitido.`);
       }
 
       if (isCatalogTextColumn(column) && isNumericOnlyText(value)) {
-        throw new SigiValidationError(`El campo "${column.label}" de ${indicator.code} debe contener texto vÃ¡lido, no solo nÃºmeros.`);
+        throw new SigiValidationError(`El campo "${column.label}" de ${indicator.code} debe contener texto válido, no solo números.`);
       }
     }
   }
@@ -1851,30 +1876,235 @@ function rowsFromCaptureDrafts({
       draft.periodoId === periodoId
     )
     .flatMap((draft) => {
-      const rows = draft.payload.rows.length > 0 ? draft.payload.rows : [{}];
+      const reportPayload: CapturePayload = {
+        ...draft.payload,
+        rows: draft.payload.rows.map((row) => ({ ...row }))
+      };
+      enrichReportPayloadWithCalculatedValues(indicator, reportPayload);
+      const rows = reportPayload.rows.length > 0 ? reportPayload.rows : [{}];
 
-      return rows.map((row, rowIndex) => ({
-        registro_id: `captura-${draft.id}-${rowIndex + 1}`,
-        captureId: draft.id,
-        actividadId: draft.actividadId,
-        actividad: readableValue(row.actividad) || activity || "Actividad general",
-        responsable: indicator.responsibleNames.join(", "),
-        estado: reportStatusForCapture(draft.estado),
-        avance: progressForCapturedRow(row, draft.estado),
-        plantel: readableValue(row.plantel) || (plantel.id === unassignedPlantel.id ? "Responsable" : plantel.name),
-        plantelId: String(plantel.id),
-        periodo,
-        periodoId: draft.periodoId,
-        ciclo: cicloEscolar,
-        meta: numberValue(row.meta) ?? 100,
-        evidencias: draft.payload.evidencia ? 1 : 0,
-        justificacion: cleanReportText(draft.payload.justificacion ?? ""),
-        evidenciaNombre: cleanReportText(draft.payload.evidencia?.nombre ?? ""),
-        vencimiento: draft.estado === "borrador" ? "atrasado" as const : "en_tiempo" as const,
-        detalle: reportDetailsFromCapturedRow(row, indicator),
-        qualityWarnings: qualityWarningsFromCapturedRow(row, indicator)
-      }));
+      return rows.map((row, rowIndex) => {
+        const blockingIssues = blockingIssuesFromCapturedRow(row, indicator, draft, reportPayload.justificacion);
+        const qualityWarnings = qualityWarningsFromCapturedRow(row, indicator);
+
+        return {
+          registro_id: `captura-${draft.id}-${rowIndex + 1}`,
+          captureId: draft.id,
+          actividadId: draft.actividadId,
+          actividad: reportActivityLabel(readableValue(row.actividad), activity),
+          responsable: responsibleReportLabel(indicator),
+          estado: reportStatusForCapture(draft.estado),
+          avance: progressForCapturedRow(row, draft.estado),
+          plantel: readableValue(row.plantel) || (plantel.id === unassignedPlantel.id ? "Responsable" : plantel.name),
+          plantelId: String(plantel.id),
+          periodo,
+          periodoId: draft.periodoId,
+          ciclo: cicloEscolar,
+          meta: numberValue(row.meta) ?? 100,
+          evidencias: reportPayload.evidencia ? 1 : 0,
+          justificacion: cleanReportText(reportPayload.justificacion ?? ""),
+          evidenciaNombre: cleanReportText(reportPayload.evidencia?.nombre ?? ""),
+          vencimiento: draft.estado === "borrador" ? "atrasado" as const : "en_tiempo" as const,
+          exportable: blockingIssues.length === 0,
+          blockingIssues,
+          detalle: reportDetailsFromCapturedRow(row, indicator),
+          qualityWarnings,
+          capturadoEn: draft.creadoEn,
+          actualizadoEn: draft.actualizadoEn,
+          enviadoPor: userDisplayName(draft.submittedByUserId)
+        };
+      });
     });
+}
+
+function enrichReportPayloadWithCalculatedValues(indicator: SigiIndicator, payload: CapturePayload) {
+  if (!Array.isArray(payload.rows)) {
+    return;
+  }
+
+  const templateColumns = templateForIndicator(indicator).columns;
+  const calculatedColumns = templateColumns.filter((column) => column.type === "calculated" && column.calculation);
+
+  if (calculatedColumns.length === 0) {
+    return;
+  }
+
+  payload.rows = payload.rows.map((row) => {
+    const enrichedRow: Record<string, unknown> = { ...row };
+
+    for (let pass = 0; pass < Math.max(1, calculatedColumns.length); pass += 1) {
+      let changed = false;
+
+      for (const column of calculatedColumns) {
+        const nextValue = calculatedValueForRow(enrichedRow, column, templateColumns) ?? 0;
+        const previousValue = numberValue(enrichedRow[column.key]) ?? 0;
+        enrichedRow[column.key] = nextValue;
+
+        if (Math.abs(previousValue - nextValue) > 0.0001) {
+          changed = true;
+        }
+      }
+
+      if (!changed) {
+        break;
+      }
+    }
+
+    return enrichedRow;
+  });
+}
+
+function reportActivityLabel(capturedActivity: string, officialActivity: string) {
+  const captured = cleanReportText(capturedActivity);
+
+  if (captured && !isWorkbookFileReference(captured)) {
+    return captured;
+  }
+
+  const official = cleanReportText(officialActivity);
+  return official && !isWorkbookFileReference(official) ? official : "Actividad general";
+}
+
+function isWorkbookFileReference(value: string) {
+  return /\.(xlsx|xlsm|xls|csv)\b/i.test(value) ||
+    /(?:^|[\\/])formatos?(?:[\\/]|$)/i.test(value) ||
+    /opci[oó]n de llenado/i.test(value);
+}
+
+function responsibleReportLabel(indicator: SigiIndicator) {
+  const reviewerNames = namesForResponsibleIds(indicator.responsibleIds);
+  const contributorNames = namesForResponsibleIds(indicator.contributorResponsibleIds ?? []);
+
+  if (reviewerNames.length <= 1 && contributorNames.length === 0) {
+    return reviewerNames[0] ?? "Responsable asignado";
+  }
+
+  const parts = [
+    reviewerNames[0] ? `Principal: ${reviewerNames[0]}` : "",
+    reviewerNames.length > 1 ? `Revisores: ${reviewerNames.slice(1).join(", ")}` : "",
+    contributorNames.length > 0 ? `Responsables específicos: ${contributorNames.join(", ")}` : ""
+  ].filter(Boolean);
+
+  return parts.join("; ");
+}
+
+function userDisplayName(userId?: string | null) {
+  if (!userId) {
+    return "";
+  }
+
+  return users.get(userId)?.name ?? userId;
+}
+
+function blockingIssuesFromCapturedRow(
+  row: Record<string, unknown>,
+  indicator: SigiIndicator,
+  draft: CaptureDraft,
+  justificacion?: string
+) {
+  const issues: string[] = [];
+  const templateColumns = templateForIndicator(indicator).columns;
+
+  if (draft.estado === "borrador") {
+    issues.push("El registro es un borrador y no puede exportarse como reporte oficial.");
+  }
+
+  if (!draft.payload.evidencia?.nombre) {
+    issues.push("El registro no tiene evidencia PDF asociada.");
+  }
+
+  if (!isMeaningfulJustification(justificacion ?? "")) {
+    issues.push("Justificación: debe explicar el avance, la fuente de datos o la evidencia.");
+  }
+
+  for (const column of templateColumns) {
+    const value = row[column.key];
+    const hasValue = value !== "" && value !== undefined && value !== null;
+
+    if (column.required && !hasValue) {
+      issues.push(`${column.label}: campo obligatorio sin captura`);
+      continue;
+    }
+
+    if (column.type === "number" || column.type === "calculated") {
+      if (!hasValue) {
+        continue;
+      }
+
+      const numericValue = numberValue(value);
+
+      if (numericValue === undefined || Number.isNaN(numericValue)) {
+        issues.push(`${column.label}: debe ser numérico`);
+        continue;
+      }
+
+      const validation = numericValidationForColumn(column);
+
+      if (validation.min !== undefined && numericValue < validation.min) {
+        issues.push(`${column.label}: valor menor al mínimo permitido`);
+      }
+
+      if (validation.max !== undefined && numericValue > validation.max) {
+        issues.push(`${column.label}: valor mayor al máximo permitido`);
+      }
+
+      if (validation.integer && !Number.isInteger(numericValue)) {
+        issues.push(`${column.label}: debe ser número entero`);
+      }
+
+      if (column.type === "calculated" && column.calculation) {
+        const expected = calculatedValueForRow(row, column, templateColumns);
+
+        if (expected !== undefined && Math.abs(numericValue - expected) > 0.01) {
+          issues.push(`${column.label}: debe recalcularse con la fórmula oficial`);
+        }
+      }
+    }
+
+    if (column.type === "text" && typeof value === "string" && isCatalogTextColumn(column) && isNumericOnlyText(value)) {
+      issues.push(`${column.label}: debe contener texto válido, no solo números`);
+    }
+  }
+
+  const domainIssue = domainConsistencyIssue(indicator, row);
+  if (domainIssue) {
+    issues.push(domainIssue);
+  }
+
+  return uniqueStrings(issues);
+}
+
+function domainConsistencyIssue(indicator: SigiIndicator, row: Record<string, unknown>) {
+  if (indicator.code !== "1.0.0.0.2") {
+    return "";
+  }
+
+  const egresados = firstNumericValue(row, [
+    "egresados_total",
+    "egresados_titulados_en_el_ano_2025_total"
+  ]) ?? sumNumericValues(row, [
+    "egresados_mujeres",
+    "egresados_hombres",
+    "egresados_titulados_en_el_ano_2025_mujeres",
+    "egresados_titulados_en_el_ano_2025_hombres"
+  ]);
+  const matricula = firstNumericValue(row, [
+    "matricula_total",
+    "matricula_de_primer_ingreso_de_la_misma_cohorte_3",
+    "matricula_de_primer_ingreso_de_la_misma_cohorte__3"
+  ]) ?? sumNumericValues(row, [
+    "matricula_mujeres",
+    "matricula_hombres",
+    "matricula_de_primer_ingreso_de_la_misma_cohorte_",
+    "matricula_de_primer_ingreso_de_la_misma_cohorte_2",
+    "matricula_de_primer_ingreso_de_la_misma_cohorte__2"
+  ]);
+
+  if (matricula > 0 && egresados > matricula) {
+    return "Los egresados titulados no pueden ser mayores que la matrícula de la cohorte.";
+  }
+
+  return "";
 }
 
 function reportStatusForCapture(status: CaptureDraft["estado"]): SigiReportPayload["indicadores"][number]["datos"][number]["estado"] {
@@ -1967,10 +2197,18 @@ function reportDetailsFromCapturedRow(row: Record<string, unknown>, indicator: S
       continue;
     }
 
-    const value = reportDetailValue(row[key]);
+    let value = reportDetailValue(row[key]);
 
     if (!value) {
       continue;
+    }
+
+    const column = templateColumns.find((item) => item.key === key);
+    if (column?.type === "calculated" && column.calculation) {
+      const formula = calculationDescription(column, templateColumns);
+      if (formula) {
+        value = `${value} (${formula})`;
+      }
     }
 
     const label = labelsByKey.get(key) ?? readableReportDetailLabel(key);
@@ -1986,6 +2224,37 @@ function reportDetailsFromCapturedRow(row: Record<string, unknown>, indicator: S
   }
 
   return details;
+}
+
+function calculationDescription(column: TemplateColumn, columns: TemplateColumn[]) {
+  if (!column.calculation) {
+    return "";
+  }
+
+  if (column.calculation.type === "sum") {
+    return column.calculation.sourceKeys
+      .map((key) => reportCalculationLabel(key, columns))
+      .filter(Boolean)
+      .join(" + ");
+  }
+
+  if (column.calculation.type === "percentage") {
+    const numerator = reportCalculationLabel(column.calculation.numeratorKey, columns);
+    const denominator = reportCalculationLabel(column.calculation.denominatorKey, columns);
+    return numerator && denominator ? `${numerator} / ${denominator} * 100` : "";
+  }
+
+  return column.calculation.expression.replace(/^=/, "").trim();
+}
+
+function reportCalculationLabel(key: string, columns: TemplateColumn[]) {
+  const normalizedKey = normalizeCalculationReference(key);
+  const column = columns.find((item) =>
+    normalizeCalculationReference(item.key) === normalizedKey ||
+    normalizeCalculationReference(item.label) === normalizedKey
+  );
+
+  return column?.label ?? readableReportDetailLabel(key);
 }
 
 function isReservedReportDetailKey(key: string) {

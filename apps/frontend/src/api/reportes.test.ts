@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { reportToCsv, reportToPdfBlob, type ExportReport } from './reportes';
+import { reportBlockingIssues, reportToCsv, reportToPdfBlob, type ExportReport } from './reportes';
 
 const sampleReport: ExportReport = {
   tipoReporte: 'plantel',
@@ -37,6 +37,9 @@ const sampleReport: ExportReport = {
           justificacion: 'Se capturó avance parcial por validación documental.',
           evidenciaNombre: 'evidencia-titulacion.pdf',
           vencimiento: 'en_tiempo',
+          capturadoEn: '2026-06-12T10:15:00.000Z',
+          actualizadoEn: '2026-06-12T12:20:00.000Z',
+          enviadoPor: 'Plantel 16',
           detalle: [
             { campo: 'Mujeres', valor: '12' },
             { campo: 'Hombres', valor: '10' },
@@ -70,13 +73,18 @@ describe('report exports', () => {
     expect(header).toContain('"Meta"');
     expect(header).toContain('"Justificación"');
     expect(header).toContain('"Evidencia"');
+    expect(header).toContain('"Capturado"');
+    expect(header).toContain('"Actualizado"');
+    expect(header).toContain('"Enviado por"');
     expect(header).toContain('"Alertas"');
+    expect(header).toContain('"Bloqueos"');
     expect(header).toContain('"Mujeres"');
     expect(header).toContain('"Observaciones"');
     expect(csv).toContain('"Captura de egresados titulados"');
     expect(csv).toContain('"Dato importado y editable"');
     expect(csv).toContain('"Se capturó avance parcial por validación documental."');
     expect(csv).toContain('"evidencia-titulacion.pdf"');
+    expect(csv).toContain('"Plantel 16"');
     expect(csv).toContain('"Matricula: valor inusualmente alto"');
     expect(csv).toContain('"\'=SUMA(1,1)"');
     expect(csv).not.toContain('"=SUMA(1,1)"');
@@ -129,6 +137,32 @@ describe('report exports', () => {
     expect(pdfText).toContain('Justificaci');
     expect(pdfText).toContain('validaci');
     expect(pdfText).toContain('evidencia-titulacion.pdf');
+    expect(pdfText).toContain('Capturado');
+    expect(pdfText).toContain('Actualizado');
+    expect(pdfText).toContain('Enviado por');
+    expect(pdfText).toContain('Plantel 16');
+  });
+
+  it('blocks CSV and PDF generation when the report contains non-exportable records', async () => {
+    const blockedReport: ExportReport = {
+      ...sampleReport,
+      indicadores: [
+        {
+          ...sampleReport.indicadores[0],
+          datos: [
+            {
+              ...sampleReport.indicadores[0].datos[0],
+              exportable: false,
+              blockingIssues: ['El registro es un borrador y no puede exportarse como reporte oficial.'],
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(reportBlockingIssues(blockedReport)[0]).toContain('borrador');
+    expect(() => reportToCsv(blockedReport)).toThrow(/requieren corrección/);
+    await expect(reportToPdfBlob(blockedReport)).rejects.toThrow(/requieren corrección/);
   });
 
   it('wraps long PDF indicator titles instead of drawing them as one overflowing line', async () => {

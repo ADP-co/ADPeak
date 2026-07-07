@@ -2162,6 +2162,68 @@ describe("SIGI store and RBAC", () => {
     ).not.toThrow();
   });
 
+  it("rejects numeric-only justifications when sending captures to review", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const plantel = sessionFromHeaders({
+      "x-role": "plantel",
+      "x-plantel-id": "1"
+    });
+    const indicator = saveIndicator(director, {
+      ...getIndicatorByCode("1.0.0.0.2")!,
+      plantelIds: [1]
+    });
+    const template = templateForIndicator(indicator, plantel);
+
+    expect(() =>
+      assertCaptureAccess(
+        plantel,
+        {
+          plantelId: 1,
+          indicadorId: indicator.id,
+          payload: {
+            rows: completedRowsForTemplate(template),
+            justificacion: "1234567890123",
+            evidencia: evidencePdf()
+          }
+        },
+        "submit"
+      )
+    ).toThrow(SigiValidationError);
+  });
+
+  it("marks draft report rows without evidence or meaningful justification as non exportable", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const plantel = sessionFromHeaders({
+      "x-role": "plantel",
+      "x-plantel-id": "1"
+    });
+    const indicator = saveIndicator(director, {
+      ...getIndicatorByCode("1.0.0.0.2")!,
+      plantelIds: [1]
+    });
+
+    createCaptureDraft({
+      plantelId: 1,
+      indicadorId: indicator.id,
+      actividadId: 1,
+      periodoId: 1,
+      responsableId: indicator.responsibleIds[0],
+      payload: {
+        rows: completedRowsForTemplate(templateForIndicator(indicator, plantel)),
+        justificacion: "9876543210"
+      }
+    });
+
+    const report = buildReportPayload(director, { plantelId: "1", periodo: "2026-2" });
+    const reportRows = report.indicadores.flatMap((item) => item.datos);
+    const issues = reportRows.flatMap((row) => row.blockingIssues ?? []);
+
+    expect(reportRows.some((row) => row.exportable === false)).toBe(true);
+    expect(issues.some((issue) => issue.includes("borrador"))).toBe(true);
+    expect(issues.some((issue) => issue.includes("evidencia PDF"))).toBe(true);
+    expect(issues.some((issue) => issue.includes("Justificación"))).toBe(true);
+  });
+
   it("adds quality warnings to reports for suspicious persisted values", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const plantel = sessionFromHeaders({

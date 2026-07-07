@@ -23,6 +23,11 @@ export type ReportDataRow = {
   vencimiento?: string;
   detalle?: Array<{ campo: string; valor: string }>;
   qualityWarnings?: string[];
+  exportable?: boolean;
+  blockingIssues?: string[];
+  capturadoEn?: string;
+  actualizadoEn?: string;
+  enviadoPor?: string;
 };
 
 export type ReportIndicator = {
@@ -91,6 +96,7 @@ export async function fetchExportReport(request: ReportRequest) {
 }
 
 export function reportToCsv(report: ExportReport) {
+  assertReportCanExport(report);
   const includePlantelColumn = shouldShowPlantelColumn(report);
   const detailHeaders = reportDetailHeaders(report);
   const headers = [
@@ -105,7 +111,11 @@ export function reportToCsv(report: ExportReport) {
     'Justificación',
     'Evidencia',
     'Vencimiento',
+    'Capturado',
+    'Actualizado',
+    'Enviado por',
     'Alertas',
+    'Bloqueos',
     ...detailHeaders,
   ];
   const rows = report.indicadores.flatMap((indicator) =>
@@ -121,7 +131,11 @@ export function reportToCsv(report: ExportReport) {
       dataRow.justificacion ?? '',
       dataRow.evidenciaNombre ?? '',
       formatDeadline(dataRow.vencimiento),
+      formatDateTime(dataRow.capturadoEn),
+      formatDateTime(dataRow.actualizadoEn),
+      dataRow.enviadoPor ?? '',
       dataRow.qualityWarnings?.join(' | ') ?? '',
+      dataRow.blockingIssues?.join(' | ') ?? '',
       ...detailHeaders.map((header) => detailValue(dataRow, header)),
     ])
   );
@@ -215,6 +229,7 @@ const PDF_LIGHT_GREEN: PdfColor = [238, 246, 232];
 const PDF_LIGHT_GRAY: PdfColor = [246, 248, 247];
 
 export async function reportToPdfBlob(report: ExportReport) {
+  assertReportCanExport(report);
   const headerImage = await createHeaderImage();
   const objects: PdfObject[] = [
     '<< /Type /Catalog /Pages 2 0 R >>',
@@ -294,6 +309,30 @@ export function countReportRows(report: ExportReport) {
   return report.indicadores.reduce((total, indicator) => total + indicator.datos.length, 0);
 }
 
+export function reportBlockingIssues(report: ExportReport) {
+  return report.indicadores.flatMap((indicator) =>
+    indicator.datos.flatMap((row) => {
+      const indicatorName = cleanExportText(indicator.nombre);
+      const rowIssues = row.blockingIssues ?? [];
+
+      if (row.exportable === false && rowIssues.length === 0) {
+        return [`${indicatorName}: registro no exportable`];
+      }
+
+      return rowIssues.map((issue) => `${indicatorName}: ${issue}`);
+    })
+  );
+}
+
+function assertReportCanExport(report: ExportReport) {
+  const issues = reportBlockingIssues(report);
+
+  if (issues.length > 0) {
+    const firstIssues = issues.slice(0, 3).join(' ');
+    throw new Error(`No se puede generar el archivo: ${issues.length} registros requieren corrección. ${firstIssues}`);
+  }
+}
+
 function shouldShowPlantelColumn(report: ExportReport) {
   const reportType = normalizeStatus(report.identidadReporte.tipo);
 
@@ -361,10 +400,11 @@ function renderPdfReport(report: ExportReport, hasHeaderImage: boolean) {
   };
 
   const drawSectionTitle = (title: string) => {
-    ensureSpace(32);
+    ensureSpace(50);
+    current.y -= 6;
     current.content.fillRect(PDF_MARGIN_X, current.y - 24, PDF_CONTENT_WIDTH, 24, PDF_LIGHT_GREEN);
     current.content.textAt(title, PDF_MARGIN_X + 10, current.y - 16, 11, 'F2', PDF_DARK_GREEN);
-    current.y -= 34;
+    current.y -= 42;
   };
 
   const drawIndicatorHeader = (indicator: ExportReport['indicadores'][number]) => {
@@ -398,7 +438,7 @@ function renderPdfReport(report: ExportReport, hasHeaderImage: boolean) {
       current.y -= 11;
     });
 
-    current.y -= 3;
+    current.y -= 8;
   };
 
   const drawIndicatorList = (indicators: ExportReport['indicadores']) => {
@@ -688,6 +728,14 @@ function drawDetailedIndicatorRows(
       ...(row.evidenciaNombre ? [['Archivo', row.evidenciaNombre] as [string, string]] : []),
       ...(row.justificacion ? [['Justificación', row.justificacion] as [string, string]] : []),
     ].filter((item): item is [string, string] => Boolean(cleanExportText(item[1])));
+    contextItems.push(
+      ...(row.capturadoEn ? [['Capturado', formatDateTime(row.capturadoEn)] as [string, string]] : []),
+      ...(row.actualizadoEn ? [['Actualizado', formatDateTime(row.actualizadoEn)] as [string, string]] : []),
+      ...(row.enviadoPor ? [['Enviado por', row.enviadoPor] as [string, string]] : []),
+      ...(row.blockingIssues?.length ? [['Bloqueos', row.blockingIssues.join('; ')] as [string, string]] : []),
+      ...(row.qualityWarnings?.length ? [['Alertas de calidad', row.qualityWarnings.join('; ')] as [string, string]] : []),
+    );
+
     const detailItems = row.detalle
       ?.map((detail) => [cleanExportText(detail.campo), cleanExportText(detail.valor)] as [string, string])
       .filter(([campo, valor]) => campo && valor) ?? [];
@@ -836,14 +884,14 @@ function drawDetailSubsectionTitle(
   } else {
     ensureSpace(requiredHeight);
     page = getCurrentPage();
-    page.y -= 6;
+    page.y -= 10;
   }
 
   page.content.fillRect(PDF_MARGIN_X, page.y - titleHeight, PDF_CONTENT_WIDTH, titleHeight, PDF_LIGHT_GREEN);
   titleLines.forEach((line, index) => {
     page.content.textAt(line, PDF_MARGIN_X + 8, page.y - 14 - index * 10, 8.8, 'F2', PDF_DARK_GREEN);
   });
-  page.y -= titleHeight + 8;
+  page.y -= titleHeight + 12;
 }
 
 function drawDetailKeyValueGrid(
@@ -1384,6 +1432,26 @@ function formatReportDate(value: string) {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
+  }).format(date);
+}
+
+function formatDateTime(value?: string) {
+  if (!value) {
+    return '';
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat('es-MX', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   }).format(date);
 }
 
