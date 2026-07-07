@@ -14,6 +14,10 @@ interface IndicatorFormProps {
   initialJustificacion?: string;
   existingEvidenceName?: string;
   existingEvidenceUrl?: string;
+  onOpenEvidence?: () => void;
+  onDownloadEvidence?: () => void;
+  canApprove?: boolean;
+  approveDisabledReason?: string;
   canReview?: boolean;
   canSaveReviewEdits?: boolean;
   canModifyRows?: boolean;
@@ -31,6 +35,7 @@ interface IndicatorFormProps {
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB en bytes
 const ACCEPTED_FILE_TYPES = ['application/pdf'];
+const MAX_REASONABLE_NUMERIC_VALUE = 999_999_999_999;
 
 export type FormSubmission = {
   rows: Record<string, unknown>[];
@@ -101,7 +106,7 @@ const numericValidationForColumn = (column: ColumnConfig): ResolvedNumberValidat
 
   return {
     min: column.validation?.min ?? 0,
-    max: column.validation?.max ?? (isPercentageLike ? 100 : undefined),
+    max: column.validation?.max ?? (isPercentageLike ? 100 : MAX_REASONABLE_NUMERIC_VALUE),
     integer: column.validation?.integer ?? !isPercentageLike,
   };
 };
@@ -427,6 +432,10 @@ export const IndicatorForm = ({
   initialJustificacion,
   existingEvidenceName,
   existingEvidenceUrl,
+  onOpenEvidence,
+  onDownloadEvidence,
+  canApprove = true,
+  approveDisabledReason,
   canReview = false,
   canSaveReviewEdits = false,
   canModifyRows = true,
@@ -824,16 +833,37 @@ export const IndicatorForm = ({
                 {String(errors.evidencia.message)}
               </span>
             )}
-            {existingEvidenceUrl && persistedEvidenceLabel && (
-              <a
-                href={existingEvidenceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`Abrir evidencia ${persistedEvidenceLabel}`}
-                className="mt-3 inline-flex min-h-9 items-center justify-center rounded-md border border-brand-Verde_principal px-4 py-2 text-sm font-accent font-bold text-brand-Verde_oscuro transition-colors hover:bg-brand-Verde_principal hover:text-brand-Blanco focus:outline-none focus:ring-2 focus:ring-brand-Verde_principal focus:ring-offset-2"
-              >
-                Abrir evidencia
-              </a>
+            {persistedEvidenceLabel && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={onOpenEvidence}
+                  disabled={!onOpenEvidence || isBusy}
+                  aria-label={`Abrir evidencia ${persistedEvidenceLabel}`}
+                  className="inline-flex min-h-9 items-center justify-center rounded-md border border-brand-Verde_principal px-4 py-2 text-sm font-accent font-bold text-brand-Verde_oscuro transition-colors hover:bg-brand-Verde_principal hover:text-brand-Blanco focus:outline-none focus:ring-2 focus:ring-brand-Verde_principal focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Abrir evidencia
+                </button>
+                <button
+                  type="button"
+                  onClick={onDownloadEvidence}
+                  disabled={!onDownloadEvidence || isBusy}
+                  aria-label={`Descargar evidencia ${persistedEvidenceLabel}`}
+                  className="inline-flex min-h-9 items-center justify-center rounded-md border border-brand-Gris_bajo/50 px-4 py-2 text-sm font-accent font-bold text-brand-Gris_oscuro transition-colors hover:bg-brand-Gris_bajo/20 focus:outline-none focus:ring-2 focus:ring-brand-Verde_principal focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Descargar
+                </button>
+                {existingEvidenceUrl && !onOpenEvidence && (
+                  <a
+                    href={existingEvidenceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="sr-only"
+                  >
+                    Abrir evidencia existente
+                  </a>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -884,11 +914,16 @@ export const IndicatorForm = ({
               type="button"
               variant="primary"
               className="text-xs py-1.5 px-4"
-              disabled={isBusy}
+              disabled={isBusy || !canApprove}
               onClick={onApprove}
             >
               Aprobar indicador
             </Button>
+            {!canApprove && approveDisabledReason && (
+              <p className="basis-full rounded-md border border-brand-Status_rojo/30 bg-brand-Status_rojo/10 px-3 py-2 text-sm font-body font-semibold text-brand-Status_rojo" role="alert">
+                {approveDisabledReason}
+              </p>
+            )}
               </>
             )}
           </>

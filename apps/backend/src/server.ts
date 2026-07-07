@@ -19,6 +19,7 @@ import {
 } from "./capture-store.js";
 import {
   assertCaptureAccess,
+  assertEvidenceOpenedBeforeApproval,
   authenticateUserResult,
   buildReportPayload,
   createSessionToken,
@@ -33,7 +34,9 @@ import {
   listUsers,
   markNotificationRead,
   officialSourcesPayload,
+  recordEvidenceOpened,
   recordCaptureNotification,
+  recordAuditEvent,
   reloadSigiStateFromPersistence,
   resetUserPassword,
   saveIndicator,
@@ -174,10 +177,12 @@ const server = createServer(async (request, response) => {
     request.url ?? "/",
     `http://${request.headers.host ?? `localhost:${port}`}`
   );
+  const requestId = request.headers["x-request-id"]?.toString() || `req-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  response.setHeader("X-Request-Id", requestId);
 
   if (request.method === "OPTIONS") {
     response.writeHead(204, {
-      "Access-Control-Allow-Headers": "Authorization, Content-Type, x-session-token, x-user-id, x-role, x-plantel-id, x-responsable-id",
+      "Access-Control-Allow-Headers": "Authorization, Content-Type, x-session-token, x-user-id, x-role, x-plantel-id, x-responsable-id, x-request-id",
       "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,OPTIONS",
       "Access-Control-Allow-Origin": "*"
     });
@@ -552,12 +557,60 @@ const server = createServer(async (request, response) => {
       }
 
       const created = createCaptureDraft(payload);
+      recordAuditEvent(session, {
+        action: "capture_saved",
+        resourceType: "capture",
+        resourceId: String(created.id),
+        after: { indicadorId: created.indicadorId, plantelId: created.plantelId, estado: created.estado },
+        status: "ok",
+        requestId
+      });
       await flushPersistedState();
       sendJson(response, 201, created);
       return;
     } catch (error) {
       sendMutationError(response, error);
       return;
+    }
+  }
+
+  const evidenceMatch = url.pathname.match(/^\/api\/v1\/capturas\/(\d+)\/evidencia$/);
+
+  if (request.method === "GET" && evidenceMatch) {
+    try {
+      const session = sessionFromHeaders(request.headers);
+      const captureId = Number(evidenceMatch[1]);
+      const draft = getCaptureDraft(captureId);
+
+      if (!draft) {
+        sendJson(response, 404, {
+          error: "capture_not_found",
+          message: "No existe una captura con ese ID."
+        });
+        return;
+      }
+
+      assertCaptureAccess(session, draft, "read");
+      recordEvidenceOpened(session, draft, requestId);
+      const evidence = draft.payload.evidencia!;
+      const fileName = sanitizeDownloadFileName(evidence.nombre || `evidencia-${captureId}.pdf`);
+      const content = Buffer.from(evidence.contenidoBase64 ?? "", "base64");
+
+      response.writeHead(200, {
+        "Access-Control-Allow-Origin": "*",
+        "Content-Disposition": `inline; filename="${fileName}"`,
+        "Content-Type": evidence.tipo || "application/pdf",
+        "Content-Length": String(content.length)
+      });
+      response.end(content);
+      await flushPersistedState();
+      return;
+    } catch (error) {
+      if (sendError(response, error)) {
+        return;
+      }
+
+      throw error;
     }
   }
 
@@ -639,6 +692,14 @@ const server = createServer(async (request, response) => {
           return;
         }
 
+        recordAuditEvent(session, {
+          action: "capture_updated",
+          resourceType: "capture",
+          resourceId: String(updatedDraft.id),
+          after: { indicadorId: updatedDraft.indicadorId, plantelId: updatedDraft.plantelId, estado: updatedDraft.estado },
+          status: "ok",
+          requestId
+        });
         await flushPersistedState();
         sendJson(response, 200, updatedDraft);
         return;
@@ -675,6 +736,14 @@ const server = createServer(async (request, response) => {
         }
 
         recordCaptureNotification("submitted", session, updatedDraft);
+        recordAuditEvent(session, {
+          action: "capture_submitted",
+          resourceType: "capture",
+          resourceId: String(updatedDraft.id),
+          after: { indicadorId: updatedDraft.indicadorId, plantelId: updatedDraft.plantelId, estado: updatedDraft.estado },
+          status: "ok",
+          requestId
+        });
         await flushPersistedState();
         sendJson(response, 200, updatedDraft);
         return;
@@ -726,6 +795,14 @@ const server = createServer(async (request, response) => {
         }
 
         recordCaptureNotification("correction_requested", session, updatedDraft);
+        recordAuditEvent(session, {
+          action: "capture_correction_requested",
+          resourceType: "capture",
+          resourceId: String(updatedDraft.id),
+          after: { indicadorId: updatedDraft.indicadorId, plantelId: updatedDraft.plantelId, estado: updatedDraft.estado },
+          status: "ok",
+          requestId
+        });
         await flushPersistedState();
         sendJson(response, 200, updatedDraft);
         return;
@@ -748,6 +825,7 @@ const server = createServer(async (request, response) => {
         }
 
         assertCaptureAccess(session, draft, "review");
+        assertEvidenceOpenedBeforeApproval(session, draft);
         const updatedDraft = approveCapture(captureId);
 
         if (!updatedDraft) {
@@ -759,6 +837,14 @@ const server = createServer(async (request, response) => {
         }
 
         recordCaptureNotification("approved", session, updatedDraft);
+        recordAuditEvent(session, {
+          action: "capture_approved",
+          resourceType: "capture",
+          resourceId: String(updatedDraft.id),
+          after: { indicadorId: updatedDraft.indicadorId, plantelId: updatedDraft.plantelId, estado: updatedDraft.estado },
+          status: "ok",
+          requestId
+        });
         await flushPersistedState();
         sendJson(response, 200, updatedDraft);
       } catch (error) {
@@ -900,6 +986,11 @@ function captureScopeFromUrl(url: URL) {
 function positiveIntegerParam(url: URL, key: string) {
   const value = Number(url.searchParams.get(key));
   return Number.isInteger(value) && value > 0 ? value : undefined;
+}
+
+function sanitizeDownloadFileName(value: string) {
+  const clean = value.replace(/[\\/:*?"<>|]+/g, "-").trim();
+  return clean || "evidencia.pdf";
 }
 
 function nonNegativeIntegerParam(url: URL, key: string) {

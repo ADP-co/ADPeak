@@ -24,6 +24,8 @@ export interface ColumnConfig {
     max?: number;
     integer?: boolean;
     decimals?: number;
+    allowedValues?: string[];
+    qualityWarningMax?: number;
   };
   calculation?: CalculationConfig;
 }

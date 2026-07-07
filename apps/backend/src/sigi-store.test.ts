@@ -11,6 +11,7 @@ import {
 } from "./capture-store.js";
 import {
   assertCaptureAccess,
+  assertEvidenceOpenedBeforeApproval,
   authenticateUser,
   authenticateUserResult,
   buildReportPayload,
@@ -27,6 +28,8 @@ import {
   recordCaptureNotification,
   reloadSigiStateFromPersistence,
   resetUserPassword,
+  recordEvidenceOpened,
+  resetAuditEventsForTest,
   resetNotificationsForTest,
   saveIndicator,
   saveUser,
@@ -41,6 +44,7 @@ describe("SIGI store and RBAC", () => {
   beforeEach(() => {
     resetCaptureDraftsForTest();
     resetNotificationsForTest();
+    resetAuditEventsForTest();
     reloadSigiStateFromPersistence();
   });
 
@@ -48,6 +52,10 @@ describe("SIGI store and RBAC", () => {
     nombre: "evidencia-qa.pdf",
     tipo: "application/pdf",
     tamanoBytes: 128
+  });
+  const evidencePdfWithContent = () => ({
+    ...evidencePdf(),
+    contenidoBase64: Buffer.from("%PDF-1.4\n% QA\n", "utf8").toString("base64")
   });
 
   const completedRowsForTemplate = (template: ReturnType<typeof templateForIndicator>) =>
@@ -1955,6 +1963,46 @@ describe("SIGI store and RBAC", () => {
     ).toThrow(SigiValidationError);
   });
 
+  it("requires reviewers to open evidence before approving a capture", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const plantel = sessionFromHeaders({
+      "x-role": "plantel",
+      "x-plantel-id": "1",
+      "x-user-id": "plantel-1"
+    });
+    const indicator = saveIndicator(director, {
+      ...getIndicatorByCode("1.0.0.0.2")!,
+      plantelIds: [1]
+    });
+    const reviewer = sessionFromHeaders({
+      "x-role": "responsable",
+      "x-responsable-id": String(indicator.responsibleIds[0]),
+      "x-user-id": `responsable-${indicator.responsibleIds[0]}`
+    });
+    const draft = createCaptureDraft({
+      plantelId: 1,
+      indicadorId: indicator.id,
+      actividadId: 1,
+      periodoId: 1,
+      responsableId: indicator.responsibleIds[0],
+      payload: {
+        rows: completedRowsForTemplate(templateForIndicator(indicator, plantel)),
+        justificacion: "Captura completa con evidencia oficial.",
+        evidencia: evidencePdfWithContent()
+      }
+    });
+    const sent = sendCaptureToReview(draft.id, {
+      userId: plantel.userId,
+      role: plantel.role
+    })!;
+
+    expect(() => assertEvidenceOpenedBeforeApproval(reviewer, sent)).toThrow(SigiValidationError);
+
+    recordEvidenceOpened(reviewer, sent, "qa-request");
+
+    expect(() => assertEvidenceOpenedBeforeApproval(reviewer, sent)).not.toThrow();
+  });
+
   it("rejects incoherent official calculated totals for titulation captures", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const plantel = sessionFromHeaders({
@@ -2062,6 +2110,44 @@ describe("SIGI store and RBAC", () => {
         "draft"
       )
     ).not.toThrow();
+  });
+
+  it("adds quality warnings to reports for suspicious persisted values", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const plantel = sessionFromHeaders({
+      "x-role": "plantel",
+      "x-plantel-id": "1"
+    });
+    const indicator = saveIndicator(director, {
+      ...getIndicatorByCode("1.0.0.0.2")!,
+      plantelIds: [1]
+    });
+    const template = templateForIndicator(indicator, plantel);
+    const rows = completedRowsForTemplate(template);
+    const numericColumn = template.columns.find((column) => column.type === "number")!;
+
+    rows[0] = {
+      ...rows[0],
+      [numericColumn.key]: 1_500_000
+    };
+
+    createCaptureDraft({
+      plantelId: 1,
+      indicadorId: indicator.id,
+      actividadId: 1,
+      periodoId: 1,
+      responsableId: indicator.responsibleIds[0],
+      payload: {
+        rows,
+        justificacion: "Captura histórica con valor sospechoso.",
+        evidencia: evidencePdfWithContent()
+      }
+    });
+
+    const report = buildReportPayload(director, { plantelId: "1", periodo: "2026-2" });
+    const warnings = report.indicadores.flatMap((item) => item.datos.flatMap((row) => row.qualityWarnings ?? []));
+
+    expect(warnings.some((warning) => warning.includes("inusualmente alto"))).toBe(true);
   });
 
   it("blocks captures for indicators that are not assigned to the requested plantel", () => {

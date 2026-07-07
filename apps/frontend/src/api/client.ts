@@ -43,10 +43,14 @@ export function sessionHeaders() {
   if (session.sessionToken) {
     headers.Authorization = `Bearer ${session.sessionToken}`;
     headers['x-session-token'] = session.sessionToken;
+    return headers;
+  }
+
+  if (!import.meta.env.DEV && import.meta.env.MODE !== 'test') {
+    return headers;
   }
 
   return {
-    ...headers,
     'x-user-id': session.id ?? import.meta.env.VITE_USER_ID ?? defaultUserId(role),
     'x-role': role,
     'x-plantel-id': String(session.plantelId ?? import.meta.env.VITE_PLANTEL_ID ?? 1),

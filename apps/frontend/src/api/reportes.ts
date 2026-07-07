@@ -22,6 +22,7 @@ export type ReportDataRow = {
   evidenciaNombre?: string;
   vencimiento?: string;
   detalle?: Array<{ campo: string; valor: string }>;
+  qualityWarnings?: string[];
 };
 
 export type ReportIndicator = {
@@ -96,6 +97,7 @@ export function reportToCsv(report: ExportReport) {
     'Justificación',
     'Evidencia',
     'Vencimiento',
+    'Alertas',
     ...detailHeaders,
   ];
   const rows = report.indicadores.flatMap((indicator) =>
@@ -111,6 +113,7 @@ export function reportToCsv(report: ExportReport) {
       dataRow.justificacion ?? '',
       dataRow.evidenciaNombre ?? '',
       formatDeadline(dataRow.vencimiento),
+      dataRow.qualityWarnings?.join(' | ') ?? '',
       ...detailHeaders.map((header) => detailValue(dataRow, header)),
     ])
   );
@@ -122,10 +125,19 @@ export function reportToCsv(report: ExportReport) {
     ['Alcance', `${report.identidadReporte.tipo}: ${report.identidadReporte.nombre}`],
   ];
   const csvBody = [...summaryRows, [], headers, ...rows]
-    .map((row) => row.map((cell) => `"${cleanExportText(String(cell)).replace(/"/g, '""')}"`).join(','))
+    .map((row) => row.map(escapeCsvCell).join(','))
     .join('\n');
 
   return `\uFEFF${csvBody}`;
+}
+
+function escapeCsvCell(cell: unknown) {
+  const cleaned = neutralizeCsvFormula(cleanExportText(String(cell ?? '')).replace(/\r?\n|\r/g, ' '));
+  return `"${cleaned.replace(/"/g, '""')}"`;
+}
+
+function neutralizeCsvFormula(value: string) {
+  return /^[=+\-@]/.test(value.trimStart()) ? `'${value}` : value;
 }
 
 type PdfStream = {
@@ -1385,6 +1397,10 @@ function buildRecordDetails(dataRow: ReportDataRow) {
 
   if (typeof dataRow.evidencias === 'number' && dataRow.evidencias > 0) {
     details.push(`Evidencias: ${dataRow.evidencias}`);
+  }
+
+  if (dataRow.qualityWarnings?.length) {
+    details.push(`Alertas de calidad: ${dataRow.qualityWarnings.join('; ')}`);
   }
 
   if (deadline === 'Atrasado') {

@@ -168,6 +168,8 @@ export type TemplateColumn = {
     max?: number;
     integer?: boolean;
     decimals?: number;
+    allowedValues?: string[];
+    qualityWarningMax?: number;
   };
   calculation?:
     | { type: "sum"; sourceKeys: string[] }
@@ -226,8 +228,23 @@ export type SigiReportPayload = {
       evidenciaNombre?: string;
       vencimiento: "en_tiempo" | "atrasado";
       detalle?: Array<{ campo: string; valor: string }>;
+      qualityWarnings?: string[];
     }>;
   }>;
+};
+
+export type SigiAuditEvent = {
+  id: number;
+  userId: string;
+  role: SystemRole;
+  action: string;
+  resourceType: "capture" | "indicator" | "user" | "report" | "auth";
+  resourceId: string;
+  before?: unknown;
+  after?: unknown;
+  status: "ok" | "rejected" | "error";
+  createdAt: string;
+  requestId: string;
 };
 
 export type OfficialSourcesPayload = {
@@ -292,6 +309,8 @@ export const planteles: Plantel[] = [
 ];
 
 const unassignedPlantel: Plantel = { id: 0, key: "sin-plantel", name: "Sin plantel asignado" };
+const MAX_REASONABLE_NUMERIC_VALUE = 999_999_999_999;
+const DEFAULT_QUALITY_WARNING_MAX = 1_000_000;
 const officialSourcePlantelIds: number[] = [];
 const officialCatalogImportVersion = "2026-07-02-indicadores-20260628-default-v3";
 const officialCatalogImportedAt = "2026-06-30T00:00:00.000-06:00";
@@ -314,7 +333,9 @@ const initialIndicators = buildIndicators();
 const indicators = new Map<number, SigiIndicator>();
 const users = new Map<string, SigiUser>();
 const notifications = new Map<number, SigiNotification>();
+const auditEvents = new Map<number, SigiAuditEvent>();
 let nextNotificationId = 1;
+let nextAuditEventId = 1;
 
 reloadSigiStateFromPersistence();
 
@@ -352,6 +373,7 @@ export function reloadSigiStateFromPersistence() {
   const persistedIndicators = readPersistedCollection<SigiIndicator>("indicators");
   const persistedUsers = readPersistedCollection<SigiUser>("users");
   const persistedNotifications = readPersistedCollection<SigiNotification>("notifications") ?? [];
+  const persistedAuditEvents = readPersistedCollection<SigiAuditEvent>("auditEvents") ?? [];
   const needsCatalogMigration = readPersistedValue<string>("catalogImportVersion") !== officialCatalogImportVersion;
 
   indicators.clear();
@@ -372,15 +394,26 @@ export function reloadSigiStateFromPersistence() {
   nextNotificationId = readPersistedValue<number>("nextNotificationId") ??
     Math.max(0, ...Array.from(notifications.keys())) + 1;
 
+  auditEvents.clear();
+  for (const event of persistedAuditEvents) {
+    auditEvents.set(event.id, event);
+  }
+  nextAuditEventId = readPersistedValue<number>("nextAuditEventId") ??
+    Math.max(0, ...Array.from(auditEvents.keys())) + 1;
+
   if (needsCatalogMigration) {
     notifications.clear();
+    auditEvents.clear();
     nextNotificationId = 1;
+    nextAuditEventId = 1;
     resetCaptureDraftsToInitialState();
     persistState({
       indicators: Array.from(indicators.values()),
       users: Array.from(users.values()),
       notifications: [],
+      auditEvents: [],
       nextNotificationId,
+      nextAuditEventId,
       captureDrafts: [],
       nextCaptureId: 1,
       catalogImportVersion: officialCatalogImportVersion
@@ -727,6 +760,79 @@ export function resetNotificationsForTest() {
   notifications.clear();
   nextNotificationId = 1;
   persistNotificationState();
+}
+
+export function resetAuditEventsForTest() {
+  auditEvents.clear();
+  nextAuditEventId = 1;
+  persistAuditState();
+}
+
+export function listAuditEventsForTest() {
+  return Array.from(auditEvents.values()).sort((a, b) => a.id - b.id);
+}
+
+export function recordAuditEvent(
+  session: SigiSession,
+  event: Omit<SigiAuditEvent, "id" | "userId" | "role" | "createdAt" | "requestId"> & { requestId?: string }
+) {
+  const auditEvent: SigiAuditEvent = {
+    id: nextAuditEventId,
+    userId: session.userId,
+    role: session.role,
+    action: event.action,
+    resourceType: event.resourceType,
+    resourceId: event.resourceId,
+    before: event.before,
+    after: event.after,
+    status: event.status,
+    createdAt: new Date().toISOString(),
+    requestId: event.requestId ?? `local-${Date.now()}-${nextAuditEventId}`
+  };
+
+  nextAuditEventId += 1;
+  auditEvents.set(auditEvent.id, auditEvent);
+  persistAuditState();
+  return auditEvent;
+}
+
+export function recordEvidenceOpened(session: SigiSession, draft: CaptureDraft, requestId?: string) {
+  assertCaptureAccess(session, draft, "read");
+
+  if (!draft.payload.evidencia?.nombre || !draft.payload.evidencia.contenidoBase64) {
+    throw new SigiValidationError("La evidencia no esta disponible. Solicita que el plantel reenvie el archivo.");
+  }
+
+  return recordAuditEvent(session, {
+    action: "evidence_opened",
+    resourceType: "capture",
+    resourceId: String(draft.id),
+    after: {
+      evidencia: draft.payload.evidencia.nombre,
+      indicadorId: draft.indicadorId,
+      plantelId: draft.plantelId
+    },
+    status: "ok",
+    requestId
+  });
+}
+
+export function assertEvidenceOpenedBeforeApproval(session: SigiSession, draft: CaptureDraft) {
+  if (!draft.payload.evidencia?.nombre || !draft.payload.evidencia.contenidoBase64) {
+    throw new SigiValidationError("La evidencia no esta disponible. Solicita que el plantel reenvie el archivo antes de aprobar.");
+  }
+
+  const opened = Array.from(auditEvents.values()).some((event) =>
+    event.action === "evidence_opened" &&
+    event.resourceType === "capture" &&
+    event.resourceId === String(draft.id) &&
+    event.userId === session.userId &&
+    event.status === "ok"
+  );
+
+  if (!opened) {
+    throw new SigiValidationError("Abre la evidencia PDF antes de aprobar el indicador.");
+  }
 }
 
 export function recordCaptureNotification(
@@ -1204,6 +1310,7 @@ export function validateCapturePayload(indicator: SigiIndicator, payload: Captur
     throw new SigiValidationError("La captura contiene campos de una plantilla anterior. Recarga el indicador y vuelve a guardar.");
   }
 
+  validateTextColumns(indicator, template, payload);
   validateNumericColumns(indicator, template, payload);
   validateCalculatedColumns(indicator, template, payload);
   validateDomainConsistency(indicator, payload);
@@ -1234,6 +1341,34 @@ export function validateCapturePayload(indicator: SigiIndicator, payload: Captur
       throw new SigiValidationError("Completa los campos capturables o ajusta el formato antes de enviar.");
     }
 
+  }
+}
+
+function validateTextColumns(
+  indicator: SigiIndicator,
+  template: IndicatorTemplate,
+  payload: CapturePayload
+) {
+  const textColumns = template.columns.filter((column) => column.type === "text");
+
+  for (const row of payload.rows) {
+    for (const column of textColumns) {
+      const rawValue = row[column.key];
+      const value = typeof rawValue === "string" ? rawValue.trim() : rawValue === undefined || rawValue === null ? "" : String(rawValue).trim();
+      const validation = column.validation;
+
+      if (column.required && !value) {
+        throw new SigiValidationError(`El campo "${column.label}" de ${indicator.code} es obligatorio.`);
+      }
+
+      if (validation?.allowedValues?.length && value && !validation.allowedValues.includes(value)) {
+        throw new SigiValidationError(`El campo "${column.label}" de ${indicator.code} debe usar un valor del catÃ¡logo permitido.`);
+      }
+
+      if (isCatalogTextColumn(column) && isNumericOnlyText(value)) {
+        throw new SigiValidationError(`El campo "${column.label}" de ${indicator.code} debe contener texto vÃ¡lido, no solo nÃºmeros.`);
+      }
+    }
   }
 }
 
@@ -1290,11 +1425,19 @@ function numericValidationForColumn(column: Pick<TemplateColumn, "key" | "label"
 
   return {
     min: finiteNumber(column.validation?.min) ?? 0,
-    max: finiteNumber(column.validation?.max) ?? (isPercentageLike ? 100 : undefined),
+    max: finiteNumber(column.validation?.max) ?? (isPercentageLike ? 100 : MAX_REASONABLE_NUMERIC_VALUE),
     integer: typeof column.validation?.integer === "boolean"
       ? column.validation.integer
       : column.type === "number" && !isPercentageLike
   };
+}
+
+function isCatalogTextColumn(column: Pick<TemplateColumn, "key" | "label">) {
+  return /programa|plantel|delegacion|responsable|actividad|nombre/i.test(normalizeCalculationReference(`${column.label} ${column.key}`));
+}
+
+function isNumericOnlyText(value: string) {
+  return /^[-+]?\d+(?:[.,]\d+)?$/.test(value.trim());
 }
 
 function finiteNumber(value: unknown) {
@@ -1604,7 +1747,8 @@ function rowsFromCaptureDrafts({
         justificacion: cleanReportText(draft.payload.justificacion ?? ""),
         evidenciaNombre: cleanReportText(draft.payload.evidencia?.nombre ?? ""),
         vencimiento: draft.estado === "borrador" ? "atrasado" as const : "en_tiempo" as const,
-        detalle: reportDetailsFromCapturedRow(row, indicator)
+        detalle: reportDetailsFromCapturedRow(row, indicator),
+        qualityWarnings: qualityWarningsFromCapturedRow(row, indicator)
       }));
     });
 }
@@ -1973,6 +2117,50 @@ function sanitizeTemplateColumns(columns?: TemplateColumn[]) {
     .filter((column) => column.label.trim());
 }
 
+function qualityWarningsFromCapturedRow(row: Record<string, unknown>, indicator: SigiIndicator) {
+  const warnings: string[] = [];
+  const templateColumns = templateForIndicator(indicator).columns;
+
+  for (const column of templateColumns) {
+    const value = row[column.key];
+    const label = column.label;
+
+    if (column.required && (value === "" || value === undefined || value === null)) {
+      warnings.push(`${label}: campo obligatorio sin captura`);
+      continue;
+    }
+
+    if (column.type === "number" || column.type === "calculated") {
+      const numericValue = numberValue(value);
+
+      if (numericValue === undefined) {
+        continue;
+      }
+
+      const validation = numericValidationForColumn(column);
+      const warningMax = finiteNumber(column.validation?.qualityWarningMax) ?? DEFAULT_QUALITY_WARNING_MAX;
+
+      if (numericValue < (validation.min ?? 0)) {
+        warnings.push(`${label}: valor menor al minimo permitido`);
+      } else if (validation.max !== undefined && numericValue > validation.max) {
+        warnings.push(`${label}: valor mayor al maximo permitido`);
+      } else if (numericValue > warningMax) {
+        warnings.push(`${label}: valor inusualmente alto`);
+      }
+
+      if (validation.integer && !Number.isInteger(numericValue)) {
+        warnings.push(`${label}: se esperaba numero entero`);
+      }
+    }
+
+    if (column.type === "text" && typeof value === "string" && isCatalogTextColumn(column) && isNumericOnlyText(value)) {
+      warnings.push(`${label}: texto sospechoso`);
+    }
+  }
+
+  return uniqueStrings(warnings);
+}
+
 function normalizeTemplateColumnType(type: TemplateColumn["type"], label: string, key: string): TemplateColumn["type"] {
   if (type !== "text") {
     return type;
@@ -1997,7 +2185,11 @@ function sanitizeColumnValidation(
   label: string
 ) {
   if (type !== "number" && type !== "calculated") {
-    return undefined;
+    const allowedValues = Array.isArray(validation?.allowedValues)
+      ? uniqueStrings(validation.allowedValues.map((value) => String(value).trim()).filter(Boolean))
+      : undefined;
+
+    return allowedValues?.length ? { allowedValues } : undefined;
   }
 
   const inferred = numericValidationForColumn({ key: label, label, type });
@@ -2006,7 +2198,8 @@ function sanitizeColumnValidation(
     min: finiteNumber(validation?.min) ?? inferred.min,
     max: finiteNumber(validation?.max) ?? inferred.max,
     integer: typeof validation?.integer === "boolean" ? validation?.integer : inferred.integer,
-    decimals: Number.isInteger(validation?.decimals) ? validation?.decimals : undefined
+    decimals: Number.isInteger(validation?.decimals) ? validation?.decimals : undefined,
+    qualityWarningMax: finiteNumber(validation?.qualityWarningMax)
   };
 }
 
@@ -2420,6 +2613,13 @@ function persistNotificationState() {
   persistState({
     notifications: Array.from(notifications.values()),
     nextNotificationId
+  });
+}
+
+function persistAuditState() {
+  persistState({
+    auditEvents: Array.from(auditEvents.values()),
+    nextAuditEventId
   });
 }
 

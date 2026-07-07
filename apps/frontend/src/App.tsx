@@ -20,6 +20,7 @@ import { AuthProvider, useAuth, type User } from './context/AuthContext';
 import { Login } from './components/ui/Login';
 import { Toaster, toast } from 'sonner';
 import { useCaptureDraft } from './hooks/useCaptureDraft';
+import { fetchCaptureEvidence } from './api/capturas';
 import { CAPTURE_CHANGED_EVENT } from './api/captureEvents';
 import { fetchNotifications, markNotificationRead, type SigiNotification } from './api/notificaciones';
 import { buildHealthIntegralTemplate, buildTemplateForCatalogIndicator, catalogPlanteles, fetchIndicatorTemplate, fetchIndicators, plantelScopeLabelForIndicator, type CatalogIndicator } from './api/catalog';
@@ -454,6 +455,11 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
     storageScope: `plantel-${activePlantelId}:${selectedCode}:periodo-${activePeriodoId}:actividad-${activeActividadId}`,
     enabled: shouldLoadCaptureDraft && resolvedIndicatorId > 0 && Boolean(selectedCatalogIndicator || canUseMockupIndicatorId) && !isWaitingForCatalogIndicator && !isUnknownIndicator,
   });
+  const [evidenceOpenedForCaptureId, setEvidenceOpenedForCaptureId] = useState<number | undefined>();
+
+  useEffect(() => {
+    setEvidenceOpenedForCaptureId(undefined);
+  }, [captureDraft.capture?.id]);
 
   const templateInitialRows = remoteTemplate?.initialRows ?? fallbackTemplate.initialRows ?? mockInitialData;
   const formInitialData = useMemo(
@@ -581,6 +587,59 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
   const persistedEvidenceUrl = persistedEvidence?.contenidoBase64
     ? `data:${persistedEvidence.tipo || 'application/pdf'};base64,${persistedEvidence.contenidoBase64}`
     : undefined;
+  const handleOpenEvidence = async () => {
+    if (!captureDraft.capture?.id) {
+      toast.error('Primero debe existir una captura con evidencia.');
+      return;
+    }
+
+    const targetWindow = window.open('', '_blank', 'noopener,noreferrer');
+
+    try {
+      const { blob } = await fetchCaptureEvidence(captureDraft.capture.id);
+      const url = URL.createObjectURL(blob);
+      if (targetWindow) {
+        targetWindow.location.href = url;
+      } else {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
+      window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      setEvidenceOpenedForCaptureId(captureDraft.capture.id);
+      toast.success('Evidencia abierta');
+    } catch (error) {
+      targetWindow?.close();
+      toast.error(error instanceof Error ? error.message : 'No se pudo abrir la evidencia');
+    }
+  };
+  const handleDownloadEvidence = async () => {
+    if (!captureDraft.capture?.id) {
+      toast.error('Primero debe existir una captura con evidencia.');
+      return;
+    }
+
+    try {
+      const { blob, filename } = await fetchCaptureEvidence(captureDraft.capture.id);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      setEvidenceOpenedForCaptureId(captureDraft.capture.id);
+      toast.success('Evidencia descargada');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'No se pudo descargar la evidencia');
+    }
+  };
+  const hasPersistedEvidence = Boolean(persistedEvidence?.nombre);
+  const canApproveCurrentCapture =
+    !canReviewCurrentCapture ||
+    (hasPersistedEvidence && evidenceOpenedForCaptureId === captureDraft.capture?.id);
+  const approveDisabledReason = !hasPersistedEvidence
+    ? 'La captura no tiene evidencia disponible para revisar.'
+    : 'Abre la evidencia PDF antes de aprobar.';
 
   return (
     <IndicatorForm
@@ -590,6 +649,10 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
       initialJustificacion={captureDraft.capture?.payload.justificacion}
       existingEvidenceName={persistedEvidence?.nombre}
       existingEvidenceUrl={persistedEvidenceUrl}
+      onOpenEvidence={persistedEvidence?.nombre ? handleOpenEvidence : undefined}
+      onDownloadEvidence={persistedEvidence?.nombre ? handleDownloadEvidence : undefined}
+      canApprove={canApproveCurrentCapture}
+      approveDisabledReason={canApproveCurrentCapture ? undefined : approveDisabledReason}
       canReview={canReviewCurrentCapture}
       canSaveReviewEdits={false}
       canModifyRows={user?.role !== 'responsable'}

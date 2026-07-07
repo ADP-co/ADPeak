@@ -239,3 +239,47 @@ export async function approveCapture(captureId: number) {
     throw captureError(error, 'No se pudo aprobar el indicador.');
   }
 }
+
+export async function fetchCaptureEvidence(captureId: number) {
+  if (!API_REQUESTS_ENABLED) {
+    throw apiUnavailableCaptureError();
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/capturas/${captureId}/evidencia`, {
+      headers: sessionHeaders(),
+    });
+
+    if (!response.ok) {
+      let message = 'No se pudo abrir la evidencia.';
+
+      try {
+        const payload = await response.json() as { message?: unknown };
+        if (typeof payload.message === 'string' && payload.message.trim()) {
+          message = cleanServerMessage(payload.message);
+        }
+      } catch {
+        // Non-JSON evidence errors keep the safe fallback.
+      }
+
+      throw new CaptureRequestError(message, undefined, response.status);
+    }
+
+    const blob = await response.blob();
+    const disposition = response.headers.get('content-disposition') ?? '';
+    const match = disposition.match(/filename="([^"]+)"/i);
+    const filename = match?.[1] ?? `evidencia-${captureId}.pdf`;
+
+    if (blob.size === 0) {
+      throw new CaptureRequestError('La evidencia no contiene archivo descargable.');
+    }
+
+    return { blob, filename };
+  } catch (error) {
+    if (error instanceof CaptureRequestError) {
+      throw error;
+    }
+
+    throw new CaptureRequestError('No se pudo abrir la evidencia.');
+  }
+}

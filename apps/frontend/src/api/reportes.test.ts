@@ -35,7 +35,9 @@ const sampleReport: ExportReport = {
             { campo: 'Total', valor: '22' },
             { campo: 'Programa', valor: 'Analista Programador' },
             { campo: 'Observaciones', valor: 'Dato importado y editable' },
+            { campo: 'Nota de seguridad', valor: '=SUMA(1,1)' },
           ],
+          qualityWarnings: ['Matricula: valor inusualmente alto'],
         },
       ],
     },
@@ -58,12 +60,16 @@ describe('report exports', () => {
     expect(header).toContain('"Meta"');
     expect(header).toContain('"Justificación"');
     expect(header).toContain('"Evidencia"');
+    expect(header).toContain('"Alertas"');
     expect(header).toContain('"Mujeres"');
     expect(header).toContain('"Observaciones"');
     expect(csv).toContain('"Captura de egresados titulados"');
     expect(csv).toContain('"Dato importado y editable"');
     expect(csv).toContain('"Se capturó avance parcial por validación documental."');
     expect(csv).toContain('"evidencia-titulacion.pdf"');
+    expect(csv).toContain('"Matricula: valor inusualmente alto"');
+    expect(csv).toContain('"\'=SUMA(1,1)"');
+    expect(csv).not.toContain('"=SUMA(1,1)"');
     expect(csv).toContain('"Concursos Académicos"');
     expect(csv).not.toContain('Acad\u00c3\u0192');
     expect(csv).not.toContain('tipo_reporte');
