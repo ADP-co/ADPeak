@@ -2503,7 +2503,7 @@ function sanitizeEvidenceRules(rules?: Partial<EvidenceRules>): EvidenceRules {
 function sanitizeTemplateColumns(columns?: TemplateColumn[]) {
   const seenKeys = new Set<string>();
 
-  return (columns ?? [])
+  const sanitizedColumns = (columns ?? [])
     .map((column, index) => {
       const label = typeof column.label === "string" ? column.label.trim() : "";
       const key = uniqueTemplateKey(
@@ -2527,6 +2527,8 @@ function sanitizeTemplateColumns(columns?: TemplateColumn[]) {
       } satisfies TemplateColumn;
     })
     .filter((column) => column.label.trim());
+
+  return resolveTemplateCalculationReferences(sanitizedColumns);
 }
 
 function qualityWarningsFromCapturedRow(row: Record<string, unknown>, indicator: SigiIndicator) {
@@ -2639,8 +2641,64 @@ function sanitizeCalculation(calculation: TemplateColumn["calculation"]) {
         type: "formula" as const,
         expression,
         decimals: Number.isInteger(calculation.decimals) ? calculation.decimals : 2
-      }
+    }
     : undefined;
+}
+
+function resolveTemplateCalculationReferences(columns: TemplateColumn[]) {
+  return columns.map((column) => {
+    if (!column.calculation) {
+      return column;
+    }
+
+    if (column.calculation.type === "sum") {
+      return {
+        ...column,
+        calculation: {
+          ...column.calculation,
+          sourceKeys: uniqueStrings(
+            column.calculation.sourceKeys
+              .map((key) => resolveTemplateColumnKey(key, columns))
+              .filter((key): key is string => Boolean(key))
+          )
+        }
+      };
+    }
+
+    if (column.calculation.type === "percentage") {
+      return {
+        ...column,
+        calculation: {
+          ...column.calculation,
+          numeratorKey: resolveTemplateColumnKey(column.calculation.numeratorKey, columns) ?? column.calculation.numeratorKey,
+          denominatorKey: resolveTemplateColumnKey(column.calculation.denominatorKey, columns) ?? column.calculation.denominatorKey
+        }
+      };
+    }
+
+    return column;
+  });
+}
+
+function resolveTemplateColumnKey(key: string | undefined, columns: TemplateColumn[]) {
+  if (!key) {
+    return undefined;
+  }
+
+  const exactColumn = columns.find((column) => column.key === key);
+
+  if (exactColumn) {
+    return exactColumn.key;
+  }
+
+  const normalizedKey = normalizeCalculationReference(key);
+  const matchingColumn = columns.find(
+    (column) =>
+      normalizeCalculationReference(column.key) === normalizedKey ||
+      normalizeCalculationReference(column.label) === normalizedKey
+  );
+
+  return matchingColumn?.key;
 }
 
 function uniqueTemplateKey(value: string, seenKeys: Set<string>) {

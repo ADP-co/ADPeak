@@ -199,6 +199,27 @@ describe("SIGI store and RBAC", () => {
     });
   });
 
+  it("exposes sanitized calculation references that point to real template keys", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const template = templateForIndicator(getIndicatorByCode("1.0.0.0.2")!, director);
+    const keys = new Set(template.columns.map((column) => column.key));
+
+    for (const column of template.columns) {
+      if (column.type !== "calculated" || !column.calculation) {
+        continue;
+      }
+
+      if (column.calculation.type === "sum") {
+        expect(column.calculation.sourceKeys.every((key) => keys.has(key))).toBe(true);
+      }
+
+      if (column.calculation.type === "percentage") {
+        expect(keys.has(column.calculation.numeratorKey)).toBe(true);
+        expect(keys.has(column.calculation.denominatorKey)).toBe(true);
+      }
+    }
+  });
+
   it("authenticates delivery users without exposing password hashes", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const users = listUsers(director);
