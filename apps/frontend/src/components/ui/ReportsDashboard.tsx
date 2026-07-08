@@ -4,6 +4,7 @@ import { Button } from './Button';
 import {
   countReportRows,
   fetchExportReport,
+  reportBlockingIssues,
   reportToCsv,
   reportToPdfBlob,
   type ExportReport,
@@ -71,6 +72,26 @@ const DonutCard = ({ title, percentage, colorClass, strokeColor }: DonutCardProp
 
 function slugify(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+function reportItemExportBlockMessage(issues: string[]) {
+  if (issues.length === 0) {
+    return '';
+  }
+
+  return `No exportable: ${issues.length} registros requieren corrección.`;
+}
+
+function downloadErrorMessage(error: unknown) {
+  if (!(error instanceof Error)) {
+    return 'No se pudo descargar el reporte.';
+  }
+
+  if (error.message.includes('requieren correcci')) {
+    return 'No exportable: corrige los registros pendientes antes de generar el archivo.';
+  }
+
+  return error.message;
 }
 
 // Tipado para la tabla de planteles
@@ -146,6 +167,34 @@ function buildIndicatorProgress(report: ExportReport, selectedPeriod: string): P
       status: statusForRows(rows, percentage),
     };
   });
+}
+
+function scopedReportForProgressItem(report: ExportReport, item: PlantelProgressRecord): ExportReport {
+  const indicadores = report.indicadores
+    .map((indicator) => {
+      const indicatorId = indicator.id ?? slugify(indicator.nombre);
+      const datos = item.kind === 'indicador'
+        ? indicatorId === item.indicatorId
+          ? indicator.datos
+          : []
+        : indicator.datos.filter((row) => {
+            const rowPlantelId = row.plantelId ? String(row.plantelId) : '';
+            const rowPlantel = row.plantel ?? '';
+
+            return rowPlantelId === String(item.plantelId) || rowPlantel === item.plantel;
+          });
+
+      return {
+        ...indicator,
+        datos,
+      };
+    })
+    .filter((indicator) => indicator.datos.length > 0);
+
+  return {
+    ...report,
+    indicadores,
+  };
 }
 
 function parseProgress(value: string) {
@@ -307,7 +356,7 @@ export const ReportsDashboard = () => {
       downloadDocument(blob, `reporte-${slugify(item.plantel)}-${selectedDate}.csv`);
       setReportMessage(`Archivo CSV generado: ${recordCount} registros.`);
     } catch (error) {
-      setReportMessage(error instanceof Error ? error.message : 'No se pudo descargar el reporte.');
+      setReportMessage(downloadErrorMessage(error));
     } finally {
       setGeneratingDocumentId(null);
     }
@@ -323,7 +372,7 @@ export const ReportsDashboard = () => {
       downloadDocument(pdf, `reporte-${slugify(item.plantel)}-${selectedDate}.pdf`);
       setReportMessage(`Archivo PDF generado: ${recordCount} registros.`);
     } catch (error) {
-      setReportMessage(error instanceof Error ? error.message : 'No se pudo descargar el reporte.');
+      setReportMessage(downloadErrorMessage(error));
     } finally {
       setGeneratingDocumentId(null);
     }
@@ -517,7 +566,13 @@ export const ReportsDashboard = () => {
             </thead>
 
             <tbody className="divide-y divide-brand-Gris_bajo/20 font-body text-sm text-brand-Gris_oscuro">
-              {processedPlanteles.map((item) => (
+              {processedPlanteles.map((item) => {
+                const scopedReport = report ? scopedReportForProgressItem(report, item) : null;
+                const blockingIssues = scopedReport ? reportBlockingIssues(scopedReport) : [];
+                const exportBlockMessage = reportItemExportBlockMessage(blockingIssues);
+                const exportDisabled = Boolean(exportBlockMessage);
+
+                return (
                 <tr key={item.id} className="hover:bg-brand-Gris_bajo/10 transition-colors">
 
                   {/* Nombre del Plantel */}
@@ -545,26 +600,34 @@ export const ReportsDashboard = () => {
                       <Button
                         variant="secondary"
                         onClick={() => handleGenerateCsv(item)}
-                        disabled={generatingDocumentId === `${item.id}:csv`}
-                        aria-label={`Descargar CSV para ${item.plantel}`}
-                        className="w-[104px] text-xs py-1.5 px-3"
+                        disabled={generatingDocumentId === `${item.id}:csv` || exportDisabled}
+                        aria-label={exportDisabled ? `${exportBlockMessage} ${item.plantel}` : `Descargar CSV para ${item.plantel}`}
+                        title={exportBlockMessage || `Descargar CSV para ${item.plantel}`}
+                        className="w-[104px] text-xs py-1.5 px-3 disabled:cursor-not-allowed"
                       >
                         {generatingDocumentId === `${item.id}:csv` ? 'Generando' : 'CSV'}
                       </Button>
                       <Button
                         variant="secondary"
                         onClick={() => handleGeneratePdf(item)}
-                        disabled={generatingDocumentId === `${item.id}:pdf`}
-                        aria-label={`Descargar PDF para ${item.plantel}`}
-                        className="w-[104px] text-xs py-1.5 px-3"
+                        disabled={generatingDocumentId === `${item.id}:pdf` || exportDisabled}
+                        aria-label={exportDisabled ? `${exportBlockMessage} ${item.plantel}` : `Descargar PDF para ${item.plantel}`}
+                        title={exportBlockMessage || `Descargar PDF para ${item.plantel}`}
+                        className="w-[104px] text-xs py-1.5 px-3 disabled:cursor-not-allowed"
                       >
                         {generatingDocumentId === `${item.id}:pdf` ? 'Generando' : 'PDF'}
                       </Button>
                     </div>
+                    {exportBlockMessage && (
+                      <p className="mt-2 text-center font-body text-xs font-semibold text-brand-Status_rojo">
+                        {exportBlockMessage}
+                      </p>
+                    )}
                   </td>
 
                 </tr>
-              ))}
+                );
+              })}
               {processedPlanteles.length === 0 && (
                 <tr>
                   <td colSpan={3} className="py-8 px-6 text-center text-brand-Gris_oscuro/60">

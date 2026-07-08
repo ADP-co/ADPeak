@@ -541,7 +541,7 @@ export const UsersTable = () => {
                     )}
                   </td>
                   <td className="py-4 px-6">
-                    <div className="flex items-center justify-center gap-3">
+                    <div className="flex flex-wrap items-center justify-center gap-2">
                       <button
                         type="button"
                         onClick={() => handleEditUser(user)}
@@ -558,29 +558,32 @@ export const UsersTable = () => {
                             type="button"
                             onClick={() => openPasswordReset(user)}
                             aria-label={`Restablecer contraseña de ${user.name}`}
-                            className="text-brand-Verde_oscuro hover:text-brand-Verde_principal transition-colors p-1 rounded-md hover:bg-brand-Verde_principal/10 cursor-pointer"
+                            className="min-h-9 rounded-md border border-brand-Verde_oscuro/40 px-3 py-1 text-brand-Verde_oscuro hover:text-brand-Blanco hover:bg-brand-Verde_oscuro transition-colors cursor-pointer inline-flex items-center gap-1.5 text-xs font-bold"
                           >
-                            <KeyRound size={20} />
+                            <KeyRound size={16} />
+                            <span>Contraseña</span>
                           </button>
                           <button
                             type="button"
                             onClick={() => setUserToToggleBlock(user)}
                             aria-label={user.isBlocked ? `Desbloquear usuario ${user.name}` : `Bloquear usuario ${user.name}`}
-                            className={`transition-colors p-1 rounded-md cursor-pointer ${
+                            className={`min-h-9 rounded-md border px-3 py-1 transition-colors cursor-pointer inline-flex items-center gap-1.5 text-xs font-bold ${
                               user.isBlocked
-                                ? 'text-brand-Status_rojo hover:bg-brand-Status_rojo/10'
-                                : 'text-brand-Verde_oscuro hover:text-brand-Status_amarillo hover:bg-brand-Status_amarillo/10'
+                                ? 'border-brand-Status_rojo/40 text-brand-Status_rojo hover:bg-brand-Status_rojo hover:text-brand-Blanco'
+                                : 'border-brand-Verde_oscuro/40 text-brand-Verde_oscuro hover:bg-brand-Status_amarillo hover:text-brand-Gris_oscuro'
                             }`}
                           >
-                            {user.isBlocked ? <Lock size={20} /> : <Unlock size={20} />}
+                            {user.isBlocked ? <Lock size={16} /> : <Unlock size={16} />}
+                            <span>{user.isBlocked ? 'Desbloquear' : 'Bloquear'}</span>
                           </button>
                           <button
                             type="button"
                             onClick={() => setUserToDelete(user)}
                             aria-label={`Eliminar usuario ${user.name}`}
-                            className="text-brand-Verde_oscuro hover:text-brand-Status_rojo transition-colors p-1 rounded-md hover:bg-brand-Status_rojo/10 cursor-pointer"
+                            className="min-h-9 rounded-md border border-brand-Status_rojo/40 px-3 py-1 text-brand-Status_rojo hover:text-brand-Blanco hover:bg-brand-Status_rojo transition-colors cursor-pointer inline-flex items-center gap-1.5 text-xs font-bold"
                           >
-                            <Trash2 size={20} />
+                            <Trash2 size={16} />
+                            <span>Eliminar</span>
                           </button>
                         </>
                       )}

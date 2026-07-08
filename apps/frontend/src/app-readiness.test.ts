@@ -40,6 +40,14 @@ describe('frontend readiness invariants', () => {
     expect(source).not.toContain('Estados para simular');
   });
 
+  it('uses an app-owned logout dialog instead of a browser confirm', () => {
+    const source = readSource('components/layout/Navbar.tsx');
+
+    expect(source).not.toContain('window.confirm');
+    expect(source).toContain('role="dialog"');
+    expect(source).toContain('Cerrar sesión');
+  });
+
   it('uses a searchable assignment list instead of a native indicator select', () => {
     const source = readSource('components/ui/UsersTable.tsx');
 
