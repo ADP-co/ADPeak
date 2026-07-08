@@ -45,6 +45,7 @@ import {
   SigiAuthError,
   SigiForbiddenError,
   SigiValidationError,
+  templateSessionForPlantelScope,
   templateForIndicator,
   updateOwnPassword
 } from "./sigi-store.js";
@@ -374,7 +375,11 @@ const server = createServer(async (request, response) => {
           return;
         }
 
-        sendJson(response, 200, templateForIndicator(indicator, session));
+        const templatePlantelId = positiveIntegerParam(url, "plantelId");
+        sendJson(response, 200, templateForIndicator(
+          indicator,
+          templateSessionForPlantelScope(session, indicator, templatePlantelId)
+        ));
         return;
       }
 

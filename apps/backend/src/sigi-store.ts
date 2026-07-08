@@ -1216,6 +1216,36 @@ export function templateForIndicator(indicator: SigiIndicator, session?: SigiSes
   return genericTemplate(indicator, session);
 }
 
+export function templateSessionForPlantelScope(
+  session: SigiSession,
+  indicator: SigiIndicator,
+  plantelId?: number
+): SigiSession {
+  if (!plantelId) {
+    return session;
+  }
+
+  if (!Number.isInteger(plantelId) || plantelId <= 0 || !planteles.some((plantel) => plantel.id === plantelId)) {
+    throw new SigiValidationError("El plantel solicitado no existe.");
+  }
+
+  if (session.role === "plantel") {
+    if (session.plantelId !== plantelId) {
+      throw new SigiForbiddenError("El plantel solo puede consultar su propia plantilla.");
+    }
+
+    if (hasExplicitPlantelScope(indicator) && !canUseIndicatorForPlantel(indicator, plantelId)) {
+      throw new SigiForbiddenError("El indicador no esta asignado a este plantel.");
+    }
+  }
+
+  return {
+    ...session,
+    role: "plantel",
+    plantelId
+  };
+}
+
 export function assertCaptureAccess(
   session: SigiSession,
   request: {
@@ -4057,11 +4087,7 @@ function terminalEfficiencyTemplate(indicator: SigiIndicator, session?: SigiSess
 }
 
 function plantelForTemplate(session?: SigiSession, indicator?: SigiIndicator) {
-  if (
-    session?.role === "plantel" &&
-    session.plantelId &&
-    (!indicator || canUseIndicatorForPlantel(indicator, session.plantelId))
-  ) {
+  if (session?.role === "plantel" && session.plantelId) {
     return planteles.find((plantel) => plantel.id === session.plantelId) ?? planteles[0];
   }
 

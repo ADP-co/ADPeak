@@ -408,13 +408,25 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
     indicatorCode: remoteTemplate?.indicatorCode ?? selectedCode,
     indicatorName: remoteTemplate?.indicatorName ?? selectedIndicator?.name ?? fallbackTemplate.indicatorName,
   };
+  const selectedIndicatorPlantelIds = selectedCatalogIndicator
+    ? effectivePlantelIdsForCatalogIndicator(selectedCatalogIndicator)
+    : [];
+  const activePlantelId = user?.role === 'plantel'
+    ? user.plantelId ?? 1
+    : requestedPlantelId ?? selectedCatalogIndicator?.plantelId ?? selectedIndicatorPlantelIds[0] ?? 0;
+  const activeActividadId = requestedActividadId ?? selectedCatalogIndicator?.actividadId ?? 1;
+  const activePeriodoId = requestedPeriodoId ?? selectedCatalogIndicator?.periodoId ?? 1;
+  const activeResponsableId = user?.role === 'responsable'
+    ? user.responsableId ?? 1
+    : selectedCatalogIndicator?.primaryResponsibleId ?? selectedCatalogIndicator?.responsibleIds[0] ?? 1;
+  const effectiveCaptureId = requestedCaptureId ?? selectedCatalogIndicator?.captureId;
 
   useEffect(() => {
     let isMounted = true;
     setRemoteTemplate(null);
     setTemplateLoadError('');
 
-    fetchIndicatorTemplate(selectedCode)
+    fetchIndicatorTemplate(selectedCode, activePlantelId > 0 ? { plantelId: activePlantelId } : undefined)
       .then((template) => {
         if (isMounted) {
           setRemoteTemplate(template);
@@ -430,20 +442,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
     return () => {
       isMounted = false;
     };
-  }, [selectedCode, user?.id]);
-
-  const selectedIndicatorPlantelIds = selectedCatalogIndicator
-    ? effectivePlantelIdsForCatalogIndicator(selectedCatalogIndicator)
-    : [];
-  const activePlantelId = user?.role === 'plantel'
-    ? user.plantelId ?? 1
-    : requestedPlantelId ?? selectedCatalogIndicator?.plantelId ?? selectedIndicatorPlantelIds[0] ?? 0;
-  const activeActividadId = requestedActividadId ?? selectedCatalogIndicator?.actividadId ?? 1;
-  const activePeriodoId = requestedPeriodoId ?? selectedCatalogIndicator?.periodoId ?? 1;
-  const activeResponsableId = user?.role === 'responsable'
-    ? user.responsableId ?? 1
-    : selectedCatalogIndicator?.primaryResponsibleId ?? selectedCatalogIndicator?.responsibleIds[0] ?? 1;
-  const effectiveCaptureId = requestedCaptureId ?? selectedCatalogIndicator?.captureId;
+  }, [activePlantelId, selectedCode, user?.id]);
   const shouldLoadCaptureDraft = user?.role !== 'responsable' || Boolean(effectiveCaptureId);
   const captureDraft = useCaptureDraft({
     requestedCaptureId: effectiveCaptureId,

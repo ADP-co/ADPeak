@@ -228,9 +228,18 @@ export async function deactivateIndicator(id: number) {
   }
 }
 
-export async function fetchIndicatorTemplate(codeOrId: string) {
+export async function fetchIndicatorTemplate(codeOrId: string, options?: { plantelId?: number }) {
+  const searchParams = new URLSearchParams();
+
+  if (options?.plantelId && Number.isInteger(options.plantelId) && options.plantelId > 0) {
+    searchParams.set('plantelId', String(options.plantelId));
+  }
+
+  const queryString = searchParams.toString();
+  const path = `/indicadores/${encodeURIComponent(codeOrId)}/template${queryString ? `?${queryString}` : ''}`;
+
   try {
-    return await apiJson<IndicatorTemplateResponse>(`/indicadores/${encodeURIComponent(codeOrId)}/template`);
+    return await apiJson<IndicatorTemplateResponse>(path);
   } catch (error) {
     if (API_REQUESTS_ENABLED) {
       throw error;

@@ -274,7 +274,11 @@ export async function handleIndicatorAction(request: RequestLike, response: any)
         return;
       }
 
-      sendJson(response, 200, sigi.templateForIndicator(indicator, session));
+      const templatePlantelId = positiveNumber(request.query?.plantelId);
+      sendJson(response, 200, sigi.templateForIndicator(
+        indicator,
+        sigi.templateSessionForPlantelScope(session, indicator, templatePlantelId)
+      ));
       return;
     }
 

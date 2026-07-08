@@ -25,6 +25,7 @@ import {
   listUsers,
   markNotificationRead,
   officialSourcesPayload,
+  planteles,
   recordCaptureNotification,
   reloadSigiStateFromPersistence,
   resetUserPassword,
@@ -37,7 +38,8 @@ import {
   templateForIndicator,
   updateOwnPassword,
   SigiForbiddenError,
-  SigiValidationError
+  SigiValidationError,
+  templateSessionForPlantelScope
 } from "./sigi-store.js";
 
 describe("SIGI store and RBAC", () => {
@@ -2327,6 +2329,22 @@ describe("SIGI store and RBAC", () => {
     expect(indicator).toBeDefined();
     expect(templateForIndicator(indicator, plantel).initialRows[0]).toMatchObject({
       plantel: "Bachillerato 4"
+    });
+  });
+
+  it("uses the requested capture plantel when a responsable opens a read-only template", () => {
+    const indicator = getIndicatorByCode("1.0.0.0.2")!;
+    const responsable = sessionFromHeaders({
+      "x-role": "responsable",
+      "x-responsable-id": String(indicator.responsibleIds[0])
+    });
+    const bachillerato1 = planteles.find((plantel) => plantel.name === "Bachillerato 1")!;
+
+    const scopedSession = templateSessionForPlantelScope(responsable, indicator, bachillerato1.id);
+    const template = templateForIndicator(indicator, scopedSession);
+
+    expect(template.initialRows[0]).toMatchObject({
+      plantel: "Bachillerato 1"
     });
   });
 });
