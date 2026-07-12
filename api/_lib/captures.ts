@@ -7,6 +7,9 @@ export type CapturePayload = {
     nombre: string;
     tipo: string;
     tamanoBytes: number;
+    contenidoBase64?: string;
+    sha256?: string;
+    storageRef?: string;
   };
 };
 

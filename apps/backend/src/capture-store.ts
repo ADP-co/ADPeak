@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import {
   persistState,
   readPersistedCollection,
@@ -12,6 +13,8 @@ export type CapturePayload = {
     tipo: string;
     tamanoBytes: number;
     contenidoBase64?: string;
+    sha256?: string;
+    storageRef?: string;
   };
 };
 
@@ -97,7 +100,10 @@ export function reloadCaptureDraftsFromState() {
   captureDrafts.clear();
 
   for (const capture of persistedCaptureDrafts) {
-    captureDrafts.set(capture.id, capture);
+    captureDrafts.set(capture.id, {
+      ...capture,
+      payload: withEvidenceMetadata(capture.payload, capture.id)
+    });
   }
 
   nextCaptureId = readPersistedValue<number>("nextCaptureId") ??
@@ -115,13 +121,13 @@ export function createCaptureDraft(request: CaptureDraftRequest): CaptureDraft {
     const updatedDraft: CaptureDraft = {
       ...existingDraft,
       estado: existingDraft.estado === "cerrado" ? "borrador" : existingDraft.estado,
-    payload: request.payload,
-    responsableId: request.responsableId ?? existingDraft.responsableId,
-    observacion: null,
-    submittedByUserId: existingDraft.submittedByUserId ?? null,
-    submittedByRole: existingDraft.submittedByRole ?? null,
-    versionActual: existingDraft.versionActual + 1,
-    actualizadoEn: nowIso()
+      payload: withEvidenceMetadata(request.payload, existingDraft.id),
+      responsableId: request.responsableId ?? existingDraft.responsableId,
+      observacion: null,
+      submittedByUserId: existingDraft.submittedByUserId ?? null,
+      submittedByRole: existingDraft.submittedByRole ?? null,
+      versionActual: existingDraft.versionActual + 1,
+      actualizadoEn: nowIso()
     };
 
     captureDrafts.set(updatedDraft.id, updatedDraft);
@@ -139,7 +145,7 @@ export function createCaptureDraft(request: CaptureDraftRequest): CaptureDraft {
     responsableId: request.responsableId ?? null,
     estado: "borrador",
     versionActual: 1,
-    payload: request.payload,
+    payload: withEvidenceMetadata(request.payload, nextCaptureId),
     observacion: null,
     submittedByUserId: null,
     submittedByRole: null,
@@ -199,7 +205,7 @@ export function updateCaptureDraft(
 
   const updatedDraft: CaptureDraft = {
     ...draft,
-    payload,
+    payload: withEvidenceMetadata(payload, captureId),
     observacion: null,
     versionActual: draft.versionActual + 1,
     actualizadoEn: nowIso()
@@ -295,4 +301,30 @@ function persistCaptureState() {
 
 function isEditableDraft(draft: CaptureDraft) {
   return draft.estado === "borrador" || draft.estado === "correccion_solicitada";
+}
+
+function withEvidenceMetadata(payload: CapturePayload, captureId: number): CapturePayload {
+  const evidence = payload.evidencia;
+
+  if (!evidence) {
+    return payload;
+  }
+
+  const content = evidence.contenidoBase64
+    ? Buffer.from(evidence.contenidoBase64, "base64")
+    : undefined;
+  const sha256 = evidence.sha256 ?? (
+    content?.length ? createHash("sha256").update(content).digest("hex") : undefined
+  );
+
+  return {
+    ...payload,
+    evidencia: {
+      ...evidence,
+      sha256,
+      storageRef: evidence.storageRef ?? (
+        sha256 ? `state://captures/${captureId}/evidence/${sha256}` : undefined
+      )
+    }
+  };
 }

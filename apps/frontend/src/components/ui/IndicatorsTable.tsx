@@ -3,6 +3,7 @@ import { Button } from './Button';
 import { Input } from './Input';
 import { Select } from './Select';
 import { useAuth } from '../../context/AuthContext';
+import type { CatalogAllowedAction } from '../../api/catalog';
 
 // Estados posibles de los Indicadores
 export type IndicatorStatus = 'Corregir' | 'Pendiente' | 'En revisión' | 'Aprobado';
@@ -21,6 +22,7 @@ export interface Indicator {
   canReview?: boolean;
   isReadOnly?: boolean;
   readOnlyReason?: string;
+  allowedActions?: CatalogAllowedAction[];
   source?: 'indicadores' | 'revision';
   plantel?: string;
   supervisor?: string;
@@ -60,9 +62,20 @@ export const IndicatorsTable = ({
   };
 
   // Función para determinar el texto del botón de acción según el estatus
-  const getActionLabel = (status: IndicatorStatus) => {
+  const getActionLabel = (indicator: Indicator) => {
+    const { status } = indicator;
+    const allowedActions = indicator.allowedActions ?? [];
+
+    if (allowedActions.includes('approve') || allowedActions.includes('request_correction')) {
+      return 'Revisar';
+    }
+
+    if (allowedActions.includes('capture')) {
+      return indicator.captureId ? 'Continuar captura' : 'Nueva captura';
+    }
+
     if (user?.role === 'responsable') {
-      if (status === 'En revisión') return 'Revisar / Editar';
+      if (status === 'En revisión') return 'Revisar';
       if (status === 'Aprobado') return 'Ver aprobado';
       return 'Ver datos';
     }
@@ -73,7 +86,7 @@ export const IndicatorsTable = ({
     }
 
     if (status === 'Corregir') return 'Modificar Datos';
-    if (status === 'Pendiente') return 'Nueva Captura';
+    if (status === 'Pendiente') return indicator.captureId ? 'Continuar captura' : 'Nueva captura';
     return 'Ver Datos'; // Para En revisión y Aprobado
   };
 
@@ -224,7 +237,7 @@ export const IndicatorsTable = ({
                       onClick={() => onSelectIndicator && onSelectIndicator(indicator)}
                       disabled={!onSelectIndicator}
                       className="w-[135px] text-xs py-1.5 px-4 disabled:opacity-50 disabled:cursor-not-allowed">
-                      {getActionLabel(indicator.status)}
+                      {getActionLabel(indicator)}
                     </Button>
                   </td>
                 </tr>

@@ -201,6 +201,7 @@ function catalogToIndicator(indicator: CatalogIndicator, user?: User | null): In
     canReview: indicator.canReview,
     isReadOnly: indicator.isReadOnly,
     readOnlyReason: indicator.readOnlyReason,
+    allowedActions: indicator.allowedActions,
     plantel: plantelScope,
     supervisor: scope,
     responsable: scope,
@@ -420,11 +421,18 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
     ? user.responsableId ?? 1
     : selectedCatalogIndicator?.primaryResponsibleId ?? selectedCatalogIndicator?.responsibleIds[0] ?? 1;
   const effectiveCaptureId = requestedCaptureId ?? selectedCatalogIndicator?.captureId;
+  const responsibleHasNoCapture = user?.role === 'responsable' && !effectiveCaptureId;
 
   useEffect(() => {
     let isMounted = true;
     setRemoteTemplate(null);
     setTemplateLoadError('');
+
+    if (responsibleHasNoCapture) {
+      return () => {
+        isMounted = false;
+      };
+    }
 
     fetchIndicatorTemplate(selectedCode, activePlantelId > 0 ? { plantelId: activePlantelId } : undefined)
       .then((template) => {
@@ -442,7 +450,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
     return () => {
       isMounted = false;
     };
-  }, [activePlantelId, selectedCode, user?.id]);
+  }, [activePlantelId, responsibleHasNoCapture, selectedCode, user?.id]);
   const shouldLoadCaptureDraft = user?.role !== 'responsable' || Boolean(effectiveCaptureId);
   const captureDraft = useCaptureDraft({
     requestedCaptureId: effectiveCaptureId,
@@ -466,9 +474,17 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
     [captureDraft.capture?.payload.rows, selectedTemplate, templateInitialRows]
   );
   const isApprovedCapture = captureDraft.capture?.estado === 'aprobado' || selectedCatalogIndicator?.captureStatus === 'aprobado';
-  const canPlantelEditCapture = user?.role === 'plantel' && isEditableCaptureStatus(captureDraft.capture?.estado);
+  const allowedActions = selectedCatalogIndicator?.allowedActions;
+  const canPlantelEditCapture = allowedActions
+    ? allowedActions.includes('capture')
+    : user?.role === 'plantel' && isEditableCaptureStatus(captureDraft.capture?.estado);
   const isReadOnlyCapture = isApprovedCapture || !canPlantelEditCapture;
-  const canReviewCurrentCapture = user?.role === 'admin' || Boolean(selectedCatalogIndicator?.canReview);
+  const canReviewCurrentCapture = allowedActions
+    ? allowedActions.includes('approve') || allowedActions.includes('request_correction')
+    : user?.role === 'admin' || Boolean(selectedCatalogIndicator?.canReview);
+  const canOpenCurrentEvidence = allowedActions
+    ? allowedActions.includes('open_evidence')
+    : true;
 
   if (isWaitingForCatalogIndicator) {
     return (
@@ -483,6 +499,23 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
       <section className="w-full max-w-[1250px] mx-auto bg-brand-Blanco rounded-lg shadow-md border border-brand-Gris_bajo/20 p-8">
         <h1 className="font-title text-xl font-bold text-brand-Gris_oscuro mb-2">Indicador no disponible</h1>
         <p className="font-body text-sm text-brand-Gris_oscuro">No tienes acceso a este indicador o no existe en el catálogo cargado.</p>
+        <Button type="button" className="mt-5 text-xs py-1.5 px-4" onClick={() => navigate('/indicadores')}>
+          Volver
+        </Button>
+      </section>
+    );
+  }
+
+  if (responsibleHasNoCapture) {
+    return (
+      <section className="w-full max-w-[1250px] mx-auto bg-brand-Blanco rounded-lg shadow-md border border-brand-Gris_bajo/20 p-8">
+        <span className="font-accent text-sm font-bold text-brand-Gris_oscuro/60">{selectedCode}</span>
+        <h1 className="font-title text-xl font-bold text-brand-Gris_oscuro mt-1 mb-2">
+          {selectedIndicator?.name ?? 'Indicador'}
+        </h1>
+        <p className="font-body text-sm text-brand-Gris_oscuro">
+          Sin registros capturados. Cuando un plantel envíe información, aparecerá en En revisión.
+        </p>
         <Button type="button" className="mt-5 text-xs py-1.5 px-4" onClick={() => navigate('/indicadores')}>
           Volver
         </Button>
@@ -592,13 +625,16 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
       return;
     }
 
-    const targetWindow = window.open('', '_blank', 'noopener,noreferrer');
+    const targetWindow = window.open('', '_blank');
+    if (targetWindow) {
+      targetWindow.opener = null;
+    }
 
     try {
       const { blob } = await fetchCaptureEvidence(captureDraft.capture.id);
       const url = URL.createObjectURL(blob);
       if (targetWindow) {
-        targetWindow.location.href = url;
+        targetWindow.location.replace(url);
       } else {
         window.open(url, '_blank', 'noopener,noreferrer');
       }
@@ -648,13 +684,13 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
       initialJustificacion={captureDraft.capture?.payload.justificacion}
       existingEvidenceName={persistedEvidence?.nombre}
       existingEvidenceUrl={persistedEvidenceUrl}
-      onOpenEvidence={persistedEvidence?.nombre ? handleOpenEvidence : undefined}
-      onDownloadEvidence={persistedEvidence?.nombre ? handleDownloadEvidence : undefined}
+      onOpenEvidence={persistedEvidence?.nombre && canOpenCurrentEvidence ? handleOpenEvidence : undefined}
+      onDownloadEvidence={persistedEvidence?.nombre && canOpenCurrentEvidence ? handleDownloadEvidence : undefined}
       canApprove={canApproveCurrentCapture}
       approveDisabledReason={canApproveCurrentCapture ? undefined : approveDisabledReason}
       canReview={canReviewCurrentCapture}
       canSaveReviewEdits={false}
-      canModifyRows={user?.role !== 'responsable'}
+      canModifyRows={allowedActions ? allowedActions.includes('add_rows') : user?.role !== 'responsable'}
       captureStatus={captureDraft.capture?.estado}
       isReadOnly={isReadOnlyCapture}
       onSaveDraft={handleSaveDraft}
@@ -700,6 +736,29 @@ function ProtectedLayout() {
     window.addEventListener(CAPTURE_CHANGED_EVENT, handleCaptureChanged);
     return () => window.removeEventListener(CAPTURE_CHANGED_EVENT, handleCaptureChanged);
   }, [loadNotifications]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !user) {
+      return;
+    }
+
+    const refresh = () => void loadNotifications();
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === 'visible') {
+        refresh();
+      }
+    };
+    const intervalId = window.setInterval(refresh, 15_000);
+
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', refreshWhenVisible);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener('focus', refresh);
+      document.removeEventListener('visibilitychange', refreshWhenVisible);
+    };
+  }, [isAuthenticated, loadNotifications, user]);
 
   const handleReadNotification = async (id: number) => {
     try {

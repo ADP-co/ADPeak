@@ -501,6 +501,56 @@ export async function handleReviewCaptures(request: RequestLike, response: any) 
   }
 }
 
+export async function handleCaptureEvidence(request: RequestLike, response: any) {
+  if (prepare(request, response, ["GET", "OPTIONS"])) {
+    return;
+  }
+
+  const id = positiveNumber(request.query?.id);
+
+  if (!id) {
+    sendJson(response, 400, { error: "invalid_capture_id", message: "El identificador de la captura no es válido." });
+    return;
+  }
+
+  try {
+    const sigi = await loadSigi();
+    const captures = await loadCaptures();
+    const session = sigi.sessionFromHeaders(request.headers ?? {});
+    const draft = captures.getCaptureDraft(id);
+
+    if (!draft) {
+      sendJson(response, 404, { error: "capture_not_found", message: "No existe una captura con ese ID." });
+      return;
+    }
+
+    sigi.assertCaptureAccess(session, draft, "read");
+    const evidence = draft.payload.evidencia;
+    const content = Buffer.from(evidence?.contenidoBase64 ?? "", "base64");
+
+    if (!evidence?.nombre || content.length === 0) {
+      sendJson(response, 404, {
+        error: "evidence_not_available",
+        message: "La evidencia no está disponible. Solicita que el plantel reenvíe el archivo."
+      });
+      return;
+    }
+
+    sigi.recordEvidenceOpened(session, draft, requestIdFromRequest(request));
+    await flushRuntimeState();
+    applyCors(response);
+    response.status(200);
+    response.setHeader("Content-Disposition", `inline; filename="${sanitizeDownloadFileName(evidence.nombre)}"`);
+    response.setHeader("Content-Type", evidence.tipo || "application/pdf");
+    response.setHeader("Content-Length", String(content.length));
+    response.end(content);
+  } catch (error) {
+    if (!sendKnownError(response, error)) {
+      sendJson(response, 500, { error: "evidence_error", message: "No se pudo abrir la evidencia." });
+    }
+  }
+}
+
 export async function handleCaptureAction(request: RequestLike, response: any) {
   if (handleOptions(request, response)) {
     return;
@@ -561,6 +611,7 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
 
     if (request.method === "POST" && action === "enviar-revision") {
       sigi.assertCaptureAccess(session, draft, "submit");
+      const notificationEvent = draft.estado === "correccion_solicitada" ? "resubmitted" : "submitted";
       const updatedDraft = captures.sendCaptureToReview(id, { userId: session.userId, role: session.role });
 
       if (!updatedDraft) {
@@ -571,7 +622,7 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
         return;
       }
 
-      sigi.recordCaptureNotification("submitted", session, updatedDraft);
+      sigi.recordCaptureNotification(notificationEvent, session, updatedDraft);
       await flushRuntimeState();
       sendJson(response, 200, updatedDraft);
       return;
@@ -579,6 +630,7 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
 
     if (request.method === "POST" && action === "aprobar") {
       sigi.assertCaptureAccess(session, draft, "review");
+      sigi.assertEvidenceOpenedBeforeApproval(session, draft);
       const updatedDraft = captures.approveCapture(id);
 
       if (!updatedDraft) {
@@ -686,6 +738,16 @@ function filtersFromRequest(request: RequestLike) {
 
 function queryValue(value: unknown) {
   return Array.isArray(value) ? String(value[0] ?? "") : typeof value === "string" ? value : undefined;
+}
+
+function requestIdFromRequest(request: RequestLike) {
+  const value = request.headers?.["x-request-id"];
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function sanitizeDownloadFileName(value: string) {
+  const clean = value.replace(/[\\/:*?"<>|\r\n]+/g, "-").trim();
+  return clean || "evidencia.pdf";
 }
 
 function sendJson(response: any, statusCode: number, payload: unknown) {

@@ -31,6 +31,8 @@ export type CapturePayload = {
     tipo: string;
     tamanoBytes: number;
     contenidoBase64?: string;
+    sha256?: string;
+    storageRef?: string;
   };
 };
 
@@ -72,6 +74,7 @@ export type ReviewCapture = {
   responsableId: number | null;
   estado: 'en_revision';
   actualizadoEn: string;
+  allowedActions: Array<'view' | 'open_evidence' | 'request_correction' | 'approve'>;
 };
 
 function captureError(error: unknown, fallbackMessage: string) {

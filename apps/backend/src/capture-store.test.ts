@@ -163,4 +163,32 @@ describe("capture store", () => {
     expect(repeatedCreate.payload.rows).toEqual([{ avance: 25 }]);
     expect(getCaptureDraft(draft.id)?.payload.rows).toEqual([{ avance: 25 }]);
   });
+
+  it("persists a stable hash and storage reference for evidence files", () => {
+    const content = Buffer.from("%PDF-1.4\n% evidence metadata\n", "utf8").toString("base64");
+    const draft = createCaptureDraft({
+      plantelId: 1,
+      indicadorId: 1,
+      actividadId: 1,
+      periodoId: 1,
+      payload: {
+        rows: [{ avance: 25 }],
+        evidencia: {
+          nombre: "evidencia.pdf",
+          tipo: "application/pdf",
+          tamanoBytes: 30,
+          contenidoBase64: content
+        }
+      }
+    });
+
+    expect(draft.payload.evidencia?.sha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(draft.payload.evidencia?.storageRef).toBe(
+      `state://captures/${draft.id}/evidence/${draft.payload.evidencia?.sha256}`
+    );
+
+    const updated = updateCaptureDraft(draft.id, draft.payload);
+    expect(updated?.payload.evidencia?.sha256).toBe(draft.payload.evidencia?.sha256);
+    expect(updated?.payload.evidencia?.storageRef).toBe(draft.payload.evidencia?.storageRef);
+  });
 });

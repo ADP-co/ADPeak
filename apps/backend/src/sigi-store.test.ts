@@ -498,10 +498,80 @@ describe("SIGI store and RBAC", () => {
     expect(indicators.every((indicator) => indicator.responsibleIds.includes(1))).toBe(true);
   });
 
+  it("persists and enforces every explicit operational scope", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const plantel1 = sessionFromHeaders({ "x-role": "plantel", "x-plantel-id": "1" });
+    const plantel2 = sessionFromHeaders({ "x-role": "plantel", "x-plantel-id": "2" });
+    const base = {
+      name: "Indicador de alcance QA",
+      dataType: "number" as const,
+      responsibleNames: ["Adriana Ruiz Rivera"],
+      activities: ["Actividad de alcance"],
+      templateColumns: [{ key: "valor", label: "Valor", type: "number" as const }]
+    };
+    const allPlanteles = saveIndicator(director, {
+      ...base,
+      code: "QA-SCOPE-ALL",
+      operationalScope: "all_planteles",
+      contributorNames: ["Planteles"]
+    });
+    const specificPlantel = saveIndicator(director, {
+      ...base,
+      code: "QA-SCOPE-PLANTEL",
+      operationalScope: "specific_planteles",
+      contributorNames: ["Planteles"],
+      plantelIds: [2]
+    });
+    const specificResponsible = saveIndicator(director, {
+      ...base,
+      code: "QA-SCOPE-RESP",
+      operationalScope: "specific_responsables",
+      contributorNames: ["Adriana Ruiz Rivera"],
+      contributorResponsibleIds: [1]
+    });
+    const noOperationalScope = saveIndicator(director, {
+      ...base,
+      code: "QA-SCOPE-NONE",
+      operationalScope: "none",
+      contributorNames: []
+    });
+    const responsable = sessionFromHeaders({
+      "x-role": "responsable",
+      "x-responsable-id": String(specificResponsible.responsibleIds[0])
+    });
+
+    expect(allPlanteles.operationalScope).toBe("all_planteles");
+    expect(specificPlantel).toMatchObject({ operationalScope: "specific_planteles", plantelIds: [2] });
+    expect(specificResponsible).toMatchObject({
+      operationalScope: "specific_responsables",
+      plantelIds: [],
+      contributorResponsibleIds: [1]
+    });
+    expect(noOperationalScope).toMatchObject({ operationalScope: "none", plantelIds: [] });
+    expect(listIndicators(plantel1).some((item) => item.code === allPlanteles.code)).toBe(true);
+    expect(listIndicators(plantel2).some((item) => item.code === allPlanteles.code)).toBe(true);
+    expect(listIndicators(plantel1).some((item) => item.code === specificPlantel.code)).toBe(false);
+    expect(listIndicators(plantel2).some((item) => item.code === specificPlantel.code)).toBe(true);
+    expect(listIndicators(plantel1).some((item) => item.code === specificResponsible.code)).toBe(false);
+    expect(listIndicators(plantel1).some((item) => item.code === noOperationalScope.code)).toBe(false);
+    expect(listIndicators(responsable).some((item) => item.code === specificResponsible.code)).toBe(true);
+    expect(listIndicators(responsable).some((item) => item.code === noOperationalScope.code)).toBe(true);
+
+    const assignmentNotifications = listNotifications(responsable).filter((notification) =>
+      notification.eventType === "assignment_changed" && notification.indicadorCodigo === specificResponsible.code
+    );
+    expect(assignmentNotifications).toHaveLength(1);
+
+    saveIndicator(director, specificResponsible);
+    expect(listNotifications(responsable).filter((notification) =>
+      notification.eventType === "assignment_changed" && notification.indicadorCodigo === specificResponsible.code
+    )).toHaveLength(1);
+  });
+
   it("scopes indicator history to the responsible user's assigned indicators", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const assigned = saveIndicator(director, {
-      code: "TMP-HISTORY-ASSIGNED",
+      code: "QA-HISTORY-ASSIGNED",
       name: "Indicador temporal asignado al responsable",
       dataType: "text",
       responsibleNames: ["Liliana Yunuen Rojas Maciel"],
@@ -510,7 +580,7 @@ describe("SIGI store and RBAC", () => {
       plantelIds: [1]
     });
     const unassigned = saveIndicator(director, {
-      code: "TMP-HISTORY-UNASSIGNED",
+      code: "QA-HISTORY-UNASSIGNED",
       name: "Indicador temporal asignado a otro responsable",
       dataType: "text",
       responsibleNames: ["Adriana Ruiz Rivera"],
@@ -874,9 +944,10 @@ describe("SIGI store and RBAC", () => {
         indicadorId: indicator.id,
         code: indicator.code,
         plantelId: 1,
-        periodoId: 1,
-        actividadId: 1,
-        estado: "en_revision"
+         periodoId: 1,
+         actividadId: 1,
+         estado: "en_revision",
+         allowedActions: ["view", "open_evidence", "request_correction", "approve"]
       }
     ]);
     expect(listReviewCaptures(assignedResponsable)).toHaveLength(1);
@@ -923,12 +994,14 @@ describe("SIGI store and RBAC", () => {
 
     const submitted = sendCaptureToReview(draft.id)!;
     recordCaptureNotification("submitted", plantel, submitted);
+    recordCaptureNotification("submitted", plantel, submitted);
 
     const responsableNotifications = listNotifications(responsable);
     expect(responsableNotifications).toHaveLength(1);
     expect(responsableNotifications[0]).toMatchObject({
       captureId: draft.id,
       estado: "en_revision",
+      eventType: "capture_submitted",
       rolDestino: "responsable",
       readAt: null
     });
@@ -941,6 +1014,10 @@ describe("SIGI store and RBAC", () => {
     expect(listNotifications(plantel).some((notification) => notification.estado === "correccion_solicitada")).toBe(true);
 
     const resent = sendCaptureToReview(draft.id)!;
+    recordCaptureNotification("resubmitted", plantel, resent);
+    expect(listNotifications(responsable).some((notification) =>
+      notification.eventType === "capture_resubmitted"
+    )).toBe(true);
     const approved = approveCapture(resent.id)!;
     recordCaptureNotification("approved", responsable, approved);
     expect(listNotifications(plantel).some((notification) => notification.estado === "aprobado")).toBe(true);
@@ -956,8 +1033,14 @@ describe("SIGI store and RBAC", () => {
       "x-role": "responsable",
       "x-responsable-id": String(indicator.responsibleIds[0])
     });
+    const plantel = sessionFromHeaders({ "x-role": "plantel", "x-plantel-id": "1" });
     const template = templateForIndicator(indicator, responsable);
     const pendingItem = listIndicators(responsable).find((item) => item.id === indicator.id);
+    const plantelItem = listIndicators(plantel).find((item) => item.id === indicator.id);
+
+    expect(plantelItem?.allowedActions).toEqual(
+      expect.arrayContaining(["view", "capture", "submit_review"])
+    );
 
     expect(pendingItem).toMatchObject({
       status: "Pendiente",
@@ -966,7 +1049,8 @@ describe("SIGI store and RBAC", () => {
       periodoId: 1,
       canEdit: false,
       canReview: false,
-      isReadOnly: true
+      isReadOnly: true,
+      allowedActions: ["view"]
     });
 
     const draft = createCaptureDraft({
@@ -992,7 +1076,8 @@ describe("SIGI store and RBAC", () => {
       captureStatus: "en_revision",
       canEdit: false,
       canReview: true,
-      isReadOnly: true
+      isReadOnly: true,
+      allowedActions: expect.arrayContaining(["view", "request_correction", "approve"])
     });
 
     approveCapture(draft.id);
@@ -1005,7 +1090,8 @@ describe("SIGI store and RBAC", () => {
       canEdit: false,
       canReview: false,
       isReadOnly: true,
-      readOnlyReason: "La captura ya fue aprobada."
+      readOnlyReason: "La captura ya fue aprobada.",
+      allowedActions: ["view"]
     });
   });
 
@@ -1479,7 +1565,7 @@ describe("SIGI store and RBAC", () => {
   it("exports captured template details in report rows", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const indicator = saveIndicator(director, {
-      code: "TMP-REPORT-DETAIL",
+      code: "QA-REPORT-DETAIL",
       name: "Indicador temporal para reporte completo",
       dataType: "number",
       responsibleNames: ["Liliana Yunuen Rojas Maciel"],
@@ -1525,10 +1611,10 @@ describe("SIGI store and RBAC", () => {
       periodo: "2025-2"
     });
     const reportRow = report.indicadores
-      .find((item) => item.id === "TMP-REPORT-DETAIL")
+      .find((item) => item.id === "QA-REPORT-DETAIL")
       ?.datos[0];
     const previousPeriodRow = previousPeriodReport.indicadores
-      .find((item) => item.id === "TMP-REPORT-DETAIL")
+      .find((item) => item.id === "QA-REPORT-DETAIL")
       ?.datos[0];
 
     expect(reportRow?.detalle).toEqual(expect.arrayContaining([
@@ -1541,7 +1627,7 @@ describe("SIGI store and RBAC", () => {
       evidenciaNombre: "evidencia-detalle.pdf",
       evidencias: 1
     });
-    expect(report.scopeSummary).toBe("Plantel unico: Bachillerato 16");
+    expect(report.scopeSummary).toBe("Plantel único: Bachillerato 16");
     expect(report.estadoConteos).toMatchObject({
       total: expect.any(Number),
       pendientes: expect.any(Number),
@@ -1555,7 +1641,7 @@ describe("SIGI store and RBAC", () => {
   it("repairs replacement characters from client-submitted report text", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const indicator = saveIndicator(director, {
-      code: "TMP-REPORT-ENCODING",
+      code: "QA-REPORT-ENCODING",
       name: "Indicador temporal para reporte con acentos",
       dataType: "number",
       responsibleNames: ["Adriana Ruiz Rivera"],
@@ -1586,7 +1672,7 @@ describe("SIGI store and RBAC", () => {
 
     const report = buildReportPayload(director, { plantelId: "1", periodo: "2026-2" });
     const reportRow = report.indicadores
-      .find((item) => item.id === "TMP-REPORT-ENCODING")
+      .find((item) => item.id === "QA-REPORT-ENCODING")
       ?.datos[0];
 
     expect(reportRow?.detalle).toEqual(expect.arrayContaining([

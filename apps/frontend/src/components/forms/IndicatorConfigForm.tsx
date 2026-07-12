@@ -10,9 +10,12 @@ import {
   fetchIndicators,
   fetchIndicatorTemplate,
   fetchUsers,
+  catalogPlanteles,
+  effectivePlantelIdsForIndicator,
   plantelScopeLabelForIndicator,
   saveIndicator,
   type CatalogIndicator,
+  type CatalogOperationalScope,
   type CatalogUser,
 } from '../../api/catalog';
 
@@ -48,9 +51,12 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
   const { code } = useParams();
   const navigate = useNavigate();
   const isNew = code?.startsWith('TMP-');
+  const [indicatorCode, setIndicatorCode] = useState('');
   const [indicatorName, setIndicatorName] = useState('');
   const [responsables, setResponsables] = useState<string[]>(['']);
-  const [contributorType, setContributorType] = useState<'planteles' | 'responsables'>('planteles');
+  const [operationalScope, setOperationalScope] = useState<CatalogOperationalScope>('all_planteles');
+  const [selectedPlantelIds, setSelectedPlantelIds] = useState<number[]>([]);
+  const [plantelSearch, setPlantelSearch] = useState('');
   const [contributors, setContributors] = useState<string[]>(['']);
   const [columns, setColumns] = useState<ConfigColumn[]>(isNew ? [] : defaultColumns);
   const [evidenceRules, setEvidenceRules] = useState<EvidenceRulesConfig>({
@@ -82,9 +88,12 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
 
         if (isNew) {
           setEditingIndicator(null);
+          setIndicatorCode('');
           setIndicatorName('');
           setResponsables(['']);
-          setContributorType('planteles');
+          setOperationalScope('all_planteles');
+          setSelectedPlantelIds([]);
+          setPlantelSearch('');
           setContributors(['']);
           setColumns([]);
           setEvidenceRules({
@@ -102,7 +111,8 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
         if (!currentIndicator) {
           setIndicatorName(code ?? '');
           setResponsables(['']);
-          setContributorType('planteles');
+          setOperationalScope('all_planteles');
+          setSelectedPlantelIds([]);
           setContributors(['']);
           setColumns(defaultColumns);
           setEvidenceRules({
@@ -115,6 +125,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
         }
 
         setEditingIndicator(currentIndicator);
+        setIndicatorCode(currentIndicator.code);
         setIndicatorName(currentIndicator.name);
         setEvidenceRules({
           required: currentIndicator.evidenceRules?.required ?? true,
@@ -123,15 +134,20 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
         });
         setResponsables(nonEmptyList(currentResponsibleNames(currentIndicator.responsibleNames), ['']));
 
-        const currentContributors = nonEmptyList(currentIndicator.contributorNames, ['Planteles']);
-        if (isPlantelContributor(currentContributors)) {
-          setContributorType('planteles');
-          setContributors(['']);
-        } else {
-          const responsibleContributors = currentResponsibleNames(currentContributors);
-          setContributorType(responsibleContributors.length > 0 ? 'responsables' : 'planteles');
-          setContributors(nonEmptyList(responsibleContributors, ['']));
-        }
+        const currentScope = currentIndicator.operationalScope ?? deriveOperationalScope(currentIndicator);
+        const currentContributors = currentResponsibleNames(currentIndicator.contributorNames);
+        setOperationalScope(currentScope);
+        setSelectedPlantelIds(
+          currentScope === 'specific_planteles'
+            ? effectivePlantelIdsForIndicator(currentIndicator)
+            : []
+        );
+        setPlantelSearch('');
+        setContributors(
+          currentScope === 'specific_responsables'
+            ? nonEmptyList(currentContributors, [''])
+            : ['']
+        );
 
         const template = await fetchIndicatorTemplate(currentIndicator.code);
 
@@ -187,6 +203,13 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
       ]),
     [catalogUsers, contributors]
   );
+  const filteredPlanteles = useMemo(() => {
+    const search = normalizeSearchText(plantelSearch);
+
+    return catalogPlanteles.filter((plantel) =>
+      !search || normalizeSearchText(plantel.name).includes(search)
+    );
+  }, [plantelSearch]);
 
   const handleBack = () => {
     if (onBack) {
@@ -213,9 +236,22 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
   };
 
   const handleSave = async () => {
+    const cleanedCode = indicatorCode.trim();
     const cleanedName = indicatorName.trim();
     const cleanedResponsables = normalizeList(responsables);
-    const cleanedContributors = contributorType === 'planteles' ? ['Planteles'] : normalizeList(contributors);
+    const cleanedContributors = operationalScope === 'specific_responsables'
+      ? normalizeList(contributors)
+      : operationalScope === 'none' ? [] : ['Planteles'];
+
+    if (!cleanedCode) {
+      toast.error('Agrega el código del indicador');
+      return;
+    }
+
+    if (!isValidIndicatorCode(cleanedCode)) {
+      toast.error('Usa un código válido, por ejemplo 1.2.3.4.5');
+      return;
+    }
 
     if (!cleanedName) {
       toast.error('Agrega el nombre del indicador');
@@ -227,8 +263,13 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
       return;
     }
 
-    if (contributorType === 'responsables' && cleanedContributors.length === 0) {
-      toast.error('Selecciona al menos un contribuidor');
+    if (operationalScope === 'specific_responsables' && cleanedContributors.length === 0) {
+      toast.error('Selecciona al menos un responsable específico');
+      return;
+    }
+
+    if (operationalScope === 'specific_planteles' && selectedPlantelIds.length === 0) {
+      toast.error('Selecciona al menos un plantel específico');
       return;
     }
 
@@ -248,16 +289,19 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
 
     const responsibleIds = idsForUserNames(cleanedResponsables, catalogUsers);
     const canSendResponsibleIds = responsibleIds.length === cleanedResponsables.length;
-    const contributorResponsibleIds = contributorType === 'responsables'
+    const contributorResponsibleIds = operationalScope === 'specific_responsables'
       ? idsForUserNames(cleanedContributors, catalogUsers)
       : [];
     const canSendContributorResponsibleIds =
-      contributorType !== 'responsables' || contributorResponsibleIds.length === cleanedContributors.length;
+      operationalScope !== 'specific_responsables' || contributorResponsibleIds.length === cleanedContributors.length;
+    const scopedPlantelIds = operationalScope === 'all_planteles'
+      ? catalogPlanteles.map((plantel) => plantel.id)
+      : operationalScope === 'specific_planteles' ? selectedPlantelIds : [];
 
     try {
       await saveIndicator({
         id: editingIndicator?.id,
-        code: editingIndicator?.code ?? code,
+        code: editingIndicator?.code ?? cleanedCode,
         name: cleanedName,
         description:
           editingIndicator?.description && editingIndicator.description !== editingIndicator.name
@@ -276,7 +320,8 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
           : configuredTemplateColumns.columns.length > 0
             ? ['Captura configurada']
             : ['Actividad general'],
-        plantelIds: contributorType === 'responsables' ? [] : editingIndicator?.plantelIds,
+        operationalScope,
+        plantelIds: scopedPlantelIds,
         templateColumns: canPersistTemplateColumns ? configuredTemplateColumns.columns : undefined,
         evidenceRules: normalizedEvidenceRules,
       });
@@ -295,7 +340,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
             {isNew ? 'NUEVO INDICADOR' : 'CONFIGURACIÓN DE INDICADOR'}
           </span>
           <h1 className="font-title text-2xl font-bold text-brand-Gris_oscuro mt-1">
-            {code}
+            {editingIndicator?.code ?? (indicatorCode || 'Nuevo indicador')}
           </h1>
         </div>
         <Button
@@ -310,6 +355,13 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
       </div>
 
       <div className="space-y-6">
+        <Input
+          label="Código del indicador"
+          value={indicatorCode}
+          placeholder="Ej. 1.2.3.4.5"
+          onChange={(event) => setIndicatorCode(event.target.value)}
+          disabled={isLoading || !isNew}
+        />
         <Input
           label="Nombre del indicador"
           value={indicatorName}
@@ -385,21 +437,58 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
           </div>
 
           <div>
-            <label htmlFor="indicator-contributor-type" className="block text-sm font-bold font-accent text-brand-Gris_oscuro mb-1">
-              Contribuidor
+            <label htmlFor="indicator-operational-scope" className="block text-sm font-bold font-accent text-brand-Gris_oscuro mb-1">
+              Alcance operativo
             </label>
-            <p className="text-xs text-brand-Gris_oscuro/60 mb-3">Quien debe capturar este indicador.</p>
+            <p className="text-xs text-brand-Gris_oscuro/60 mb-3">Define quién puede consultar o capturar este indicador.</p>
             <select
-              id="indicator-contributor-type"
-              value={contributorType}
-              onChange={(event) => setContributorType(event.target.value as 'planteles' | 'responsables')}
+              id="indicator-operational-scope"
+              value={operationalScope}
+              onChange={(event) => setOperationalScope(event.target.value as CatalogOperationalScope)}
               className="w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro font-body bg-brand-Blanco outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal"
             >
-              <option value="planteles">Planteles</option>
-              <option value="responsables">Responsables específicos</option>
+              <option value="all_planteles">Todos los planteles</option>
+              <option value="specific_planteles">Planteles específicos</option>
+              <option value="specific_responsables">Responsables específicos</option>
+              <option value="none">Sin alcance operativo</option>
             </select>
 
-            {contributorType === 'responsables' && (
+            {operationalScope === 'specific_planteles' && (
+              <div className="mt-4 space-y-3">
+                <Input
+                  label="Buscar plantel"
+                  value={plantelSearch}
+                  placeholder="Ej. Bachillerato 16"
+                  onChange={(event) => setPlantelSearch(event.target.value)}
+                  className="h-10"
+                />
+                <div className="max-h-48 space-y-1 overflow-y-auto rounded-md border border-brand-Gris_bajo/30 bg-brand-Blanco p-2">
+                  {filteredPlanteles.map((plantel) => (
+                    <label key={plantel.id} className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm text-brand-Gris_oscuro hover:bg-brand-Gris_bajo/10">
+                      <input
+                        type="checkbox"
+                        checked={selectedPlantelIds.includes(plantel.id)}
+                        onChange={(event) => setSelectedPlantelIds((current) =>
+                          event.target.checked
+                            ? [...new Set([...current, plantel.id])].sort((a, b) => a - b)
+                            : current.filter((id) => id !== plantel.id)
+                        )}
+                        className="h-4 w-4 accent-brand-Verde_principal"
+                      />
+                      {plantel.name}
+                    </label>
+                  ))}
+                  {filteredPlanteles.length === 0 && (
+                    <p className="px-2 py-3 text-sm text-brand-Gris_oscuro/60">No se encontraron planteles.</p>
+                  )}
+                </div>
+                <p className="text-xs font-semibold text-brand-Gris_oscuro/70">
+                  {selectedPlantelIds.length} plantel{selectedPlantelIds.length === 1 ? '' : 'es'} seleccionado{selectedPlantelIds.length === 1 ? '' : 's'}
+                </p>
+              </div>
+            )}
+
+            {operationalScope === 'specific_responsables' && (
               <div className="space-y-3 mt-4">
                 {contributors.map((contributor, index) => (
                   <div key={index} className="flex items-center gap-2">
@@ -438,6 +527,12 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
                   <PlusCircle size={14} /> Agregar contribuidor
                 </button>
               </div>
+            )}
+
+            {operationalScope === 'none' && (
+              <p className="mt-4 rounded-md border border-brand-Gris_bajo/30 bg-brand-Blanco px-3 py-2 text-xs text-brand-Gris_oscuro/70">
+                El indicador quedará disponible para administración, sin tareas de captura para planteles.
+              </p>
             )}
           </div>
         </div>
@@ -596,6 +691,10 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
     </div>
   );
 };
+
+function isValidIndicatorCode(value: string) {
+  return /^(?!TMP(?:-|$))(?!FMT(?:-|$))[A-Za-z0-9]+(?:[._-][A-Za-z0-9]+)*$/i.test(value);
+}
 
 function buildTemplateColumns(columns: ConfigColumn[]) {
   const seenKeys = new Set<string>();
@@ -788,6 +887,27 @@ function isGhostUserName(name: string) {
 
 function isPlantelContributor(contributors: string[]) {
   return contributors.length === 0 || contributors.some((contributor) => normalizeText(contributor).includes('plantel'));
+}
+
+function deriveOperationalScope(indicator: CatalogIndicator): CatalogOperationalScope {
+  if (
+    (indicator.contributorResponsibleIds?.length ?? 0) > 0 ||
+    (indicator.contributorNames.length > 0 && !isPlantelContributor(indicator.contributorNames))
+  ) {
+    return 'specific_responsables';
+  }
+
+  const plantelIds = effectivePlantelIdsForIndicator(indicator);
+
+  if (plantelIds.length === 0) {
+    return 'none';
+  }
+
+  return plantelIds.length === catalogPlanteles.length ? 'all_planteles' : 'specific_planteles';
+}
+
+function normalizeSearchText(value: string) {
+  return normalizeText(value).trim();
 }
 
 function idsForUserNames(names: string[], users: CatalogUser[]) {

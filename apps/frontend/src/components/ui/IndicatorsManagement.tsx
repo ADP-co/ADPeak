@@ -26,7 +26,9 @@ function fromCatalogIndicator(indicator: CatalogIndicator): IndicatorRecord {
     name: indicator.name,
     alcance: plantelScopeLabelForIndicator(indicator),
     responsable: indicator.responsibleNames.join(', ') || 'Sin asignar',
-    contribuidor: indicator.contributorNames.join(', ') || 'Planteles',
+    contribuidor: indicator.operationalScope === 'none'
+      ? 'No aplica'
+      : indicator.contributorNames.join(', ') || 'Sin asignar',
     enabled: indicator.active,
   };
 }
@@ -94,8 +96,10 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
       } else {
         await deactivateIndicator(Number(indicator.id));
       }
-    } catch {
-      // El fallback local mantiene la pantalla funcional si no hay API publica.
+    } catch (error) {
+      setStatusMessage(error instanceof Error ? error.message : 'No se pudo actualizar el indicador.');
+      setIndicatorToToggle(null);
+      return;
     }
 
     setIndicators((current) =>

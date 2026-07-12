@@ -71,7 +71,12 @@ const DonutCard = ({ title, percentage, colorClass, strokeColor }: DonutCardProp
 };
 
 function slugify(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
 }
 
 function reportItemExportBlockMessage(issues: string[]) {

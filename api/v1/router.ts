@@ -1,5 +1,6 @@
 import {
   handleCaptureAction,
+  handleCaptureEvidence,
   handleCaptureDrafts,
   handleReviewCaptures,
   handleIndicatorAction,
@@ -90,6 +91,12 @@ export default async function handler(request: any, response: any) {
 
   if (path === "capturas/en-revision") {
     await handleReviewCaptures(request, response);
+    return;
+  }
+
+  const captureEvidenceMatch = path.match(/^capturas\/(\d+)\/evidencia$/);
+  if (captureEvidenceMatch) {
+    await handleCaptureEvidence(withQuery(request, { id: captureEvidenceMatch[1] }), response);
     return;
   }
 

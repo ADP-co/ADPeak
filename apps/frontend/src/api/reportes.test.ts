@@ -11,7 +11,7 @@ const sampleReport: ExportReport = {
     tipo: 'Plantel',
     nombre: 'Bachillerato 16',
   },
-  scopeSummary: 'Plantel unico: Bachillerato 16',
+  scopeSummary: 'Plantel único: Bachillerato 16',
   estadoConteos: {
     total: 1,
     pendientes: 0,
@@ -65,7 +65,7 @@ describe('report exports', () => {
     expect(lines[0]).toContain('"Periodo","2026-2"');
     expect(lines[1]).toContain('"Ciclo escolar","2025-2026"');
     expect(lines[2]).toContain('"Fecha de generación"');
-    expect(lines[3]).toContain('"Alcance","Plantel unico: Bachillerato 16"');
+    expect(lines[3]).toContain('"Alcance","Plantel único: Bachillerato 16"');
     expect(lines[4]).toContain('"Registros totales","1"');
     expect(lines[8]).toContain('"Aprobados","1"');
     expect(header).not.toContain('"Plantel"');
@@ -96,13 +96,14 @@ describe('report exports', () => {
   });
 
   it('builds an executive PDF without internal field names', async () => {
-    const pdfText = await (await reportToPdfBlob(sampleReport)).text();
+    const pdfBlob = await reportToPdfBlob(sampleReport);
+    const pdfText = new TextDecoder('windows-1252').decode(await pdfBlob.arrayBuffer());
 
     expect(pdfText).toContain('(Resumen) Tj');
     expect(pdfText).toContain('Indicadores evaluados');
     expect(pdfText).toContain('Resumen ejecutivo');
     expect(pdfText).toContain('Detalle filtrado');
-    expect(pdfText).toContain('Plantel unico');
+    expect(pdfText).toContain('Plantel único');
     expect(pdfText).toContain('(Total registros) Tj');
     expect(pdfText).toContain('(Planteles) Tj');
     expect(pdfText).toContain('(Responsables) Tj');

@@ -181,6 +181,20 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
     }
 
     if (captureQuery.data || scopedCapture) {
+      const status = captureQuery.data?.estado ?? scopedCapture?.estado;
+
+      if (status === 'en_revision') {
+        return 'Captura en revisión.';
+      }
+
+      if (status === 'correccion_solicitada') {
+        return 'Corrección solicitada.';
+      }
+
+      if (status === 'aprobado' || status === 'cerrado') {
+        return 'Captura aprobada.';
+      }
+
       return 'Borrador disponible.';
     }
 

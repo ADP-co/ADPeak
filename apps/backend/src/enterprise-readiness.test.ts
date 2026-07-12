@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   listIndicators,
+  listReviewCaptures,
   sessionFromHeaders,
   templateForIndicator
 } from "./sigi-store.js";
@@ -16,7 +17,7 @@ describe("enterprise readiness invariants", () => {
     expect(indicators.length).toBeGreaterThan(0);
 
     indicators.forEach((indicator) => {
-      expect(indicator.code, indicator.code).not.toMatch(/^FMT-|-FMT-/);
+      expect(indicator.code, indicator.code).not.toMatch(/^TMP-|^FMT-|-FMT-/);
       expect(indicator.name, indicator.code).not.toMatch(mojibakePattern);
       expect(indicator.name.trim(), indicator.code).not.toHaveLength(0);
 
@@ -45,5 +46,12 @@ describe("enterprise readiness invariants", () => {
         });
       }
     });
+  });
+
+  it("keeps temporary administration routes outside operational lists", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+
+    expect(listIndicators(director).some((indicator) => indicator.code.startsWith("TMP-"))).toBe(false);
+    expect(listReviewCaptures(director).some((capture) => capture.code.startsWith("TMP-"))).toBe(false);
   });
 });

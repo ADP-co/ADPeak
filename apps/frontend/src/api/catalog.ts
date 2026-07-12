@@ -7,6 +7,16 @@ import { officialWorkbookTemplates } from '../catalog/officialData.generated';
 import type { ColumnConfig, IndicatorTemplate } from '../components/forms/formConfig';
 
 export type CatalogRole = 'director' | 'responsable' | 'plantel';
+export type CatalogOperationalScope = 'all_planteles' | 'specific_planteles' | 'specific_responsables' | 'none';
+export type CatalogAllowedAction =
+  | 'view'
+  | 'capture'
+  | 'add_rows'
+  | 'submit_review'
+  | 'open_evidence'
+  | 'request_correction'
+  | 'approve'
+  | 'configure';
 
 export type CatalogUser = {
   id: string;
@@ -37,6 +47,7 @@ export type CatalogIndicator = {
   canReview?: boolean;
   isReadOnly?: boolean;
   readOnlyReason?: string;
+  allowedActions?: CatalogAllowedAction[];
   description: string;
   dataType: 'number' | 'percentage' | 'text';
   period: string;
@@ -49,6 +60,7 @@ export type CatalogIndicator = {
   activities: string[];
   plantelIds: number[];
   plantelScopeSource?: 'manual' | 'official-import';
+  operationalScope?: CatalogOperationalScope;
   templateColumns?: ColumnConfig[];
   evidenceRules?: {
     required: boolean;
@@ -113,15 +125,33 @@ export function plantelNameFromId(id?: number) {
   return catalogPlanteles.find((plantel) => plantel.id === id)?.name ?? `Bachillerato ${id}`;
 }
 
-export function effectivePlantelIdsForIndicator(indicator: Pick<CatalogIndicator, 'code' | 'plantelIds'>) {
+export function effectivePlantelIdsForIndicator(
+  indicator: Pick<CatalogIndicator, 'code' | 'plantelIds' | 'operationalScope'>
+) {
+  if (indicator.operationalScope === 'none' || indicator.operationalScope === 'specific_responsables') {
+    return [];
+  }
+
+  if (indicator.operationalScope === 'all_planteles') {
+    return allPlantelIds();
+  }
+
   return indicator.plantelIds.length > 0
     ? indicator.plantelIds
     : officialIndicatorPlantelScopes[indicator.code] ?? [];
 }
 
 export function plantelScopeLabelForIndicator(
-  indicator: Pick<CatalogIndicator, 'code' | 'plantelIds' | 'plantelScopeSource'>
+  indicator: Pick<CatalogIndicator, 'code' | 'plantelIds' | 'plantelScopeSource' | 'operationalScope'>
 ) {
+  if (indicator.operationalScope === 'none') {
+    return 'Sin alcance operativo';
+  }
+
+  if (indicator.operationalScope === 'specific_responsables') {
+    return 'Responsables específicos';
+  }
+
   const effectivePlantelIds = effectivePlantelIdsForIndicator(indicator);
 
   if (
@@ -1330,6 +1360,7 @@ function buildEmptyIndicator(current: CatalogIndicator[]): CatalogIndicator {
     contributorNames: ['Planteles'],
     activities: [],
     plantelIds: allPlantelIds(),
+    operationalScope: 'all_planteles',
   };
 }
 

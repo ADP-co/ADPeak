@@ -63,4 +63,56 @@ describe('frontend readiness invariants', () => {
       expect(source, path).not.toMatch(forbiddenPattern);
     });
   });
+
+  it('refreshes notifications across tabs and devices without a manual reload', () => {
+    const source = readSource('App.tsx');
+
+    expect(source).toContain('window.setInterval(refresh, 15_000)');
+    expect(source).toContain("window.addEventListener('focus', refresh)");
+    expect(source).toContain("document.addEventListener('visibilitychange', refreshWhenVisible)");
+    expect(source).toContain("const targetWindow = window.open('', '_blank');");
+    expect(source).toContain('targetWindow.location.replace(url)');
+  });
+
+  it('requires a real code when creating an indicator', () => {
+    const source = readSource('components/forms/IndicatorConfigForm.tsx');
+
+    expect(source).toContain('Código del indicador');
+    expect(source).toContain('isValidIndicatorCode');
+    expect(source).toContain('(?!TMP(?:-|$))');
+    expect(source).toContain('(?!FMT(?:-|$))');
+  });
+
+  it('configures explicit operational scope without inferring it from display text', () => {
+    const source = readSource('components/forms/IndicatorConfigForm.tsx');
+
+    expect(source).toContain('Todos los planteles');
+    expect(source).toContain('Planteles específicos');
+    expect(source).toContain('Responsables específicos');
+    expect(source).toContain('Sin alcance operativo');
+    expect(source).toContain('operationalScope,');
+    expect(source).toContain('plantelIds: scopedPlantelIds');
+  });
+
+  it('uses backend allowed actions for capture, review, rows and evidence controls', () => {
+    const source = readSource('App.tsx');
+    const tableSource = readSource('components/ui/IndicatorsTable.tsx');
+
+    expect(source).toContain("allowedActions.includes('capture')");
+    expect(source).toContain("allowedActions.includes('approve')");
+    expect(source).toContain("allowedActions.includes('open_evidence')");
+    expect(source).toContain("allowedActions.includes('add_rows')");
+    expect(tableSource).toContain("allowedActions.includes('request_correction')");
+  });
+
+  it('describes responsible review actions without promising data editing', () => {
+    const source = readSource('components/ui/IndicatorsTable.tsx');
+    const appSource = readSource('App.tsx');
+
+    expect(source).toContain("if (status === 'En revisión') return 'Revisar'");
+    expect(source).not.toContain("return 'Revisar / Editar'");
+    expect(source).toContain("indicator.captureId ? 'Continuar captura' : 'Nueva captura'");
+    expect(appSource).toContain("const responsibleHasNoCapture = user?.role === 'responsable' && !effectiveCaptureId;");
+    expect(appSource).toContain('Sin registros capturados. Cuando un plantel envíe información, aparecerá en En revisión.');
+  });
 });

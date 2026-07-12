@@ -596,10 +596,19 @@ const server = createServer(async (request, response) => {
       }
 
       assertCaptureAccess(session, draft, "read");
+      const evidence = draft.payload.evidencia;
+      const fileName = sanitizeDownloadFileName(evidence?.nombre || `evidencia-${captureId}.pdf`);
+      const content = Buffer.from(evidence?.contenidoBase64 ?? "", "base64");
+
+      if (!evidence?.nombre || content.length === 0) {
+        sendJson(response, 404, {
+          error: "evidence_not_available",
+          message: "La evidencia no está disponible. Solicita que el plantel reenvíe el archivo."
+        });
+        return;
+      }
+
       recordEvidenceOpened(session, draft, requestId);
-      const evidence = draft.payload.evidencia!;
-      const fileName = sanitizeDownloadFileName(evidence.nombre || `evidencia-${captureId}.pdf`);
-      const content = Buffer.from(evidence.contenidoBase64 ?? "", "base64");
 
       response.writeHead(200, {
         "Access-Control-Allow-Origin": "*",
@@ -727,6 +736,7 @@ const server = createServer(async (request, response) => {
         }
 
         assertCaptureAccess(session, { ...draft, payload: draft.payload }, "submit");
+        const notificationEvent = draft.estado === "correccion_solicitada" ? "resubmitted" : "submitted";
         const updatedDraft = sendCaptureToReview(captureId, {
           userId: session.userId,
           role: session.role
@@ -740,7 +750,7 @@ const server = createServer(async (request, response) => {
           return;
         }
 
-        recordCaptureNotification("submitted", session, updatedDraft);
+        recordCaptureNotification(notificationEvent, session, updatedDraft);
         recordAuditEvent(session, {
           action: "capture_submitted",
           resourceType: "capture",

@@ -25,6 +25,22 @@ import {
 
 export type SystemRole = "director" | "responsable" | "plantel";
 
+export type SigiOperationalScope =
+  | "all_planteles"
+  | "specific_planteles"
+  | "specific_responsables"
+  | "none";
+
+export type SigiAllowedAction =
+  | "view"
+  | "capture"
+  | "add_rows"
+  | "submit_review"
+  | "open_evidence"
+  | "request_correction"
+  | "approve"
+  | "configure";
+
 export type SigiSession = {
   userId: string;
   role: SystemRole;
@@ -87,6 +103,7 @@ export type SigiIndicator = {
   activities: string[];
   plantelIds: number[];
   plantelScopeSource?: "official-import" | "manual";
+  operationalScope?: SigiOperationalScope;
   templateColumns?: TemplateColumn[];
   evidenceRules?: EvidenceRules;
   updatedAt?: string;
@@ -107,6 +124,7 @@ export type SigiIndicatorListItem = SigiIndicator & {
   canReview?: boolean;
   isReadOnly?: boolean;
   readOnlyReason?: string;
+  allowedActions: SigiAllowedAction[];
 };
 
 export type SigiIndicatorHistoryEntry = {
@@ -133,7 +151,15 @@ export type SigiReviewCapture = {
   responsableId: number | null;
   estado: "en_revision";
   actualizadoEn: string;
+  allowedActions: SigiAllowedAction[];
 };
+
+export type SigiNotificationEvent =
+  | "capture_submitted"
+  | "capture_resubmitted"
+  | "correction_requested"
+  | "capture_approved"
+  | "assignment_changed";
 
 export type SigiNotification = {
   id: number;
@@ -142,10 +168,12 @@ export type SigiNotification = {
   indicadorId: number;
   indicadorCodigo: string;
   indicadorNombre: string;
-  captureId: number;
+  captureId?: number;
   plantelId?: number;
   plantel?: string;
-  estado: CaptureDraft["estado"];
+  estado?: CaptureDraft["estado"];
+  eventType?: SigiNotificationEvent;
+  idempotencyKey?: string;
   mensaje: string;
   createdAt: string;
   readAt: string | null;
@@ -679,10 +707,16 @@ export function listIndicators(session: SigiSession, options: { includeInactive?
     .filter((indicator) => isVisibleOperationalIndicatorCode(indicator.code))
     .filter((indicator) => options.includeInactive || indicator.active)
     .filter((indicator) => canReadIndicator(session, indicator))
-    .map((indicator) => ({
-      ...indicator,
-      ...workStateForIndicator(session, indicator)
-    }))
+    .map((indicator) => {
+      const workState = workStateForIndicator(session, indicator);
+
+      return {
+        ...indicator,
+        operationalScope: operationalScopeForIndicator(indicator),
+        ...workState,
+        allowedActions: allowedActionsForIndicator(session, indicator, workState)
+      };
+    })
     .sort((a, b) => a.code.localeCompare(b.code, "es", { numeric: true }));
 }
 
@@ -717,7 +751,7 @@ export function listReviewCaptures(session: SigiSession): SigiReviewCapture[] {
       const indicator = indicators.get(draft.indicadorId);
       const plantel = planteles.find((item) => item.id === draft.plantelId) ?? unassignedPlantel;
 
-      if (!indicator || !indicator.active || !plantel) {
+      if (!indicator || !indicator.active || !isVisibleOperationalIndicatorCode(indicator.code) || !plantel) {
         return [];
       }
 
@@ -740,7 +774,8 @@ export function listReviewCaptures(session: SigiSession): SigiReviewCapture[] {
         actividadId: draft.actividadId,
         responsableId: draft.responsableId,
         estado: "en_revision" as const,
-        actualizadoEn: draft.actualizadoEn
+        actualizadoEn: draft.actualizadoEn,
+        allowedActions: ["view", "open_evidence", "request_correction", "approve"] as SigiAllowedAction[]
       }];
     })
     .sort((a, b) =>
@@ -868,7 +903,7 @@ export function assertEvidenceOpenedBeforeApproval(session: SigiSession, draft: 
 }
 
 export function recordCaptureNotification(
-  event: "submitted" | "correction_requested" | "approved",
+  event: "submitted" | "resubmitted" | "correction_requested" | "approved",
   actor: SigiSession,
   draft: CaptureDraft
 ) {
@@ -882,8 +917,18 @@ export function recordCaptureNotification(
   const targetUsers = notificationTargetsForCapture(event, indicator, draft, actor);
   const createdAt = new Date().toISOString();
   const created: SigiNotification[] = [];
+  const eventType: SigiNotificationEvent = event === "submitted"
+    ? "capture_submitted"
+    : event === "resubmitted" ? "capture_resubmitted"
+    : event === "approved" ? "capture_approved" : "correction_requested";
 
   for (const targetUser of targetUsers) {
+    const idempotencyKey = `${eventType}:${draft.id}:${draft.versionActual}:${targetUser.id}`;
+
+    if (Array.from(notifications.values()).some((item) => item.idempotencyKey === idempotencyKey)) {
+      continue;
+    }
+
     const notification: SigiNotification = {
       id: nextNotificationId,
       rolDestino: targetUser.role,
@@ -895,7 +940,9 @@ export function recordCaptureNotification(
       plantelId: draft.plantelId,
       plantel: plantel.name,
       estado: draft.estado,
-      mensaje: notificationMessage(event, indicator, plantel.name === unassignedPlantel.name ? undefined : plantel.name),
+      eventType,
+      idempotencyKey,
+      mensaje: notificationMessage(eventType, indicator, plantel.name === unassignedPlantel.name ? undefined : plantel.name),
       createdAt,
       readAt: null,
       actorUserId: actor.userId,
@@ -998,6 +1045,39 @@ function workStateForIndicator(session: SigiSession, indicator: SigiIndicator): 
   };
 }
 
+function allowedActionsForIndicator(
+  session: SigiSession,
+  indicator: SigiIndicator,
+  workState: ReturnType<typeof workStateForIndicator>
+): SigiAllowedAction[] {
+  const actions: SigiAllowedAction[] = ["view"];
+  const capture = workState.captureId
+    ? listCaptureDrafts().find((draft) => draft.id === workState.captureId)
+    : undefined;
+
+  if (session.role === "director") {
+    actions.push("configure");
+  }
+
+  if (workState.canEdit && session.role === "plantel") {
+    actions.push("capture", "submit_review");
+
+    if (templateForIndicator(indicator, session).allowAddRows !== false) {
+      actions.push("add_rows");
+    }
+  }
+
+  if (capture?.payload.evidencia?.nombre) {
+    actions.push("open_evidence");
+  }
+
+  if (workState.canReview) {
+    actions.push("request_correction", "approve");
+  }
+
+  return uniqueStrings(actions) as SigiAllowedAction[];
+}
+
 function relevantCapturesForIndicator(session: SigiSession, indicator: SigiIndicator) {
   return listCaptureDrafts()
     .filter((draft) => draft.indicadorId === indicator.id && draft.estado !== "cerrado")
@@ -1056,11 +1136,28 @@ export function getIndicatorByCode(code: string) {
 export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator>) {
   requireDirector(session);
 
-  if (!input.code?.trim() || !input.name?.trim()) {
+  const normalizedCode = input.code?.trim() ?? "";
+
+  if (!normalizedCode || !input.name?.trim()) {
     throw new SigiValidationError("El indicador debe incluir código y nombre.");
   }
 
-  const existing = input.id ? indicators.get(Number(input.id)) : getIndicatorByCode(input.code);
+  if (!/^[A-Za-z0-9]+(?:[._-][A-Za-z0-9]+)*$/.test(normalizedCode)) {
+    throw new SigiValidationError("El código del indicador contiene caracteres no válidos.");
+  }
+
+  const existingById = input.id ? indicators.get(Number(input.id)) : undefined;
+  const existingByCode = getIndicatorByCode(normalizedCode);
+
+  if (existingById && existingById.code !== normalizedCode) {
+    throw new SigiValidationError("El código de un indicador existente no puede cambiarse.");
+  }
+
+  if (!existingById && existingByCode) {
+    throw new SigiValidationError("Ya existe un indicador con ese código.");
+  }
+
+  const existing = existingById;
   const id = existing?.id ?? nextIndicatorId();
   const responsibleIds = normalizeResponsibleIds(input.responsibleIds, input.responsibleNames);
   const primaryResponsibleId = input.primaryResponsibleId ?? responsibleIds[0] ?? 1;
@@ -1068,33 +1165,71 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
   const lastChange = existing?.active === false && input.active !== false
     ? "habilitado"
     : isNewIndicator ? "creado" : "actualizado";
-  const nextContributorNames = input.contributorNames ?? existing?.contributorNames ?? [];
-  const targetsResponsibleContributors =
-    nextContributorNames.length > 0 && !targetsPlanteles(nextContributorNames);
-  const contributorResponsibleIds = targetsResponsibleContributors
-    ? normalizeOptionalResponsibleIds(input.contributorResponsibleIds, nextContributorNames)
-    : [];
+  const requestedContributorNames = input.contributorNames ?? existing?.contributorNames ?? [];
   const inputHasPlantelIds = Object.prototype.hasOwnProperty.call(input, "plantelIds");
+  const normalizedInputPlantelIds = normalizePlantelScope(input.plantelIds ?? []);
+  const plantelIdsChanged = inputHasPlantelIds && (
+    !existing || !sameNumberSet(normalizedInputPlantelIds, existing.plantelIds)
+  );
+  const resolvedContributorResponsibleIds = normalizeOptionalResponsibleIds(
+    input.contributorResponsibleIds,
+    requestedContributorNames
+  );
+  const hasResponsibleContributorInput = resolvedContributorResponsibleIds.length > 0;
   const isOfficialImportedIndicator = Boolean(
-    initialIndicators.find((indicator) => indicator.code === input.code && indicator.plantelScopeSource === "official-import")
+    initialIndicators.find((indicator) => indicator.code === normalizedCode && indicator.plantelScopeSource === "official-import")
   );
-  const nextPlantelIds = normalizePlantelScope(
-    inputHasPlantelIds
-      ? input.plantelIds ?? []
-      : existing?.plantelIds ??
-        (isNewIndicator && targetsPlanteles(nextContributorNames) ? allPlantelIds() : officialSourcePlantelIds)
+  const requestedScopeIsConsistent = input.operationalScope === undefined || (
+    input.operationalScope === "specific_responsables"
+      ? hasResponsibleContributorInput && normalizedInputPlantelIds.length === 0
+      : input.operationalScope === "specific_planteles"
+        ? normalizedInputPlantelIds.length > 0 && !hasResponsibleContributorInput
+        : input.operationalScope === "all_planteles"
+          ? !hasResponsibleContributorInput
+          : normalizedInputPlantelIds.length === 0 && !hasResponsibleContributorInput
   );
+  const operationalScope: SigiOperationalScope = input.operationalScope && requestedScopeIsConsistent
+    ? input.operationalScope
+    : hasResponsibleContributorInput
+      ? "specific_responsables"
+      : inputHasPlantelIds
+        ? normalizedInputPlantelIds.length === 0
+          ? "specific_planteles"
+          : sameNumberSet(normalizedInputPlantelIds, allPlantelIds()) ? "all_planteles" : "specific_planteles"
+        : existing ? operationalScopeForIndicator(existing) : "all_planteles";
+  const nextContributorNames = operationalScope === "specific_responsables"
+    ? requestedContributorNames
+    : operationalScope === "none" ? [] : ["Planteles"];
+  const contributorResponsibleIds = operationalScope === "specific_responsables"
+    ? resolvedContributorResponsibleIds
+    : [];
+  const scopedPlantelIds = inputHasPlantelIds
+    ? input.plantelIds ?? []
+    : existing?.plantelIds?.length
+      ? existing.plantelIds
+      : officialIndicatorPlantelScopes[normalizedCode] ?? officialSourcePlantelIds;
+  const nextPlantelIds = operationalScope === "all_planteles"
+    ? allPlantelIds()
+    : operationalScope === "specific_planteles"
+      ? normalizePlantelScope(scopedPlantelIds)
+      : [];
   const preservesOfficialImportedScope =
     isOfficialImportedIndicator &&
+    !plantelIdsChanged &&
+    (!input.operationalScope || input.operationalScope === existing?.operationalScope) &&
     nextPlantelIds.length === 0;
 
-  if (nextPlantelIds.length === 0 && !preservesOfficialImportedScope && !targetsResponsibleContributors) {
-    throw new SigiValidationError("Asigna al menos un plantel para habilitar captura.");
+  if (operationalScope === "specific_planteles" && nextPlantelIds.length === 0) {
+    throw new SigiValidationError("Selecciona al menos un plantel específico.");
+  }
+
+  if (operationalScope === "specific_responsables" && contributorResponsibleIds.length === 0) {
+    throw new SigiValidationError("Selecciona al menos un responsable específico.");
   }
 
   const indicator: SigiIndicator = {
     id,
-    code: input.code.trim(),
+    code: normalizedCode,
     name: input.name.trim(),
     description: input.description?.trim() || input.name.trim(),
     dataType: input.dataType ?? inferDataType(input.name),
@@ -1107,9 +1242,12 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
     contributorNames: nextContributorNames,
     activities: input.activities?.filter(Boolean) ?? existing?.activities ?? ["Actividad general"],
     plantelIds: nextPlantelIds,
+    operationalScope,
     plantelScopeSource: preservesOfficialImportedScope
       ? "official-import"
-      : inputHasPlantelIds ? "manual" : existing?.plantelScopeSource ?? "manual",
+      : plantelIdsChanged || (input.operationalScope && input.operationalScope !== existing?.operationalScope)
+        ? "manual"
+        : existing?.plantelScopeSource ?? "manual",
     templateColumns: sanitizeTemplateColumns(input.templateColumns ?? existing?.templateColumns),
     evidenceRules: sanitizeEvidenceRules(input.evidenceRules ?? existing?.evidenceRules),
     updatedAt: new Date().toISOString(),
@@ -1118,7 +1256,12 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
   };
 
   indicators.set(id, indicator);
-  syncUserAssignmentsForIndicator(indicator, existing?.responsibleIds ?? [], existing?.contributorResponsibleIds ?? []);
+  syncUserAssignmentsForIndicator(
+    indicator,
+    existing?.responsibleIds ?? [],
+    existing?.contributorResponsibleIds ?? [],
+    session
+  );
   persistCatalogState();
   return indicator;
 }
@@ -1843,7 +1986,7 @@ function reportScopeSummary({
   hasPlantelFilter: boolean;
 }) {
   if (identityPlantel) {
-    return `Plantel unico: ${identityPlantel.name}`;
+    return `Plantel único: ${identityPlantel.name}`;
   }
 
   if (session.role === "responsable") {
@@ -1853,7 +1996,7 @@ function reportScopeSummary({
   const rowPlanteles = uniqueStrings(rows.map((row) => row.plantel).filter(Boolean));
 
   if (rowPlanteles.length === 1) {
-    return `Plantel unico: ${rowPlanteles[0]}`;
+    return `Plantel único: ${rowPlanteles[0]}`;
   }
 
   if (rowPlanteles.length > 1) {
@@ -2372,6 +2515,9 @@ function buildIndicators() {
       activities: [row.activity || "Actividad general"],
       plantelIds: [...officialSourcePlantelIds],
       plantelScopeSource: "official-import",
+      operationalScope: officialIndicatorPlantelScopes[row.code]?.length
+        ? "specific_planteles"
+        : "none",
       updatedAt: officialCatalogImportedAt,
       updatedBy: "Sistema",
       lastChange: "importado"
@@ -2498,6 +2644,12 @@ function normalizePersistedIndicator(indicator: SigiIndicator): SigiIndicator {
     period: shouldUseSeededOfficialMetadata ? seededIndicator.period : indicator.period,
     plantelIds: shouldUseSeededPlantelScope ? seededIndicator!.plantelIds : plantelIds,
     plantelScopeSource: indicator.plantelScopeSource ?? seededIndicator?.plantelScopeSource ?? "manual",
+    operationalScope: indicator.operationalScope ?? (
+      seededIndicator?.operationalScope ?? operationalScopeForIndicator({
+        ...indicator,
+        plantelIds: shouldUseSeededPlantelScope ? seededIndicator!.plantelIds : plantelIds
+      })
+    ),
     responsibleIds: indicator.responsibleIds?.length ? indicator.responsibleIds : seededIndicator?.responsibleIds ?? [1],
     responsibleNames: indicator.responsibleNames?.length ? indicator.responsibleNames : seededIndicator?.responsibleNames ?? namesForResponsibleIds([1]),
     contributorResponsibleIds: normalizePersistedContributorResponsibleIds(indicator, seededIndicator),
@@ -3071,7 +3223,8 @@ function syncIndicatorAssignmentsForUser(user: SigiUser, shouldSync: boolean) {
 function syncUserAssignmentsForIndicator(
   indicator: SigiIndicator,
   previousResponsibleIds: number[],
-  previousContributorResponsibleIds: number[] = []
+  previousContributorResponsibleIds: number[] = [],
+  actor?: SigiSession
 ) {
   if (!isVisibleOperationalIndicatorCode(indicator.code)) {
     return;
@@ -3087,6 +3240,8 @@ function syncUserAssignmentsForIndicator(
     ...indicator.responsibleIds,
     ...(indicator.contributorResponsibleIds ?? [])
   ]);
+
+  let createdNotification = false;
 
   users.forEach((user, userId) => {
     if (user.role !== "responsable" || !user.responsableId || !affectedResponsibleIds.has(user.responsableId)) {
@@ -3106,7 +3261,56 @@ function syncUserAssignmentsForIndicator(
         ? [...user.indicatorCodes, indicator.code].sort((a, b) => a.localeCompare(b, "es", { numeric: true }))
         : user.indicatorCodes.filter((code) => code !== indicator.code)
     });
+
+    if (actor) {
+      createdNotification = recordAssignmentNotification(actor, user, indicator, isAssigned) || createdNotification;
+    }
   });
+
+  if (createdNotification) {
+    persistNotificationState();
+  }
+}
+
+function recordAssignmentNotification(
+  actor: SigiSession,
+  targetUser: SigiUser,
+  indicator: SigiIndicator,
+  isAssigned: boolean
+) {
+  const idempotencyKey = [
+    "assignment_changed",
+    indicator.id,
+    indicator.updatedAt ?? "",
+    targetUser.id,
+    isAssigned ? "assigned" : "removed"
+  ].join(":");
+
+  if (Array.from(notifications.values()).some((notification) => notification.idempotencyKey === idempotencyKey)) {
+    return false;
+  }
+
+  const notification: SigiNotification = {
+    id: nextNotificationId,
+    rolDestino: targetUser.role,
+    usuarioDestino: targetUser.id,
+    indicadorId: indicator.id,
+    indicadorCodigo: indicator.code,
+    indicadorNombre: indicator.name,
+    eventType: "assignment_changed",
+    idempotencyKey,
+    mensaje: isAssigned
+      ? `Se te asignó el indicador ${indicator.code}.`
+      : `Se retiró tu asignación al indicador ${indicator.code}.`,
+    createdAt: new Date().toISOString(),
+    readAt: null,
+    actorUserId: actor.userId,
+    actorRole: actor.role
+  };
+
+  nextNotificationId += 1;
+  notifications.set(notification.id, notification);
+  return true;
 }
 
 function persistNotificationState() {
@@ -3124,12 +3328,12 @@ function persistAuditState() {
 }
 
 function notificationTargetsForCapture(
-  event: "submitted" | "correction_requested" | "approved",
+  event: "submitted" | "resubmitted" | "correction_requested" | "approved",
   indicator: SigiIndicator,
   draft: CaptureDraft,
   actor?: SigiSession
 ) {
-  if (event === "submitted") {
+  if (event === "submitted" || event === "resubmitted") {
     return Array.from(users.values())
       .filter((user) =>
         user.active &&
@@ -3151,14 +3355,18 @@ function notificationTargetsForCapture(
 }
 
 function notificationMessage(
-  event: "submitted" | "correction_requested" | "approved",
+  event: Exclude<SigiNotificationEvent, "assignment_changed">,
   indicator: SigiIndicator,
   plantelName?: string
 ) {
   const scope = plantelName ? ` de ${plantelName}` : "";
 
-  if (event === "submitted") {
+  if (event === "capture_submitted") {
     return `Nueva captura en revisión${scope}: ${indicator.code}.`;
+  }
+
+  if (event === "capture_resubmitted") {
+    return `Captura corregida y reenviada${scope}: ${indicator.code}.`;
   }
 
   if (event === "correction_requested") {
@@ -3262,12 +3470,14 @@ function actorNameForSession(session: SigiSession) {
 }
 
 function plantelScopeLabel(indicator: SigiIndicator) {
-  if (
-    indicator.plantelScopeSource === "official-import" &&
-    indicator.plantelIds.length === 0 &&
-    !officialIndicatorPlantelScopes[indicator.code]?.length
-  ) {
-    return "Responsable";
+  const operationalScope = operationalScopeForIndicator(indicator);
+
+  if (operationalScope === "none") {
+    return "Sin alcance operativo";
+  }
+
+  if (operationalScope === "specific_responsables") {
+    return "Responsables específicos";
   }
 
   const effectivePlantelIds = effectivePlantelIdsForIndicator(indicator);
@@ -3288,6 +3498,16 @@ function plantelScopeLabel(indicator: SigiIndicator) {
 }
 
 function effectivePlantelIdsForIndicator(indicator: SigiIndicator) {
+  const operationalScope = operationalScopeForIndicator(indicator);
+
+  if (operationalScope === "none" || operationalScope === "specific_responsables") {
+    return [];
+  }
+
+  if (operationalScope === "all_planteles") {
+    return allPlantelIds();
+  }
+
   if (indicator.plantelIds.length > 0) {
     return indicator.plantelIds;
   }
@@ -3308,7 +3528,7 @@ function isOperationalCatalogRow(row: (typeof officialCatalogRows)[number]) {
 }
 
 function isVisibleOperationalIndicatorCode(code: string) {
-  return !isSyntheticIndicatorCode(code) && !hiddenImportedIndicatorCodes.has(code);
+  return !isSyntheticIndicatorCode(code) && !code.startsWith("TMP-") && !hiddenImportedIndicatorCodes.has(code);
 }
 
 function officialImportEvidencePlantelIds(code?: string) {
@@ -4148,6 +4368,33 @@ function normalizeOptionalResponsibleIds(ids?: number[], names?: string[]) {
   }
 
   return [];
+}
+
+function operationalScopeForIndicator(indicator: SigiIndicator): SigiOperationalScope {
+  if (indicator.operationalScope) {
+    return indicator.operationalScope;
+  }
+
+  if (
+    (indicator.contributorResponsibleIds?.length ?? 0) > 0 ||
+    (indicator.contributorNames.length > 0 && !targetsPlanteles(indicator.contributorNames))
+  ) {
+    return "specific_responsables";
+  }
+
+  const explicitPlantelIds = normalizePlantelScope(indicator.plantelIds ?? []);
+  const officialPlantelIds = officialIndicatorPlantelScopes[indicator.code] ?? [];
+  const effectiveIds = explicitPlantelIds.length > 0 ? explicitPlantelIds : officialPlantelIds;
+
+  if (sameNumberSet(effectiveIds, allPlantelIds())) {
+    return "all_planteles";
+  }
+
+  if (effectiveIds.length > 0) {
+    return "specific_planteles";
+  }
+
+  return "none";
 }
 
 function normalizePersistedContributorResponsibleIds(indicator: SigiIndicator, seededIndicator?: SigiIndicator) {

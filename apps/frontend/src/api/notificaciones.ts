@@ -7,10 +7,12 @@ export type SigiNotification = {
   indicadorId: number;
   indicadorCodigo: string;
   indicadorNombre: string;
-  captureId: number;
+  captureId?: number;
   plantelId?: number;
   plantel?: string;
-  estado: 'borrador' | 'en_revision' | 'correccion_solicitada' | 'aprobado' | 'cerrado';
+  estado?: 'borrador' | 'en_revision' | 'correccion_solicitada' | 'aprobado' | 'cerrado';
+  eventType?: 'capture_submitted' | 'capture_resubmitted' | 'correction_requested' | 'capture_approved' | 'assignment_changed';
+  idempotencyKey?: string;
   mensaje: string;
   createdAt: string;
   readAt: string | null;
