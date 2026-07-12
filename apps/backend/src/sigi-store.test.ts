@@ -30,6 +30,7 @@ import {
   planteles,
   recordAuditEvent,
   recordCaptureNotification,
+  reconcilePersistedAssignments,
   reloadSigiStateFromPersistence,
   resetUserPassword,
   recordEvidenceOpened,
@@ -209,6 +210,37 @@ describe("SIGI store and RBAC", () => {
         decimals: 2
       }
     });
+  });
+
+  it("removes stale responsible IDs and rebuilds names and user assignments", () => {
+    const source = getIndicatorByCode("4.1.1.1.1");
+    expect(source).toBeDefined();
+
+    const result = reconcilePersistedAssignments(
+      [{
+        ...source!,
+        primaryResponsibleId: 2,
+        responsibleIds: [2, 11, 13],
+        responsibleNames: ["Angel Ordoñez", "gael2", "Andy"]
+      }],
+      [{
+        id: "responsable-2",
+        username: "resp02",
+        name: "Angel Ordoñez",
+        role: "responsable",
+        responsableId: 2,
+        indicatorCodes: ["1.0.0.0.2"],
+        active: true,
+        passwordHash: "test"
+      }]
+    );
+
+    expect(result.indicators[0]).toMatchObject({
+      primaryResponsibleId: 2,
+      responsibleIds: [2],
+      responsibleNames: ["Angel Ordoñez"]
+    });
+    expect(result.users[0].indicatorCodes).toEqual(["4.1.1.1.1"]);
   });
 
   it("preserves an official plantel scope when the director saves its effective ids unchanged", () => {

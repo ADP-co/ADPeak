@@ -440,6 +440,8 @@ export function reloadSigiStateFromPersistence() {
     users.set(normalizedUser.id, normalizedUser);
   }
 
+  reconcileCurrentAssignments();
+
   notifications.clear();
   for (const notification of persistedNotifications) {
     notifications.set(notification.id, notification);
@@ -2333,8 +2335,19 @@ function isWorkbookFileReference(value: string) {
 }
 
 function responsibleReportLabel(indicator: SigiIndicator) {
-  const reviewerNames = namesForResponsibleIds(indicator.responsibleIds);
-  const contributorNames = namesForResponsibleIds(indicator.contributorResponsibleIds ?? []);
+  const reviewerIds = uniqueNumbers([
+    indicator.primaryResponsibleId,
+    ...indicator.responsibleIds
+  ]).sort((left, right) => {
+    if (left === indicator.primaryResponsibleId) return -1;
+    if (right === indicator.primaryResponsibleId) return 1;
+    return left - right;
+  });
+  const reviewerNames = namesForResponsibleIds(reviewerIds);
+  const reviewerIdSet = new Set(reviewerIds);
+  const contributorNames = namesForResponsibleIds(
+    (indicator.contributorResponsibleIds ?? []).filter((id) => !reviewerIdSet.has(id))
+  );
 
   if (reviewerNames.length <= 1 && contributorNames.length === 0) {
     return reviewerNames[0] ?? "Responsable asignado";
@@ -3418,6 +3431,73 @@ function persistCatalogState() {
     users: Array.from(users.values()),
     indicators: Array.from(indicators.values())
   });
+}
+
+function reconcileCurrentAssignments() {
+  const reconciled = reconcilePersistedAssignments(
+    Array.from(indicators.values()),
+    Array.from(users.values())
+  );
+
+  indicators.clear();
+  reconciled.indicators.forEach((indicator) => indicators.set(indicator.id, indicator));
+  users.clear();
+  reconciled.users.forEach((user) => users.set(user.id, user));
+}
+
+export function reconcilePersistedAssignments(
+  indicatorItems: SigiIndicator[],
+  userItems: SigiUser[]
+) {
+  const responsibleUsers = new Map(
+    userItems
+      .filter((user) => user.role === "responsable" && user.active && user.responsableId)
+      .map((user) => [user.responsableId!, user])
+  );
+
+  const reconciledIndicators = indicatorItems.map((indicator) => {
+    const seededIndicator = initialIndicators.find((item) => item.code === indicator.code);
+    const seededResponsibleIds = (seededIndicator?.responsibleIds ?? []).filter((id) => responsibleUsers.has(id));
+    const responsibleIds = uniqueNumbers(indicator.responsibleIds.filter((id) => responsibleUsers.has(id)));
+    const effectiveResponsibleIds = responsibleIds.length > 0 ? responsibleIds : seededResponsibleIds;
+    const contributorResponsibleIds = uniqueNumbers(
+      (indicator.contributorResponsibleIds ?? []).filter((id) => responsibleUsers.has(id))
+    );
+    const primaryResponsibleId = effectiveResponsibleIds.includes(indicator.primaryResponsibleId)
+      ? indicator.primaryResponsibleId
+      : effectiveResponsibleIds[0] ?? seededIndicator?.primaryResponsibleId ?? indicator.primaryResponsibleId;
+    const contributorNames = contributorResponsibleIds.length > 0
+      ? contributorResponsibleIds.map((id) => responsibleUsers.get(id)!.name)
+      : targetsPlanteles(indicator.contributorNames)
+        ? ["Planteles"]
+        : [];
+
+    return {
+      ...indicator,
+      primaryResponsibleId,
+      responsibleIds: effectiveResponsibleIds,
+      responsibleNames: effectiveResponsibleIds.map((id) => responsibleUsers.get(id)!.name),
+      contributorResponsibleIds,
+      contributorNames
+    };
+  });
+
+  const reconciledUsers = userItems.map((user) => {
+    if (user.role !== "responsable" || !user.responsableId) {
+      return user;
+    }
+
+    const indicatorCodes = reconciledIndicators
+      .filter((indicator) =>
+        indicator.responsibleIds.includes(user.responsableId!) ||
+        (indicator.contributorResponsibleIds ?? []).includes(user.responsableId!)
+      )
+      .map((indicator) => indicator.code);
+
+    return { ...user, indicatorCodes: uniqueStrings(indicatorCodes) };
+  });
+
+  return { indicators: reconciledIndicators, users: reconciledUsers };
 }
 
 function syncIndicatorAssignmentsForUser(user: SigiUser, shouldSync: boolean) {
