@@ -2087,7 +2087,7 @@ export function buildReportPayload(
         return filterReportRowsByStatus([{
           registro_id: `${indicator.code}-${plantel.id}-${activityIndex + 1}`,
           actividad: activity || "Actividad general",
-          responsable: indicator.responsibleNames.join(", "),
+          responsable: responsibleReportLabel(indicator),
           estado: "Borrador" as const,
           avance: "0%",
           plantel: plantel.name,

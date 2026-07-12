@@ -243,6 +243,35 @@ describe("SIGI store and RBAC", () => {
     expect(result.users[0].indicatorCodes).toEqual(["4.1.1.1.1"]);
   });
 
+  it("uses one canonical responsible label for base report rows", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const source = getIndicatorByCode("1.1.2.5.3");
+    expect(source).toBeDefined();
+
+    saveIndicator(director, {
+      ...source!,
+      primaryResponsibleId: 2,
+      responsibleIds: [1, 2],
+      plantelIds: [3],
+      operationalScope: "specific_planteles",
+      contributorNames: ["Planteles"]
+    });
+
+    const report = buildReportPayload(director, {
+      tipo: "avance",
+      plantelId: "3",
+      periodo: "2026-A"
+    });
+    const labels = report.indicadores.flatMap((indicator) =>
+      indicator.id === source!.code ? indicator.datos.map((row) => row.responsable) : []
+    );
+
+    expect(labels.length).toBeGreaterThan(0);
+    expect(new Set(labels)).toEqual(new Set([
+      "Principal: Angel Ordoñez; Revisores: Adriana Ruiz Rivera"
+    ]));
+  });
+
   it("preserves an official plantel scope when the director saves its effective ids unchanged", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const original = getIndicatorByCode("1.0.0.0.2")!;
