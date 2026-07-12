@@ -11,4 +11,14 @@ describe("production runtime contract", () => {
 
     expect(packageJson.engines?.node).toBe("22.x");
   });
+
+  it("excludes certification artifacts and secrets from Vercel uploads", () => {
+    const ignorePath = path.resolve(process.cwd(), "..", "..", ".vercelignore");
+    const patterns = readFileSync(ignorePath, "utf8").split(/\r?\n/);
+
+    expect(patterns).toContain(".env*");
+    expect(patterns).toContain("output/");
+    expect(patterns).toContain(".playwright-cli/");
+    expect(patterns).toContain("docs/project/qa-runs/");
+  });
 });

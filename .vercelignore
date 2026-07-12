@@ -1,0 +1,12 @@
+.vercel/
+.env*
+node_modules/
+output/
+.playwright-cli/
+docs/project/PLAN_FORMAL_PRUEBAS_ADPEAK.md
+docs/project/qa-runs/
+*.csv
+*.pdf
+*.xlsx
+*.xls
+*.zip
