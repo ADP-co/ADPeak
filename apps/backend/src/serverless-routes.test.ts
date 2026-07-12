@@ -6,6 +6,13 @@ function workspaceSource(path: string) {
 }
 
 describe("serverless route parity", () => {
+  it("loads the ESM state store lazily from the CommonJS Vercel entrypoint", () => {
+    const router = workspaceSource("api/v1/router.ts");
+
+    expect(router).toContain('await import("../../apps/backend/src/state-store.js")');
+    expect(router).not.toContain('from "../../apps/backend/src/state-store"');
+  });
+
   it("routes authenticated evidence requests with hardened PDF responses in both runtimes", () => {
     const router = workspaceSource("api/v1/router.ts");
     const handlers = workspaceSource("api/_lib/sigi-handlers.ts");

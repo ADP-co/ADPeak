@@ -17,7 +17,6 @@ import {
   handleUsers,
 } from "../_lib/sigi-handlers";
 import { applyCors, handleOptions } from "../_lib/http";
-import { withPersistedStateMutation } from "../../apps/backend/src/state-store";
 
 export default async function handler(request: any, response: any) {
   if (handleOptions(request, response)) {
@@ -33,6 +32,7 @@ export default async function handler(request: any, response: any) {
     path !== "auth/login" &&
     ["POST", "PUT", "PATCH"].includes(String(request.method ?? "").toUpperCase())
   ) {
+    const { withPersistedStateMutation } = await import("../../apps/backend/src/state-store.js");
     await withPersistedStateMutation(dispatch);
     return;
   }
