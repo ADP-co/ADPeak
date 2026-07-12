@@ -1,4 +1,5 @@
 import {
+  handleAuditEvents,
   handleCaptureAction,
   handleCaptureEvidence,
   handleCaptureDrafts,
@@ -16,6 +17,7 @@ import {
   handleUsers,
 } from "../_lib/sigi-handlers";
 import { applyCors, handleOptions } from "../_lib/http";
+import { withPersistedStateMutation } from "../../apps/backend/src/state-store";
 
 export default async function handler(request: any, response: any) {
   if (handleOptions(request, response)) {
@@ -25,6 +27,20 @@ export default async function handler(request: any, response: any) {
   applyCors(response);
 
   const path = routePath(request);
+  const dispatch = () => dispatchRequest(request, response, path);
+
+  if (
+    path !== "auth/login" &&
+    ["POST", "PUT", "PATCH"].includes(String(request.method ?? "").toUpperCase())
+  ) {
+    await withPersistedStateMutation(dispatch);
+    return;
+  }
+
+  await dispatch();
+}
+
+async function dispatchRequest(request: any, response: any, path: string) {
 
   if (path === "auth/login") {
     await handleLogin(request, response);
@@ -54,6 +70,11 @@ export default async function handler(request: any, response: any) {
 
   if (path === "indicadores/historial") {
     await handleIndicatorHistory(request, response);
+    return;
+  }
+
+  if (path === "auditoria") {
+    await handleAuditEvents(request, response);
     return;
   }
 

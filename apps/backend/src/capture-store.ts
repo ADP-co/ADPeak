@@ -44,7 +44,18 @@ export type CaptureDraftRequest = {
   responsableId?: number;
   payload: CapturePayload;
   motivoCambio?: string;
+  expectedVersion?: number;
 };
+
+export class CaptureVersionConflictError extends Error {
+  statusCode = 409;
+  code = "capture_version_conflict";
+
+  constructor(public readonly currentVersion: number) {
+    super("La captura cambió en otra sesión. Recarga antes de guardar de nuevo.");
+    this.name = "CaptureVersionConflictError";
+  }
+}
 
 const captureDrafts = new Map<number, CaptureDraft>();
 let nextCaptureId = 1;
@@ -77,7 +88,8 @@ export function isCaptureDraftRequest(value: unknown): value is CaptureDraftRequ
     isPositiveInteger(value.indicadorId) &&
     isPositiveInteger(value.actividadId) &&
     isPositiveInteger(value.periodoId) &&
-    (value.responsableId === undefined || isPositiveInteger(value.responsableId))
+    (value.responsableId === undefined || isPositiveInteger(value.responsableId)) &&
+    (value.expectedVersion === undefined || isPositiveInteger(value.expectedVersion))
   );
 }
 
@@ -117,6 +129,8 @@ export function createCaptureDraft(request: CaptureDraftRequest): CaptureDraft {
     if (!isEditableDraft(existingDraft)) {
       return existingDraft;
     }
+
+    assertExpectedVersion(existingDraft, request.expectedVersion);
 
     const updatedDraft: CaptureDraft = {
       ...existingDraft,
@@ -189,7 +203,7 @@ export function listCaptureDrafts() {
 export function updateCaptureDraft(
   captureId: number,
   payload: CapturePayload,
-  options: { allowReviewStatus?: boolean } = {}
+  options: { allowReviewStatus?: boolean; expectedVersion?: number } = {}
 ) {
   const draft = captureDrafts.get(captureId);
 
@@ -202,6 +216,8 @@ export function updateCaptureDraft(
   if (!isEditableDraft(draft) && !canUpdateReviewDraft) {
     return undefined;
   }
+
+  assertExpectedVersion(draft, options.expectedVersion);
 
   const updatedDraft: CaptureDraft = {
     ...draft,
@@ -218,7 +234,8 @@ export function updateCaptureDraft(
 
 export function sendCaptureToReview(
   captureId: number,
-  submittedBy?: { userId: string; role: CaptureDraft["submittedByRole"] }
+  submittedBy?: { userId: string; role: CaptureDraft["submittedByRole"] },
+  expectedVersion?: number
 ) {
   const draft = captureDrafts.get(captureId);
 
@@ -229,6 +246,8 @@ export function sendCaptureToReview(
   if (!isEditableDraft(draft)) {
     return undefined;
   }
+
+  assertExpectedVersion(draft, expectedVersion);
 
   const updatedDraft: CaptureDraft = {
     ...draft,
@@ -244,7 +263,7 @@ export function sendCaptureToReview(
   return updatedDraft;
 }
 
-export function requestCaptureCorrection(captureId: number, observacion: string) {
+export function requestCaptureCorrection(captureId: number, observacion: string, expectedVersion?: number) {
   const draft = captureDrafts.get(captureId);
 
   if (!draft) {
@@ -254,6 +273,8 @@ export function requestCaptureCorrection(captureId: number, observacion: string)
   if (draft.estado !== "en_revision") {
     return undefined;
   }
+
+  assertExpectedVersion(draft, expectedVersion);
 
   const updatedDraft: CaptureDraft = {
     ...draft,
@@ -268,7 +289,7 @@ export function requestCaptureCorrection(captureId: number, observacion: string)
   return updatedDraft;
 }
 
-export function approveCapture(captureId: number) {
+export function approveCapture(captureId: number, expectedVersion?: number) {
   const draft = captureDrafts.get(captureId);
 
   if (!draft) {
@@ -278,6 +299,8 @@ export function approveCapture(captureId: number) {
   if (draft.estado !== "en_revision") {
     return undefined;
   }
+
+  assertExpectedVersion(draft, expectedVersion);
 
   const updatedDraft: CaptureDraft = {
     ...draft,
@@ -301,6 +324,12 @@ function persistCaptureState() {
 
 function isEditableDraft(draft: CaptureDraft) {
   return draft.estado === "borrador" || draft.estado === "correccion_solicitada";
+}
+
+function assertExpectedVersion(draft: CaptureDraft, expectedVersion?: number) {
+  if (expectedVersion !== undefined && draft.versionActual !== expectedVersion) {
+    throw new CaptureVersionConflictError(draft.versionActual);
+  }
 }
 
 function withEvidenceMetadata(payload: CapturePayload, captureId: number): CapturePayload {

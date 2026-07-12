@@ -18,14 +18,17 @@ import {
   deactivateIndicator,
   deactivateUser,
   getIndicatorByCode,
+  listAuditEvents,
   listIndicators,
   listIndicatorHistory,
   listNotifications,
   listReviewCaptures,
   listUsers,
   markNotificationRead,
+  mergeInitialUsersForTest,
   officialSourcesPayload,
   planteles,
+  recordAuditEvent,
   recordCaptureNotification,
   reloadSigiStateFromPersistence,
   resetUserPassword,
@@ -50,15 +53,17 @@ describe("SIGI store and RBAC", () => {
     reloadSigiStateFromPersistence();
   });
 
-  const evidencePdf = () => ({
-    nombre: "evidencia-qa.pdf",
-    tipo: "application/pdf",
-    tamanoBytes: 128
-  });
-  const evidencePdfWithContent = () => ({
-    ...evidencePdf(),
-    contenidoBase64: Buffer.from("%PDF-1.4\n% QA\n", "utf8").toString("base64")
-  });
+  const evidencePdf = () => {
+    const content = Buffer.from("%PDF-1.4\n1 0 obj\n<<>>\nendobj\ntrailer\n<<>>\n%%EOF\n", "ascii");
+
+    return {
+      nombre: "evidencia-qa.pdf",
+      tipo: "application/pdf",
+      tamanoBytes: content.length,
+      contenidoBase64: content.toString("base64")
+    };
+  };
+  const evidencePdfWithContent = evidencePdf;
 
   const completedRowsForTemplate = (template: ReturnType<typeof templateForIndicator>) =>
     template.initialRows.map((row, rowIndex) => {
@@ -124,6 +129,11 @@ describe("SIGI store and RBAC", () => {
       plantelIds: [],
       plantelScopeSource: "official-import"
     });
+    const titulation = indicators.find((indicator) => indicator.code === "1.0.0.0.2");
+    const bachillerato4 = sessionFromHeaders({ "x-role": "plantel", "x-plantel-id": "2" });
+
+    expect(titulation?.effectivePlantelIds).toEqual(officialIndicatorPlantelScopes["1.0.0.0.2"]);
+    expect(listIndicators(bachillerato4).some((indicator) => indicator.code === "1.0.0.0.2")).toBe(true);
     expect(listUsers(director).some((user) => user.role === "responsable" && user.indicatorCodes.length > 1)).toBe(true);
   });
 
@@ -201,6 +211,34 @@ describe("SIGI store and RBAC", () => {
     });
   });
 
+  it("preserves an official plantel scope when the director saves its effective ids unchanged", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const original = getIndicatorByCode("1.0.0.0.2")!;
+    const saved = saveIndicator(director, {
+      ...original,
+      operationalScope: "specific_planteles",
+      plantelIds: officialIndicatorPlantelScopes[original.code]
+    });
+
+    expect(saved.plantelScopeSource).toBe("official-import");
+    expect(saved.plantelIds).toEqual([]);
+    expect(listIndicators(director).find((indicator) => indicator.code === original.code)?.effectivePlantelIds)
+      .toEqual(officialIndicatorPlantelScopes[original.code]);
+  });
+
+  it("rejects plantel context for an indicator assigned only to specific responsables", () => {
+    const responsable = sessionFromHeaders({ "x-role": "responsable", "x-responsable-id": "1" });
+    const indicator = {
+      ...getIndicatorByCode("1.0.0.0.2")!,
+      operationalScope: "specific_responsables" as const,
+      plantelIds: [],
+      contributorResponsibleIds: [1],
+      contributorNames: ["Adriana Ruiz Rivera"]
+    };
+
+    expect(() => templateSessionForPlantelScope(responsable, indicator, 1)).toThrow(SigiForbiddenError);
+  });
+
   it("exposes sanitized calculation references that point to real template keys", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const template = templateForIndicator(getIndicatorByCode("1.0.0.0.2")!, director);
@@ -226,37 +264,37 @@ describe("SIGI store and RBAC", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const users = listUsers(director);
 
-    expect(authenticateUser("director", "Director2026!")).toMatchObject({
+    expect(authenticateUser("director", "TestDirector-Only!")).toMatchObject({
       id: "director-1",
       role: "admin"
     });
-    expect(authenticateUser("admin", "Director2026!")).toMatchObject({
+    expect(authenticateUser("admin", "TestDirector-Only!")).toMatchObject({
       id: "director-1",
       role: "admin"
     });
-    expect(authenticateUser("administrador", "Director2026!")).toMatchObject({
+    expect(authenticateUser("administrador", "TestDirector-Only!")).toMatchObject({
       id: "director-1",
       role: "admin"
     });
-    expect(authenticateUser("Director DGEMS", "Director2026!")).toMatchObject({
+    expect(authenticateUser("Director DGEMS", "TestDirector-Only!")).toMatchObject({
       id: "director-1",
       role: "admin"
     });
-    expect(authenticateUser("resp01", "Resp2026!")).toMatchObject({
+    expect(authenticateUser("resp01", "TestResponsible-Only!")).toMatchObject({
       role: "responsable",
       responsableId: 1
     });
-    expect(authenticateUser("bach16", "Plantel2026!")).toMatchObject({
+    expect(authenticateUser("bach16", "TestPlantel-Only!")).toMatchObject({
       role: "plantel",
       plantelId: 1
     });
-    expect(authenticateUser("bach35", "Plantel2026!")).toMatchObject({
+    expect(authenticateUser("bach35", "TestPlantel-Only!")).toMatchObject({
       role: "plantel"
     });
-    expect(authenticateUser("bachlinea", "Plantel2026!")).toMatchObject({
+    expect(authenticateUser("bachlinea", "TestPlantel-Only!")).toMatchObject({
       role: "plantel"
     });
-    expect(authenticateUser("iuba", "Plantel2026!")).toMatchObject({
+    expect(authenticateUser("iuba", "TestPlantel-Only!")).toMatchObject({
       role: "plantel"
     });
     expect(authenticateUser("director", "incorrecta")).toBeUndefined();
@@ -308,6 +346,62 @@ describe("SIGI store and RBAC", () => {
     expect(getIndicatorByCode(targetCode)?.responsibleIds).not.toContain(created.responsableId);
   });
 
+  it("preserves official account credentials and status during catalog migrations", () => {
+    const persistedUsers = [
+      {
+        id: "responsable-1",
+        username: "responsable-personalizado",
+        name: "Responsable Personalizado",
+        role: "responsable" as const,
+        responsableId: 1,
+        indicatorCodes: ["codigo-obsoleto"],
+        active: false,
+        passwordHash: "hash-personalizado"
+      },
+      {
+        id: "plantel-1",
+        username: "plantel-personalizado",
+        name: "Plantel Personalizado",
+        role: "plantel" as const,
+        plantelId: 1,
+        indicatorCodes: ["codigo-obsoleto"],
+        active: true,
+        passwordHash: "hash-plantel-personalizado"
+      },
+      {
+        id: "responsable-99",
+        username: "temporal",
+        name: "Temporal",
+        role: "responsable" as const,
+        responsableId: 99,
+        indicatorCodes: [],
+        active: true,
+        passwordHash: "hash-temporal"
+      }
+    ];
+
+    const migrated = mergeInitialUsersForTest(persistedUsers, true);
+    const responsible = migrated.find((user) => user.id === "responsable-1");
+    const plantel = migrated.find((user) => user.id === "plantel-1");
+
+    expect(migrated).toHaveLength(46);
+    expect(migrated.some((user) => user.id === "responsable-99")).toBe(false);
+    expect(responsible).toMatchObject({
+      username: "responsable-personalizado",
+      name: "Responsable Personalizado",
+      active: false,
+      passwordHash: "hash-personalizado"
+    });
+    expect(responsible?.indicatorCodes).not.toContain("codigo-obsoleto");
+    expect(plantel).toMatchObject({
+      username: "plantel-personalizado",
+      name: "Plantel Personalizado",
+      active: true,
+      passwordHash: "hash-plantel-personalizado",
+      indicatorCodes: []
+    });
+  });
+
   it("allows creating configurable temporary indicators from administration", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const indicator = saveIndicator(director, {
@@ -347,7 +441,7 @@ describe("SIGI store and RBAC", () => {
 
     expect(() =>
       updateOwnPassword(director, {
-        currentPassword: "Director2026!",
+        currentPassword: "TestDirector-Only!",
         newPassword: "corta",
         confirmPassword: "corta"
       })
@@ -355,23 +449,23 @@ describe("SIGI store and RBAC", () => {
 
     expect(() =>
       updateOwnPassword(director, {
-        currentPassword: "Director2026!",
+        currentPassword: "TestDirector-Only!",
         newPassword: "Nueva2026!",
         confirmPassword: "Distinta2026!"
       })
     ).toThrow(SigiValidationError);
 
     expect(updateOwnPassword(director, {
-      currentPassword: "Director2026!",
+      currentPassword: "TestDirector-Only!",
       newPassword: "Nueva2026!",
       confirmPassword: "Nueva2026!"
     })).toMatchObject({ id: "director-1" });
-    expect(authenticateUser("director", "Director2026!")).toBeUndefined();
+    expect(authenticateUser("director", "TestDirector-Only!")).toBeUndefined();
     expect(authenticateUser("director", "Nueva2026!")).toMatchObject({ id: "director-1" });
     updateOwnPassword(director, {
       currentPassword: "Nueva2026!",
-      newPassword: "Director2026!",
-      confirmPassword: "Director2026!"
+      newPassword: "TestDirector-Only!",
+      confirmPassword: "TestDirector-Only!"
     });
   });
 
@@ -473,13 +567,13 @@ describe("SIGI store and RBAC", () => {
       role: "responsable",
       responsableId: 98,
       indicatorCodes: ["1.0.0.0.2"],
-      password: "Resp2026!"
+      password: "TestResponsible-Only!"
     });
 
     deactivateUser(director, blocked.id);
 
-    expect(authenticateUser("resp-bloqueado", "Resp2026!")).toBeUndefined();
-    expect(authenticateUserResult("resp-bloqueado", "Resp2026!")).toMatchObject({
+    expect(authenticateUser("resp-bloqueado", "TestResponsible-Only!")).toBeUndefined();
+    expect(authenticateUserResult("resp-bloqueado", "TestResponsible-Only!")).toMatchObject({
       reason: "inactive_user"
     });
     expect(authenticateUserResult("resp-bloqueado", "incorrecta")).toMatchObject({
@@ -603,6 +697,73 @@ describe("SIGI store and RBAC", () => {
       active: true
     });
     expect(directorHistory.some((item) => item.code === unassigned.code)).toBe(true);
+  });
+
+  it("allows only directors to read audit events and returns them newest first", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const plantel = sessionFromHeaders({ "x-role": "plantel", "x-plantel-id": "1" });
+
+    recordAuditEvent(plantel, {
+      action: "capture_saved",
+      resourceType: "capture",
+      resourceId: "41",
+      status: "ok",
+      requestId: "req-older"
+    });
+    recordAuditEvent(director, {
+      action: "capture_approved",
+      resourceType: "capture",
+      resourceId: "41",
+      status: "ok",
+      requestId: "req-newer"
+    });
+
+    expect(() => listAuditEvents(plantel)).toThrow(SigiForbiddenError);
+    expect(listAuditEvents(director).map((event) => event.requestId)).toEqual([
+      "req-newer",
+      "req-older"
+    ]);
+  });
+
+  it("sanitizes audit snapshots and bounds request IDs before persistence", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const longRequestId = `request-${"x".repeat(300)}`;
+
+    const recorded = recordAuditEvent(director, {
+      action: "capture_updated",
+      resourceType: "capture",
+      resourceId: "52",
+      before: {
+        password: "plain-password",
+        passwordHash: "password-hash",
+        sessionToken: "session-token-value",
+        cookie: "session=cookie-value",
+        authorization: "Bearer authorization-value",
+        storageRef: "private/evidence.pdf",
+        contenidoBase64: Buffer.from("private evidence").toString("base64"),
+        sha256: "a".repeat(64),
+        nested: {
+          safeField: "visible",
+          attachment: "data:application/pdf;base64,private-data"
+        }
+      },
+      after: {
+        estado: "borrador",
+        rows: [{ resultado: 12 }]
+      },
+      status: "ok",
+      requestId: longRequestId
+    });
+    const stored = JSON.stringify(recorded);
+    const listed = JSON.stringify(listAuditEvents(director));
+
+    expect(recorded.requestId).toHaveLength(128);
+    expect(recorded.requestId).toBe(longRequestId.slice(0, 128));
+    expect(stored).toContain('"safeField":"visible"');
+    expect(stored).toContain('"attachment":"[omitido]"');
+    expect(stored).not.toMatch(/plain-password|password-hash|session-token-value|cookie-value|authorization-value|private\/evidence|private-data/);
+    expect(stored).not.toMatch(/passwordHash|sessionToken|contenidoBase64|storageRef|sha256|authorization|cookie/);
+    expect(listed).toBe(stored.startsWith("[") ? stored : `[${stored}]`);
   });
 
   it("scopes report indicators for responsible users", () => {
@@ -730,6 +891,9 @@ describe("SIGI store and RBAC", () => {
     expect(previousCycle.periodo).toBe("2025-2");
     expect(previousCycle.cicloEscolar).toBe("2024-2025");
     expect(currentCycle.indicadores.flatMap((indicator) => indicator.datos).every((row) => row.estado === "Borrador" || row.estado === "Aprobado")).toBe(true);
+    expect(currentCycle.indicadores.flatMap((indicator) => indicator.datos).every((row) =>
+      row.exportable === false && row.blockingIssues?.includes("No hay registros capturados para este indicador.")
+    )).toBe(true);
     expect(previousCycle.indicadores.flatMap((indicator) => indicator.datos).length).toBeLessThan(
       currentCycle.indicadores.flatMap((indicator) => indicator.datos).length
     );
@@ -2080,6 +2244,63 @@ describe("SIGI store and RBAC", () => {
     ).toThrow(SigiValidationError);
   });
 
+  it("rejects evidence whose MIME, size or content does not describe a real PDF", () => {
+    const director = sessionFromHeaders({ "x-role": "director" });
+    const plantel = sessionFromHeaders({
+      "x-role": "plantel",
+      "x-plantel-id": "1",
+      "x-user-id": "plantel-1"
+    });
+    const indicator = saveIndicator(director, {
+      ...getIndicatorByCode("1.0.0.0.2")!,
+      plantelIds: [1]
+    });
+    const rows = completedRowsForTemplate(templateForIndicator(indicator, plantel));
+    const html = Buffer.from("<html><script>alert(1)</script></html>", "utf8");
+    const basePayload = {
+      rows,
+      justificacion: "Captura completa con evidencia oficial."
+    };
+
+    expect(() => assertCaptureAccess(plantel, {
+      plantelId: 1,
+      indicadorId: indicator.id,
+      payload: {
+        ...basePayload,
+        evidencia: {
+          nombre: "evidencia.pdf",
+          tipo: "text/html",
+          tamanoBytes: html.length,
+          contenidoBase64: html.toString("base64")
+        }
+      }
+    }, "draft")).toThrow(/PDF/);
+
+    expect(() => assertCaptureAccess(plantel, {
+      plantelId: 1,
+      indicadorId: indicator.id,
+      payload: {
+        ...basePayload,
+        evidencia: {
+          nombre: "evidencia.pdf",
+          tipo: "application/pdf",
+          tamanoBytes: html.length,
+          contenidoBase64: html.toString("base64")
+        }
+      }
+    }, "draft")).toThrow(/no contiene un PDF/);
+
+    const validEvidence = evidencePdf();
+    expect(() => assertCaptureAccess(plantel, {
+      plantelId: 1,
+      indicadorId: indicator.id,
+      payload: {
+        ...basePayload,
+        evidencia: { ...validEvidence, tamanoBytes: validEvidence.tamanoBytes + 1 }
+      }
+    }, "draft")).toThrow(/tamaño real/);
+  });
+
   it("requires reviewers to open evidence before approving a capture", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const plantel = sessionFromHeaders({
@@ -2118,6 +2339,20 @@ describe("SIGI store and RBAC", () => {
     recordEvidenceOpened(reviewer, sent, "qa-request");
 
     expect(() => assertEvidenceOpenedBeforeApproval(reviewer, sent)).not.toThrow();
+
+    const observed = requestCaptureCorrection(sent.id, "Actualiza la evidencia oficial.", sent.versionActual)!;
+    const corrected = updateCaptureDraft(observed.id, {
+      ...observed.payload,
+      evidencia: evidencePdfWithContent()
+    }, { expectedVersion: observed.versionActual })!;
+    const resent = sendCaptureToReview(corrected.id, {
+      userId: plantel.userId,
+      role: plantel.role
+    }, corrected.versionActual)!;
+
+    expect(() => assertEvidenceOpenedBeforeApproval(reviewer, resent)).toThrow(SigiValidationError);
+    recordEvidenceOpened(reviewer, resent, "qa-request-updated-evidence");
+    expect(() => assertEvidenceOpenedBeforeApproval(reviewer, resent)).not.toThrow();
   });
 
   it("respects indicator evidence rules when opening evidence is not required before approval", () => {
@@ -2424,13 +2659,15 @@ describe("SIGI store and RBAC", () => {
       "x-role": "responsable",
       "x-responsable-id": String(indicator.responsibleIds[0])
     });
-    const bachillerato1 = planteles.find((plantel) => plantel.name === "Bachillerato 1")!;
+    const scopedPlantel = planteles.find((plantel) =>
+      plantel.id === (officialIndicatorPlantelScopes[indicator.code]?.[0] ?? indicator.plantelIds[0])
+    )!;
 
-    const scopedSession = templateSessionForPlantelScope(responsable, indicator, bachillerato1.id);
+    const scopedSession = templateSessionForPlantelScope(responsable, indicator, scopedPlantel.id);
     const template = templateForIndicator(indicator, scopedSession);
 
     expect(template.initialRows[0]).toMatchObject({
-      plantel: "Bachillerato 1"
+      plantel: scopedPlantel.name
     });
   });
 });

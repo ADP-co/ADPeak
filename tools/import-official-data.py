@@ -178,19 +178,42 @@ def catalog_stats(rows: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def frontend_catalog_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    aliases = person_aliases(rows)
-    sanitized = []
+    operational_rows = [
+        row
+        for row in rows
+        if row.get("classification") == "operational"
+        and row.get("visible") is True
+        and not is_synthetic_indicator_code(row.get("code", ""))
+    ]
+    aliases = person_aliases(operational_rows)
+    sanitized: list[dict[str, Any]] = []
+    seen: set[tuple[str, str, str, str]] = set()
 
-    for row in rows:
-        next_row = dict(row)
-        next_row["responsible"] = aliases.get(row["responsible"], "Responsable sin asignar")
-        next_row["contributors"] = ", ".join(
+    for row in operational_rows:
+        responsible = aliases.get(row["responsible"], "Responsable sin asignar")
+        contributors = ", ".join(
             aliases.get(person, "Responsable sin asignar")
             for person in split_people(row["contributors"])
         )
-        sanitized.append(next_row)
+        dedupe_key = (row["code"], responsible, contributors, row["activity"])
+
+        if dedupe_key in seen:
+            continue
+
+        seen.add(dedupe_key)
+        sanitized.append({
+            "code": row["code"],
+            "name": row["name"],
+            "responsible": responsible,
+            "contributors": contributors,
+            "activity": row["activity"],
+        })
 
     return sanitized
+
+
+def is_synthetic_indicator_code(code: str) -> bool:
+    return code.startswith("FMT-") or "-FMT-" in code or code.startswith("TMP-")
 
 
 def person_aliases(rows: list[dict[str, Any]]) -> dict[str, str]:
@@ -1449,40 +1472,6 @@ def first_header_rows(sheets: list[dict[str, Any]]) -> list[list[str]]:
     return []
 
 
-def frontend_workbook_summaries(summaries: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    sanitized = []
-
-    for workbook_index, summary in enumerate(summaries, start=1):
-        next_summary = dict(summary)
-        next_summary["sourceLabel"] = f"{summary['category']} / workbook {workbook_index:02d}"
-        next_summary["privacy"] = "Frontend fallback exposes aggregate workbook structure only."
-        next_summary["detectedReferenceCodes"] = []
-        next_summary["sheets"] = [
-            {
-                **sheet,
-                "name": f"Sheet {sheet_index:02d}",
-                "sampleHeaders": [],
-                "headerRows": [],
-                "codeDescriptions": [],
-            }
-            for sheet_index, sheet in enumerate(summary["sheets"], start=1)
-        ]
-        sanitized.append(next_summary)
-
-    return sanitized
-
-
-def frontend_template_candidates(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    return [
-        {
-            **candidate,
-            "sourcePath": f"private-workbook-{index:02d}",
-            "headerRows": [],
-        }
-        for index, candidate in enumerate(candidates, start=1)
-    ]
-
-
 def synthetic_workbook_code(
     source_path: str,
     digest: str,
@@ -1590,13 +1579,35 @@ def empty_row_for_columns(columns: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def frontend_workbook_templates(templates: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+def frontend_workbook_templates(
+    templates: dict[str, dict[str, Any]],
+    operational_names: dict[str, str],
+) -> dict[str, dict[str, Any]]:
     sanitized: dict[str, dict[str, Any]] = {}
-    for code, template in templates.items():
-        next_template = dict(template)
-        next_template["sourcePath"] = "private-workbook"
-        next_template["sourceLabel"] = f"Formato oficial {code}"
-        sanitized[code] = next_template
+    for code in sorted(operational_names, key=normalize_key):
+        template = templates.get(code)
+        if not template or is_synthetic_indicator_code(code):
+            continue
+
+        sanitized[code] = {
+            "indicatorCode": code,
+            "officialCode": code,
+            "indicatorName": operational_names[code],
+            "activityLabel": "",
+            "sourceLabel": "Development fallback",
+            "sourcePath": "",
+            "sheetName": "",
+            "groups": template["groups"],
+            "headerRows": template.get("headerRows") or [],
+            "columns": template["columns"],
+            "initialRows": template["initialRows"],
+            "showTotals": template["showTotals"],
+            "allowAddRows": template["allowAddRows"],
+            "addRowLabel": template["addRowLabel"],
+            "emptyRow": template["emptyRow"],
+            "footerNote": "",
+            "quality": [],
+        }
     return sanitized
 
 
@@ -1653,6 +1664,24 @@ export const officialCatalogRows: OfficialCatalogRow[] = {json_ts(rows)};
 """
 
 
+def generate_frontend_catalog_file(rows: list[dict[str, Any]], scopes: dict[str, list[int]]) -> str:
+    return f"""// Generated by tools/import-official-data.py for development fallback only.
+// Production catalog and assignment options are served by the backend API.
+
+export type OfficialCatalogRow = {{
+  code: string;
+  name: string;
+  responsible: string;
+  contributors: string;
+  activity: string;
+}};
+
+export const officialIndicatorPlantelScopes: Record<string, number[]> = {json_ts(scopes)};
+
+export const officialCatalogRows: OfficialCatalogRow[] = {json_ts(rows)};
+"""
+
+
 def generate_data_file(
     summaries: list[dict[str, Any]],
     evidence_groups: list[dict[str, Any]],
@@ -1667,10 +1696,10 @@ def generate_data_file(
     nested_total_bytes = sum(group["totalBytes"] for group in evidence_groups)
     source_packages = [path.name for path, _scope, _prefix in official_workbook_archives()]
     summary = {
-        "sourcePackage": ", ".join(source_packages) or INDICADORES_ZIP.name,
+        "sourcePackage": "Development fallback" if frontend else ", ".join(source_packages) or INDICADORES_ZIP.name,
         "plantel": "Indicadores oficiales",
         "generatedAt": "2026-06-30",
-        "topLevelFiles": 3 + (1 if INDICADORES_ZIP.exists() else 0),
+        "topLevelFiles": 0 if frontend else 3 + (1 if INDICADORES_ZIP.exists() else 0),
         "nestedFiles": nested_file_count,
         "nestedTotalBytes": nested_total_bytes,
         "workbookCount": len(summaries),
@@ -1819,20 +1848,34 @@ def main() -> None:
     stats = catalog_stats(rows)
     scopes = catalog_plantel_scopes(rows, detected_scopes)
 
+    public_catalog_rows = frontend_catalog_rows(rows)
+    operational_names = {
+        row["code"]: row["name"]
+        for row in public_catalog_rows
+    }
+    public_scopes = {
+        code: plantel_ids
+        for code, plantel_ids in scopes.items()
+        if code in operational_names
+    }
     backend_catalog_text = generate_catalog_file(rows, stats, scopes)
-    frontend_catalog_text = generate_catalog_file(frontend_catalog_rows(rows), stats, scopes)
+    frontend_catalog_text = generate_frontend_catalog_file(public_catalog_rows, public_scopes)
     backend_data_text = generate_data_file(summaries, evidence_groups, template_candidates, workbook_templates)
     frontend_data_text = generate_data_file(
-        frontend_workbook_summaries(summaries),
-        evidence_groups,
-        frontend_template_candidates(template_candidates),
-        frontend_workbook_templates(workbook_templates),
+        [],
+        [],
+        [],
+        frontend_workbook_templates(workbook_templates, operational_names),
         frontend=True,
     )
 
-    write_text(BACKEND_CATALOG_TARGET, backend_catalog_text)
+    frontend_only = os.environ.get("ADPEAK_FRONTEND_ONLY") == "1"
+
+    if not frontend_only:
+        write_text(BACKEND_CATALOG_TARGET, backend_catalog_text)
+        write_text(BACKEND_DATA_TARGET, backend_data_text)
+
     write_text(FRONTEND_CATALOG_TARGET, frontend_catalog_text)
-    write_text(BACKEND_DATA_TARGET, backend_data_text)
     write_text(FRONTEND_DATA_TARGET, frontend_data_text)
 
     print(json.dumps({
@@ -1840,6 +1883,7 @@ def main() -> None:
         "workbooks": len(summaries),
         "scopedIndicators": len(scopes),
         "workbookTemplates": len(workbook_templates),
+        "frontendOnly": frontend_only,
     }, ensure_ascii=False))
 
 

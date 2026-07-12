@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   createCaptureDraft,
+  CaptureVersionConflictError,
   approveCapture,
   findCaptureDraftByScope,
   getCaptureDraft,
@@ -162,6 +163,38 @@ describe("capture store", () => {
 
     expect(repeatedCreate.payload.rows).toEqual([{ avance: 25 }]);
     expect(getCaptureDraft(draft.id)?.payload.rows).toEqual([{ avance: 25 }]);
+  });
+
+  it("rejects stale updates and stale state transitions", () => {
+    const draft = createCaptureDraft({
+      plantelId: 1,
+      indicadorId: 1,
+      actividadId: 1,
+      periodoId: 1,
+      payload: { rows: [{ avance: 25 }] }
+    });
+    const updated = updateCaptureDraft(draft.id, { rows: [{ avance: 50 }] }, {
+      expectedVersion: draft.versionActual
+    });
+
+    expect(updated?.versionActual).toBe(2);
+    expect(() => updateCaptureDraft(draft.id, { rows: [{ avance: 80 }] }, {
+      expectedVersion: draft.versionActual
+    })).toThrow(CaptureVersionConflictError);
+    expect(getCaptureDraft(draft.id)?.payload.rows).toEqual([{ avance: 50 }]);
+
+    expect(() => sendCaptureToReview(draft.id, undefined, draft.versionActual)).toThrow(
+      CaptureVersionConflictError
+    );
+    const reviewed = sendCaptureToReview(draft.id, undefined, updated?.versionActual);
+    expect(reviewed?.estado).toBe("en_revision");
+
+    expect(() => requestCaptureCorrection(draft.id, "Corregir datos", updated?.versionActual)).toThrow(
+      CaptureVersionConflictError
+    );
+    expect(() => approveCapture(draft.id, updated?.versionActual)).toThrow(
+      CaptureVersionConflictError
+    );
   });
 
   it("persists a stable hash and storage reference for evidence files", () => {

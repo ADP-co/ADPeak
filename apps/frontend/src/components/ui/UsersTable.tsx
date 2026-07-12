@@ -1,8 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
-import { KeyRound, Lock, PlusCircle, Search, Trash2, Unlock, X } from 'lucide-react';
+import { KeyRound, Lock, PlusCircle, Search, Unlock, X } from 'lucide-react';
 import { ConfirmModal } from './ConfirmModal';
-import { catalogPlanteles, deactivateUser, fetchUsers, resetUserPassword, saveUser, type CatalogUser } from '../../api/catalog';
-import { officialCatalogRows } from '../../catalog/officialCatalog.generated';
+import {
+  catalogPlanteles,
+  deactivateUser,
+  fetchIndicators,
+  fetchUsers,
+  resetUserPassword,
+  saveUser,
+  type CatalogIndicator,
+  type CatalogUser,
+} from '../../api/catalog';
 
 export type SystemRole = 'Administrador' | 'Responsable' | 'Plantel';
 
@@ -26,10 +34,26 @@ const KNOWN_PLANTELES = catalogPlanteles.map((plantel) => ({
   name: plantel.name,
 }));
 const MOCK_PLANTELES = ['-', ...KNOWN_PLANTELES.map((plantel) => plantel.label)];
-const INDICATOR_OPTIONS = officialCatalogRows
-  .filter((indicator) => indicator.classification === 'operational' && indicator.visible)
-  .map((indicator) => ({ code: indicator.code, name: indicator.name }))
-  .sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }));
+
+export type IndicatorAssignmentOption = Pick<CatalogIndicator, 'code' | 'name'>;
+
+export function dedupeIndicatorAssignmentOptions(indicators: CatalogIndicator[]) {
+  const options = new Map<string, IndicatorAssignmentOption>();
+
+  indicators.forEach((indicator) => {
+    const code = indicator.code.trim();
+    const key = code.toLocaleLowerCase('es');
+
+    if (!indicator.active || !code || options.has(key)) {
+      return;
+    }
+
+    options.set(key, { code, name: indicator.name.trim() || code });
+  });
+
+  return Array.from(options.values())
+    .sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }));
+}
 
 function normalizeSearch(value: string) {
   return value
@@ -40,9 +64,21 @@ function normalizeSearch(value: string) {
 }
 
 function splitIndicators(value: string) {
-  return value === '-' || !value
-    ? []
-    : value.split(',').map((indicator) => indicator.trim()).filter(Boolean);
+  if (value === '-' || !value) {
+    return [];
+  }
+
+  const codes = new Map<string, string>();
+  value.split(',').forEach((indicator) => {
+    const code = indicator.trim();
+    const key = code.toLocaleLowerCase('es');
+
+    if (code && !codes.has(key)) {
+      codes.set(key, code);
+    }
+  });
+
+  return Array.from(codes.values());
 }
 
 function shortPlantelLabel(name: string) {
@@ -124,8 +160,8 @@ function fromCatalogUser(user: CatalogUser): UserRecord {
   };
 }
 
-function indicatorLabel(code: string) {
-  const option = INDICATOR_OPTIONS.find((indicator) => indicator.code === code);
+function indicatorLabel(code: string, options: IndicatorAssignmentOption[]) {
+  const option = options.find((indicator) => indicator.code === code);
   return option ? `${option.code} - ${option.name}` : code;
 }
 
@@ -150,12 +186,12 @@ function isPasswordValidationMessage(message: string) {
 
 export const UsersTable = () => {
   const [users, setUsers] = useState<UserRecord[]>([]);
+  const [indicatorOptions, setIndicatorOptions] = useState<IndicatorAssignmentOption[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeSearch, setActiveSearch] = useState('');
   const [statusMessage, setStatusMessage] = useState('');
   const [editingUser, setEditingUser] = useState<UserRecord | null>(null);
-  const [userToDelete, setUserToDelete] = useState<UserRecord | null>(null);
   const [userToToggleBlock, setUserToToggleBlock] = useState<UserRecord | null>(null);
   const [userToResetPassword, setUserToResetPassword] = useState<UserRecord | null>(null);
   const [passwordResetForm, setPasswordResetForm] = useState({ password: '', confirmPassword: '' });
@@ -165,10 +201,11 @@ export const UsersTable = () => {
     let isMounted = true;
 
     setIsLoadingUsers(true);
-    fetchUsers()
-      .then((items) => {
+    Promise.all([fetchUsers(), fetchIndicators()])
+      .then(([items, indicators]) => {
         if (isMounted) {
           setUsers(items.map(fromCatalogUser));
+          setIndicatorOptions(dedupeIndicatorAssignmentOptions(indicators));
         }
       })
       .catch((error) => {
@@ -227,7 +264,7 @@ export const UsersTable = () => {
     };
 
     if (!normalizedUser.name || normalizedUser.name === '-') {
-      setStatusMessage('Completa el nombre o plantel del usuario antes de guardar.');
+      setStatusMessage('Completa el nombre del responsable antes de guardar.');
       return;
     }
 
@@ -275,31 +312,6 @@ export const UsersTable = () => {
       setStatusMessage(isNew ? `Usuario agregado: ${savedRecord.username ?? savedRecord.name}.` : 'Usuario actualizado.');
     } catch (error) {
       setStatusMessage(error instanceof Error ? error.message : 'No se pudo guardar el usuario.');
-      return;
-    }
-  };
-
-  const confirmDeleteUser = async () => {
-    if (!userToDelete) {
-      return;
-    }
-
-    try {
-      const updated = await deactivateUser(userToDelete.id);
-
-      if (!updated) {
-        setStatusMessage('No se encontró el usuario.');
-        setUserToDelete(null);
-        return;
-      }
-
-      const updatedRecord = fromCatalogUser(updated);
-      setUsers((current) => current.map((item) => (item.id === userToDelete.id ? updatedRecord : item)));
-      setStatusMessage('Usuario desactivado.');
-      setUserToDelete(null);
-    } catch (error) {
-      setStatusMessage(error instanceof Error ? error.message : 'No se pudo desactivar el usuario.');
-      setUserToDelete(null);
       return;
     }
   };
@@ -417,7 +429,7 @@ export const UsersTable = () => {
     const assigned = new Set(assignedIndicatorCodes);
     const normalizedFilter = normalizeSearch(indicatorPickerSearch);
 
-    return INDICATOR_OPTIONS.filter((indicator) => {
+    return indicatorOptions.filter((indicator) => {
       if (assigned.has(indicator.code)) {
         return false;
       }
@@ -428,7 +440,7 @@ export const UsersTable = () => {
 
       return normalizeSearch(`${indicator.code} ${indicator.name}`).includes(normalizedFilter);
     }).slice(0, 40);
-  }, [assignedIndicatorCodes, indicatorPickerSearch]);
+  }, [assignedIndicatorCodes, indicatorOptions, indicatorPickerSearch]);
   const clearPasswordMessageIfValid = (password: string, confirmPassword: string) => {
     if (password.length >= 8 && confirmPassword.length >= 8 && password === confirmPassword && isPasswordValidationMessage(statusMessage)) {
       setStatusMessage('');
@@ -480,7 +492,7 @@ export const UsersTable = () => {
           </button>
         </div>
 
-        {statusMessage && (
+        {statusMessage && !editingUser && !userToResetPassword && (
           <p className={`text-sm font-body font-semibold ${statusIsError ? 'text-brand-Status_rojo' : 'text-brand-Verde_oscuro'}`} role="status">
             {statusMessage}
           </p>
@@ -575,15 +587,6 @@ export const UsersTable = () => {
                           >
                             {user.isBlocked ? <Lock size={16} /> : <Unlock size={16} />}
                             <span>{user.isBlocked ? 'Desbloquear' : 'Bloquear'}</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setUserToDelete(user)}
-                            aria-label={`Eliminar usuario ${user.name}`}
-                            className="min-h-9 rounded-md border border-brand-Status_rojo/40 px-3 py-1 text-brand-Status_rojo hover:text-brand-Blanco hover:bg-brand-Status_rojo transition-colors cursor-pointer inline-flex items-center gap-1.5 text-xs font-bold"
-                          >
-                            <Trash2 size={16} />
-                            <span>Eliminar</span>
                           </button>
                         </>
                       )}
@@ -806,7 +809,7 @@ export const UsersTable = () => {
                   <div className="flex flex-wrap gap-2 p-3 bg-brand-Gris_bajo/5 rounded-md border border-brand-Gris_bajo/20 min-h-[50px] items-center">
                     {assignedIndicatorCodes.length > 0 ? (
                       assignedIndicatorCodes.map((indicator) => (
-                        <span key={indicator} title={indicatorLabel(indicator)} className="flex items-center gap-1.5 bg-brand-Verde_oscuro text-brand-Blanco px-2.5 py-1 rounded-full text-xs font-accent font-semibold shadow-sm">
+                        <span key={indicator} title={indicatorLabel(indicator, indicatorOptions)} className="flex items-center gap-1.5 bg-brand-Verde_oscuro text-brand-Blanco px-2.5 py-1 rounded-full text-xs font-accent font-semibold shadow-sm">
                           {indicator}
                           <button
                             type="button"
@@ -857,7 +860,7 @@ export const UsersTable = () => {
             role="dialog"
             aria-modal="true"
             aria-labelledby="password-reset-title"
-            className="bg-brand-Blanco rounded-lg shadow-xl p-6 w-full max-w-md border border-brand-Gris_bajo/20"
+            className="max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto rounded-lg border border-brand-Gris_bajo/20 bg-brand-Blanco p-6 shadow-xl"
           >
             <h2 id="password-reset-title" className="text-xl font-title font-bold text-brand-Gris_oscuro mb-2">
               Restablecer contraseña
@@ -932,15 +935,6 @@ export const UsersTable = () => {
           </div>
         </div>
       )}
-
-      <ConfirmModal
-        isOpen={!!userToDelete}
-        title="Desactivar usuario"
-        message={`¿Deseas desactivar al usuario ${userToDelete?.name}? Se conservará su historial.`}
-        onConfirm={confirmDeleteUser}
-        onCancel={() => setUserToDelete(null)}
-        confirmText="Desactivar"
-      />
 
       <ConfirmModal
         isOpen={!!userToToggleBlock}

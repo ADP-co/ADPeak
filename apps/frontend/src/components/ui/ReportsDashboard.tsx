@@ -4,7 +4,7 @@ import { Button } from './Button';
 import {
   countReportRows,
   fetchExportReport,
-  reportBlockingIssues,
+  reportExportBlockReason,
   reportToCsv,
   reportToPdfBlob,
   type ExportReport,
@@ -79,12 +79,13 @@ function slugify(value: string) {
     .replace(/^-|-$/g, '');
 }
 
-function reportItemExportBlockMessage(issues: string[]) {
-  if (issues.length === 0) {
+function reportItemExportBlockMessage(report: ExportReport | null) {
+  if (!report) {
     return '';
   }
 
-  return `No exportable: ${issues.length} registros requieren corrección.`;
+  const reason = reportExportBlockReason(report);
+  return reason ? `No exportable: ${reason}` : '';
 }
 
 function downloadErrorMessage(error: unknown) {
@@ -94,6 +95,14 @@ function downloadErrorMessage(error: unknown) {
 
   if (error.message.includes('requieren correcci')) {
     return 'No exportable: corrige los registros pendientes antes de generar el archivo.';
+  }
+
+  if (error.message.includes('requiere correcci')) {
+    return 'No exportable: corrige el registro pendiente antes de generar el archivo.';
+  }
+
+  if (error.message.includes('No hay registros capturados')) {
+    return 'No exportable: no hay registros capturados para el alcance seleccionado.';
   }
 
   return error.message;
@@ -310,16 +319,8 @@ export const ReportsDashboard = () => {
           }
         : report;
 
-      if (countReportRows(scopedReport) === 0) {
-        throw new Error(`No hay registros para ${item.plantel}.`);
-      }
-
       return scopedReport;
     } catch (error) {
-      if (error instanceof Error && error.message.includes('No hay registros')) {
-        throw error;
-      }
-
       throw new Error(`No se pudo preparar la descarga de ${item.plantel}.`);
     }
   };
@@ -573,8 +574,7 @@ export const ReportsDashboard = () => {
             <tbody className="divide-y divide-brand-Gris_bajo/20 font-body text-sm text-brand-Gris_oscuro">
               {processedPlanteles.map((item) => {
                 const scopedReport = report ? scopedReportForProgressItem(report, item) : null;
-                const blockingIssues = scopedReport ? reportBlockingIssues(scopedReport) : [];
-                const exportBlockMessage = reportItemExportBlockMessage(blockingIssues);
+                const exportBlockMessage = reportItemExportBlockMessage(scopedReport);
                 const exportDisabled = Boolean(exportBlockMessage);
 
                 return (

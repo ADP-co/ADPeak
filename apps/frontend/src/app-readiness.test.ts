@@ -40,6 +40,40 @@ describe('frontend readiness invariants', () => {
     expect(source).not.toContain('Estados para simular');
   });
 
+  it('disables both scoped report exports and renders the blocking reason', () => {
+    const source = readSource('components/ui/ReportsDashboard.tsx');
+
+    expect(source).toContain('reportItemExportBlockMessage(scopedReport)');
+    expect(source).toContain('disabled={generatingDocumentId === `${item.id}:csv` || exportDisabled}');
+    expect(source).toContain('disabled={generatingDocumentId === `${item.id}:pdf` || exportDisabled}');
+    expect(source).toContain('{exportBlockMessage && (');
+  });
+
+  it('keeps generated operational fallbacks behind a development-only import', () => {
+    const appSource = readSource('App.tsx');
+    const catalogSource = readSource('api/catalog.ts');
+    const usersSource = readSource('components/ui/UsersTable.tsx');
+
+    expect(appSource).not.toContain("from './catalog/officialCatalog.generated'");
+    expect(usersSource).not.toContain("from '../../catalog/officialCatalog.generated'");
+    expect(catalogSource).not.toContain("from '../catalog/officialCatalog.generated'");
+    expect(catalogSource).not.toContain("from '../catalog/officialData.generated'");
+    expect(catalogSource).toContain("if (!import.meta.env.DEV)");
+    expect(catalogSource).toContain("modulePath = '../catalog/officialCatalog.generated.ts'");
+    expect(catalogSource).toContain("modulePath = '../catalog/officialData.generated.ts'");
+    expect(catalogSource).toContain('import(/* @vite-ignore */ modulePath)');
+  });
+
+  it('keeps frontend generated fallbacks free of synthetic identifiers and workbook provenance', () => {
+    const generatedSource = [
+      readSource('catalog/officialCatalog.generated.ts'),
+      readSource('catalog/officialData.generated.ts'),
+    ].join('\n');
+
+    expect(generatedSource).not.toMatch(/(?:FMT|TMP)-[A-Z0-9]/i);
+    expect(generatedSource).not.toMatch(/pending_mapping|template_variant|private-workbook/i);
+  });
+
   it('uses an app-owned logout dialog instead of a browser confirm', () => {
     const source = readSource('components/layout/Navbar.tsx');
 
@@ -114,5 +148,14 @@ describe('frontend readiness invariants', () => {
     expect(source).toContain("indicator.captureId ? 'Continuar captura' : 'Nueva captura'");
     expect(appSource).toContain("const responsibleHasNoCapture = user?.role === 'responsable' && !effectiveCaptureId;");
     expect(appSource).toContain('Sin registros capturados. Cuando un plantel envíe información, aparecerá en En revisión.');
+  });
+
+  it('shows the responsible observation when a plantel must correct a capture', () => {
+    const source = readSource('components/forms/IndicatorForm.tsx');
+    const appSource = readSource('App.tsx');
+
+    expect(source).toContain("captureStatus === 'correccion_solicitada'");
+    expect(source).toContain('correctionObservation.trim()');
+    expect(appSource).toContain('correctionObservation={captureDraft.capture?.observacion ?? undefined}');
   });
 });

@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
-  buildTemplateForCatalogIndicator,
   deactivateIndicator,
   deactivateUser,
+  effectivePlantelIdsForIndicator,
+  fetchIndicatorTemplate,
   fetchIndicators,
   saveIndicator,
   saveUser,
@@ -16,6 +17,15 @@ vi.mock('./client', () => ({
 }));
 
 describe('catalog API safety', () => {
+  it('uses the effective plantel scope resolved by the backend', () => {
+    expect(effectivePlantelIdsForIndicator({
+      code: '1.0.0.0.2',
+      plantelIds: [],
+      effectivePlantelIds: [1, 2, 3],
+      operationalScope: 'specific_planteles',
+    })).toEqual([1, 2, 3]);
+  });
+
   it('does not create local fake catalog data when the API is unavailable', async () => {
     await expect(saveIndicator({ name: 'Indicador local falso' }))
       .rejects.toThrow('El sistema no está conectado. No se guardaron cambios locales.');
@@ -35,8 +45,8 @@ describe('catalog API safety', () => {
     expect(ptcIndicator).toBeDefined();
     expect(abandonoIndicator).toBeDefined();
 
-    const ptcTemplate = buildTemplateForCatalogIndicator(ptcIndicator!);
-    const abandonoTemplate = buildTemplateForCatalogIndicator(abandonoIndicator!);
+    const ptcTemplate = await fetchIndicatorTemplate(ptcIndicator!.code);
+    const abandonoTemplate = await fetchIndicatorTemplate(abandonoIndicator!.code);
 
     expect(ptcTemplate.columns.find((column) => column.key === 'ptc')).toMatchObject({
       type: 'number',

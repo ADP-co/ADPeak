@@ -1,8 +1,10 @@
 /// <reference types="node" />
 
+import { AsyncLocalStorage } from "node:async_hooks";
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import type { PoolClient } from "pg";
 import { loadLocalEnv } from "./config.js";
 
 type PersistedState = Record<string, unknown>;
@@ -34,6 +36,9 @@ let pool: import("pg").Pool | undefined;
 let hydratedFromDatabase = false;
 let hydratePromise: Promise<void> | undefined;
 let pendingDatabaseWrite: Promise<void> | undefined;
+const databaseWriter = createSerializedWriter(writeStateToDatabase);
+type MutationContext = { client: PoolClient; pendingWrite: Promise<void> };
+const mutationContext = new AsyncLocalStorage<MutationContext>();
 
 export function isPersistenceEnabled() {
   return Boolean(stateFilePath || databaseUrl);
@@ -49,10 +54,18 @@ export function readPersistedValue<T>(key: string): T | undefined {
 }
 
 export function persistState(patch: PersistedState) {
-  cachedState = { ...cachedState, ...patch, updatedAt: new Date().toISOString() };
+  const persistedPatch = { ...patch, updatedAt: new Date().toISOString() };
+  cachedState = { ...cachedState, ...persistedPatch };
 
-  if (databaseUrl) {
-    pendingDatabaseWrite = writeStateToDatabase(cachedState).catch((error) => {
+  const context = mutationContext.getStore();
+
+  if (context) {
+    const snapshot = clonePersistedState(persistedPatch);
+    context.pendingWrite = context.pendingWrite.then(() => writeStatePatch(context.client, snapshot));
+  }
+
+  if (databaseUrl && !context) {
+    pendingDatabaseWrite = databaseWriter.enqueue(clonePersistedState(cachedState)).catch((error) => {
       console.error("state_store_database_write_error", safeErrorMessage(error));
 
       if (!stateFilePath) {
@@ -74,6 +87,15 @@ export function persistState(patch: PersistedState) {
 }
 
 export async function hydrateState(options: { force?: boolean } = {}) {
+  const context = mutationContext.getStore();
+
+  if (context) {
+    const state = await readStateFromDatabase(context.client);
+    cachedState = { ...cachedState, ...state };
+    hydratedFromDatabase = true;
+    return;
+  }
+
   if (!databaseUrl || (hydratedFromDatabase && !options.force)) {
     return;
   }
@@ -101,9 +123,68 @@ export async function hydrateState(options: { force?: boolean } = {}) {
 }
 
 export async function flushPersistedState() {
+  const context = mutationContext.getStore();
+
+  if (context) {
+    await context.pendingWrite;
+    return;
+  }
+
   if (pendingDatabaseWrite) {
     await pendingDatabaseWrite;
   }
+}
+
+export async function withPersistedStateMutation<T>(operation: () => Promise<T>): Promise<T> {
+  if (!databaseUrl) {
+    return operation();
+  }
+
+  const pool = await getPool();
+  const client = await pool.connect();
+
+  try {
+    await client.query("begin");
+    await client.query("select pg_advisory_xact_lock(hashtext('adpeak:app_state:mutation'))");
+    const state = await readStateFromDatabase(client);
+    cachedState = { ...cachedState, ...state };
+    hydratedFromDatabase = true;
+
+    const result = await mutationContext.run(
+      { client, pendingWrite: Promise.resolve() },
+      async () => {
+        const value = await operation();
+        await flushPersistedState();
+        return value;
+      }
+    );
+
+    await client.query("commit");
+    return result;
+  } catch (error) {
+    await client.query("rollback").catch(() => undefined);
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+export function createSerializedWriter<T>(write: (snapshot: T) => Promise<void>) {
+  let queue = Promise.resolve();
+
+  return {
+    enqueue(snapshot: T) {
+      const task = queue
+        .catch(() => undefined)
+        .then(() => write(snapshot));
+
+      queue = task;
+      return task;
+    },
+    flush() {
+      return queue;
+    }
+  };
 }
 
 export function stateFileLocation() {
@@ -131,10 +212,10 @@ function loadStateFromDisk(): PersistedState {
   }
 }
 
-async function readStateFromDatabase(): Promise<PersistedState> {
-  const client = await getPool();
-  await ensureStateTable(client);
-  const result = await client.query<{ key: string; value: unknown }>(
+async function readStateFromDatabase(client?: Queryable): Promise<PersistedState> {
+  const queryable = client ?? await getPool();
+  await ensureStateTable(queryable);
+  const result = await queryable.query<{ key: string; value: unknown }>(
     "select key, value from app_state"
   );
 
@@ -144,8 +225,12 @@ async function readStateFromDatabase(): Promise<PersistedState> {
 async function writeStateToDatabase(state: PersistedState) {
   const client = await getPool();
   await ensureStateTable(client);
+  await writeStatePatch(client, state);
+}
+
+async function writeStatePatch(client: Queryable, patch: PersistedState) {
   await Promise.all(
-    Object.entries(state).map(([key, value]) =>
+    Object.entries(patch).map(([key, value]) =>
       client.query(
         `insert into app_state (key, value, updated_at)
          values ($1, $2::jsonb, now())
@@ -156,7 +241,9 @@ async function writeStateToDatabase(state: PersistedState) {
   );
 }
 
-async function ensureStateTable(client: import("pg").Pool) {
+type Queryable = Pick<import("pg").Pool | PoolClient, "query">;
+
+async function ensureStateTable(client: Queryable) {
   await client.query(`
     create table if not exists app_state (
       key text primary key,
@@ -186,4 +273,8 @@ function shouldUseSsl(url: string) {
 
 function safeErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "unknown";
+}
+
+function clonePersistedState(state: PersistedState): PersistedState {
+  return JSON.parse(JSON.stringify(state)) as PersistedState;
 }

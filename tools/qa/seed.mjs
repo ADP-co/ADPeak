@@ -1,0 +1,121 @@
+#!/usr/bin/env node
+
+import path from "node:path";
+import {
+  assertTestEnvironment,
+  displayPath,
+  expectedHashEnvironment,
+  expectedPasswordHashes,
+  loadManifest,
+  parseArguments,
+  printDryRun,
+  readClonePasswords,
+  readEnvironmentFile,
+  runCommand,
+  saveManifest,
+  scrubInheritedDatabaseEnvironment,
+  withQaLock,
+  writeEnvironmentFile
+} from "./lib/common.mjs";
+import {
+  assertManifestTarget,
+  readTargetAppState,
+  replaceTargetAppState,
+  sanitizedConnection
+} from "./lib/database.mjs";
+import {
+  sanitizeCloneStateRows,
+  validateCertificationRows
+} from "./lib/state.mjs";
+
+scrubInheritedDatabaseEnvironment();
+
+const HELP = `Usage: npm run qa:seed -- [options]
+
+Sanitize only the manifest-bound isolated database. The command enforces the
+46-account and 14-indicator official baseline, strips visible QA/TMP/FMT state,
+reactivates the baseline, synchronizes assignments, and replaces passwords with
+clone-only values supplied through required environment variables.
+
+Required environment:
+  APP_ENV=test
+  NODE_ENV=test
+  QA_CLONE_DIRECTOR_PASSWORD=<strong unique clone password>
+  QA_CLONE_RESPONSABLE_PASSWORD=<strong unique clone password>
+  QA_CLONE_PLANTEL_PASSWORD=<strong unique clone password>
+
+Options:
+  --manifest <path>  Manifest created by qa:clone
+  --dry-run           Print guarded operations without reading env or connecting
+  -h, --help          Show this help
+`;
+
+await runCommand(async () => {
+  const options = parseArguments(process.argv.slice(2), ["--manifest"]);
+
+  if (options.help) {
+    console.log(HELP);
+    return;
+  }
+
+  if (options.dryRun) {
+    printDryRun("qa:seed", [
+      "Erase inherited DATABASE_URL and PostgreSQL fallback variables",
+      "Require both test environment guards and three strong clone-only role passwords",
+      `Load and validate manifest ${displayPath(options.manifest)}`,
+      "Read the manifest target, sanitize visible state, and validate 46 accounts plus 14 indicators",
+      "Replace target public.app_state in one transaction and verify the committed baseline",
+      "Store only expected password hashes in the ignored QA environment; never log passwords"
+    ]);
+    return;
+  }
+
+  assertTestEnvironment();
+  let manifest = await loadManifest(options.manifest);
+  const outputRoot = path.dirname(manifest.artifacts.activeManifest);
+
+  await withQaLock(outputRoot, async () => {
+    manifest = await loadManifest(options.manifest);
+    if (!["cloned", "seeded", "certified", "findings"].includes(manifest.status)) {
+      throw new Error("qa:seed requires a completed clone. Clean up interrupted or already-cleaned manifests first.");
+    }
+
+    const environment = await readEnvironmentFile(manifest.artifacts.environment);
+    assertGeneratedTestEnvironment(environment);
+    const targetConnection = assertManifestTarget(manifest, environment);
+    const passwords = readClonePasswords();
+    const hashes = expectedPasswordHashes(passwords);
+    const current = await readTargetAppState(targetConnection);
+    const sanitized = await sanitizeCloneStateRows(current.rows, hashes);
+
+    await replaceTargetAppState(targetConnection, sanitized.rows);
+    const committed = await readTargetAppState(targetConnection);
+    await validateCertificationRows(committed.rows, hashes);
+
+    const nextEnvironment = {
+      ...environment,
+      ...expectedHashEnvironment(hashes)
+    };
+    await writeEnvironmentFile(manifest.artifacts.environment, nextEnvironment);
+
+    await saveManifest({
+      ...manifest,
+      status: "seeded",
+      seededAt: new Date().toISOString(),
+      seed: sanitized.summary,
+      certification: undefined
+    });
+
+    console.log(`Seeded isolated database: ${sanitizedConnection(targetConnection)}`);
+    console.log(`Official accounts: ${sanitized.summary.users}`);
+    console.log(`Official indicators: ${sanitized.summary.indicators}`);
+    console.log(`Removed non-baseline users: ${sanitized.summary.removedUsers}`);
+    console.log(`Removed non-baseline indicators: ${sanitized.summary.removedIndicators}`);
+  });
+});
+
+function assertGeneratedTestEnvironment(environment) {
+  if (environment.APP_ENV !== "test" || environment.NODE_ENV !== "test") {
+    throw new Error("Generated QA environment is not explicitly test/test.");
+  }
+}

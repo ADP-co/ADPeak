@@ -7,6 +7,7 @@ import {
 } from "./config.js";
 import {
   approveCapture,
+  CaptureVersionConflictError,
   createCaptureDraft,
   findCaptureDraftByScope,
   getCaptureDraft,
@@ -27,6 +28,7 @@ import {
   deactivateUser,
   getIndicatorByCode,
   getIndicatorById,
+  listAuditEvents,
   listIndicatorHistory,
   listIndicators,
   listNotifications,
@@ -112,7 +114,8 @@ function sendError(response: ServerResponse, error: unknown) {
   if (
     error instanceof SigiAuthError ||
     error instanceof SigiForbiddenError ||
-    error instanceof SigiValidationError
+    error instanceof SigiValidationError ||
+    error instanceof CaptureVersionConflictError
   ) {
     sendJson(response, error.statusCode, {
       error: error.code,
@@ -417,6 +420,21 @@ const server = createServer(async (request, response) => {
     }
   }
 
+  if (request.method === "GET" && url.pathname === "/api/v1/auditoria") {
+    try {
+      const session = sessionFromHeaders(request.headers);
+      sendJson(response, 200, { events: listAuditEvents(session) });
+      return;
+    } catch (error) {
+      if (sendError(response, error)) {
+        return;
+      }
+
+      sendJson(response, 500, { error: "audit_error", message: "No se pudo consultar la auditoria." });
+      return;
+    }
+  }
+
   if (request.method === "GET" && url.pathname === "/api/v1/reportes") {
     try {
       sendJson(response, 200, buildReportPayload(sessionFromHeaders(request.headers), reportFiltersFromUrl(url)));
@@ -561,12 +579,18 @@ const server = createServer(async (request, response) => {
         return;
       }
 
+      if (existingDraft && payload.expectedVersion !== existingDraft.versionActual) {
+        sendCaptureVersionConflict(response, existingDraft.versionActual);
+        return;
+      }
+
       const created = createCaptureDraft(payload);
       recordAuditEvent(session, {
         action: "capture_saved",
         resourceType: "capture",
         resourceId: String(created.id),
-        after: { indicadorId: created.indicadorId, plantelId: created.plantelId, estado: created.estado },
+        before: existingDraft,
+        after: created,
         status: "ok",
         requestId
       });
@@ -612,9 +636,12 @@ const server = createServer(async (request, response) => {
 
       response.writeHead(200, {
         "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "private, no-store",
+        "Content-Security-Policy": "sandbox; default-src 'none'",
         "Content-Disposition": `inline; filename="${fileName}"`,
-        "Content-Type": evidence.tipo || "application/pdf",
-        "Content-Length": String(content.length)
+        "Content-Length": String(content.length),
+        "Content-Type": "application/pdf",
+        "X-Content-Type-Options": "nosniff"
       });
       response.end(content);
       await flushPersistedState();
@@ -695,8 +722,15 @@ const server = createServer(async (request, response) => {
           return;
         }
 
+        const expectedVersion = positiveExpectedVersion(body);
+
+        if (!expectedVersion) {
+          sendCaptureVersionConflict(response, draft.versionActual);
+          return;
+        }
+
         assertCaptureAccess(session, { ...draft, payload }, "draft");
-        const updatedDraft = updateCaptureDraft(captureId, payload);
+        const updatedDraft = updateCaptureDraft(captureId, payload, { expectedVersion });
 
         if (!updatedDraft) {
           sendJson(response, 409, {
@@ -710,7 +744,8 @@ const server = createServer(async (request, response) => {
           action: "capture_updated",
           resourceType: "capture",
           resourceId: String(updatedDraft.id),
-          after: { indicadorId: updatedDraft.indicadorId, plantelId: updatedDraft.plantelId, estado: updatedDraft.estado },
+          before: draft,
+          after: updatedDraft,
           status: "ok",
           requestId
         });
@@ -735,12 +770,19 @@ const server = createServer(async (request, response) => {
           return;
         }
 
+        const expectedVersion = positiveExpectedVersion(await readJsonBody(request));
+
+        if (!expectedVersion) {
+          sendCaptureVersionConflict(response, draft.versionActual);
+          return;
+        }
+
         assertCaptureAccess(session, { ...draft, payload: draft.payload }, "submit");
         const notificationEvent = draft.estado === "correccion_solicitada" ? "resubmitted" : "submitted";
         const updatedDraft = sendCaptureToReview(captureId, {
           userId: session.userId,
           role: session.role
-        });
+        }, expectedVersion);
 
         if (!updatedDraft) {
           sendJson(response, 409, {
@@ -755,7 +797,8 @@ const server = createServer(async (request, response) => {
           action: "capture_submitted",
           resourceType: "capture",
           resourceId: String(updatedDraft.id),
-          after: { indicadorId: updatedDraft.indicadorId, plantelId: updatedDraft.plantelId, estado: updatedDraft.estado },
+          before: draft,
+          after: updatedDraft,
           status: "ok",
           requestId
         });
@@ -790,6 +833,12 @@ const server = createServer(async (request, response) => {
         assertCaptureAccess(session, draft, "review");
         const body = await readJsonBody(request);
         const observacion = typeof body.observacion === "string" ? body.observacion.trim() : "";
+        const expectedVersion = positiveExpectedVersion(body);
+
+        if (!expectedVersion) {
+          sendCaptureVersionConflict(response, draft.versionActual);
+          return;
+        }
 
         if (!observacion) {
           sendJson(response, 400, {
@@ -799,7 +848,7 @@ const server = createServer(async (request, response) => {
           return;
         }
 
-        const updatedDraft = requestCaptureCorrection(captureId, observacion);
+        const updatedDraft = requestCaptureCorrection(captureId, observacion, expectedVersion);
 
         if (!updatedDraft) {
           sendJson(response, 409, {
@@ -814,7 +863,8 @@ const server = createServer(async (request, response) => {
           action: "capture_correction_requested",
           resourceType: "capture",
           resourceId: String(updatedDraft.id),
-          after: { indicadorId: updatedDraft.indicadorId, plantelId: updatedDraft.plantelId, estado: updatedDraft.estado },
+          before: draft,
+          after: updatedDraft,
           status: "ok",
           requestId
         });
@@ -839,9 +889,16 @@ const server = createServer(async (request, response) => {
           return;
         }
 
+        const expectedVersion = positiveExpectedVersion(await readJsonBody(request));
+
+        if (!expectedVersion) {
+          sendCaptureVersionConflict(response, draft.versionActual);
+          return;
+        }
+
         assertCaptureAccess(session, draft, "review");
         assertEvidenceOpenedBeforeApproval(session, draft);
-        const updatedDraft = approveCapture(captureId);
+        const updatedDraft = approveCapture(captureId, expectedVersion);
 
         if (!updatedDraft) {
           sendJson(response, 409, {
@@ -856,7 +913,8 @@ const server = createServer(async (request, response) => {
           action: "capture_approved",
           resourceType: "capture",
           resourceId: String(updatedDraft.id),
-          after: { indicadorId: updatedDraft.indicadorId, plantelId: updatedDraft.plantelId, estado: updatedDraft.estado },
+          before: draft,
+          after: updatedDraft,
           status: "ok",
           requestId
         });
@@ -1015,4 +1073,21 @@ function nonNegativeIntegerParam(url: URL, key: string) {
 
 function isEditableCaptureStatus(status: string) {
   return status === "borrador" || status === "correccion_solicitada";
+}
+
+function positiveExpectedVersion(body: unknown) {
+  if (typeof body !== "object" || body === null || !("expectedVersion" in body)) {
+    return undefined;
+  }
+
+  const value = Number((body as { expectedVersion?: unknown }).expectedVersion);
+  return Number.isInteger(value) && value > 0 ? value : undefined;
+}
+
+function sendCaptureVersionConflict(response: ServerResponse, currentVersion: number) {
+  sendJson(response, 409, {
+    error: "capture_version_conflict",
+    message: "La captura cambió en otra sesión. Recarga antes de guardar de nuevo.",
+    currentVersion
+  });
 }

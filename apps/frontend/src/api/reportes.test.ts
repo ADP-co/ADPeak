@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { reportBlockingIssues, reportToCsv, reportToPdfBlob, type ExportReport } from './reportes';
+import {
+  reportBlockingIssues,
+  reportExportBlockReason,
+  reportToCsv,
+  reportToPdfBlob,
+  type ExportReport,
+} from './reportes';
 
 const sampleReport: ExportReport = {
   tipoReporte: 'plantel',
@@ -27,6 +33,7 @@ const sampleReport: ExportReport = {
       datos: [
         {
           registro_id: 'registro-1',
+          captureId: 1,
           actividad: 'Captura de egresados titulados',
           responsable: 'Responsable academico',
           estado: 'Aprobado',
@@ -162,8 +169,50 @@ describe('report exports', () => {
     };
 
     expect(reportBlockingIssues(blockedReport)[0]).toContain('borrador');
-    expect(() => reportToCsv(blockedReport)).toThrow(/requieren corrección/);
-    await expect(reportToPdfBlob(blockedReport)).rejects.toThrow(/requieren corrección/);
+    expect(() => reportToCsv(blockedReport)).toThrow(/requiere corrección/);
+    await expect(reportToPdfBlob(blockedReport)).rejects.toThrow(/requiere corrección/);
+  });
+
+  it('rejects empty scoped data consistently for CSV and PDF exports', async () => {
+    const emptyReport: ExportReport = {
+      ...sampleReport,
+      estadoConteos: {
+        total: 0,
+        pendientes: 0,
+        enRevision: 0,
+        observados: 0,
+        aprobados: 0,
+      },
+      indicadores: sampleReport.indicadores.map((indicator) => ({
+        ...indicator,
+        datos: [],
+      })),
+    };
+
+    const reason = 'No hay registros capturados para el alcance seleccionado.';
+
+    expect(reportExportBlockReason(emptyReport)).toBe(reason);
+    expect(() => reportToCsv(emptyReport)).toThrow(`No se puede generar el archivo: ${reason}`);
+    await expect(reportToPdfBlob(emptyReport)).rejects.toThrow(`No se puede generar el archivo: ${reason}`);
+  });
+
+  it('treats synthetic progress rows without capture IDs as no captured data', () => {
+    const progressOnlyReport: ExportReport = {
+      ...sampleReport,
+      vistaReporte: 'avance',
+      indicadores: sampleReport.indicadores.map((indicator) => ({
+        ...indicator,
+        datos: indicator.datos.map(({ captureId: _captureId, ...row }) => ({
+          ...row,
+          exportable: false,
+          blockingIssues: ['No hay registros capturados para este indicador.'],
+        })),
+      })),
+    };
+
+    expect(reportExportBlockReason(progressOnlyReport)).toBe(
+      'No hay registros capturados para el alcance seleccionado.'
+    );
   });
 
   it('wraps long PDF indicator titles instead of drawing them as one overflowing line', async () => {

@@ -23,31 +23,19 @@ import { useCaptureDraft } from './hooks/useCaptureDraft';
 import { fetchCaptureEvidence } from './api/capturas';
 import { CAPTURE_CHANGED_EVENT } from './api/captureEvents';
 import { fetchNotifications, markNotificationRead, type SigiNotification } from './api/notificaciones';
-import { buildHealthIntegralTemplate, buildTemplateForCatalogIndicator, catalogPlanteles, fetchIndicatorTemplate, fetchIndicators, plantelScopeLabelForIndicator, type CatalogIndicator } from './api/catalog';
+import {
+  buildHealthIntegralTemplate,
+  buildTemplateForCatalogIndicator,
+  catalogPlanteles,
+  effectivePlantelIdsForIndicator,
+  fetchIndicatorTemplate,
+  fetchIndicators,
+  plantelScopeLabelForIndicator,
+  type CatalogIndicator,
+} from './api/catalog';
 import { API_REQUESTS_ENABLED } from './api/client';
-import { officialCatalogRows, officialIndicatorPlantelScopes } from './catalog/officialCatalog.generated';
 
 const UNASSIGNED_PLANTEL_LABEL = 'Todos los planteles';
-
-const plantelIndicatorScope: Pick<Indicator, 'plantel' | 'supervisor' | 'responsable' | 'contribuidor'> = {
-  plantel: UNASSIGNED_PLANTEL_LABEL,
-  supervisor: 'Liliana Yunuen Rojas Maciel',
-  responsable: 'Liliana Yunuen Rojas Maciel',
-  contribuidor: UNASSIGNED_PLANTEL_LABEL,
-};
-
-const mockupIndicatorsBase: Indicator[] = officialCatalogRows
-  .filter((indicator) => indicator.classification === 'operational' && indicator.visible)
-  .map((indicator) => ({
-  code: indicator.code,
-  name: indicator.name,
-  status: 'Pendiente',
-}));
-
-const mockupIndicators: Indicator[] = mockupIndicatorsBase.map((indicator) => ({
-  ...indicator,
-  ...plantelIndicatorScope,
-}));
 
   const template1_0_0_0_2: IndicatorTemplate = {
     indicatorCode: '1.0.0.0.2',
@@ -135,11 +123,6 @@ function readIndicatorStatusOverrides() {
   }
 }
 
-function getIndicatorIdByCode(code: string) {
-  const index = mockupIndicators.findIndex((indicator) => indicator.code === code);
-  return index >= 0 ? index + 1 : 1;
-}
-
 function plantelNameFromId(id?: number) {
   if (!id) {
     return 'Planteles';
@@ -162,20 +145,6 @@ function isEditableCaptureStatus(status?: string) {
   return !status || status === 'borrador' || status === 'correccion_solicitada';
 }
 
-function applySessionScope(indicator: Indicator, user?: User | null): Indicator {
-  if (user?.role !== 'plantel') {
-    return indicator;
-  }
-
-  const plantelName = plantelNameFromId(user.plantelId);
-
-  return {
-    ...indicator,
-    plantel: plantelName,
-    contribuidor: plantelName,
-  };
-}
-
 function catalogToIndicator(indicator: CatalogIndicator, user?: User | null): Indicator {
   const scope = indicator.responsibleNames.join(', ') || 'Responsable DGEMS';
   const plantelScope = user?.role === 'plantel'
@@ -183,7 +152,7 @@ function catalogToIndicator(indicator: CatalogIndicator, user?: User | null): In
     : indicator.plantelId
       ? plantelNameFromId(indicator.plantelId)
       : plantelScopeLabelForIndicator(indicator);
-  const plantelIds = effectivePlantelIdsForCatalogIndicator(indicator);
+  const plantelIds = effectivePlantelIdsForIndicator(indicator);
   const defaultPlantelId = user?.role === 'plantel'
     ? user.plantelId
     : plantelIds[0];
@@ -215,7 +184,7 @@ function canDisplayCatalogIndicatorForUser(indicator: CatalogIndicator, user?: U
   }
 
   if (user.role === 'plantel') {
-    return effectivePlantelIdsForCatalogIndicator(indicator).includes(user.plantelId ?? -1);
+    return effectivePlantelIdsForIndicator(indicator).includes(user.plantelId ?? -1);
   }
 
   const responsableId = user.responsableId ?? -1;
@@ -223,12 +192,6 @@ function canDisplayCatalogIndicatorForUser(indicator: CatalogIndicator, user?: U
     indicator.responsibleIds.includes(responsableId) ||
     (indicator.contributorResponsibleIds ?? []).includes(responsableId)
   );
-}
-
-function effectivePlantelIdsForCatalogIndicator(indicator: CatalogIndicator) {
-  return indicator.plantelIds.length > 0
-    ? indicator.plantelIds
-    : officialIndicatorPlantelScopes[indicator.code] ?? [];
 }
 
 const MAX_INLINE_EVIDENCE_BYTES = 2 * 1024 * 1024;
@@ -392,15 +355,13 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
   const requestedCaptureId = positiveQueryParam(queryParams, 'captureId');
   const requestedSource = queryParams.get('source');
   const selectedCode = code ?? template1_0_0_0_2.indicatorCode;
-  const selectedMockupIndicator = mockupIndicators.find((indicator) => indicator.code === selectedCode);
   const selectedCatalogIndicator = catalogIndicators.find((indicator) => indicator.code === selectedCode);
   const selectedIndicator = selectedCatalogIndicator
     ? catalogToIndicator(selectedCatalogIndicator, user)
-    : applySessionScope(selectedMockupIndicator ?? mockupIndicators[0], user);
-  const isWaitingForCatalogIndicator = !selectedCatalogIndicator && !selectedMockupIndicator && !catalogLoaded;
-  const isUnknownIndicator = !selectedCatalogIndicator && !selectedMockupIndicator && catalogLoaded;
-  const canUseMockupIndicatorId = Boolean(selectedMockupIndicator && catalogLoaded);
-  const resolvedIndicatorId = selectedCatalogIndicator?.id ?? (canUseMockupIndicatorId ? getIndicatorIdByCode(selectedCode) : 0);
+    : undefined;
+  const isWaitingForCatalogIndicator = !selectedCatalogIndicator && !catalogLoaded;
+  const isUnknownIndicator = !selectedCatalogIndicator && catalogLoaded;
+  const resolvedIndicatorId = selectedCatalogIndicator?.id ?? 0;
   const fallbackTemplate = fallbackTemplateForIndicator(selectedCode, selectedIndicator, selectedCatalogIndicator);
   const [remoteTemplate, setRemoteTemplate] = useState<(IndicatorTemplate & { initialRows?: Record<string, unknown>[] }) | null>(null);
   const [templateLoadError, setTemplateLoadError] = useState('');
@@ -410,7 +371,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
     indicatorName: remoteTemplate?.indicatorName ?? selectedIndicator?.name ?? fallbackTemplate.indicatorName,
   };
   const selectedIndicatorPlantelIds = selectedCatalogIndicator
-    ? effectivePlantelIdsForCatalogIndicator(selectedCatalogIndicator)
+    ? effectivePlantelIdsForIndicator(selectedCatalogIndicator)
     : [];
   const activePlantelId = user?.role === 'plantel'
     ? user.plantelId ?? 1
@@ -460,7 +421,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
     actividadId: activeActividadId,
     responsableId: activeResponsableId,
     storageScope: `plantel-${activePlantelId}:${selectedCode}:periodo-${activePeriodoId}:actividad-${activeActividadId}`,
-    enabled: shouldLoadCaptureDraft && resolvedIndicatorId > 0 && Boolean(selectedCatalogIndicator || canUseMockupIndicatorId) && !isWaitingForCatalogIndicator && !isUnknownIndicator,
+    enabled: shouldLoadCaptureDraft && resolvedIndicatorId > 0 && Boolean(selectedCatalogIndicator) && !isWaitingForCatalogIndicator && !isUnknownIndicator,
   });
   const [evidenceOpenedForCaptureId, setEvidenceOpenedForCaptureId] = useState<number | undefined>();
 
@@ -692,6 +653,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
       canSaveReviewEdits={false}
       canModifyRows={allowedActions ? allowedActions.includes('add_rows') : user?.role !== 'responsable'}
       captureStatus={captureDraft.capture?.estado}
+      correctionObservation={captureDraft.capture?.observacion ?? undefined}
       isReadOnly={isReadOnlyCapture}
       onSaveDraft={handleSaveDraft}
       onSendReview={handleSendReview}
@@ -872,16 +834,10 @@ function AppContent() {
 
   const indicators = useMemo(
     () =>
-      (catalogIndicators.length > 0
-        ? catalogIndicators
-            .filter((indicator) => canDisplayCatalogIndicatorForUser(indicator, user))
-            .map((indicator) => catalogToIndicator(indicator, user))
-        : catalogLoaded
-          ? []
-          : API_REQUESTS_ENABLED
-            ? []
-            : mockupIndicators.map((indicator) => applySessionScope(indicator, user))
-      ).map((indicator) => ({
+      catalogIndicators
+        .filter((indicator) => canDisplayCatalogIndicatorForUser(indicator, user))
+        .map((indicator) => catalogToIndicator(indicator, user))
+        .map((indicator) => ({
         ...indicator,
         status: API_REQUESTS_ENABLED ? indicator.status : indicatorStatusOverrides[indicator.code] ?? indicator.status,
       })),

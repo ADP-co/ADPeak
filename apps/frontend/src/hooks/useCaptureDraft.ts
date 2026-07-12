@@ -83,6 +83,7 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
     enabled: enabled && !captureId && !hasRequestedCapture,
   });
   const scopedCapture = hasRequestedCapture ? undefined : scopedCaptureQuery.data;
+  const currentCapture = captureQuery.data ?? scopedCapture;
 
   useEffect(() => {
     if (!hasRequestedCapture && scopedCaptureQuery.data) {
@@ -102,10 +103,15 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
     }
   }, [captureQuery.error, requestedCaptureId, storageKey]);
 
+  const refreshCaptureAfterConflict = () => {
+    void queryClient.invalidateQueries({ queryKey: ['capture-draft'] });
+    void queryClient.invalidateQueries({ queryKey: ['capture-draft-scope'] });
+  };
+
   const saveDraftMutation = useMutation({
     mutationFn: async (payload: CapturePayload) => {
       if (captureId) {
-        return updateCaptureDraft(captureId, payload);
+        return updateCaptureDraft(captureId, payload, 'actualización desde frontend', currentCapture?.versionActual);
       }
 
       return createCaptureDraft({
@@ -115,12 +121,13 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
       });
     },
     onSuccess: persistCaptureChange,
+    onError: refreshCaptureAfterConflict,
   });
 
   const sendToReviewMutation = useMutation({
     mutationFn: async (payload: CapturePayload) => {
       const draft = captureId
-        ? await updateCaptureDraft(captureId, payload, 'envío a revisión desde frontend')
+        ? await updateCaptureDraft(captureId, payload, 'envío a revisión desde frontend', currentCapture?.versionActual)
         : await createCaptureDraft({
             ...captureOptions,
             payload,
@@ -128,9 +135,10 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
           });
 
       persistCapture(draft);
-      return sendCaptureToReview(draft.id);
+      return sendCaptureToReview(draft.id, draft.versionActual);
     },
     onSuccess: persistCaptureChange,
+    onError: refreshCaptureAfterConflict,
   });
 
   const requestCorrectionMutation = useMutation({
@@ -141,9 +149,10 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
         throw new CaptureRequestError('Primero debe existir una captura enviada a revisión.');
       }
 
-      return requestCaptureCorrection(draftId, observacion);
+      return requestCaptureCorrection(draftId, observacion, currentCapture?.versionActual);
     },
     onSuccess: persistCaptureChange,
+    onError: refreshCaptureAfterConflict,
   });
 
   const approveMutation = useMutation({
@@ -154,9 +163,10 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
         throw new CaptureRequestError('Primero debe existir una captura enviada a revisión.');
       }
 
-      return approveCapture(draftId);
+      return approveCapture(draftId, currentCapture?.versionActual);
     },
     onSuccess: persistCaptureChange,
+    onError: refreshCaptureAfterConflict,
   });
 
   const statusMessage = useMemo(() => {

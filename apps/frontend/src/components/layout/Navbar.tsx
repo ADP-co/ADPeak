@@ -2,10 +2,16 @@ import { useState } from 'react';
 import { LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import LogoUdec from '../../assets/logo-udec.svg';
+import { useModalFocusTrap } from '../ui/ConfirmModal';
 
 export const Navbar = () => {
   const { logout } = useAuth();
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
+  const closeLogoutDialog = () => setIsLogoutDialogOpen(false);
+  const { dialogRef, initialFocusRef } = useModalFocusTrap(
+    isLogoutDialogOpen,
+    closeLogoutDialog
+  );
 
   return (
     <>
@@ -46,9 +52,11 @@ export const Navbar = () => {
           role="presentation"
         >
           <div
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="logout-dialog-title"
+            tabIndex={-1}
             className="w-full max-w-sm rounded-lg border border-brand-Gris_bajo/25 bg-brand-Blanco p-6 shadow-xl"
           >
             <h2 id="logout-dialog-title" className="font-title text-xl font-bold text-brand-Gris_oscuro">
@@ -59,8 +67,9 @@ export const Navbar = () => {
             </p>
             <div className="mt-6 flex justify-end gap-3">
               <button
+                ref={initialFocusRef}
                 type="button"
-                onClick={() => setIsLogoutDialogOpen(false)}
+                onClick={closeLogoutDialog}
                 className="min-h-11 rounded-md border border-brand-Gris_bajo px-5 py-2 font-accent text-sm font-bold text-brand-Gris_oscuro hover:bg-brand-Fondo"
               >
                 Cancelar
@@ -68,7 +77,7 @@ export const Navbar = () => {
               <button
                 type="button"
                 onClick={() => {
-                  setIsLogoutDialogOpen(false);
+                  closeLogoutDialog();
                   logout();
                 }}
                 className="min-h-11 rounded-md bg-brand-Verde_oscuro px-5 py-2 font-accent text-sm font-bold text-brand-Blanco hover:bg-brand-Verde_principal"

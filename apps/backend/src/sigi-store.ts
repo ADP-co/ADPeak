@@ -114,6 +114,7 @@ export type SigiIndicator = {
 export type SigiIndicatorStatus = "Pendiente" | "En revisión" | "Corregir" | "Aprobado";
 
 export type SigiIndicatorListItem = SigiIndicator & {
+  effectivePlantelIds: number[];
   status: SigiIndicatorStatus;
   captureId?: number;
   plantelId?: number;
@@ -360,6 +361,9 @@ export const planteles: Plantel[] = [
 const unassignedPlantel: Plantel = { id: 0, key: "sin-plantel", name: "Sin plantel asignado" };
 const MAX_REASONABLE_NUMERIC_VALUE = 999_999_999_999;
 const DEFAULT_QUALITY_WARNING_MAX = 1_000_000;
+export const MAX_AUDIT_REQUEST_ID_LENGTH = 128;
+const AUDIT_VALUE_OMITTED = "[omitido]";
+const MAX_AUDIT_VALUE_DEPTH = 12;
 const officialSourcePlantelIds: number[] = [];
 const officialCatalogImportVersion = "2026-07-02-indicadores-20260628-default-v3";
 const officialCatalogImportedAt = "2026-06-30T00:00:00.000-06:00";
@@ -713,6 +717,7 @@ export function listIndicators(session: SigiSession, options: { includeInactive?
       return {
         ...indicator,
         operationalScope: operationalScopeForIndicator(indicator),
+        effectivePlantelIds: effectivePlantelIdsForIndicator(indicator),
         ...workState,
         allowedActions: allowedActionsForIndicator(session, indicator, workState)
       };
@@ -828,28 +833,165 @@ export function listAuditEventsForTest() {
   return Array.from(auditEvents.values()).sort((a, b) => a.id - b.id);
 }
 
+export function listAuditEvents(session: SigiSession): SigiAuditEvent[] {
+  requireDirector(session);
+
+  return Array.from(auditEvents.values())
+    .map(sanitizeAuditEvent)
+    .sort((a, b) =>
+      b.createdAt.localeCompare(a.createdAt) ||
+      b.id - a.id
+    );
+}
+
 export function recordAuditEvent(
   session: SigiSession,
   event: Omit<SigiAuditEvent, "id" | "userId" | "role" | "createdAt" | "requestId"> & { requestId?: string }
 ) {
+  const id = nextAuditEventId;
   const auditEvent: SigiAuditEvent = {
-    id: nextAuditEventId,
-    userId: session.userId,
+    id,
+    userId: sanitizeAuditText(session.userId),
     role: session.role,
-    action: event.action,
+    action: sanitizeAuditText(event.action),
     resourceType: event.resourceType,
-    resourceId: event.resourceId,
-    before: event.before,
-    after: event.after,
+    resourceId: sanitizeAuditText(event.resourceId),
+    before: sanitizeAuditValue(event.before),
+    after: sanitizeAuditValue(event.after),
     status: event.status,
     createdAt: new Date().toISOString(),
-    requestId: event.requestId ?? `local-${Date.now()}-${nextAuditEventId}`
+    requestId: sanitizeAuditRequestId(event.requestId, id)
   };
 
   nextAuditEventId += 1;
   auditEvents.set(auditEvent.id, auditEvent);
   persistAuditState();
   return auditEvent;
+}
+
+function sanitizeAuditEvent(event: SigiAuditEvent): SigiAuditEvent {
+  return {
+    ...event,
+    userId: sanitizeAuditText(event.userId),
+    action: sanitizeAuditText(event.action),
+    resourceId: sanitizeAuditText(event.resourceId),
+    before: sanitizeAuditValue(event.before),
+    after: sanitizeAuditValue(event.after),
+    requestId: sanitizeAuditRequestId(event.requestId, event.id)
+  };
+}
+
+function sanitizeAuditValue(
+  value: unknown,
+  depth = 0,
+  seen = new WeakSet<object>()
+): unknown {
+  if (value === undefined || value === null || typeof value === "boolean" || typeof value === "number") {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    return isSensitiveAuditString(value) ? AUDIT_VALUE_OMITTED : value;
+  }
+
+  if (typeof value === "bigint") {
+    return String(value);
+  }
+
+  if (typeof value !== "object" || depth >= MAX_AUDIT_VALUE_DEPTH) {
+    return AUDIT_VALUE_OMITTED;
+  }
+
+  if (seen.has(value)) {
+    return AUDIT_VALUE_OMITTED;
+  }
+
+  seen.add(value);
+
+  if (Array.isArray(value)) {
+    const sanitized = value.map((item) => sanitizeAuditValue(item, depth + 1, seen));
+    seen.delete(value);
+    return sanitized;
+  }
+
+  const sanitized: Record<string, unknown> = {};
+
+  for (const [key, nestedValue] of Object.entries(value)) {
+    if (isSensitiveAuditKey(key)) {
+      continue;
+    }
+
+    const sanitizedValue = sanitizeAuditValue(nestedValue, depth + 1, seen);
+
+    if (sanitizedValue !== undefined) {
+      sanitized[key] = sanitizedValue;
+    }
+  }
+
+  seen.delete(value);
+  return sanitized;
+}
+
+function isSensitiveAuditKey(key: string) {
+  const normalized = key
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]/gi, "")
+    .toLowerCase();
+
+  return [
+    "password",
+    "passwd",
+    "contrasena",
+    "credential",
+    "secret",
+    "hash",
+    "sha",
+    "token",
+    "cookie",
+    "authorization",
+    "storageref",
+    "base64"
+  ].some((term) => normalized.includes(term));
+}
+
+function sanitizeAuditText(value: string) {
+  return isSensitiveAuditString(value) ? AUDIT_VALUE_OMITTED : value;
+}
+
+function sanitizeAuditRequestId(value: string | undefined, eventId: number) {
+  const fallback = `local-${Date.now()}-${eventId}`;
+  const bounded = typeof value === "string"
+    ? value.trim().replace(/[\u0000-\u001f\u007f]/g, "").slice(0, MAX_AUDIT_REQUEST_ID_LENGTH)
+    : "";
+
+  if (!bounded || isSensitiveAuditString(bounded)) {
+    return fallback;
+  }
+
+  return bounded;
+}
+
+function isSensitiveAuditString(value: string) {
+  const trimmed = value.trim();
+
+  if (/^data:/i.test(trimmed) || /^(?:bearer|basic)\s+\S+/i.test(trimmed)) {
+    return true;
+  }
+
+  if (/^[a-f0-9]{32,}$/i.test(trimmed)) {
+    return true;
+  }
+
+  if (/^[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}$/.test(trimmed)) {
+    return true;
+  }
+
+  const compact = trimmed.replace(/\s+/g, "");
+  return compact.length >= 24 &&
+    compact.length % 4 === 0 &&
+    /^[A-Za-z0-9+/]+={0,2}$/.test(compact) &&
+    (compact.length >= 64 || /[=+/]/.test(compact));
 }
 
 export function recordEvidenceOpened(session: SigiSession, draft: CaptureDraft, requestId?: string) {
@@ -866,7 +1008,8 @@ export function recordEvidenceOpened(session: SigiSession, draft: CaptureDraft, 
     after: {
       evidencia: draft.payload.evidencia.nombre,
       indicadorId: draft.indicadorId,
-      plantelId: draft.plantelId
+      plantelId: draft.plantelId,
+      versionActual: draft.versionActual
     },
     status: "ok",
     requestId
@@ -894,7 +1037,12 @@ export function assertEvidenceOpenedBeforeApproval(session: SigiSession, draft: 
     event.resourceType === "capture" &&
     event.resourceId === String(draft.id) &&
     event.userId === session.userId &&
-    event.status === "ok"
+    event.status === "ok" &&
+    typeof event.after === "object" &&
+    event.after !== null &&
+    !Array.isArray(event.after) &&
+    "versionActual" in event.after &&
+    event.after.versionActual === draft.versionActual
   );
 
   if (!opened) {
@@ -1122,7 +1270,7 @@ function defaultPlantelIdForIndicator(session: SigiSession, indicator: SigiIndic
     return session.plantelId;
   }
 
-  return indicator.plantelIds[0] ?? officialIndicatorPlantelScopes[indicator.code]?.[0];
+  return effectivePlantelIdsForIndicator(indicator)[0];
 }
 
 export function getIndicatorById(id: number) {
@@ -1179,6 +1327,7 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
   const isOfficialImportedIndicator = Boolean(
     initialIndicators.find((indicator) => indicator.code === normalizedCode && indicator.plantelScopeSource === "official-import")
   );
+  const officialPlantelIds = normalizePlantelScope(officialIndicatorPlantelScopes[normalizedCode] ?? []);
   const requestedScopeIsConsistent = input.operationalScope === undefined || (
     input.operationalScope === "specific_responsables"
       ? hasResponsibleContributorInput && normalizedInputPlantelIds.length === 0
@@ -1203,23 +1352,28 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
   const contributorResponsibleIds = operationalScope === "specific_responsables"
     ? resolvedContributorResponsibleIds
     : [];
+  const preservesOfficialImportedScope = Boolean(
+    existing &&
+    isOfficialImportedIndicator &&
+    existing.plantelScopeSource === "official-import" &&
+    (!input.operationalScope || input.operationalScope === operationalScopeForIndicator(existing)) &&
+    (!inputHasPlantelIds || sameNumberSet(normalizedInputPlantelIds, officialPlantelIds))
+  );
   const scopedPlantelIds = inputHasPlantelIds
     ? input.plantelIds ?? []
     : existing?.plantelIds?.length
       ? existing.plantelIds
       : officialIndicatorPlantelScopes[normalizedCode] ?? officialSourcePlantelIds;
-  const nextPlantelIds = operationalScope === "all_planteles"
-    ? allPlantelIds()
-    : operationalScope === "specific_planteles"
-      ? normalizePlantelScope(scopedPlantelIds)
-      : [];
-  const preservesOfficialImportedScope =
-    isOfficialImportedIndicator &&
-    !plantelIdsChanged &&
-    (!input.operationalScope || input.operationalScope === existing?.operationalScope) &&
-    nextPlantelIds.length === 0;
+  const nextPlantelIds = preservesOfficialImportedScope
+    ? []
+    : operationalScope === "all_planteles"
+      ? allPlantelIds()
+      : operationalScope === "specific_planteles"
+        ? normalizePlantelScope(scopedPlantelIds)
+        : [];
+  const effectiveNextPlantelIds = preservesOfficialImportedScope ? officialPlantelIds : nextPlantelIds;
 
-  if (operationalScope === "specific_planteles" && nextPlantelIds.length === 0) {
+  if (operationalScope === "specific_planteles" && effectiveNextPlantelIds.length === 0) {
     throw new SigiValidationError("Selecciona al menos un plantel específico.");
   }
 
@@ -1372,13 +1526,19 @@ export function templateSessionForPlantelScope(
     throw new SigiValidationError("El plantel solicitado no existe.");
   }
 
+  const operationalScope = operationalScopeForIndicator(indicator);
+
+  if (operationalScope === "none" || operationalScope === "specific_responsables") {
+    throw new SigiForbiddenError("El indicador no tiene alcance operativo para planteles.");
+  }
+
+  if (!canUseIndicatorForPlantel(indicator, plantelId)) {
+    throw new SigiForbiddenError("El indicador no esta asignado a este plantel.");
+  }
+
   if (session.role === "plantel") {
     if (session.plantelId !== plantelId) {
       throw new SigiForbiddenError("El plantel solo puede consultar su propia plantilla.");
-    }
-
-    if (hasExplicitPlantelScope(indicator) && !canUseIndicatorForPlantel(indicator, plantelId)) {
-      throw new SigiForbiddenError("El indicador no esta asignado a este plantel.");
     }
   }
 
@@ -1521,6 +1681,10 @@ export function validateCapturePayload(indicator: SigiIndicator, payload: Captur
   validateCalculatedColumns(indicator, template, payload);
   validateDomainConsistency(indicator, payload);
 
+  if (payload.evidencia?.nombre) {
+    validateEvidenceMetadata(payload.evidencia, sanitizeEvidenceRules(indicator.evidenceRules));
+  }
+
   const missingValues = payload.rows.some((row) =>
     template.columns.some((column) => {
       if (column.type === "readonly" || column.type === "calculated") {
@@ -1546,10 +1710,6 @@ export function validateCapturePayload(indicator: SigiIndicator, payload: Captur
 
     if (evidenceRules.required && !payload.evidencia?.nombre) {
       throw new SigiValidationError("Adjunta una evidencia PDF antes de enviar a revisión.");
-    }
-
-    if (payload.evidencia?.nombre) {
-      validateEvidenceMetadata(payload.evidencia, evidenceRules);
     }
 
     if (missingValues) {
@@ -1590,6 +1750,32 @@ function validateEvidenceMetadata(evidence: NonNullable<CapturePayload["evidenci
 
   if (evidence.tamanoBytes > maxBytes) {
     throw new SigiValidationError(`La evidencia no debe superar ${rules.maxSizeMb} MB.`);
+  }
+
+  if (!evidence.nombre.toLowerCase().endsWith(".pdf")) {
+    throw new SigiValidationError("La evidencia debe conservar la extensión .pdf.");
+  }
+
+  const encodedContent = evidence.contenidoBase64?.replace(/\s+/g, "") ?? "";
+
+  if (!encodedContent || encodedContent.length % 4 !== 0 || !/^[A-Za-z0-9+/]+={0,2}$/.test(encodedContent)) {
+    throw new SigiValidationError("La evidencia PDF no contiene datos válidos.");
+  }
+
+  const content = Buffer.from(encodedContent, "base64");
+
+  if (content.length !== evidence.tamanoBytes) {
+    throw new SigiValidationError("El tamaño real de la evidencia no coincide con el archivo informado.");
+  }
+
+  if (content.subarray(0, 5).toString("ascii") !== "%PDF-") {
+    throw new SigiValidationError("El archivo adjunto no contiene un PDF válido.");
+  }
+
+  const trailer = content.subarray(Math.max(0, content.length - 2048)).toString("latin1");
+
+  if (!trailer.includes("%%EOF")) {
+    throw new SigiValidationError("El PDF está incompleto o dañado.");
   }
 }
 
@@ -1908,7 +2094,9 @@ export function buildReportPayload(
           ciclo: cicloEscolar,
           meta: 100,
           evidencias: 0,
-          vencimiento: "atrasado" as const
+          vencimiento: "atrasado" as const,
+          exportable: false,
+          blockingIssues: ["No hay registros capturados para este indicador."]
         }], normalizedStatusFilter);
       })
     );
@@ -3027,6 +3215,23 @@ function mergeInitialUsers(persisted?: SigiUser[], resetToInitial = false) {
   const byId = new Map(buildInitialUsers().map((user) => [user.id, user]));
 
   if (resetToInitial) {
+    for (const user of persisted ?? []) {
+      const normalizedUser = normalizePersistedUser(user);
+      const seededUser = byId.get(normalizedUser.id);
+
+      if (!seededUser || normalizedUser.role !== seededUser.role) {
+        continue;
+      }
+
+      byId.set(normalizedUser.id, {
+        ...seededUser,
+        username: normalizedUser.username,
+        name: normalizedUser.name,
+        active: normalizedUser.active,
+        passwordHash: normalizedUser.passwordHash
+      });
+    }
+
     return Array.from(byId.values());
   }
 
@@ -3044,6 +3249,10 @@ function mergeInitialUsers(persisted?: SigiUser[], resetToInitial = false) {
   }
 
   return Array.from(byId.values());
+}
+
+export function mergeInitialUsersForTest(persisted: SigiUser[], resetToInitial: boolean) {
+  return mergeInitialUsers(persisted, resetToInitial);
 }
 
 function usernameForPlantel(plantel: Plantel) {
@@ -3079,15 +3288,31 @@ function usernameForUser(id: string, name: string | undefined, role: SystemRole)
 }
 
 function defaultPasswordHashForRole(role: SystemRole) {
-  if (role === "director") {
-    return hashPassword("Director2026!");
+  const variableByRole: Record<SystemRole, string> = {
+    director: "INITIAL_DIRECTOR_PASSWORD",
+    responsable: "INITIAL_RESPONSABLE_PASSWORD",
+    plantel: "INITIAL_PLANTEL_PASSWORD"
+  };
+  const configuredPassword = process.env[variableByRole[role]]?.trim();
+
+  if (
+    configuredPassword &&
+    configuredPassword.length >= 12 &&
+    (!isProductionRuntime() || !/change|placeholder|test|demo/i.test(configuredPassword))
+  ) {
+    return hashPassword(configuredPassword);
   }
 
-  if (role === "responsable") {
-    return hashPassword("Resp2026!");
+  if (isProductionRuntime()) {
+    return hashPassword(`${sessionSecret()}:${role}:bootstrap-disabled`);
   }
 
-  return hashPassword("Plantel2026!");
+  const testPasswordByRole: Record<SystemRole, string> = {
+    director: "TestDirector-Only!",
+    responsable: "TestResponsible-Only!",
+    plantel: "TestPlantel-Only!"
+  };
+  return hashPassword(testPasswordByRole[role]);
 }
 
 function hashPassword(password: string) {
@@ -3153,7 +3378,21 @@ function sessionTtlSeconds() {
 }
 
 function sessionSecret() {
-  return process.env.AUTH_SECRET || process.env.SIGI_AUTH_SECRET || "adpeak-local-session-secret-change-me";
+  const configuredSecret = process.env.AUTH_SECRET || process.env.SIGI_AUTH_SECRET;
+
+  if (configuredSecret) {
+    return configuredSecret;
+  }
+
+  if (isProductionRuntime()) {
+    throw new Error("AUTH_SECRET es obligatorio en producción.");
+  }
+
+  return "adpeak-local-session-secret-change-me";
+}
+
+function isProductionRuntime() {
+  return process.env.APP_ENV === "production" || process.env.VERCEL_ENV === "production";
 }
 
 function base64UrlEncode(value: string) {

@@ -324,12 +324,29 @@ export function reportBlockingIssues(report: ExportReport) {
   );
 }
 
-function assertReportCanExport(report: ExportReport) {
-  const issues = reportBlockingIssues(report);
+export function reportExportBlockReason(report: ExportReport) {
+  const rows = report.indicadores.flatMap((indicator) => indicator.datos);
 
-  if (issues.length > 0) {
-    const firstIssues = issues.slice(0, 3).join(' ');
-    throw new Error(`No se puede generar el archivo: ${issues.length} registros requieren corrección. ${firstIssues}`);
+  if (rows.length === 0 || rows.every((row) => !row.captureId)) {
+    return 'No hay registros capturados para el alcance seleccionado.';
+  }
+
+  const issueCount = reportBlockingIssues(report).length;
+
+  if (issueCount === 0) {
+    return '';
+  }
+
+  return issueCount === 1
+    ? '1 registro requiere corrección antes de exportar.'
+    : `${issueCount} registros requieren corrección antes de exportar.`;
+}
+
+function assertReportCanExport(report: ExportReport) {
+  const reason = reportExportBlockReason(report);
+
+  if (reason) {
+    throw new Error(`No se puede generar el archivo: ${reason}`);
   }
 }
 

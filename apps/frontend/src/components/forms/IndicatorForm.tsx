@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState, type ClipboardEvent } from 'react';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -22,6 +22,7 @@ interface IndicatorFormProps {
   canSaveReviewEdits?: boolean;
   canModifyRows?: boolean;
   captureStatus?: string;
+  correctionObservation?: string;
   isReadOnly?: boolean;
   onBack?: () => void;
   onSaveDraft: (data: FormSubmission) => void;
@@ -209,6 +210,208 @@ const createDynamicSchema = (columns: ColumnConfig[]) => {
         }
       }),
   });
+};
+
+type PastePlanFailure =
+  | { ok: false; reason: 'read_only' }
+  | { ok: false; reason: 'invalid' | 'overflow'; message: string };
+
+type PastePlanResult =
+  | {
+      ok: true;
+      rows: Record<string, unknown>[];
+      addedRows: number;
+    }
+  | PastePlanFailure;
+
+type PastePlanOptions = {
+  clipboardText: string;
+  startRowIndex: number;
+  startColumnKey: string;
+  columns: ColumnConfig[];
+  rows: Record<string, unknown>[];
+  canAddRows: boolean;
+  isReadOnly: boolean;
+  createRow?: (rowIndex: number, rows: Record<string, unknown>[]) => Record<string, unknown>;
+};
+
+type ParsedPasteCell =
+  | { ok: true; value: string }
+  | { ok: false; message: string };
+
+const isEditablePasteColumn = (column: ColumnConfig) => column.type === 'number' || column.type === 'text';
+
+const parseClipboardRows = (clipboardText: string) => {
+  const normalizedText = clipboardText.replace(/\r\n?/g, '\n').replace(/\n+$/, '');
+  return normalizedText.split('\n').map((row) => row.split('\t'));
+};
+
+const parsePastedCell = (value: string, column: ColumnConfig): ParsedPasteCell => {
+  if (column.type === 'text') {
+    if (column.required && !value.trim()) {
+      return { ok: false, message: 'Campo requerido' };
+    }
+
+    return { ok: true, value };
+  }
+
+  const trimmedValue = value.trim();
+
+  if (!trimmedValue) {
+    return column.required
+      ? { ok: false, message: 'Campo requerido' }
+      : { ok: true, value: '' };
+  }
+
+  const validation = numericValidationForColumn(column);
+  const commaCount = (trimmedValue.match(/,/g) ?? []).length;
+  let normalizedValue = trimmedValue;
+
+  if (commaCount > 0) {
+    if (validation.integer !== false) {
+      return { ok: false, message: 'La columna no admite valores decimales' };
+    }
+
+    const isSafeCommaDecimal =
+      commaCount === 1 &&
+      !trimmedValue.includes('.') &&
+      /^-?\d+,\d+$/.test(trimmedValue);
+
+    if (!isSafeCommaDecimal) {
+      return { ok: false, message: 'Usa un n\u00famero v\u00e1lido sin separadores de miles' };
+    }
+
+    normalizedValue = trimmedValue.replace(',', '.');
+  }
+
+  if (!/^-?\d+(?:\.\d+)?$/.test(normalizedValue)) {
+    return { ok: false, message: 'Debe ser un n\u00famero' };
+  }
+
+  const decimalPlaces = normalizedValue.split('.')[1]?.length ?? 0;
+  const allowedDecimalPlaces = column.validation?.decimals;
+
+  if (allowedDecimalPlaces !== undefined && decimalPlaces > allowedDecimalPlaces) {
+    return {
+      ok: false,
+      message: `Admite como m\u00e1ximo ${allowedDecimalPlaces} decimales`,
+    };
+  }
+
+  const parsedValue = createStrictNumberSchema(column).safeParse(normalizedValue);
+
+  if (!parsedValue.success) {
+    return {
+      ok: false,
+      message: parsedValue.error.issues[0]?.message ?? 'Debe ser un n\u00famero',
+    };
+  }
+
+  return { ok: true, value: String(parsedValue.data) };
+};
+
+const formatPasteValue = (value: string) => {
+  const singleLineValue = value.replace(/\s+/g, ' ').trim();
+  return singleLineValue.length > 30 ? `${singleLineValue.slice(0, 27)}...` : singleLineValue;
+};
+
+const planIndicatorPaste = ({
+  clipboardText,
+  startRowIndex,
+  startColumnKey,
+  columns,
+  rows,
+  canAddRows,
+  isReadOnly,
+  createRow,
+}: PastePlanOptions): PastePlanResult => {
+  if (isReadOnly) {
+    return { ok: false, reason: 'read_only' };
+  }
+
+  const startColumnIndex = columns.findIndex((column) => column.key === startColumnKey);
+
+  if (
+    startRowIndex < 0 ||
+    startRowIndex >= rows.length ||
+    startColumnIndex < 0 ||
+    !isEditablePasteColumn(columns[startColumnIndex])
+  ) {
+    return {
+      ok: false,
+      reason: 'invalid',
+      message: 'No se pegaron los datos: la celda inicial no es editable.',
+    };
+  }
+
+  const clipboardRows = parseClipboardRows(clipboardText);
+  const targetColumns = columns.slice(startColumnIndex).filter(isEditablePasteColumn);
+  const overflowingRowIndex = clipboardRows.findIndex((row) => row.length > targetColumns.length);
+
+  if (overflowingRowIndex >= 0) {
+    return {
+      ok: false,
+      reason: 'overflow',
+      message: `No se pegaron los datos: la fila ${startRowIndex + overflowingRowIndex + 1} excede las columnas editables disponibles.`,
+    };
+  }
+
+  const requiredRowCount = startRowIndex + clipboardRows.length;
+
+  if (requiredRowCount > rows.length && !canAddRows) {
+    return {
+      ok: false,
+      reason: 'overflow',
+      message: `No se pegaron los datos: se necesitan ${requiredRowCount} filas y no est\u00e1 permitido agregar m\u00e1s.`,
+    };
+  }
+
+  const assignments: Array<{ rowIndex: number; columnKey: string; value: string }> = [];
+
+  for (let clipboardRowIndex = 0; clipboardRowIndex < clipboardRows.length; clipboardRowIndex += 1) {
+    const targetRowIndex = startRowIndex + clipboardRowIndex;
+    const clipboardRow = clipboardRows[clipboardRowIndex];
+
+    for (let clipboardColumnIndex = 0; clipboardColumnIndex < clipboardRow.length; clipboardColumnIndex += 1) {
+      const column = targetColumns[clipboardColumnIndex];
+      const clipboardValue = clipboardRow[clipboardColumnIndex];
+      const parsedCell = parsePastedCell(clipboardValue, column);
+
+      if (!parsedCell.ok) {
+        const displayedValue = formatPasteValue(clipboardValue);
+        const valueLabel = displayedValue ? `\"${displayedValue}\"` : 'El valor vac\u00edo';
+
+        return {
+          ok: false,
+          reason: 'invalid',
+          message: `No se pegaron los datos: ${valueLabel} no es v\u00e1lido para ${column.label} (fila ${targetRowIndex + 1}). ${parsedCell.message}.`,
+        };
+      }
+
+      assignments.push({
+        rowIndex: targetRowIndex,
+        columnKey: column.key,
+        value: parsedCell.value,
+      });
+    }
+  }
+
+  const nextRows = rows.map((row) => ({ ...row }));
+
+  while (nextRows.length < requiredRowCount) {
+    const nextRow = createRow?.(nextRows.length, nextRows) ?? {};
+    nextRows.push({ ...nextRow });
+  }
+
+  assignments.forEach(({ rowIndex, columnKey, value }) => {
+    nextRows[rowIndex][columnKey] = value;
+  });
+
+  return {
+    ok: true,
+    rows: nextRows,
+    addedRows: Math.max(0, requiredRowCount - rows.length),
+  };
 };
 
 const toNumber = (value: unknown) => {
@@ -424,6 +627,7 @@ export const __indicatorFormTestUtils = {
   normalizeNumberInputValue,
   enrichRowWithCalculatedValues,
   totalForColumn,
+  planIndicatorPaste,
 };
 
 export const IndicatorForm = ({
@@ -440,6 +644,7 @@ export const IndicatorForm = ({
   canSaveReviewEdits = false,
   canModifyRows = true,
   captureStatus,
+  correctionObservation,
   isReadOnly = false,
   onSaveDraft,
   onSendReview,
@@ -458,6 +663,8 @@ export const IndicatorForm = ({
     register,
     control,
     handleSubmit,
+    getValues,
+    trigger,
     formState: { errors, isValid, touchedFields },
     reset,
   } = useForm<FormData>({
@@ -467,7 +674,7 @@ export const IndicatorForm = ({
     mode: 'onChange',
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control,
     name: 'rows',
   });
@@ -482,6 +689,7 @@ export const IndicatorForm = ({
   );
   const lastAppliedInitialDataSignature = useRef<string | undefined>(undefined);
   const hasUserTouchedFields = hasTouchedFields(touchedFields);
+  const [pasteError, setPasteError] = useState<string>();
 
   useEffect(() => {
     if (lastAppliedInitialDataSignature.current === initialDataSignature || hasUserTouchedFields) {
@@ -489,6 +697,7 @@ export const IndicatorForm = ({
     }
 
     reset({ rows: initialData, justificacion: initialJustificacion ?? '' });
+    setPasteError(undefined);
     lastAppliedInitialDataSignature.current = initialDataSignature;
   }, [hasUserTouchedFields, initialData, initialDataSignature, initialJustificacion, reset]);
 
@@ -498,13 +707,13 @@ export const IndicatorForm = ({
     evidencia: data.evidencia,
   });
 
-  const createEmptyRow = () => {
-    const currentRows = (watchedRows ?? []) as Record<string, unknown>[];
+  const createEmptyRow = (sourceRows?: Record<string, unknown>[]) => {
+    const currentRows = sourceRows ?? (getValues('rows') as Record<string, unknown>[]);
     const source =
       [...currentRows].reverse().find((row) =>
         template.columns.some((column) => column.type === 'readonly' && hasMeaningfulValue(row?.[column.key]))
       ) ??
-      initialData[fields.length] ??
+      initialData[currentRows.length] ??
       initialData.find((row) =>
         template.columns.some((column) => column.type === 'readonly' && hasMeaningfulValue(row?.[column.key]))
       ) ??
@@ -530,6 +739,41 @@ export const IndicatorForm = ({
     return row;
   };
 
+  const handleGridPaste = (
+    event: ClipboardEvent<HTMLInputElement>,
+    rowIndex: number,
+    column: ColumnConfig
+  ) => {
+    if (isReadOnly) {
+      event.preventDefault();
+      return;
+    }
+
+    event.preventDefault();
+
+    const result = planIndicatorPaste({
+      clipboardText: event.clipboardData.getData('text/plain'),
+      startRowIndex: rowIndex,
+      startColumnKey: column.key,
+      columns: template.columns,
+      rows: getValues('rows') as Record<string, unknown>[],
+      canAddRows: Boolean(template.allowAddRows && canModifyRows),
+      isReadOnly,
+      createRow: (_newRowIndex, nextRows) => createEmptyRow(nextRows),
+    });
+
+    if (!result.ok) {
+      if (result.reason !== 'read_only') {
+        setPasteError(result.message);
+      }
+      return;
+    }
+
+    replace(result.rows as FormData['rows']);
+    setPasteError(undefined);
+    void trigger('rows');
+  };
+
   const handleSaveDraft = handleSubmit((data) => onSaveDraft(toSubmission(data)));
   const handleValidSubmit = (data: FormData) => onSendReview(toSubmission(data));
   const persistedEvidenceLabel = watchedEvidencia && watchedEvidencia.length > 0
@@ -550,6 +794,7 @@ export const IndicatorForm = ({
   return (
     <form
       onSubmit={handleSubmit(handleValidSubmit)}
+      onChange={() => setPasteError(undefined)}
       className="w-full max-w-[1250px] mx-auto bg-brand-Blanco rounded-lg shadow-md border border-brand-Gris_bajo/20 p-6"
     >
       {/* Cabecera */}
@@ -698,6 +943,7 @@ export const IndicatorForm = ({
                             aria-label={`${column.label}, fila ${rowIndex + 1}`}
                             disabled={isReadOnly}
                             {...fieldRegistration}
+                            onPaste={(event) => handleGridPaste(event, rowIndex, column)}
                             onKeyDown={(event) => {
                               if (['-', '+', 'e', 'E'].includes(event.key)) {
                                 event.preventDefault();
@@ -725,6 +971,7 @@ export const IndicatorForm = ({
                             aria-label={`${column.label}, fila ${rowIndex + 1}`}
                             disabled={isReadOnly}
                             {...fieldRegistration}
+                            onPaste={(event) => handleGridPaste(event, rowIndex, column)}
                             error={error}
                           />
                         )}
@@ -753,6 +1000,14 @@ export const IndicatorForm = ({
             </tfoot>
           )}
         </table>
+        {pasteError && (
+          <p
+            className="min-w-[980px] border-t border-brand-Status_rojo/30 bg-brand-Status_rojo/10 px-3 py-2 text-left text-sm font-body font-semibold text-brand-Status_rojo"
+            role="alert"
+          >
+            {pasteError}
+          </p>
+        )}
         {template.allowAddRows && canModifyRows && (
           <div className="min-w-[980px] flex flex-wrap justify-end gap-3 border-t border-brand-Gris_bajo/30 bg-brand-Blanco px-3 py-3">
             {fields.length > 1 && (
@@ -786,6 +1041,20 @@ export const IndicatorForm = ({
       </div>
 
       {/* Apartado de Justificación y Evidencia */}
+      {captureStatus === 'correccion_solicitada' && correctionObservation?.trim() && (
+        <section
+          className="mt-6 rounded-md border border-brand-Status_amarillo/50 bg-brand-Status_amarillo/10 px-4 py-3 text-brand-Gris_oscuro"
+          aria-labelledby="correction-observation-heading"
+        >
+          <h2 id="correction-observation-heading" className="font-accent text-sm font-bold">
+            Corrección solicitada
+          </h2>
+          <p className="mt-1 whitespace-pre-wrap font-body text-sm leading-relaxed">
+            {correctionObservation.trim()}
+          </p>
+        </section>
+      )}
+
       <div className="mt-8 bg-brand-Gris_bajo/5 p-6 rounded-lg border border-brand-Gris_bajo/20">
         <h3 className="font-title text-lg font-bold text-brand-Gris_oscuro mb-4">
           {template.analysisHeading ?? 'Justificación y Evidencia'}

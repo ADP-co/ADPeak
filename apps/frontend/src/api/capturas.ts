@@ -44,6 +44,7 @@ export type CaptureDraftRequest = {
   responsableId?: number;
   payload: CapturePayload;
   motivoCambio?: string;
+  expectedVersion?: number;
 };
 
 export type CaptureDraft = {
@@ -175,6 +176,7 @@ export async function updateCaptureDraft(
   captureId: number,
   payload: CapturePayload,
   motivoCambio = 'actualización desde frontend',
+  expectedVersion?: number,
 ) {
   if (!API_REQUESTS_ENABLED) {
     throw apiUnavailableCaptureError();
@@ -184,6 +186,7 @@ export async function updateCaptureDraft(
     const response = await api.put<CaptureDraft>(`/capturas/${captureId}`, {
       payload,
       motivoCambio,
+      expectedVersion,
     }, { headers: sessionHeaders() });
     return response.data;
   } catch (error) {
@@ -204,39 +207,39 @@ export async function getCaptureDraft(captureId: number) {
   }
 }
 
-export async function sendCaptureToReview(captureId: number) {
+export async function sendCaptureToReview(captureId: number, expectedVersion?: number) {
   if (!API_REQUESTS_ENABLED) {
     throw apiUnavailableCaptureError();
   }
 
   try {
-    const response = await api.post<CaptureDraft>(`/capturas/${captureId}/enviar-revision`);
+    const response = await api.post<CaptureDraft>(`/capturas/${captureId}/enviar-revision`, { expectedVersion });
     return response.data;
   } catch (error) {
     throw captureError(error, 'No se pudo enviar a revisión.');
   }
 }
 
-export async function requestCaptureCorrection(captureId: number, observacion: string) {
+export async function requestCaptureCorrection(captureId: number, observacion: string, expectedVersion?: number) {
   if (!API_REQUESTS_ENABLED) {
     throw apiUnavailableCaptureError();
   }
 
   try {
-    const response = await api.post<CaptureDraft>(`/capturas/${captureId}/observar`, { observacion });
+    const response = await api.post<CaptureDraft>(`/capturas/${captureId}/observar`, { observacion, expectedVersion });
     return response.data;
   } catch (error) {
     throw captureError(error, 'No se pudo solicitar la corrección.');
   }
 }
 
-export async function approveCapture(captureId: number) {
+export async function approveCapture(captureId: number, expectedVersion?: number) {
   if (!API_REQUESTS_ENABLED) {
     throw apiUnavailableCaptureError();
   }
 
   try {
-    const response = await api.post<CaptureDraft>(`/capturas/${captureId}/aprobar`);
+    const response = await api.post<CaptureDraft>(`/capturas/${captureId}/aprobar`, { expectedVersion });
     return response.data;
   } catch (error) {
     throw captureError(error, 'No se pudo aprobar el indicador.');

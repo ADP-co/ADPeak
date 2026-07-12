@@ -1,9 +1,4 @@
 import { API_REQUESTS_ENABLED, apiJson } from './client';
-import {
-  officialCatalogRows,
-  officialIndicatorPlantelScopes,
-} from '../catalog/officialCatalog.generated';
-import { officialWorkbookTemplates } from '../catalog/officialData.generated';
 import type { ColumnConfig, IndicatorTemplate } from '../components/forms/formConfig';
 
 export type CatalogRole = 'director' | 'responsable' | 'plantel';
@@ -59,6 +54,7 @@ export type CatalogIndicator = {
   contributorNames: string[];
   activities: string[];
   plantelIds: number[];
+  effectivePlantelIds?: number[];
   plantelScopeSource?: 'manual' | 'official-import';
   operationalScope?: CatalogOperationalScope;
   templateColumns?: ColumnConfig[];
@@ -82,9 +78,45 @@ export type IndicatorHistoryEntry = {
   active: boolean;
 };
 
+export type AuditEvent = {
+  id: number;
+  userId: string;
+  role: CatalogRole;
+  action: string;
+  resourceType: 'capture' | 'indicator' | 'user' | 'report' | 'auth';
+  resourceId: string;
+  before?: unknown;
+  after?: unknown;
+  status: 'ok' | 'rejected' | 'error';
+  createdAt: string;
+  requestId: string;
+};
+
 type IndicatorTemplateResponse = IndicatorTemplate & {
   initialRows?: Record<string, unknown>[];
 };
+
+type DevelopmentCatalogRow = {
+  code: string;
+  name: string;
+  responsible: string;
+  contributors: string;
+  activity: string;
+};
+
+type DevelopmentWorkbookTemplate = {
+  officialCode?: string | null;
+  groups: IndicatorTemplate['groups'];
+  headerRows?: IndicatorTemplate['headerRows'];
+  columns: ColumnConfig[];
+  initialRows: Record<string, unknown>[];
+  showTotals: boolean;
+  allowAddRows: boolean;
+  addRowLabel: string;
+  emptyRow: Record<string, unknown>;
+};
+
+type DevelopmentWorkbookTemplates = Record<string, DevelopmentWorkbookTemplate>;
 
 const INDICATORS_STORAGE_KEY = 'adpeak.catalog.indicators';
 const USERS_STORAGE_KEY = 'adpeak.catalog.users';
@@ -113,7 +145,6 @@ export const catalogPlanteles = [
   { id: 37, name: 'IUBA Bachillerato' },
 ];
 
-const officialSourcePlantelIds: number[] = [];
 const allPlantelIds = () => catalogPlanteles.map((plantel) => plantel.id);
 const DEFAULT_TEMPLATE_PLANTEL_LABEL = 'Todos los planteles';
 
@@ -126,7 +157,7 @@ export function plantelNameFromId(id?: number) {
 }
 
 export function effectivePlantelIdsForIndicator(
-  indicator: Pick<CatalogIndicator, 'code' | 'plantelIds' | 'operationalScope'>
+  indicator: Pick<CatalogIndicator, 'code' | 'plantelIds' | 'effectivePlantelIds' | 'operationalScope'>
 ) {
   if (indicator.operationalScope === 'none' || indicator.operationalScope === 'specific_responsables') {
     return [];
@@ -136,9 +167,7 @@ export function effectivePlantelIdsForIndicator(
     return allPlantelIds();
   }
 
-  return indicator.plantelIds.length > 0
-    ? indicator.plantelIds
-    : officialIndicatorPlantelScopes[indicator.code] ?? [];
+  return indicator.effectivePlantelIds ?? indicator.plantelIds;
 }
 
 export function plantelScopeLabelForIndicator(
@@ -179,9 +208,6 @@ export function plantelScopeLabelForIndicator(
   return `${labels.length} planteles`;
 }
 
-const fallbackIndicators = buildFallbackIndicators();
-const fallbackUsers = buildFallbackUsers(fallbackIndicators);
-
 export async function fetchIndicators() {
   try {
     const response = await apiJson<{ indicators: CatalogIndicator[] }>('/indicadores');
@@ -192,6 +218,7 @@ export async function fetchIndicators() {
       throw error;
     }
 
+    const fallbackIndicators = await loadDevelopmentFallbackIndicators();
     return readStorage(INDICATORS_STORAGE_KEY, fallbackIndicators);
   }
 }
@@ -199,6 +226,11 @@ export async function fetchIndicators() {
 export async function fetchIndicatorHistory() {
   const response = await apiJson<{ history: IndicatorHistoryEntry[] }>('/indicadores/historial');
   return response.history;
+}
+
+export async function fetchAuditEvents() {
+  const response = await apiJson<{ events: AuditEvent[] }>('/auditoria');
+  return response.events;
 }
 
 export async function saveIndicator(input: Partial<CatalogIndicator>) {
@@ -212,32 +244,7 @@ export async function saveIndicator(input: Partial<CatalogIndicator>) {
     mergeIndicator(response);
     return response;
   } catch (error) {
-    if (!shouldUseLocalWriteFallback(error)) {
-      throw catalogWriteError(error, 'No se pudo guardar el indicador.');
-    }
-
-    const current = readStorage(INDICATORS_STORAGE_KEY, fallbackIndicators);
-    const existing = current.find((indicator) => indicator.id === input.id || indicator.code === input.code);
-    const next: CatalogIndicator = {
-      ...buildEmptyIndicator(current),
-      ...existing,
-      ...input,
-      id: existing?.id ?? input.id ?? nextId(current),
-      active: input.active ?? existing?.active ?? true,
-      code: input.code?.trim() || existing?.code || `TMP-${Date.now()}`,
-      name: input.name?.trim() || existing?.name || 'Nuevo indicador',
-      description: input.description?.trim() || existing?.description || input.name?.trim() || 'Nuevo indicador',
-      responsibleNames: input.responsibleNames?.length ? input.responsibleNames : existing?.responsibleNames ?? ['Responsable sin asignar'],
-      contributorNames: input.contributorNames?.length ? input.contributorNames : existing?.contributorNames ?? ['Planteles'],
-      activities: input.activities?.length ? input.activities : existing?.activities ?? ['Actividad general'],
-      templateColumns: input.templateColumns ?? existing?.templateColumns,
-    };
-
-    writeStorage(
-      INDICATORS_STORAGE_KEY,
-      existing ? current.map((indicator) => (indicator.id === existing.id ? next : indicator)) : [next, ...current]
-    );
-    return next;
+    throw catalogWriteError(error, 'No se pudo guardar el indicador.');
   }
 }
 
@@ -247,14 +254,7 @@ export async function deactivateIndicator(id: number) {
     mergeIndicator(response);
     return response;
   } catch (error) {
-    if (!shouldUseLocalWriteFallback(error)) {
-      throw catalogWriteError(error, 'No se pudo desactivar el indicador.');
-    }
-
-    const current = readStorage(INDICATORS_STORAGE_KEY, fallbackIndicators);
-    const updated = current.map((indicator) => (indicator.id === id ? { ...indicator, active: false } : indicator));
-    writeStorage(INDICATORS_STORAGE_KEY, updated);
-    return updated.find((indicator) => indicator.id === id);
+    throw catalogWriteError(error, 'No se pudo desactivar el indicador.');
   }
 }
 
@@ -275,9 +275,22 @@ export async function fetchIndicatorTemplate(codeOrId: string, options?: { plant
       throw error;
     }
 
+    const [fallbackIndicators, fallbackData] = await Promise.all([
+      loadDevelopmentFallbackIndicators(),
+      loadDevelopmentFallbackData(),
+    ]);
     const indicator = readStorage(INDICATORS_STORAGE_KEY, fallbackIndicators)
       .find((candidate) => candidate.code === codeOrId || String(candidate.id) === codeOrId);
-    return templateForIndicator(indicator ?? fallbackIndicators[0]);
+
+    if (!indicator) {
+      throw new Error('Indicador no disponible en el catálogo de desarrollo.');
+    }
+
+    return buildTemplateForCatalogIndicator(
+      indicator,
+      plantelNameFromId(options?.plantelId),
+      fallbackData.officialWorkbookTemplates
+    );
   }
 }
 
@@ -291,12 +304,14 @@ export async function fetchUsers() {
       throw error;
     }
 
+    const fallbackIndicators = await loadDevelopmentFallbackIndicators();
+    const fallbackUsers = buildFallbackUsers(fallbackIndicators);
     return readStorage(USERS_STORAGE_KEY, fallbackUsers);
   }
 }
 
 export async function saveUser(input: CatalogUserInput) {
-  const current = readStorage(USERS_STORAGE_KEY, fallbackUsers);
+  const current = readStorage<CatalogUser[]>(USERS_STORAGE_KEY, []);
   const existing = current.find((user) => user.id === input.id);
   const nextRole = input.role ?? existing?.role ?? 'responsable';
 
@@ -331,22 +346,7 @@ export async function saveUser(input: CatalogUserInput) {
     mergeUser(response);
     return response;
   } catch (error) {
-    if (!shouldUseLocalWriteFallback(error)) {
-      throw catalogWriteError(error, 'No se pudo guardar el usuario.');
-    }
-
-    const next: CatalogUser = {
-      id: existing?.id ?? input.id ?? `user-${Date.now()}`,
-      name: input.name?.trim() || existing?.name || 'Usuario',
-      role: nextRole,
-      plantelId: input.plantelId ?? existing?.plantelId,
-      responsableId: input.responsableId ?? existing?.responsableId,
-      indicatorCodes: input.indicatorCodes ?? existing?.indicatorCodes ?? [],
-      active: input.active ?? existing?.active ?? true,
-    };
-
-    writeStorage(USERS_STORAGE_KEY, existing ? current.map((user) => (user.id === next.id ? next : user)) : [next, ...current]);
-    return next;
+    throw catalogWriteError(error, 'No se pudo guardar el usuario.');
   }
 }
 
@@ -356,14 +356,7 @@ export async function deactivateUser(id: string) {
     mergeUser(response);
     return response;
   } catch (error) {
-    if (!shouldUseLocalWriteFallback(error)) {
-      throw catalogWriteError(error, 'No se pudo desactivar el usuario.');
-    }
-
-    const current = readStorage(USERS_STORAGE_KEY, fallbackUsers);
-    const updated = current.map((user) => (user.id === id ? { ...user, active: false } : user));
-    writeStorage(USERS_STORAGE_KEY, updated);
-    return updated.find((user) => user.id === id);
+    throw catalogWriteError(error, 'No se pudo desactivar el usuario.');
   }
 }
 
@@ -380,8 +373,34 @@ export async function resetUserPassword(id: string, password: string, confirmPas
   }
 }
 
-function buildFallbackIndicators(): CatalogIndicator[] {
-  const operationalRows = officialCatalogRows.filter(isOperationalCatalogRow);
+async function loadDevelopmentFallbackIndicators() {
+  if (!import.meta.env.DEV) {
+    throw new Error('api_unavailable');
+  }
+
+  const modulePath = '../catalog/officialCatalog.generated.ts';
+  const fallbackCatalog = await import(/* @vite-ignore */ modulePath) as typeof import('../catalog/officialCatalog.generated');
+  return buildFallbackIndicators(
+    fallbackCatalog.officialCatalogRows,
+    fallbackCatalog.officialIndicatorPlantelScopes
+  );
+}
+
+async function loadDevelopmentFallbackData() {
+  if (!import.meta.env.DEV) {
+    throw new Error('api_unavailable');
+  }
+
+  const modulePath = '../catalog/officialData.generated.ts';
+  return import(/* @vite-ignore */ modulePath) as Promise<{
+    officialWorkbookTemplates: DevelopmentWorkbookTemplates;
+  }>;
+}
+
+function buildFallbackIndicators(
+  operationalRows: DevelopmentCatalogRow[],
+  plantelScopes: Record<string, number[]>
+): CatalogIndicator[] {
   const responsibleNames = Array.from(new Set(operationalRows.map((row) => row.responsible).filter(Boolean)))
     .sort((a, b) => a.localeCompare(b, 'es'));
   const responsibleIdByName = new Map(responsibleNames.map((name, index) => [name, index + 1]));
@@ -413,20 +432,12 @@ function buildFallbackIndicators(): CatalogIndicator[] {
       responsibleNames: [row.responsible],
       contributorNames: contributors,
       activities: [row.activity || 'Actividad general'],
-      plantelIds: officialIndicatorPlantelScopes[row.code] ?? [...officialSourcePlantelIds],
+      plantelIds: plantelScopes[row.code] ?? [],
       plantelScopeSource: 'official-import',
     });
   });
 
   return Array.from(byCode.values()).sort((a, b) => a.code.localeCompare(b.code, 'es', { numeric: true }));
-}
-
-function isSyntheticIndicatorCode(code: string) {
-  return code.startsWith('FMT-') || code.includes('-FMT-');
-}
-
-function isOperationalCatalogRow(row: (typeof officialCatalogRows)[number]) {
-  return row.classification === 'operational' && row.visible === true && !isSyntheticIndicatorCode(row.code);
 }
 
 function buildFallbackUsers(indicators: CatalogIndicator[]): CatalogUser[] {
@@ -480,8 +491,6 @@ const participantActionCodes = new Set([
   '3.1.0.0.1',
   '3.1.1.3.6',
 ]);
-const infrastructureCodes = new Set(['FMT-01-E81E8473-41221-porcentaje-de-uo-q']);
-
 const activitiesForTemplate = (indicator: Pick<CatalogIndicator, 'activities'>) =>
   indicator.activities.length > 0 ? indicator.activities : ['Actividad general'];
 
@@ -506,9 +515,15 @@ const rowsFromActivities = (
   ...rowFactory(activity, index),
 }));
 
-export function buildTemplateForCatalogIndicator(indicator: CatalogIndicator, plantelName = DEFAULT_TEMPLATE_PLANTEL_LABEL): IndicatorTemplateResponse {
-  if (officialWorkbookTemplates[indicator.code]) {
-    return buildOfficialWorkbookTemplate(indicator, plantelName);
+export function buildTemplateForCatalogIndicator(
+  indicator: CatalogIndicator,
+  plantelName = DEFAULT_TEMPLATE_PLANTEL_LABEL,
+  workbookTemplates: DevelopmentWorkbookTemplates = {}
+): IndicatorTemplateResponse {
+  const workbookTemplate = workbookTemplates[indicator.code];
+
+  if (workbookTemplate) {
+    return buildOfficialWorkbookTemplate(indicator, plantelName, workbookTemplate);
   }
 
   if (indicator.templateColumns?.length) {
@@ -543,10 +558,6 @@ export function buildTemplateForCatalogIndicator(indicator: CatalogIndicator, pl
     return buildStaffProfileTemplate(indicator, plantelName);
   }
 
-  if (infrastructureCodes.has(indicator.code)) {
-    return buildInfrastructureTemplate(indicator, plantelName);
-  }
-
   if (participantActionCodes.has(indicator.code) || indicator.dataType === 'number') {
     return buildParticipantActionTemplate(indicator, plantelName);
   }
@@ -554,10 +565,13 @@ export function buildTemplateForCatalogIndicator(indicator: CatalogIndicator, pl
   return buildGenericTemplate(indicator, plantelName);
 }
 
-function buildOfficialWorkbookTemplate(indicator: CatalogIndicator, plantelName: string): IndicatorTemplateResponse {
-  const imported = officialWorkbookTemplates[indicator.code];
+function buildOfficialWorkbookTemplate(
+  indicator: CatalogIndicator,
+  plantelName: string,
+  imported: DevelopmentWorkbookTemplate
+): IndicatorTemplateResponse {
   const columns = relaxBlankReadonlyColumns(normalizeImportedColumns(imported.columns), imported.initialRows, imported.emptyRow);
-  const displayCode = imported.officialCode || (indicator.code.startsWith('FMT-') ? 'Pendiente de mapeo' : indicator.code);
+  const displayCode = imported.officialCode || indicator.code;
   const groups = imported.groups.filter((group) => group.label !== 'Formato oficial importado');
   const applyPlantel = (sourceRow: Record<string, unknown>) => {
     const row: Record<string, unknown> = {};
@@ -670,66 +684,6 @@ function shouldTreatImportedColumnAsNumber(column: ColumnConfig) {
   }
 
   return /(matr|matricula|alumn|mujer|hombre|egresad|docent|cantidad|numero|num|sesion|accion|total|tasa|porcentaje|avance|meta|ptc)/.test(normalized);
-}
-
-function templateForIndicator(indicator: CatalogIndicator): IndicatorTemplateResponse {
-  return buildTemplateForCatalogIndicator(indicator);
-
-  if (indicator.code === '1.0.0.0.2') {
-    return {
-      indicatorCode: indicator.code,
-      indicatorName: indicator.name,
-      groups: [
-        { label: 'Contexto Escolar', colspan: 3 },
-        { label: 'Egresados titulados en el año 2025', colspan: 3 },
-        { label: 'Matrícula de primer ingreso (agosto 2022)', colspan: 3 },
-        { label: 'Resultados', colspan: 1 },
-      ],
-      columns: [
-        { key: 'delegacion', label: 'Delegación', type: 'readonly' },
-        { key: 'plantel', label: 'Plantel', type: 'readonly' },
-        { key: 'programa', label: 'Programa Educativo', type: 'readonly' },
-        { key: 'egresados_mujeres', label: 'Mujeres', type: 'number' },
-        { key: 'egresados_hombres', label: 'Hombres', type: 'number' },
-        { key: 'egresados_total', label: 'Total', type: 'calculated', calculation: { type: 'sum', sourceKeys: ['egresados_mujeres', 'egresados_hombres'] } },
-        { key: 'matricula_mujeres', label: 'Mujeres', type: 'number' },
-        { key: 'matricula_hombres', label: 'Hombres', type: 'number' },
-        { key: 'matricula_total', label: 'Total', type: 'calculated', calculation: { type: 'sum', sourceKeys: ['matricula_mujeres', 'matricula_hombres'] } },
-        { key: 'porcentaje_titulacion', label: '% de titulación', type: 'calculated', calculation: { type: 'percentage', numeratorKey: 'egresados_total', denominatorKey: 'matricula_total', decimals: 2 } },
-      ],
-      initialRows: [
-        { delegacion: 'Villa de Álvarez', plantel: DEFAULT_TEMPLATE_PLANTEL_LABEL, programa: 'Técnico Analista Programador', egresados_mujeres: '', egresados_hombres: '', matricula_mujeres: '', matricula_hombres: '' },
-        { delegacion: 'Villa de Álvarez', plantel: DEFAULT_TEMPLATE_PLANTEL_LABEL, programa: 'Técnico Analista Químico', egresados_mujeres: '', egresados_hombres: '', matricula_mujeres: '', matricula_hombres: '' },
-      ],
-    };
-  }
-
-  if (indicator.code === '1.1.2.1.4') {
-    return buildHealthIntegralTemplate(indicator);
-  }
-
-  return {
-    indicatorCode: indicator.code,
-    indicatorName: indicator.name,
-    groups: [
-      { label: 'Contexto', colspan: 2 },
-      { label: 'Seguimiento', colspan: 3 },
-    ],
-    columns: [
-      { key: 'plantel', label: 'Plantel', type: 'readonly' },
-      { key: 'actividad', label: 'Actividad', type: 'readonly' },
-      { key: 'meta', label: 'Meta', type: 'number' },
-      { key: 'avance', label: 'Avance', type: 'number' },
-      { key: 'observaciones', label: 'Observaciones', type: 'text' },
-    ],
-    initialRows: catalogPlanteles.slice(0, 1).map((plantel) => ({
-      plantel: plantel.name,
-      actividad: indicator.activities[0] ?? 'Actividad general',
-      meta: '',
-      avance: '',
-      observaciones: '',
-    })),
-  };
 }
 
 function buildConfiguredTemplate(indicator: CatalogIndicator, plantelName: string): IndicatorTemplateResponse {
@@ -1302,10 +1256,6 @@ function readStorage<T>(key: string, fallback: T) {
   }
 }
 
-function shouldUseLocalWriteFallback(_error: unknown) {
-  return false;
-}
-
 function catalogWriteError(error: unknown, fallbackMessage: string) {
   if (error instanceof Error && error.message.startsWith('api_error_')) {
     return new Error(`${fallbackMessage} Código ${error.message.replace('api_error_', '')}.`);
@@ -1325,7 +1275,7 @@ function writeStorage<T>(key: string, value: T) {
 }
 
 function mergeIndicator(indicator: CatalogIndicator) {
-  const current = readStorage(INDICATORS_STORAGE_KEY, fallbackIndicators);
+  const current = readStorage<CatalogIndicator[]>(INDICATORS_STORAGE_KEY, []);
   writeStorage(
     INDICATORS_STORAGE_KEY,
     current.some((item) => item.id === indicator.id)
@@ -1335,33 +1285,13 @@ function mergeIndicator(indicator: CatalogIndicator) {
 }
 
 function mergeUser(user: CatalogUser) {
-  const current = readStorage(USERS_STORAGE_KEY, fallbackUsers);
+  const current = readStorage<CatalogUser[]>(USERS_STORAGE_KEY, []);
   writeStorage(
     USERS_STORAGE_KEY,
     current.some((item) => item.id === user.id)
       ? current.map((item) => (item.id === user.id ? user : item))
       : [user, ...current]
   );
-}
-
-function buildEmptyIndicator(current: CatalogIndicator[]): CatalogIndicator {
-  return {
-    id: nextId(current),
-    code: '',
-    name: '',
-    description: '',
-    dataType: 'number',
-    period: '2026',
-    active: true,
-    primaryResponsibleId: 1,
-    responsibleIds: [1],
-    responsibleNames: [],
-    contributorResponsibleIds: [],
-    contributorNames: ['Planteles'],
-    activities: [],
-    plantelIds: allPlantelIds(),
-    operationalScope: 'all_planteles',
-  };
 }
 
 function usernameForPlantel(plantel: { key?: string; name: string }) {
@@ -1385,10 +1315,6 @@ function usernameForPlantel(plantel: { key?: string; name: string }) {
   }
 
   return (plantel.key ?? plantel.name).replace(/\W+/g, '').toLowerCase();
-}
-
-function nextId(indicators: CatalogIndicator[]) {
-  return Math.max(0, ...indicators.map((indicator) => indicator.id)) + 1;
 }
 
 function splitNames(value: string) {

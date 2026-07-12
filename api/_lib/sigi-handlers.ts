@@ -247,6 +247,22 @@ export async function handleIndicatorHistory(request: RequestLike, response: any
   }
 }
 
+export async function handleAuditEvents(request: RequestLike, response: any) {
+  if (prepare(request, response, ["GET", "OPTIONS"])) {
+    return;
+  }
+
+  try {
+    const sigi = await loadSigi();
+    const session = sigi.sessionFromHeaders(request.headers ?? {});
+    sendJson(response, 200, { events: sigi.listAuditEvents(session) });
+  } catch (error) {
+    if (!sendKnownError(response, error)) {
+      sendJson(response, 500, { error: "audit_error", message: "No se pudo consultar la auditoria." });
+    }
+  }
+}
+
 export async function handleIndicatorAction(request: RequestLike, response: any) {
   if (handleOptions(request, response)) {
     return;
@@ -466,7 +482,21 @@ export async function handleCaptureDrafts(request: RequestLike, response: any) {
         return;
       }
 
+      if (existingDraft && body.expectedVersion !== existingDraft.versionActual) {
+        sendCaptureVersionConflict(response, existingDraft.versionActual);
+        return;
+      }
+
       const created = captures.createCaptureDraft(body);
+      sigi.recordAuditEvent(session, {
+        action: "capture_saved",
+        resourceType: "capture",
+        resourceId: String(created.id),
+        before: existingDraft,
+        after: created,
+        status: "ok",
+        requestId: requestIdFromRequest(request)
+      });
       await flushRuntimeState();
       sendJson(response, 201, created);
       return;
@@ -540,9 +570,12 @@ export async function handleCaptureEvidence(request: RequestLike, response: any)
     await flushRuntimeState();
     applyCors(response);
     response.status(200);
+    response.setHeader("Cache-Control", "private, no-store");
+    response.setHeader("Content-Security-Policy", "sandbox; default-src 'none'");
     response.setHeader("Content-Disposition", `inline; filename="${sanitizeDownloadFileName(evidence.nombre)}"`);
-    response.setHeader("Content-Type", evidence.tipo || "application/pdf");
     response.setHeader("Content-Length", String(content.length));
+    response.setHeader("Content-Type", "application/pdf");
+    response.setHeader("X-Content-Type-Options", "nosniff");
     response.end(content);
   } catch (error) {
     if (!sendKnownError(response, error)) {
@@ -591,9 +624,17 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
         return;
       }
 
+      const expectedVersion = positiveExpectedVersion(body);
+
+      if (!expectedVersion) {
+        sendCaptureVersionConflict(response, draft.versionActual);
+        return;
+      }
+
       sigi.assertCaptureAccess(session, { ...draft, payload: body.payload }, "draft");
       const updatedDraft = captures.updateCaptureDraft(id, body.payload, {
-        allowReviewStatus: false
+        allowReviewStatus: false,
+        expectedVersion
       });
 
       if (!updatedDraft) {
@@ -604,15 +645,36 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
         return;
       }
 
+      sigi.recordAuditEvent(session, {
+        action: "capture_updated",
+        resourceType: "capture",
+        resourceId: String(updatedDraft.id),
+        before: draft,
+        after: updatedDraft,
+        status: "ok",
+        requestId: requestIdFromRequest(request)
+      });
       await flushRuntimeState();
       sendJson(response, 200, updatedDraft);
       return;
     }
 
     if (request.method === "POST" && action === "enviar-revision") {
+      const body = await readJsonBody(request);
+      const expectedVersion = positiveExpectedVersion(body);
+
+      if (!expectedVersion) {
+        sendCaptureVersionConflict(response, draft.versionActual);
+        return;
+      }
+
       sigi.assertCaptureAccess(session, draft, "submit");
       const notificationEvent = draft.estado === "correccion_solicitada" ? "resubmitted" : "submitted";
-      const updatedDraft = captures.sendCaptureToReview(id, { userId: session.userId, role: session.role });
+      const updatedDraft = captures.sendCaptureToReview(
+        id,
+        { userId: session.userId, role: session.role },
+        expectedVersion
+      );
 
       if (!updatedDraft) {
         sendJson(response, 409, {
@@ -623,15 +685,32 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
       }
 
       sigi.recordCaptureNotification(notificationEvent, session, updatedDraft);
+      sigi.recordAuditEvent(session, {
+        action: "capture_submitted",
+        resourceType: "capture",
+        resourceId: String(updatedDraft.id),
+        before: draft,
+        after: updatedDraft,
+        status: "ok",
+        requestId: requestIdFromRequest(request)
+      });
       await flushRuntimeState();
       sendJson(response, 200, updatedDraft);
       return;
     }
 
     if (request.method === "POST" && action === "aprobar") {
+      const body = await readJsonBody(request);
+      const expectedVersion = positiveExpectedVersion(body);
+
+      if (!expectedVersion) {
+        sendCaptureVersionConflict(response, draft.versionActual);
+        return;
+      }
+
       sigi.assertCaptureAccess(session, draft, "review");
       sigi.assertEvidenceOpenedBeforeApproval(session, draft);
-      const updatedDraft = captures.approveCapture(id);
+      const updatedDraft = captures.approveCapture(id, expectedVersion);
 
       if (!updatedDraft) {
         sendJson(response, 409, {
@@ -642,6 +721,15 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
       }
 
       sigi.recordCaptureNotification("approved", session, updatedDraft);
+      sigi.recordAuditEvent(session, {
+        action: "capture_approved",
+        resourceType: "capture",
+        resourceId: String(updatedDraft.id),
+        before: draft,
+        after: updatedDraft,
+        status: "ok",
+        requestId: requestIdFromRequest(request)
+      });
       await flushRuntimeState();
       sendJson(response, 200, updatedDraft);
       return;
@@ -651,13 +739,19 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
       sigi.assertCaptureAccess(session, draft, "review");
       const body = await readJsonBody(request);
       const observacion = typeof body.observacion === "string" ? body.observacion.trim() : "";
+      const expectedVersion = positiveExpectedVersion(body);
+
+      if (!expectedVersion) {
+        sendCaptureVersionConflict(response, draft.versionActual);
+        return;
+      }
 
       if (!observacion) {
         sendJson(response, 400, { error: "observation_required", message: "Agrega una observación para solicitar corrección." });
         return;
       }
 
-      const updatedDraft = captures.requestCaptureCorrection(id, observacion);
+      const updatedDraft = captures.requestCaptureCorrection(id, observacion, expectedVersion);
 
       if (!updatedDraft) {
         sendJson(response, 409, {
@@ -668,6 +762,15 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
       }
 
       sigi.recordCaptureNotification("correction_requested", session, updatedDraft);
+      sigi.recordAuditEvent(session, {
+        action: "capture_correction_requested",
+        resourceType: "capture",
+        resourceId: String(updatedDraft.id),
+        before: draft,
+        after: updatedDraft,
+        status: "ok",
+        requestId: requestIdFromRequest(request)
+      });
       await flushRuntimeState();
       sendJson(response, 200, updatedDraft);
       return;
@@ -721,6 +824,23 @@ function positiveNumber(value: unknown) {
 
 function isEditableCaptureStatus(status: string) {
   return status === "borrador" || status === "correccion_solicitada";
+}
+
+function positiveExpectedVersion(body: unknown) {
+  if (typeof body !== "object" || body === null || !("expectedVersion" in body)) {
+    return undefined;
+  }
+
+  const value = Number((body as { expectedVersion?: unknown }).expectedVersion);
+  return Number.isInteger(value) && value > 0 ? value : undefined;
+}
+
+function sendCaptureVersionConflict(response: any, currentVersion: number) {
+  sendJson(response, 409, {
+    error: "capture_version_conflict",
+    message: "La captura cambió en otra sesión. Recarga antes de guardar de nuevo.",
+    currentVersion
+  });
 }
 
 function filtersFromRequest(request: RequestLike) {
