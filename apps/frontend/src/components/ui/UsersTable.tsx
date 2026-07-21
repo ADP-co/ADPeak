@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { KeyRound, Lock, PlusCircle, Search, Unlock, X } from 'lucide-react';
+import { KeyRound, Lock, Pencil, PlusCircle, Search, Unlock, X } from 'lucide-react';
 import { ConfirmModal } from './ConfirmModal';
 import {
   catalogPlanteles,
@@ -91,6 +91,9 @@ const rolePriority: Record<SystemRole, number> = {
   Responsable: 2,
   Plantel: 3,
 };
+
+export const USER_ACTION_BUTTON_CLASS =
+  'min-h-9 min-w-[124px] rounded-full border px-4 py-1.5 inline-flex items-center justify-center gap-1.5 text-sm font-bold transition-colors cursor-pointer';
 
 function roleFromCatalog(role: CatalogUser['role']): SystemRole {
   if (role === 'director') {
@@ -559,9 +562,10 @@ export const UsersTable = () => {
                         onClick={() => handleEditUser(user)}
                         disabled={user.isBlocked}
                         aria-label={`Modificar usuario ${user.name}`}
-                        className="px-5 py-1 rounded-full border border-brand-Verde_oscuro text-brand-Verde_oscuro font-bold text-sm hover:bg-brand-Verde_oscuro hover:text-brand-Blanco transition-colors w-[112px] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-brand-Verde_oscuro"
+                        className={`${USER_ACTION_BUTTON_CLASS} border-brand-Verde_oscuro text-brand-Verde_oscuro hover:bg-brand-Verde_oscuro hover:text-brand-Blanco disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-brand-Verde_oscuro`}
                       >
-                        Modificar
+                        <Pencil size={16} />
+                        <span>Modificar</span>
                       </button>
 
                       {user.role !== 'Administrador' && (
@@ -570,7 +574,7 @@ export const UsersTable = () => {
                             type="button"
                             onClick={() => openPasswordReset(user)}
                             aria-label={`Restablecer contraseña de ${user.name}`}
-                            className="min-h-9 rounded-md border border-brand-Verde_oscuro/40 px-3 py-1 text-brand-Verde_oscuro hover:text-brand-Blanco hover:bg-brand-Verde_oscuro transition-colors cursor-pointer inline-flex items-center gap-1.5 text-xs font-bold"
+                            className={`${USER_ACTION_BUTTON_CLASS} border-brand-Verde_oscuro/40 text-brand-Verde_oscuro hover:text-brand-Blanco hover:bg-brand-Verde_oscuro`}
                           >
                             <KeyRound size={16} />
                             <span>Contraseña</span>
@@ -579,7 +583,7 @@ export const UsersTable = () => {
                             type="button"
                             onClick={() => setUserToToggleBlock(user)}
                             aria-label={user.isBlocked ? `Desbloquear usuario ${user.name}` : `Bloquear usuario ${user.name}`}
-                            className={`min-h-9 rounded-md border px-3 py-1 transition-colors cursor-pointer inline-flex items-center gap-1.5 text-xs font-bold ${
+                            className={`${USER_ACTION_BUTTON_CLASS} ${
                               user.isBlocked
                                 ? 'border-brand-Status_rojo/40 text-brand-Status_rojo hover:bg-brand-Status_rojo hover:text-brand-Blanco'
                                 : 'border-brand-Verde_oscuro/40 text-brand-Verde_oscuro hover:bg-brand-Status_amarillo hover:text-brand-Gris_oscuro'

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { CatalogIndicator } from '../../api/catalog';
-import { dedupeIndicatorAssignmentOptions } from './UsersTable';
+import { dedupeIndicatorAssignmentOptions, USER_ACTION_BUTTON_CLASS } from './UsersTable';
 
 function indicator(input: Partial<CatalogIndicator> & Pick<CatalogIndicator, 'code' | 'name'>): CatalogIndicator {
   return {
@@ -20,6 +20,13 @@ function indicator(input: Partial<CatalogIndicator> & Pick<CatalogIndicator, 'co
 }
 
 describe('user indicator assignment options', () => {
+  it('uses the same pill-shaped dimensions for every user action', () => {
+    expect(USER_ACTION_BUTTON_CLASS).toContain('rounded-full');
+    expect(USER_ACTION_BUTTON_CLASS).toContain('min-h-9');
+    expect(USER_ACTION_BUTTON_CLASS).toContain('min-w-[124px]');
+    expect(USER_ACTION_BUTTON_CLASS).not.toContain('rounded-md');
+  });
+
   it('deduplicates backend indicators by normalized code and excludes inactive rows', () => {
     const options = dedupeIndicatorAssignmentOptions([
       indicator({ code: ' 1.1.2.0.3 ', name: 'Abandono escolar' }),
