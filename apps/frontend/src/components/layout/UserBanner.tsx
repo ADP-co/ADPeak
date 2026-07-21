@@ -1,4 +1,4 @@
-import { Bell, User } from 'lucide-react';
+import { ArrowRight, Bell, User } from 'lucide-react';
 import type { SigiNotification } from '../../api/notificaciones';
 
 // Roles del sistema
@@ -12,6 +12,7 @@ interface UserBannerProps {
   currentView?: string;
   notifications?: SigiNotification[];
   onReadNotification?: (id: number) => void;
+  onOpenNotification?: (notification: SigiNotification) => void;
 }
 
 // Diccionario de enlaces
@@ -36,7 +37,16 @@ const navLinksByRole: Record<UserRole, { label: string; href: string }[]> = {
   ]
 };
 
-export const UserBanner = ({ role, name, description, onNavigate, currentView, notifications = [], onReadNotification }: UserBannerProps) => {
+export const UserBanner = ({
+  role,
+  name,
+  description,
+  onNavigate,
+  currentView,
+  notifications = [],
+  onReadNotification,
+  onOpenNotification,
+}: UserBannerProps) => {
   const currentLinks = navLinksByRole[role] || [];
   const unreadNotifications = notifications.filter((notification) => !notification.readAt);
   const unreadCount = unreadNotifications.length;
@@ -118,8 +128,23 @@ export const UserBanner = ({ role, name, description, onNavigate, currentView, n
               ) : (
                 <ul className="space-y-2">
                   {recentNotifications.map((notification) => (
-                    <li key={notification.id} className="rounded border border-brand-Gris_bajo/30 p-2">
-                      <p className="font-body text-xs leading-snug">{notification.mensaje}</p>
+                    <li key={notification.id} className="rounded border border-brand-Gris_bajo/30 p-2 transition-colors hover:border-brand-Verde_oscuro/50 hover:bg-brand-Fondo">
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.currentTarget.closest('details')?.removeAttribute('open');
+                          onOpenNotification?.(notification);
+                        }}
+                        disabled={!onOpenNotification}
+                        className="group w-full text-left disabled:cursor-default"
+                        aria-label={`Abrir notificación: ${notification.mensaje}`}
+                      >
+                        <p className="font-body text-xs leading-snug">{notification.mensaje}</p>
+                        <span className="mt-1 inline-flex items-center gap-1 font-accent text-[10px] font-bold text-brand-Verde_oscuro group-hover:underline">
+                          {notification.captureId ? 'Ver captura' : 'Ver indicadores'}
+                          <ArrowRight size={12} aria-hidden="true" />
+                        </span>
+                      </button>
                       <div className="mt-2 flex items-center justify-between gap-2">
                         <span className="font-accent text-[10px] text-brand-Gris_oscuro/60">
                           {new Date(notification.createdAt).toLocaleString('es-MX')}

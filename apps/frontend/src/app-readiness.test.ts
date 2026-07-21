@@ -100,12 +100,16 @@ describe('frontend readiness invariants', () => {
 
   it('refreshes notifications across tabs and devices without a manual reload', () => {
     const source = readSource('App.tsx');
+    const bannerSource = readSource('components/layout/UserBanner.tsx');
 
     expect(source).toContain('window.setInterval(refresh, 15_000)');
     expect(source).toContain("window.addEventListener('focus', refresh)");
     expect(source).toContain("document.addEventListener('visibilitychange', refreshWhenVisible)");
     expect(source).toContain("const targetWindow = window.open('', '_blank');");
     expect(source).toContain('targetWindow.location.replace(url)');
+    expect(source).toContain('notificationTargetPath(notification');
+    expect(bannerSource).toContain('onOpenNotification?.(notification)');
+    expect(bannerSource).toContain("notification.captureId ? 'Ver captura' : 'Ver indicadores'");
   });
 
   it('requires a real code when creating an indicator', () => {

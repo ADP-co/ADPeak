@@ -22,6 +22,7 @@ import {
   readPersistedCollection,
   readPersistedValue
 } from "./state-store.js";
+import { normalizeUserFacingText } from "./text-normalization.js";
 
 export type SystemRole = "director" | "responsable" | "plantel";
 
@@ -444,7 +445,12 @@ export function reloadSigiStateFromPersistence() {
 
   notifications.clear();
   for (const notification of persistedNotifications) {
-    notifications.set(notification.id, notification);
+    notifications.set(notification.id, {
+      ...notification,
+      indicadorNombre: normalizeUserFacingText(notification.indicadorNombre),
+      plantel: notification.plantel ? normalizeUserFacingText(notification.plantel) : notification.plantel,
+      mensaje: normalizeUserFacingText(notification.mensaje)
+    });
   }
   nextNotificationId = readPersistedValue<number>("nextNotificationId") ??
     Math.max(0, ...Array.from(notifications.keys())) + 1;
@@ -2520,11 +2526,7 @@ function readableValue(value: unknown) {
 }
 
 function cleanReportText(value: string) {
-  if (!value.includes("\uFFFD")) {
-    return value;
-  }
-
-  return value
+  return normalizeUserFacingText(value)
     .replace(/\uFFFDlvarez/g, "\u00C1lvarez")
     .replace(/T\uFFFDcnico/g, "T\u00E9cnico")
     .replace(/Qu\uFFFDmico/g, "Qu\u00EDmico")

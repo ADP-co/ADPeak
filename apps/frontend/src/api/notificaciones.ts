@@ -36,3 +36,33 @@ export async function markNotificationRead(id: number) {
 
   return apiJson<SigiNotification>(`/notificaciones/${id}/leida`, { method: 'PATCH' });
 }
+
+export function notificationTargetPath(
+  notification: SigiNotification,
+  role: string,
+) {
+  const normalizedRole = role === 'admin' || role === 'responsable' || role === 'plantel'
+    ? role
+    : 'plantel';
+
+  if (notification.captureId && notification.indicadorCodigo) {
+    const params = new URLSearchParams({
+      captureId: String(notification.captureId),
+      source: normalizedRole === 'responsable' ? 'revision' : 'notification',
+    });
+
+    if (notification.plantelId !== undefined) {
+      params.set('plantelId', String(notification.plantelId));
+    }
+
+    return `/indicadores/captura/${encodeURIComponent(notification.indicadorCodigo)}?${params.toString()}`;
+  }
+
+  if (notification.eventType !== 'assignment_changed' && notification.indicadorCodigo) {
+    return `/indicadores/captura/${encodeURIComponent(notification.indicadorCodigo)}`;
+  }
+
+  return normalizedRole === 'responsable' && notification.eventType !== 'assignment_changed'
+    ? '/revision'
+    : '/indicadores';
+}

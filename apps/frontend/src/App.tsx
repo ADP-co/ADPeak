@@ -22,7 +22,12 @@ import { Toaster, toast } from 'sonner';
 import { useCaptureDraft } from './hooks/useCaptureDraft';
 import { fetchCaptureEvidence } from './api/capturas';
 import { CAPTURE_CHANGED_EVENT } from './api/captureEvents';
-import { fetchNotifications, markNotificationRead, type SigiNotification } from './api/notificaciones';
+import {
+  fetchNotifications,
+  markNotificationRead,
+  notificationTargetPath,
+  type SigiNotification,
+} from './api/notificaciones';
 import {
   buildHealthIntegralTemplate,
   buildTemplateForCatalogIndicator,
@@ -731,6 +736,21 @@ function ProtectedLayout() {
     }
   };
 
+  const handleOpenNotification = async (notification: SigiNotification) => {
+    const targetPath = notificationTargetPath(notification, user?.role ?? 'plantel');
+
+    if (!notification.readAt) {
+      try {
+        await markNotificationRead(notification.id);
+        await loadNotifications();
+      } catch {
+        toast.error('No se pudo marcar la notificación como leída');
+      }
+    }
+
+    navigate(targetPath);
+  };
+
   // Si no está logueado, lo mandamos directo al login
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -755,6 +775,7 @@ function ProtectedLayout() {
           currentView={currentView}
           notifications={notifications}
           onReadNotification={handleReadNotification}
+          onOpenNotification={handleOpenNotification}
         />
       )}
 

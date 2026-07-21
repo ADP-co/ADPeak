@@ -4,6 +4,7 @@ import {
   readPersistedCollection,
   readPersistedValue
 } from "./state-store.js";
+import { normalizeUserFacingText } from "./text-normalization.js";
 
 export type CapturePayload = {
   rows: Record<string, unknown>[];
@@ -114,7 +115,8 @@ export function reloadCaptureDraftsFromState() {
   for (const capture of persistedCaptureDrafts) {
     captureDrafts.set(capture.id, {
       ...capture,
-      payload: withEvidenceMetadata(capture.payload, capture.id)
+      payload: withEvidenceMetadata(capture.payload, capture.id),
+      observacion: capture.observacion ? normalizeUserFacingText(capture.observacion) : null
     });
   }
 
@@ -279,7 +281,7 @@ export function requestCaptureCorrection(captureId: number, observacion: string,
   const updatedDraft: CaptureDraft = {
     ...draft,
     estado: "correccion_solicitada",
-    observacion,
+    observacion: normalizeUserFacingText(observacion),
     versionActual: draft.versionActual + 1,
     actualizadoEn: nowIso()
   };
@@ -333,10 +335,11 @@ function assertExpectedVersion(draft: CaptureDraft, expectedVersion?: number) {
 }
 
 function withEvidenceMetadata(payload: CapturePayload, captureId: number): CapturePayload {
-  const evidence = payload.evidencia;
+  const normalizedPayload = normalizeCapturePayload(payload);
+  const evidence = normalizedPayload.evidencia;
 
   if (!evidence) {
-    return payload;
+    return normalizedPayload;
   }
 
   const content = evidence.contenidoBase64
@@ -347,7 +350,7 @@ function withEvidenceMetadata(payload: CapturePayload, captureId: number): Captu
   );
 
   return {
-    ...payload,
+    ...normalizedPayload,
     evidencia: {
       ...evidence,
       sha256,
@@ -355,5 +358,26 @@ function withEvidenceMetadata(payload: CapturePayload, captureId: number): Captu
         sha256 ? `state://captures/${captureId}/evidence/${sha256}` : undefined
       )
     }
+  };
+}
+
+function normalizeCapturePayload(payload: CapturePayload): CapturePayload {
+  return {
+    ...payload,
+    rows: payload.rows.map((row) => Object.fromEntries(
+      Object.entries(row).map(([key, value]) => [
+        key,
+        typeof value === "string" ? normalizeUserFacingText(value) : value
+      ])
+    )),
+    justificacion: payload.justificacion
+      ? normalizeUserFacingText(payload.justificacion)
+      : payload.justificacion,
+    evidencia: payload.evidencia
+      ? {
+          ...payload.evidencia,
+          nombre: normalizeUserFacingText(payload.evidencia.nombre)
+        }
+      : undefined
   };
 }

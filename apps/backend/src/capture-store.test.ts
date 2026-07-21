@@ -83,6 +83,40 @@ describe("capture store", () => {
     });
   });
 
+  it("repairs damaged accents in persisted user-facing capture text", () => {
+    const draft = createCaptureDraft({
+      plantelId: 1,
+      indicadorId: 1,
+      actividadId: 1,
+      periodoId: 1,
+      payload: {
+        rows: [{ descripcion: "EducaciÃ³n y gesti?n" }],
+        justificacion: "Informaci?n num?rica",
+        evidencia: {
+          nombre: "titulaci?n.pdf",
+          tipo: "application/pdf",
+          tamanoBytes: 20,
+          contenidoBase64: Buffer.from("%PDF-1.4\n", "utf8").toString("base64")
+        }
+      }
+    });
+
+    expect(draft.payload).toMatchObject({
+      rows: [{ descripcion: "Educación y gestión" }],
+      justificacion: "Información numérica",
+      evidencia: { nombre: "titulación.pdf" }
+    });
+
+    const reviewed = sendCaptureToReview(draft.id);
+    const observed = requestCaptureCorrection(
+      draft.id,
+      "Requiere corregir valores num?ricos antes de exportar.",
+      reviewed?.versionActual
+    );
+
+    expect(observed?.observacion).toBe("Requiere corregir valores numéricos antes de exportar.");
+  });
+
   it("validates the request shape expected by the final frontend", () => {
     expect(
       isCaptureDraftRequest({
