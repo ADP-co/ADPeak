@@ -440,6 +440,7 @@ const users = new Map<string, SigiUser>();
 const notifications = new Map<number, SigiNotification>();
 const auditEvents = new Map<number, SigiAuditEvent>();
 const defaultPasswordHashCache = new Map<SystemRole, string>();
+const officialCredentialResetVersion = process.env.OFFICIAL_CREDENTIAL_RESET_VERSION?.trim();
 let nextNotificationId = 1;
 let nextAuditEventId = 1;
 
@@ -481,6 +482,10 @@ export function reloadSigiStateFromPersistence() {
   const persistedNotifications = readPersistedCollection<SigiNotification>("notifications") ?? [];
   const persistedAuditEvents = readPersistedCollection<SigiAuditEvent>("auditEvents") ?? [];
   const needsCatalogMigration = readPersistedValue<string>("catalogImportVersion") !== officialCatalogImportVersion;
+  const needsCredentialReset = Boolean(
+    officialCredentialResetVersion &&
+    readPersistedValue<string>("officialCredentialResetVersion") !== officialCredentialResetVersion
+  );
 
   indicators.clear();
   for (const indicator of mergeInitialIndicators(persistedIndicators, needsCatalogMigration)) {
@@ -491,6 +496,10 @@ export function reloadSigiStateFromPersistence() {
   for (const user of mergeInitialUsers(persistedUsers, needsCatalogMigration)) {
     const normalizedUser = normalizePersistedUser(user);
     users.set(normalizedUser.id, normalizedUser);
+  }
+
+  if (needsCredentialReset) {
+    resetOfficialUserCredentials();
   }
 
   reconcileCurrentAssignments();
@@ -529,7 +538,15 @@ export function reloadSigiStateFromPersistence() {
       nextAuditEventId,
       captureDrafts: [],
       nextCaptureId: 1,
-      catalogImportVersion: officialCatalogImportVersion
+      catalogImportVersion: officialCatalogImportVersion,
+      ...(officialCredentialResetVersion
+        ? { officialCredentialResetVersion }
+        : {})
+    });
+  } else if (needsCredentialReset) {
+    persistState({
+      users: Array.from(users.values()),
+      officialCredentialResetVersion
     });
   }
 }
@@ -3949,18 +3966,9 @@ function defaultPasswordHashForRole(role: SystemRole) {
     return cached;
   }
 
-  const variableByRole: Record<SystemRole, string> = {
-    director: "INITIAL_DIRECTOR_PASSWORD",
-    responsable: "INITIAL_RESPONSABLE_PASSWORD",
-    plantel: "INITIAL_PLANTEL_PASSWORD"
-  };
-  const configuredPassword = process.env[variableByRole[role]]?.trim();
+  const configuredPassword = configuredInitialPasswordForRole(role);
 
-  if (
-    configuredPassword &&
-    configuredPassword.length >= 12 &&
-    (!isProductionRuntime() || !/change|placeholder|test|demo/i.test(configuredPassword))
-  ) {
+  if (configuredPassword) {
     const hash = hashPassword(configuredPassword);
     defaultPasswordHashCache.set(role, hash);
     return hash;
@@ -3980,6 +3988,49 @@ function defaultPasswordHashForRole(role: SystemRole) {
   const hash = hashPassword(testPasswordByRole[role]);
   defaultPasswordHashCache.set(role, hash);
   return hash;
+}
+
+function configuredInitialPasswordForRole(role: SystemRole) {
+  const variableByRole: Record<SystemRole, string> = {
+    director: "INITIAL_DIRECTOR_PASSWORD",
+    responsable: "INITIAL_RESPONSABLE_PASSWORD",
+    plantel: "INITIAL_PLANTEL_PASSWORD"
+  };
+  const configuredPassword = process.env[variableByRole[role]]?.trim();
+
+  if (!configuredPassword || configuredPassword.length < 8) {
+    return undefined;
+  }
+
+  if (isProductionRuntime() && /change|placeholder|test|demo/i.test(configuredPassword)) {
+    return undefined;
+  }
+
+  return configuredPassword;
+}
+
+function resetOfficialUserCredentials() {
+  const initialUsers = buildInitialUsers();
+  const officialUserIds = new Set(initialUsers.map((user) => user.id));
+
+  for (const role of ["director", "responsable", "plantel"] as const) {
+    if (!configuredInitialPasswordForRole(role)) {
+      throw new Error(`No se configuró una contraseña inicial válida para el rol ${role}.`);
+    }
+  }
+
+  for (const [id, user] of users) {
+    if (!officialUserIds.has(id)) {
+      continue;
+    }
+
+    users.set(id, {
+      ...user,
+      active: true,
+      passwordHash: defaultPasswordHashForRole(user.role),
+      credentialVersion: credentialVersionFor(user) + 1
+    });
+  }
 }
 
 function hashPassword(password: string) {
