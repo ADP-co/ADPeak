@@ -375,13 +375,38 @@ const hiddenImportedIndicatorCodes = new Set(
     .flatMap((row) => [row.code, row.sourceCode].filter(Boolean))
 );
 
-const responsibleNames = Array.from(
-  new Set(operationalCatalogRows.map((row) => row.responsible).filter(Boolean))
-).sort((a, b) => a.localeCompare(b, "es"));
+const officialResponsibleAccounts = [
+  { responsableId: 1, username: "resp01", name: "Adriana Ruiz Rivera" },
+  { responsableId: 2, username: "resp02", name: "Angel Ordoñez Ayala" },
+  { responsableId: 3, username: "resp03", name: "Ariadna Zúñiga Torres" },
+  { responsableId: 4, username: "resp04", name: "Armando Hernández Ramírez" },
+  { responsableId: 5, username: "resp05", name: "Arturo Gordillo Chávez" },
+  { responsableId: 6, username: "resp06", name: "Carlos Hernández Nava" },
+  { responsableId: 7, username: "resp07", name: "Claudia Raquel Piña Andrade" },
+  { responsableId: 8, username: "resp08", name: "Daniela Nohemi Navarro Castillo" },
+  { responsableId: 9, username: "resp09", name: "Dulce Sarahi García Mójica" },
+  { responsableId: 10, username: "resp10", name: "Laura Gabriela Calvario" },
+  { responsableId: 11, username: "resp11", name: "Liliana Yunuen Rojas Maciel" },
+  { responsableId: 12, username: "resp12", name: "Ma. Guadalupe del Rocío Herrera Chacón" },
+  { responsableId: 13, username: "resp13", name: "Marcial Aviña Iglesias" },
+  { responsableId: 14, username: "resp14", name: "Martín Jesús Robles DeAnda" },
+  { responsableId: 15, username: "resp15", name: "Oscar Delgado Sánchez" },
+  { responsableId: 16, username: "resp16", name: "Oscar Gustavo Mendoza Barajas" },
+  { responsableId: 17, username: "resp17", name: "Oscar Pedraza Farías" },
+  { responsableId: 18, username: "resp18", name: "Salvador Aguilar Aguilar" }
+] as const;
 
-const responsibleIdByName = new Map(
-  responsibleNames.map((name, index) => [name, index + 1])
+const responsibleNames = officialResponsibleAccounts.map((account) => account.name);
+const officialResponsibleAccountById = new Map<number, (typeof officialResponsibleAccounts)[number]>(
+  officialResponsibleAccounts.map((account) => [account.responsableId, account])
 );
+const responsibleIdByName = new Map<string, number>();
+
+for (const account of officialResponsibleAccounts) {
+  responsibleIdByName.set(account.name, account.responsableId);
+  responsibleIdByName.set(account.username, account.responsableId);
+  responsibleIdByName.set(`Responsable ${String(account.responsableId).padStart(2, "0")}`, account.responsableId);
+}
 
 const initialIndicators = buildIndicators();
 const indicators = new Map<number, SigiIndicator>();
@@ -2712,7 +2737,7 @@ function buildIndicators() {
       active: true,
       primaryResponsibleId: responsibleId,
       responsibleIds: [responsibleId],
-      responsibleNames: [row.responsible],
+      responsibleNames: namesForResponsibleIds([responsibleId]),
       contributorResponsibleIds: [],
       contributorNames: contributors,
       activities: [row.activity || "Actividad general"],
@@ -2740,11 +2765,11 @@ function buildInitialUsers(): SigiUser[] {
     active: true,
     passwordHash: defaultPasswordHashForRole("director")
   };
-  const responsibleUsers = responsibleNames.map((name) => {
-    const responsableId = responsibleIdByName.get(name) ?? 1;
+  const responsibleUsers = officialResponsibleAccounts.map((account) => {
+    const { responsableId, username, name } = account;
     return {
       id: `responsable-${responsableId}`,
-      username: `resp${String(responsableId).padStart(2, "0")}`,
+      username,
       name,
       role: "responsable" as const,
       responsableId,
@@ -4736,7 +4761,7 @@ function normalizePersistedContributorResponsibleIds(indicator: SigiIndicator, s
 
 function namesForResponsibleIds(ids: number[]) {
   return ids.map((id) =>
-    responsibleNames[id - 1] ??
+    officialResponsibleAccountById.get(id)?.name ??
     Array.from(users.values()).find((user) => user.role === "responsable" && user.responsableId === id)?.name
   ).filter((name): name is string => Boolean(name));
 }
@@ -4747,7 +4772,7 @@ function nextIndicatorId() {
 
 function nextResponsableId() {
   return Math.max(
-    responsibleNames.length,
+    ...officialResponsibleAccounts.map((account) => account.responsableId),
     0,
     ...Array.from(users.values())
       .map((user) => user.role === "responsable" ? user.responsableId ?? 0 : 0)

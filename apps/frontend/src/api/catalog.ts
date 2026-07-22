@@ -116,6 +116,27 @@ type DevelopmentWorkbookTemplate = {
   emptyRow: Record<string, unknown>;
 };
 
+const officialResponsibleAccounts = [
+  { responsableId: 1, username: 'resp01', name: 'Adriana Ruiz Rivera' },
+  { responsableId: 2, username: 'resp02', name: 'Angel Ordoñez Ayala' },
+  { responsableId: 3, username: 'resp03', name: 'Ariadna Zúñiga Torres' },
+  { responsableId: 4, username: 'resp04', name: 'Armando Hernández Ramírez' },
+  { responsableId: 5, username: 'resp05', name: 'Arturo Gordillo Chávez' },
+  { responsableId: 6, username: 'resp06', name: 'Carlos Hernández Nava' },
+  { responsableId: 7, username: 'resp07', name: 'Claudia Raquel Piña Andrade' },
+  { responsableId: 8, username: 'resp08', name: 'Daniela Nohemi Navarro Castillo' },
+  { responsableId: 9, username: 'resp09', name: 'Dulce Sarahi García Mójica' },
+  { responsableId: 10, username: 'resp10', name: 'Laura Gabriela Calvario' },
+  { responsableId: 11, username: 'resp11', name: 'Liliana Yunuen Rojas Maciel' },
+  { responsableId: 12, username: 'resp12', name: 'Ma. Guadalupe del Rocío Herrera Chacón' },
+  { responsableId: 13, username: 'resp13', name: 'Marcial Aviña Iglesias' },
+  { responsableId: 14, username: 'resp14', name: 'Martín Jesús Robles DeAnda' },
+  { responsableId: 15, username: 'resp15', name: 'Oscar Delgado Sánchez' },
+  { responsableId: 16, username: 'resp16', name: 'Oscar Gustavo Mendoza Barajas' },
+  { responsableId: 17, username: 'resp17', name: 'Oscar Pedraza Farías' },
+  { responsableId: 18, username: 'resp18', name: 'Salvador Aguilar Aguilar' },
+] as const;
+
 type DevelopmentWorkbookTemplates = Record<string, DevelopmentWorkbookTemplate>;
 
 const INDICATORS_STORAGE_KEY = 'adpeak.catalog.indicators';
@@ -401,9 +422,14 @@ function buildFallbackIndicators(
   operationalRows: DevelopmentCatalogRow[],
   plantelScopes: Record<string, number[]>
 ): CatalogIndicator[] {
-  const responsibleNames = Array.from(new Set(operationalRows.map((row) => row.responsible).filter(Boolean)))
-    .sort((a, b) => a.localeCompare(b, 'es'));
-  const responsibleIdByName = new Map(responsibleNames.map((name, index) => [name, index + 1]));
+  const responsibleNames = officialResponsibleAccounts.map((account) => account.name);
+  const responsibleIdByName = new Map<string, number>();
+
+  officialResponsibleAccounts.forEach((account) => {
+    responsibleIdByName.set(account.name, account.responsableId);
+    responsibleIdByName.set(account.username, account.responsableId);
+    responsibleIdByName.set(`Responsable ${String(account.responsableId).padStart(2, '0')}`, account.responsableId);
+  });
   const byCode = new Map<string, CatalogIndicator>();
 
   operationalRows.forEach((row) => {
@@ -429,7 +455,7 @@ function buildFallbackIndicators(
       active: true,
       primaryResponsibleId: responsibleId,
       responsibleIds: [responsibleId],
-      responsibleNames: [row.responsible],
+      responsibleNames: namesForIds([responsibleId], responsibleNames),
       contributorNames: contributors,
       activities: [row.activity || 'Actividad general'],
       plantelIds: plantelScopes[row.code] ?? [],
@@ -441,8 +467,6 @@ function buildFallbackIndicators(
 }
 
 function buildFallbackUsers(indicators: CatalogIndicator[]): CatalogUser[] {
-  const responsibleNames = Array.from(new Set(indicators.flatMap((indicator) => indicator.responsibleNames)))
-    .sort((a, b) => a.localeCompare(b, 'es'));
   const director: CatalogUser = {
     id: 'director-1',
     name: 'Director DGEMS',
@@ -450,10 +474,10 @@ function buildFallbackUsers(indicators: CatalogIndicator[]): CatalogUser[] {
     indicatorCodes: [],
     active: true,
   };
-  const responsables = responsibleNames.map((name, index) => {
-    const responsableId = index + 1;
+  const responsables = officialResponsibleAccounts.map(({ responsableId, username, name }) => {
     return {
       id: `responsable-${responsableId}`,
+      username,
       name,
       role: 'responsable' as const,
       responsableId,

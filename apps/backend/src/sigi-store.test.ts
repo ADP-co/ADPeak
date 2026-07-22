@@ -136,6 +136,10 @@ describe("SIGI store and RBAC", () => {
     expect(titulation?.effectivePlantelIds).toEqual(officialIndicatorPlantelScopes["1.0.0.0.2"]);
     expect(listIndicators(bachillerato4).some((indicator) => indicator.code === "1.0.0.0.2")).toBe(true);
     expect(listUsers(director).some((user) => user.role === "responsable" && user.indicatorCodes.length > 1)).toBe(true);
+    expect(listUsers(director).filter((user) => user.role === "responsable")).toHaveLength(18);
+    expect(listUsers(director).filter((user) => user.role === "responsable").map((user) => user.username)).toEqual(
+      Array.from({ length: 18 }, (_, index) => `resp${String(index + 1).padStart(2, "0")}`)
+    );
   });
 
   it("keeps official catalog indicators visible for plantel capture even when no detailed workbook exists", () => {
@@ -268,7 +272,7 @@ describe("SIGI store and RBAC", () => {
 
     expect(labels.length).toBeGreaterThan(0);
     expect(new Set(labels)).toEqual(new Set([
-      "Principal: Angel Ordoñez; Revisores: Adriana Ruiz Rivera"
+      "Principal: Angel Ordoñez Ayala; Revisores: Adriana Ruiz Rivera"
     ]));
   });
 
@@ -445,7 +449,7 @@ describe("SIGI store and RBAC", () => {
     const responsible = migrated.find((user) => user.id === "responsable-1");
     const plantel = migrated.find((user) => user.id === "plantel-1");
 
-    expect(migrated).toHaveLength(46);
+    expect(migrated).toHaveLength(56);
     expect(migrated.some((user) => user.id === "responsable-99")).toBe(false);
     expect(responsible).toMatchObject({
       username: "responsable-personalizado",
