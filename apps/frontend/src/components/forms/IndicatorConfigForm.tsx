@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, GripVertical, PlusCircle, Trash2 } from 'lucide-react';
+import { ArrowLeft, PlusCircle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -19,7 +19,14 @@ import {
   type CatalogUser,
 } from '../../api/catalog';
 
-type ColumnType = 'readonly' | 'number' | 'text' | 'calculated';
+export type ColumnType = 'readonly' | 'number' | 'text' | 'calculated';
+
+export const FIELD_EDITOR_PRIMARY_GRID =
+  'grid min-w-0 gap-4 p-4 md:grid-cols-[minmax(0,1fr)_220px] md:items-end';
+
+export function supportsNumericValidation(type: ColumnType) {
+  return type === 'number';
+}
 
 interface ConfigColumn {
   id: string;
@@ -573,47 +580,75 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
           </label>
         </div>
 
-        <div className="border border-brand-Gris_bajo/40 rounded-lg p-6 bg-brand-Gris_bajo/5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-title font-bold text-brand-Gris_oscuro">Campos a capturar</h3>
-            <Button type="button" variant="secondary" onClick={handleAddColumn} className="flex items-center gap-2 text-xs py-1.5">
+        <div className="rounded-lg border border-brand-Gris_bajo/40 bg-brand-Gris_bajo/5 p-4 md:p-6">
+          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="font-title font-bold text-brand-Gris_oscuro">Campos a capturar</h3>
+              <p className="mt-1 text-sm text-brand-Gris_oscuro/60">
+                {columns.length === 1 ? '1 campo configurado' : `${columns.length} campos configurados`}
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleAddColumn}
+              className="inline-flex items-center justify-center gap-2 self-start rounded-full px-5 text-sm sm:self-auto"
+            >
               <PlusCircle size={16} />
               Agregar campo
             </Button>
           </div>
 
-          <div className="space-y-3">
-            {columns.map((column) => (
-              <div key={column.id} className="flex flex-col md:flex-row md:items-center gap-4 bg-brand-Blanco p-3 rounded-md border border-brand-Gris_bajo/20 shadow-sm">
-                <GripVertical size={20} className="hidden md:block text-brand-Gris_oscuro/30" />
-                <Input
-                  label="Nombre de columna"
-                  value={column.label}
-                  placeholder="Ej. Mujeres"
-                  onChange={(event) => handleChangeColumn(column.id, 'label', event.target.value)}
-                  className="h-10"
-                />
-                <select
-                  aria-label={`Tipo de campo para ${column.label}`}
-                  className="w-full md:w-48 h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro font-body bg-brand-Blanco outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal"
-                  value={column.type}
-                  onChange={(event) => handleChangeColumn(column.id, 'type', event.target.value)}
-                >
-                  <option value="readonly">Solo lectura</option>
-                  <option value="number">Número</option>
-                  <option value="text">Texto</option>
-                  <option value="calculated">Calculado con fórmula</option>
-                </select>
-                <button
-                  type="button"
-                  onClick={() => setColumns((current) => current.filter((item) => item.id !== column.id))}
-                  className="p-2 text-brand-Gris_oscuro/40 hover:text-brand-Status_rojo transition-colors rounded-md hover:bg-brand-Status_rojo/10"
-                  aria-label={`Eliminar campo ${column.label}`}
-                >
-                  <Trash2 size={18} />
-                </button>
+          <div className="space-y-4">
+            {columns.map((column, index) => (
+              <section
+                key={column.id}
+                className="overflow-hidden rounded-lg border border-brand-Gris_bajo/30 bg-brand-Blanco shadow-sm"
+              >
+                <div className="flex min-h-12 items-center justify-between border-b border-brand-Gris_bajo/20 bg-brand-Gris_bajo/5 px-4 py-2">
+                  <span className="text-xs font-bold uppercase text-brand-Gris_oscuro/70">Campo {index + 1}</span>
+                  <button
+                    type="button"
+                    onClick={() => setColumns((current) => current.filter((item) => item.id !== column.id))}
+                    className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-brand-Gris_oscuro/55 transition-colors hover:bg-brand-Status_rojo/10 hover:text-brand-Status_rojo focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-offset-2"
+                    aria-label={`Eliminar campo ${column.label || index + 1}`}
+                    title="Eliminar campo"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+
+                <div className={FIELD_EDITOR_PRIMARY_GRID}>
+                  <Input
+                    label="Nombre de columna"
+                    value={column.label}
+                    placeholder="Ej. Mujeres"
+                    onChange={(event) => handleChangeColumn(column.id, 'label', event.target.value)}
+                    className="h-10"
+                  />
+                  <div className="flex min-w-0 flex-col gap-1">
+                    <label
+                      htmlFor={`column-type-${column.id}`}
+                      className="font-title text-sm font-semibold text-brand-Gris_oscuro"
+                    >
+                      Tipo de campo
+                    </label>
+                    <select
+                      id={`column-type-${column.id}`}
+                      className="h-10 w-full rounded-md border border-brand-Gris_bajo/50 bg-brand-Blanco px-3 font-body text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal"
+                      value={column.type}
+                      onChange={(event) => handleChangeColumn(column.id, 'type', event.target.value)}
+                    >
+                      <option value="readonly">Solo lectura</option>
+                      <option value="number">Número</option>
+                      <option value="text">Texto</option>
+                      <option value="calculated">Calculado con fórmula</option>
+                    </select>
+                  </div>
+                </div>
+
                 {column.type === 'calculated' && (
-                  <div className="w-full md:basis-full md:pl-9">
+                  <div className="border-t border-brand-Gris_bajo/20 bg-brand-Gris_bajo/5 px-4 py-4">
                     <Input
                       label="Fórmula"
                       value={column.formula ?? ''}
@@ -626,52 +661,64 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
                     </p>
                   </div>
                 )}
-                <div className="grid w-full gap-3 rounded-md border border-brand-Gris_bajo/20 bg-brand-Gris_bajo/5 p-3 md:basis-full md:grid-cols-5 md:pl-9">
-                  <label className="flex items-center gap-2 text-xs font-bold text-brand-Gris_oscuro">
-                    <input
-                      type="checkbox"
-                      checked={Boolean(column.required)}
-                      onChange={(event) => handleChangeColumn(column.id, 'required', event.target.checked)}
-                      className="h-4 w-4 accent-brand-Verde_principal"
-                    />
-                    Requerido
-                  </label>
-                  <label className="flex items-center gap-2 text-xs font-bold text-brand-Gris_oscuro">
-                    <input
-                      type="checkbox"
-                      checked={Boolean(column.integer)}
-                      disabled={column.type !== 'number'}
-                      onChange={(event) => handleChangeColumn(column.id, 'integer', event.target.checked)}
-                      className="h-4 w-4 accent-brand-Verde_principal disabled:opacity-40"
-                    />
-                    Entero
-                  </label>
-                  <Input
-                    label="Mínimo"
-                    type="number"
-                    value={column.min ?? ''}
-                    disabled={column.type !== 'number'}
-                    onChange={(event) => handleChangeColumn(column.id, 'min', event.target.value)}
-                    className="h-9"
-                  />
-                  <Input
-                    label="Máximo"
-                    type="number"
-                    value={column.max ?? ''}
-                    disabled={column.type !== 'number'}
-                    onChange={(event) => handleChangeColumn(column.id, 'max', event.target.value)}
-                    className="h-9"
-                  />
-                  <Input
-                    label="Alerta si supera"
-                    type="number"
-                    value={column.qualityWarningMax ?? ''}
-                    disabled={column.type !== 'number'}
-                    onChange={(event) => handleChangeColumn(column.id, 'qualityWarningMax', event.target.value)}
-                    className="h-9"
-                  />
-                </div>
-              </div>
+
+                <fieldset className="border-t border-brand-Gris_bajo/20 bg-brand-Gris_bajo/5 px-4 py-4">
+                  <legend className="sr-only">Validación del campo {column.label || index + 1}</legend>
+                  <p className="mb-3 font-title text-sm font-bold text-brand-Gris_oscuro">Validación</p>
+                  <div
+                    className={
+                      supportsNumericValidation(column.type)
+                        ? 'grid gap-3 sm:grid-cols-2 xl:grid-cols-[180px_180px_repeat(3,minmax(120px,1fr))]'
+                        : 'grid gap-3 sm:grid-cols-2'
+                    }
+                  >
+                    <label className="flex min-h-10 items-center gap-2 rounded-md border border-brand-Gris_bajo/35 bg-brand-Blanco px-3 py-2 text-sm font-semibold text-brand-Gris_oscuro">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(column.required)}
+                        onChange={(event) => handleChangeColumn(column.id, 'required', event.target.checked)}
+                        className="h-4 w-4 shrink-0 accent-brand-Verde_principal"
+                      />
+                      Requerido
+                    </label>
+
+                    {supportsNumericValidation(column.type) && (
+                      <>
+                        <label className="flex min-h-10 items-center gap-2 rounded-md border border-brand-Gris_bajo/35 bg-brand-Blanco px-3 py-2 text-sm font-semibold text-brand-Gris_oscuro">
+                          <input
+                            type="checkbox"
+                            checked={Boolean(column.integer)}
+                            onChange={(event) => handleChangeColumn(column.id, 'integer', event.target.checked)}
+                            className="h-4 w-4 shrink-0 accent-brand-Verde_principal"
+                          />
+                          Solo enteros
+                        </label>
+                        <Input
+                          label="Mínimo"
+                          type="number"
+                          value={column.min ?? ''}
+                          onChange={(event) => handleChangeColumn(column.id, 'min', event.target.value)}
+                          className="h-10"
+                        />
+                        <Input
+                          label="Máximo"
+                          type="number"
+                          value={column.max ?? ''}
+                          onChange={(event) => handleChangeColumn(column.id, 'max', event.target.value)}
+                          className="h-10"
+                        />
+                        <Input
+                          label="Alerta si supera"
+                          type="number"
+                          value={column.qualityWarningMax ?? ''}
+                          onChange={(event) => handleChangeColumn(column.id, 'qualityWarningMax', event.target.value)}
+                          className="h-10"
+                        />
+                      </>
+                    )}
+                  </div>
+                </fieldset>
+              </section>
             ))}
 
             {columns.length === 0 && (
