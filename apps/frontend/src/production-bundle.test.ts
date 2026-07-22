@@ -25,5 +25,7 @@ describe('production frontend bundle', () => {
     expect(moduleIds).not.toMatch(/catalog\/official(?:Catalog|Data)\.generated/i);
     expect(bundleText).not.toMatch(/(?:FMT|TMP)-[A-Z0-9]/i);
     expect(bundleText).not.toMatch(/pending_mapping|template_variant|private-workbook|sourcePathHash/i);
+    expect(bundleText).not.toMatch(/\bresp(?:0[1-9]|1[0-8])\b/i);
+    expect(bundleText).not.toMatch(/Adriana Ruiz Rivera|Angel Ordo(?:ñ|Ã±)ez Ayala|Liliana Yunuen Rojas Maciel/i);
   }, 60_000);
 });

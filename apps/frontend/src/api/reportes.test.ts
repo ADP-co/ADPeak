@@ -62,6 +62,38 @@ const sampleReport: ExportReport = {
   ],
 };
 
+function countPdfText(pdfText: string, value: string) {
+  return pdfText.split(value).length - 1;
+}
+
+function pdfPageCount(pdfText: string) {
+  return Number(pdfText.match(/\/Type \/Pages \/Kids \[[^\]]*\] \/Count (\d+)/)?.[1] ?? 0);
+}
+
+function pdfPageStreams(pdfText: string) {
+  return Array.from(
+    pdfText.matchAll(/<< \/Length \d+ >>\r?\nstream\r?\n([\s\S]*?)\r?\nendstream/g),
+    (match) => match[1]
+  ).filter((stream) => stream.includes('ADPeak SIGI-POA DGEMS'));
+}
+
+function expectPdfBodyAboveFooter(pdfText: string) {
+  const rectangleBottoms = Array.from(
+    pdfText.matchAll(/(-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?) re [fS]/g),
+    (match) => Number(match[2])
+  );
+  const bodyTextBaselines = Array.from(
+    pdfText.matchAll(/(-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?) Td\r?\n\(([^\r\n]*)\) Tj/g)
+  )
+    .filter((match) => !match[3].startsWith('ADPeak SIGI-POA DGEMS'))
+    .map((match) => Number(match[2]));
+
+  expect(rectangleBottoms.length).toBeGreaterThan(0);
+  expect(bodyTextBaselines.length).toBeGreaterThan(0);
+  expect(Math.min(...rectangleBottoms)).toBeGreaterThanOrEqual(58);
+  expect(Math.min(...bodyTextBaselines)).toBeGreaterThanOrEqual(58);
+}
+
 describe('report exports', () => {
   it('uses readable CSV headers for administrators', () => {
     const csv = reportToCsv(sampleReport);
@@ -126,6 +158,28 @@ describe('report exports', () => {
     expect(pdfText).not.toContain('registro_id');
     expect(pdfText).not.toContain('tipoReporte');
     expect(pdfText).not.toContain('indicadores[].datos[]');
+  });
+
+  it('reconciles stale estadoConteos from canonical indicator rows in CSV and PDF', async () => {
+    const staleCountsReport: ExportReport = {
+      ...sampleReport,
+      estadoConteos: {
+        total: 14,
+        pendientes: 14,
+        enRevision: 0,
+        observados: 0,
+        aprobados: 0,
+      },
+    };
+    const csv = reportToCsv(staleCountsReport);
+    const pdfText = await (await reportToPdfBlob(staleCountsReport)).text();
+
+    expect(csv).toContain('"Registros totales","1"');
+    expect(csv).toContain('"Pendientes","0"');
+    expect(csv).toContain('"Aprobados","1"');
+    expect(pdfText).toContain('(Total registros) Tj');
+    expect(pdfText).toContain('(Aprobados) Tj');
+    expect(pdfText).not.toContain('(14) Tj');
   });
 
   it('builds a detailed PDF centered on stored indicator information', async () => {
@@ -231,5 +285,120 @@ describe('report exports', () => {
     expect(pdfText).not.toContain(`(${longTitle}) Tj`);
     expect(pdfText).toContain('(Indicador de seguimiento academico institucional para evaluar permanencia y) Tj');
     expect(pdfText).toContain('(acompanamiento integral de estudiantes de media superior) Tj');
+  });
+
+  it('splits tall summary rows across pages without crossing the PDF footer', async () => {
+    const longObservation = `OBSERVACION_AVANCE_INICIO ${'contenido de observacion verificable '.repeat(220)} OBSERVACION_AVANCE_FIN`;
+    const pdfText = await (await reportToPdfBlob({
+      ...sampleReport,
+      indicadores: sampleReport.indicadores.map((indicator) => ({
+        ...indicator,
+        datos: indicator.datos.map((row) => ({
+          ...row,
+          detalle: [{ campo: 'Observaciones', valor: longObservation }],
+        })),
+      })),
+    })).text();
+    const activityHeaderCount = countPdfText(pdfText, '(Actividad) Tj');
+
+    expect(pdfPageCount(pdfText)).toBeGreaterThan(2);
+    expect(pdfText).toContain('OBSERVACION_AVANCE_INICIO');
+    expect(pdfText).toContain('OBSERVACION_AVANCE_FIN');
+    expect(activityHeaderCount).toBeGreaterThan(1);
+    expect(countPdfText(pdfText, 'Indicador:')).toBe(activityHeaderCount - 1);
+    expectPdfBodyAboveFooter(pdfText);
+  });
+
+  it('paginates long justifications and detail values while preserving record context', async () => {
+    const longJustification = `JUSTIFICACION_INICIO ${'justificacion documental extensa '.repeat(240)} JUSTIFICACION_FIN`;
+    const longObservation = `OBSERVACION_DETALLE_INICIO ${'observacion capturada extensa '.repeat(180)} OBSERVACION_DETALLE_FIN`;
+    const longDetail = `DETALLE_OPERATIVO_INICIO ${'detalle operativo verificable '.repeat(180)} DETALLE_OPERATIVO_FIN`;
+    const sourceRow = sampleReport.indicadores[0].datos[0];
+    const pdfText = await (await reportToPdfBlob({
+      ...sampleReport,
+      vistaReporte: 'detalle',
+      estadoConteos: {
+        total: 2,
+        pendientes: 0,
+        enRevision: 0,
+        observados: 0,
+        aprobados: 2,
+      },
+      indicadores: [
+        {
+          ...sampleReport.indicadores[0],
+          datos: [
+            {
+              ...sourceRow,
+              justificacion: longJustification,
+              detalle: [
+                { campo: 'Observaciones', valor: longObservation },
+                { campo: 'Detalle operativo', valor: longDetail },
+              ],
+            },
+            {
+              ...sourceRow,
+              registro_id: 'registro-2',
+              captureId: 2,
+              actividad: 'Segundo registro de control',
+              detalle: [
+                { campo: 'Observaciones', valor: 'Sin observaciones adicionales' },
+                { campo: 'Detalle operativo', valor: 'Control completado' },
+              ],
+            },
+          ],
+        },
+      ],
+    })).text();
+
+    expect(pdfPageCount(pdfText)).toBeGreaterThan(2);
+    expect(pdfPageCount(pdfText)).toBeLessThan(18);
+    expect(pdfText).toContain('JUSTIFICACION_INICIO');
+    expect(pdfText).toContain('JUSTIFICACION_FIN');
+    expect(countPdfText(pdfText, 'OBSERVACION_DETALLE_FIN')).toBe(1);
+    expect(countPdfText(pdfText, 'DETALLE_OPERATIVO_FIN')).toBe(1);
+    expect(pdfText).toContain('Justificaci');
+    expect(countPdfText(pdfText, '\\(continuaci')).toBeGreaterThan(2);
+    expect(pdfText).toContain('Tabla comparativa');
+    expectPdfBodyAboveFooter(pdfText);
+  });
+
+  it('keeps every CSV detail field in a compact multi-row PDF without duplicating values', async () => {
+    const rows = Array.from({ length: 18 }, (_, rowIndex) => ({
+      ...sampleReport.indicadores[0].datos[0],
+      registro_id: `registro-${rowIndex + 1}`,
+      captureId: rowIndex + 1,
+      actividad: `Actividad ${rowIndex + 1}`,
+      detalle: Array.from({ length: 18 }, (_unused, detailIndex) => ({
+        campo: `Campo ${detailIndex + 1}`,
+        valor: `VALOR_${rowIndex + 1}_${detailIndex + 1}`,
+      })),
+    }));
+    const wideReport: ExportReport = {
+      ...sampleReport,
+      vistaReporte: 'detalle',
+      indicadores: [{ ...sampleReport.indicadores[0], datos: rows }],
+    };
+    const csv = reportToCsv(wideReport);
+    const pdfText = await (await reportToPdfBlob(wideReport)).text();
+    const pageStreams = pdfPageStreams(pdfText);
+
+    expect(pdfPageCount(pdfText)).toBeLessThan(30);
+    expect(pageStreams).toHaveLength(pdfPageCount(pdfText));
+    expect(pageStreams.at(-1)).toContain('(VALOR_18_18) Tj');
+    rows.forEach((row) => {
+      row.detalle.forEach(({ campo, valor }) => {
+        expect(csv).toContain(`"${campo}"`);
+        expect(csv).toContain(`"${valor}"`);
+        expect(countPdfText(pdfText, `(${valor}) Tj`)).toBe(1);
+      });
+    });
+    expectPdfBodyAboveFooter(pdfText);
+  });
+
+  it('keeps PDF generation usable and exposes explicit feedback when logos cannot load', async () => {
+    const pdfText = await (await reportToPdfBlob(sampleReport)).text();
+
+    expect(pdfText).toContain('Aviso: no fue posible incorporar los logotipos oficiales.');
   });
 });

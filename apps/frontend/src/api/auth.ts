@@ -1,4 +1,4 @@
-import { API_BASE_URL, API_REQUESTS_ENABLED, sessionHeaders } from './client';
+import { API_BASE_URL, API_REQUESTS_ENABLED, authenticatedFetch, sessionHeaders } from './client';
 import type { User } from '../context/AuthContext';
 
 type LoginResponse = {
@@ -13,17 +13,16 @@ export async function loginWithCredentials(username: string, password: string) {
     throw new Error('api_unavailable');
   }
 
-  const response = await fetch(`${API_BASE_URL}/auth/login`, {
+  const response = await authenticatedFetch(`${API_BASE_URL}/auth/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...sessionHeaders(),
     },
     body: JSON.stringify({
       username,
       password,
     }),
-  });
+  }, { invalidateOnUnauthorized: false });
 
   if (!response.ok) {
     const payload = await response.json().catch(() => undefined) as { message?: string } | undefined;
@@ -43,7 +42,7 @@ export async function updatePassword(currentPassword: string, newPassword: strin
     throw new Error('El sistema no está conectado.');
   }
 
-  const response = await fetch(`${API_BASE_URL}/auth/password`, {
+  const response = await authenticatedFetch(`${API_BASE_URL}/auth/password`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -61,5 +60,5 @@ export async function updatePassword(currentPassword: string, newPassword: strin
     throw new Error(payload?.message ?? 'No se pudo actualizar la contraseña.');
   }
 
-  return response.json() as Promise<{ user: User }>;
+  return response.json() as Promise<{ user: User; sessionToken: string }>;
 }

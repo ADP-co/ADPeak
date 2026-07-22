@@ -22,6 +22,7 @@ export const ProgressBar = ({ totalIndicators, completedIndicators }: ProgressBa
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={PorcentajeFinal}
+        aria-valuetext={`${completedIndicators} de ${totalIndicators} indicadores completados, ${PorcentajeFinal}%`}
       >
         {/* Barra de Progreso Activa*/}
         <div

@@ -222,6 +222,10 @@ export const Dashboard = ({ onSelectIndicator, mode = 'general' }: DashboardProp
           </p>
         )}
 
+        {isLoading && (
+          <p className="sr-only" role="status" aria-live="polite">Actualizando información del tablero.</p>
+        )}
+
         <div className={`grid grid-cols-1 gap-6 ${isResponsible ? 'md:grid-cols-4' : 'md:grid-cols-3'}`}>
           <DonutCard
             title={isResponsible ? 'Pendientes' : 'Indicadores Aprobados'}

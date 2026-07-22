@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isDirectorAuditRole, safeAuditJson } from './IndicatorHistory';
+import { historyViewForKey, isDirectorAuditRole, safeAuditJson } from './IndicatorHistory';
 
 describe('IndicatorHistory audit safety', () => {
   it('selects the forensic audit only for Director UI roles', () => {
@@ -31,5 +31,13 @@ describe('IndicatorHistory audit safety', () => {
     expect(rendered).toContain('"preview": "[omitido]"');
     expect(rendered).not.toMatch(/plain-password|private-hash|private-token|private-authorization|private-cookie|private\/evidence|private-data/);
     expect(rendered).not.toMatch(/passwordHash|authorization|cookie|storageRef|contenidoBase64/);
+  });
+
+  it('supports arrow, Home and End navigation for the history tabs', () => {
+    expect(historyViewForKey('indicators', 'ArrowRight')).toBe('audit');
+    expect(historyViewForKey('audit', 'ArrowLeft')).toBe('indicators');
+    expect(historyViewForKey('audit', 'Home')).toBe('indicators');
+    expect(historyViewForKey('indicators', 'End')).toBe('audit');
+    expect(historyViewForKey('indicators', 'Enter')).toBeNull();
   });
 });

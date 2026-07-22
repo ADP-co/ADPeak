@@ -273,7 +273,10 @@ function validateCertificationState(state, passwordHashes, officialCodes) {
 
   for (const user of users.filter((item) => item.role === "responsable")) {
     const expectedCodes = indicators
-      .filter((indicator) => indicator.responsibleIds.includes(user.responsableId))
+      .filter((indicator) =>
+        indicator.responsibleIds.includes(user.responsableId) ||
+        cleanArray(indicator.contributorResponsibleIds).includes(user.responsableId)
+      )
       .map((indicator) => indicator.code)
       .sort(compareText);
     const actualUserCodes = [...user.indicatorCodes].sort(compareText);
@@ -334,7 +337,10 @@ function synchronizeResponsibleAssignments(users, indicators) {
     }
 
     user.indicatorCodes = indicators
-      .filter((indicator) => indicator.responsibleIds.includes(user.responsableId))
+      .filter((indicator) =>
+        indicator.responsibleIds.includes(user.responsableId) ||
+        cleanArray(indicator.contributorResponsibleIds).includes(user.responsableId)
+      )
       .map((indicator) => indicator.code)
       .sort(compareText);
   }
@@ -351,7 +357,7 @@ function assertOfficialAccountBaseline(users) {
     users.some((user) => !isOfficialUser(user))
   ) {
     throw new QaHarnessError(
-      `Clone baseline requires ${BASELINE.accounts} official accounts (1 director, 8 responsables, 37 planteles).`
+      `Clone baseline requires ${BASELINE.accounts} official accounts (1 director, ${BASELINE.roles.responsable} responsables, ${BASELINE.roles.plantel} planteles).`
     );
   }
 

@@ -145,7 +145,52 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "",
     "sheetName": "",
     "groups": [],
-    "headerRows": [],
+    "headerRows": [
+      [
+        {
+          "label": "Plantel",
+          "rowspan": 2
+        },
+        {
+          "label": "Programa Educativo",
+          "rowspan": 2
+        },
+        {
+          "label": "Egresados titulados en el año 2025",
+          "colspan": 3,
+          "rowspan": 2
+        },
+        {
+          "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas",
+          "colspan": 3,
+          "rowspan": 2
+        },
+        {
+          "label": "% de titulación por cohorte",
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Hombres"
+        },
+        {
+          "label": "Total"
+        },
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Hombres"
+        },
+        {
+          "label": "Total"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -441,7 +486,49 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "",
     "sheetName": "",
     "groups": [],
-    "headerRows": [],
+    "headerRows": [
+      [
+        {
+          "label": "Escuela"
+        },
+        {
+          "label": "Semestre"
+        },
+        {
+          "label": "Programa Educativo"
+        },
+        {
+          "label": "Matr."
+        },
+        {
+          "label": "Tasa de Reprobación",
+          "colspan": 2
+        },
+        {
+          "label": "Tasa de Aprobación",
+          "colspan": 2
+        },
+        {
+          "label": "Tasa de Deserción",
+          "colspan": 2
+        },
+        {
+          "label": "Semestre"
+        },
+        {
+          "label": "Tasa de Reprobación",
+          "colspan": 2
+        },
+        {
+          "label": "Tasa de Aprobación",
+          "colspan": 2
+        },
+        {
+          "label": "Tasa de Deserción",
+          "colspan": 2
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "escuela",
@@ -783,7 +870,58 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "",
     "sheetName": "",
     "groups": [],
-    "headerRows": [],
+    "headerRows": [
+      [
+        {
+          "label": "Plantel",
+          "rowspan": 2
+        },
+        {
+          "label": "Nombre de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "Descripción de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "TOTAL ESTUDIANTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DOCENTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL PERSONAL ADMINISTRATIVO",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DE PARTICIPANTES",
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -877,7 +1015,54 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "",
     "sheetName": "",
     "groups": [],
-    "headerRows": [],
+    "headerRows": [
+      [
+        {
+          "label": "Plantel",
+          "rowspan": 2
+        },
+        {
+          "label": "Nombre de la capacitación y /o actividades formativas",
+          "rowspan": 2
+        },
+        {
+          "label": "TOTAL ESTUDIANTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DOCENTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL PERSONAL ADMINISTRATIVO",
+          "colspan": 2
+        },
+        {
+          "label": "TEMAS QUE SE ABORDARON",
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -964,7 +1149,48 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "",
     "sheetName": "",
     "groups": [],
-    "headerRows": [],
+    "headerRows": [
+      [
+        {
+          "label": "Registro",
+          "rowspan": 2
+        },
+        {
+          "label": "Nombre de la charla",
+          "rowspan": 2
+        },
+        {
+          "label": "Ponente",
+          "rowspan": 2
+        },
+        {
+          "label": "Fecha de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "Total estudiantes asistentes",
+          "colspan": 2
+        },
+        {
+          "label": "Total docentes asistentes",
+          "colspan": 2
+        }
+      ],
+      [
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Hombres"
+        },
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Hombres"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "registro",
@@ -1047,77 +1273,77 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "headerRows": [],
     "columns": [
       {
-        "key": "agosto_2025_enero_2026_m",
-        "label": "Agosto 2025-Enero 2026 M",
+        "key": "agosto_2025_enero_2026",
+        "label": "Agosto 2025-Enero 2026",
+        "type": "text"
+      },
+      {
+        "key": "agosto_2025_enero_2026_2",
+        "label": "Agosto 2025-Enero 2026",
+        "type": "text"
+      },
+      {
+        "key": "total",
+        "label": "Total",
         "type": "number"
       },
       {
-        "key": "agosto_2025_enero_2026_h",
-        "label": "Agosto 2025-Enero 2026 H",
+        "key": "enero_2026_junio_2026",
+        "label": "Enero 2026-Junio 2026",
+        "type": "text"
+      },
+      {
+        "key": "enero_2026_junio_2026_2",
+        "label": "Enero 2026-Junio 2026",
+        "type": "text"
+      },
+      {
+        "key": "total_2",
+        "label": "Total",
         "type": "number"
       },
       {
-        "key": "total_h",
-        "label": "Total H",
-        "type": "number"
+        "key": "agosto_2026_enero_2027",
+        "label": "Agosto 2026- Enero 2027",
+        "type": "text"
       },
       {
-        "key": "enero_2026_junio_2026_m",
-        "label": "Enero 2026-Junio 2026 M",
-        "type": "number"
+        "key": "agosto_2026_enero_2027_2",
+        "label": "Agosto 2026- Enero 2027",
+        "type": "text"
       },
       {
-        "key": "enero_2026_junio_2026_h",
-        "label": "Enero 2026-Junio 2026 H",
-        "type": "number"
-      },
-      {
-        "key": "total_h_2",
-        "label": "Total H",
-        "type": "number"
-      },
-      {
-        "key": "agosto_2026_enero_2027_m",
-        "label": "Agosto 2026- Enero 2027 M",
-        "type": "number"
-      },
-      {
-        "key": "agosto_2026_enero_2027_h",
-        "label": "Agosto 2026- Enero 2027 H",
-        "type": "number"
-      },
-      {
-        "key": "total_h_3",
-        "label": "Total H",
+        "key": "total_3",
+        "label": "Total",
         "type": "number"
       }
     ],
     "initialRows": [
       {
-        "agosto_2025_enero_2026_m": "",
-        "agosto_2025_enero_2026_h": "",
-        "total_h": "",
-        "enero_2026_junio_2026_m": "",
-        "enero_2026_junio_2026_h": "",
-        "total_h_2": "",
-        "agosto_2026_enero_2027_m": "",
-        "agosto_2026_enero_2027_h": "",
-        "total_h_3": ""
+        "agosto_2025_enero_2026": "",
+        "agosto_2025_enero_2026_2": "",
+        "total": "",
+        "enero_2026_junio_2026": "",
+        "enero_2026_junio_2026_2": "",
+        "total_2": "",
+        "agosto_2026_enero_2027": "",
+        "agosto_2026_enero_2027_2": "",
+        "total_3": ""
       }
     ],
     "showTotals": true,
     "allowAddRows": true,
     "addRowLabel": "Agregar fila",
     "emptyRow": {
-      "agosto_2025_enero_2026_m": "",
-      "agosto_2025_enero_2026_h": "",
-      "total_h": "",
-      "enero_2026_junio_2026_m": "",
-      "enero_2026_junio_2026_h": "",
-      "total_h_2": "",
-      "agosto_2026_enero_2027_m": "",
-      "agosto_2026_enero_2027_h": "",
-      "total_h_3": ""
+      "agosto_2025_enero_2026": "",
+      "agosto_2025_enero_2026_2": "",
+      "total": "",
+      "enero_2026_junio_2026": "",
+      "enero_2026_junio_2026_2": "",
+      "total_2": "",
+      "agosto_2026_enero_2027": "",
+      "agosto_2026_enero_2027_2": "",
+      "total_3": ""
     },
     "footerNote": "",
     "quality": []
@@ -1198,7 +1424,34 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "",
     "sheetName": "",
     "groups": [],
-    "headerRows": [],
+    "headerRows": [
+      [
+        {
+          "label": "PLANTEL",
+          "rowspan": 2
+        },
+        {
+          "label": "Nombre de /los proyectos de investigación",
+          "rowspan": 2
+        },
+        {
+          "label": "Número de estudiantes",
+          "colspan": 2
+        },
+        {
+          "label": "Observaciones (indicar el periodo del proyecto)",
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Hombres"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -1257,7 +1510,58 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "",
     "sheetName": "",
     "groups": [],
-    "headerRows": [],
+    "headerRows": [
+      [
+        {
+          "label": "Plantel",
+          "rowspan": 2
+        },
+        {
+          "label": "Nombre de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "Descripción de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "TOTAL ESTUDIANTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DOCENTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL PERSONAL ADMINISTRATIVO",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DE PARTICIPANTES",
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -1351,7 +1655,58 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "",
     "sheetName": "",
     "groups": [],
-    "headerRows": [],
+    "headerRows": [
+      [
+        {
+          "label": "Plantel",
+          "rowspan": 2
+        },
+        {
+          "label": "Nombre de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "Descripción de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "TOTAL ESTUDIANTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DOCENTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL PERSONAL ADMINISTRATIVO",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DE PARTICIPANTES",
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",

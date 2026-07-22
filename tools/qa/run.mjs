@@ -25,6 +25,7 @@ import {
   sanitizedConnection
 } from "./lib/database.mjs";
 import { addCheck, writeCertificationArtifacts } from "./lib/reports.mjs";
+import { BASELINE } from "./lib/constants.mjs";
 import { withTestBackend } from "./lib/runtime.mjs";
 import {
   containsVisibleMarker,
@@ -70,9 +71,9 @@ await runCommand(async () => {
       "Erase inherited DATABASE_URL and PostgreSQL fallback variables",
       `Validate seeded manifest ${displayPath(options.manifest)} and generated QA environment`,
       "Read clone inventory in a repeatable-read, read-only PostgreSQL transaction",
-      "Verify backup SHA, 46/14 baseline, role hashes, scopes, captures, and marker stripping",
+      "Verify backup SHA, 56/14 baseline, role hashes, scopes, captures, and marker stripping",
       "Start the real backend against the isolated clone on an ephemeral localhost port",
-      "Log in all 46 official accounts and probe role scoping, indicators, reports, and security rejections",
+      "Log in all 56 official accounts and probe role scoping, indicators, reports, and security rejections",
       "Temporarily assign one official indicator and run draft, conflict, review, evidence, correction, approval, notification, audit, and detail-report checks",
       "Stop the backend and restore the exact initial app_state snapshot even when the mutable flow fails",
       "Write ignored QA_MATRIX.csv, QA_REPORT.md, and QA_FINDINGS.md"
@@ -133,7 +134,7 @@ await runCommand(async () => {
         area: "inventory",
         test: "Sanitized official clone baseline",
         pass: true,
-        detail: "46 official accounts and 14 official indicators validated."
+        detail: "56 official accounts and 14 official indicators validated."
       });
     } catch (error) {
       addCheck(matrix, {
@@ -272,7 +273,7 @@ function addDatabaseChecks(matrix, validation, passwordHashes, officialCodes) {
     id: "AUTH-002",
     area: "auth",
     test: "Active unique account identities",
-    pass: users.length === 46 && users.every((user) => user.active === true) && usernames.every(Boolean) && new Set(usernames).size === users.length,
+    pass: users.length === BASELINE.accounts && users.every((user) => user.active === true) && usernames.every(Boolean) && new Set(usernames).size === users.length,
     detail: `${users.length} accounts inspected; ${new Set(usernames).size} unique usernames.`
   });
   addCheck(matrix, {
@@ -411,7 +412,7 @@ async function addRuntimeChecks(matrix, runtime, officialCodes, users, clonePass
     area: "roles",
     test: "Role-scoped user inventory",
     pass:
-      directorUsers.status === 200 && directorList.length === 46 &&
+      directorUsers.status === 200 && directorList.length === BASELINE.accounts &&
       responsibleUsers.status === 200 && responsibleList.length === 1 && responsibleList[0]?.id === "responsable-1" &&
       plantelUsers.status === 200 && plantelList.length === 1 && plantelList[0]?.id === "plantel-1" &&
       noHashLeak,

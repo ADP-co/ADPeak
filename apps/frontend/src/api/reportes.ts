@@ -1,6 +1,6 @@
 import logoUdecUrl from '../assets/logo-udec.svg';
 import mediaSuperiorLogoUrl from '../assets/MediaSuperiorLogo.png';
-import { API_BASE_URL, API_REQUESTS_ENABLED, sessionHeaders } from './client';
+import { API_BASE_URL, API_REQUESTS_ENABLED, authenticatedFetch, sessionHeaders } from './client';
 
 export type ReportDataRow = {
   id?: string;
@@ -64,6 +64,7 @@ export type ReportRequest = {
   periodo?: string;
   cicloEscolar?: string;
   tipo?: 'detalle' | 'avance';
+  estado?: string;
 };
 
 export async function fetchExportReport(request: ReportRequest) {
@@ -79,7 +80,7 @@ export async function fetchExportReport(request: ReportRequest) {
     }
   }
 
-  const response = await fetch(url, { headers: sessionHeaders() });
+  const response = await authenticatedFetch(url, { headers: sessionHeaders() });
   const contentType = response.headers.get('content-type') ?? '';
 
   if (!response.ok || !contentType.includes('application/json')) {
@@ -566,11 +567,11 @@ function renderPdfReport(report: ExportReport, hasHeaderImage: boolean) {
     }
 
     if (report.vistaReporte === 'detalle') {
-      drawDetailedIndicatorRows(indicator.datos, report, () => current, ensureSpace, (nextPage) => {
+      drawDetailedIndicatorRows(indicator.datos, report, indicator.nombre, () => current, ensureSpace, (nextPage) => {
         current = nextPage;
       }, hasHeaderImage, pages);
     } else {
-      drawIndicatorTable(indicator.datos, report, () => current, ensureSpace, (nextPage) => {
+      drawIndicatorTable(indicator.datos, report, indicator.nombre, () => current, ensureSpace, (nextPage) => {
         current = nextPage;
       }, hasHeaderImage, pages);
     }
@@ -602,6 +603,7 @@ function drawPdfHeader(content: PdfContentBuilder, hasHeaderImage: boolean) {
   } else {
     content.textAt('Universidad de Colima', PDF_MARGIN_X, 748, 11, 'F2', PDF_DARK_GREEN);
     content.textAt('Media Superior', PDF_WIDTH - PDF_MARGIN_X - 86, 748, 11, 'F2', PDF_DARK_GREEN);
+    content.textAt('Aviso: no fue posible incorporar los logotipos oficiales.', PDF_MARGIN_X, 730, 7.5, 'F1', PDF_MUTED);
   }
 
   content.fillRect(PDF_MARGIN_X, 700, PDF_CONTENT_WIDTH, 3, PDF_GREEN);
@@ -610,6 +612,27 @@ function drawPdfHeader(content: PdfContentBuilder, hasHeaderImage: boolean) {
 function drawPdfFooter(content: PdfContentBuilder, pageNumber: number, pageCount: number) {
   content.strokeLine(PDF_MARGIN_X, 44, PDF_WIDTH - PDF_MARGIN_X, 44, PDF_LINE);
   content.textAt(`ADPeak SIGI-POA DGEMS | Página ${pageNumber} de ${pageCount}`, PDF_MARGIN_X, 28, 8, 'F1', PDF_MUTED);
+}
+
+function drawPdfContinuationContext(page: PdfReportPage, context: string) {
+  const lines = wrapPdfLine(`${cleanExportText(context)} (continuación)`, 96).slice(0, 2);
+  const height = Math.max(22, lines.length * 10 + 10);
+
+  page.content.fillRect(PDF_MARGIN_X, page.y - height, PDF_CONTENT_WIDTH, height, PDF_LIGHT_GREEN);
+  lines.forEach((line, index) => {
+    page.content.textAt(line, PDF_MARGIN_X + 8, page.y - 14 - index * 10, 8.2, 'F2', PDF_DARK_GREEN);
+  });
+  page.y -= height + 6;
+}
+
+function pdfRowLineCapacity(page: PdfReportPage, lineHeight: number, padding: number, minimumHeight: number) {
+  const availableHeight = page.y - PDF_BOTTOM_Y;
+
+  if (availableHeight < minimumHeight) {
+    return 0;
+  }
+
+  return Math.max(1, Math.floor((availableHeight - padding) / lineHeight));
 }
 
 function drawMetricGrid(page: PdfReportPage, metrics: Array<[string, string]>) {
@@ -635,6 +658,7 @@ function drawMetricGrid(page: PdfReportPage, metrics: Array<[string, string]>) {
 function drawIndicatorTable(
   rows: ReportDataRow[],
   report: ExportReport,
+  indicatorName: string,
   getCurrentPage: () => PdfReportPage,
   ensureSpace: (height: number) => void,
   setCurrentPage: (page: PdfReportPage) => void,
@@ -678,51 +702,80 @@ function drawIndicatorTable(
     page.y -= 20;
   };
 
+  const startContinuationPage = () => {
+    const nextPage = createPdfReportPage(pages, hasHeaderImage);
+    setCurrentPage(nextPage);
+    drawPdfContinuationContext(nextPage, `Indicador: ${indicatorName}`);
+    drawHeader();
+    return getCurrentPage();
+  };
+
   drawHeader();
 
   rows.forEach((row, rowIndex) => {
-    let page = getCurrentPage();
     const wrappedCells = columns.map((column) => wrapPdfLine(column.value(row, report), Math.max(8, Math.floor(column.width / 4.4))));
-    const lineCount = Math.max(...wrappedCells.map((cellLines) => cellLines.length));
-    const rowHeight = Math.max(24, lineCount * 9.5 + 10);
+    const totalLineCount = Math.max(...wrappedCells.map((cellLines) => cellLines.length));
+    let lineOffset = 0;
 
-    if (page.y - rowHeight < PDF_BOTTOM_Y) {
-      const nextPage = createPdfReportPage(pages, hasHeaderImage);
-      setCurrentPage(nextPage);
-      drawHeader();
-      page = getCurrentPage();
-    }
+    while (lineOffset < totalLineCount) {
+      let page = getCurrentPage();
+      let lineCapacity = pdfRowLineCapacity(page, 9.5, 10, 24);
+      const remainingLineCount = totalLineCount - lineOffset;
 
-    let x = PDF_MARGIN_X;
-    const fill = rowIndex % 2 === 0 ? [255, 255, 255] as PdfColor : PDF_LIGHT_GRAY;
-    page.content.fillRect(PDF_MARGIN_X, page.y - rowHeight, PDF_CONTENT_WIDTH, rowHeight, fill);
-    page.content.strokeRect(PDF_MARGIN_X, page.y - rowHeight, PDF_CONTENT_WIDTH, rowHeight, PDF_LINE);
+      if (lineCapacity === 0 || (lineCapacity < 2 && remainingLineCount > 1)) {
+        page = startContinuationPage();
+        lineCapacity = pdfRowLineCapacity(page, 9.5, 10, 24);
+      }
 
-    columns.forEach((column, columnIndex) => {
-      const cellLines = wrappedCells[columnIndex];
-      const textX = column.align === 'center' ? x + column.width / 2 : x + 5;
+      const segmentLineCount = Math.min(remainingLineCount, lineCapacity);
+      const segmentCells = wrappedCells.map((cellLines, columnIndex) => {
+        const lines = cellLines.slice(lineOffset, lineOffset + segmentLineCount);
 
-      cellLines.forEach((line, lineIndex) => {
-        page.content.textAt(
-          line,
-          textX,
-          page.y - 12 - lineIndex * 9.5,
-          7.1,
-          'F1',
-          PDF_TEXT,
-          column.align ?? 'left'
-        );
+        if (lineOffset > 0 && lines.length === 0 && columns[columnIndex].label !== 'Detalle') {
+          return cellLines.slice(0, Math.min(2, segmentLineCount));
+        }
+
+        return lines;
       });
-      x += column.width;
-    });
+      const renderedLineCount = Math.max(...segmentCells.map((cellLines) => cellLines.length), 1);
+      const rowHeight = Math.max(24, renderedLineCount * 9.5 + 10);
+      let x = PDF_MARGIN_X;
+      const fill = rowIndex % 2 === 0 ? [255, 255, 255] as PdfColor : PDF_LIGHT_GRAY;
 
-    page.y -= rowHeight;
+      page.content.fillRect(PDF_MARGIN_X, page.y - rowHeight, PDF_CONTENT_WIDTH, rowHeight, fill);
+      page.content.strokeRect(PDF_MARGIN_X, page.y - rowHeight, PDF_CONTENT_WIDTH, rowHeight, PDF_LINE);
+
+      columns.forEach((column, columnIndex) => {
+        const textX = column.align === 'center' ? x + column.width / 2 : x + 5;
+
+        segmentCells[columnIndex].forEach((line, lineIndex) => {
+          page.content.textAt(
+            line,
+            textX,
+            page.y - 12 - lineIndex * 9.5,
+            7.1,
+            'F1',
+            PDF_TEXT,
+            column.align ?? 'left'
+          );
+        });
+        x += column.width;
+      });
+
+      page.y -= rowHeight;
+      lineOffset += segmentLineCount;
+
+      if (lineOffset < totalLineCount) {
+        startContinuationPage();
+      }
+    }
   });
 }
 
 function drawDetailedIndicatorRows(
   rows: ReportDataRow[],
   report: ExportReport,
+  indicatorName: string,
   getCurrentPage: () => PdfReportPage,
   ensureSpace: (height: number) => void,
   setCurrentPage: (page: PdfReportPage) => void,
@@ -730,7 +783,8 @@ function drawDetailedIndicatorRows(
   pages: PdfContentBuilder[]
 ) {
   if (rows.length > 1) {
-    drawDetailComparisonTable(rows, report, getCurrentPage, ensureSpace, setCurrentPage, hasHeaderImage, pages);
+    drawDetailComparisonTable(rows, report, indicatorName, getCurrentPage, ensureSpace, setCurrentPage, hasHeaderImage, pages);
+    return;
   }
 
   rows.forEach((row, rowIndex) => {
@@ -757,6 +811,7 @@ function drawDetailedIndicatorRows(
       ?.map((detail) => [cleanExportText(detail.campo), cleanExportText(detail.valor)] as [string, string])
       .filter(([campo, valor]) => campo && valor) ?? [];
     const blocks = chunkDetailItems(detailItems, 4);
+    const recordContext = `Registro ${rowIndex + 1} | Indicador: ${indicatorName}`;
 
     ensureSpace(72);
     let page = getCurrentPage();
@@ -764,7 +819,7 @@ function drawDetailedIndicatorRows(
     page.content.textAt(`Registro ${rowIndex + 1}`, PDF_MARGIN_X + 8, page.y - 13, 7.8, 'F2', [255, 255, 255]);
     page.y -= 24;
 
-    drawDetailKeyValueGrid(contextItems, getCurrentPage, ensureSpace, setCurrentPage, hasHeaderImage, pages);
+    drawDetailKeyValueGrid(contextItems, getCurrentPage, ensureSpace, setCurrentPage, hasHeaderImage, pages, recordContext);
 
     if (blocks.length === 0) {
       ensureSpace(20);
@@ -776,7 +831,9 @@ function drawDetailedIndicatorRows(
 
     blocks.forEach((block, blockIndex) => {
       drawDetailSubsectionTitle(
-        blockIndex === 0 ? 'Información capturada' : 'Información capturada (continuación)',
+        blockIndex === 0
+          ? `${recordContext} | Información capturada`
+          : `${recordContext} | Información capturada (continuación)`,
         getCurrentPage,
         ensureSpace,
         setCurrentPage,
@@ -784,7 +841,7 @@ function drawDetailedIndicatorRows(
         pages,
         34
       );
-      drawDetailKeyValueGrid(block, getCurrentPage, ensureSpace, setCurrentPage, hasHeaderImage, pages);
+      drawDetailKeyValueGrid(block, getCurrentPage, ensureSpace, setCurrentPage, hasHeaderImage, pages, recordContext);
     });
 
     getCurrentPage().y -= 8;
@@ -794,90 +851,167 @@ function drawDetailedIndicatorRows(
 function drawDetailComparisonTable(
   rows: ReportDataRow[],
   report: ExportReport,
+  indicatorName: string,
   getCurrentPage: () => PdfReportPage,
   ensureSpace: (height: number) => void,
   setCurrentPage: (page: PdfReportPage) => void,
   hasHeaderImage: boolean,
   pages: PdfContentBuilder[]
 ) {
-  const detailHeaders = reportDetailHeaders({ ...report, indicadores: [{ nombre: 'detalle', datos: rows }] }).slice(0, 4);
-  const columns = [
-    { label: 'Registro', width: 54, value: (_row: ReportDataRow, index: number) => String(index + 1) },
-    { label: 'Actividad', width: 118, value: (row: ReportDataRow) => row.actividad },
-    ...(shouldShowPlantelColumn(report) ? [{ label: 'Plantel', width: 80, value: (row: ReportDataRow) => row.plantel ?? report.identidadReporte.nombre }] : []),
-    { label: 'Estado', width: 64, value: (row: ReportDataRow) => formatStatusLabel(row.estado) },
+  const includePlantelColumn = shouldShowPlantelColumn(report);
+  const detailHeaders = reportDetailHeaders({ ...report, indicadores: [{ nombre: 'detalle', datos: rows }] });
+  const fields: Array<{ label: string; value: (row: ReportDataRow) => string }> = [
+    { label: 'Actividad', value: (row) => row.actividad },
+    { label: 'Responsable', value: (row) => row.responsable },
+    ...(includePlantelColumn
+      ? [{ label: 'Plantel', value: (row: ReportDataRow) => row.plantel ?? report.identidadReporte.nombre }]
+      : []),
+    { label: 'Estado', value: (row) => formatStatusLabel(row.estado) },
+    { label: 'Avance', value: (row) => row.avance },
+    { label: 'Meta', value: (row) => typeof row.meta === 'number' ? String(row.meta) : '' },
+    { label: 'Evidencias', value: (row) => typeof row.evidencias === 'number' ? String(row.evidencias) : '' },
+    { label: 'Justificación', value: (row) => row.justificacion ?? '' },
+    { label: 'Evidencia', value: (row) => row.evidenciaNombre ?? '' },
+    { label: 'Vencimiento', value: (row) => formatDeadline(row.vencimiento) },
+    { label: 'Capturado', value: (row) => formatDateTime(row.capturadoEn) },
+    { label: 'Actualizado', value: (row) => formatDateTime(row.actualizadoEn) },
+    { label: 'Enviado por', value: (row) => row.enviadoPor ?? '' },
+    { label: 'Alertas', value: (row) => row.qualityWarnings?.join('; ') ?? '' },
+    { label: 'Bloqueos', value: (row) => row.blockingIssues?.join('; ') ?? '' },
     ...detailHeaders.map((header) => ({
       label: header,
-      width: Math.max(58, (PDF_CONTENT_WIDTH - 236 - (shouldShowPlantelColumn(report) ? 80 : 0)) / Math.max(detailHeaders.length, 1)),
       value: (row: ReportDataRow) => detailValue(row, header),
     })),
   ];
-  const totalWidth = columns.reduce((total, column) => total + column.width, 0);
-  const widthScale = totalWidth > PDF_CONTENT_WIDTH ? PDF_CONTENT_WIDTH / totalWidth : 1;
+  const populatedFields = fields.filter((field) => rows.some((row) => cleanExportText(field.value(row))));
+  const fieldBlocks = chunkComparisonFields(populatedFields, 4);
+
+  fieldBlocks.forEach((fieldBlock, blockIndex) => {
+    drawDetailComparisonBlock(
+      rows,
+      fieldBlock,
+      indicatorName,
+      blockIndex,
+      fieldBlocks.length,
+      getCurrentPage,
+      ensureSpace,
+      setCurrentPage,
+      hasHeaderImage,
+      pages
+    );
+  });
+}
+
+function drawDetailComparisonBlock(
+  rows: ReportDataRow[],
+  fields: Array<{ label: string; value: (row: ReportDataRow) => string }>,
+  indicatorName: string,
+  blockIndex: number,
+  blockCount: number,
+  getCurrentPage: () => PdfReportPage,
+  ensureSpace: (height: number) => void,
+  setCurrentPage: (page: PdfReportPage) => void,
+  hasHeaderImage: boolean,
+  pages: PdfContentBuilder[]
+) {
+  const recordWidth = 48;
+  const fieldWidth = (PDF_CONTENT_WIDTH - recordWidth) / Math.max(fields.length, 1);
+  const columns = [
+    { label: 'Registro', width: recordWidth, value: (_row: ReportDataRow, index: number) => String(index + 1) },
+    ...fields.map((field) => ({ ...field, width: fieldWidth })),
+  ];
+  const blockLabel = blockCount > 1 ? ` (${blockIndex + 1}/${blockCount})` : '';
 
   drawDetailSubsectionTitle(
-    'Tabla comparativa de registros',
+    `Tabla comparativa${blockLabel} | Indicador: ${indicatorName}`,
     getCurrentPage,
     ensureSpace,
     setCurrentPage,
     hasHeaderImage,
     pages,
-    54
+    82
   );
 
   const drawHeader = () => {
     let page = getCurrentPage();
 
-    if (page.y - 24 < PDF_BOTTOM_Y) {
+    if (page.y - 30 < PDF_BOTTOM_Y) {
       const nextPage = createPdfReportPage(pages, hasHeaderImage);
       setCurrentPage(nextPage);
       page = getCurrentPage();
     }
 
-    page.content.fillRect(PDF_MARGIN_X, page.y - 22, PDF_CONTENT_WIDTH, 22, PDF_DARK_GREEN);
+    page.content.fillRect(PDF_MARGIN_X, page.y - 28, PDF_CONTENT_WIDTH, 28, PDF_DARK_GREEN);
     let x = PDF_MARGIN_X;
     columns.forEach((column) => {
-      const width = column.width * widthScale;
-      wrapPdfLine(column.label, Math.max(8, Math.floor(width / 4.5))).slice(0, 2).forEach((line, index) => {
-        page.content.textAt(line, x + 4, page.y - 8 - index * 8, 6.6, 'F2', [255, 255, 255]);
+      wrapPdfLine(column.label, Math.max(8, Math.floor(column.width / 4.5))).slice(0, 3).forEach((line, index) => {
+        page.content.textAt(line, x + 4, page.y - 8 - index * 8, 6.5, 'F2', [255, 255, 255]);
       });
-      x += width;
+      x += column.width;
     });
-    page.y -= 22;
+    page.y -= 28;
+  };
+
+  const startContinuationPage = () => {
+    const nextPage = createPdfReportPage(pages, hasHeaderImage);
+    setCurrentPage(nextPage);
+    drawPdfContinuationContext(nextPage, `Indicador: ${indicatorName} | Tabla ${blockIndex + 1}/${blockCount}`);
+    drawHeader();
+    return getCurrentPage();
   };
 
   drawHeader();
 
   rows.forEach((row, rowIndex) => {
-    let page = getCurrentPage();
-    const values = columns.map((column) => cleanExportText(column.value(row, rowIndex)));
-    const lineCounts = values.map((value, index) => wrapPdfLine(value, Math.max(10, Math.floor((columns[index].width * widthScale) / 4.8))).slice(0, 3).length);
-    const rowHeight = Math.max(28, Math.max(...lineCounts) * 9 + 10);
+    const wrappedCells = columns.map((column) =>
+      wrapPdfLine(cleanExportText(column.value(row, rowIndex)), Math.max(8, Math.floor(column.width / 4.7)))
+    );
+    const totalLineCount = Math.max(...wrappedCells.map((cellLines) => cellLines.length), 1);
+    let lineOffset = 0;
 
-    if (page.y - rowHeight < PDF_BOTTOM_Y) {
-      const nextPage = createPdfReportPage(pages, hasHeaderImage);
-      setCurrentPage(nextPage);
-      drawHeader();
-      page = getCurrentPage();
-    } else {
-      ensureSpace(rowHeight);
-      page = getCurrentPage();
-    }
+    while (lineOffset < totalLineCount) {
+      let page = getCurrentPage();
+      let lineCapacity = pdfRowLineCapacity(page, 8.6, 10, 28);
+      const remainingLineCount = totalLineCount - lineOffset;
 
-    page.content.fillRect(PDF_MARGIN_X, page.y - rowHeight, PDF_CONTENT_WIDTH, rowHeight, rowIndex % 2 === 0 ? [255, 255, 255] : PDF_LIGHT_GRAY);
-    page.content.strokeRect(PDF_MARGIN_X, page.y - rowHeight, PDF_CONTENT_WIDTH, rowHeight, PDF_LINE);
-    let x = PDF_MARGIN_X;
-    values.forEach((value, index) => {
-      const width = columns[index].width * widthScale;
-      wrapPdfLine(value, Math.max(10, Math.floor(width / 4.8))).slice(0, 3).forEach((line, lineIndex) => {
-        page.content.textAt(line, x + 4, page.y - 12 - lineIndex * 9, 6.8, 'F1', PDF_TEXT);
+      if (lineCapacity === 0 || (lineCapacity < 3 && remainingLineCount > lineCapacity)) {
+        page = startContinuationPage();
+        lineCapacity = pdfRowLineCapacity(page, 8.6, 10, 28);
+      }
+
+      const segmentLineCount = Math.min(remainingLineCount, lineCapacity);
+      const segmentCells = wrappedCells.map((cellLines, columnIndex) => {
+        const lines = cellLines.slice(lineOffset, lineOffset + segmentLineCount);
+        return lineOffset > 0 && lines.length === 0 && columnIndex === 0 ? [String(rowIndex + 1)] : lines;
       });
-      x += width;
-    });
-    page.y -= rowHeight;
+      const renderedLineCount = Math.max(...segmentCells.map((cellLines) => cellLines.length), 1);
+      const rowHeight = Math.max(28, renderedLineCount * 8.6 + 10);
+
+      page.content.fillRect(PDF_MARGIN_X, page.y - rowHeight, PDF_CONTENT_WIDTH, rowHeight, rowIndex % 2 === 0 ? [255, 255, 255] : PDF_LIGHT_GRAY);
+      page.content.strokeRect(PDF_MARGIN_X, page.y - rowHeight, PDF_CONTENT_WIDTH, rowHeight, PDF_LINE);
+      let x = PDF_MARGIN_X;
+      segmentCells.forEach((cellLines, index) => {
+        cellLines.forEach((line, lineIndex) => {
+          page.content.textAt(line, x + 4, page.y - 11 - lineIndex * 8.6, 6.6, 'F1', PDF_TEXT);
+        });
+        x += columns[index].width;
+      });
+      page.y -= rowHeight;
+      lineOffset += segmentLineCount;
+    }
   });
 
   getCurrentPage().y -= 10;
+}
+
+function chunkComparisonFields<T>(items: T[], size: number) {
+  const chunks: T[][] = [];
+
+  for (let index = 0; index < items.length; index += size) {
+    chunks.push(items.slice(index, index + size));
+  }
+
+  return chunks;
 }
 
 function drawDetailSubsectionTitle(
@@ -917,40 +1051,60 @@ function drawDetailKeyValueGrid(
   ensureSpace: (height: number) => void,
   setCurrentPage: (page: PdfReportPage) => void,
   hasHeaderImage: boolean,
-  pages: PdfContentBuilder[]
+  pages: PdfContentBuilder[],
+  continuationContext: string
 ) {
   const labelWidth = 116;
-  const valueWidth = PDF_CONTENT_WIDTH - labelWidth;
 
   items.forEach(([label, value], index) => {
-    let page = getCurrentPage();
     const valueLines = wrapPdfLine(value, 82);
-    const labelLines = wrapPdfLine(label, 24);
-    const lineCount = Math.max(valueLines.length, labelLines.length, 1);
-    const rowHeight = Math.max(24, lineCount * 9.5 + 10);
+    let valueOffset = 0;
+    let segmentIndex = 0;
 
-    if (page.y - rowHeight < PDF_BOTTOM_Y) {
+    const startContinuationPage = () => {
       const nextPage = createPdfReportPage(pages, hasHeaderImage);
       setCurrentPage(nextPage);
-      page = getCurrentPage();
-    } else {
+      drawPdfContinuationContext(nextPage, continuationContext);
+      return getCurrentPage();
+    };
+
+    while (valueOffset < valueLines.length) {
+      let page = getCurrentPage();
+      const renderedLabel = segmentIndex === 0 ? label : `${label} (continuación)`;
+      const labelLines = wrapPdfLine(renderedLabel, 24);
+      let lineCapacity = pdfRowLineCapacity(page, 9.5, 10, 24);
+
+      if (lineCapacity < Math.max(labelLines.length, 1)) {
+        page = startContinuationPage();
+        lineCapacity = pdfRowLineCapacity(page, 9.5, 10, 24);
+      }
+
+      const segmentValueLines = valueLines.slice(valueOffset, valueOffset + lineCapacity);
+      const lineCount = Math.max(segmentValueLines.length, labelLines.length, 1);
+      const rowHeight = Math.max(24, lineCount * 9.5 + 10);
+      const fill = index % 2 === 0 ? [255, 255, 255] as PdfColor : PDF_LIGHT_GRAY;
+
       ensureSpace(rowHeight);
       page = getCurrentPage();
+      page.content.fillRect(PDF_MARGIN_X, page.y - rowHeight, PDF_CONTENT_WIDTH, rowHeight, fill);
+      page.content.strokeRect(PDF_MARGIN_X, page.y - rowHeight, PDF_CONTENT_WIDTH, rowHeight, PDF_LINE);
+      page.content.strokeLine(PDF_MARGIN_X + labelWidth, page.y, PDF_MARGIN_X + labelWidth, page.y - rowHeight, PDF_LINE);
+
+      labelLines.forEach((line, lineIndex) => {
+        page.content.textAt(line, PDF_MARGIN_X + 6, page.y - 12 - lineIndex * 9.5, 7.2, 'F2', PDF_DARK_GREEN);
+      });
+      segmentValueLines.forEach((line, lineIndex) => {
+        page.content.textAt(line, PDF_MARGIN_X + labelWidth + 7, page.y - 12 - lineIndex * 9.5, 7.2, 'F1', PDF_TEXT);
+      });
+
+      page.y -= rowHeight;
+      valueOffset += segmentValueLines.length;
+      segmentIndex += 1;
+
+      if (valueOffset < valueLines.length) {
+        startContinuationPage();
+      }
     }
-
-    const fill = index % 2 === 0 ? [255, 255, 255] as PdfColor : PDF_LIGHT_GRAY;
-    page.content.fillRect(PDF_MARGIN_X, page.y - rowHeight, PDF_CONTENT_WIDTH, rowHeight, fill);
-    page.content.strokeRect(PDF_MARGIN_X, page.y - rowHeight, PDF_CONTENT_WIDTH, rowHeight, PDF_LINE);
-    page.content.strokeLine(PDF_MARGIN_X + labelWidth, page.y, PDF_MARGIN_X + labelWidth, page.y - rowHeight, PDF_LINE);
-
-    labelLines.forEach((line, lineIndex) => {
-      page.content.textAt(line, PDF_MARGIN_X + 6, page.y - 12 - lineIndex * 9.5, 7.2, 'F2', PDF_DARK_GREEN);
-    });
-    valueLines.forEach((line, lineIndex) => {
-      page.content.textAt(line, PDF_MARGIN_X + labelWidth + 7, page.y - 12 - lineIndex * 9.5, 7.2, 'F1', PDF_TEXT);
-    });
-
-    page.y -= rowHeight;
   });
 }
 
@@ -1473,19 +1627,6 @@ function formatDateTime(value?: string) {
 }
 
 function summarizeReport(report: ExportReport) {
-  const explicitCounts = report.estadoConteos;
-
-  if (explicitCounts) {
-    return {
-      total: explicitCounts.total,
-      approved: explicitCounts.aprobados,
-      inReview: explicitCounts.enRevision,
-      observed: explicitCounts.observados,
-      pending: explicitCounts.pendientes,
-      late: 0,
-    };
-  }
-
   const rows = report.indicadores.flatMap((indicator) => indicator.datos);
 
   return rows.reduce(
@@ -1501,6 +1642,7 @@ function summarizeReport(report: ExportReport) {
         summary.observed += 1;
       } else if (status === 'Atrasado') {
         summary.late += 1;
+        summary.pending += 1;
       } else {
         summary.pending += 1;
       }
@@ -1517,10 +1659,6 @@ function summarizeReport(report: ExportReport) {
 }
 
 function stateCountsForReport(report: ExportReport) {
-  if (report.estadoConteos) {
-    return report.estadoConteos;
-  }
-
   const summary = summarizeReport(report);
 
   return {

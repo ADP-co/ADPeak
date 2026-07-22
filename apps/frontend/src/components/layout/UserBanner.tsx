@@ -11,6 +11,7 @@ interface UserBannerProps {
   onNavigate?: (view: string) => void;
   currentView?: string;
   notifications?: SigiNotification[];
+  notificationError?: string;
   onReadNotification?: (id: number) => void;
   onOpenNotification?: (notification: SigiNotification) => void;
 }
@@ -44,6 +45,7 @@ export const UserBanner = ({
   onNavigate,
   currentView,
   notifications = [],
+  notificationError = '',
   onReadNotification,
   onOpenNotification,
 }: UserBannerProps) => {
@@ -53,9 +55,9 @@ export const UserBanner = ({
   const recentNotifications = unreadNotifications.slice(0, 5);
 
   return (
-    <div className="w-full min-h-[70px] bg-brand-Verde_oscuro text-brand-Blanco px-4 sm:px-6 shadow-md z-40 relative">
+    <div className="relative z-40 min-h-[70px] w-full bg-brand-Verde_oscuro px-4 text-brand-Blanco shadow-md sm:px-6">
 
-      <div className="max-w-[1250px] mx-auto min-h-[70px] py-2 flex flex-wrap items-center justify-between gap-3">
+      <div className="mx-auto flex min-h-[70px] max-w-[1250px] flex-col items-stretch gap-2 py-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3">
 
         {/* Lado Izquierdo: Botón de Perfil */}
         <button
@@ -64,7 +66,7 @@ export const UserBanner = ({
               onNavigate('perfil');
             }
           }}
-          className="flex items-center gap-3 h-full hover:bg-brand-Verde_oscuro/30 px-3 -ml-3 rounded-md transition-colors duration-200 cursor-pointer group text-left"
+          className="group -ml-3 flex min-h-11 min-w-0 cursor-pointer items-center gap-3 rounded-md px-3 text-left transition-colors duration-200 hover:bg-brand-Blanco/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Blanco focus-visible:ring-offset-2 focus-visible:ring-offset-brand-Verde_oscuro"
           aria-label={`Abrir perfil de ${name}`}
           title="Ver mi perfil y cambiar contraseña"
         >
@@ -72,9 +74,9 @@ export const UserBanner = ({
             <User size={20} strokeWidth={2.5} className="text-brand-Blanco" />
           </div>
 
-          <div className="flex flex-col justify-center">
+          <div className="flex min-w-0 flex-col justify-center">
             <span className="font-title text-sm font-bold leading-tight underline-offset-4 group-hover:underline">
-              {name}
+              <span className="break-words">{name}</span>
             </span>
             {description && (
               <span className="font-body text-xs text-brand-Blanco/80 leading-tight mt-0.5">
@@ -85,7 +87,7 @@ export const UserBanner = ({
         </button>
 
         {/* Lado Derecho: Enlaces Dinámicos */}
-        <nav className="flex flex-wrap items-center justify-end gap-x-5 gap-y-2 min-h-10" aria-label="Navegación principal">
+        <nav className="flex min-h-11 w-full flex-wrap items-center gap-1 sm:w-auto sm:justify-end sm:gap-x-2" aria-label="Navegación principal">
           {currentLinks.map((link) => {
             const viewName = link.href.replace('/', '');
             let isActive = currentView === viewName;
@@ -106,24 +108,28 @@ export const UserBanner = ({
                   }
                 }}
                 aria-current={isActive ? 'page' : undefined}
-                className={`min-h-10 flex items-center font-title text-sm font-semibold text-brand-Blanco underline-offset-4 transition-all ${isActive ? 'underline' : 'hover:underline'}`}
+                className={`flex min-h-11 shrink-0 items-center rounded-md px-2 font-title text-sm font-semibold text-brand-Blanco underline-offset-4 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Blanco ${isActive ? 'bg-brand-Blanco/10 underline' : 'hover:bg-brand-Blanco/10 hover:underline'}`}
               >
                 {link.label}
               </a>
             );
           })}
-          <details className="relative">
-            <summary className="list-none min-h-10 flex items-center gap-1 cursor-pointer rounded-md px-2 hover:bg-brand-Blanco/10" aria-label="Notificaciones">
+          <details className="relative shrink-0">
+            <summary className="flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center gap-1 rounded-md px-2 hover:bg-brand-Blanco/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Blanco" aria-label={`Notificaciones, ${unreadCount} sin leer`}>
               <Bell size={18} aria-hidden="true" />
               {unreadCount > 0 && (
-                <span className="min-w-5 rounded-full bg-brand-Status_rojo px-1.5 py-0.5 text-center text-[10px] font-bold text-brand-Blanco">
+                <span aria-hidden="true" className="min-w-5 rounded-full bg-brand-Status_rojo px-1.5 py-0.5 text-center text-xs font-bold text-brand-Blanco">
                   {unreadCount}
                 </span>
               )}
             </summary>
-            <div className="absolute right-0 top-11 z-50 w-80 max-w-[calc(100vw-2rem)] rounded-md border border-brand-Gris_bajo/30 bg-brand-Blanco p-3 text-brand-Gris_oscuro shadow-lg">
+            <div className="absolute right-0 top-12 z-50 w-80 max-w-[calc(100vw-2rem)] rounded-md border border-brand-Gris_bajo/30 bg-brand-Blanco p-3 text-brand-Gris_oscuro shadow-lg" aria-live="polite">
               <p className="mb-2 font-title text-sm font-bold">Notificaciones</p>
-              {recentNotifications.length === 0 ? (
+              {notificationError ? (
+                <p className="font-body text-xs font-semibold text-brand-Status_rojo" role="alert">
+                  {notificationError}
+                </p>
+              ) : recentNotifications.length === 0 ? (
                 <p className="font-body text-xs text-brand-Gris_oscuro/70">Sin novedades.</p>
               ) : (
                 <ul className="space-y-2">
@@ -136,24 +142,24 @@ export const UserBanner = ({
                           onOpenNotification?.(notification);
                         }}
                         disabled={!onOpenNotification}
-                        className="group w-full text-left disabled:cursor-default"
+                        className="group min-h-11 w-full rounded-sm text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal disabled:cursor-default"
                         aria-label={`Abrir notificación: ${notification.mensaje}`}
                       >
                         <p className="font-body text-xs leading-snug">{notification.mensaje}</p>
-                        <span className="mt-1 inline-flex items-center gap-1 font-accent text-[10px] font-bold text-brand-Verde_oscuro group-hover:underline">
+                        <span className="mt-1 inline-flex items-center gap-1 font-accent text-xs font-bold text-brand-Verde_oscuro group-hover:underline">
                           {notification.captureId ? 'Ver captura' : 'Ver indicadores'}
                           <ArrowRight size={12} aria-hidden="true" />
                         </span>
                       </button>
                       <div className="mt-2 flex items-center justify-between gap-2">
-                        <span className="font-accent text-[10px] text-brand-Gris_oscuro/60">
+                        <span className="font-accent text-xs text-brand-Gris_oscuro/70">
                           {new Date(notification.createdAt).toLocaleString('es-MX')}
                         </span>
                         {!notification.readAt && (
                           <button
                             type="button"
                             onClick={() => onReadNotification?.(notification.id)}
-                            className="font-accent text-[10px] font-bold text-brand-Verde_oscuro underline-offset-2 hover:underline"
+                            className="min-h-11 rounded px-2 font-accent text-xs font-bold text-brand-Verde_oscuro underline-offset-2 hover:bg-brand-Verde_principal/10 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal"
                           >
                             Marcar leída
                           </button>

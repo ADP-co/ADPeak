@@ -93,7 +93,7 @@ export const Login = () => {
             autoComplete="current-password"
           />
           {loginError && (
-            <p className="text-sm font-semibold text-brand-Status_rojo">
+            <p className="text-sm font-semibold text-brand-Status_rojo" role="alert" aria-live="assertive">
               {loginError}
             </p>
           )}

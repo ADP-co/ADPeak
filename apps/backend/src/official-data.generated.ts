@@ -1461,7 +1461,52 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Adriana Ruiz/1.0.0.0.2 Titulación por cohorte.xlsx",
     "sheetName": "Titulación",
     "groups": [],
-    "headerRows": [],
+    "headerRows": [
+      [
+        {
+          "label": "Plantel",
+          "rowspan": 2
+        },
+        {
+          "label": "Programa Educativo",
+          "rowspan": 2
+        },
+        {
+          "label": "Egresados titulados en el año 2025",
+          "colspan": 3,
+          "rowspan": 2
+        },
+        {
+          "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas",
+          "colspan": 3,
+          "rowspan": 2
+        },
+        {
+          "label": "% de titulación por cohorte",
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Hombres"
+        },
+        {
+          "label": "Total"
+        },
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Hombres"
+        },
+        {
+          "label": "Total"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -1571,7 +1616,58 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Oscar Mendoza/3.1.0.0.1.xlsx",
     "sheetName": "Hoja1",
     "groups": [],
-    "headerRows": [],
+    "headerRows": [
+      [
+        {
+          "label": "Plantel",
+          "rowspan": 2
+        },
+        {
+          "label": "Nombre de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "Descripción de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "TOTAL ESTUDIANTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DOCENTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL PERSONAL ADMINISTRATIVO",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DE PARTICIPANTES",
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -1669,7 +1765,49 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Liliana Rojas/Indicador 1.1.2.0.3..xlsx",
     "sheetName": "Indicador 1.1.2.0.3",
     "groups": [],
-    "headerRows": [],
+    "headerRows": [
+      [
+        {
+          "label": "Escuela"
+        },
+        {
+          "label": "Semestre"
+        },
+        {
+          "label": "Programa Educativo"
+        },
+        {
+          "label": "Matr."
+        },
+        {
+          "label": "Tasa de Reprobación",
+          "colspan": 2
+        },
+        {
+          "label": "Tasa de Aprobación",
+          "colspan": 2
+        },
+        {
+          "label": "Tasa de Deserción",
+          "colspan": 2
+        },
+        {
+          "label": "Semestre"
+        },
+        {
+          "label": "Tasa de Reprobación",
+          "colspan": 2
+        },
+        {
+          "label": "Tasa de Aprobación",
+          "colspan": 2
+        },
+        {
+          "label": "Tasa de Deserción",
+          "colspan": 2
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "escuela",
@@ -2077,82 +2215,82 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "activityLabel": "",
     "sourceLabel": "1.1.2.5.10 - Porcentaje de docentes de educación media superior y superior certificados en el dominio de una Lengua Extranjera.xlsx",
     "sourcePath": "Indicadores/Laura Calvario - solo responsable/1.1.2.5.10 - Porcentaje de docentes de educación media superior y superior certificados en el dominio de una Lengua Extranjera.xlsx",
-    "sheetName": "Hoja1",
+    "sheetName": "Hoja2",
     "groups": [],
     "headerRows": [],
     "columns": [
       {
-        "key": "agosto_2025_enero_2026_m",
-        "label": "Agosto 2025-Enero 2026 M",
+        "key": "agosto_2025_enero_2026",
+        "label": "Agosto 2025-Enero 2026",
+        "type": "text"
+      },
+      {
+        "key": "agosto_2025_enero_2026_2",
+        "label": "Agosto 2025-Enero 2026",
+        "type": "text"
+      },
+      {
+        "key": "total",
+        "label": "Total",
         "type": "number"
       },
       {
-        "key": "agosto_2025_enero_2026_h",
-        "label": "Agosto 2025-Enero 2026 H",
+        "key": "enero_2026_junio_2026",
+        "label": "Enero 2026-Junio 2026",
+        "type": "text"
+      },
+      {
+        "key": "enero_2026_junio_2026_2",
+        "label": "Enero 2026-Junio 2026",
+        "type": "text"
+      },
+      {
+        "key": "total_2",
+        "label": "Total",
         "type": "number"
       },
       {
-        "key": "total_h",
-        "label": "Total H",
-        "type": "number"
+        "key": "agosto_2026_enero_2027",
+        "label": "Agosto 2026- Enero 2027",
+        "type": "text"
       },
       {
-        "key": "enero_2026_junio_2026_m",
-        "label": "Enero 2026-Junio 2026 M",
-        "type": "number"
+        "key": "agosto_2026_enero_2027_2",
+        "label": "Agosto 2026- Enero 2027",
+        "type": "text"
       },
       {
-        "key": "enero_2026_junio_2026_h",
-        "label": "Enero 2026-Junio 2026 H",
-        "type": "number"
-      },
-      {
-        "key": "total_h_2",
-        "label": "Total H",
-        "type": "number"
-      },
-      {
-        "key": "agosto_2026_enero_2027_m",
-        "label": "Agosto 2026- Enero 2027 M",
-        "type": "number"
-      },
-      {
-        "key": "agosto_2026_enero_2027_h",
-        "label": "Agosto 2026- Enero 2027 H",
-        "type": "number"
-      },
-      {
-        "key": "total_h_3",
-        "label": "Total H",
+        "key": "total_3",
+        "label": "Total",
         "type": "number"
       }
     ],
     "initialRows": [
       {
-        "agosto_2025_enero_2026_m": "",
-        "agosto_2025_enero_2026_h": "",
-        "total_h": "",
-        "enero_2026_junio_2026_m": "",
-        "enero_2026_junio_2026_h": "",
-        "total_h_2": "",
-        "agosto_2026_enero_2027_m": "",
-        "agosto_2026_enero_2027_h": "",
-        "total_h_3": ""
+        "agosto_2025_enero_2026": "",
+        "agosto_2025_enero_2026_2": "",
+        "total": "",
+        "enero_2026_junio_2026": "",
+        "enero_2026_junio_2026_2": "",
+        "total_2": "",
+        "agosto_2026_enero_2027": "",
+        "agosto_2026_enero_2027_2": "",
+        "total_3": ""
       }
     ],
     "showTotals": true,
     "allowAddRows": true,
     "addRowLabel": "Agregar fila",
     "emptyRow": {
-      "agosto_2025_enero_2026_m": "",
-      "agosto_2025_enero_2026_h": "",
-      "total_h": "",
-      "enero_2026_junio_2026_m": "",
-      "enero_2026_junio_2026_h": "",
-      "total_h_2": "",
-      "agosto_2026_enero_2027_m": "",
-      "agosto_2026_enero_2027_h": "",
-      "total_h_3": ""
+      "agosto_2025_enero_2026": "",
+      "agosto_2025_enero_2026_2": "",
+      "total": "",
+      "enero_2026_junio_2026": "",
+      "enero_2026_junio_2026_2": "",
+      "total_2": "",
+      "agosto_2026_enero_2027": "",
+      "agosto_2026_enero_2027_2": "",
+      "total_3": ""
     },
     "footerNote": "",
     "quality": [
@@ -2350,7 +2488,48 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Ariadna Zuñiga/1.1.2.3.1 Programa Adopta una Prepa .xlsx",
     "sheetName": "1.1.2.3.1",
     "groups": [],
-    "headerRows": [],
+    "headerRows": [
+      [
+        {
+          "label": "Registro",
+          "rowspan": 2
+        },
+        {
+          "label": "Nombre de la charla",
+          "rowspan": 2
+        },
+        {
+          "label": "Ponente",
+          "rowspan": 2
+        },
+        {
+          "label": "Fecha de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "Total estudiantes asistentes",
+          "colspan": 2
+        },
+        {
+          "label": "Total docentes asistentes",
+          "colspan": 2
+        }
+      ],
+      [
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Hombres"
+        },
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Hombres"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "registro",
@@ -2886,7 +3065,58 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Oscar Mendoza/1.1.2.3.1.xlsx",
     "sheetName": "Hoja1",
     "groups": [],
-    "headerRows": [],
+    "headerRows": [
+      [
+        {
+          "label": "Plantel",
+          "rowspan": 2
+        },
+        {
+          "label": "Nombre de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "Descripción de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "TOTAL ESTUDIANTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DOCENTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL PERSONAL ADMINISTRATIVO",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DE PARTICIPANTES",
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -2985,7 +3215,54 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Ariadna Zuñiga/1.1.2.2.11 Seguimiento capacitación en materia de género planteles.xlsx",
     "sheetName": "1.1.2.2.11",
     "groups": [],
-    "headerRows": [],
+    "headerRows": [
+      [
+        {
+          "label": "Plantel",
+          "rowspan": 2
+        },
+        {
+          "label": "Nombre de la capacitación y /o actividades formativas",
+          "rowspan": 2
+        },
+        {
+          "label": "TOTAL ESTUDIANTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DOCENTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL PERSONAL ADMINISTRATIVO",
+          "colspan": 2
+        },
+        {
+          "label": "TEMAS QUE SE ABORDARON",
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -3189,7 +3466,58 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Oscar Mendoza/3.1.1.3.6.xlsx",
     "sheetName": "Hoja1",
     "groups": [],
-    "headerRows": [],
+    "headerRows": [
+      [
+        {
+          "label": "Plantel",
+          "rowspan": 2
+        },
+        {
+          "label": "Nombre de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "Descripción de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "TOTAL ESTUDIANTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DOCENTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL PERSONAL ADMINISTRATIVO",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DE PARTICIPANTES",
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -3467,7 +3795,34 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Ariadna Zuñiga/2.1.4.1.2 Seguimiento a proyectos de investigación en planteles.xlsx",
     "sheetName": "2.1.4.1.2",
     "groups": [],
-    "headerRows": [],
+    "headerRows": [
+      [
+        {
+          "label": "PLANTEL",
+          "rowspan": 2
+        },
+        {
+          "label": "Nombre de /los proyectos de investigación",
+          "rowspan": 2
+        },
+        {
+          "label": "Número de estudiantes",
+          "colspan": 2
+        },
+        {
+          "label": "Observaciones (indicar el periodo del proyecto)",
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "Mujeres"
+        },
+        {
+          "label": "Hombres"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -4123,7 +4478,58 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "sourcePath": "Indicadores/Oscar Mendoza/1.1.2.2.10.xlsx",
     "sheetName": "1.1.2.2.10",
     "groups": [],
-    "headerRows": [],
+    "headerRows": [
+      [
+        {
+          "label": "Plantel",
+          "rowspan": 2
+        },
+        {
+          "label": "Nombre de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "Descripción de la actividad",
+          "rowspan": 2
+        },
+        {
+          "label": "TOTAL ESTUDIANTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DOCENTES",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL PERSONAL ADMINISTRATIVO",
+          "colspan": 2
+        },
+        {
+          "label": "TOTAL DE PARTICIPANTES",
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        },
+        {
+          "label": "MUJERES"
+        },
+        {
+          "label": "HOMBRES"
+        }
+      ]
+    ],
     "columns": [
       {
         "key": "plantel",
@@ -4711,15 +5117,15 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       [
         {
           "label": "Delegación",
-          "rowspan": 3
+          "rowspan": 2
         },
         {
           "label": "Plantel",
-          "rowspan": 3
+          "rowspan": 2
         },
         {
           "label": "Programa Educativo",
-          "rowspan": 3
+          "rowspan": 2
         },
         {
           "label": "Egresados titulados en el año 2025",
@@ -4733,7 +5139,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         },
         {
           "label": "% de titulación por cohorte",
-          "rowspan": 3
+          "rowspan": 2
         }
       ],
       [
@@ -5917,15 +6323,15 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
             [
               {
                 "label": "Delegación",
-                "rowspan": 3
+                "rowspan": 2
               },
               {
                 "label": "Plantel",
-                "rowspan": 3
+                "rowspan": 2
               },
               {
                 "label": "Programa Educativo",
-                "rowspan": 3
+                "rowspan": 2
               },
               {
                 "label": "Egresados titulados en el año 2025",
@@ -5939,7 +6345,7 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
               },
               {
                 "label": "% de titulación por cohorte",
-                "rowspan": 3
+                "rowspan": 2
               }
             ],
             [
@@ -6304,7 +6710,58 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 5,
-          "headerRows": [],
+          "headerRows": [
+            [
+              {
+                "label": "Plantel",
+                "rowspan": 2
+              },
+              {
+                "label": "Nombre de la actividad",
+                "rowspan": 2
+              },
+              {
+                "label": "Descripción de la actividad",
+                "rowspan": 2
+              },
+              {
+                "label": "TOTAL ESTUDIANTES",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL DOCENTES",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL PERSONAL ADMINISTRATIVO",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL DE PARTICIPANTES",
+                "rowspan": 2
+              }
+            ],
+            [
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -6463,7 +6920,110 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 4,
-          "headerRows": [],
+          "headerRows": [
+            [
+              {
+                "label": "Programa educativo",
+                "rowspan": 3
+              },
+              {
+                "label": "Matricula escolar oficializada",
+                "rowspan": 3
+              },
+              {
+                "label": "Altas vigentes",
+                "colspan": 6
+              },
+              {
+                "label": "Variación de la matrícula",
+                "rowspan": 3
+              },
+              {
+                "label": "Justificación",
+                "rowspan": 3
+              },
+              {
+                "label": "Matricula escolar oficializada",
+                "rowspan": 3
+              },
+              {
+                "label": "Altas vigentes",
+                "colspan": 6
+              },
+              {
+                "label": "Variación de la matrícula",
+                "rowspan": 3
+              },
+              {
+                "label": "Justificación",
+                "rowspan": 3
+              }
+            ],
+            [
+              {
+                "label": "2",
+                "colspan": 2
+              },
+              {
+                "label": "4",
+                "colspan": 2
+              },
+              {
+                "label": "6",
+                "colspan": 2
+              },
+              {
+                "label": "1",
+                "colspan": 2
+              },
+              {
+                "label": "3",
+                "colspan": 2
+              },
+              {
+                "label": "5",
+                "colspan": 2
+              }
+            ],
+            [
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              },
+              {
+                "label": "H"
+              },
+              {
+                "label": "M"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "programa_educativo",
@@ -6650,7 +7210,49 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 4,
-          "headerRows": [],
+          "headerRows": [
+            [
+              {
+                "label": "Escuela"
+              },
+              {
+                "label": "Semestre"
+              },
+              {
+                "label": "Programa Educativo"
+              },
+              {
+                "label": "Matr."
+              },
+              {
+                "label": "Tasa de Reprobación",
+                "colspan": 2
+              },
+              {
+                "label": "Tasa de Aprobación",
+                "colspan": 2
+              },
+              {
+                "label": "Tasa de Deserción",
+                "colspan": 2
+              },
+              {
+                "label": "Semestre"
+              },
+              {
+                "label": "Tasa de Reprobación",
+                "colspan": 2
+              },
+              {
+                "label": "Tasa de Aprobación",
+                "colspan": 2
+              },
+              {
+                "label": "Tasa de Deserción",
+                "colspan": 2
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "escuela",
@@ -7540,7 +8142,48 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 8,
-          "headerRows": [],
+          "headerRows": [
+            [
+              {
+                "label": "Registro",
+                "rowspan": 2
+              },
+              {
+                "label": "Nombre de la charla",
+                "rowspan": 2
+              },
+              {
+                "label": "Ponente",
+                "rowspan": 2
+              },
+              {
+                "label": "Fecha de la actividad",
+                "rowspan": 2
+              },
+              {
+                "label": "Total estudiantes asistentes",
+                "colspan": 2
+              },
+              {
+                "label": "Total docentes asistentes",
+                "colspan": 2
+              }
+            ],
+            [
+              {
+                "label": "Mujeres"
+              },
+              {
+                "label": "Hombres"
+              },
+              {
+                "label": "Mujeres"
+              },
+              {
+                "label": "Hombres"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "registro",
@@ -8119,7 +8762,52 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 8,
-          "headerRows": [],
+          "headerRows": [
+            [
+              {
+                "label": "Plantel",
+                "rowspan": 2
+              },
+              {
+                "label": "Programa Educativo",
+                "rowspan": 2
+              },
+              {
+                "label": "Egresados titulados en el año 2025",
+                "colspan": 3,
+                "rowspan": 2
+              },
+              {
+                "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas",
+                "colspan": 3,
+                "rowspan": 2
+              },
+              {
+                "label": "% de titulación por cohorte",
+                "rowspan": 2
+              }
+            ],
+            [
+              {
+                "label": "Mujeres"
+              },
+              {
+                "label": "Hombres"
+              },
+              {
+                "label": "Total"
+              },
+              {
+                "label": "Mujeres"
+              },
+              {
+                "label": "Hombres"
+              },
+              {
+                "label": "Total"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -8236,7 +8924,22 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 8,
-          "headerRows": [],
+          "headerRows": [
+            [
+              {
+                "label": "Plantel"
+              },
+              {
+                "label": "Programa Educativo"
+              },
+              {
+                "label": "Estrategias"
+              },
+              {
+                "label": "Acciones implementadas"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -8411,7 +9114,58 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 5,
-          "headerRows": [],
+          "headerRows": [
+            [
+              {
+                "label": "Plantel",
+                "rowspan": 2
+              },
+              {
+                "label": "Nombre de la actividad",
+                "rowspan": 2
+              },
+              {
+                "label": "Descripción de la actividad",
+                "rowspan": 2
+              },
+              {
+                "label": "TOTAL ESTUDIANTES",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL DOCENTES",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL PERSONAL ADMINISTRATIVO",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL DE PARTICIPANTES",
+                "rowspan": 2
+              }
+            ],
+            [
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -8543,7 +9297,54 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 5,
-          "headerRows": [],
+          "headerRows": [
+            [
+              {
+                "label": "Plantel",
+                "rowspan": 2
+              },
+              {
+                "label": "Nombre de la capacitación y /o actividades formativas",
+                "rowspan": 2
+              },
+              {
+                "label": "TOTAL ESTUDIANTES",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL DOCENTES",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL PERSONAL ADMINISTRATIVO",
+                "colspan": 2
+              },
+              {
+                "label": "TEMAS QUE SE ABORDARON",
+                "rowspan": 2
+              }
+            ],
+            [
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -8812,7 +9613,58 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 5,
-          "headerRows": [],
+          "headerRows": [
+            [
+              {
+                "label": "Plantel",
+                "rowspan": 2
+              },
+              {
+                "label": "Nombre de la actividad",
+                "rowspan": 2
+              },
+              {
+                "label": "Descripción de la actividad",
+                "rowspan": 2
+              },
+              {
+                "label": "TOTAL ESTUDIANTES",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL DOCENTES",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL PERSONAL ADMINISTRATIVO",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL DE PARTICIPANTES",
+                "rowspan": 2
+              }
+            ],
+            [
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -9150,7 +10002,34 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 5,
-          "headerRows": [],
+          "headerRows": [
+            [
+              {
+                "label": "PLANTEL",
+                "rowspan": 2
+              },
+              {
+                "label": "Nombre de /los proyectos de investigación",
+                "rowspan": 2
+              },
+              {
+                "label": "Número de estudiantes",
+                "colspan": 2
+              },
+              {
+                "label": "Observaciones (indicar el periodo del proyecto)",
+                "rowspan": 2
+              }
+            ],
+            [
+              {
+                "label": "Mujeres"
+              },
+              {
+                "label": "Hombres"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",
@@ -10471,7 +11350,58 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
         "formulaCells": 0,
         "table": {
           "headerRow": 5,
-          "headerRows": [],
+          "headerRows": [
+            [
+              {
+                "label": "Plantel",
+                "rowspan": 2
+              },
+              {
+                "label": "Nombre de la actividad",
+                "rowspan": 2
+              },
+              {
+                "label": "Descripción de la actividad",
+                "rowspan": 2
+              },
+              {
+                "label": "TOTAL ESTUDIANTES",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL DOCENTES",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL PERSONAL ADMINISTRATIVO",
+                "colspan": 2
+              },
+              {
+                "label": "TOTAL DE PARTICIPANTES",
+                "rowspan": 2
+              }
+            ],
+            [
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              },
+              {
+                "label": "MUJERES"
+              },
+              {
+                "label": "HOMBRES"
+              }
+            ]
+          ],
           "columns": [
             {
               "key": "plantel",

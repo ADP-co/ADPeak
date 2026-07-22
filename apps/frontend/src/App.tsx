@@ -199,25 +199,34 @@ function canDisplayCatalogIndicatorForUser(indicator: CatalogIndicator, user?: U
   );
 }
 
-const MAX_INLINE_EVIDENCE_BYTES = 2 * 1024 * 1024;
+const DEFAULT_EVIDENCE_RULES = {
+  required: true,
+  allowedTypes: ['application/pdf'],
+  maxSizeMb: 5,
+  requireOpenBeforeApproval: true,
+};
 
 async function buildCapturePayload(data: FormSubmission, existingPayload?: {
   evidencia?: { nombre: string; tipo: string; tamanoBytes: number; contenidoBase64?: string };
-}) {
+}, evidenceRules = DEFAULT_EVIDENCE_RULES) {
   const evidenceFile = data.evidencia?.[0];
 
   return {
     rows: data.rows,
     justificacion: data.justificacion?.trim() || undefined,
     evidencia: evidenceFile
-      ? await evidenceFileToPayload(evidenceFile)
+      ? await evidenceFileToPayload(evidenceFile, evidenceRules)
       : existingPayload?.evidencia,
   };
 }
 
-async function evidenceFileToPayload(file: File) {
-  if (file.size > MAX_INLINE_EVIDENCE_BYTES) {
-    throw new Error('La evidencia debe pesar máximo 2 MB para esta versión.');
+async function evidenceFileToPayload(file: File, evidenceRules = DEFAULT_EVIDENCE_RULES) {
+  if (file.size > evidenceRules.maxSizeMb * 1024 * 1024) {
+    throw new Error(`La evidencia debe pesar máximo ${evidenceRules.maxSizeMb} MB.`);
+  }
+
+  if (!evidenceRules.allowedTypes.includes(file.type)) {
+    throw new Error('El tipo de archivo no está permitido para este indicador.');
   }
 
   return {
@@ -361,6 +370,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
   const requestedSource = queryParams.get('source');
   const selectedCode = code ?? template1_0_0_0_2.indicatorCode;
   const selectedCatalogIndicator = catalogIndicators.find((indicator) => indicator.code === selectedCode);
+  const evidenceRules = selectedCatalogIndicator?.evidenceRules ?? DEFAULT_EVIDENCE_RULES;
   const selectedIndicator = selectedCatalogIndicator
     ? catalogToIndicator(selectedCatalogIndicator, user)
     : undefined;
@@ -420,6 +430,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
   const shouldLoadCaptureDraft = user?.role !== 'responsable' || Boolean(effectiveCaptureId);
   const captureDraft = useCaptureDraft({
     requestedCaptureId: effectiveCaptureId,
+    strictRequestedCaptureId: Boolean(requestedCaptureId),
     plantelId: activePlantelId,
     indicadorId: resolvedIndicatorId,
     periodoId: activePeriodoId,
@@ -507,9 +518,23 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
     );
   }
 
+  if (captureDraft.hasStrictLookupError) {
+    return (
+      <section className="w-full max-w-[1250px] mx-auto bg-brand-Blanco rounded-lg shadow-md border border-brand-Gris_bajo/20 p-8">
+        <h1 className="font-title text-xl font-bold text-brand-Gris_oscuro mb-2">Captura no disponible</h1>
+        <p className="font-body text-sm text-brand-Gris_oscuro">
+          {captureDraft.errorMessage || 'La captura no existe o no pertenece a tu alcance.'}
+        </p>
+        <Button type="button" className="mt-5 text-xs py-1.5 px-4" onClick={() => navigate('/indicadores')}>
+          Volver a indicadores
+        </Button>
+      </section>
+    );
+  }
+
   const handleSaveDraft = async (data: FormSubmission) => {
     try {
-      const payload = await buildCapturePayload(data, captureDraft.capture?.payload);
+      const payload = await buildCapturePayload(data, captureDraft.capture?.payload, evidenceRules);
       captureDraft.saveDraft(payload, {
         onSuccess: () => {
           toast.success('Cambios guardados');
@@ -533,7 +558,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
         return;
       }
 
-      if (!hasEvidence) {
+      if (evidenceRules.required && !hasEvidence) {
         toast.error('Adjunta una evidencia PDF antes de enviar.');
         return;
       }
@@ -543,7 +568,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
         return;
       }
 
-      const payload = await buildCapturePayload(data, captureDraft.capture?.payload);
+      const payload = await buildCapturePayload(data, captureDraft.capture?.payload, evidenceRules);
       captureDraft.sendToReview(payload, {
         onSuccess: () => {
           onIndicatorStatusChange?.(selectedCode, 'En revisión');
@@ -637,8 +662,9 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
   const hasPersistedEvidence = Boolean(persistedEvidence?.nombre);
   const canApproveCurrentCapture =
     !canReviewCurrentCapture ||
+    (!evidenceRules.requireOpenBeforeApproval && (!evidenceRules.required || hasPersistedEvidence)) ||
     (hasPersistedEvidence && evidenceOpenedForCaptureId === captureDraft.capture?.id);
-  const approveDisabledReason = !hasPersistedEvidence
+  const approveDisabledReason = evidenceRules.required && !hasPersistedEvidence
     ? 'La captura no tiene evidencia disponible para revisar.'
     : 'Abre la evidencia PDF antes de aprobar.';
 
@@ -650,6 +676,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
       initialJustificacion={captureDraft.capture?.payload.justificacion}
       existingEvidenceName={persistedEvidence?.nombre}
       existingEvidenceUrl={persistedEvidenceUrl}
+      evidenceRules={evidenceRules}
       onOpenEvidence={persistedEvidence?.nombre && canOpenCurrentEvidence ? handleOpenEvidence : undefined}
       onDownloadEvidence={persistedEvidence?.nombre && canOpenCurrentEvidence ? handleDownloadEvidence : undefined}
       canApprove={canApproveCurrentCapture}
@@ -677,17 +704,21 @@ function ProtectedLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<SigiNotification[]>([]);
+  const [notificationError, setNotificationError] = useState('');
 
   const loadNotifications = useCallback(async () => {
     if (!isAuthenticated || !user) {
       setNotifications([]);
+      setNotificationError('');
       return;
     }
 
     try {
       setNotifications(await fetchNotifications());
+      setNotificationError('');
     } catch {
       setNotifications([]);
+      setNotificationError('No se pudieron cargar las notificaciones.');
     }
   }, [isAuthenticated, user]);
 
@@ -736,18 +767,8 @@ function ProtectedLayout() {
     }
   };
 
-  const handleOpenNotification = async (notification: SigiNotification) => {
+  const handleOpenNotification = (notification: SigiNotification) => {
     const targetPath = notificationTargetPath(notification, user?.role ?? 'plantel');
-
-    if (!notification.readAt) {
-      try {
-        await markNotificationRead(notification.id);
-        await loadNotifications();
-      } catch {
-        toast.error('No se pudo marcar la notificación como leída');
-      }
-    }
-
     navigate(targetPath);
   };
 
@@ -774,6 +795,7 @@ function ProtectedLayout() {
           onNavigate={handleNavigate}
           currentView={currentView}
           notifications={notifications}
+          notificationError={notificationError}
           onReadNotification={handleReadNotification}
           onOpenNotification={handleOpenNotification}
         />

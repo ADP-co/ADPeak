@@ -8,9 +8,9 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
 }
 
-export const Button = ({ children, variant = 'primary', className = '', ...props }: ButtonProps) => {
+export const Button = ({ children, variant = 'primary', className = '', type = 'button', ...props }: ButtonProps) => {
   // Mapeo de estilos según la variante elegida
-  const baseStyles = 'font-accent font-bold px-6 py-2 rounded-md transition-all duration-250 cursor-pointer active:scale-98 disabled:opacity-50';
+  const baseStyles = 'min-h-11 font-accent font-bold px-6 py-2 rounded-md transition-all duration-200 cursor-pointer active:scale-98 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100';
 
   const variants = {
     primary: 'bg-brand-Verde_oscuro text-brand-Blanco hover:bg-brand-Verde_principal',
@@ -22,6 +22,7 @@ export const Button = ({ children, variant = 'primary', className = '', ...props
 
   return (
     <button
+      type={type}
       className={`${baseStyles} ${variants[variant]} ${className}`}
       {...props}
     >

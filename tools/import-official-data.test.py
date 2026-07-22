@@ -14,6 +14,12 @@ SPEC.loader.exec_module(IMPORTER)
 
 
 class FrontendGenerationTests(unittest.TestCase):
+    def test_default_zip_uses_latest_official_archive(self) -> None:
+        self.assertEqual(
+            IMPORTER.INDICADORES_ZIP.name,
+            "indicadores-20260628T002121Z-3-001.zip",
+        )
+
     def test_frontend_catalog_contains_only_minimal_operational_rows(self) -> None:
         base = {
             "name": "Indicador operativo",
@@ -64,6 +70,118 @@ class FrontendGenerationTests(unittest.TestCase):
         serialized = json.dumps(public_templates)
         self.assertNotRegex(serialized, r"(?:FMT|TMP)-|pending_mapping|private-workbook")
         self.assertEqual(public_templates["1.0.0.0.1"]["sourcePath"], "")
+
+
+class WorkbookTemplateTests(unittest.TestCase):
+    def test_sheet_with_target_indicator_code_wins_over_larger_sheet(self) -> None:
+        small_matching_table = {
+            "columns": [{"key": "docentes", "label": "Docentes", "type": "number"}],
+            "initialRows": [{"docentes": ""}],
+            "headerRows": [],
+        }
+        large_unrelated_table = {
+            "columns": [
+                {"key": "plantel", "label": "Plantel", "type": "readonly"},
+                {"key": "estudiantes", "label": "Estudiantes", "type": "number"},
+            ],
+            "initialRows": [
+                {"plantel": "Bachillerato 1", "estudiantes": 1},
+                {"plantel": "Bachillerato 2", "estudiantes": 2},
+            ],
+            "headerRows": [],
+        }
+        sheets = [
+            {
+                "name": "Hoja1",
+                "table": large_unrelated_table,
+                "formulaCells": 10,
+                "_indicatorCodes": ["1.1.2.2.8"],
+                "_codes": ["1.1.2.2.8"],
+                "codeDescriptions": [],
+                "activityDescriptions": [],
+                "headerRows": [],
+            },
+            {
+                "name": "Hoja2",
+                "table": small_matching_table,
+                "formulaCells": 0,
+                "_indicatorCodes": ["1.1.2.5.10"],
+                "_codes": ["1.1.2.5.10"],
+                "codeDescriptions": [],
+                "activityDescriptions": [],
+                "headerRows": [],
+            },
+        ]
+
+        template = IMPORTER.template_from_workbook_sheets(
+            "1.1.2.5.10",
+            sheets,
+            "Indicadores/idiomas.xlsx",
+            official_code="1.1.2.5.10",
+        )
+
+        self.assertIsNotNone(template)
+        self.assertEqual(template["sheetName"], "Hoja2")
+        self.assertEqual(template["columns"][0]["label"], "Docentes")
+
+    def test_hiding_blank_readonly_column_preserves_grouped_headers(self) -> None:
+        columns = [
+            {"key": "delegacion", "label": "Delegación", "type": "readonly"},
+            {"key": "plantel", "label": "Plantel", "type": "readonly"},
+            {"key": "mujeres", "label": "Mujeres", "type": "number"},
+            {"key": "hombres", "label": "Hombres", "type": "number"},
+        ]
+        rows = [{"delegacion": "", "plantel": "Bachillerato 16", "mujeres": 2, "hombres": 3}]
+        header_rows = [
+            [
+                {"label": "Contexto", "colspan": 2},
+                {"label": "Egresados", "colspan": 2},
+            ],
+            [
+                {"label": "Delegación"},
+                {"label": "Plantel"},
+                {"label": "Mujeres"},
+                {"label": "Hombres"},
+            ],
+        ]
+
+        normalized_columns, normalized_rows, normalized_headers = IMPORTER.normalize_extracted_table(
+            columns,
+            rows,
+            header_rows,
+        )
+
+        self.assertEqual([column["key"] for column in normalized_columns], ["plantel", "mujeres", "hombres"])
+        self.assertNotIn("delegacion", normalized_rows[0])
+        self.assertEqual(
+            normalized_headers,
+            [
+                [{"label": "Contexto"}, {"label": "Egresados", "colspan": 2}],
+                [{"label": "Plantel"}, {"label": "Mujeres"}, {"label": "Hombres"}],
+            ],
+        )
+
+    def test_empty_header_row_does_not_leave_oversized_rowspan(self) -> None:
+        headers = [
+            [{"label": "Plantel", "rowspan": 3}],
+            [{"label": "Seguimiento"}],
+            [],
+        ]
+
+        self.assertEqual(
+            IMPORTER.strip_empty_header_rows(headers),
+            [
+                [{"label": "Plantel", "rowspan": 2}],
+                [{"label": "Seguimiento"}],
+            ],
+        )
+
+    @unittest.skipUnless(IMPORTER.INDICADORES_ZIP.exists(), "ZIP oficial no disponible")
+    def test_real_language_indicator_uses_sheet_two(self) -> None:
+        _, _, _, _, templates = IMPORTER.workbook_summaries()
+
+        self.assertIn("1.1.2.5.10", templates)
+        self.assertEqual(templates["1.1.2.5.10"]["sheetName"], "Hoja2")
 
 
 if __name__ == "__main__":

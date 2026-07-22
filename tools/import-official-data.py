@@ -18,7 +18,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DOWNLOADS_DIR = Path(os.environ.get("ADPEAK_DOWNLOADS_DIR", r"C:\Users\Lenovo\Downloads"))
 INDICADORES_ZIP = Path(os.environ.get(
     "ADPEAK_OFFICIAL_INDICADORES_ZIP",
-    DOWNLOADS_DIR / "indicadores-20260622T210134Z-3-001.zip",
+    DOWNLOADS_DIR / "indicadores-20260628T002121Z-3-001.zip",
 ))
 
 BACKEND_CATALOG_TARGET = REPO_ROOT / "apps/backend/src/official-catalog.generated.ts"
@@ -485,6 +485,8 @@ def workbook_summaries() -> tuple[
                     sheet_summary = summarize_sheet(sheet)
                     reliable_sheet_codes = sheet_summary.pop("indicatorCodes")
                     sheet_codes = sheet_summary.pop("codes")
+                    sheet_summary["_indicatorCodes"] = sorted(reliable_sheet_codes, key=normalize_key)
+                    sheet_summary["_codes"] = sorted(sheet_codes, key=normalize_key)
                     indicator_codes.update(reliable_sheet_codes)
                     reference_codes.update(sheet_codes)
                     planteles.update(sheet_summary.pop("planteles"))
@@ -561,7 +563,14 @@ def workbook_summaries() -> tuple[
                         "detectedReferenceCodes": sorted(reference_codes - indicator_codes),
                         "detectedPlanteles": sorted(planteles, key=str.casefold),
                         "formulaCells": formulas,
-                        "sheets": sheets,
+                        "sheets": [
+                            {
+                                key: value
+                                for key, value in sheet.items()
+                                if not key.startswith("_")
+                            }
+                            for sheet in sheets
+                        ],
                         "privacy": "Row-level personal data remains in private storage only.",
                     }
                 )
@@ -758,11 +767,88 @@ def fallback_header_label(_index: int) -> str:
 
 
 def strip_empty_header_rows(header_rows: list[list[dict[str, Any]]]) -> list[list[dict[str, Any]]]:
-    return [
+    non_empty_rows = [
         row
         for row in header_rows
         if any(clean_text(cell.get("label", "")) for cell in row)
     ]
+    normalized_rows: list[list[dict[str, Any]]] = []
+
+    for row_index, row in enumerate(non_empty_rows):
+        remaining_rows = len(non_empty_rows) - row_index
+        normalized_row: list[dict[str, Any]] = []
+        for source_cell in row:
+            cell = dict(source_cell)
+            if "rowspan" in cell:
+                rowspan = min(max(1, int(cell.get("rowspan", 1) or 1)), remaining_rows)
+                if rowspan > 1:
+                    cell["rowspan"] = rowspan
+                else:
+                    cell.pop("rowspan", None)
+            normalized_row.append(cell)
+        normalized_rows.append(normalized_row)
+
+    return normalized_rows
+
+
+def project_header_rows(
+    header_rows: list[list[dict[str, Any]]],
+    source_width: int,
+    kept_source_indices: list[int],
+) -> list[list[dict[str, Any]]]:
+    """Remove hidden columns from structured headers without losing group labels."""
+    if not header_rows or source_width <= 0:
+        return strip_empty_header_rows(header_rows)
+
+    occupied_until = [0] * source_width
+    projected_rows: list[list[dict[str, Any]]] = []
+
+    for row_index, row in enumerate(header_rows):
+        cursor = 0
+        projected_cells: list[tuple[int, dict[str, Any]]] = []
+
+        for source_cell in row:
+            while cursor < source_width and occupied_until[cursor] > row_index:
+                cursor += 1
+            if cursor >= source_width:
+                break
+
+            colspan = max(1, int(source_cell.get("colspan", 1) or 1))
+            rowspan = max(1, int(source_cell.get("rowspan", 1) or 1))
+            end = min(source_width, cursor + colspan)
+            covered_source_indices = set(range(cursor, end))
+            projected_positions = [
+                projected_index
+                for projected_index, source_index in enumerate(kept_source_indices)
+                if source_index in covered_source_indices
+            ]
+
+            if projected_positions:
+                projected_cell = {
+                    key: value
+                    for key, value in source_cell.items()
+                    if key not in {"colspan", "rowspan"}
+                }
+                if len(projected_positions) > 1:
+                    projected_cell["colspan"] = len(projected_positions)
+                if rowspan > 1:
+                    projected_cell["rowspan"] = rowspan
+                projected_cells.append((min(projected_positions), projected_cell))
+
+            if rowspan > 1:
+                for source_index in range(cursor, end):
+                    occupied_until[source_index] = max(
+                        occupied_until[source_index],
+                        row_index + rowspan,
+                    )
+            cursor = end
+
+        projected_rows.append([
+            cell
+            for _, cell in sorted(projected_cells, key=lambda item: item[0])
+        ])
+
+    return strip_empty_header_rows(projected_rows)
 
 
 def values_for_column(rows: list[dict[str, Any]], key: str) -> list[str]:
@@ -833,10 +919,11 @@ def normalize_extracted_table(
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[list[dict[str, Any]]]]:
     rows = [dict(row) for row in initial_rows]
     kept_columns: list[dict[str, Any]] = []
+    kept_source_indices: list[int] = []
     kept_by_signature: dict[tuple[str, str], int] = {}
     dropped_columns: set[str] = set()
 
-    for column in columns:
+    for source_index, column in enumerate(columns):
         next_column = dict(column)
         normalized_label = normalize_key(next_column["label"])
         base_key = re.sub(r"_\d+$", "", next_column["key"])
@@ -860,16 +947,18 @@ def normalize_extracted_table(
             if all_blank(existing_values):
                 dropped_columns.add(existing_column["key"])
                 kept_columns[existing_index] = next_column
+                kept_source_indices[existing_index] = source_index
                 continue
 
         kept_by_signature[signature] = len(kept_columns)
         kept_columns.append(next_column)
+        kept_source_indices.append(source_index)
 
     if dropped_columns:
         for row in rows:
             for key in dropped_columns:
                 row.pop(key, None)
-        header_rows = []
+        header_rows = project_header_rows(header_rows, len(columns), kept_source_indices)
         kept_columns = disambiguate_repeated_labels(kept_columns)
     else:
         header_rows = strip_empty_header_rows(header_rows)
@@ -1497,8 +1586,21 @@ def template_from_workbook_sheets(
     if not table_sheets:
         return None
 
+    target_code = official_code or code
+    exact_indicator_matches = [
+        sheet
+        for sheet in table_sheets
+        if target_code in (sheet.get("_indicatorCodes") or [])
+    ]
+    exact_code_matches = [
+        sheet
+        for sheet in table_sheets
+        if target_code in (sheet.get("_codes") or [])
+    ]
+    selection_pool = exact_indicator_matches or exact_code_matches or table_sheets
+
     selected = max(
-        table_sheets,
+        selection_pool,
         key=lambda sheet: (
             len(sheet["table"]["initialRows"]),
             len(sheet["table"]["columns"]),

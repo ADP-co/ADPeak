@@ -17,18 +17,33 @@ export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElemen
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, options, error, className = '', containerClassName = '', variant = 'default', ...props }, ref) => {
+  ({
+    label,
+    options,
+    error,
+    className = '',
+    containerClassName = '',
+    variant = 'default',
+    'aria-describedby': ariaDescribedBy,
+    'aria-invalid': ariaInvalid,
+    ...props
+  }, ref) => {
     const generatedId = useId();
     const selectId = props.id ?? generatedId;
+    const errorId = `${selectId}-error`;
+    const hasError = Boolean(error);
+    const describedBy = hasError
+      ? [ariaDescribedBy, errorId].filter(Boolean).join(' ')
+      : ariaDescribedBy;
 
-    const baseSelectStyles = "appearance-none outline-none transition-colors cursor-pointer";
+    const baseSelectStyles = "appearance-none outline-none transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60";
 
     const variantStyles = {
-      default: `w-full h-9 pl-4 pr-10 rounded-md border text-sm text-center text-brand-Gris_oscuro font-body bg-brand-Blanco focus:ring-1 focus:ring-brand-Verde_principal focus:border-brand-Verde_principal ${
+      default: `w-full h-11 pl-4 pr-10 rounded-md border text-sm text-center text-brand-Gris_oscuro font-body bg-brand-Blanco focus:ring-1 focus:ring-brand-Verde_principal focus:border-brand-Verde_principal ${
         error ? 'border-brand-Status_rojo focus:ring-brand-Status_rojo focus:border-brand-Status_rojo' : 'border-brand-Gris_bajo/50'
       }`,
-      outline: `w-full h-8 px-4 pr-8 rounded-full border border-brand-Verde_oscuro text-center text-brand-Verde_oscuro text-xs font-bold font-accent bg-transparent`,
-      solid: `w-full h-8 px-4 pr-8 rounded-full bg-brand-Verde_oscuro text-center text-brand-Blanco text-xs font-bold font-accent`
+      outline: `w-full h-11 px-4 pr-8 rounded-full border border-brand-Verde_oscuro text-center text-brand-Verde_oscuro text-xs font-bold font-accent bg-transparent`,
+      solid: `w-full h-11 px-4 pr-8 rounded-full bg-brand-Verde_oscuro text-center text-brand-Blanco text-xs font-bold font-accent`
     };
 
     const iconStyles = {
@@ -51,6 +66,8 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           <select
             id={selectId}
             ref={ref}
+            aria-describedby={describedBy}
+            aria-invalid={hasError ? true : ariaInvalid}
             className={`${baseSelectStyles} ${variantStyles[variant]} ${className}`}
             {...props}
           >
@@ -72,7 +89,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         </div>
 
         {error && (
-          <span className="text-xs text-brand-Status_rojo font-body font-medium">
+          <span id={errorId} role="alert" className="text-sm text-brand-Status_rojo font-body font-semibold">
             {error}
           </span>
         )}

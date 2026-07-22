@@ -1,6 +1,6 @@
 /// <reference types="node" />
 
-import { createHash, createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import {
   officialCatalogRows,
   officialIndicatorPlantelScopes
@@ -59,9 +59,13 @@ export type SigiUser = {
   indicatorCodes: string[];
   active: boolean;
   passwordHash: string;
+  credentialVersion?: number;
 };
 
-export type PublicSigiUser = Omit<SigiUser, "passwordHash">;
+export type PublicSigiUser = Omit<SigiUser, "passwordHash" | "credentialVersion"> & {
+  reviewerIndicatorCodes: string[];
+  contributorIndicatorCodes: string[];
+};
 
 export type AuthenticatedSigiUser = {
   id: string;
@@ -85,6 +89,7 @@ type SessionTokenPayload = {
   role: SystemRole;
   plantelId?: number;
   responsableId?: number;
+  credentialVersion: number;
   exp: number;
 };
 
@@ -106,6 +111,7 @@ export type SigiIndicator = {
   plantelScopeSource?: "official-import" | "manual";
   operationalScope?: SigiOperationalScope;
   templateColumns?: TemplateColumn[];
+  templateStructureCustomized?: boolean;
   evidenceRules?: EvidenceRules;
   updatedAt?: string;
   updatedBy?: string;
@@ -400,12 +406,32 @@ const responsibleNames = officialResponsibleAccounts.map((account) => account.na
 const officialResponsibleAccountById = new Map<number, (typeof officialResponsibleAccounts)[number]>(
   officialResponsibleAccounts.map((account) => [account.responsableId, account])
 );
+const officialResponsibleAliases = [
+  { name: "Angel Ordoñez", responsableId: 2 }
+] as const;
 const responsibleIdByName = new Map<string, number>();
 
 for (const account of officialResponsibleAccounts) {
-  responsibleIdByName.set(account.name, account.responsableId);
-  responsibleIdByName.set(account.username, account.responsableId);
-  responsibleIdByName.set(`Responsable ${String(account.responsableId).padStart(2, "0")}`, account.responsableId);
+  responsibleIdByName.set(normalizeResponsibleName(account.name), account.responsableId);
+  responsibleIdByName.set(normalizeResponsibleName(account.username), account.responsableId);
+  responsibleIdByName.set(
+    normalizeResponsibleName(`Responsable ${String(account.responsableId).padStart(2, "0")}`),
+    account.responsableId
+  );
+}
+
+for (const alias of officialResponsibleAliases) {
+  responsibleIdByName.set(normalizeResponsibleName(alias.name), alias.responsableId);
+}
+
+export function resolveOfficialResponsibleId(name: string) {
+  const responsibleId = responsibleIdByName.get(normalizeResponsibleName(name));
+
+  if (responsibleId === undefined) {
+    throw new Error(`No existe una cuenta oficial para el responsable importado "${name}".`);
+  }
+
+  return responsibleId;
 }
 
 const initialIndicators = buildIndicators();
@@ -413,6 +439,7 @@ const indicators = new Map<number, SigiIndicator>();
 const users = new Map<string, SigiUser>();
 const notifications = new Map<number, SigiNotification>();
 const auditEvents = new Map<number, SigiAuditEvent>();
+const defaultPasswordHashCache = new Map<SystemRole, string>();
 let nextNotificationId = 1;
 let nextAuditEventId = 1;
 
@@ -572,21 +599,69 @@ export function saveUser(session: SigiSession, input: Partial<SigiUser> & { pass
     ? input.responsableId ?? existing?.responsableId ?? nextResponsableId()
     : undefined;
   const userId = input.id || (role === "responsable" ? `responsable-${responsableId}` : `user-${Date.now()}`);
+  const username = input.username?.trim().toLowerCase() || existing?.username || usernameForUser(userId, input.name, role);
+  const normalizedUsername = normalizeUsername(username);
 
+  if (!normalizedUsername) {
+    throw new SigiValidationError("El nombre de usuario no puede estar vacío.");
+  }
+
+  const duplicateUsername = Array.from(users.values()).find((candidate) =>
+    candidate.id !== userId && (
+      normalizeUsername(candidate.username) === normalizedUsername ||
+      matchesLoginUsername(candidate, normalizedUsername)
+    )
+  );
+
+  if (duplicateUsername) {
+    throw new SigiValidationError("Ese nombre de usuario ya está registrado.");
+  }
+
+  const passwordChanged = Boolean(normalizedPassword && normalizedPassword !== existing?.passwordHash);
+  const activeChanged = existing ? (input.active ?? existing.active) !== existing.active : false;
   const user: SigiUser = {
     id: userId,
-    username: input.username?.trim().toLowerCase() || existing?.username || usernameForUser(userId, input.name, role),
+    username,
     name: input.name.trim(),
     role,
     plantelId: role === "plantel" ? input.plantelId ?? existing?.plantelId ?? 1 : undefined,
     responsableId,
     indicatorCodes: sanitizeUserIndicatorCodes(role, input.indicatorCodes ?? existing?.indicatorCodes ?? []),
     active: input.active ?? existing?.active ?? true,
-    passwordHash: normalizedPassword ? hashPassword(normalizedPassword) : existing?.passwordHash ?? defaultPasswordHashForRole(role)
+    passwordHash: normalizedPassword ? hashPassword(normalizedPassword) : existing?.passwordHash ?? defaultPasswordHashForRole(role),
+    credentialVersion: existing
+      ? credentialVersionFor(existing) + (passwordChanged || activeChanged ? 1 : 0)
+      : 1
   };
 
   users.set(user.id, user);
-  syncIndicatorAssignmentsForUser(user, Object.prototype.hasOwnProperty.call(input, "indicatorCodes"));
+  const assignmentChanges = syncIndicatorAssignmentsForUser(
+    session,
+    user,
+    Object.prototype.hasOwnProperty.call(input, "indicatorCodes")
+  );
+
+  if (assignmentChanges.length > 0) {
+    persistNotificationState();
+    recordAuditEvent(session, {
+      action: "user_indicator_assignments_changed",
+      resourceType: "user",
+      resourceId: user.id,
+      before: {
+        indicatorCodes: existing?.indicatorCodes ?? []
+      },
+      after: {
+        indicatorCodes: users.get(user.id)?.indicatorCodes ?? [],
+        changes: assignmentChanges.map((change) => ({
+          indicadorId: change.indicator.id,
+          codigo: change.indicator.code,
+          assigned: change.isAssigned
+        }))
+      },
+      status: "ok"
+    });
+  }
+
   persistCatalogState();
   return publicUser(user);
 }
@@ -603,7 +678,7 @@ export function deactivateUser(session: SigiSession, id: string) {
     throw new SigiValidationError("El administrador principal no puede desactivarse.");
   }
 
-  const updated = { ...user, active: false };
+  const updated = { ...user, active: false, credentialVersion: credentialVersionFor(user) + 1 };
   users.set(id, updated);
   persistCatalogState();
   return publicUser(updated);
@@ -623,8 +698,16 @@ export function authenticateUserResult(username: string, password: string): Auth
     return { reason: "inactive_user" };
   }
 
-  if (user.passwordHash !== hashPassword(password)) {
+  if (!verifyPassword(user.passwordHash, password)) {
     return { reason: "invalid_credentials" };
+  }
+
+  if (!user.passwordHash.startsWith("scrypt$")) {
+    users.set(user.id, {
+      ...user,
+      passwordHash: hashPassword(password)
+    });
+    persistCatalogState();
   }
 
   return { user: authenticatedUser(user) };
@@ -651,7 +734,7 @@ export function updateOwnPassword(
     throw new SigiValidationError("Completa los tres campos de contraseña.");
   }
 
-  if (user.passwordHash !== hashPassword(currentPassword)) {
+  if (!verifyPassword(user.passwordHash, currentPassword)) {
     throw new SigiValidationError("La contraseña actual no es correcta.");
   }
 
@@ -665,7 +748,8 @@ export function updateOwnPassword(
 
   const updated = {
     ...user,
-    passwordHash: hashPassword(newPassword)
+    passwordHash: hashPassword(newPassword),
+    credentialVersion: credentialVersionFor(user) + 1
   };
   users.set(user.id, updated);
   persistCatalogState();
@@ -705,7 +789,8 @@ export function resetUserPassword(
 
   const updated = {
     ...user,
-    passwordHash: hashPassword(password)
+    passwordHash: hashPassword(password),
+    credentialVersion: credentialVersionFor(user) + 1
   };
   users.set(user.id, updated);
   persistCatalogState();
@@ -724,13 +809,15 @@ function matchesLoginUsername(user: SigiUser, normalizedUsername: string) {
   ].includes(normalizedUsername);
 }
 
-export function createSessionToken(user: AuthenticatedSigiUser | SigiUser) {
+export function createSessionToken(user: AuthenticatedSigiUser | PublicSigiUser | SigiUser) {
   const role = normalizeRole(user.role) ?? "plantel";
+  const storedUser = users.get(user.id);
   const payload: SessionTokenPayload = {
     sub: user.id,
     role,
     plantelId: user.plantelId,
     responsableId: user.responsableId,
+    credentialVersion: storedUser ? credentialVersionFor(storedUser) : 1,
     exp: Math.floor(Date.now() / 1000) + sessionTtlSeconds()
   };
   const encodedPayload = base64UrlEncode(JSON.stringify(payload));
@@ -794,6 +881,10 @@ export function listReviewCaptures(session: SigiSession): SigiReviewCapture[] {
       }
 
       if (!canReadIndicator(session, indicator)) {
+        return [];
+      }
+
+      if (session.role === "responsable" && !isResponsibleReviewer(session, indicator)) {
         return [];
       }
 
@@ -886,7 +977,7 @@ export function recordAuditEvent(
     id,
     userId: sanitizeAuditText(session.userId),
     role: session.role,
-    action: sanitizeAuditText(event.action),
+    action: sanitizeAuditText(auditActionForTransition(event)),
     resourceType: event.resourceType,
     resourceId: sanitizeAuditText(event.resourceId),
     before: sanitizeAuditValue(event.before),
@@ -900,6 +991,28 @@ export function recordAuditEvent(
   auditEvents.set(auditEvent.id, auditEvent);
   persistAuditState();
   return auditEvent;
+}
+
+function auditActionForTransition(
+  event: Pick<SigiAuditEvent, "action" | "before" | "after">
+) {
+  if (
+    event.action === "capture_submitted" &&
+    captureStatusFromAuditSnapshot(event.before) === "correccion_solicitada" &&
+    captureStatusFromAuditSnapshot(event.after) === "en_revision"
+  ) {
+    return "capture_resubmitted";
+  }
+
+  return event.action;
+}
+
+function captureStatusFromAuditSnapshot(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value) || !("estado" in value)) {
+    return undefined;
+  }
+
+  return typeof value.estado === "string" ? value.estado : undefined;
 }
 
 function sanitizeAuditEvent(event: SigiAuditEvent): SigiAuditEvent {
@@ -1330,6 +1443,14 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
   const existingById = input.id ? indicators.get(Number(input.id)) : undefined;
   const existingByCode = getIndicatorByCode(normalizedCode);
 
+  if (
+    !existingById &&
+    isProductionRuntime() &&
+    (isSyntheticIndicatorCode(normalizedCode) || normalizedCode.startsWith("TMP-"))
+  ) {
+    throw new SigiValidationError("El código corresponde a una plantilla interna y no puede publicarse como indicador.");
+  }
+
   if (existingById && existingById.code !== normalizedCode) {
     throw new SigiValidationError("El código de un indicador existente no puede cambiarse.");
   }
@@ -1340,8 +1461,15 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
 
   const existing = existingById;
   const id = existing?.id ?? nextIndicatorId();
-  const responsibleIds = normalizeResponsibleIds(input.responsibleIds, input.responsibleNames);
-  const primaryResponsibleId = input.primaryResponsibleId ?? responsibleIds[0] ?? 1;
+  const responsibleIds = normalizeResponsibleIds(
+    input.responsibleIds ?? existing?.responsibleIds,
+    input.responsibleNames ?? existing?.responsibleNames
+  );
+  const primaryResponsibleId = input.primaryResponsibleId ?? existing?.primaryResponsibleId ?? responsibleIds[0];
+
+  if (!responsibleIds.includes(primaryResponsibleId)) {
+    throw new SigiValidationError("El responsable principal debe pertenecer a los responsables generales seleccionados.");
+  }
   const isNewIndicator = !existing;
   const lastChange = existing?.active === false && input.active !== false
     ? "habilitado"
@@ -1354,7 +1482,8 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
   );
   const resolvedContributorResponsibleIds = normalizeOptionalResponsibleIds(
     input.contributorResponsibleIds,
-    requestedContributorNames
+    requestedContributorNames,
+    true
   );
   const hasResponsibleContributorInput = resolvedContributorResponsibleIds.length > 0;
   const isOfficialImportedIndicator = Boolean(
@@ -1414,6 +1543,12 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
     throw new SigiValidationError("Selecciona al menos un responsable específico.");
   }
 
+  const hasTemplateColumnsInput = Object.prototype.hasOwnProperty.call(input, "templateColumns") &&
+    Array.isArray(input.templateColumns);
+  const nextTemplateColumns = hasTemplateColumnsInput
+    ? sanitizeTemplateColumns(input.templateColumns)
+    : existing?.templateColumns;
+
   const indicator: SigiIndicator = {
     id,
     code: normalizedCode,
@@ -1435,7 +1570,10 @@ export function saveIndicator(session: SigiSession, input: Partial<SigiIndicator
       : plantelIdsChanged || (input.operationalScope && input.operationalScope !== existing?.operationalScope)
         ? "manual"
         : existing?.plantelScopeSource ?? "manual",
-    templateColumns: sanitizeTemplateColumns(input.templateColumns ?? existing?.templateColumns),
+    templateColumns: nextTemplateColumns,
+    templateStructureCustomized: hasTemplateColumnsInput
+      ? true
+      : existing?.templateStructureCustomized,
     evidenceRules: sanitizeEvidenceRules(input.evidenceRules ?? existing?.evidenceRules),
     updatedAt: new Date().toISOString(),
     updatedBy: actorNameForSession(session),
@@ -1495,12 +1633,12 @@ const participantActionCodes = new Set([
 const infrastructureCodes = new Set(["FMT-01-E81E8473-41221-porcentaje-de-uo-q"]);
 
 export function templateForIndicator(indicator: SigiIndicator, session?: SigiSession): IndicatorTemplate {
-  if (officialWorkbookTemplates[indicator.code]) {
-    return officialWorkbookTemplate(indicator, session);
-  }
-
   if (indicator.templateColumns?.length) {
     return configuredTemplate(indicator, session);
+  }
+
+  if (officialWorkbookTemplates[indicator.code]) {
+    return officialWorkbookTemplate(indicator, session);
   }
 
   if (indicator.code === "1.0.0.0.1") {
@@ -1969,7 +2107,193 @@ function calculatedValueForRow(row: Record<string, unknown>, column: TemplateCol
     return Math.round((numerator / denominator) * 100 * factor) / factor;
   }
 
+  if (column.calculation.type === "formula") {
+    const value = evaluateConfiguredFormula(column.calculation.expression, row, columns);
+
+    if (value === undefined) {
+      return undefined;
+    }
+
+    const decimals = column.calculation.decimals ?? 2;
+    const factor = 10 ** decimals;
+    return Math.round(value * factor) / factor;
+  }
+
   return undefined;
+}
+
+function evaluateConfiguredFormula(
+  expression: string,
+  row: Record<string, unknown>,
+  columns: TemplateColumn[]
+) {
+  let normalizedExpression = expression.trim().replace(/^=/, "");
+
+  if (!normalizedExpression) {
+    return 0;
+  }
+
+  const functionPattern = /\b(SUM|SUMA)\(([^()]*)\)/gi;
+  let safetyCounter = 0;
+
+  while (functionPattern.test(normalizedExpression) && safetyCounter < 20) {
+    normalizedExpression = normalizedExpression.replace(
+      functionPattern,
+      (_match, _functionName: string, args: string) => {
+        const total = args
+          .split(/[;,]/)
+          .map((argument) => argument.trim())
+          .filter(Boolean)
+          .reduce(
+            (sum, argument) => sum + (evaluateConfiguredFormula(argument, row, columns) ?? 0),
+            0
+          );
+
+        return String(total);
+      }
+    );
+    functionPattern.lastIndex = 0;
+    safetyCounter += 1;
+  }
+
+  normalizedExpression = normalizedExpression.replace(
+    /\[([^\]]+)\]/g,
+    (_match, reference: string) => String(numberValue(valueForCalculationKey(row, reference, columns)) ?? 0)
+  );
+
+  const references = columns
+    .flatMap((candidate) => [
+      { key: candidate.key, name: candidate.key },
+      { key: candidate.key, name: candidate.label }
+    ])
+    .sort((left, right) => right.name.length - left.name.length);
+
+  for (const reference of references) {
+    const pattern = new RegExp(
+      `(?<![\\p{L}\\p{N}_])${escapeFormulaReference(reference.name)}(?![\\p{L}\\p{N}_])`,
+      "giu"
+    );
+    const value = numberValue(valueForCalculationKey(row, reference.key, columns)) ?? 0;
+    normalizedExpression = normalizedExpression.replace(pattern, String(value));
+  }
+
+  if (!/^[0-9+\-*/().\s]+$/.test(normalizedExpression)) {
+    return undefined;
+  }
+
+  return evaluateArithmeticExpression(normalizedExpression);
+}
+
+function evaluateArithmeticExpression(expression: string) {
+  let index = 0;
+
+  const skipWhitespace = () => {
+    while (/\s/.test(expression[index] ?? "")) {
+      index += 1;
+    }
+  };
+
+  const parseNumber = (): number | undefined => {
+    skipWhitespace();
+    const match = expression.slice(index).match(/^(?:\d+(?:\.\d*)?|\.\d+)/);
+
+    if (!match) {
+      return undefined;
+    }
+
+    index += match[0].length;
+    const value = Number(match[0]);
+    return Number.isFinite(value) ? value : undefined;
+  };
+
+  const parseFactor = (): number | undefined => {
+    skipWhitespace();
+    const operator = expression[index];
+
+    if (operator === "+" || operator === "-") {
+      index += 1;
+      const value = parseFactor();
+      return value === undefined ? undefined : operator === "-" ? -value : value;
+    }
+
+    if (operator === "(") {
+      index += 1;
+      const value = parseExpression();
+      skipWhitespace();
+
+      if (expression[index] !== ")") {
+        return undefined;
+      }
+
+      index += 1;
+      return value;
+    }
+
+    return parseNumber();
+  };
+
+  const parseTerm = (): number | undefined => {
+    let value = parseFactor();
+
+    if (value === undefined) {
+      return undefined;
+    }
+
+    while (true) {
+      skipWhitespace();
+      const operator = expression[index];
+
+      if (operator !== "*" && operator !== "/") {
+        return value;
+      }
+
+      index += 1;
+      const right = parseFactor();
+
+      if (right === undefined || (operator === "/" && right === 0)) {
+        return undefined;
+      }
+
+      value = operator === "*" ? value * right : value / right;
+    }
+  };
+
+  const parseExpression = (): number | undefined => {
+    let value = parseTerm();
+
+    if (value === undefined) {
+      return undefined;
+    }
+
+    while (true) {
+      skipWhitespace();
+      const operator = expression[index];
+
+      if (operator !== "+" && operator !== "-") {
+        return value;
+      }
+
+      index += 1;
+      const right = parseTerm();
+
+      if (right === undefined) {
+        return undefined;
+      }
+
+      value = operator === "+" ? value + right : value - right;
+    }
+  };
+
+  const result = parseExpression();
+  skipWhitespace();
+
+  return result !== undefined && index === expression.length && Number.isFinite(result)
+    ? result
+    : undefined;
+}
+
+function escapeFormulaReference(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function valueForCalculationKey(row: Record<string, unknown>, key: string, columns: TemplateColumn[]) {
@@ -1978,13 +2302,13 @@ function valueForCalculationKey(row: Record<string, unknown>, key: string, colum
   }
 
   const normalizedKey = normalizeCalculationReference(key);
-  const matchingColumn = columns.find(
+  const matchingColumns = columns.filter(
     (column) =>
       normalizeCalculationReference(column.key) === normalizedKey ||
       normalizeCalculationReference(column.label) === normalizedKey
   );
 
-  return matchingColumn ? row[matchingColumn.key] : undefined;
+  return matchingColumns.length === 1 ? row[matchingColumns[0].key] : undefined;
 }
 
 function normalizeCalculationReference(value: string) {
@@ -2004,6 +2328,23 @@ function validateDomainConsistency(indicator: SigiIndicator, payload: CapturePay
   }
 
   for (const row of payload.rows) {
+    const egresadasMujeres = firstNumericValue(row, [
+      "egresados_mujeres",
+      "egresados_titulados_en_el_ano_2025_mujeres"
+    ]);
+    const egresadosHombres = firstNumericValue(row, [
+      "egresados_hombres",
+      "egresados_titulados_en_el_ano_2025_hombres"
+    ]);
+    const matriculaMujeres = firstNumericValue(row, [
+      "matricula_mujeres",
+      "matricula_de_primer_ingreso_de_la_misma_cohorte_"
+    ]);
+    const matriculaHombres = firstNumericValue(row, [
+      "matricula_hombres",
+      "matricula_de_primer_ingreso_de_la_misma_cohorte_2",
+      "matricula_de_primer_ingreso_de_la_misma_cohorte__2"
+    ]);
     const egresados = firstNumericValue(row, [
       "egresados_total",
       "egresados_titulados_en_el_ano_2025_total"
@@ -2028,6 +2369,26 @@ function validateDomainConsistency(indicator: SigiIndicator, payload: CapturePay
     if (matricula > 0 && egresados > matricula) {
       throw new SigiValidationError("Los egresados titulados no pueden ser mayores que la matrícula de la cohorte.");
     }
+
+    if (
+      egresadasMujeres !== undefined &&
+      matriculaMujeres !== undefined &&
+      egresadasMujeres > matriculaMujeres
+    ) {
+      throw new SigiValidationError(
+        "Las mujeres egresadas tituladas no pueden ser mayores que la matrícula de mujeres de la cohorte."
+      );
+    }
+
+    if (
+      egresadosHombres !== undefined &&
+      matriculaHombres !== undefined &&
+      egresadosHombres > matriculaHombres
+    ) {
+      throw new SigiValidationError(
+        "Los hombres egresados titulados no pueden ser mayores que la matrícula de hombres de la cohorte."
+      );
+    }
   }
 }
 
@@ -2048,9 +2409,7 @@ function sumNumericValues(row: Record<string, unknown>, keys: string[]) {
 }
 
 export function officialSourcesPayload(session: SigiSession): OfficialSourcesPayload {
-  if (session.role === "plantel" && session.plantelId !== 1) {
-    throw new SigiForbiddenError("El plantel solo puede consultar sus propias fuentes oficiales.");
-  }
+  requireDirector(session);
 
   return {
     summary: officialDataSummary,
@@ -2067,9 +2426,9 @@ export function buildReportPayload(
   session: SigiSession,
   filters: { plantelId?: string; plantel?: string; periodo?: string; cicloEscolar?: string; estado?: string; tipo?: string; now?: Date } = {}
 ): SigiReportPayload {
-  const cicloEscolar = filters.cicloEscolar ?? "2025-2026";
-  const periodo = filters.periodo ?? "2026-A";
-  const requestedPeriodoId = periodIdFromReportPeriod(`${periodo} ${cicloEscolar}`);
+  const reportPeriod = resolveReportPeriod(filters.periodo, filters.cicloEscolar);
+  const { cicloEscolar, periodo, periodoId: requestedPeriodoId } = reportPeriod;
+  const reportNow = filters.now ?? new Date();
   const reportView = normalizeReportView(filters.tipo, session.role);
   const includeBaseRows = reportView === "avance" && session.role !== "responsable" && requestedPeriodoId === currentReportPeriodId();
   const normalizedStatusFilter = normalizeReportStatusFilter(filters.estado);
@@ -2104,7 +2463,8 @@ export function buildReportPayload(
           activityIndex,
           periodoId: requestedPeriodoId,
           periodo,
-          cicloEscolar
+          cicloEscolar,
+          now: reportNow
         });
 
         if (capturedRows.length > 0) {
@@ -2127,7 +2487,7 @@ export function buildReportPayload(
           ciclo: cicloEscolar,
           meta: 100,
           evidencias: 0,
-          vencimiento: "atrasado" as const,
+          vencimiento: "en_tiempo" as const,
           exportable: false,
           blockingIssues: ["No hay registros capturados para este indicador."]
         }], normalizedStatusFilter);
@@ -2152,7 +2512,7 @@ export function buildReportPayload(
     vistaReporte: reportView,
     periodo,
     cicloEscolar,
-    fechaGeneracion: (filters.now ?? new Date()).toISOString().slice(0, 10),
+    fechaGeneracion: reportNow.toISOString().slice(0, 10),
     identidadReporte: {
       tipo: identityPlantel ? "Plantel" : session.role === "responsable" ? "Responsable" : "Institucional",
       nombre: identityPlantel?.name ?? responsibleUser?.name ?? "DGEMS"
@@ -2251,16 +2611,18 @@ function rowsFromCaptureDrafts({
   activityIndex,
   periodoId,
   periodo,
-  cicloEscolar
+  cicloEscolar,
+  now
 }: {
   captureDrafts: CaptureDraft[];
   indicator: SigiIndicator;
   plantel: (typeof planteles)[number];
   activity: string;
   activityIndex: number;
-  periodoId: number;
+  periodoId?: number;
   periodo: string;
   cicloEscolar: string;
+  now: Date;
 }): SigiReportPayload["indicadores"][number]["datos"] {
   return captureDrafts
     .filter((draft) =>
@@ -2288,7 +2650,7 @@ function rowsFromCaptureDrafts({
           actividad: reportActivityLabel(readableValue(row.actividad), activity),
           responsable: responsibleReportLabel(indicator),
           estado: reportStatusForCapture(draft.estado),
-          avance: progressForCapturedRow(row, draft.estado),
+          avance: progressForCapturedRow(row, indicator),
           plantel: readableValue(row.plantel) || (plantel.id === unassignedPlantel.id ? "Responsable" : plantel.name),
           plantelId: String(plantel.id),
           periodo,
@@ -2298,7 +2660,7 @@ function rowsFromCaptureDrafts({
           evidencias: reportPayload.evidencia ? 1 : 0,
           justificacion: cleanReportText(reportPayload.justificacion ?? ""),
           evidenciaNombre: cleanReportText(reportPayload.evidencia?.nombre ?? ""),
-          vencimiento: draft.estado === "borrador" ? "atrasado" as const : "en_tiempo" as const,
+          vencimiento: reportDeadlineForCapturedRow(row, now),
           exportable: blockingIssues.length === 0,
           blockingIssues,
           detalle: reportDetailsFromCapturedRow(row, indicator),
@@ -2528,22 +2890,72 @@ function reportStatusForCapture(status: CaptureDraft["estado"]): SigiReportPaylo
   return "Borrador";
 }
 
-function progressForCapturedRow(row: Record<string, unknown>, status: CaptureDraft["estado"]) {
-  const explicitProgress = numberValue(row.avance) ?? numberValue(row.porcentaje_titulacion);
+function progressForCapturedRow(row: Record<string, unknown>, indicator: SigiIndicator) {
+  const templateColumns = templateForIndicator(indicator).columns;
+  const calculatedPercentageColumns = templateColumns.filter((column) =>
+    column.type === "calculated" && column.calculation?.type === "percentage"
+  );
+  const directPercentageColumns = templateColumns.filter((column) => {
+    const normalized = normalizeKey(`${column.key} ${column.label}`);
+    return normalized.includes("porcentaje") ||
+      normalized.includes("cumplimiento") ||
+      normalized.includes("tasa") ||
+      column.label.includes("%");
+  });
+  const candidates = calculatedPercentageColumns.length > 0
+    ? calculatedPercentageColumns
+    : directPercentageColumns.length === 1 ? directPercentageColumns : [];
 
-  if (explicitProgress !== undefined) {
-    return `${Math.max(0, Math.min(100, explicitProgress))}%`;
+  for (const column of candidates) {
+    const value = numberValue(row[column.key]);
+    if (value !== undefined) {
+      return `${Object.is(value, -0) ? 0 : value}%`;
+    }
   }
 
-  if (status === "aprobado" || status === "cerrado") {
-    return "100%";
+  return "";
+}
+
+function reportDeadlineForCapturedRow(row: Record<string, unknown>, now: Date): "en_tiempo" | "atrasado" {
+  const deadlineEntry = Object.entries(row).find(([key, value]) => {
+    if (value === undefined || value === null || String(value).trim() === "") {
+      return false;
+    }
+
+    const normalizedKey = normalizeKey(key);
+    return normalizedKey.includes("fecha limite") ||
+      normalizedKey.includes("fecha de limite") ||
+      normalizedKey.includes("fecha vencimiento") ||
+      normalizedKey.includes("fecha de vencimiento") ||
+      normalizedKey.includes("fecha entrega") ||
+      normalizedKey.includes("fecha de entrega") ||
+      normalizedKey === "deadline" ||
+      normalizedKey === "due date";
+  });
+
+  if (!deadlineEntry) {
+    return "en_tiempo";
   }
 
-  if (status === "borrador") {
-    return "0%";
+  return isPastReportDeadline(deadlineEntry[1], now) ? "atrasado" : "en_tiempo";
+}
+
+function isPastReportDeadline(value: unknown, now: Date) {
+  const text = String(value).trim();
+  const isoDate = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
+
+  if (isoDate) {
+    return text < now.toISOString().slice(0, 10);
   }
 
-  return "75%";
+  const localDate = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(text);
+  if (localDate) {
+    const normalizedDate = `${localDate[3]}-${localDate[2]}-${localDate[1]}`;
+    return normalizedDate < now.toISOString().slice(0, 10);
+  }
+
+  const deadline = Date.parse(text);
+  return Number.isFinite(deadline) && deadline < now.getTime();
 }
 
 function readableValue(value: unknown) {
@@ -2591,6 +3003,13 @@ function reportDetailsFromCapturedRow(row: Record<string, unknown>, indicator: S
     ...templateColumns.map((column) => column.key),
     ...Object.keys(row)
   ]));
+  const labelCounts = orderedKeys.reduce((counts, key) => {
+    const label = (labelsByKey.get(key) ?? readableReportDetailLabel(key)).trim().toLowerCase();
+    if (label) {
+      counts.set(label, (counts.get(label) ?? 0) + 1);
+    }
+    return counts;
+  }, new Map<string, number>());
   const seenLabels = new Set<string>();
 
   for (const key of orderedKeys) {
@@ -2612,12 +3031,20 @@ function reportDetailsFromCapturedRow(row: Record<string, unknown>, indicator: S
       }
     }
 
-    const label = labelsByKey.get(key) ?? readableReportDetailLabel(key);
-    const normalizedLabel = label.trim();
-    const dedupeKey = normalizedLabel.toLowerCase();
-
-    if (!normalizedLabel || seenLabels.has(dedupeKey)) {
+    const baseLabel = (labelsByKey.get(key) ?? readableReportDetailLabel(key)).trim();
+    if (!baseLabel) {
       continue;
+    }
+
+    const readableKey = readableReportDetailLabel(key);
+    let normalizedLabel = (labelCounts.get(baseLabel.toLowerCase()) ?? 0) > 1
+      ? `${baseLabel} (${readableKey})`
+      : baseLabel;
+    let dedupeKey = normalizedLabel.toLowerCase();
+
+    if (seenLabels.has(dedupeKey)) {
+      normalizedLabel = `${baseLabel} (${key})`;
+      dedupeKey = normalizedLabel.toLowerCase();
     }
 
     seenLabels.add(dedupeKey);
@@ -2715,7 +3142,7 @@ function buildIndicators() {
   const byCode = new Map<string, SigiIndicator>();
 
   for (const row of operationalCatalogRows) {
-    const responsibleId = responsibleIdByName.get(row.responsible) ?? 1;
+    const responsibleId = resolveOfficialResponsibleId(row.responsible);
     const contributors = splitNames(row.contributors);
     const existing = byCode.get(row.code);
 
@@ -2763,7 +3190,8 @@ function buildInitialUsers(): SigiUser[] {
     role: "director",
     indicatorCodes: [],
     active: true,
-    passwordHash: defaultPasswordHashForRole("director")
+    passwordHash: defaultPasswordHashForRole("director"),
+    credentialVersion: 1
   };
   const responsibleUsers = officialResponsibleAccounts.map((account) => {
     const { responsableId, username, name } = account;
@@ -2777,7 +3205,8 @@ function buildInitialUsers(): SigiUser[] {
         .filter((indicator) => indicator.responsibleIds.includes(responsableId))
         .map((indicator) => indicator.code),
       active: true,
-      passwordHash: defaultPasswordHashForRole("responsable")
+      passwordHash: defaultPasswordHashForRole("responsable"),
+      credentialVersion: 1
     };
   });
   const plantelUsers = planteles.map((plantel) => ({
@@ -2788,15 +3217,29 @@ function buildInitialUsers(): SigiUser[] {
     plantelId: plantel.id,
     indicatorCodes: [],
     active: true,
-    passwordHash: defaultPasswordHashForRole("plantel")
+    passwordHash: defaultPasswordHashForRole("plantel"),
+    credentialVersion: 1
   }));
 
   return [director, ...responsibleUsers, ...plantelUsers];
 }
 
 function publicUser(user: SigiUser): PublicSigiUser {
-  const { passwordHash: _passwordHash, ...publicFields } = user;
-  return publicFields;
+  const { passwordHash: _passwordHash, credentialVersion: _credentialVersion, ...publicFields } = user;
+  const reviewerIndicatorCodes = user.role === "responsable" && user.responsableId
+    ? Array.from(indicators.values())
+        .filter((indicator) => indicator.active && indicator.responsibleIds.includes(user.responsableId!))
+        .map((indicator) => indicator.code)
+        .sort((a, b) => a.localeCompare(b, "es", { numeric: true }))
+    : [];
+  const contributorIndicatorCodes = user.role === "responsable" && user.responsableId
+    ? Array.from(indicators.values())
+        .filter((indicator) => indicator.active && (indicator.contributorResponsibleIds ?? []).includes(user.responsableId!))
+        .map((indicator) => indicator.code)
+        .sort((a, b) => a.localeCompare(b, "es", { numeric: true }))
+    : [];
+
+  return { ...publicFields, reviewerIndicatorCodes, contributorIndicatorCodes };
 }
 
 function authenticatedUser(user: SigiUser): AuthenticatedSigiUser {
@@ -2831,9 +3274,16 @@ function normalizePersistedUser(user: SigiUser): SigiUser {
     role,
     username: normalizeUsername(user.username || usernameForUser(user.id, user.name, role)),
     passwordHash: user.passwordHash || defaultPasswordHashForRole(role),
+    credentialVersion: credentialVersionFor(user),
     indicatorCodes: sanitizeUserIndicatorCodes(role, user.indicatorCodes ?? []),
     active: user.active ?? true
   };
+}
+
+function credentialVersionFor(user: Pick<SigiUser, "credentialVersion">) {
+  return Number.isInteger(user.credentialVersion) && (user.credentialVersion ?? 0) > 0
+    ? user.credentialVersion!
+    : 1;
 }
 
 function sanitizeUserIndicatorCodes(role: SystemRole, indicatorCodes: string[]) {
@@ -2852,6 +3302,8 @@ function sanitizeUserIndicatorCodes(role: SystemRole, indicatorCodes: string[]) 
 
 function normalizePersistedIndicator(indicator: SigiIndicator): SigiIndicator {
   const seededIndicator = initialIndicators.find((item) => item.code === indicator.code);
+  const contributorResponsibleIds = normalizePersistedContributorResponsibleIds(indicator, seededIndicator);
+  const persistedTemplateStructure = normalizePersistedTemplateStructure(indicator, seededIndicator);
   const plantelIds = normalizePlantelScope(indicator.plantelIds ?? []);
   const shouldResetLegacyOfficialScope =
     seededIndicator?.plantelScopeSource === "official-import" &&
@@ -2872,7 +3324,9 @@ function normalizePersistedIndicator(indicator: SigiIndicator): SigiIndicator {
     period: shouldUseSeededOfficialMetadata ? seededIndicator.period : indicator.period,
     plantelIds: shouldUseSeededPlantelScope ? seededIndicator!.plantelIds : plantelIds,
     plantelScopeSource: indicator.plantelScopeSource ?? seededIndicator?.plantelScopeSource ?? "manual",
-    operationalScope: indicator.operationalScope ?? (
+    operationalScope: contributorResponsibleIds.length > 0 && indicator.operationalScope === "none"
+      ? "specific_responsables"
+      : indicator.operationalScope ?? (
       seededIndicator?.operationalScope ?? operationalScopeForIndicator({
         ...indicator,
         plantelIds: shouldUseSeededPlantelScope ? seededIndicator!.plantelIds : plantelIds
@@ -2880,10 +3334,11 @@ function normalizePersistedIndicator(indicator: SigiIndicator): SigiIndicator {
     ),
     responsibleIds: indicator.responsibleIds?.length ? indicator.responsibleIds : seededIndicator?.responsibleIds ?? [1],
     responsibleNames: indicator.responsibleNames?.length ? indicator.responsibleNames : seededIndicator?.responsibleNames ?? namesForResponsibleIds([1]),
-    contributorResponsibleIds: normalizePersistedContributorResponsibleIds(indicator, seededIndicator),
+    contributorResponsibleIds,
     contributorNames: indicator.contributorNames ?? seededIndicator?.contributorNames ?? [],
     activities: indicator.activities?.length ? indicator.activities : seededIndicator?.activities ?? ["Actividad general"],
-    templateColumns: sanitizeTemplateColumns(indicator.templateColumns ?? seededIndicator?.templateColumns),
+    templateColumns: persistedTemplateStructure.columns,
+    templateStructureCustomized: persistedTemplateStructure.customized,
     evidenceRules: sanitizeEvidenceRules(indicator.evidenceRules ?? seededIndicator?.evidenceRules),
     active: indicator.active ?? true,
     updatedAt: indicator.updatedAt ?? seededIndicator?.updatedAt ?? officialCatalogImportedAt,
@@ -2906,12 +3361,63 @@ function sanitizeEvidenceRules(rules?: Partial<EvidenceRules>): EvidenceRules {
     required: rules?.required !== false,
     allowedTypes: allowedTypes.length > 0 ? allowedTypes : ["application/pdf"],
     maxSizeMb: maxSizeMb && maxSizeMb > 0 ? Math.min(maxSizeMb, 25) : 5,
-    requireOpenBeforeApproval: rules?.requireOpenBeforeApproval !== false
+    requireOpenBeforeApproval: rules?.required !== false && rules?.requireOpenBeforeApproval !== false
+  };
+}
+
+function normalizePersistedTemplateStructure(indicator: SigiIndicator, seededIndicator?: SigiIndicator) {
+  const persistedColumns = indicator.templateColumns ?? [];
+
+  if (persistedColumns.length === 0) {
+    return {
+      columns: seededIndicator?.templateColumns,
+      customized: seededIndicator?.templateStructureCustomized
+    };
+  }
+
+  const officialColumns = officialWorkbookTemplates[indicator.code]?.columns ?? [];
+
+  if (officialColumns.length === 0 || indicator.templateStructureCustomized === true) {
+    return {
+      columns: sanitizeTemplateColumns(persistedColumns),
+      customized: true
+    };
+  }
+
+  const effectiveOfficialColumns = sanitizeTemplateColumns(officialColumns);
+  const officialPairs = new Set(
+    effectiveOfficialColumns.map((column) =>
+      `${normalizeCalculationReference(column.key)}\u0000${normalizeCalculationReference(column.label)}`
+    )
+  );
+  const hasOnlyNamedUniqueColumns = persistedColumns.every((column) =>
+    typeof column.key === "string" && Boolean(column.key.trim()) &&
+    typeof column.label === "string" && Boolean(column.label.trim())
+  ) && new Set(persistedColumns.map((column) => column.key.trim())).size === persistedColumns.length;
+  const isOfficialProjection = hasOnlyNamedUniqueColumns && persistedColumns.every((column) =>
+    officialPairs.has(
+      `${normalizeCalculationReference(column.key)}\u0000${normalizeCalculationReference(column.label)}`
+    )
+  );
+
+  if (isOfficialProjection || !hasOnlyNamedUniqueColumns) {
+    return { columns: undefined, customized: false };
+  }
+
+  return {
+    columns: sanitizeTemplateColumns(persistedColumns),
+    customized: true
   };
 }
 
 function sanitizeTemplateColumns(columns?: TemplateColumn[]) {
   const seenKeys = new Set<string>();
+
+  for (const [index, column] of (columns ?? []).entries()) {
+    if (typeof column.label !== "string" || !column.label.trim()) {
+      throw new SigiValidationError(`El campo ${index + 1} debe tener un nombre.`);
+    }
+  }
 
   const sanitizedColumns = (columns ?? [])
     .map((column, index) => {
@@ -2929,7 +3435,7 @@ function sanitizeTemplateColumns(columns?: TemplateColumn[]) {
 
       return {
         key,
-        label: label || `Campo ${index + 1}`,
+        label,
         type,
         required: Boolean(column.required),
         validation: sanitizeColumnValidation(column.validation, type, label || column.key),
@@ -2938,7 +3444,9 @@ function sanitizeTemplateColumns(columns?: TemplateColumn[]) {
     })
     .filter((column) => column.label.trim());
 
-  return resolveTemplateCalculationReferences(sanitizedColumns);
+  const resolvedColumns = resolveTemplateCalculationReferences(sanitizedColumns);
+  validateTemplateCalculations(resolvedColumns);
+  return resolvedColumns;
 }
 
 function qualityWarningsFromCapturedRow(row: Record<string, unknown>, indicator: SigiIndicator) {
@@ -3018,9 +3526,16 @@ function sanitizeColumnValidation(
 
   const inferred = numericValidationForColumn({ key: label, label, type });
 
+  const min = finiteNumber(validation?.min) ?? inferred.min;
+  const max = finiteNumber(validation?.max) ?? inferred.max;
+
+  if (min !== undefined && max !== undefined && min > max) {
+    throw new SigiValidationError(`El mínimo de "${label}" no puede ser mayor que el máximo.`);
+  }
+
   return {
-    min: finiteNumber(validation?.min) ?? inferred.min,
-    max: finiteNumber(validation?.max) ?? inferred.max,
+    min,
+    max,
     integer: typeof validation?.integer === "boolean" ? validation?.integer : inferred.integer,
     decimals: Number.isInteger(validation?.decimals) ? validation?.decimals : undefined,
     qualityWarningMax: finiteNumber(validation?.qualityWarningMax)
@@ -3090,6 +3605,101 @@ function resolveTemplateCalculationReferences(columns: TemplateColumn[]) {
   });
 }
 
+function validateTemplateCalculations(columns: TemplateColumn[]) {
+  const columnKeys = new Set(columns.map((column) => column.key));
+  const dependencies = new Map<string, string[]>();
+  const sampleRow = Object.fromEntries(columns.map((column) => [column.key, 1]));
+
+  for (const column of columns) {
+    if (column.type !== "calculated" || !column.calculation) {
+      continue;
+    }
+
+    let sourceKeys: string[] = [];
+
+    if (column.calculation.type === "sum") {
+      sourceKeys = column.calculation.sourceKeys;
+    } else if (column.calculation.type === "percentage") {
+      sourceKeys = [column.calculation.numeratorKey, column.calculation.denominatorKey];
+    } else {
+      sourceKeys = formulaReferenceKeys(column.calculation.expression, columns);
+
+      if (evaluateConfiguredFormula(column.calculation.expression, sampleRow, columns) === undefined) {
+        throw new SigiValidationError(`La fórmula de "${column.label}" usa campos u operadores no válidos.`);
+      }
+    }
+
+    if (sourceKeys.length === 0 || sourceKeys.some((key) => !columnKeys.has(key))) {
+      throw new SigiValidationError(`La fórmula de "${column.label}" usa campos no configurados.`);
+    }
+
+    dependencies.set(column.key, uniqueStrings(sourceKeys));
+  }
+
+  const visiting = new Set<string>();
+  const visited = new Set<string>();
+  const visit = (key: string): boolean => {
+    if (visiting.has(key)) {
+      return true;
+    }
+
+    if (visited.has(key)) {
+      return false;
+    }
+
+    visiting.add(key);
+    const hasCycle = (dependencies.get(key) ?? []).some((dependency) =>
+      dependencies.has(dependency) && visit(dependency)
+    );
+    visiting.delete(key);
+    visited.add(key);
+    return hasCycle;
+  };
+
+  if (Array.from(dependencies.keys()).some(visit)) {
+    throw new SigiValidationError("Las fórmulas de la plantilla contienen una referencia circular.");
+  }
+}
+
+function formulaReferenceKeys(expression: string, columns: TemplateColumn[]) {
+  const references = new Set<string>();
+  const bracketReferences = expression.matchAll(/\[([^\]]+)\]/g);
+
+  for (const match of bracketReferences) {
+    const key = resolveTemplateColumnKey(match[1], columns);
+    if (key) {
+      references.add(key);
+    }
+  }
+
+  const normalizedExpression = expression.replace(/^=/, "").replace(/\[([^\]]+)\]/g, " ");
+  const labelOccurrences = new Map<string, number>();
+  for (const column of columns) {
+    const normalizedLabel = normalizeCalculationReference(column.label);
+    labelOccurrences.set(normalizedLabel, (labelOccurrences.get(normalizedLabel) ?? 0) + 1);
+  }
+  const candidates = columns
+    .flatMap((column) => [
+      { key: column.key, name: column.key },
+      ...(labelOccurrences.get(normalizeCalculationReference(column.label)) === 1
+        ? [{ key: column.key, name: column.label }]
+        : [])
+    ])
+    .sort((left, right) => right.name.length - left.name.length);
+
+  for (const candidate of candidates) {
+    const pattern = new RegExp(
+      `(?<![\\p{L}\\p{N}_])${escapeFormulaReference(candidate.name)}(?![\\p{L}\\p{N}_])`,
+      "iu"
+    );
+    if (pattern.test(normalizedExpression)) {
+      references.add(candidate.key);
+    }
+  }
+
+  return Array.from(references);
+}
+
 function resolveTemplateColumnKey(key: string | undefined, columns: TemplateColumn[]) {
   if (!key) {
     return undefined;
@@ -3102,13 +3712,13 @@ function resolveTemplateColumnKey(key: string | undefined, columns: TemplateColu
   }
 
   const normalizedKey = normalizeCalculationReference(key);
-  const matchingColumn = columns.find(
+  const matchingColumns = columns.filter(
     (column) =>
       normalizeCalculationReference(column.key) === normalizedKey ||
       normalizeCalculationReference(column.label) === normalizedKey
   );
 
-  return matchingColumn?.key;
+  return matchingColumns.length === 1 ? matchingColumns[0].key : undefined;
 }
 
 function uniqueTemplateKey(value: string, seenKeys: Set<string>) {
@@ -3268,7 +3878,8 @@ function mergeInitialUsers(persisted?: SigiUser[], resetToInitial = false) {
         username: normalizedUser.username,
         name: normalizedUser.name,
         active: normalizedUser.active,
-        passwordHash: normalizedUser.passwordHash
+        passwordHash: normalizedUser.passwordHash,
+        credentialVersion: normalizedUser.credentialVersion
       });
     }
 
@@ -3289,6 +3900,10 @@ function mergeInitialUsers(persisted?: SigiUser[], resetToInitial = false) {
   }
 
   return Array.from(byId.values());
+}
+
+export function mergeInitialIndicatorsForTest(persisted: SigiIndicator[], applyCatalogMigration = false) {
+  return mergeInitialIndicators(persisted, applyCatalogMigration);
 }
 
 export function mergeInitialUsersForTest(persisted: SigiUser[], resetToInitial: boolean) {
@@ -3328,6 +3943,12 @@ function usernameForUser(id: string, name: string | undefined, role: SystemRole)
 }
 
 function defaultPasswordHashForRole(role: SystemRole) {
+  const cached = defaultPasswordHashCache.get(role);
+
+  if (cached) {
+    return cached;
+  }
+
   const variableByRole: Record<SystemRole, string> = {
     director: "INITIAL_DIRECTOR_PASSWORD",
     responsable: "INITIAL_RESPONSABLE_PASSWORD",
@@ -3340,11 +3961,15 @@ function defaultPasswordHashForRole(role: SystemRole) {
     configuredPassword.length >= 12 &&
     (!isProductionRuntime() || !/change|placeholder|test|demo/i.test(configuredPassword))
   ) {
-    return hashPassword(configuredPassword);
+    const hash = hashPassword(configuredPassword);
+    defaultPasswordHashCache.set(role, hash);
+    return hash;
   }
 
   if (isProductionRuntime()) {
-    return hashPassword(`${sessionSecret()}:${role}:bootstrap-disabled`);
+    const hash = hashPassword(`${sessionSecret()}:${role}:bootstrap-disabled`);
+    defaultPasswordHashCache.set(role, hash);
+    return hash;
   }
 
   const testPasswordByRole: Record<SystemRole, string> = {
@@ -3352,11 +3977,38 @@ function defaultPasswordHashForRole(role: SystemRole) {
     responsable: "TestResponsible-Only!",
     plantel: "TestPlantel-Only!"
   };
-  return hashPassword(testPasswordByRole[role]);
+  const hash = hashPassword(testPasswordByRole[role]);
+  defaultPasswordHashCache.set(role, hash);
+  return hash;
 }
 
 function hashPassword(password: string) {
-  return createHash("sha256").update(`adpeak:${password}`).digest("hex");
+  const salt = randomBytes(16);
+  const digest = scryptSync(password, salt, 32);
+  return `scrypt$${salt.toString("base64url")}$${digest.toString("base64url")}`;
+}
+
+function verifyPassword(storedHash: string, password: string) {
+  if (storedHash.startsWith("scrypt$")) {
+    const [, encodedSalt, encodedDigest] = storedHash.split("$");
+
+    if (!encodedSalt || !encodedDigest) {
+      return false;
+    }
+
+    try {
+      const salt = Buffer.from(encodedSalt, "base64url");
+      const expected = Buffer.from(encodedDigest, "base64url");
+      const actual = scryptSync(password, salt, expected.length);
+      return expected.length === actual.length && timingSafeEqual(expected, actual);
+    } catch {
+      return false;
+    }
+  }
+
+  const legacy = createHash("sha256").update(`adpeak:${password}`).digest();
+  const stored = Buffer.from(storedHash, "hex");
+  return stored.length === legacy.length && timingSafeEqual(stored, legacy);
 }
 
 function bearerTokenFromHeaders(headers: Record<string, string | string[] | undefined>) {
@@ -3385,7 +4037,7 @@ function sessionFromToken(token: string): SigiSession {
     throw new SigiAuthError("La sesión no es válida.");
   }
 
-  if (!payload.sub || payload.exp < Math.floor(Date.now() / 1000)) {
+  if (!payload.sub || !Number.isInteger(payload.exp) || payload.exp <= Math.floor(Date.now() / 1000)) {
     throw new SigiAuthError("La sesión expiró.");
   }
 
@@ -3393,6 +4045,10 @@ function sessionFromToken(token: string): SigiSession {
 
   if (!user?.active) {
     throw new SigiAuthError("La sesión no pertenece a un usuario activo.");
+  }
+
+  if (payload.credentialVersion !== credentialVersionFor(user)) {
+    throw new SigiAuthError("La sesión ya no es válida. Inicia sesión nuevamente.");
   }
 
   return {
@@ -3478,7 +4134,7 @@ export function reconcilePersistedAssignments(
 ) {
   const responsibleUsers = new Map(
     userItems
-      .filter((user) => user.role === "responsable" && user.active && user.responsableId)
+      .filter((user) => user.role === "responsable" && user.responsableId)
       .map((user) => [user.responsableId!, user])
   );
 
@@ -3527,13 +4183,23 @@ export function reconcilePersistedAssignments(
   return { indicators: reconciledIndicators, users: reconciledUsers };
 }
 
-function syncIndicatorAssignmentsForUser(user: SigiUser, shouldSync: boolean) {
+type UserAssignmentChange = {
+  indicator: SigiIndicator;
+  isAssigned: boolean;
+};
+
+function syncIndicatorAssignmentsForUser(
+  actor: SigiSession,
+  user: SigiUser,
+  shouldSync: boolean
+): UserAssignmentChange[] {
   if (!shouldSync || user.role !== "responsable" || !user.responsableId) {
-    return;
+    return [];
   }
 
   const assignedCodes = new Set(user.indicatorCodes);
   const now = new Date().toISOString();
+  const changes: UserAssignmentChange[] = [];
 
   indicators.forEach((indicator, indicatorId) => {
     if (!isVisibleOperationalIndicatorCode(indicator.code)) {
@@ -3563,7 +4229,22 @@ function syncIndicatorAssignmentsForUser(user: SigiUser, shouldSync: boolean) {
       updatedBy: "Administración de usuarios",
       lastChange: "actualizado"
     });
+
+    const updatedIndicator = indicators.get(indicatorId)!;
+    changes.push({ indicator: updatedIndicator, isAssigned: shouldHaveResponsible });
+    recordAssignmentNotification(actor, user, updatedIndicator, shouldHaveResponsible);
   });
+
+  const visibleCodes = Array.from(indicators.values())
+    .filter((indicator) =>
+      indicator.responsibleIds.includes(user.responsableId!) ||
+      (indicator.contributorResponsibleIds ?? []).includes(user.responsableId!)
+    )
+    .map((indicator) => indicator.code)
+    .sort((a, b) => a.localeCompare(b, "es", { numeric: true }));
+
+  users.set(user.id, { ...user, indicatorCodes: visibleCodes });
+  return changes;
 }
 
 function syncUserAssignmentsForIndicator(
@@ -4671,42 +5352,51 @@ function plantelForTemplate(session?: SigiSession, indicator?: SigiIndicator) {
 }
 
 function normalizeResponsibleIds(ids?: number[], names?: string[]) {
-  if (ids?.length) {
-    return uniqueNumbers(ids.filter((id) => Number.isInteger(id) && id > 0));
+  assertNoDuplicateResponsibleSelections(ids, names);
+  const idsFromInput = ids?.length ? ids.map(validateResponsibleId) : [];
+  const idsFromNames = names?.length ? names.map(resolveResponsibleNameForAssignment) : [];
+
+  if (idsFromInput.length > 0 && idsFromNames.length > 0 && !sameNumberSet(idsFromInput, idsFromNames)) {
+    throw new SigiValidationError("Los responsables seleccionados no coinciden con sus identificadores.");
   }
 
-  if (names?.length) {
-    return uniqueNumbers(names.map((name) => {
-      const officialId = responsibleIdByName.get(name);
+  const resolved = uniqueNumbers(idsFromInput.length > 0 ? idsFromInput : idsFromNames);
 
-      if (officialId) {
-        return officialId;
-      }
-
-      return Array.from(users.values()).find((user) =>
-        user.role === "responsable" &&
-        user.name.localeCompare(name, "es", { sensitivity: "accent" }) === 0
-      )?.responsableId;
-    }).filter((id): id is number => Boolean(id)));
+  if (resolved.length === 0) {
+    throw new SigiValidationError("Selecciona al menos un responsable general válido.");
   }
 
-  return [1];
+  return resolved;
 }
 
-function normalizeOptionalResponsibleIds(ids?: number[], names?: string[]) {
+function normalizeOptionalResponsibleIds(ids?: number[], names?: string[], strict = false) {
   if (ids?.length) {
+    if (strict) {
+      assertNoDuplicateResponsibleSelections(ids, names);
+      const validatedIds = ids.map(validateResponsibleId);
+      const idsFromNames = names?.length && !targetsPlanteles(names)
+        ? names.map(resolveResponsibleNameForAssignment)
+        : [];
+
+      if (idsFromNames.length > 0 && !sameNumberSet(validatedIds, idsFromNames)) {
+        throw new SigiValidationError("Los responsables específicos no coinciden con sus identificadores.");
+      }
+
+      return uniqueNumbers(validatedIds);
+    }
+
     return uniqueNumbers(ids.filter((id) => Number.isInteger(id) && id > 0));
   }
 
-  if (names?.length) {
+  if (names?.length && !targetsPlanteles(names)) {
+    if (strict) {
+      assertNoDuplicateResponsibleSelections(undefined, names);
+      return uniqueNumbers(names.map(resolveResponsibleNameForAssignment));
+    }
+
     return uniqueNumbers(names.map((name) => {
-      const officialId = responsibleIdByName.get(name);
-
-      if (officialId) {
-        return officialId;
-      }
-
-      return Array.from(users.values()).find((user) =>
+      const officialId = responsibleIdByName.get(normalizeResponsibleName(name));
+      return officialId ?? Array.from(users.values()).find((user) =>
         user.role === "responsable" &&
         user.name.localeCompare(name, "es", { sensitivity: "accent" }) === 0
       )?.responsableId;
@@ -4716,16 +5406,58 @@ function normalizeOptionalResponsibleIds(ids?: number[], names?: string[]) {
   return [];
 }
 
-function operationalScopeForIndicator(indicator: SigiIndicator): SigiOperationalScope {
-  if (indicator.operationalScope) {
-    return indicator.operationalScope;
+function validateResponsibleId(id: number) {
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new SigiValidationError("La selección incluye un responsable no válido.");
   }
 
+  const exists = officialResponsibleAccountById.has(id) || Array.from(users.values()).some((user) =>
+    user.role === "responsable" && user.responsableId === id
+  );
+
+  if (!exists) {
+    throw new SigiValidationError(`No existe un responsable con identificador ${id}.`);
+  }
+
+  return id;
+}
+
+function resolveResponsibleNameForAssignment(name: string) {
+  const normalizedName = name.trim();
+  const officialId = responsibleIdByName.get(normalizeResponsibleName(normalizedName));
+  const userId = officialId ?? Array.from(users.values()).find((user) =>
+    user.role === "responsable" &&
+    user.name.localeCompare(normalizedName, "es", { sensitivity: "accent" }) === 0
+  )?.responsableId;
+
+  if (!userId) {
+    throw new SigiValidationError(`No existe el responsable "${normalizedName}".`);
+  }
+
+  return userId;
+}
+
+function assertNoDuplicateResponsibleSelections(ids?: number[], names?: string[]) {
+  if (ids && new Set(ids).size !== ids.length) {
+    throw new SigiValidationError("Un responsable no puede seleccionarse más de una vez.");
+  }
+
+  const normalizedNames = (names ?? []).map((name) => normalizeResponsibleName(name)).filter(Boolean);
+  if (new Set(normalizedNames).size !== normalizedNames.length) {
+    throw new SigiValidationError("Un responsable no puede seleccionarse más de una vez.");
+  }
+}
+
+function operationalScopeForIndicator(indicator: SigiIndicator): SigiOperationalScope {
   if (
     (indicator.contributorResponsibleIds?.length ?? 0) > 0 ||
     (indicator.contributorNames.length > 0 && !targetsPlanteles(indicator.contributorNames))
   ) {
     return "specific_responsables";
+  }
+
+  if (indicator.operationalScope) {
+    return indicator.operationalScope;
   }
 
   const explicitPlantelIds = normalizePlantelScope(indicator.plantelIds ?? []);
@@ -4811,21 +5543,51 @@ function inferDataType(name: string): SigiIndicator["dataType"] {
 }
 
 function currentReportPeriodId() {
-  return 1;
+  return reportPeriodDefinitions[0].id;
 }
 
-function periodIdFromReportPeriod(periodo: string) {
-  const normalized = normalizeKey(periodo);
-
-  if (normalized.includes("2024")) {
-    return 2;
+const reportPeriodDefinitions = [
+  {
+    id: 1,
+    periodo: "2026-A",
+    aliases: ["2026-A", "2026-2"],
+    cicloEscolar: "2025-2026"
+  },
+  {
+    id: 2,
+    periodo: "2025-2",
+    aliases: ["2025-A", "2025-2"],
+    cicloEscolar: "2024-2025"
   }
+] as const;
 
-  if (normalized.includes("2025") && !normalized.includes("2026")) {
-    return 2;
-  }
+function resolveReportPeriod(periodo?: string, cicloEscolar?: string) {
+  const current = reportPeriodDefinitions[0];
+  const periodMatch = periodo ? reportPeriodDefinitionFromPeriod(periodo) : undefined;
+  const cycleMatch = cicloEscolar ? reportPeriodDefinitionFromCycle(cicloEscolar) : undefined;
+  const inferred = periodMatch ?? cycleMatch ?? current;
+  const knownPair = (!periodo || periodMatch?.id === inferred.id) &&
+    (!cicloEscolar || cycleMatch?.id === inferred.id);
 
-  return currentReportPeriodId();
+  return {
+    periodo: periodo ?? inferred.periodo,
+    cicloEscolar: cicloEscolar ?? inferred.cicloEscolar,
+    periodoId: knownPair ? inferred.id : undefined
+  };
+}
+
+function reportPeriodDefinitionFromPeriod(periodo: string) {
+  const normalized = normalizeKey(periodo).replace(/\s+/g, "");
+  return reportPeriodDefinitions.find((definition) =>
+    definition.aliases.some((alias) => normalizeKey(alias).replace(/\s+/g, "") === normalized)
+  );
+}
+
+function reportPeriodDefinitionFromCycle(cicloEscolar: string) {
+  const normalized = normalizeKey(cicloEscolar).replace(/\s+/g, "");
+  return reportPeriodDefinitions.find((definition) =>
+    normalizeKey(definition.cicloEscolar).replace(/\s+/g, "") === normalized
+  );
 }
 
 function normalizeReportStatusFilter(status?: string) {
@@ -4835,23 +5597,31 @@ function normalizeReportStatusFilter(status?: string) {
     return undefined;
   }
 
-  if (normalized.includes("aprobado") || normalized.includes("completo")) {
+  if (["aprobado", "completo", "completado"].includes(normalized)) {
     return "aprobado";
   }
 
-  if (normalized.includes("revision") || normalized.includes("enviado")) {
+  if (["revision", "en revision", "enviado"].includes(normalized)) {
     return "en revision";
   }
 
-  if (normalized.includes("observado") || normalized.includes("corregir") || normalized.includes("correccion")) {
+  if (["observado", "corregir", "correccion", "correccion solicitada"].includes(normalized)) {
     return "observado";
   }
 
-  if (normalized.includes("borrador") || normalized.includes("pendiente")) {
+  if (["borrador", "pendiente"].includes(normalized)) {
     return "borrador";
   }
 
-  if (normalized.includes("atrasado")) {
+  if (normalized === "en progreso") {
+    return "en progreso";
+  }
+
+  if (normalized === "rezagado") {
+    return "rezagado";
+  }
+
+  if (normalized === "atrasado") {
     return "atrasado";
   }
 
@@ -4869,6 +5639,10 @@ function normalizeReportView(tipo: string | undefined, role: SystemRole): "detal
     return "detalle";
   }
 
+  if (normalized) {
+    throw new SigiValidationError('El tipo de reporte debe ser "avance" o "detalle".');
+  }
+
   return role === "director" ? "avance" : "detalle";
 }
 
@@ -4878,6 +5652,25 @@ function filterReportRowsByStatus(
 ) {
   if (!normalizedStatusFilter) {
     return rows;
+  }
+
+  if (normalizedStatusFilter === "atrasado") {
+    return rows.filter((row) => row.vencimiento === "atrasado");
+  }
+
+  if (normalizedStatusFilter === "rezagado") {
+    return rows.filter((row) =>
+      row.vencimiento === "atrasado" ||
+      normalizeReportStatusFilter(row.estado) === "observado" ||
+      (numberValue(String(row.avance ?? "").replace("%", "")) ?? 0) <= 0
+    );
+  }
+
+  if (normalizedStatusFilter === "en progreso") {
+    return rows.filter((row) =>
+      normalizeReportStatusFilter(row.estado) === "borrador" &&
+      (numberValue(String(row.avance ?? "").replace("%", "")) ?? 0) > 0
+    );
   }
 
   return rows.filter((row) => normalizeReportStatusFilter(row.estado) === normalizedStatusFilter);
@@ -4928,4 +5721,8 @@ function normalizeKey(value: string) {
     .trim()
     .toLowerCase()
     .replace(/_/g, " ");
+}
+
+function normalizeResponsibleName(value: string) {
+  return normalizeKey(value).replace(/\s+/g, " ");
 }

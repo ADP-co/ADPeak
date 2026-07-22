@@ -21,6 +21,8 @@ export type CatalogUser = {
   plantelId?: number;
   responsableId?: number;
   indicatorCodes: string[];
+  reviewerIndicatorCodes?: string[];
+  contributorIndicatorCodes?: string[];
   active: boolean;
 };
 
@@ -116,26 +118,7 @@ type DevelopmentWorkbookTemplate = {
   emptyRow: Record<string, unknown>;
 };
 
-const officialResponsibleAccounts = [
-  { responsableId: 1, username: 'resp01', name: 'Adriana Ruiz Rivera' },
-  { responsableId: 2, username: 'resp02', name: 'Angel Ordoñez Ayala' },
-  { responsableId: 3, username: 'resp03', name: 'Ariadna Zúñiga Torres' },
-  { responsableId: 4, username: 'resp04', name: 'Armando Hernández Ramírez' },
-  { responsableId: 5, username: 'resp05', name: 'Arturo Gordillo Chávez' },
-  { responsableId: 6, username: 'resp06', name: 'Carlos Hernández Nava' },
-  { responsableId: 7, username: 'resp07', name: 'Claudia Raquel Piña Andrade' },
-  { responsableId: 8, username: 'resp08', name: 'Daniela Nohemi Navarro Castillo' },
-  { responsableId: 9, username: 'resp09', name: 'Dulce Sarahi García Mójica' },
-  { responsableId: 10, username: 'resp10', name: 'Laura Gabriela Calvario' },
-  { responsableId: 11, username: 'resp11', name: 'Liliana Yunuen Rojas Maciel' },
-  { responsableId: 12, username: 'resp12', name: 'Ma. Guadalupe del Rocío Herrera Chacón' },
-  { responsableId: 13, username: 'resp13', name: 'Marcial Aviña Iglesias' },
-  { responsableId: 14, username: 'resp14', name: 'Martín Jesús Robles DeAnda' },
-  { responsableId: 15, username: 'resp15', name: 'Oscar Delgado Sánchez' },
-  { responsableId: 16, username: 'resp16', name: 'Oscar Gustavo Mendoza Barajas' },
-  { responsableId: 17, username: 'resp17', name: 'Oscar Pedraza Farías' },
-  { responsableId: 18, username: 'resp18', name: 'Salvador Aguilar Aguilar' },
-] as const;
+const DEVELOPMENT_RESPONSIBLE_COUNT = 18;
 
 type DevelopmentWorkbookTemplates = Record<string, DevelopmentWorkbookTemplate>;
 
@@ -422,24 +405,20 @@ function buildFallbackIndicators(
   operationalRows: DevelopmentCatalogRow[],
   plantelScopes: Record<string, number[]>
 ): CatalogIndicator[] {
-  const responsibleNames = officialResponsibleAccounts.map((account) => account.name);
-  const responsibleIdByName = new Map<string, number>();
-
-  officialResponsibleAccounts.forEach((account) => {
-    responsibleIdByName.set(account.name, account.responsableId);
-    responsibleIdByName.set(account.username, account.responsableId);
-    responsibleIdByName.set(`Responsable ${String(account.responsableId).padStart(2, '0')}`, account.responsableId);
-  });
   const byCode = new Map<string, CatalogIndicator>();
 
   operationalRows.forEach((row) => {
-    const responsibleId = responsibleIdByName.get(row.responsible) ?? 1;
+    const responsibleId = developmentResponsibleId(row.responsible);
+
+    if (responsibleId === undefined) {
+      throw new Error(`Responsable oficial sin cuenta asociada: ${row.responsible}`);
+    }
     const contributors = splitNames(row.contributors);
     const existing = byCode.get(row.code);
 
     if (existing) {
       existing.responsibleIds = uniqueNumbers([...existing.responsibleIds, responsibleId]);
-      existing.responsibleNames = namesForIds(existing.responsibleIds, responsibleNames);
+      existing.responsibleNames = existing.responsibleIds.map(developmentResponsibleName);
       existing.contributorNames = uniqueStrings([...existing.contributorNames, ...contributors]);
       existing.activities = uniqueStrings([...existing.activities, row.activity || 'Actividad general']);
       return;
@@ -455,7 +434,7 @@ function buildFallbackIndicators(
       active: true,
       primaryResponsibleId: responsibleId,
       responsibleIds: [responsibleId],
-      responsibleNames: namesForIds([responsibleId], responsibleNames),
+      responsibleNames: [developmentResponsibleName(responsibleId)],
       contributorNames: contributors,
       activities: [row.activity || 'Actividad general'],
       plantelIds: plantelScopes[row.code] ?? [],
@@ -474,10 +453,14 @@ function buildFallbackUsers(indicators: CatalogIndicator[]): CatalogUser[] {
     indicatorCodes: [],
     active: true,
   };
-  const responsables = officialResponsibleAccounts.map(({ responsableId, username, name }) => {
+  const responsables = Array.from(
+    { length: DEVELOPMENT_RESPONSIBLE_COUNT },
+    (_, index) => index + 1
+  ).map((responsableId) => {
+    const name = developmentResponsibleName(responsableId);
+
     return {
       id: `responsable-${responsableId}`,
-      username,
       name,
       role: 'responsable' as const,
       responsableId,
@@ -498,6 +481,19 @@ function buildFallbackUsers(indicators: CatalogIndicator[]): CatalogUser[] {
   }));
 
   return [director, ...responsables, ...plantelUsers];
+}
+
+function developmentResponsibleId(label: string) {
+  const match = label.trim().match(/^Responsable\s+0?(\d{1,2})$/i);
+  const responsableId = Number(match?.[1]);
+
+  return Number.isInteger(responsableId) && responsableId >= 1 && responsableId <= DEVELOPMENT_RESPONSIBLE_COUNT
+    ? responsableId
+    : undefined;
+}
+
+function developmentResponsibleName(responsableId: number) {
+  return `Responsable ${String(responsableId).padStart(2, '0')}`;
 }
 
 const studentPeriodMatrixCodes = new Set([
@@ -1343,10 +1339,6 @@ function usernameForPlantel(plantel: { key?: string; name: string }) {
 
 function splitNames(value: string) {
   return uniqueStrings(value.split(',').map((name) => name.trim()).filter(Boolean));
-}
-
-function namesForIds(ids: number[], names: string[]) {
-  return ids.map((id) => names[id - 1]).filter(Boolean);
 }
 
 function uniqueStrings(values: string[]) {

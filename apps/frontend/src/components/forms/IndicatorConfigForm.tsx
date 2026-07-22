@@ -28,11 +28,14 @@ export function supportsNumericValidation(type: ColumnType) {
   return type === 'number';
 }
 
-interface ConfigColumn {
+export interface ConfigColumn {
   id: string;
   label: string;
   type: ColumnType;
   formula?: string;
+  decimals?: string;
+  originalCalculation?: ColumnConfig['calculation'];
+  originalValidation?: ColumnConfig['validation'];
   required?: boolean;
   min?: string;
   max?: string;
@@ -75,6 +78,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
   const [editingIndicator, setEditingIndicator] = useState<CatalogIndicator | null>(null);
   const [isLoading, setIsLoading] = useState(!isNew);
   const [loadError, setLoadError] = useState('');
+  const [initialStructureFingerprint, setInitialStructureFingerprint] = useState('');
 
   useEffect(() => {
     let isMounted = true;
@@ -103,6 +107,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
           setPlantelSearch('');
           setContributors(['']);
           setColumns([]);
+          setInitialStructureFingerprint('');
           setEvidenceRules({
             required: true,
             maxSizeMb: '5',
@@ -122,6 +127,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
           setSelectedPlantelIds([]);
           setContributors(['']);
           setColumns(defaultColumns);
+          setInitialStructureFingerprint('');
           setEvidenceRules({
             required: true,
             maxSizeMb: '5',
@@ -159,19 +165,10 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
         const template = await fetchIndicatorTemplate(currentIndicator.code);
 
         if (isMounted) {
+          setInitialStructureFingerprint(templateColumnsFingerprint(template.columns));
           setColumns(
             template.columns.length > 0
-              ? template.columns.map((column, index) => ({
-                  id: column.key || `column-${index}`,
-                  label: column.label,
-                  type: column.type,
-                  formula: formulaFromCalculation(column, template.columns),
-                  required: column.required,
-                  min: column.validation?.min !== undefined ? String(column.validation.min) : '',
-                  max: column.validation?.max !== undefined ? String(column.validation.max) : '',
-                  integer: column.validation?.integer,
-                  qualityWarningMax: column.validation?.qualityWarningMax !== undefined ? String(column.validation.qualityWarningMax) : '',
-                }))
+              ? configColumnsFromTemplate(template.columns)
               : defaultColumns
           );
         }
@@ -245,6 +242,21 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
   const handleSave = async () => {
     const cleanedCode = indicatorCode.trim();
     const cleanedName = indicatorName.trim();
+    const duplicateResponsible = duplicateSelection(responsables);
+    const duplicateContributor = operationalScope === 'specific_responsables'
+      ? duplicateSelection(contributors)
+      : '';
+
+    if (duplicateResponsible) {
+      toast.error(`El responsable "${duplicateResponsible}" está seleccionado más de una vez.`);
+      return;
+    }
+
+    if (duplicateContributor) {
+      toast.error(`El responsable específico "${duplicateContributor}" está seleccionado más de una vez.`);
+      return;
+    }
+
     const cleanedResponsables = normalizeList(responsables);
     const cleanedContributors = operationalScope === 'specific_responsables'
       ? normalizeList(contributors)
@@ -281,26 +293,36 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
     }
 
     const configuredTemplateColumns = buildTemplateColumns(columns);
-    const canPersistTemplateColumns = !configuredTemplateColumns.error;
+    const structureWasExplicitlyChanged = shouldPersistTemplateStructure(
+      Boolean(isNew),
+      configuredTemplateColumns.columns,
+      initialStructureFingerprint
+    );
     const normalizedEvidenceRules = {
       required: evidenceRules.required,
       allowedTypes: ['application/pdf'],
       maxSizeMb: positiveNumberOrDefault(evidenceRules.maxSizeMb, 5),
-      requireOpenBeforeApproval: evidenceRules.requireOpenBeforeApproval,
+      requireOpenBeforeApproval: evidenceRules.required && evidenceRules.requireOpenBeforeApproval,
     };
 
-    if (configuredTemplateColumns.error && isNew) {
+    if (configuredTemplateColumns.error) {
       toast.error(configuredTemplateColumns.error);
       return;
     }
 
     const responsibleIds = idsForUserNames(cleanedResponsables, catalogUsers);
-    const canSendResponsibleIds = responsibleIds.length === cleanedResponsables.length;
+    if (responsibleIds.length !== cleanedResponsables.length) {
+      toast.error('Uno de los responsables seleccionados ya no existe o no está activo. Recarga la página.');
+      return;
+    }
+
     const contributorResponsibleIds = operationalScope === 'specific_responsables'
       ? idsForUserNames(cleanedContributors, catalogUsers)
       : [];
-    const canSendContributorResponsibleIds =
-      operationalScope !== 'specific_responsables' || contributorResponsibleIds.length === cleanedContributors.length;
+    if (operationalScope === 'specific_responsables' && contributorResponsibleIds.length !== cleanedContributors.length) {
+      toast.error('Uno de los responsables específicos ya no existe o no está activo. Recarga la página.');
+      return;
+    }
     const scopedPlantelIds = operationalScope === 'all_planteles'
       ? catalogPlanteles.map((plantel) => plantel.id)
       : operationalScope === 'specific_planteles' ? selectedPlantelIds : [];
@@ -317,10 +339,10 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
         dataType: editingIndicator?.dataType ?? 'number',
         period: editingIndicator?.period ?? '2026',
         active: editingIndicator?.active ?? true,
-        primaryResponsibleId: canSendResponsibleIds ? responsibleIds[0] : undefined,
-        responsibleIds: canSendResponsibleIds ? responsibleIds : undefined,
+        primaryResponsibleId: responsibleIds[0],
+        responsibleIds,
         responsibleNames: cleanedResponsables,
-        contributorResponsibleIds: canSendContributorResponsibleIds ? contributorResponsibleIds : undefined,
+        contributorResponsibleIds,
         contributorNames: cleanedContributors,
         activities: editingIndicator?.activities?.length
           ? editingIndicator.activities
@@ -329,7 +351,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
             : ['Actividad general'],
         operationalScope,
         plantelIds: scopedPlantelIds,
-        templateColumns: canPersistTemplateColumns ? configuredTemplateColumns.columns : undefined,
+        templateColumns: structureWasExplicitlyChanged ? configuredTemplateColumns.columns : undefined,
         evidenceRules: normalizedEvidenceRules,
       });
       toast.success('Configuración guardada');
@@ -340,9 +362,9 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
   };
 
   return (
-    <div className="w-full max-w-[1000px] mx-auto bg-brand-Blanco rounded-lg shadow-md border border-brand-Gris_bajo/20 p-6">
-      <div className="flex items-start justify-between mb-8">
-        <div>
+    <div className="mx-auto w-full max-w-[1000px] rounded-lg border border-brand-Gris_bajo/20 bg-brand-Blanco p-4 shadow-md sm:p-6" aria-busy={isLoading}>
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
           <span className="text-sm font-accent text-brand-Gris_oscuro/60 font-bold tracking-wider">
             {isNew ? 'NUEVO INDICADOR' : 'CONFIGURACIÓN DE INDICADOR'}
           </span>
@@ -354,7 +376,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
           type="button"
           variant="secondary"
           onClick={handleBack}
-          className="flex items-center gap-2 text-xs py-1.5 px-4 border-transparent"
+          className="inline-flex self-start items-center gap-2 rounded-full border-transparent px-4 py-1.5 text-xs sm:self-auto"
         >
           <ArrowLeft size={18} strokeWidth={2.5} />
           Volver
@@ -397,24 +419,26 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
           </p>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 border border-brand-Gris_bajo/40 rounded-lg bg-brand-Gris_bajo/5">
+        <div className="grid grid-cols-1 gap-6 rounded-lg border border-brand-Gris_bajo/40 bg-brand-Gris_bajo/5 p-4 md:grid-cols-2 md:p-6">
           <div>
             <label htmlFor="indicator-responsible-0" className="block text-sm font-bold font-accent text-brand-Gris_oscuro mb-1">
               Responsables generales
             </label>
-            <p className="text-xs text-brand-Gris_oscuro/60 mb-3">Usuarios encargados de revisar y aprobar.</p>
+            <p id="indicator-responsible-help" className="text-xs text-brand-Gris_oscuro/70 mb-3">Usuarios encargados de revisar y aprobar.</p>
             <div className="space-y-3">
               {responsables.map((responsable, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <select
                     id={`indicator-responsible-${index}`}
+                    aria-label={`Responsable general ${index + 1}`}
+                    aria-describedby="indicator-responsible-help"
                     value={responsable}
                     onChange={(event) => {
                       const next = [...responsables];
                       next[index] = event.target.value;
                       setResponsables(next);
                     }}
-                    className="w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro font-body bg-brand-Blanco outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal"
+                    className="h-11 w-full rounded-md border border-brand-Gris_bajo/50 bg-brand-Blanco px-3 font-body text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-2 focus:ring-brand-Verde_principal"
                   >
                     <option value="">Seleccione un usuario...</option>
                     {responsibleOptions.map((user) => (
@@ -425,7 +449,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
                     <button
                       type="button"
                       onClick={() => setResponsables((current) => current.filter((_, itemIndex) => itemIndex !== index))}
-                      className="p-2 text-brand-Gris_oscuro/40 hover:text-brand-Status_rojo transition-colors rounded-md hover:bg-brand-Status_rojo/10 flex-shrink-0"
+                      className="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-brand-Gris_oscuro/60 transition-colors hover:bg-brand-Status_rojo/10 hover:text-brand-Status_rojo focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal"
                       aria-label={`Eliminar responsable ${index + 1}`}
                     >
                       <Trash2 size={18} />
@@ -436,7 +460,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
               <button
                 type="button"
                 onClick={() => setResponsables((current) => [...current, ''])}
-                className="text-xs font-bold text-brand-Verde_principal flex items-center gap-1.5 hover:underline mt-1"
+                className="mt-1 flex min-h-11 items-center gap-1.5 rounded-md px-2 text-sm font-bold text-brand-Verde_oscuro hover:bg-brand-Verde_principal/10 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal"
               >
                 <PlusCircle size={14} /> Agregar responsable
               </button>
@@ -447,12 +471,13 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
             <label htmlFor="indicator-operational-scope" className="block text-sm font-bold font-accent text-brand-Gris_oscuro mb-1">
               Alcance operativo
             </label>
-            <p className="text-xs text-brand-Gris_oscuro/60 mb-3">Define quién puede consultar o capturar este indicador.</p>
+            <p id="indicator-scope-help" className="text-xs text-brand-Gris_oscuro/70 mb-3">Define quién puede consultar o capturar este indicador.</p>
             <select
               id="indicator-operational-scope"
+              aria-describedby="indicator-scope-help"
               value={operationalScope}
               onChange={(event) => setOperationalScope(event.target.value as CatalogOperationalScope)}
-              className="w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro font-body bg-brand-Blanco outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal"
+              className="h-11 w-full rounded-md border border-brand-Gris_bajo/50 bg-brand-Blanco px-3 font-body text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-2 focus:ring-brand-Verde_principal"
             >
               <option value="all_planteles">Todos los planteles</option>
               <option value="specific_planteles">Planteles específicos</option>
@@ -469,9 +494,9 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
                   onChange={(event) => setPlantelSearch(event.target.value)}
                   className="h-10"
                 />
-                <div className="max-h-48 space-y-1 overflow-y-auto rounded-md border border-brand-Gris_bajo/30 bg-brand-Blanco p-2">
+                <div className="max-h-48 space-y-1 overflow-y-auto rounded-md border border-brand-Gris_bajo/30 bg-brand-Blanco p-2" role="group" aria-label="Planteles disponibles">
                   {filteredPlanteles.map((plantel) => (
-                    <label key={plantel.id} className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm text-brand-Gris_oscuro hover:bg-brand-Gris_bajo/10">
+                    <label key={plantel.id} className="flex min-h-11 cursor-pointer items-center gap-2 rounded px-2 py-2 text-sm text-brand-Gris_oscuro hover:bg-brand-Gris_bajo/10 focus-within:ring-2 focus-within:ring-brand-Verde_principal">
                       <input
                         type="checkbox"
                         checked={selectedPlantelIds.includes(plantel.id)}
@@ -480,7 +505,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
                             ? [...new Set([...current, plantel.id])].sort((a, b) => a - b)
                             : current.filter((id) => id !== plantel.id)
                         )}
-                        className="h-4 w-4 accent-brand-Verde_principal"
+                        className="h-5 w-5 shrink-0 accent-brand-Verde_principal"
                       />
                       {plantel.name}
                     </label>
@@ -489,7 +514,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
                     <p className="px-2 py-3 text-sm text-brand-Gris_oscuro/60">No se encontraron planteles.</p>
                   )}
                 </div>
-                <p className="text-xs font-semibold text-brand-Gris_oscuro/70">
+                <p className="text-sm font-semibold text-brand-Gris_oscuro/70" role="status" aria-live="polite">
                   {selectedPlantelIds.length} plantel{selectedPlantelIds.length === 1 ? '' : 'es'} seleccionado{selectedPlantelIds.length === 1 ? '' : 's'}
                 </p>
               </div>
@@ -500,14 +525,15 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
                 {contributors.map((contributor, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <select
-                      aria-label={`Contribuidor ${index + 1}`}
+                      id={`indicator-contributor-${index}`}
+                      aria-label={`Responsable específico ${index + 1}`}
                       value={contributor}
                       onChange={(event) => {
                         const next = [...contributors];
                         next[index] = event.target.value;
                         setContributors(next);
                       }}
-                      className="w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro font-body bg-brand-Blanco outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal"
+                      className="h-11 w-full rounded-md border border-brand-Gris_bajo/50 bg-brand-Blanco px-3 font-body text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-2 focus:ring-brand-Verde_principal"
                     >
                       <option value="">Seleccione un usuario...</option>
                       {contributorOptions.map((user) => (
@@ -518,7 +544,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
                       <button
                         type="button"
                         onClick={() => setContributors((current) => current.filter((_, itemIndex) => itemIndex !== index))}
-                        className="p-2 text-brand-Gris_oscuro/40 hover:text-brand-Status_rojo transition-colors rounded-md hover:bg-brand-Status_rojo/10 flex-shrink-0"
+                        className="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-brand-Gris_oscuro/60 transition-colors hover:bg-brand-Status_rojo/10 hover:text-brand-Status_rojo focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal"
                         aria-label={`Eliminar contribuidor ${index + 1}`}
                       >
                         <Trash2 size={18} />
@@ -529,7 +555,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
                 <button
                   type="button"
                   onClick={() => setContributors((current) => [...current, ''])}
-                  className="text-xs font-bold text-brand-Verde_principal flex items-center gap-1.5 hover:underline mt-1"
+                  className="mt-1 flex min-h-11 items-center gap-1.5 rounded-md px-2 text-sm font-bold text-brand-Verde_oscuro hover:bg-brand-Verde_principal/10 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal"
                 >
                   <PlusCircle size={14} /> Agregar contribuidor
                 </button>
@@ -544,18 +570,22 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 rounded-lg border border-brand-Gris_bajo/40 bg-brand-Gris_bajo/5 p-6 md:grid-cols-[1fr_160px_1fr] md:items-end">
+        <div className="grid grid-cols-1 gap-4 rounded-lg border border-brand-Gris_bajo/40 bg-brand-Gris_bajo/5 p-4 md:grid-cols-[minmax(0,1fr)_160px_minmax(0,1fr)] md:items-end md:p-6">
           <div>
             <h3 className="font-title font-bold text-brand-Gris_oscuro">Reglas de evidencia</h3>
-            <p className="mt-1 text-xs text-brand-Gris_oscuro/60">
+            <p className="mt-1 text-xs text-brand-Gris_oscuro/70">
               Controla si el archivo PDF es obligatorio y si el revisor debe abrirlo antes de aprobar.
             </p>
-            <label className="mt-4 flex items-center gap-2 text-sm font-semibold text-brand-Gris_oscuro">
+            <label className="mt-4 flex min-h-11 items-center gap-2 rounded-md px-2 text-sm font-semibold text-brand-Gris_oscuro focus-within:ring-2 focus-within:ring-brand-Verde_principal">
               <input
                 type="checkbox"
                 checked={evidenceRules.required}
-                onChange={(event) => setEvidenceRules((current) => ({ ...current, required: event.target.checked }))}
-                className="h-4 w-4 accent-brand-Verde_principal"
+                onChange={(event) => setEvidenceRules((current) => ({
+                  ...current,
+                  required: event.target.checked,
+                  requireOpenBeforeApproval: event.target.checked && current.requireOpenBeforeApproval,
+                }))}
+                className="h-5 w-5 shrink-0 accent-brand-Verde_principal"
               />
               Evidencia PDF obligatoria
             </label>
@@ -569,12 +599,13 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
             onChange={(event) => setEvidenceRules((current) => ({ ...current, maxSizeMb: event.target.value }))}
             className="h-10"
           />
-          <label className="flex items-center gap-2 text-sm font-semibold text-brand-Gris_oscuro">
+          <label className="flex min-h-11 items-center gap-2 rounded-md px-2 text-sm font-semibold text-brand-Gris_oscuro focus-within:ring-2 focus-within:ring-brand-Verde_principal">
             <input
               type="checkbox"
               checked={evidenceRules.requireOpenBeforeApproval}
+              disabled={!evidenceRules.required}
               onChange={(event) => setEvidenceRules((current) => ({ ...current, requireOpenBeforeApproval: event.target.checked }))}
-              className="h-4 w-4 accent-brand-Verde_principal"
+              className="h-5 w-5 shrink-0 accent-brand-Verde_principal"
             />
             Exigir abrir evidencia antes de aprobar
           </label>
@@ -610,7 +641,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
                   <button
                     type="button"
                     onClick={() => setColumns((current) => current.filter((item) => item.id !== column.id))}
-                    className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-brand-Gris_oscuro/55 transition-colors hover:bg-brand-Status_rojo/10 hover:text-brand-Status_rojo focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-offset-2"
+                    className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-brand-Gris_oscuro/55 transition-colors hover:bg-brand-Status_rojo/10 hover:text-brand-Status_rojo focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-offset-2"
                     aria-label={`Eliminar campo ${column.label || index + 1}`}
                     title="Eliminar campo"
                   >
@@ -635,7 +666,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
                     </label>
                     <select
                       id={`column-type-${column.id}`}
-                      className="h-10 w-full rounded-md border border-brand-Gris_bajo/50 bg-brand-Blanco px-3 font-body text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal"
+                      className="h-11 w-full rounded-md border border-brand-Gris_bajo/50 bg-brand-Blanco px-3 font-body text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-2 focus:ring-brand-Verde_principal"
                       value={column.type}
                       onChange={(event) => handleChangeColumn(column.id, 'type', event.target.value)}
                     >
@@ -648,16 +679,25 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
                 </div>
 
                 {column.type === 'calculated' && (
-                  <div className="border-t border-brand-Gris_bajo/20 bg-brand-Gris_bajo/5 px-4 py-4">
+                  <div className="grid gap-4 border-t border-brand-Gris_bajo/20 bg-brand-Gris_bajo/5 px-4 py-4 md:grid-cols-[minmax(0,1fr)_140px] md:items-end">
                     <Input
                       label="Fórmula"
                       value={column.formula ?? ''}
-                      placeholder="Ej. =Mujeres + Hombres"
+                      placeholder="Ej. =[mujeres] + [hombres]"
                       onChange={(event) => handleChangeColumn(column.id, 'formula', event.target.value)}
                       className="h-10"
                     />
-                    <p className="mt-1 text-xs text-brand-Gris_oscuro/60">
-                      Usa columnas, + - * /, paréntesis y SUMA(). Para nombres largos usa corchetes.
+                    <Input
+                      label="Decimales"
+                      type="number"
+                      min="0"
+                      max="6"
+                      value={column.decimals ?? ''}
+                      onChange={(event) => handleChangeColumn(column.id, 'decimals', event.target.value)}
+                      className="h-10"
+                    />
+                    <p className="text-xs text-brand-Gris_oscuro/70 md:col-span-2">
+                      Usa las claves entre corchetes, + - * /, paréntesis y SUMA(). Así cada referencia es inequívoca.
                     </p>
                   </div>
                 )}
@@ -672,24 +712,24 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
                         : 'grid gap-3 sm:grid-cols-2'
                     }
                   >
-                    <label className="flex min-h-10 items-center gap-2 rounded-md border border-brand-Gris_bajo/35 bg-brand-Blanco px-3 py-2 text-sm font-semibold text-brand-Gris_oscuro">
+                    <label className="flex min-h-11 items-center gap-2 rounded-md border border-brand-Gris_bajo/35 bg-brand-Blanco px-3 py-2 text-sm font-semibold text-brand-Gris_oscuro focus-within:ring-2 focus-within:ring-brand-Verde_principal">
                       <input
                         type="checkbox"
                         checked={Boolean(column.required)}
                         onChange={(event) => handleChangeColumn(column.id, 'required', event.target.checked)}
-                        className="h-4 w-4 shrink-0 accent-brand-Verde_principal"
+                        className="h-5 w-5 shrink-0 accent-brand-Verde_principal"
                       />
                       Requerido
                     </label>
 
                     {supportsNumericValidation(column.type) && (
                       <>
-                        <label className="flex min-h-10 items-center gap-2 rounded-md border border-brand-Gris_bajo/35 bg-brand-Blanco px-3 py-2 text-sm font-semibold text-brand-Gris_oscuro">
+                        <label className="flex min-h-11 items-center gap-2 rounded-md border border-brand-Gris_bajo/35 bg-brand-Blanco px-3 py-2 text-sm font-semibold text-brand-Gris_oscuro focus-within:ring-2 focus-within:ring-brand-Verde_principal">
                           <input
                             type="checkbox"
                             checked={Boolean(column.integer)}
                             onChange={(event) => handleChangeColumn(column.id, 'integer', event.target.checked)}
-                            className="h-4 w-4 shrink-0 accent-brand-Verde_principal"
+                            className="h-5 w-5 shrink-0 accent-brand-Verde_principal"
                           />
                           Solo enteros
                         </label>
@@ -729,8 +769,8 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
           </div>
         </div>
 
-        <div className="flex justify-end pt-4 border-t border-brand-Gris_bajo/20">
-          <Button type="button" variant="primary" onClick={handleSave} className="px-8" disabled={isLoading}>
+        <div className="sticky bottom-0 z-10 flex justify-stretch border-t border-brand-Gris_bajo/20 bg-brand-Blanco/95 py-4 backdrop-blur-sm sm:justify-end">
+          <Button type="button" variant="primary" onClick={handleSave} className="w-full px-8 sm:w-auto" disabled={isLoading}>
             Guardar configuración
           </Button>
         </div>
@@ -743,11 +783,23 @@ function isValidIndicatorCode(value: string) {
   return /^(?!TMP(?:-|$))(?!FMT(?:-|$))[A-Za-z0-9]+(?:[._-][A-Za-z0-9]+)*$/i.test(value);
 }
 
-function buildTemplateColumns(columns: ConfigColumn[]) {
+export function buildTemplateColumns(columns: ConfigColumn[]) {
+  if (columns.some((column) => !column.label.trim())) {
+    return { columns: [], error: 'Todos los campos deben tener un nombre.' };
+  }
+
+  for (const column of columns) {
+    const min = optionalNumber(column.min);
+    const max = optionalNumber(column.max);
+
+    if (min !== undefined && max !== undefined && min > max) {
+      return { columns: [], error: `${column.label}: el mínimo no puede ser mayor que el máximo.` };
+    }
+  }
+
   const seenKeys = new Set<string>();
-  const templateColumns: ColumnConfig[] = columns
-    .filter((column) => column.label.trim())
-    .map((column) => {
+  const sourceColumns = columns.filter((column) => column.label.trim());
+  const templateColumns: ColumnConfig[] = sourceColumns.map((column) => {
       const key = stableColumnKey(column, seenKeys);
       const templateColumn: ColumnConfig = {
         key,
@@ -762,27 +814,45 @@ function buildTemplateColumns(columns: ConfigColumn[]) {
         templateColumn.validation = validation;
       }
 
-      if (column.type === 'calculated') {
-        templateColumn.calculation = {
-          type: 'formula',
-          expression: column.formula?.trim() ?? '',
-          decimals: 2,
-        };
-      }
-
       return templateColumn;
     });
+
+  sourceColumns.forEach((column, index) => {
+    if (column.type !== 'calculated') {
+      return;
+    }
+
+    const expression = normalizeFormulaReferences(column.formula?.trim() ?? '', templateColumns);
+    const originalExpression = normalizeFormulaReferences(
+      formulaFromOriginalCalculation(column.originalCalculation),
+      templateColumns
+    );
+    templateColumns[index].calculation = column.originalCalculation && expression === originalExpression
+      ? structuredClone(column.originalCalculation)
+      : {
+          type: 'formula',
+          expression,
+          decimals: configuredDecimals(column.decimals),
+        };
+  });
 
   for (const column of templateColumns) {
     if (column.type !== 'calculated') {
       continue;
     }
 
-    const error = validateFormulaExpression(
-      column.calculation?.type === 'formula' ? column.calculation.expression : '',
-      templateColumns,
-      column.key
-    );
+    const calculation = column.calculation;
+    const knownKeys = new Set(templateColumns.map((item) => item.key));
+    const hasInvalidStructuredReference = calculation?.type === 'sum'
+      ? calculation.sourceKeys.some((key) => !knownKeys.has(key))
+      : calculation?.type === 'percentage'
+        ? !knownKeys.has(calculation.numeratorKey) || !knownKeys.has(calculation.denominatorKey)
+        : false;
+    const error = hasInvalidStructuredReference
+      ? 'La fórmula usa campos no configurados.'
+      : calculation?.type === 'formula'
+        ? validateFormulaExpression(calculation.expression, templateColumns, column.key)
+        : '';
 
     if (error) {
       return { columns: templateColumns, error: `${column.label}: ${error}` };
@@ -790,6 +860,25 @@ function buildTemplateColumns(columns: ConfigColumn[]) {
   }
 
   return { columns: templateColumns, error: '' };
+}
+
+export function configColumnsFromTemplate(columns: ColumnConfig[]): ConfigColumn[] {
+  return columns.map((column, index) => ({
+    id: column.key || `column-${index}`,
+    label: column.label,
+    type: column.type,
+    formula: formulaFromCalculation(column, columns),
+    decimals: calculationDecimals(column.calculation),
+    originalCalculation: column.calculation ? structuredClone(column.calculation) : undefined,
+    originalValidation: column.validation ? structuredClone(column.validation) : undefined,
+    required: column.required,
+    min: column.validation?.min !== undefined ? String(column.validation.min) : '',
+    max: column.validation?.max !== undefined ? String(column.validation.max) : '',
+    integer: column.validation?.integer,
+    qualityWarningMax: column.validation?.qualityWarningMax !== undefined
+      ? String(column.validation.qualityWarningMax)
+      : '',
+  }));
 }
 
 function updateConfigColumn(column: ConfigColumn, field: keyof ConfigColumn, value: string | boolean): ConfigColumn {
@@ -810,7 +899,7 @@ function updateConfigColumn(column: ConfigColumn, field: keyof ConfigColumn, val
     };
   }
 
-  if (field === 'formula' || field === 'label' || field === 'min' || field === 'max' || field === 'qualityWarningMax') {
+  if (field === 'formula' || field === 'decimals' || field === 'label' || field === 'min' || field === 'max' || field === 'qualityWarningMax') {
     return { ...column, [field]: String(value) };
   }
 
@@ -819,10 +908,17 @@ function updateConfigColumn(column: ConfigColumn, field: keyof ConfigColumn, val
 
 function validationFromConfigColumn(column: ConfigColumn): ColumnConfig['validation'] | undefined {
   if (column.type !== 'number') {
-    return undefined;
+    return column.originalValidation ? structuredClone(column.originalValidation) : undefined;
   }
 
-  const validation: NonNullable<ColumnConfig['validation']> = {};
+  const validation: NonNullable<ColumnConfig['validation']> = {
+    ...(column.originalValidation?.decimals !== undefined
+      ? { decimals: column.originalValidation.decimals }
+      : {}),
+    ...(column.originalValidation?.allowedValues?.length
+      ? { allowedValues: [...column.originalValidation.allowedValues] }
+      : {}),
+  };
   const min = optionalNumber(column.min);
   const max = optionalNumber(column.max);
   const qualityWarningMax = optionalNumber(column.qualityWarningMax);
@@ -881,26 +977,129 @@ function formulaFromCalculation(column: ColumnConfig, columns: ColumnConfig[]) {
   }
 
   if (column.calculation.type === 'formula') {
-    return column.calculation.expression;
+    return normalizeFormulaReferences(column.calculation.expression, columns);
   }
 
   if (column.calculation.type === 'sum') {
-    return `=${column.calculation.sourceKeys.map((key) => formulaReference(labelForColumnKey(key, columns))).join(' + ')}`;
+    return `=${column.calculation.sourceKeys.map(formulaKeyReference).join(' + ')}`;
   }
 
-  return `=${formulaReference(labelForColumnKey(column.calculation.numeratorKey, columns))} / ${formulaReference(labelForColumnKey(column.calculation.denominatorKey, columns))} * 100`;
+  return `=${formulaKeyReference(column.calculation.numeratorKey)} / ${formulaKeyReference(column.calculation.denominatorKey)} * 100`;
 }
 
-function labelForColumnKey(key: string, columns: ColumnConfig[]) {
-  return columns.find((column) => column.key === key)?.label ?? key;
+function formulaFromOriginalCalculation(calculation: ColumnConfig['calculation']) {
+  if (!calculation) {
+    return '';
+  }
+
+  if (calculation.type === 'formula') {
+    return calculation.expression;
+  }
+
+  if (calculation.type === 'sum') {
+    return `=${calculation.sourceKeys.map(formulaKeyReference).join(' + ')}`;
+  }
+
+  return `=${formulaKeyReference(calculation.numeratorKey)} / ${formulaKeyReference(calculation.denominatorKey)} * 100`;
 }
 
-function formulaReference(label: string) {
-  return /[^a-zA-Z0-9_]/.test(label) ? `[${label}]` : label;
+function formulaKeyReference(key: string) {
+  return `[${key}]`;
+}
+
+function normalizeFormulaReferences(expression: string, columns: ColumnConfig[]) {
+  return expression.replace(/\[([^\]]+)\]/g, (_match, reference: string) => {
+    const exact = columns.find((column) => column.key === reference.trim());
+
+    if (exact) {
+      return formulaKeyReference(exact.key);
+    }
+
+    const normalizedReference = normalizeKey(reference);
+    const matches = columns.filter((column) => normalizeKey(column.label) === normalizedReference);
+    return matches.length === 1 ? formulaKeyReference(matches[0].key) : `[${reference.trim()}]`;
+  });
+}
+
+function calculationDecimals(calculation: ColumnConfig['calculation']) {
+  return calculation && 'decimals' in calculation && calculation.decimals !== undefined
+    ? String(calculation.decimals)
+    : '';
+}
+
+function configuredDecimals(value?: string) {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed >= 0 && parsed <= 6 ? parsed : 2;
+}
+
+export function templateColumnsFingerprint(columns: ColumnConfig[]) {
+  return JSON.stringify(columns.map((column) => ({
+    key: column.key,
+    label: column.label.trim(),
+    type: column.type,
+    required: Boolean(column.required),
+    validation: canonicalValidationForFingerprint(column.validation),
+    calculation: canonicalCalculationForFingerprint(column.calculation, columns),
+  })));
+}
+
+export function shouldPersistTemplateStructure(
+  isNew: boolean,
+  columns: ColumnConfig[],
+  initialFingerprint: string
+) {
+  return isNew || templateColumnsFingerprint(columns) !== initialFingerprint;
+}
+
+function canonicalValidationForFingerprint(validation: ColumnConfig['validation']) {
+  if (!validation) {
+    return null;
+  }
+
+  return {
+    min: validation.min ?? null,
+    max: validation.max ?? null,
+    integer: validation.integer ?? null,
+    decimals: validation.decimals ?? null,
+    allowedValues: validation.allowedValues ?? null,
+    qualityWarningMax: validation.qualityWarningMax ?? null,
+  };
+}
+
+function canonicalCalculationForFingerprint(
+  calculation: ColumnConfig['calculation'],
+  columns: ColumnConfig[]
+) {
+  if (!calculation) {
+    return null;
+  }
+
+  if (calculation.type !== 'formula') {
+    return calculation;
+  }
+
+  return {
+    ...calculation,
+    expression: normalizeFormulaReferences(calculation.expression, columns),
+  };
 }
 
 function normalizeList(values: string[]) {
-  return values.map((value) => value.trim()).filter(Boolean);
+  return Array.from(new Set(values.map((value) => value.trim()).filter(Boolean)));
+}
+
+export function duplicateSelection(values: string[]) {
+  const seen = new Set<string>();
+
+  for (const value of values.map((item) => item.trim()).filter(Boolean)) {
+    const normalized = normalizeText(value);
+    if (seen.has(normalized)) {
+      return value;
+    }
+    seen.add(normalized);
+  }
+
+  return '';
 }
 
 function nonEmptyList(values: string[] | undefined, fallback: string[]) {
@@ -942,6 +1141,10 @@ function deriveOperationalScope(indicator: CatalogIndicator): CatalogOperational
     (indicator.contributorNames.length > 0 && !isPlantelContributor(indicator.contributorNames))
   ) {
     return 'specific_responsables';
+  }
+
+  if (indicator.operationalScope) {
+    return indicator.operationalScope;
   }
 
   const plantelIds = effectivePlantelIdsForIndicator(indicator);

@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
+import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { ChevronDown, ChevronRight, Search } from 'lucide-react';
 import {
   fetchAuditEvents,
@@ -9,6 +10,15 @@ import {
 import { useAuth } from '../../context/AuthContext';
 
 type HistoryView = 'indicators' | 'audit';
+
+export function historyViewForKey(current: HistoryView, key: string): HistoryView | null {
+  if (key === 'Home') return 'indicators';
+  if (key === 'End') return 'audit';
+  if (key === 'ArrowLeft' || key === 'ArrowRight') {
+    return current === 'indicators' ? 'audit' : 'indicators';
+  }
+  return null;
+}
 
 function normalizeSearch(value: string) {
   return value
@@ -269,6 +279,15 @@ export const IndicatorHistory = () => {
     setActiveSearch('');
   };
 
+  const handleViewKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>, current: HistoryView) => {
+    const nextView = historyViewForKey(current, event.key);
+    if (!nextView) return;
+
+    event.preventDefault();
+    selectView(nextView);
+    window.requestAnimationFrame(() => document.getElementById(`history-tab-${nextView}`)?.focus());
+  };
+
   const toggleAuditDetails = (id: number) => {
     setExpandedAuditIds((current) => {
       const next = new Set(current);
@@ -299,11 +318,15 @@ export const IndicatorHistory = () => {
         {isDirector && (
           <div className="flex border-b border-brand-Gris_bajo/40" role="tablist" aria-label="Vistas del historial">
             <button
+              id="history-tab-indicators"
               type="button"
               role="tab"
               aria-selected={activeView === 'indicators'}
+              aria-controls="history-panel-indicators"
+              tabIndex={activeView === 'indicators' ? 0 : -1}
               onClick={() => selectView('indicators')}
-              className={`px-4 py-2.5 text-sm font-title font-bold border-b-2 transition-colors ${
+              onKeyDown={(event) => handleViewKeyDown(event, 'indicators')}
+              className={`min-h-11 rounded-t-md px-4 py-2.5 text-sm font-title font-bold border-b-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-inset ${
                 activeView === 'indicators'
                   ? 'border-brand-Verde_oscuro text-brand-Verde_oscuro'
                   : 'border-transparent text-brand-Gris_oscuro/70 hover:text-brand-Gris_oscuro'
@@ -312,11 +335,15 @@ export const IndicatorHistory = () => {
               Indicadores
             </button>
             <button
+              id="history-tab-audit"
               type="button"
               role="tab"
               aria-selected={activeView === 'audit'}
+              aria-controls="history-panel-audit"
+              tabIndex={activeView === 'audit' ? 0 : -1}
               onClick={() => selectView('audit')}
-              className={`px-4 py-2.5 text-sm font-title font-bold border-b-2 transition-colors ${
+              onKeyDown={(event) => handleViewKeyDown(event, 'audit')}
+              className={`min-h-11 rounded-t-md px-4 py-2.5 text-sm font-title font-bold border-b-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-inset ${
                 activeView === 'audit'
                   ? 'border-brand-Verde_oscuro text-brand-Verde_oscuro'
                   : 'border-transparent text-brand-Gris_oscuro/70 hover:text-brand-Gris_oscuro'
@@ -336,14 +363,14 @@ export const IndicatorHistory = () => {
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               onKeyDown={(event) => event.key === 'Enter' && setActiveSearch(searchTerm.trim())}
-              className="w-full h-9 pl-4 pr-4 rounded-full border border-brand-Gris_bajo/50 focus:outline-none focus:border-brand-Verde_principal text-sm text-brand-Gris_oscuro"
+              className="h-11 w-full rounded-full border border-brand-Gris_bajo/50 px-4 text-sm text-brand-Gris_oscuro focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal"
             />
             <button
               type="button"
               onClick={() => setActiveSearch(searchTerm.trim())}
               aria-label={isAuditView ? 'Buscar auditoría' : 'Buscar historial'}
               title="Buscar"
-              className="h-9 w-9 flex items-center justify-center bg-brand-Verde_oscuro text-brand-Blanco rounded-full hover:bg-brand-Verde_principal transition-colors shrink-0"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-Verde_oscuro text-brand-Blanco transition-colors hover:bg-brand-Verde_principal focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-offset-2"
             >
               <Search size={18} />
             </button>
@@ -358,9 +385,10 @@ export const IndicatorHistory = () => {
       </div>
 
       {isAuditView ? (
-        <div className="bg-brand-Blanco rounded-lg shadow-md overflow-hidden border border-brand-Gris_bajo/20">
-          <div className="w-full overflow-x-auto">
+        <div id="history-panel-audit" role="tabpanel" aria-labelledby="history-tab-audit" className="bg-brand-Blanco rounded-lg shadow-md overflow-hidden border border-brand-Gris_bajo/20">
+          <div className="w-full overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-inset" role="region" aria-label="Eventos de auditoría" tabIndex={0}>
             <table className="w-full min-w-[1120px] border-collapse text-left">
+              <caption className="sr-only">Eventos de auditoría, actor, acción, recurso y estado</caption>
               <thead>
                 <tr className="bg-brand-Gris_bajo/35 text-brand-Gris_oscuro font-title font-bold text-sm select-none border-b border-brand-Gris_bajo/20">
                   <th className="py-4 px-4 w-[16%]">Fecha</th>
@@ -414,7 +442,7 @@ export const IndicatorHistory = () => {
                             aria-label={`${isExpanded ? 'Ocultar' : 'Mostrar'} cambios del evento ${event.id}`}
                             aria-expanded={isExpanded}
                             title={isExpanded ? 'Ocultar cambios' : 'Mostrar cambios'}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-brand-Verde_oscuro hover:bg-brand-Verde_principal/10 transition-colors"
+                            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-brand-Verde_oscuro hover:bg-brand-Verde_principal/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal"
                           >
                             {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
                           </button>
@@ -457,9 +485,10 @@ export const IndicatorHistory = () => {
           </div>
         </div>
       ) : (
-        <div className="bg-brand-Blanco rounded-lg shadow-md overflow-hidden border border-brand-Gris_bajo/20">
-          <div className="w-full overflow-x-auto">
+        <div id="history-panel-indicators" role="tabpanel" aria-labelledby="history-tab-indicators" className="bg-brand-Blanco rounded-lg shadow-md overflow-hidden border border-brand-Gris_bajo/20">
+          <div className="w-full overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-inset" role="region" aria-label="Historial de indicadores" tabIndex={0}>
             <table className="w-full min-w-[1120px] border-collapse text-left">
+              <caption className="sr-only">Historial de cambios en indicadores</caption>
               <thead>
                 <tr className="bg-brand-Gris_bajo/35 text-brand-Gris_oscuro font-title font-bold text-sm select-none border-b border-brand-Gris_bajo/20">
                   <th className="py-4 px-5 w-[11%]">Código</th>

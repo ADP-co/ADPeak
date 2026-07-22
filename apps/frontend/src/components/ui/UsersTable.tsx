@@ -1,6 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
+import {
+  forwardRef,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PropsWithChildren,
+} from 'react';
 import { KeyRound, Lock, Pencil, PlusCircle, Search, Unlock, X } from 'lucide-react';
-import { ConfirmModal } from './ConfirmModal';
+import {
+  ConfirmModal,
+  focusInitialModalElement,
+  handleModalKeyDown,
+  restoreModalFocus,
+} from './ConfirmModal';
 import {
   catalogPlanteles,
   deactivateUser,
@@ -95,6 +107,71 @@ const rolePriority: Record<SystemRole, number> = {
 export const USER_ACTION_BUTTON_CLASS =
   'min-h-9 min-w-[124px] rounded-full border px-4 py-1.5 inline-flex items-center justify-center gap-1.5 text-sm font-bold transition-colors cursor-pointer';
 
+interface UserModalFrameProps extends PropsWithChildren {
+  labelledBy: string;
+}
+
+export const UserModalFrame = forwardRef<HTMLDivElement, UserModalFrameProps>(
+  ({ children, labelledBy }, ref) => (
+    <div
+      role="presentation"
+      className="fixed inset-0 z-50 flex overflow-y-auto overscroll-contain bg-brand-Gris_oscuro/60 p-3 backdrop-blur-sm sm:p-4"
+    >
+      <div
+        ref={ref}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={labelledBy}
+        tabIndex={-1}
+        className="relative my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-y-auto rounded-lg border border-brand-Gris_bajo/20 bg-brand-Blanco p-4 shadow-xl sm:max-h-[calc(100dvh-2rem)] sm:p-6"
+      >
+        {children}
+      </div>
+    </div>
+  )
+);
+
+UserModalFrame.displayName = 'UserModalFrame';
+
+const useUserModalFocusTrap = <T extends HTMLElement>(isOpen: boolean, onClose: () => void) => {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const initialFocusRef = useRef<T>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const previouslyFocusedElement =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousBodyOverflow = document.body.style.overflow;
+
+    document.body.style.overflow = 'hidden';
+    focusInitialModalElement(initialFocusRef.current, dialogRef.current);
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      handleModalKeyDown(
+        event,
+        dialogRef.current,
+        document.activeElement,
+        onCloseRef.current
+      );
+    };
+
+    document.addEventListener('keydown', handleKeyDown, true);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown, true);
+      document.body.style.overflow = previousBodyOverflow;
+      restoreModalFocus(previouslyFocusedElement);
+    };
+  }, [isOpen]);
+
+  return { dialogRef, initialFocusRef };
+};
+
 function roleFromCatalog(role: CatalogUser['role']): SystemRole {
   if (role === 'director') {
     return 'Administrador';
@@ -156,7 +233,9 @@ function fromCatalogUser(user: CatalogUser): UserRecord {
     name: user.name,
     role: roleFromCatalog(user.role),
     plantel: plantelLabelFromId(user.plantelId),
-    indicadores: user.indicatorCodes.length > 0 ? user.indicatorCodes.join(', ') : '-',
+    indicadores: (user.reviewerIndicatorCodes ?? user.indicatorCodes).length > 0
+      ? (user.reviewerIndicatorCodes ?? user.indicatorCodes).join(', ')
+      : '-',
     plantelId: user.plantelId,
     responsableId: user.responsableId,
     isBlocked: !user.active,
@@ -175,7 +254,6 @@ function isStatusError(message: string) {
     'define',
     'completa',
     'solo',
-    'desbloquea',
     'contrasena',
     'contraseña',
     'error'
@@ -199,6 +277,27 @@ export const UsersTable = () => {
   const [userToResetPassword, setUserToResetPassword] = useState<UserRecord | null>(null);
   const [passwordResetForm, setPasswordResetForm] = useState({ password: '', confirmPassword: '' });
   const [indicatorPickerSearch, setIndicatorPickerSearch] = useState('');
+
+  const closeUserEditor = () => {
+    setEditingUser(null);
+    setIndicatorPickerSearch('');
+    setStatusMessage('');
+  };
+
+  const closePasswordReset = () => {
+    setUserToResetPassword(null);
+    setPasswordResetForm({ password: '', confirmPassword: '' });
+    setStatusMessage('');
+  };
+
+  const {
+    dialogRef: userEditorDialogRef,
+    initialFocusRef: userEditorInitialFocusRef,
+  } = useUserModalFocusTrap<HTMLInputElement>(Boolean(editingUser), closeUserEditor);
+  const {
+    dialogRef: passwordResetDialogRef,
+    initialFocusRef: passwordResetInitialFocusRef,
+  } = useUserModalFocusTrap<HTMLInputElement>(Boolean(userToResetPassword), closePasswordReset);
 
   useEffect(() => {
     let isMounted = true;
@@ -589,7 +688,7 @@ export const UsersTable = () => {
                                 : 'border-brand-Verde_oscuro/40 text-brand-Verde_oscuro hover:bg-brand-Status_amarillo hover:text-brand-Gris_oscuro'
                             }`}
                           >
-                            {user.isBlocked ? <Lock size={16} /> : <Unlock size={16} />}
+                            {user.isBlocked ? <Unlock size={16} /> : <Lock size={16} />}
                             <span>{user.isBlocked ? 'Desbloquear' : 'Bloquear'}</span>
                           </button>
                         </>
@@ -611,13 +710,7 @@ export const UsersTable = () => {
       </div>
 
       {editingUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-brand-Gris_oscuro/60 backdrop-blur-sm p-4">
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="user-editor-title"
-            className="bg-brand-Blanco rounded-lg shadow-xl p-6 w-full max-w-md border border-brand-Gris_bajo/20"
-          >
+        <UserModalFrame ref={userEditorDialogRef} labelledBy="user-editor-title">
             <h2 id="user-editor-title" className="text-xl font-title font-bold text-brand-Gris_oscuro mb-6">
               {isCreatingUser ? 'Agregar responsable' : 'Modificar usuario'}
             </h2>
@@ -640,6 +733,7 @@ export const UsersTable = () => {
                   Nombre
                 </label>
                 <input
+                  ref={editingUser.role === 'Plantel' ? undefined : userEditorInitialFocusRef}
                   id="user-editor-name"
                   type="text"
                   value={editingUser.name}
@@ -841,7 +935,7 @@ export const UsersTable = () => {
             <div className="flex justify-end gap-3 mt-8">
               <button
                 type="button"
-                onClick={() => setEditingUser(null)}
+                onClick={closeUserEditor}
                 className="px-5 py-2 rounded-md border border-brand-Gris_bajo/50 text-brand-Gris_oscuro text-sm font-bold hover:bg-brand-Gris_bajo/10 transition-colors"
               >
                 Cancelar
@@ -854,18 +948,11 @@ export const UsersTable = () => {
                 {isCreatingUser ? 'Crear responsable' : 'Guardar cambios'}
               </button>
             </div>
-          </div>
-        </div>
+        </UserModalFrame>
       )}
 
       {userToResetPassword && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-brand-Gris_oscuro/60 backdrop-blur-sm p-4">
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="password-reset-title"
-            className="max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto rounded-lg border border-brand-Gris_bajo/20 bg-brand-Blanco p-6 shadow-xl"
-          >
+        <UserModalFrame ref={passwordResetDialogRef} labelledBy="password-reset-title">
             <h2 id="password-reset-title" className="text-xl font-title font-bold text-brand-Gris_oscuro mb-2">
               Restablecer contraseña
             </h2>
@@ -891,6 +978,7 @@ export const UsersTable = () => {
                   Nueva contraseña
                 </label>
                 <input
+                  ref={passwordResetInitialFocusRef}
                   id="reset-password"
                   type="password"
                   value={passwordResetForm.password}
@@ -920,10 +1008,7 @@ export const UsersTable = () => {
             <div className="flex justify-end gap-3 mt-8">
               <button
                 type="button"
-                onClick={() => {
-                  setUserToResetPassword(null);
-                  setPasswordResetForm({ password: '', confirmPassword: '' });
-                }}
+                onClick={closePasswordReset}
                 className="px-5 py-2 rounded-md border border-brand-Gris_bajo/50 text-brand-Gris_oscuro text-sm font-bold hover:bg-brand-Gris_bajo/10 transition-colors"
               >
                 Cancelar
@@ -936,8 +1021,7 @@ export const UsersTable = () => {
                 Actualizar
               </button>
             </div>
-          </div>
-        </div>
+        </UserModalFrame>
       )}
 
       <ConfirmModal

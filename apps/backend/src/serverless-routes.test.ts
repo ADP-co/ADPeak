@@ -74,4 +74,41 @@ describe("serverless route parity", () => {
     expect(handlers).toContain("before: draft");
     expect(handlers).toContain("requestId: requestIdFromRequest(request)");
   });
+
+  it("checks capture scope before revealing the current draft version", () => {
+    const handlers = workspaceSource("api/_lib/sigi-handlers.ts");
+    const localServer = readFileSync(new URL("./server.ts", import.meta.url), "utf8");
+
+    const serverlessAccess = handlers.indexOf(
+      'sigi.assertCaptureAccess(session, { ...draft, payload: body.payload }, "draft")'
+    );
+    const serverlessVersion = handlers.indexOf("const expectedVersion = positiveExpectedVersion(body)", serverlessAccess);
+    const localAccess = localServer.indexOf('assertCaptureAccess(session, { ...draft, payload }, "draft")');
+    const localVersion = localServer.indexOf("const expectedVersion = positiveExpectedVersion(body)", localAccess);
+
+    expect(serverlessAccess).toBeGreaterThan(-1);
+    expect(serverlessVersion).toBeGreaterThan(serverlessAccess);
+    expect(localAccess).toBeGreaterThan(-1);
+    expect(localVersion).toBeGreaterThan(localAccess);
+  });
+
+  it("keeps invalid JSON distinct from unexpected server failures", () => {
+    const handlers = workspaceSource("api/_lib/sigi-handlers.ts");
+
+    expect(handlers).toContain('error: "server_error"');
+    expect(handlers).toContain('error: "invalid_json"');
+    expect(handlers).toContain("error instanceof InvalidJsonBodyError");
+    expect(handlers.match(/sendErrorResponse\(response, error\)/g)?.length ?? 0).toBeGreaterThanOrEqual(6);
+    expect(handlers.match(/error: "invalid_json"/g)).toHaveLength(1);
+  });
+
+  it("renews the token after a password change and persists legacy hash upgrades", () => {
+    const handlers = workspaceSource("api/_lib/sigi-handlers.ts");
+    const localServer = workspaceSource("apps/backend/src/server.ts");
+
+    expect(handlers).toContain("await flushRuntimeState();\n    sendJson(response, 200, { user, sessionToken: sigi.createSessionToken(user) });");
+    expect(handlers.match(/sessionToken: sigi\.createSessionToken\(user\)/g)).toHaveLength(2);
+    expect(localServer.match(/sessionToken: createSessionToken\(user\)/g)).toHaveLength(2);
+    expect(localServer).toContain("catch (error) {\n      sendMutationError(response, error);");
+  });
 });

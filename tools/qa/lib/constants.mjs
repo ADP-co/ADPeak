@@ -10,11 +10,11 @@ export const DATABASE_PREFIX = "adpeak_qa_cert_";
 export const MANIFEST_SCHEMA_VERSION = 1;
 
 export const BASELINE = Object.freeze({
-  accounts: 46,
+  accounts: 56,
   indicators: 14,
   roles: Object.freeze({
     director: 1,
-    responsable: 8,
+    responsable: 18,
     plantel: 37
   })
 });

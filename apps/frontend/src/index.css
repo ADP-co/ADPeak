@@ -13,3 +13,30 @@
   --color-brand-Gris_Medio: #B4B4B4;
   --color-brand-Gris_bajo: #B4B4B4;
 }
+
+html {
+  scroll-padding-top: 5rem;
+}
+
+body {
+  overflow-wrap: anywhere;
+}
+
+button,
+input,
+select,
+summary,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

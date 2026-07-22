@@ -40,7 +40,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           aria-describedby={describedBy}
           aria-invalid={hasError ? true : ariaInvalid}
           className={`
-            border p-2 rounded-md font-body text-brand-Gris_oscuro w-full
+            min-h-11 border p-2 rounded-md font-body text-brand-Gris_oscuro w-full
             focus:outline-none focus:ring-2 focus:ring-brand-Verde_principal
             transition-all duration-200 bg-brand-Blanco
             ${error ? 'border-brand-Status_rojo ring-1 ring-brand-Status_rojo' : 'border-brand-Gris_bajo'}
@@ -48,7 +48,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           `}
         />
         {error && (
-          <span id={errorId} className="text-brand-Status_rojo text-xs font-accent mt-0.5">
+          <span id={errorId} role="alert" className="text-brand-Status_rojo text-sm font-accent font-semibold mt-0.5">
             {error}
           </span>
         )}

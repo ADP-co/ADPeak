@@ -176,19 +176,19 @@ export const ConfirmModal = ({
           {message}
         </p>
 
-        <div className="flex w-full gap-3">
+        <div className="flex w-full flex-col-reverse gap-3 sm:flex-row">
           <button
             ref={initialFocusRef}
             type="button"
             onClick={onCancel}
-            className="flex-1 py-2 rounded-md border border-brand-Gris_bajo/50 text-brand-Gris_oscuro text-sm font-bold hover:bg-brand-Gris_bajo/10 transition-colors"
+            className="min-h-11 flex-1 rounded-md border border-brand-Gris_bajo/50 py-2 text-sm font-bold text-brand-Gris_oscuro transition-colors hover:bg-brand-Gris_bajo/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-offset-2"
           >
             {cancelText}
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className={`flex-1 py-2 rounded-md text-brand-Blanco text-sm font-bold transition-colors ${
+            className={`min-h-11 flex-1 rounded-md py-2 text-sm font-bold text-brand-Blanco transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-offset-2 ${
               isDestructive
                 ? 'bg-brand-Status_rojo hover:bg-red-700'
                 : 'bg-brand-Verde_oscuro hover:bg-brand-Verde_principal'

@@ -231,11 +231,8 @@ const server = createServer(async (request, response) => {
 
       sendJson(response, 200, { user, sessionToken: createSessionToken(user) });
       return;
-    } catch {
-      sendJson(response, 400, {
-        error: "invalid_json",
-        message: "El cuerpo de la solicitud debe ser JSON válido."
-      });
+    } catch (error) {
+      sendMutationError(response, error);
       return;
     }
   }
@@ -244,8 +241,15 @@ const server = createServer(async (request, response) => {
     try {
       const session = sessionFromHeaders(request.headers);
       const user = updateOwnPassword(session, await readJsonBody(request));
+      recordAuditEvent(session, {
+        action: "password_changed",
+        resourceType: "auth",
+        resourceId: session.userId,
+        status: "ok",
+        requestId
+      });
       await flushPersistedState();
-      sendJson(response, 200, { user });
+      sendJson(response, 200, { user, sessionToken: createSessionToken(user) });
       return;
     } catch (error) {
       sendMutationError(response, error);
@@ -264,6 +268,14 @@ const server = createServer(async (request, response) => {
 
       if (request.method === "POST") {
         const saved = saveUser(session, await readJsonBody(request));
+        recordAuditEvent(session, {
+          action: "user_created",
+          resourceType: "user",
+          resourceId: saved.id,
+          after: saved,
+          status: "ok",
+          requestId
+        });
         await flushPersistedState();
         sendJson(response, 201, saved);
         return;
@@ -283,13 +295,24 @@ const server = createServer(async (request, response) => {
       const action = userMatch[2];
 
       if (request.method === "PUT" && !action) {
+        const before = listUsers(session).find((candidate) => candidate.id === userId);
         const saved = saveUser(session, { ...(await readJsonBody(request)), id: userId });
+        recordAuditEvent(session, {
+          action: "user_updated",
+          resourceType: "user",
+          resourceId: saved.id,
+          before,
+          after: saved,
+          status: "ok",
+          requestId
+        });
         await flushPersistedState();
         sendJson(response, 200, saved);
         return;
       }
 
       if (request.method === "PATCH" && action === "desactivar") {
+        const before = listUsers(session).find((candidate) => candidate.id === userId);
         const updated = deactivateUser(session, userId);
 
         if (!updated) {
@@ -297,6 +320,15 @@ const server = createServer(async (request, response) => {
           return;
         }
 
+        recordAuditEvent(session, {
+          action: "user_deactivated",
+          resourceType: "user",
+          resourceId: updated.id,
+          before,
+          after: updated,
+          status: "ok",
+          requestId
+        });
         await flushPersistedState();
         sendJson(response, 200, updated);
         return;
@@ -310,6 +342,13 @@ const server = createServer(async (request, response) => {
           return;
         }
 
+        recordAuditEvent(session, {
+          action: "user_password_reset",
+          resourceType: "auth",
+          resourceId: updated.id,
+          status: "ok",
+          requestId
+        });
         await flushPersistedState();
         sendJson(response, 200, updated);
         return;
@@ -335,6 +374,14 @@ const server = createServer(async (request, response) => {
 
       if (request.method === "POST") {
         const saved = saveIndicator(session, await readJsonBody(request));
+        recordAuditEvent(session, {
+          action: "indicator_created",
+          resourceType: "indicator",
+          resourceId: String(saved.id),
+          after: saved,
+          status: "ok",
+          requestId
+        });
         await flushPersistedState();
         sendJson(response, 201, saved);
         return;
@@ -387,7 +434,17 @@ const server = createServer(async (request, response) => {
       }
 
       if (request.method === "PUT" && !action) {
+        const before = indicator;
         const saved = saveIndicator(session, { ...(await readJsonBody(request)), id: indicator?.id ?? indicatorId });
+        recordAuditEvent(session, {
+          action: "indicator_configured",
+          resourceType: "indicator",
+          resourceId: String(saved.id),
+          before,
+          after: saved,
+          status: "ok",
+          requestId
+        });
         await flushPersistedState();
         sendJson(response, 200, saved);
         return;
@@ -406,6 +463,15 @@ const server = createServer(async (request, response) => {
           return;
         }
 
+        recordAuditEvent(session, {
+          action: "indicator_deactivated",
+          resourceType: "indicator",
+          resourceId: String(updated.id),
+          before: indicator,
+          after: updated,
+          status: "ok",
+          requestId
+        });
         await flushPersistedState();
         sendJson(response, 200, updated);
         return;
@@ -722,6 +788,7 @@ const server = createServer(async (request, response) => {
           return;
         }
 
+        assertCaptureAccess(session, { ...draft, payload }, "draft");
         const expectedVersion = positiveExpectedVersion(body);
 
         if (!expectedVersion) {
@@ -729,7 +796,6 @@ const server = createServer(async (request, response) => {
           return;
         }
 
-        assertCaptureAccess(session, { ...draft, payload }, "draft");
         const updatedDraft = updateCaptureDraft(captureId, payload, { expectedVersion });
 
         if (!updatedDraft) {

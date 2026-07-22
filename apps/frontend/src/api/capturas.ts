@@ -1,5 +1,5 @@
 import axios, { AxiosHeaders } from 'axios';
-import { API_BASE_URL, API_REQUESTS_ENABLED, sessionHeaders } from './client';
+import { API_BASE_URL, API_REQUESTS_ENABLED, authenticatedFetch, sessionHeaders } from './client';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -252,7 +252,7 @@ export async function fetchCaptureEvidence(captureId: number) {
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/capturas/${captureId}/evidencia`, {
+    const response = await authenticatedFetch(`${API_BASE_URL}/capturas/${captureId}/evidencia`, {
       headers: sessionHeaders(),
     });
 

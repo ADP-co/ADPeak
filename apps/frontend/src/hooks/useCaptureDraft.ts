@@ -19,6 +19,7 @@ const STORAGE_KEY_PREFIX = 'sigi-poa:capture-draft-id';
 
 type UseCaptureDraftOptions = Omit<CaptureDraftRequest, 'payload' | 'motivoCambio'> & {
   requestedCaptureId?: number;
+  strictRequestedCaptureId?: boolean;
   storageScope?: string;
   enabled?: boolean;
 };
@@ -36,7 +37,7 @@ function isRecoverableCaptureLookupError(error: unknown) {
 
 export function useCaptureDraft(options: UseCaptureDraftOptions) {
   const queryClient = useQueryClient();
-  const { requestedCaptureId, storageScope, enabled = true, ...captureOptions } = options;
+  const { requestedCaptureId, strictRequestedCaptureId = false, storageScope, enabled = true, ...captureOptions } = options;
   const [ignoredRequestedCaptureId, setIgnoredRequestedCaptureId] = useState<number | undefined>();
   const effectiveRequestedCaptureId = requestedCaptureId && requestedCaptureId !== ignoredRequestedCaptureId
     ? requestedCaptureId
@@ -92,16 +93,14 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
   }, [hasRequestedCapture, scopedCaptureQuery.data]);
 
   useEffect(() => {
-    if (
-      isRecoverableCaptureLookupError(captureQuery.error)
-    ) {
+    if (isRecoverableCaptureLookupError(captureQuery.error) && !strictRequestedCaptureId) {
       window.localStorage.removeItem(storageKey);
       if (requestedCaptureId) {
         setIgnoredRequestedCaptureId(requestedCaptureId);
       }
       setCaptureId(undefined);
     }
-  }, [captureQuery.error, requestedCaptureId, storageKey]);
+  }, [captureQuery.error, requestedCaptureId, storageKey, strictRequestedCaptureId]);
 
   const refreshCaptureAfterConflict = () => {
     void queryClient.invalidateQueries({ queryKey: ['capture-draft'] });
@@ -225,7 +224,7 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
     capture: captureQuery.data ?? scopedCapture,
     statusMessage,
     errorMessage:
-      captureQuery.error instanceof Error && !isRecoverableCaptureLookupError(captureQuery.error)
+      captureQuery.error instanceof Error && (strictRequestedCaptureId || !isRecoverableCaptureLookupError(captureQuery.error))
         ? captureQuery.error.message
         : !hasRequestedCapture && scopedCaptureQuery.error instanceof Error
           ? scopedCaptureQuery.error.message
@@ -249,5 +248,6 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
       sendToReviewMutation.isPending ||
       requestCorrectionMutation.isPending ||
       approveMutation.isPending,
+    hasStrictLookupError: strictRequestedCaptureId && captureQuery.error instanceof Error,
   };
 }

@@ -19,7 +19,8 @@ async function hydrateRuntimeState() {
 }
 
 async function flushRuntimeState() {
-  const state = await hydrateRuntimeState();
+  stateModulePromise ??= import("../../apps/backend/src/state-store.js");
+  const state = await stateModulePromise;
   await state.flushPersistedState?.();
 }
 
@@ -72,11 +73,10 @@ export async function handleLogin(request: RequestLike, response: any) {
       return;
     }
 
+    await flushRuntimeState();
     sendJson(response, 200, { user, sessionToken: sigi.createSessionToken(user) });
   } catch (error) {
-    if (!sendKnownError(response, error)) {
-      sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON válido." });
-    }
+    sendErrorResponse(response, error);
   }
 }
 
@@ -90,12 +90,18 @@ export async function handleUpdatePassword(request: RequestLike, response: any) 
     const session = sigi.sessionFromHeaders(request.headers ?? {});
     const user = sigi.updateOwnPassword(session, await readJsonBody(request));
 
+    sigi.recordAuditEvent(session, {
+      action: "password_changed",
+      resourceType: "auth",
+      resourceId: session.userId,
+      status: "ok",
+      requestId: requestIdFromRequest(request)
+    });
+
     await flushRuntimeState();
-    sendJson(response, 200, { user });
+    sendJson(response, 200, { user, sessionToken: sigi.createSessionToken(user) });
   } catch (error) {
-    if (!sendKnownError(response, error)) {
-      sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON válido." });
-    }
+    sendErrorResponse(response, error);
   }
 }
 
@@ -117,16 +123,20 @@ export async function handleUsers(request: RequestLike, response: any) {
 
     if (request.method === "POST") {
       const saved = sigi.saveUser(session, await readJsonBody(request));
+      sigi.recordAuditEvent(session, {
+        action: "user_created",
+        resourceType: "user",
+        resourceId: saved.id,
+        after: saved,
+        status: "ok",
+        requestId: requestIdFromRequest(request)
+      });
       await flushRuntimeState();
       sendJson(response, 201, saved);
       return;
     }
   } catch (error) {
-    if (sendKnownError(response, error)) {
-      return;
-    }
-
-    sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON válido." });
+    sendErrorResponse(response, error);
     return;
   }
 
@@ -152,13 +162,24 @@ export async function handleUserAction(request: RequestLike, response: any) {
     }
 
     if (request.method === "PUT" && !action) {
+      const before = sigi.listUsers(session).find((candidate: any) => candidate.id === userId);
       const saved = sigi.saveUser(session, { ...(await readJsonBody(request)), id: userId });
+      sigi.recordAuditEvent(session, {
+        action: "user_updated",
+        resourceType: "user",
+        resourceId: saved.id,
+        before,
+        after: saved,
+        status: "ok",
+        requestId: requestIdFromRequest(request)
+      });
       await flushRuntimeState();
       sendJson(response, 200, saved);
       return;
     }
 
     if (request.method === "PATCH" && action === "desactivar") {
+      const before = sigi.listUsers(session).find((candidate: any) => candidate.id === userId);
       const updated = sigi.deactivateUser(session, userId);
 
       if (!updated) {
@@ -166,6 +187,15 @@ export async function handleUserAction(request: RequestLike, response: any) {
         return;
       }
 
+      sigi.recordAuditEvent(session, {
+        action: "user_deactivated",
+        resourceType: "user",
+        resourceId: updated.id,
+        before,
+        after: updated,
+        status: "ok",
+        requestId: requestIdFromRequest(request)
+      });
       await flushRuntimeState();
       sendJson(response, 200, updated);
       return;
@@ -179,18 +209,20 @@ export async function handleUserAction(request: RequestLike, response: any) {
         return;
       }
 
+      sigi.recordAuditEvent(session, {
+        action: "user_password_reset",
+        resourceType: "auth",
+        resourceId: updated.id,
+        status: "ok",
+        requestId: requestIdFromRequest(request)
+      });
       await flushRuntimeState();
       sendJson(response, 200, updated);
       return;
     }
   } catch (error) {
-    console.error("capture_drafts_error", error);
-
-    if (sendKnownError(response, error)) {
-      return;
-    }
-
-    sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON válido." });
+    console.error("user_action_error", error);
+    sendErrorResponse(response, error);
     return;
   }
 
@@ -220,11 +252,7 @@ export async function handleIndicators(request: RequestLike, response: any) {
       return;
     }
   } catch (error) {
-    if (sendKnownError(response, error)) {
-      return;
-    }
-
-    sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON válido." });
+    sendErrorResponse(response, error);
     return;
   }
 
@@ -299,7 +327,17 @@ export async function handleIndicatorAction(request: RequestLike, response: any)
     }
 
     if (request.method === "PUT" && !action) {
+      const before = indicator;
       const saved = sigi.saveIndicator(session, { ...(await readJsonBody(request)), id: indicator?.id ?? indicatorId });
+      sigi.recordAuditEvent(session, {
+        action: "indicator_configured",
+        resourceType: "indicator",
+        resourceId: String(saved.id),
+        before,
+        after: saved,
+        status: "ok",
+        requestId: requestIdFromRequest(request)
+      });
       await flushRuntimeState();
       sendJson(response, 200, saved);
       return;
@@ -318,16 +356,21 @@ export async function handleIndicatorAction(request: RequestLike, response: any)
         return;
       }
 
+      sigi.recordAuditEvent(session, {
+        action: "indicator_deactivated",
+        resourceType: "indicator",
+        resourceId: String(updated.id),
+        before: indicator,
+        after: updated,
+        status: "ok",
+        requestId: requestIdFromRequest(request)
+      });
       await flushRuntimeState();
       sendJson(response, 200, updated);
       return;
     }
   } catch (error) {
-    if (sendKnownError(response, error)) {
-      return;
-    }
-
-    sendJson(response, 400, { error: "invalid_json", message: "El cuerpo de la solicitud debe ser JSON válido." });
+    sendErrorResponse(response, error);
     return;
   }
 
@@ -624,6 +667,7 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
         return;
       }
 
+      sigi.assertCaptureAccess(session, { ...draft, payload: body.payload }, "draft");
       const expectedVersion = positiveExpectedVersion(body);
 
       if (!expectedVersion) {
@@ -631,7 +675,6 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
         return;
       }
 
-      sigi.assertCaptureAccess(session, { ...draft, payload: body.payload }, "draft");
       const updatedDraft = captures.updateCaptureDraft(id, body.payload, {
         allowReviewStatus: false,
         expectedVersion
@@ -873,6 +916,18 @@ function sanitizeDownloadFileName(value: string) {
 function sendJson(response: any, statusCode: number, payload: unknown) {
   applyCors(response);
   response.status(statusCode).json(payload);
+}
+
+function sendErrorResponse(response: any, error: unknown) {
+  if (sendKnownError(response, error)) {
+    return;
+  }
+
+  console.error("sigi_server_error", error);
+  sendJson(response, 500, {
+    error: "server_error",
+    message: "Ocurrió un error interno. Intenta de nuevo."
+  });
 }
 
 function sendKnownError(response: any, error: unknown) {

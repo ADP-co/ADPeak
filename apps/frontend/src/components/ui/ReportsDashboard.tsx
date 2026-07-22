@@ -241,6 +241,10 @@ function normalizeStatus(value: string) {
     .toLowerCase();
 }
 
+function reportStatusFilter(value: string) {
+  return value === 'todos' ? undefined : value;
+}
+
 // Pantalla Principal de Reportes
 export const ReportsDashboard = () => {
   const { user } = useAuth();
@@ -256,6 +260,7 @@ export const ReportsDashboard = () => {
   // Estado para el filtrado
   const [filterBy, setFilterBy] = useState('todos');
   const [reportMessage, setReportMessage] = useState('');
+  const [reportMessageKind, setReportMessageKind] = useState<'info' | 'success' | 'error'>('info');
   const [generatingDocumentId, setGeneratingDocumentId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -300,6 +305,7 @@ export const ReportsDashboard = () => {
   }, [dateOptions, refreshToken, selectedDate, user?.role]);
 
   const loadReport = async (item: PlantelProgressRecord): Promise<ExportReport> => {
+    setReportMessageKind('info');
     setReportMessage(`Preparando ${item.plantel}...`);
     const selectedOption = dateOptions.find((option) => option.value === selectedDate) ?? dateOptions[0];
 
@@ -309,6 +315,7 @@ export const ReportsDashboard = () => {
         periodo: selectedOption.value,
         tipo: 'detalle',
         plantelId: item.kind === 'plantel' ? item.plantelId : undefined,
+        estado: reportStatusFilter(filterBy),
       });
       const scopedReport = item.kind === 'indicador'
         ? {
@@ -321,7 +328,9 @@ export const ReportsDashboard = () => {
 
       return scopedReport;
     } catch (error) {
-      throw new Error(`No se pudo preparar la descarga de ${item.plantel}.`);
+      throw error instanceof Error
+        ? error
+        : new Error(`No se pudo preparar la descarga de ${item.plantel}.`);
     }
   };
 
@@ -360,8 +369,10 @@ export const ReportsDashboard = () => {
       const recordCount = countReportRows(report);
 
       downloadDocument(blob, `reporte-${slugify(item.plantel)}-${selectedDate}.csv`);
+      setReportMessageKind('success');
       setReportMessage(`Archivo CSV generado: ${recordCount} registros.`);
     } catch (error) {
+      setReportMessageKind('error');
       setReportMessage(downloadErrorMessage(error));
     } finally {
       setGeneratingDocumentId(null);
@@ -376,8 +387,10 @@ export const ReportsDashboard = () => {
       const recordCount = countReportRows(report);
 
       downloadDocument(pdf, `reporte-${slugify(item.plantel)}-${selectedDate}.pdf`);
+      setReportMessageKind('success');
       setReportMessage(`Archivo PDF generado: ${recordCount} registros.`);
     } catch (error) {
+      setReportMessageKind('error');
       setReportMessage(downloadErrorMessage(error));
     } finally {
       setGeneratingDocumentId(null);
@@ -470,11 +483,11 @@ export const ReportsDashboard = () => {
 
       {/* Título y Gráficas */}
       <div className="mb-10">
-        <div className="flex flex-wrap items-center justify-between mb-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between mb-4">
           <h1 className="font-title text-3xl font-bold text-brand-Gris_oscuro">
             {isResponsible ? 'Reportes de mis indicadores' : 'Reportes Dinámicos'}
           </h1>
-          <div className="flex gap-4">
+          <div className="flex w-full gap-4 sm:w-auto">
             <Select
               id="reports-period-filter"
               aria-label="Periodo del reporte"
@@ -482,7 +495,7 @@ export const ReportsDashboard = () => {
               onChange={(e) => setSelectedDate(e.target.value)}
               options={dateOptions}
               variant="outline"
-              containerClassName="w-36"
+              containerClassName="w-full sm:w-40"
             />
           </div>
         </div>
@@ -519,11 +532,11 @@ export const ReportsDashboard = () => {
 
       {/* Tabla de Progreso */}
       <div>
-        <div className="flex flex-wrap items-center justify-between mb-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between mb-4">
           <h2 className="font-title text-3xl font-bold text-brand-Gris_oscuro">
             {isResponsible ? 'Información capturada' : 'Progreso de los Planteles'}
           </h2>
-          <div className="flex items-center gap-2">
+          <div className="flex w-full items-center gap-2 sm:w-auto">
             <label htmlFor="reports-status-filter" className="text-xs text-brand-Gris_oscuro font-bold font-accent">Filtrar por</label>
             <Select
               id="reports-status-filter"
@@ -537,13 +550,23 @@ export const ReportsDashboard = () => {
                 { value: 'Rezagado', label: 'Rezagado' }
               ]}
               variant="solid"
-              containerClassName="w-36"
+              containerClassName="min-w-0 flex-1 sm:w-40 sm:flex-none"
             />
           </div>
         </div>
 
         {reportMessage && (
-          <p className="mb-4 text-sm font-body font-semibold text-brand-Verde_oscuro">
+          <p
+            className={`mb-4 rounded-md border px-3 py-2 text-sm font-body font-semibold ${
+              reportMessageKind === 'error'
+                ? 'border-brand-Status_rojo/30 bg-brand-Status_rojo/10 text-brand-Status_rojo'
+                : reportMessageKind === 'success'
+                  ? 'border-brand-Verde_principal/30 bg-brand-Verde_principal/10 text-brand-Verde_oscuro'
+                  : 'border-brand-Status_azul/30 bg-brand-Status_azul/10 text-brand-Gris_oscuro'
+            }`}
+            role={reportMessageKind === 'error' ? 'alert' : 'status'}
+            aria-live={reportMessageKind === 'error' ? 'assertive' : 'polite'}
+          >
             {reportMessage}
           </p>
         )}
@@ -555,13 +578,14 @@ export const ReportsDashboard = () => {
         )}
 
         {isLoadingReport && (
-          <p className="mb-4 text-sm font-body font-semibold text-brand-Gris_oscuro/70">
+          <p className="mb-4 text-sm font-body font-semibold text-brand-Gris_oscuro/70" role="status" aria-live="polite">
             Actualizando reportes...
           </p>
         )}
 
-        <div className="bg-brand-Blanco rounded-lg shadow-md border border-brand-Gris_bajo/20 overflow-x-auto">
+        <div className="bg-brand-Blanco rounded-lg shadow-md border border-brand-Gris_bajo/20 overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-inset" role="region" aria-label="Reportes disponibles" tabIndex={0}>
           <table className="w-full min-w-[720px] border-collapse text-center">
+            <caption className="sr-only">Reportes disponibles y acciones de descarga</caption>
 
             <thead>
               <tr className="bg-brand-Gris_bajo/35 text-brand-Gris_oscuro font-title font-bold text-sm select-none border-b border-brand-Gris_bajo/20">

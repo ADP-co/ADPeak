@@ -14,6 +14,7 @@ interface IndicatorFormProps {
   initialJustificacion?: string;
   existingEvidenceName?: string;
   existingEvidenceUrl?: string;
+  evidenceRules?: EvidenceRulesConfig;
   onOpenEvidence?: () => void;
   onDownloadEvidence?: () => void;
   canApprove?: boolean;
@@ -34,8 +35,19 @@ interface IndicatorFormProps {
   errorMessage?: string;
 }
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB en bytes
-const ACCEPTED_FILE_TYPES = ['application/pdf'];
+type EvidenceRulesConfig = {
+  required: boolean;
+  allowedTypes: string[];
+  maxSizeMb: number;
+  requireOpenBeforeApproval: boolean;
+};
+
+const DEFAULT_EVIDENCE_RULES: EvidenceRulesConfig = {
+  required: true,
+  allowedTypes: ['application/pdf'],
+  maxSizeMb: 5,
+  requireOpenBeforeApproval: true,
+};
 const MAX_REASONABLE_NUMERIC_VALUE = 999_999_999_999;
 
 export type FormSubmission = {
@@ -166,7 +178,10 @@ const createTextSchema = (required = false) => {
   }, z.string().optional());
 };
 
-const createDynamicSchema = (columns: ColumnConfig[]) => {
+const createDynamicSchema = (
+  columns: ColumnConfig[],
+  evidenceRules: EvidenceRulesConfig = DEFAULT_EVIDENCE_RULES
+) => {
   const schemaShape: Record<string, z.ZodTypeAny> = {};
 
   columns.forEach((column) => {
@@ -195,17 +210,17 @@ const createDynamicSchema = (columns: ColumnConfig[]) => {
 
         const file = files[0] as File;
 
-        if (file.size > MAX_FILE_SIZE) {
+        if (file.size > evidenceRules.maxSizeMb * 1024 * 1024) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: 'El archivo no debe pesar más de 5MB',
+            message: `El archivo no debe pesar más de ${evidenceRules.maxSizeMb} MB`,
           });
         }
 
-        if (!ACCEPTED_FILE_TYPES.includes(file.type)) {
+        if (!evidenceRules.allowedTypes.includes(file.type)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: 'El archivo debe ser un documento PDF',
+            message: 'El tipo de archivo no está permitido para este indicador',
           });
         }
       }),
@@ -636,6 +651,7 @@ export const IndicatorForm = ({
   initialJustificacion,
   existingEvidenceName,
   existingEvidenceUrl,
+  evidenceRules = DEFAULT_EVIDENCE_RULES,
   onOpenEvidence,
   onDownloadEvidence,
   canApprove = true,
@@ -656,7 +672,10 @@ export const IndicatorForm = ({
   onBack,
 }: IndicatorFormProps) => {
   // Memoizar el esquema para evitar re-cálculos en cada renderizado (optimización)
-  const dynamicSchema = useMemo(() => createDynamicSchema(template.columns), [template.columns]);
+  const dynamicSchema = useMemo(
+    () => createDynamicSchema(template.columns, evidenceRules),
+    [evidenceRules, template.columns]
+  );
   type FormData = z.infer<typeof dynamicSchema>;
 
   const {
@@ -1074,7 +1093,7 @@ export const IndicatorForm = ({
           </div>
           <div className="w-full md:w-1/3">
             <label className="block text-sm font-bold font-accent text-brand-Gris_oscuro mb-2">
-              Evidencia (PDF)
+              Evidencia{evidenceRules.required ? ' obligatoria' : ' opcional'}
             </label>
             <div className="flex items-center w-full h-[46px] border border-brand-Gris_bajo/40 rounded-md bg-brand-Blanco overflow-hidden focus-within:border-brand-Verde_principal focus-within:ring-1 focus-within:ring-brand-Verde_principal">
               <label
@@ -1085,9 +1104,9 @@ export const IndicatorForm = ({
                 <input
                   id={evidenciaInputId}
                   type="file"
-                  accept=".pdf"
+                  accept={evidenceRules.allowedTypes.join(',')}
                   className="sr-only"
-                  aria-label="Seleccionar evidencia en PDF"
+                  aria-label="Seleccionar archivo de evidencia"
                   disabled={isReadOnly}
                   {...register('evidencia')}
                 />

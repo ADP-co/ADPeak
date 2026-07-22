@@ -43,13 +43,13 @@ const PasswordField = ({
           minLength={label === 'Contraseña actual' ? undefined : 8}
           aria-invalid={invalid}
           aria-describedby={describedBy}
-          className="h-10 w-full rounded-md border border-brand-Gris_bajo/50 bg-brand-Blanco pl-3 pr-12 font-body text-sm text-brand-Gris_oscuro transition-colors focus:border-brand-Verde_oscuro focus:outline-none focus:ring-1 focus:ring-brand-Verde_oscuro"
+          className="h-11 w-full rounded-md border border-brand-Gris_bajo/50 bg-brand-Blanco pl-3 pr-12 font-body text-sm text-brand-Gris_oscuro transition-colors focus:border-brand-Verde_oscuro focus:outline-none focus:ring-2 focus:ring-brand-Verde_oscuro"
         />
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
           aria-label={showPassword ? `Ocultar ${label}` : `Mostrar ${label}`}
-          className="absolute right-1 top-1/2 -translate-y-1/2 cursor-pointer p-2 text-brand-Gris_oscuro transition-colors hover:text-brand-Verde_oscuro"
+          className="absolute right-0 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md text-brand-Gris_oscuro transition-colors hover:bg-brand-Verde_principal/10 hover:text-brand-Verde_oscuro focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal"
         >
           {showPassword ? <Eye size={20} strokeWidth={2} /> : <EyeOff size={20} strokeWidth={2} />}
         </button>
@@ -63,7 +63,7 @@ interface AccountProfileProps {
 }
 
 export const AccountProfile = ({ onBack }: AccountProfileProps) => {
-  const { user } = useAuth();
+  const { user, login } = useAuth();
   const [saveMessage, setSaveMessage] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
@@ -92,7 +92,8 @@ export const AccountProfile = ({ onBack }: AccountProfileProps) => {
 
     try {
       setIsSavingPassword(true);
-      await updatePassword(currentPassword, newPassword, confirmPassword);
+      const updatedSession = await updatePassword(currentPassword, newPassword, confirmPassword);
+      login({ ...updatedSession.user, sessionToken: updatedSession.sessionToken });
       setPasswordError('');
       setCurrentPassword('');
       setNewPassword('');
@@ -113,14 +114,14 @@ export const AccountProfile = ({ onBack }: AccountProfileProps) => {
           type="button"
           onClick={onBack}
           aria-label="Regresar"
-          className="cursor-pointer rounded-full p-2 text-brand-Verde_oscuro transition-colors hover:bg-brand-Verde_oscuro/10"
+          className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-brand-Verde_oscuro transition-colors hover:bg-brand-Verde_oscuro/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal"
           title="Regresar"
         >
           <ArrowLeft size={24} strokeWidth={2.5} />
         </button>
       </div>
 
-      <div className="flex flex-col gap-10 rounded-lg border border-brand-Gris_bajo/20 bg-brand-Blanco p-8 shadow-md md:flex-row md:p-10">
+      <div className="flex flex-col gap-8 rounded-lg border border-brand-Gris_bajo/20 bg-brand-Blanco p-4 shadow-md sm:p-8 md:flex-row md:gap-10 md:p-10">
         <div className="flex flex-col items-center justify-center border-brand-Gris_bajo/20 md:w-[35%] md:border-r md:pr-10">
           <div className="mb-6 flex h-36 w-36 items-center justify-center rounded-full bg-brand-Gris_bajo/10 text-brand-Verde_oscuro">
             <User size={80} strokeWidth={2} />
@@ -135,7 +136,7 @@ export const AccountProfile = ({ onBack }: AccountProfileProps) => {
 
         <div className="flex flex-1 flex-col gap-6">
           <div className="flex w-full flex-col gap-1">
-            <label className="font-title text-sm font-bold text-brand-Gris_oscuro">Usuario</label>
+            <span className="font-title text-sm font-bold text-brand-Gris_oscuro">Usuario</span>
             <div className="flex h-10 w-full items-center rounded-md bg-brand-Verde_principal/15 px-3">
               <span className="font-body text-sm font-bold text-brand-Verde_oscuro">
                 {user?.username || user?.name || 'Nombre de Usuario'}
@@ -172,20 +173,20 @@ export const AccountProfile = ({ onBack }: AccountProfileProps) => {
               invalid={Boolean(passwordError)}
             />
             {passwordError && (
-              <p id={passwordFeedbackId} role="alert" className="text-xs font-semibold text-brand-Status_rojo">{passwordError}</p>
+              <p id={passwordFeedbackId} role="alert" className="rounded-md border border-brand-Status_rojo/30 bg-brand-Status_rojo/10 px-3 py-2 text-sm font-semibold text-brand-Status_rojo">{passwordError}</p>
             )}
           </div>
 
           {saveMessage && (
-            <p id={passwordFeedbackId} role="status" aria-live="polite" className="text-right font-body text-sm font-semibold text-brand-Verde_oscuro">{saveMessage}</p>
+            <p id={passwordFeedbackId} role="status" aria-live="polite" className="rounded-md border border-brand-Verde_principal/30 bg-brand-Verde_principal/10 px-3 py-2 text-right font-body text-sm font-semibold text-brand-Verde_oscuro">{saveMessage}</p>
           )}
 
-          <div className="mt-4 flex justify-end">
+          <div className="mt-4 flex justify-stretch sm:justify-end">
             <Button
               variant="primary"
               onClick={() => void handleSavePassword()}
               disabled={isSavingPassword}
-              className="px-8 py-2.5 text-sm"
+              className="w-full px-8 py-2.5 text-sm sm:w-auto"
             >
               {isSavingPassword ? 'Guardando' : 'Guardar contraseña'}
             </Button>

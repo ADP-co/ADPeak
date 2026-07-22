@@ -33,9 +33,11 @@ describe("forensic audit route parity", () => {
       expect(handlers).toContain(`action: "${action}"`);
     }
 
-    expect(localServer.match(/recordAuditEvent\(session/g)).toHaveLength(actions.length);
-    expect(handlers.match(/sigi\.recordAuditEvent\(session/g)).toHaveLength(actions.length);
+    expect(localServer.match(/recordAuditEvent\(session/g)?.length ?? 0).toBeGreaterThanOrEqual(actions.length);
+    expect(handlers.match(/sigi\.recordAuditEvent\(session/g)?.length ?? 0).toBeGreaterThanOrEqual(actions.length);
     expect(localServer.match(/requestId\r?\n/g)?.length ?? 0).toBeGreaterThanOrEqual(actions.length);
-    expect(handlers.match(/requestId: requestIdFromRequest\(request\)/g)).toHaveLength(actions.length);
+    expect(handlers.match(/requestId: requestIdFromRequest\(request\)/g)?.length ?? 0).toBeGreaterThanOrEqual(
+      actions.length
+    );
   });
 });

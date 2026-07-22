@@ -16,6 +16,7 @@ describe('Input accessibility', () => {
     expect(markup).toContain('aria-describedby="email-hint email-error"');
     expect(markup).toContain('aria-invalid="true"');
     expect(markup).toContain('id="email-error"');
+    expect(markup).toContain('role="alert"');
     expect(markup).toContain('Email is required');
   });
 

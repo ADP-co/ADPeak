@@ -33,7 +33,7 @@ scrubInheritedDatabaseEnvironment();
 const HELP = `Usage: npm run qa:seed -- [options]
 
 Sanitize only the manifest-bound isolated database. The command enforces the
-46-account and 14-indicator official baseline, strips visible QA/TMP/FMT state,
+56-account and 14-indicator official baseline, strips visible QA/TMP/FMT state,
 reactivates the baseline, synchronizes assignments, and replaces passwords with
 clone-only values supplied through required environment variables.
 
@@ -63,7 +63,7 @@ await runCommand(async () => {
       "Erase inherited DATABASE_URL and PostgreSQL fallback variables",
       "Require both test environment guards and three strong clone-only role passwords",
       `Load and validate manifest ${displayPath(options.manifest)}`,
-      "Read the manifest target, sanitize visible state, and validate 46 accounts plus 14 indicators",
+      "Read the manifest target, sanitize visible state, and validate 56 accounts plus 14 indicators",
       "Replace target public.app_state in one transaction and verify the committed baseline",
       "Store only expected password hashes in the ignored QA environment; never log passwords"
     ]);

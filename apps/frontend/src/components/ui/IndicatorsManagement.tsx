@@ -46,6 +46,8 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
   const [searchTerm, setSearchTerm] = useState('');
   const [activeSearch, setActiveSearch] = useState('');
   const [statusMessage, setStatusMessage] = useState('');
+  const [statusKind, setStatusKind] = useState<'success' | 'error'>('success');
+  const [isLoading, setIsLoading] = useState(true);
   const [indicatorToDelete, setIndicatorToDelete] = useState<IndicatorRecord | null>(null);
   const [indicatorToToggle, setIndicatorToToggle] = useState<IndicatorRecord | null>(null);
 
@@ -58,7 +60,17 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
           setIndicators(items.map(fromCatalogIndicator));
         }
       })
-      .catch(() => undefined);
+      .catch(() => {
+        if (isMounted) {
+          setStatusKind('error');
+          setStatusMessage('No se pudo cargar la gestión de indicadores. Intenta nuevamente.');
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      });
 
     return () => {
       isMounted = false;
@@ -82,6 +94,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
 
     const indicator = indicatorToToggle;
     const nextEnabled = indicator.enabled === false;
+    setStatusMessage('');
 
     try {
       if (nextEnabled) {
@@ -96,8 +109,9 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
       } else {
         await deactivateIndicator(Number(indicator.id));
       }
-    } catch (error) {
-      setStatusMessage(error instanceof Error ? error.message : 'No se pudo actualizar el indicador.');
+    } catch {
+      setStatusKind('error');
+      setStatusMessage('No se pudo actualizar el indicador. Intenta nuevamente.');
       setIndicatorToToggle(null);
       return;
     }
@@ -107,6 +121,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
         item.id === indicator.id ? { ...item, enabled: nextEnabled } : item
       )
     );
+    setStatusKind('success');
     setStatusMessage(nextEnabled ? 'Indicador habilitado.' : 'Indicador deshabilitado.');
     setIndicatorToToggle(null);
   };
@@ -119,7 +134,10 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
     try {
       await deactivateIndicator(Number(indicatorToDelete.id));
     } catch {
-      // Fallback local.
+      setStatusKind('error');
+      setStatusMessage('No se pudo desactivar el indicador. Intenta nuevamente.');
+      setIndicatorToDelete(null);
+      return;
     }
 
     setIndicators((current) =>
@@ -127,6 +145,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
         item.id === indicatorToDelete.id ? { ...item, enabled: false } : item
       )
     );
+    setStatusKind('success');
     setStatusMessage('Indicador desactivado.');
     setIndicatorToDelete(null);
   };
@@ -170,13 +189,13 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
                 }
               }}
               onKeyDown={(event) => event.key === 'Enter' && setActiveSearch(searchTerm.trim())}
-              className="w-full h-9 pl-4 pr-4 rounded-full border border-brand-Gris_bajo/50 focus:outline-none focus:border-brand-Verde_principal text-sm text-brand-Gris_oscuro"
+              className="h-11 w-full rounded-full border border-brand-Gris_bajo/50 px-4 text-sm text-brand-Gris_oscuro focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal"
             />
             <button
               type="button"
               onClick={() => setActiveSearch(searchTerm.trim())}
               aria-label="Buscar indicadores"
-              className="h-9 flex items-center justify-center bg-brand-Verde_oscuro text-brand-Blanco px-4 rounded-full hover:bg-brand-Verde_principal transition-colors shrink-0"
+              className="flex h-11 min-w-11 shrink-0 items-center justify-center rounded-full bg-brand-Verde_oscuro px-4 text-brand-Blanco transition-colors hover:bg-brand-Verde_principal focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-offset-2"
             >
               <Search size={18} />
             </button>
@@ -186,7 +205,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
             type="button"
             onClick={handleAddIndicator}
             aria-label="Agregar indicador"
-            className="h-9 flex items-center gap-2 bg-brand-Verde_oscuro text-brand-Blanco px-5 rounded-full font-bold text-sm hover:bg-brand-Verde_principal transition-colors"
+            className="flex min-h-11 items-center gap-2 rounded-full bg-brand-Verde_oscuro px-5 text-sm font-bold text-brand-Blanco transition-colors hover:bg-brand-Verde_principal focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-offset-2"
           >
             Agregar
             <PlusCircle size={18} strokeWidth={2.5} />
@@ -194,15 +213,24 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
         </div>
 
         {statusMessage && (
-          <p className="text-sm font-body font-semibold text-brand-Verde_oscuro" role="status">
+          <p
+            className={`rounded-md border px-3 py-2 text-sm font-body font-semibold ${
+              statusKind === 'error'
+                ? 'border-brand-Status_rojo/30 bg-brand-Status_rojo/10 text-brand-Status_rojo'
+                : 'border-brand-Verde_principal/30 bg-brand-Verde_principal/10 text-brand-Verde_oscuro'
+            }`}
+            role={statusKind === 'error' ? 'alert' : 'status'}
+            aria-live={statusKind === 'error' ? 'assertive' : 'polite'}
+          >
             {statusMessage}
           </p>
         )}
       </div>
 
       <div className="bg-brand-Blanco rounded-lg shadow-md overflow-hidden border border-brand-Gris_bajo/20">
-        <div className="w-full overflow-x-auto">
+        <div className="w-full overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-inset" role="region" aria-label="Lista de indicadores configurables" tabIndex={0}>
           <table className="w-full min-w-[1120px] border-collapse text-center">
+            <caption className="sr-only">Indicadores, alcance, responsables y acciones de configuración</caption>
             <thead>
               <tr className="bg-brand-Gris_bajo/35 text-brand-Gris_oscuro font-title font-bold text-sm select-none border-b border-brand-Gris_bajo/20">
                 <th className="py-4 px-5 w-[12%]">Código</th>
@@ -243,7 +271,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
                         type="button"
                         onClick={() => handleEditIndicator(indicator)}
                         aria-label={`Configurar indicador ${indicator.code}`}
-                        className="px-6 py-1 rounded-full border border-brand-Verde_oscuro text-brand-Verde_oscuro font-bold text-sm hover:bg-brand-Verde_oscuro hover:text-brand-Blanco transition-colors w-[120px]"
+                        className="min-h-11 w-[120px] rounded-full border border-brand-Verde_oscuro px-6 py-1 text-sm font-bold text-brand-Verde_oscuro transition-colors hover:bg-brand-Verde_oscuro hover:text-brand-Blanco focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-offset-2"
                       >
                         Configurar
                       </button>
@@ -251,7 +279,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
                         type="button"
                         onClick={() => setIndicatorToToggle(indicator)}
                         aria-label={indicator.enabled === false ? `Habilitar indicador ${indicator.code}` : `Deshabilitar indicador ${indicator.code}`}
-                        className="text-brand-Verde_oscuro hover:text-brand-Status_amarillo transition-colors p-1 rounded-md hover:bg-brand-Status_amarillo/10 cursor-pointer"
+                        className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-brand-Verde_oscuro transition-colors hover:bg-brand-Status_amarillo/20 hover:text-brand-Gris_oscuro focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal"
                       >
                         {indicator.enabled === false ? <EyeOff size={20} /> : <Eye size={20} />}
                       </button>
@@ -259,7 +287,7 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
                         type="button"
                         onClick={() => setIndicatorToDelete(indicator)}
                         aria-label={`Desactivar indicador ${indicator.code}`}
-                        className="text-brand-Verde_oscuro hover:text-brand-Status_rojo transition-colors p-1 rounded-md hover:bg-brand-Status_rojo/10 cursor-pointer"
+                        className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-brand-Verde_oscuro transition-colors hover:bg-brand-Status_rojo/10 hover:text-brand-Status_rojo focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal"
                       >
                         <Trash2 size={20} />
                       </button>
@@ -267,10 +295,17 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
                   </td>
                 </tr>
               ))}
-              {filteredIndicators.length === 0 && (
+              {!isLoading && filteredIndicators.length === 0 && (
                 <tr>
                   <td colSpan={6} className="py-8 px-6 text-center text-brand-Gris_oscuro/70">
                     Sin resultados para la búsqueda actual.
+                  </td>
+                </tr>
+              )}
+              {isLoading && (
+                <tr>
+                  <td colSpan={6} className="py-8 px-6 text-center text-brand-Gris_oscuro/70" role="status">
+                    Cargando indicadores...
                   </td>
                 </tr>
               )}

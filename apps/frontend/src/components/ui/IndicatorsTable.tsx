@@ -152,11 +152,12 @@ export const IndicatorsTable = ({
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               placeholder="Código, nombre, plantel o responsable..."
-              className="h-9 sm:w-80"
+              className="h-11 sm:w-80"
             />
             <div className="flex items-end gap-2">
-              <span className="pb-2 text-xs text-brand-Gris_oscuro font-bold font-accent whitespace-nowrap">Filtrar por</span>
+              <label htmlFor="indicators-status-filter" className="pb-3 text-xs text-brand-Gris_oscuro font-bold font-accent whitespace-nowrap">Filtrar por</label>
               <Select
+                id="indicators-status-filter"
                 options={[
                   { value: 'todos', label: 'Todos' },
                   { value: 'aprobado', label: 'Aprobado' },
@@ -175,8 +176,9 @@ export const IndicatorsTable = ({
 
         {/* Tarjeta blanca contenedora de la tabla */}
         <div className="bg-brand-Blanco rounded-lg shadow-md overflow-hidden border border-brand-Gris_bajo/20">
-        <div className="w-full overflow-x-auto">
+        <div className="w-full overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-inset" role="region" aria-label={`${title}: resultados`} tabIndex={0}>
           <table className={`w-full border-collapse text-left ${showScopeColumns ? 'min-w-[1040px]' : ''}`}>
+            <caption className="sr-only">{title}, estados y acciones disponibles</caption>
 
             {/* Cabecera de la tabla con fondo gris claro al 35% de opacidad */}
             <thead>

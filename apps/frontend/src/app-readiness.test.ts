@@ -40,6 +40,17 @@ describe('frontend readiness invariants', () => {
     expect(source).not.toContain('Estados para simular');
   });
 
+  it('stores the renewed session token after changing the current password', () => {
+    const accountProfile = readSource('components/ui/AccountProfile.tsx');
+    const authApi = readSource('api/auth.ts');
+    const authContext = readSource('context/AuthContext.tsx');
+
+    expect(accountProfile).toContain('login({ ...updatedSession.user, sessionToken: updatedSession.sessionToken })');
+    expect(authApi).toContain('Promise<{ user: User; sessionToken: string }>');
+    expect(authContext).toContain('!Number.isInteger(payload.exp)');
+    expect(authContext).toContain('parsedUser.sessionToken && !isExpiredToken(parsedUser.sessionToken)');
+  });
+
   it('disables both scoped report exports and renders the blocking reason', () => {
     const source = readSource('components/ui/ReportsDashboard.tsx');
 
@@ -47,6 +58,7 @@ describe('frontend readiness invariants', () => {
     expect(source).toContain('disabled={generatingDocumentId === `${item.id}:csv` || exportDisabled}');
     expect(source).toContain('disabled={generatingDocumentId === `${item.id}:pdf` || exportDisabled}');
     expect(source).toContain('{exportBlockMessage && (');
+    expect(source).toContain('estado: reportStatusFilter(filterBy)');
   });
 
   it('keeps generated operational fallbacks behind a development-only import', () => {
@@ -143,6 +155,18 @@ describe('frontend readiness invariants', () => {
     expect(tableSource).toContain("allowedActions.includes('request_correction')");
   });
 
+  it('applies each indicator evidence policy instead of hard-coded limits', () => {
+    const appSource = readSource('App.tsx');
+    const formSource = readSource('components/forms/IndicatorForm.tsx');
+
+    expect(appSource).toContain('selectedCatalogIndicator?.evidenceRules ?? DEFAULT_EVIDENCE_RULES');
+    expect(appSource).toContain('evidenceRules.required && !hasEvidence');
+    expect(appSource).toContain('evidenceRules.requireOpenBeforeApproval');
+    expect(appSource).not.toContain('MAX_INLINE_EVIDENCE_BYTES');
+    expect(formSource).toContain('evidenceRules.maxSizeMb * 1024 * 1024');
+    expect(formSource).toContain('evidenceRules.allowedTypes.includes(file.type)');
+  });
+
   it('describes responsible review actions without promising data editing', () => {
     const source = readSource('components/ui/IndicatorsTable.tsx');
     const appSource = readSource('App.tsx');
@@ -161,5 +185,16 @@ describe('frontend readiness invariants', () => {
     expect(source).toContain("captureStatus === 'correccion_solicitada'");
     expect(source).toContain('correctionObservation.trim()');
     expect(appSource).toContain('correctionObservation={captureDraft.capture?.observacion ?? undefined}');
+  });
+
+  it('does not silently replace an explicit inaccessible capture with another draft', () => {
+    const hookSource = readSource('hooks/useCaptureDraft.ts');
+    const appSource = readSource('App.tsx');
+
+    expect(hookSource).toContain('strictRequestedCaptureId = false');
+    expect(hookSource).toContain('&& !strictRequestedCaptureId');
+    expect(hookSource).toContain('hasStrictLookupError');
+    expect(appSource).toContain('strictRequestedCaptureId: Boolean(requestedCaptureId)');
+    expect(appSource).toContain('Captura no disponible');
   });
 });

@@ -120,8 +120,16 @@ const demoProgress = [
   }
 ];
 
+export function demoEnabled(environment: NodeJS.ProcessEnv = process.env) {
+  return environment.APP_ENV !== "production" && !environment.VERCEL;
+}
+
 export function publicDemoUsers() {
-  return demoUsers.map(({ accessCode, ...user }) => ({ ...user, accessCode }));
+  if (!demoEnabled()) {
+    return [];
+  }
+
+  return demoUsers.map(({ accessCode: _accessCode, ...user }) => user);
 }
 
 export function demoStatusPayload() {
@@ -136,6 +144,10 @@ export function demoStatusPayload() {
 }
 
 export function demoDatasetPayload() {
+  if (!demoEnabled()) {
+    return disabledDemoDataset();
+  }
+
   return {
     cycle: "POA 2026",
     filters: {
@@ -154,6 +166,10 @@ export function demoDatasetPayload() {
 }
 
 export function authenticateDemoUser(email: string, accessCode: string) {
+  if (!demoEnabled()) {
+    return undefined;
+  }
+
   const user = demoUsers.find(
     (candidate) =>
       candidate.email === email.trim().toLowerCase() &&
@@ -179,12 +195,20 @@ export function authenticateDemoUser(email: string, accessCode: string) {
 }
 
 export function demoRoleFlows() {
+  if (!demoEnabled()) {
+    return {};
+  }
+
   return Object.fromEntries(
     demoUsers.map((user) => [user.role, { displayName: user.displayName, mainFlow: user.mainFlow }])
   );
 }
 
 export function runDemoAction(role: DemoRole, action: DemoAction) {
+  if (!demoEnabled()) {
+    return undefined;
+  }
+
   const allowedActions: Record<DemoRole, DemoAction[]> = {
     admin_dgems: ["approve"],
     plantel: ["capture_submit"],
@@ -205,6 +229,17 @@ export function runDemoAction(role: DemoRole, action: DemoAction) {
 }
 
 export function demoReportPayload(filters: DemoReportFilters = {}) {
+  if (!demoEnabled()) {
+    return {
+      tipoReporte: "demo_disabled",
+      periodo: "",
+      cicloEscolar: "",
+      fechaGeneracion: new Date().toISOString().slice(0, 10),
+      identidadReporte: { tipo: "Demo", nombre: "No disponible" },
+      indicadores: []
+    };
+  }
+
   const normalizedPlantel = normalizeFilter(filters.plantel);
   const normalizedPlantelId = normalizeFilter(filters.plantelId);
   const normalizedPeriodo = normalizeFilter(filters.periodo);
@@ -356,4 +391,31 @@ function uniqueSorted(values: string[]) {
 
 function normalizeFilter(value?: string) {
   return value?.trim().toLowerCase();
+}
+
+function disabledDemoDataset() {
+  return {
+    cycle: "",
+    filters: {
+      cycles: [],
+      periods: [],
+      campuses: [],
+      indicators: [],
+      activities: [],
+      responsibles: [],
+      statuses: []
+    },
+    users: [],
+    progress: [],
+    summary: {
+      indicators: 0,
+      evidenceFiles: 0,
+      completionPercent: 0,
+      approved: 0,
+      pendingReview: 0,
+      observed: 0,
+      missing: 0,
+      late: 0
+    }
+  };
 }
