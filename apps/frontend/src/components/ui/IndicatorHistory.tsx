@@ -120,7 +120,32 @@ function formatAuditValue(value: unknown) {
   return safeAuditJson(value);
 }
 
-function readableAuditLabel(value: string) {
+export function readableAuditLabel(value: string) {
+  const labels: Record<string, string> = {
+    password_changed: 'Contraseña actualizada',
+    user_created: 'Usuario creado',
+    user_updated: 'Usuario actualizado',
+    user_deactivated: 'Usuario desactivado',
+    user_password_reset: 'Contraseña restablecida',
+    user_indicator_assignments_changed: 'Asignaciones de indicadores actualizadas',
+    indicator_created: 'Indicador creado',
+    indicator_configured: 'Indicador configurado',
+    indicator_deactivated: 'Indicador desactivado',
+    capture_saved: 'Borrador guardado',
+    capture_updated: 'Captura actualizada',
+    capture_submitted: 'Captura enviada a revisión',
+    capture_resubmitted: 'Captura corregida y reenviada',
+    capture_correction_requested: 'Corrección solicitada',
+    correction_requested: 'Corrección solicitada',
+    capture_approved: 'Captura aprobada',
+    evidence_opened: 'Evidencia abierta',
+    report_exported: 'Reporte exportado',
+  };
+
+  if (labels[value]) {
+    return labels[value];
+  }
+
   const label = value.replace(/_/g, ' ').trim();
   return label ? `${label.charAt(0).toUpperCase()}${label.slice(1)}` : 'Sin acción';
 }
@@ -386,7 +411,71 @@ export const IndicatorHistory = () => {
 
       {isAuditView ? (
         <div id="history-panel-audit" role="tabpanel" aria-labelledby="history-tab-audit" className="bg-brand-Blanco rounded-lg shadow-md overflow-hidden border border-brand-Gris_bajo/20">
-          <div className="w-full overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-inset" role="region" aria-label="Eventos de auditoría" tabIndex={0}>
+          <div className="space-y-3 p-3 sm:hidden" aria-label="Eventos de auditoría">
+            {isAuditLoading && (
+              <p className="px-3 py-8 text-center text-sm text-brand-Gris_oscuro/70" role="status">Cargando auditoría...</p>
+            )}
+            {!isAuditLoading && filteredAuditEvents.map((event) => {
+              const isExpanded = expandedAuditIds.has(event.id);
+
+              return (
+                <article key={`mobile-audit-${event.id}`} className="rounded-lg border border-brand-Gris_bajo/30 bg-brand-Blanco p-4 shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-title text-sm font-bold text-brand-Gris_oscuro">{readableAuditLabel(event.action)}</p>
+                      <p className="mt-1 text-xs text-brand-Gris_oscuro/65">{formatDate(event.createdAt)}</p>
+                    </div>
+                    <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${
+                      event.status === 'ok'
+                        ? 'bg-brand-Verde_principal/15 text-brand-Verde_oscuro'
+                        : 'bg-brand-Status_rojo/10 text-brand-Status_rojo'
+                    }`}>
+                      {statusLabel(event.status)}
+                    </span>
+                  </div>
+                  <dl className="mt-4 grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
+                    <div>
+                      <dt className="font-bold text-brand-Gris_oscuro">Actor</dt>
+                      <dd className="break-words text-brand-Gris_oscuro/75">{event.userId} · {roleLabel(event.role)}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-bold text-brand-Gris_oscuro">Recurso</dt>
+                      <dd className="break-words text-brand-Gris_oscuro/75">{resourceLabel(event.resourceType)} {event.resourceId}</dd>
+                    </div>
+                    <div className="col-span-2">
+                      <dt className="font-bold text-brand-Gris_oscuro">Request ID</dt>
+                      <dd className="break-all font-mono text-xs text-brand-Gris_oscuro/70">{event.requestId}</dd>
+                    </div>
+                  </dl>
+                  <button
+                    type="button"
+                    onClick={() => toggleAuditDetails(event.id)}
+                    aria-expanded={isExpanded}
+                    className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-brand-Verde_oscuro px-4 text-sm font-bold text-brand-Verde_oscuro hover:bg-brand-Verde_oscuro hover:text-brand-Blanco focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal"
+                  >
+                    {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                    {isExpanded ? 'Ocultar cambios' : 'Ver cambios'}
+                  </button>
+                  {isExpanded && (
+                    <div className="mt-4 space-y-4 rounded-md bg-brand-Gris_bajo/10 p-3">
+                      <section>
+                        <h2 className="mb-2 font-title text-sm font-bold text-brand-Gris_oscuro">Antes</h2>
+                        <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-words font-mono text-xs leading-relaxed text-brand-Gris_oscuro/85">{formatAuditValue(event.before)}</pre>
+                      </section>
+                      <section>
+                        <h2 className="mb-2 font-title text-sm font-bold text-brand-Gris_oscuro">Después</h2>
+                        <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-words font-mono text-xs leading-relaxed text-brand-Gris_oscuro/85">{formatAuditValue(event.after)}</pre>
+                      </section>
+                    </div>
+                  )}
+                </article>
+              );
+            })}
+            {!isAuditLoading && filteredAuditEvents.length === 0 && (
+              <p className="px-3 py-8 text-center text-sm text-brand-Gris_oscuro/70">Sin eventos para la búsqueda actual.</p>
+            )}
+          </div>
+          <div className="hidden w-full overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-inset sm:block" role="region" aria-label="Eventos de auditoría" tabIndex={0}>
             <table className="w-full min-w-[1120px] border-collapse text-left">
               <caption className="sr-only">Eventos de auditoría, actor, acción, recurso y estado</caption>
               <thead>
@@ -486,7 +575,45 @@ export const IndicatorHistory = () => {
         </div>
       ) : (
         <div id="history-panel-indicators" role="tabpanel" aria-labelledby="history-tab-indicators" className="bg-brand-Blanco rounded-lg shadow-md overflow-hidden border border-brand-Gris_bajo/20">
-          <div className="w-full overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-inset" role="region" aria-label="Historial de indicadores" tabIndex={0}>
+          <div className="space-y-3 p-3 sm:hidden" aria-label="Historial de indicadores">
+            {isHistoryLoading && (
+              <p className="px-3 py-8 text-center text-sm text-brand-Gris_oscuro/70" role="status">Cargando historial...</p>
+            )}
+            {!isHistoryLoading && filteredHistory.map((item) => (
+              <article key={`mobile-history-${item.id}-${item.updatedAt}`} className="rounded-lg border border-brand-Gris_bajo/30 bg-brand-Blanco p-4 shadow-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <span className="font-mono text-sm font-bold text-brand-Verde_oscuro">{item.code}</span>
+                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${
+                    item.active
+                      ? 'bg-brand-Verde_principal/15 text-brand-Verde_oscuro'
+                      : 'bg-brand-Status_rojo/10 text-brand-Status_rojo'
+                  }`}>
+                    {item.active ? 'Activo' : 'Inactivo'}
+                  </span>
+                </div>
+                <h2 className="mt-3 font-title text-base font-bold leading-snug text-brand-Gris_oscuro">{item.name}</h2>
+                <dl className="mt-4 space-y-2 text-sm">
+                  <div>
+                    <dt className="font-bold text-brand-Gris_oscuro">Responsable</dt>
+                    <dd className="break-words text-brand-Gris_oscuro/75">{item.responsibleNames.join(', ') || 'Sin asignar'}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-bold text-brand-Gris_oscuro">Alcance</dt>
+                    <dd className="break-words text-brand-Gris_oscuro/75">{item.plantelScope}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-bold text-brand-Gris_oscuro">Último movimiento</dt>
+                    <dd className="text-brand-Gris_oscuro/75">{item.action}</dd>
+                    <dd className="mt-0.5 text-xs text-brand-Gris_oscuro/65">{formatDate(item.updatedAt)} · {item.updatedBy}</dd>
+                  </div>
+                </dl>
+              </article>
+            ))}
+            {!isHistoryLoading && filteredHistory.length === 0 && (
+              <p className="px-3 py-8 text-center text-sm text-brand-Gris_oscuro/70">Sin movimientos para la búsqueda actual.</p>
+            )}
+          </div>
+          <div className="hidden w-full overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-inset sm:block" role="region" aria-label="Historial de indicadores" tabIndex={0}>
             <table className="w-full min-w-[1120px] border-collapse text-left">
               <caption className="sr-only">Historial de cambios en indicadores</caption>
               <thead>

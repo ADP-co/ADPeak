@@ -249,6 +249,8 @@ function reportStatusFilter(value: string) {
 export const ReportsDashboard = () => {
   const { user } = useAuth();
   const isResponsible = user?.role === 'responsable';
+  const isPlantel = user?.role === 'plantel';
+  const isScopedReport = isResponsible || isPlantel;
 
   const [dateOptions] = useState(periodOptions);
   const [selectedDate, setSelectedDate] = useState(periodOptions[0].value);
@@ -398,7 +400,7 @@ export const ReportsDashboard = () => {
   };
 
   const plantelesFromReport = report
-    ? user?.role === 'responsable'
+    ? isScopedReport
       ? buildIndicatorProgress(report, selectedDate)
       : buildPlantelProgress(report, selectedDate)
     : [];
@@ -485,7 +487,7 @@ export const ReportsDashboard = () => {
       <div className="mb-10">
         <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between mb-4">
           <h1 className="font-title text-3xl font-bold text-brand-Gris_oscuro">
-            {isResponsible ? 'Reportes de mis indicadores' : 'Reportes Dinámicos'}
+            {isResponsible ? 'Reportes de mis indicadores' : isPlantel ? 'Reportes de mi plantel' : 'Reportes Dinámicos'}
           </h1>
           <div className="flex w-full gap-4 sm:w-auto">
             <Select
@@ -500,33 +502,25 @@ export const ReportsDashboard = () => {
           </div>
         </div>
 
-        <div className={`grid grid-cols-1 gap-6 ${isResponsible ? 'md:grid-cols-4' : 'md:grid-cols-3'}`}>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <DonutCard
-            title={isResponsible ? 'Aprobados' : 'Bachilleratos Completos'}
+            title={isScopedReport ? 'Indicadores aprobados' : 'Bachilleratos Completos'}
             percentage={completosPercentage}
             colorClass="bg-[#C1D82F]"
             strokeColor="#C1D82F"
           />
           <DonutCard
-            title={isResponsible ? 'Pendientes' : 'Bachilleratos Pendientes'}
+            title={isScopedReport ? 'Indicadores pendientes' : 'Bachilleratos Pendientes'}
             percentage={pendientesPercentage}
             colorClass="bg-[#FFD100]"
             strokeColor="#FFD100"
           />
           <DonutCard
-            title={isResponsible ? 'Con observación' : 'Bachilleratos Rezagados'}
+            title={isScopedReport ? 'Con observación' : 'Bachilleratos Rezagados'}
             percentage={rezagadosPercentage}
             colorClass="bg-[#770F00]"
             strokeColor="#770F00"
           />
-          {isResponsible && (
-            <DonutCard
-              title="Asignados"
-              percentage={totalPlanteles > 0 ? 100 : 0}
-              colorClass="bg-[#00A4E4]"
-              strokeColor="#00A4E4"
-            />
-          )}
         </div>
       </div>
 
@@ -534,7 +528,7 @@ export const ReportsDashboard = () => {
       <div>
         <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between mb-4">
           <h2 className="font-title text-3xl font-bold text-brand-Gris_oscuro">
-            {isResponsible ? 'Información capturada' : 'Progreso de los Planteles'}
+            {isScopedReport ? 'Información capturada' : 'Progreso de los Planteles'}
           </h2>
           <div className="flex w-full items-center gap-2 sm:w-auto">
             <label htmlFor="reports-status-filter" className="text-xs text-brand-Gris_oscuro font-bold font-accent">Filtrar por</label>
@@ -544,10 +538,10 @@ export const ReportsDashboard = () => {
               onChange={(e) => setFilterBy(e.target.value)}
               options={[
                 { value: 'todos', label: 'Todos' },
-                { value: 'Completo', label: 'Completo' },
+                { value: 'Completo', label: isScopedReport ? 'Aprobado' : 'Completo' },
                 { value: 'En Revisión', label: 'En Revisión' },
-                { value: 'En Progreso', label: 'En Progreso' },
-                { value: 'Rezagado', label: 'Rezagado' }
+                { value: 'En Progreso', label: isScopedReport ? 'Pendiente' : 'En Progreso' },
+                { value: 'Rezagado', label: isScopedReport ? 'Con observación' : 'Rezagado' }
               ]}
               variant="solid"
               containerClassName="min-w-0 flex-1 sm:w-40 sm:flex-none"
@@ -583,14 +577,63 @@ export const ReportsDashboard = () => {
           </p>
         )}
 
-        <div className="bg-brand-Blanco rounded-lg shadow-md border border-brand-Gris_bajo/20 overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-inset" role="region" aria-label="Reportes disponibles" tabIndex={0}>
+        <div className="space-y-3 sm:hidden" aria-label="Reportes disponibles">
+          {processedPlanteles.map((item) => {
+            const scopedReport = report ? scopedReportForProgressItem(report, item) : null;
+            const exportBlockMessage = reportItemExportBlockMessage(scopedReport);
+            const exportDisabled = Boolean(exportBlockMessage);
+
+            return (
+              <article key={`mobile-${item.id}`} className="rounded-lg border border-brand-Gris_bajo/30 bg-brand-Blanco p-4 shadow-sm">
+                <h3 className="font-title text-base font-bold leading-snug text-brand-Gris_oscuro">{item.plantel}</h3>
+                <div className="mt-3">
+                  {isScopedReport ? (
+                    <div className="flex items-baseline justify-between gap-3 rounded-md bg-brand-Gris_bajo/10 px-3 py-2">
+                      <span className="font-body text-sm text-brand-Gris_oscuro/70">Registros capturados</span>
+                      <span className="font-title text-lg font-bold text-brand-Verde_oscuro">{item.recordCount ?? 0}</span>
+                    </div>
+                  ) : renderProgressBar(item)}
+                </div>
+                <p className="mt-2 text-xs font-semibold text-brand-Gris_oscuro/70">{item.status}</p>
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <Button
+                    variant="secondary"
+                    onClick={() => handleGenerateCsv(item)}
+                    disabled={generatingDocumentId === `${item.id}:csv` || exportDisabled}
+                    className="min-h-11 w-full px-3 py-2 text-sm disabled:cursor-not-allowed"
+                  >
+                    {generatingDocumentId === `${item.id}:csv` ? 'Generando' : 'CSV'}
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => handleGeneratePdf(item)}
+                    disabled={generatingDocumentId === `${item.id}:pdf` || exportDisabled}
+                    className="min-h-11 w-full px-3 py-2 text-sm disabled:cursor-not-allowed"
+                  >
+                    {generatingDocumentId === `${item.id}:pdf` ? 'Generando' : 'PDF'}
+                  </Button>
+                </div>
+                {exportBlockMessage && (
+                  <p className="mt-3 text-sm font-semibold text-brand-Status_rojo">{exportBlockMessage}</p>
+                )}
+              </article>
+            );
+          })}
+          {processedPlanteles.length === 0 && (
+            <p className="rounded-lg border border-brand-Gris_bajo/30 bg-brand-Blanco px-4 py-8 text-center text-sm text-brand-Gris_oscuro/60">
+              No hay registros para el periodo seleccionado.
+            </p>
+          )}
+        </div>
+
+        <div className="hidden bg-brand-Blanco rounded-lg shadow-md border border-brand-Gris_bajo/20 overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-inset sm:block" role="region" aria-label="Reportes disponibles" tabIndex={0}>
           <table className="w-full min-w-[720px] border-collapse text-center">
             <caption className="sr-only">Reportes disponibles y acciones de descarga</caption>
 
             <thead>
               <tr className="bg-brand-Gris_bajo/35 text-brand-Gris_oscuro font-title font-bold text-sm select-none border-b border-brand-Gris_bajo/20">
-                <th className="py-4 px-6 w-[20%] text-left">{isResponsible ? 'Indicador' : 'Plantel'}</th>
-                <th className="py-4 px-6 w-[55%]">{isResponsible ? 'Registros capturados' : 'Progreso'}</th>
+                <th className="py-4 px-6 w-[20%] text-left">{isScopedReport ? 'Indicador' : 'Plantel'}</th>
+                <th className="py-4 px-6 w-[55%]">{isScopedReport ? 'Registros capturados' : 'Progreso'}</th>
                 <th className="py-4 px-6 w-[25%]">Documentos</th>
               </tr>
             </thead>
@@ -611,7 +654,7 @@ export const ReportsDashboard = () => {
 
                   {/* Barra Mágica */}
                   <td className="py-4 px-6">
-                    {isResponsible ? (
+                    {isScopedReport ? (
                       <div className="flex flex-col items-center justify-center gap-1">
                         <span className="font-title text-lg font-bold text-brand-Verde_oscuro">
                           {item.recordCount ?? 0}

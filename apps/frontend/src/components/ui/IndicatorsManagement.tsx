@@ -228,7 +228,80 @@ export const IndicatorsManagementTable = ({ onEditIndicator }: IndicatorsManagem
       </div>
 
       <div className="bg-brand-Blanco rounded-lg shadow-md overflow-hidden border border-brand-Gris_bajo/20">
-        <div className="w-full overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-inset" role="region" aria-label="Lista de indicadores configurables" tabIndex={0}>
+        <div className="space-y-3 p-3 sm:hidden" aria-label="Lista de indicadores configurables">
+          {isLoading && (
+            <p className="px-3 py-8 text-center text-sm text-brand-Gris_oscuro/70" role="status">
+              Cargando indicadores...
+            </p>
+          )}
+          {!isLoading && filteredIndicators.map((indicator) => (
+            <article
+              key={`mobile-${indicator.id}`}
+              className={`rounded-lg border border-brand-Gris_bajo/30 bg-brand-Blanco p-4 shadow-sm ${
+                indicator.enabled === false ? 'opacity-60' : ''
+              }`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <span className="font-mono text-sm font-bold text-brand-Verde_oscuro">{indicator.code}</span>
+                <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${
+                  indicator.enabled === false
+                    ? 'bg-brand-Status_rojo/10 text-brand-Status_rojo'
+                    : 'bg-brand-Verde_principal/15 text-brand-Verde_oscuro'
+                }`}>
+                  {indicator.enabled === false ? 'Inactivo' : 'Activo'}
+                </span>
+              </div>
+              <h2 className="mt-3 font-title text-base font-bold leading-snug text-brand-Gris_oscuro">
+                {indicator.name}
+              </h2>
+              <dl className="mt-4 space-y-2 text-sm">
+                <div>
+                  <dt className="font-bold text-brand-Gris_oscuro">Alcance</dt>
+                  <dd className="mt-0.5 break-words text-brand-Gris_oscuro/75">{indicator.alcance}</dd>
+                </div>
+                <div>
+                  <dt className="font-bold text-brand-Gris_oscuro">Contribuidor</dt>
+                  <dd className="mt-0.5 break-words text-brand-Gris_oscuro/75">{indicator.contribuidor}</dd>
+                </div>
+                <div>
+                  <dt className="font-bold text-brand-Gris_oscuro">Responsable</dt>
+                  <dd className="mt-0.5 break-words text-brand-Gris_oscuro/75">{indicator.responsable}</dd>
+                </div>
+              </dl>
+              <div className="mt-4 grid grid-cols-[minmax(0,1fr)_44px_44px] gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleEditIndicator(indicator)}
+                  className="min-h-11 rounded-full border border-brand-Verde_oscuro px-4 text-sm font-bold text-brand-Verde_oscuro transition-colors hover:bg-brand-Verde_oscuro hover:text-brand-Blanco focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal"
+                >
+                  Configurar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIndicatorToToggle(indicator)}
+                  aria-label={indicator.enabled === false ? `Habilitar indicador ${indicator.code}` : `Deshabilitar indicador ${indicator.code}`}
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full text-brand-Verde_oscuro hover:bg-brand-Status_amarillo/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal"
+                >
+                  {indicator.enabled === false ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIndicatorToDelete(indicator)}
+                  aria-label={`Desactivar indicador ${indicator.code}`}
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full text-brand-Verde_oscuro hover:bg-brand-Status_rojo/10 hover:text-brand-Status_rojo focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal"
+                >
+                  <Trash2 size={20} />
+                </button>
+              </div>
+            </article>
+          ))}
+          {!isLoading && filteredIndicators.length === 0 && (
+            <p className="px-3 py-8 text-center text-sm text-brand-Gris_oscuro/70">
+              Sin resultados para la búsqueda actual.
+            </p>
+          )}
+        </div>
+        <div className="hidden w-full overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-inset sm:block" role="region" aria-label="Lista de indicadores configurables" tabIndex={0}>
           <table className="w-full min-w-[1120px] border-collapse text-center">
             <caption className="sr-only">Indicadores, alcance, responsables y acciones de configuración</caption>
             <thead>

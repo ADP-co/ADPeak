@@ -176,12 +176,56 @@ class WorkbookTemplateTests(unittest.TestCase):
             ],
         )
 
+    def test_grouped_header_does_not_overlap_its_subcolumns(self) -> None:
+        malformed_headers = [
+            [
+                {"label": "Plantel", "rowspan": 2},
+                {"label": "Programa Educativo", "rowspan": 2},
+                {"label": "Egresados", "colspan": 3, "rowspan": 2},
+                {"label": "MatrÃ­cula", "colspan": 3, "rowspan": 2},
+                {"label": "% titulaciÃ³n", "rowspan": 2},
+            ],
+            [
+                {"label": "Mujeres"},
+                {"label": "Hombres"},
+                {"label": "Total"},
+                {"label": "Mujeres"},
+                {"label": "Hombres"},
+                {"label": "Total"},
+            ],
+        ]
+
+        repaired = IMPORTER.repair_header_geometry(malformed_headers, 9)
+
+        self.assertTrue(IMPORTER.header_layout_is_valid(repaired, 9))
+        self.assertNotIn("rowspan", repaired[0][2])
+        self.assertNotIn("rowspan", repaired[0][3])
+        self.assertEqual(repaired[0][0]["rowspan"], 2)
+        self.assertEqual(repaired[0][4]["rowspan"], 2)
+
     @unittest.skipUnless(IMPORTER.INDICADORES_ZIP.exists(), "ZIP oficial no disponible")
     def test_real_language_indicator_uses_sheet_two(self) -> None:
         _, _, _, _, templates = IMPORTER.workbook_summaries()
 
         self.assertIn("1.1.2.5.10", templates)
         self.assertEqual(templates["1.1.2.5.10"]["sheetName"], "Hoja2")
+
+    @unittest.skipUnless(IMPORTER.INDICADORES_ZIP.exists(), "ZIP oficial no disponible")
+    def test_all_real_grouped_headers_fit_their_generated_columns(self) -> None:
+        _, _, _, _, templates = IMPORTER.workbook_summaries()
+        templates = IMPORTER.canonicalize_workbook_templates(templates)
+
+        invalid_codes = [
+            code
+            for code, template in templates.items()
+            if template.get("headerRows")
+            and not IMPORTER.header_layout_is_valid(
+                template["headerRows"],
+                len(template["columns"]),
+            )
+        ]
+
+        self.assertEqual(invalid_codes, [])
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@ import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 import type { ColumnConfig, IndicatorTemplate } from './formConfig';
 import { evaluateFormula } from './formula';
+import { columnWidth, normalizedHeaderRows, tableMinimumWidth } from './tableLayout';
 
 interface IndicatorFormProps {
   template: IndicatorTemplate;
@@ -676,6 +677,14 @@ export const IndicatorForm = ({
     () => createDynamicSchema(template.columns, evidenceRules),
     [evidenceRules, template.columns]
   );
+  const visibleHeaderRows = useMemo(
+    () => normalizedHeaderRows(template.headerRows, template.columns.length),
+    [template.columns.length, template.headerRows]
+  );
+  const minimumTableWidth = useMemo(
+    () => tableMinimumWidth(template.columns),
+    [template.columns]
+  );
   type FormData = z.infer<typeof dynamicSchema>;
 
   const {
@@ -817,8 +826,8 @@ export const IndicatorForm = ({
       className="w-full max-w-[1250px] mx-auto bg-brand-Blanco rounded-lg shadow-md border border-brand-Gris_bajo/20 p-6"
     >
       {/* Cabecera */}
-      <div className="flex items-start justify-between mb-8">
-        <div>
+      <div className="mb-8 flex flex-col-reverse items-start justify-between gap-4 sm:flex-row">
+        <div className="min-w-0">
           <span className="text-sm font-accent text-brand-Gris_oscuro/60 font-bold tracking-wider">
             {template.indicatorCode}
           </span>
@@ -853,7 +862,7 @@ export const IndicatorForm = ({
           type="button"
           variant="secondary"
           onClick={() => onBack && onBack()}
-          className="flex items-center gap-2 text-xs py-1.5 px-4 border-transparent"
+          className="flex shrink-0 items-center gap-2 self-end whitespace-nowrap border-transparent px-4 py-1.5 text-xs sm:self-auto"
         >
           <ArrowLeft size={18} strokeWidth={2.5} />
           Volver
@@ -862,9 +871,17 @@ export const IndicatorForm = ({
         )}
       </div>
 
-      <div className="w-full overflow-x-auto border border-brand-Gris_bajo/40 rounded-lg">
+      <div
+        className="w-full overflow-x-auto border border-brand-Gris_bajo/40 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-inset"
+        role="region"
+        aria-label={`Tabla de captura del indicador ${template.indicatorCode}`}
+        tabIndex={0}
+      >
         {template.infoBlocks && template.infoBlocks.length > 0 && (
-          <div className="min-w-[980px] border-b border-brand-Gris_bajo/30 text-left">
+          <div
+            className="border-b border-brand-Gris_bajo/30 text-left"
+            style={{ minWidth: `${minimumTableWidth}px` }}
+          >
             {template.infoBlocks.map((block, index) => (
               <p
                 key={`${block.label ?? 'info'}-${index}`}
@@ -880,17 +897,25 @@ export const IndicatorForm = ({
             ))}
           </div>
         )}
-        <table className="w-full min-w-[980px] border-collapse text-center text-sm font-body">
+        <table
+          className="w-full border-collapse text-center text-sm font-body"
+          style={{ minWidth: `${minimumTableWidth}px` }}
+        >
+          <colgroup>
+            {template.columns.map((column) => (
+              <col key={`column-width-${column.key}`} style={{ width: `${columnWidth(column)}px` }} />
+            ))}
+          </colgroup>
           <thead className="bg-brand-Verde_oscuro text-brand-Blanco">
-            {template.headerRows && template.headerRows.length > 0 ? (
-              template.headerRows.map((row, rowIndex) => (
+            {visibleHeaderRows.length > 0 ? (
+              visibleHeaderRows.map((row, rowIndex) => (
                 <tr key={`header-row-${rowIndex}`} className={rowIndex === 0 ? undefined : 'bg-brand-Verde_principal/90'}>
                   {row.map((cell, cellIndex) => (
                     <th
                       key={`${cell.label}-${rowIndex}-${cellIndex}`}
                       colSpan={cell.colspan ?? 1}
                       rowSpan={cell.rowspan ?? 1}
-                      className="border border-brand-Blanco/20 py-2 px-2 text-xs font-semibold whitespace-pre-line"
+                      className="border border-brand-Blanco/20 px-3 py-3 text-xs font-semibold leading-snug whitespace-normal break-words"
                     >
                       {cell.label}
                     </th>
@@ -916,7 +941,7 @@ export const IndicatorForm = ({
                   {template.columns.map((column) => (
                     <th
                       key={column.key}
-                      className="border border-brand-Blanco/20 py-2 px-2 text-xs font-semibold"
+                      className="border border-brand-Blanco/20 px-3 py-3 text-xs font-semibold leading-snug whitespace-normal break-words"
                     >
                       {column.label}
                     </th>
@@ -943,7 +968,7 @@ export const IndicatorForm = ({
                     const numberValidation = column.type === 'number' ? numericValidationForColumn(column) : undefined;
 
                     return (
-                      <td key={column.key} className="border border-brand-Gris_bajo/20 p-2 align-middle">
+                      <td key={column.key} className="border border-brand-Gris_bajo/20 p-2 align-middle break-words">
                         {column.type === 'readonly' && (
                           <span className="text-brand-Gris_oscuro font-medium">
                             {String(displayRow[column.key] ?? '')}
@@ -1021,14 +1046,18 @@ export const IndicatorForm = ({
         </table>
         {pasteError && (
           <p
-            className="min-w-[980px] border-t border-brand-Status_rojo/30 bg-brand-Status_rojo/10 px-3 py-2 text-left text-sm font-body font-semibold text-brand-Status_rojo"
+            className="border-t border-brand-Status_rojo/30 bg-brand-Status_rojo/10 px-3 py-2 text-left text-sm font-body font-semibold text-brand-Status_rojo"
+            style={{ minWidth: `${minimumTableWidth}px` }}
             role="alert"
           >
             {pasteError}
           </p>
         )}
         {template.allowAddRows && canModifyRows && (
-          <div className="min-w-[980px] flex flex-wrap justify-end gap-3 border-t border-brand-Gris_bajo/30 bg-brand-Blanco px-3 py-3">
+          <div
+            className="flex flex-wrap justify-end gap-3 border-t border-brand-Gris_bajo/30 bg-brand-Blanco px-3 py-3"
+            style={{ minWidth: `${minimumTableWidth}px` }}
+          >
             {fields.length > 1 && (
               <Button
                 type="button"
@@ -1053,7 +1082,10 @@ export const IndicatorForm = ({
           </div>
         )}
         {template.footerNote && (
-          <p className="min-w-[980px] border-t border-brand-Gris_bajo/30 px-3 py-2 text-left text-sm leading-snug text-blue-700 bg-brand-Blanco">
+          <p
+            className="border-t border-brand-Gris_bajo/30 px-3 py-2 text-left text-sm leading-snug text-blue-700 bg-brand-Blanco"
+            style={{ minWidth: `${minimumTableWidth}px` }}
+          >
             {template.footerNote}
           </p>
         )}

@@ -157,13 +157,11 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
         },
         {
           "label": "Egresados titulados en el año 2025",
-          "colspan": 3,
-          "rowspan": 2
+          "colspan": 3
         },
         {
           "label": "Matrícula de primer ingreso de la misma cohorte (agosto 2022) de Opciones Técnicas",
-          "colspan": 3,
-          "rowspan": 2
+          "colspan": 3
         },
         {
           "label": "% de titulación por cohorte",

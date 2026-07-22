@@ -602,7 +602,90 @@ export const UsersTable = () => {
       </div>
 
       <div className="bg-brand-Blanco rounded-lg shadow-md overflow-hidden border border-brand-Gris_bajo/20">
-        <div className="w-full overflow-x-auto">
+        <div className="space-y-3 p-3 sm:hidden" aria-label="Usuarios del sistema">
+          {isLoadingUsers && (
+            <p className="px-3 py-8 text-center text-sm text-brand-Gris_oscuro/70" role="status">
+              Cargando usuarios...
+            </p>
+          )}
+          {!isLoadingUsers && filteredUsers.map((user) => (
+            <article
+              key={`mobile-${user.id}`}
+              className={`rounded-lg border border-brand-Gris_bajo/30 bg-brand-Blanco p-4 shadow-sm ${user.isBlocked ? 'opacity-60' : ''}`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h2 className="break-words font-title text-base font-bold text-brand-Gris_oscuro">{user.name}</h2>
+                  {user.username && <p className="mt-0.5 font-mono text-xs text-brand-Gris_oscuro/60">{user.username}</p>}
+                </div>
+                <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${
+                  user.isBlocked
+                    ? 'bg-brand-Status_rojo/10 text-brand-Status_rojo'
+                    : 'bg-brand-Verde_principal/15 text-brand-Verde_oscuro'
+                }`}>
+                  {user.isBlocked ? 'Bloqueado' : user.role}
+                </span>
+              </div>
+              <div className="mt-4">
+                <p className="text-xs font-bold uppercase text-brand-Gris_oscuro/65">Indicadores</p>
+                {splitIndicators(user.indicadores).length === 0 ? (
+                  <p className="mt-1 text-sm text-brand-Gris_oscuro/70">Sin indicadores asignados</p>
+                ) : (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {splitIndicators(user.indicadores)
+                      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+                      .map((indicator) => (
+                        <span key={indicator} className="rounded bg-brand-Gris_bajo/10 px-2 py-0.5 font-mono text-xs">
+                          {indicator}
+                        </span>
+                      ))}
+                  </div>
+                )}
+              </div>
+              <div className="mt-4 grid gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleEditUser(user)}
+                  disabled={user.isBlocked}
+                  className={`${USER_ACTION_BUTTON_CLASS} w-full border-brand-Verde_oscuro text-brand-Verde_oscuro hover:bg-brand-Verde_oscuro hover:text-brand-Blanco disabled:cursor-not-allowed disabled:opacity-50`}
+                >
+                  <Pencil size={16} />
+                  <span>Modificar</span>
+                </button>
+                {user.role !== 'Administrador' && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => openPasswordReset(user)}
+                      className={`${USER_ACTION_BUTTON_CLASS} min-w-0 border-brand-Verde_oscuro/40 px-2 text-brand-Verde_oscuro hover:bg-brand-Verde_oscuro hover:text-brand-Blanco`}
+                    >
+                      <KeyRound size={16} />
+                      <span>Contraseña</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setUserToToggleBlock(user)}
+                      className={`${USER_ACTION_BUTTON_CLASS} min-w-0 px-2 ${
+                        user.isBlocked
+                          ? 'border-brand-Status_rojo/40 text-brand-Status_rojo hover:bg-brand-Status_rojo hover:text-brand-Blanco'
+                          : 'border-brand-Verde_oscuro/40 text-brand-Verde_oscuro hover:bg-brand-Status_amarillo hover:text-brand-Gris_oscuro'
+                      }`}
+                    >
+                      {user.isBlocked ? <Unlock size={16} /> : <Lock size={16} />}
+                      <span>{user.isBlocked ? 'Desbloquear' : 'Bloquear'}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </article>
+          ))}
+          {!isLoadingUsers && filteredUsers.length === 0 && (
+            <p className="px-3 py-8 text-center text-sm text-brand-Gris_oscuro/70">
+              Sin resultados para la búsqueda actual.
+            </p>
+          )}
+        </div>
+        <div className="hidden w-full overflow-x-auto sm:block">
           <table className="w-full min-w-[860px] border-collapse text-center">
             <thead>
               <tr className="bg-brand-Gris_bajo/35 text-brand-Gris_oscuro font-title font-bold text-sm select-none border-b border-brand-Gris_bajo/20">

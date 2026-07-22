@@ -769,7 +769,7 @@ export const IndicatorConfigForm = ({ onBack }: { onBack?: () => void }) => {
           </div>
         </div>
 
-        <div className="sticky bottom-0 z-10 flex justify-stretch border-t border-brand-Gris_bajo/20 bg-brand-Blanco/95 py-4 backdrop-blur-sm sm:justify-end">
+        <div className="flex justify-stretch border-t border-brand-Gris_bajo/20 pt-6 sm:justify-end">
           <Button type="button" variant="primary" onClick={handleSave} className="w-full px-8 sm:w-auto" disabled={isLoading}>
             Guardar configuración
           </Button>

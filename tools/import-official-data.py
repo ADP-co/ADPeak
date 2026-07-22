@@ -791,6 +791,78 @@ def strip_empty_header_rows(header_rows: list[list[dict[str, Any]]]) -> list[lis
     return normalized_rows
 
 
+def header_layout_is_valid(
+    header_rows: list[list[dict[str, Any]]],
+    column_count: int,
+) -> bool:
+    """Validate that every header row resolves to exactly the table width."""
+    if not header_rows or column_count <= 0:
+        return False
+
+    occupied_until = [0] * column_count
+
+    for row_index, row in enumerate(header_rows):
+        cursor = 0
+        covered: set[int] = {
+            column_index
+            for column_index, until in enumerate(occupied_until)
+            if until > row_index
+        }
+
+        for cell in row:
+            while cursor < column_count and cursor in covered:
+                cursor += 1
+
+            colspan = max(1, int(cell.get("colspan", 1) or 1))
+            rowspan = max(1, int(cell.get("rowspan", 1) or 1))
+            end = cursor + colspan
+
+            if cursor >= column_count or end > column_count:
+                return False
+            if any(column_index in covered for column_index in range(cursor, end)):
+                return False
+
+            for column_index in range(cursor, end):
+                covered.add(column_index)
+                if rowspan > 1:
+                    occupied_until[column_index] = max(
+                        occupied_until[column_index],
+                        row_index + rowspan,
+                    )
+            cursor = end
+
+        if len(covered) != column_count:
+            return False
+
+    return True
+
+
+def repair_header_geometry(
+    header_rows: list[list[dict[str, Any]]],
+    column_count: int,
+) -> list[list[dict[str, Any]]]:
+    """Repair Excel group cells that incorrectly overlap their subheaders."""
+    normalized = strip_empty_header_rows(header_rows)
+    if header_layout_is_valid(normalized, column_count):
+        return normalized
+
+    repaired: list[list[dict[str, Any]]] = []
+    for row in normalized:
+        repaired_row: list[dict[str, Any]] = []
+        for source_cell in row:
+            cell = dict(source_cell)
+            if int(cell.get("colspan", 1) or 1) > 1 and int(cell.get("rowspan", 1) or 1) > 1:
+                cell.pop("rowspan", None)
+            repaired_row.append(cell)
+        repaired.append(repaired_row)
+
+    if header_layout_is_valid(repaired, column_count):
+        return repaired
+
+    # An invalid grouped header is worse than the safe column-label fallback.
+    return []
+
+
 def project_header_rows(
     header_rows: list[list[dict[str, Any]]],
     source_width: int,
@@ -962,6 +1034,8 @@ def normalize_extracted_table(
         kept_columns = disambiguate_repeated_labels(kept_columns)
     else:
         header_rows = strip_empty_header_rows(header_rows)
+
+    header_rows = repair_header_geometry(header_rows, len(kept_columns))
 
     return kept_columns, rows, header_rows
 

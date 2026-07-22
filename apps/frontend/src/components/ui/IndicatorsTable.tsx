@@ -174,8 +174,54 @@ export const IndicatorsTable = ({
           </div>
         </div>
 
+        <div className="space-y-3 sm:hidden" aria-label={`${title}: resultados`}>
+          {filteredIndicators.map((indicator) => (
+            <article
+              key={`mobile-${indicator.rowKey ?? indicator.code}`}
+              className="rounded-lg border border-brand-Gris_bajo/30 bg-brand-Blanco p-4 shadow-sm"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <span className="font-mono text-xs font-bold text-brand-Gris_oscuro/70">
+                  {indicator.code}
+                </span>
+                <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold font-accent ${statusStyles[indicator.status]}`}>
+                  {indicator.status}
+                </span>
+              </div>
+              <h2 className="mt-3 font-body text-base font-semibold leading-snug text-brand-Gris_oscuro">
+                {indicator.name}
+              </h2>
+              {showScopeColumns && (
+                <dl className="mt-4 grid grid-cols-1 gap-3 border-t border-brand-Gris_bajo/20 pt-3 text-sm">
+                  <div>
+                    <dt className="font-accent text-xs font-bold text-brand-Gris_oscuro/60">{scopeColumnLabel}</dt>
+                    <dd className="mt-1 break-words text-brand-Gris_oscuro">{getPlantelLabel(indicator)}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-accent text-xs font-bold text-brand-Gris_oscuro/60">Supervisor</dt>
+                    <dd className="mt-1 break-words text-brand-Gris_oscuro">{getSupervisorLabel(indicator)}</dd>
+                  </div>
+                </dl>
+              )}
+              <Button
+                variant="secondary"
+                onClick={() => onSelectIndicator && onSelectIndicator(indicator)}
+                disabled={!onSelectIndicator}
+                className="mt-4 min-h-11 w-full px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {getActionLabel(indicator)}
+              </Button>
+            </article>
+          ))}
+          {filteredIndicators.length === 0 && (
+            <p className="rounded-lg border border-brand-Gris_bajo/30 bg-brand-Blanco px-4 py-8 text-center text-sm text-brand-Gris_oscuro/60">
+              {emptyMessage}
+            </p>
+          )}
+        </div>
+
         {/* Tarjeta blanca contenedora de la tabla */}
-        <div className="bg-brand-Blanco rounded-lg shadow-md overflow-hidden border border-brand-Gris_bajo/20">
+        <div className="hidden bg-brand-Blanco rounded-lg shadow-md overflow-hidden border border-brand-Gris_bajo/20 sm:block">
         <div className="w-full overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal focus-visible:ring-inset" role="region" aria-label={`${title}: resultados`} tabIndex={0}>
           <table className={`w-full border-collapse text-left ${showScopeColumns ? 'min-w-[1040px]' : ''}`}>
             <caption className="sr-only">{title}, estados y acciones disponibles</caption>

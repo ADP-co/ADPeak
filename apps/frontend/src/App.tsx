@@ -1018,6 +1018,7 @@ function App() {
 
   return (
     <BrowserRouter basename={routerBasename}>
+      <ScrollToTop />
       {/* El proveedor global va dentro del Router para poder usar navegación */}
       <AuthProvider>
         <AppContent />
@@ -1025,6 +1026,16 @@ function App() {
       </AuthProvider>
     </BrowserRouter>
   );
+}
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [pathname]);
+
+  return null;
 }
 
 export default App;

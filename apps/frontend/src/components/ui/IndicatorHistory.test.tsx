@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { historyViewForKey, isDirectorAuditRole, safeAuditJson } from './IndicatorHistory';
+import { historyViewForKey, isDirectorAuditRole, readableAuditLabel, safeAuditJson } from './IndicatorHistory';
 
 describe('IndicatorHistory audit safety', () => {
   it('selects the forensic audit only for Director UI roles', () => {
@@ -39,5 +39,11 @@ describe('IndicatorHistory audit safety', () => {
     expect(historyViewForKey('audit', 'Home')).toBe('indicators');
     expect(historyViewForKey('indicators', 'End')).toBe('audit');
     expect(historyViewForKey('indicators', 'Enter')).toBeNull();
+  });
+
+  it('translates audit action identifiers into user-facing Spanish', () => {
+    expect(readableAuditLabel('evidence_opened')).toBe('Evidencia abierta');
+    expect(readableAuditLabel('capture_updated')).toBe('Captura actualizada');
+    expect(readableAuditLabel('capture_submitted')).toBe('Captura enviada a revisión');
   });
 });
