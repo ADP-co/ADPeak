@@ -124,6 +124,13 @@ describe('frontend readiness invariants', () => {
     expect(bannerSource).toContain("notification.captureId ? 'Ver captura' : 'Ver indicadores'");
   });
 
+  it('keeps evidence blob URLs alive long enough for Chrome to start the download', () => {
+    const source = readSource('App.tsx');
+
+    expect(source).toContain("link.style.display = 'none'");
+    expect(source).toContain('window.setTimeout(() => {\n        link.remove();\n        URL.revokeObjectURL(url);\n      }, 4000);');
+  });
+
   it('requires a real code when creating an indicator', () => {
     const source = readSource('components/forms/IndicatorConfigForm.tsx');
 

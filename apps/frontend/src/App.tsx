@@ -649,10 +649,14 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
       const link = document.createElement('a');
       link.href = url;
       link.download = filename;
+      link.rel = 'noopener';
+      link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
+      window.setTimeout(() => {
+        link.remove();
+        URL.revokeObjectURL(url);
+      }, 4000);
       setEvidenceOpenedForCaptureId(captureDraft.capture.id);
       toast.success('Evidencia descargada');
     } catch (error) {
