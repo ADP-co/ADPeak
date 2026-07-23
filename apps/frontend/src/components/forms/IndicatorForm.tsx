@@ -1189,80 +1189,89 @@ export const IndicatorForm = ({
         </div>
       </div>
 
-      <div className="flex justify-end gap-4 mt-6">
-        <div className="flex-1 min-h-8 text-left">
-          {statusMessage && (
-            <p className="rounded-md border border-brand-Verde_principal/30 bg-brand-Verde_principal/10 px-3 py-2 text-sm font-body font-semibold text-brand-Verde_oscuro" role="status">
-              {statusMessage}
-            </p>
-          )}
-          {errorMessage && (
-            <p className="rounded-md border border-brand-Status_rojo/30 bg-brand-Status_rojo/10 px-3 py-2 text-sm font-body font-semibold text-brand-Status_rojo" role="alert">
-              {errorMessage}
-            </p>
-          )}
-        </div>
-        {isReadOnly && !canSaveReviewEdits && !canReviewCurrentCapture ? (
-          <p className="rounded-md border border-brand-Gris_bajo/30 bg-brand-Gris_bajo/10 px-3 py-2 text-sm font-body font-semibold text-brand-Gris_oscuro" role="status">
-            Consulta en solo lectura.
-          </p>
-        ) : canSaveReviewEdits || canReviewCurrentCapture ? (
-          <>
-            {canSaveReviewEdits && (
-              <Button
-                type="button"
-                variant="secondary"
-                className="text-xs py-1.5 px-4"
-                disabled={isBusy || isReadOnly}
-                onClick={() => void handleSaveDraft()}
-              >
-                Guardar cambios
-              </Button>
-            )}
-            {canReviewCurrentCapture && (
-              <>
-            <Button
-              type="button"
-              variant="secondary"
-              className="text-xs py-1.5 px-4"
-              disabled={isBusy}
-              onClick={handleRequestCorrection}
-            >
-              Solicitar corrección
-            </Button>
-            <Button
-              type="button"
-              variant="primary"
-              className="text-xs py-1.5 px-4"
-              disabled={isBusy || !canApprove}
-              onClick={onApprove}
-            >
-              Aprobar indicador
-            </Button>
-            {!canApprove && approveDisabledReason && (
-              <p className="basis-full rounded-md border border-brand-Status_rojo/30 bg-brand-Status_rojo/10 px-3 py-2 text-sm font-body font-semibold text-brand-Status_rojo" role="alert">
-                {approveDisabledReason}
+      <div className="mt-6 space-y-3 border-t border-brand-Gris_bajo/20 pt-5">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0 flex-1 space-y-2 text-left">
+            {statusMessage && (
+              <p className="rounded-md border border-brand-Verde_principal/30 bg-brand-Verde_principal/10 px-4 py-3 text-sm font-body font-semibold leading-5 text-brand-Verde_oscuro" role="status">
+                {statusMessage}
               </p>
             )}
+            {errorMessage && (
+              <p className="rounded-md border border-brand-Status_rojo/30 bg-brand-Status_rojo/10 px-4 py-3 text-sm font-body font-semibold leading-5 text-brand-Status_rojo" role="alert">
+                {errorMessage}
+              </p>
+            )}
+          </div>
+          <div className="flex w-full shrink-0 flex-col gap-3 sm:flex-row sm:flex-wrap lg:w-auto lg:justify-end">
+            {isReadOnly && !canSaveReviewEdits && !canReviewCurrentCapture ? (
+              <p className="w-full rounded-md border border-brand-Gris_bajo/30 bg-brand-Gris_bajo/10 px-4 py-3 text-center text-sm font-body font-semibold leading-5 text-brand-Gris_oscuro sm:w-auto" role="status">
+                Consulta en solo lectura.
+              </p>
+            ) : canSaveReviewEdits || canReviewCurrentCapture ? (
+              <>
+                {canSaveReviewEdits && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="w-full whitespace-nowrap px-5 py-2 text-sm sm:w-auto"
+                    disabled={isBusy || isReadOnly}
+                    onClick={() => void handleSaveDraft()}
+                  >
+                    Guardar cambios
+                  </Button>
+                )}
+                {canReviewCurrentCapture && (
+                  <>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="w-full whitespace-nowrap px-5 py-2 text-sm sm:w-auto"
+                      disabled={isBusy}
+                      onClick={handleRequestCorrection}
+                    >
+                      Solicitar corrección
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="primary"
+                      className="w-full whitespace-nowrap px-5 py-2 text-sm sm:w-auto"
+                      disabled={isBusy || !canApprove}
+                      onClick={onApprove}
+                    >
+                      Aprobar indicador
+                    </Button>
+                  </>
+                )}
+              </>
+            ) : (
+              <>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="w-full whitespace-nowrap px-5 py-2 text-sm sm:w-auto"
+                  disabled={isBusy || isReadOnly}
+                  onClick={() => void handleSaveDraft()}
+                >
+                  Guardar borrador
+                </Button>
+                {/* Bloquear el botón de envío si el formulario contiene errores */}
+                <Button
+                  type="submit"
+                  variant="primary"
+                  className="w-full whitespace-nowrap px-5 py-2 text-sm sm:w-auto"
+                  disabled={!isValid || isBusy || isReadOnly}
+                >
+                  Enviar a revisión
+                </Button>
               </>
             )}
-          </>
-        ) : (
-          <>
-        <Button
-          type="button"
-          variant="secondary"
-          className="text-xs py-1.5 px-4"
-          disabled={isBusy || isReadOnly}
-          onClick={() => void handleSaveDraft()}
-        >
-          Guardar borrador
-        </Button>
-        {/* Bloquear el botón de envío si el formulario contiene errores */}
-        <Button type="submit" variant="primary" className="text-xs py-1.5 px-4" disabled={!isValid || isBusy || isReadOnly}>
-          Enviar a revisión
-        </Button>
-          </>
+          </div>
+        </div>
+        {canReviewCurrentCapture && !canApprove && approveDisabledReason && (
+          <p className="w-full rounded-md border border-brand-Status_rojo/30 bg-brand-Status_rojo/10 px-4 py-3 text-sm font-body font-semibold leading-5 text-brand-Status_rojo" role="alert">
+            {approveDisabledReason}
+          </p>
         )}
       </div>
     </form>

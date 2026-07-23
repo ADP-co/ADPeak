@@ -194,6 +194,16 @@ describe('frontend readiness invariants', () => {
     expect(appSource).toContain('correctionObservation={captureDraft.capture?.observacion ?? undefined}');
   });
 
+  it('keeps review actions readable and separates the approval warning from the button row', () => {
+    const source = readSource('components/forms/IndicatorForm.tsx');
+
+    expect(source).toContain('flex w-full shrink-0 flex-col gap-3 sm:flex-row sm:flex-wrap');
+    expect(source).toContain('w-full whitespace-nowrap px-5 py-2 text-sm sm:w-auto');
+    expect(source).toContain('canReviewCurrentCapture && !canApprove && approveDisabledReason');
+    expect(source).not.toContain('basis-full rounded-md border border-brand-Status_rojo');
+    expect(source).not.toContain('flex justify-end gap-4 mt-6');
+  });
+
   it('does not silently replace an explicit inaccessible capture with another draft', () => {
     const hookSource = readSource('hooks/useCaptureDraft.ts');
     const appSource = readSource('App.tsx');
