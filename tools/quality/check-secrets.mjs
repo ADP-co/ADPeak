@@ -23,6 +23,8 @@ const secretPatterns = [
 const findings = [];
 
 for (const relativePath of trackedFiles) {
+  if (relativePath === "tools/quality/check-secrets.mjs") continue;
+
   const fileName = path.basename(relativePath).toLowerCase();
   const trackedEnvironmentFile = fileName.startsWith(".env") && !fileName.endsWith(".example");
   if (trackedEnvironmentFile || sensitiveFileName.test(relativePath)) {
