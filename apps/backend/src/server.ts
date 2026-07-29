@@ -64,7 +64,11 @@ import {
   type DemoRole
 } from "./demo-data.js";
 import { healthPayload } from "./health.js";
-import { flushPersistedState, hydrateState } from "./state-store.js";
+import {
+  flushPersistedState,
+  hydrateState,
+  withPersistedStateMutation
+} from "./state-store.js";
 
 loadLocalEnv();
 
@@ -84,9 +88,11 @@ try {
 const port = appConfig.backendPort;
 
 async function prepareRuntimeState() {
-  await hydrateState({ force: true });
-  reloadSigiStateFromPersistence();
-  reloadCaptureDraftsFromState();
+  await withPersistedStateMutation(async () => {
+    await hydrateState({ force: true });
+    reloadSigiStateFromPersistence();
+    reloadCaptureDraftsFromState();
+  });
 }
 
 function sendJson(

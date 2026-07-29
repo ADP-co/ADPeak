@@ -27,13 +27,14 @@ import {
   sanitizeCloneStateRows,
   validateCertificationRows
 } from "./lib/state.mjs";
+import { withTestBackend } from "./lib/runtime.mjs";
 
 scrubInheritedDatabaseEnvironment();
 
 const HELP = `Usage: npm run qa:seed -- [options]
 
 Sanitize only the manifest-bound isolated database. The command enforces the
-56-account and 14-indicator official baseline, strips visible QA/TMP/FMT state,
+56-account and generated official indicator baseline, strips visible QA/TMP/FMT state,
 reactivates the baseline, synchronizes assignments, and replaces passwords with
 clone-only values supplied through required environment variables.
 
@@ -63,7 +64,7 @@ await runCommand(async () => {
       "Erase inherited DATABASE_URL and PostgreSQL fallback variables",
       "Require both test environment guards and three strong clone-only role passwords",
       `Load and validate manifest ${displayPath(options.manifest)}`,
-      "Read the manifest target, sanitize visible state, and validate 56 accounts plus 14 indicators",
+      "Read the manifest target, sanitize visible state, and validate 56 accounts plus the generated indicator baseline",
       "Replace target public.app_state in one transaction and verify the committed baseline",
       "Store only expected password hashes in the ignored QA environment; never log passwords"
     ]);
@@ -85,6 +86,27 @@ await runCommand(async () => {
     const targetConnection = assertManifestTarget(manifest, environment);
     const passwords = readClonePasswords();
     const hashes = expectedPasswordHashes(passwords);
+
+    await withTestBackend({
+      authSecret: environment.QA_AUTH_SECRET,
+      artifactDirectory: manifest.artifacts.runDirectory,
+      databaseUrl: targetConnection.url.toString(),
+      initialPasswords: passwords,
+      factoryResetVersion: `qa-seed-${manifest.target.database}-${Date.now()}`
+    }, async (runtime) => {
+      const login = await runtime.request("/api/v1/auth/login", {
+        method: "POST",
+        body: {
+          username: "director",
+          password: passwords.director
+        }
+      });
+
+      if (login.status !== 200) {
+        throw new Error(`Factory seed readiness login failed with HTTP ${login.status}.`);
+      }
+    });
+
     const current = await readTargetAppState(targetConnection);
     const sanitized = await sanitizeCloneStateRows(current.rows, hashes);
 

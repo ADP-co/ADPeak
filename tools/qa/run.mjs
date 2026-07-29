@@ -134,7 +134,7 @@ await runCommand(async () => {
         area: "inventory",
         test: "Sanitized official clone baseline",
         pass: true,
-        detail: "56 official accounts and 14 official indicators validated."
+        detail: `56 official accounts and ${validation.officialCodes.length} generated official indicators validated.`
       });
     } catch (error) {
       addCheck(matrix, {
@@ -280,7 +280,10 @@ function addDatabaseChecks(matrix, validation, passwordHashes, officialCodes) {
     id: "ROLE-001",
     area: "roles",
     test: "Official role distribution",
-    pass: roles.director === 1 && roles.responsable === 8 && roles.plantel === 37,
+    pass:
+      roles.director === BASELINE.roles.director &&
+      roles.responsable === BASELINE.roles.responsable &&
+      roles.plantel === BASELINE.roles.plantel,
     severity: "critical",
     detail: `director=${roles.director}, responsable=${roles.responsable}, plantel=${roles.plantel}.`
   });
@@ -303,14 +306,16 @@ function addDatabaseChecks(matrix, validation, passwordHashes, officialCodes) {
         .filter((indicator) => indicator.responsibleIds?.includes(user.responsableId))
         .map((indicator) => indicator.code)
         .sort(compareText);
-      return expected.length > 0 && sameArray([...user.indicatorCodes].sort(compareText), expected);
+      return sameArray([...(user.indicatorCodes ?? [])].sort(compareText), expected);
     });
   addCheck(matrix, {
     id: "IND-002",
     area: "indicators",
     test: "Responsible assignments are synchronized",
     pass: assignmentsValid,
-    detail: assignmentsValid ? "All eight responsible accounts resolve to official assigned indicators." : "One or more responsible assignments are empty or inconsistent."
+    detail: assignmentsValid
+      ? `All ${BASELINE.roles.responsable} responsible accounts match their official assignments.`
+      : "One or more responsible assignments are inconsistent."
   });
 
   const indicatorIds = new Set(indicators.map((indicator) => indicator.id));

@@ -429,12 +429,12 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
     ]
   },
   {
-    "indicatorCode": "FMT-01-E81E8473-41221-porcentaje-de-uo-q",
-    "officialCode": null,
+    "indicatorCode": "4.1.2.2.1",
+    "officialCode": "4.1.2.2.1",
     "sourcePath": "Indicadores/Angel Ordoñez/41221 - Porcentaje de UO que realizan acciones de actualización, mantenimiento preventivo o correctivo de la insfraestructura tecnologica.xlsx",
     "planteles": [],
     "classification": "official_table",
-    "confidence": "source-table-pending-code",
+    "confidence": "detected-code",
     "headerRows": [
       [
         "Responsable",
@@ -950,12 +950,12 @@ export const officialTemplateCandidates: OfficialTemplateCandidate[] = [
     "headerRows": []
   },
   {
-    "indicatorCode": "FMT-01-F2A88F7E-nivelacion-academica-ago",
-    "officialCode": null,
+    "indicatorCode": "1.1.2.2.1",
+    "officialCode": "1.1.2.2.1",
     "sourcePath": "Indicadores/Marcial Aviña/NIVELACION ACADEMICA_ agosto 2025_ENERO2026 (1).xlsx",
     "planteles": [],
     "classification": "official_table",
-    "confidence": "source-table-pending-code",
+    "confidence": "detected-code",
     "headerRows": [
       [
         "PLANTEL",
@@ -2000,10 +2000,10 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "official_code_detected"
     ]
   },
-  "FMT-01-E81E8473-41221-porcentaje-de-uo-q": {
-    "indicatorCode": "FMT-01-E81E8473-41221-porcentaje-de-uo-q",
-    "officialCode": null,
-    "indicatorName": "41221 - Porcentaje de UO que realizan acciones de actualización, mantenimiento preventivo o correctivo de la insfraestructura tecnologica",
+  "4.1.2.2.1": {
+    "indicatorCode": "4.1.2.2.1",
+    "officialCode": "4.1.2.2.1",
+    "indicatorName": "Porcentaje de UO que realizan acciones de actualización, mantenimiento preventivo y/o correctivo a la infraestructura tecnológica",
     "activityLabel": "",
     "sourceLabel": "41221 - Porcentaje de UO que realizan acciones de actualización, mantenimiento preventivo o correctivo de la insfraestructura tecnologica.xlsx",
     "sourcePath": "Indicadores/Angel Ordoñez/41221 - Porcentaje de UO que realizan acciones de actualización, mantenimiento preventivo o correctivo de la insfraestructura tecnologica.xlsx",
@@ -2203,7 +2203,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
-      "pending_indicator_code"
+      "official_code_detected"
     ]
   },
   "1.1.2.5.10": {
@@ -4731,10 +4731,10 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "shared_official_code_split_by_source"
     ]
   },
-  "FMT-01-F2A88F7E-nivelacion-academica-ago": {
-    "indicatorCode": "FMT-01-F2A88F7E-nivelacion-academica-ago",
-    "officialCode": null,
-    "indicatorName": "NIVELACION ACADEMICA_ agosto 2025_ENERO2026 (1)",
+  "1.1.2.2.1": {
+    "indicatorCode": "1.1.2.2.1",
+    "officialCode": "1.1.2.2.1",
+    "indicatorName": "REPORTE DE ATENCIÓN A ESTUDIANTES EN NIVELACIÓN ACADÉMICA PARA EL PERIODO ORDINARIO",
     "activityLabel": "",
     "sourceLabel": "NIVELACION ACADEMICA_ agosto 2025_ENERO2026 (1).xlsx",
     "sourcePath": "Indicadores/Marcial Aviña/NIVELACION ACADEMICA_ agosto 2025_ENERO2026 (1).xlsx",
@@ -5099,7 +5099,7 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "quality": [
       "source_workbook_template",
       "private_fields_blank",
-      "pending_indicator_code"
+      "official_code_detected"
     ]
   },
   "1.0.0.0.2-FMT-23CFCBF2": {
@@ -7444,10 +7444,10 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "sourcePathHash": "e81e84739d6e3df2f9f937ae8dfff654a616da7107f406f5f6cce9b2efd994fe",
     "category": "Indicadores / Angel Ordoñez",
     "sizeBytes": 11561,
-    "detectedIndicatorCodes": [],
-    "detectedReferenceCodes": [
+    "detectedIndicatorCodes": [
       "4.1.2.2.1"
     ],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [],
     "formulaCells": 0,
     "sheets": [
@@ -11891,10 +11891,10 @@ export const officialWorkbookSummaries: OfficialWorkbookSummary[] = [
     "sourcePathHash": "f2a88f7ed8a1cb1402515937492dbedebbbb6d1d0e297faf9f8410c351f6814c",
     "category": "Indicadores / Marcial Aviña",
     "sizeBytes": 114667,
-    "detectedIndicatorCodes": [],
-    "detectedReferenceCodes": [
+    "detectedIndicatorCodes": [
       "1.1.2.2.1"
     ],
+    "detectedReferenceCodes": [],
     "detectedPlanteles": [],
     "formulaCells": 45,
     "sheets": [

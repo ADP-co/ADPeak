@@ -18,6 +18,7 @@ import {
   type CapturePayload
 } from "./capture-store.js";
 import {
+  isPersistedStateHydrated,
   persistState,
   readPersistedCollection,
   readPersistedValue
@@ -372,7 +373,7 @@ export const MAX_AUDIT_REQUEST_ID_LENGTH = 128;
 const AUDIT_VALUE_OMITTED = "[omitido]";
 const MAX_AUDIT_VALUE_DEPTH = 12;
 const officialSourcePlantelIds: number[] = [];
-const officialCatalogImportVersion = "2026-07-02-indicadores-20260628-default-v3";
+const officialCatalogImportVersion = "2026-07-29-indicadores-20260628-canonical-v4";
 const officialCatalogImportedAt = "2026-06-30T00:00:00.000-06:00";
 const operationalCatalogRows = officialCatalogRows.filter(isOperationalCatalogRow);
 const hiddenImportedIndicatorCodes = new Set(
@@ -441,6 +442,7 @@ const notifications = new Map<number, SigiNotification>();
 const auditEvents = new Map<number, SigiAuditEvent>();
 const defaultPasswordHashCache = new Map<SystemRole, string>();
 const officialCredentialResetVersion = process.env.OFFICIAL_CREDENTIAL_RESET_VERSION?.trim();
+const officialFactoryResetVersion = process.env.OFFICIAL_FACTORY_RESET_VERSION?.trim();
 let nextNotificationId = 1;
 let nextAuditEventId = 1;
 
@@ -486,6 +488,16 @@ export function reloadSigiStateFromPersistence() {
     officialCredentialResetVersion &&
     readPersistedValue<string>("officialCredentialResetVersion") !== officialCredentialResetVersion
   );
+  const needsFactoryReset = Boolean(
+    isPersistedStateHydrated() &&
+    officialFactoryResetVersion &&
+    readPersistedValue<string>("officialFactoryResetVersion") !== officialFactoryResetVersion
+  );
+
+  if (needsFactoryReset) {
+    replaceWithOfficialFactoryState();
+    return;
+  }
 
   indicators.clear();
   for (const indicator of mergeInitialIndicators(persistedIndicators, needsCatalogMigration)) {
@@ -4031,6 +4043,57 @@ function resetOfficialUserCredentials() {
       credentialVersion: credentialVersionFor(user) + 1
     });
   }
+}
+
+function replaceWithOfficialFactoryState() {
+  assertInitialCredentialsConfigured();
+
+  const credentialVersion = factoryCredentialVersion();
+  const factoryIndicators = structuredClone(initialIndicators);
+  const factoryUsers = buildInitialUsers().map((user) => ({
+    ...user,
+    credentialVersion
+  }));
+
+  indicators.clear();
+  factoryIndicators.forEach((indicator) => indicators.set(indicator.id, indicator));
+  users.clear();
+  factoryUsers.forEach((user) => users.set(user.id, user));
+  notifications.clear();
+  auditEvents.clear();
+  nextNotificationId = 1;
+  nextAuditEventId = 1;
+  resetCaptureDraftsToInitialState();
+
+  persistState({
+    indicators: factoryIndicators,
+    users: factoryUsers,
+    notifications: [],
+    auditEvents: [],
+    nextNotificationId: 1,
+    nextAuditEventId: 1,
+    captureDrafts: [],
+    nextCaptureId: 1,
+    catalogImportVersion: officialCatalogImportVersion,
+    officialFactoryResetVersion,
+    ...(officialCredentialResetVersion
+      ? { officialCredentialResetVersion }
+      : {})
+  });
+}
+
+function assertInitialCredentialsConfigured() {
+  for (const role of ["director", "responsable", "plantel"] as const) {
+    if (!configuredInitialPasswordForRole(role)) {
+      throw new Error(`No se configuró una contraseña inicial válida para el rol ${role}.`);
+    }
+  }
+}
+
+function factoryCredentialVersion() {
+  const resetVersion = officialFactoryResetVersion || officialCatalogImportVersion;
+  const digest = createHash("sha256").update(resetVersion).digest();
+  return digest.readUInt32BE(0) || 1;
 }
 
 function hashPassword(password: string) {

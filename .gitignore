@@ -79,7 +79,6 @@ downloads/
 *.pdf
 *.docx
 *.pptx
-!docs/project/action-plan-original.pdf
 
 # IDEs and operating system files
 .vscode/

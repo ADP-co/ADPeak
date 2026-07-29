@@ -1,23 +1,16 @@
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useParams, Outlet } from 'react-router-dom';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState, type ComponentType } from 'react';
 import { Navbar } from './components/layout/Navbar';
 import { UserBanner } from './components/layout/UserBanner';
-import { IndicatorForm, type FormSubmission } from './components/forms/IndicatorForm';
-import { IndicatorConfigForm } from './components/forms/IndicatorConfigForm';
+import type { FormSubmission } from './components/forms/IndicatorForm';
 import type { IndicatorTemplate } from './components/forms/formConfig';
 import { ProgressBar } from './components/layout/ProgressBar';
 import { IndicatorsTable } from './components/ui/IndicatorsTable';
 import { IndicatorsManagementTable } from './components/ui/IndicatorsManagement';
 import type { Indicator } from './components/ui/IndicatorsTable';
-import { UsersTable } from './components/ui/UsersTable';
-import { Dashboard } from './components/ui/Dashboard';
-import { ReportsDashboard } from './components/ui/ReportsDashboard';
-import { AccountProfile } from './components/ui/AccountProfile';
-import { IndicatorHistory } from './components/ui/IndicatorHistory';
 import { Button } from './components/ui/Button';
 import MediaSuperiorLogo from './assets/MediaSuperiorLogo.png';
 import { AuthProvider, useAuth, type User } from './context/AuthContext';
-import { Login } from './components/ui/Login';
 import { Toaster, toast } from 'sonner';
 import { useCaptureDraft } from './hooks/useCaptureDraft';
 import { fetchCaptureEvidence } from './api/capturas';
@@ -39,6 +32,22 @@ import {
   type CatalogIndicator,
 } from './api/catalog';
 import { API_REQUESTS_ENABLED } from './api/client';
+
+const IndicatorForm = lazyNamed(() => import('./components/forms/IndicatorForm'), 'IndicatorForm');
+const IndicatorConfigForm = lazyNamed(() => import('./components/forms/IndicatorConfigForm'), 'IndicatorConfigForm');
+const UsersTable = lazyNamed(() => import('./components/ui/UsersTable'), 'UsersTable');
+const Dashboard = lazyNamed(() => import('./components/ui/Dashboard'), 'Dashboard');
+const ReportsDashboard = lazyNamed(() => import('./components/ui/ReportsDashboard'), 'ReportsDashboard');
+const AccountProfile = lazyNamed(() => import('./components/ui/AccountProfile'), 'AccountProfile');
+const IndicatorHistory = lazyNamed(() => import('./components/ui/IndicatorHistory'), 'IndicatorHistory');
+const Login = lazyNamed(() => import('./components/ui/Login'), 'Login');
+
+function lazyNamed<Module, Key extends keyof Module>(
+  loader: () => Promise<Module>,
+  exportName: Key,
+) {
+  return lazy(async () => ({ default: (await loader())[exportName] as ComponentType<any> }));
+}
 
 const UNASSIGNED_PLANTEL_LABEL = 'Todos los planteles';
 
@@ -929,7 +938,8 @@ function AppContent() {
   const role = user?.role || 'plantel'; // Fallback por defecto
 
   return (
-    <Routes>
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center" role="status">Cargando...</div>}>
+      <Routes>
       {/* Ruta pública */}
       <Route path="/login" element={<LoginRoute />} />
 
@@ -1009,7 +1019,8 @@ function AppContent() {
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+      </Routes>
+    </Suspense>
   );
 }
 

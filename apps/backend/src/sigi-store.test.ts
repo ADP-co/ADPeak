@@ -116,14 +116,14 @@ describe("SIGI store and RBAC", () => {
     const director = sessionFromHeaders({ "x-role": "director" });
     const indicators = listIndicators(director);
 
-    expect(officialCatalogStats.uniqueIndicators).toBe(14);
-    expect(officialCatalogStats.operationalRows).toBe(20);
+    expect(officialCatalogStats.uniqueIndicators).toBe(16);
+    expect(officialCatalogStats.operationalRows).toBe(22);
     expect(officialCatalogStats.templateRows).toBe(1);
     expect(officialCatalogStats.templateVariantRows).toBe(3);
-    expect(officialCatalogStats.pendingMappingRows).toBe(4);
+    expect(officialCatalogStats.pendingMappingRows).toBe(2);
     expect(officialDataSummary.workbookCount).toBe(30);
     expect(Object.keys(officialWorkbookTemplates)).toHaveLength(28);
-    expect(indicators).toHaveLength(14);
+    expect(indicators).toHaveLength(16);
     expect(indicators.length).toBeGreaterThan(0);
     expect(indicators.every((indicator) => !indicator.code.startsWith("FMT-") && !indicator.code.includes("-FMT-"))).toBe(true);
     expect(indicators.some((indicator) => indicator.code === "1.1.1.1.1")).toBe(false);
@@ -186,7 +186,7 @@ describe("SIGI store and RBAC", () => {
     );
 
     expect(catalogSourceCodes.length).toBe(28);
-    expect(operationalCodes).toHaveLength(14);
+    expect(operationalCodes).toHaveLength(16);
     expect(operationalCodes.filter((code) => !visibleCodes.has(code))).toEqual([]);
     expect(Array.from(hiddenCodes).some((code) => visibleCodes.has(code))).toBe(false);
   });
@@ -2707,7 +2707,7 @@ describe("SIGI store and RBAC", () => {
         }
       },
       {
-        code: "FMT-01-E81E8473-41221-porcentaje-de-uo-q",
+        code: "4.1.2.2.1",
         expectedKeys: ["dependencia_area", "actividad", "descripcion", "total_de_equipos", "equipos_atendidos"],
         sampleValues: {
           dependencia_area: "DGEMS",

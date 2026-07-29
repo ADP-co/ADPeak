@@ -71,8 +71,61 @@ class FrontendGenerationTests(unittest.TestCase):
         self.assertNotRegex(serialized, r"(?:FMT|TMP)-|pending_mapping|private-workbook")
         self.assertEqual(public_templates["1.0.0.0.1"]["sourcePath"], "")
 
+    def test_classification_matrix_is_derived_from_catalog_rows(self) -> None:
+        rows = [{
+            "code": "4.1.2.2.1",
+            "sourceCode": "FMT-01-AAAA",
+            "classification": "operational",
+            "visible": True,
+            "responsible": "Angel Ordoñez",
+            "activity": "Fuente oficial.xlsx",
+        }]
+        stats = {
+            "sourceRows": 1,
+            "uniqueIndicators": 1,
+            "operationalRows": 1,
+            "templateRows": 0,
+            "templateVariantRows": 0,
+            "pendingMappingRows": 0,
+        }
+
+        generated = IMPORTER.generate_classification_matrix(rows, stats)
+
+        self.assertIn("4.1.2.2.1", generated)
+        self.assertIn("indicadores-20260628T002121Z-3-001.zip", generated)
+        self.assertIn("Indicadores operativos visibles y únicos: `1`", generated)
+
 
 class WorkbookTemplateTests(unittest.TestCase):
+    def test_reference_code_is_promoted_only_for_one_described_table(self) -> None:
+        sheets = [
+            {
+                "name": "Hoja2",
+                "table": {"columns": [], "initialRows": [], "headerRows": []},
+                "_codes": ["4.1.2.2.1"],
+                "codeDescriptions": [
+                    "4.1.2.2.1. Porcentaje de UO que realizan acciones de actualización"
+                ],
+            }
+        ]
+
+        self.assertEqual(
+            IMPORTER.inferred_indicator_code_from_table(sheets),
+            "4.1.2.2.1",
+        )
+
+    def test_reference_code_without_capture_table_is_not_promoted(self) -> None:
+        sheets = [
+            {
+                "name": "Hoja1",
+                "table": None,
+                "_codes": ["4.1.5.3.3"],
+                "codeDescriptions": ["4.1.5.3.3. Programa anual de comunicación social"],
+            }
+        ]
+
+        self.assertEqual(IMPORTER.inferred_indicator_code_from_table(sheets), "")
+
     def test_sheet_with_target_indicator_code_wins_over_larger_sheet(self) -> None:
         small_matching_table = {
             "columns": [{"key": "docentes", "label": "Docentes", "type": "number"}],

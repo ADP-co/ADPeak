@@ -45,7 +45,7 @@ their application hashes are written to the ignored QA environment.
 | Command | Behavior |
 | --- | --- |
 | `npm run qa:clone` | Reads source state in a repeatable-read, read-only transaction; writes an ignored backup and SHA-256 digest; creates a unique `adpeak_qa_cert_*` database on the same host and port; copies `app_state`; writes the ignored manifest and environment. |
-| `npm run qa:seed` | Requires clone-only passwords, keeps the 46 official accounts and 14 official indicators, removes visible QA/TMP/FMT state and dependent records, synchronizes assignments, and commits the target replacement atomically. |
+| `npm run qa:seed` | Requires clone-only passwords, keeps the 56 official accounts and the generated official indicator set, removes visible QA/TMP/FMT state and dependent records, synchronizes assignments, and commits the target replacement atomically. |
 | `npm run qa:run` | Reads the target in a read-only transaction and certifies inventory, auth, roles, indicators, reports, and security. Backend HTTP probes run in `NODE_ENV=test`, where application persistence is memory only. |
 | `npm run qa:cleanup` | Drops only the database recorded by the manifest after exact URL fingerprint, host, port, source separation, and strict prefix checks. Artifacts are retained. |
 

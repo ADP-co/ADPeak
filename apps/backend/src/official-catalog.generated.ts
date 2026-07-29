@@ -24,14 +24,14 @@ export const officialCatalogStats = {
   "uniqueRows": 28,
   "duplicateRows": 0,
   "uniqueSourceCodes": 28,
-  "uniqueIndicators": 14,
-  "operationalRows": 20,
+  "uniqueIndicators": 16,
+  "operationalRows": 22,
   "templateRows": 1,
   "templateVariantRows": 3,
-  "pendingMappingRows": 4,
-  "uniqueResponsibles": 8,
+  "pendingMappingRows": 2,
+  "uniqueResponsibles": 9,
   "uniqueContributors": 1,
-  "uniqueActivities": 20,
+  "uniqueActivities": 22,
   "blankActivities": 0,
   "workbookOnlyIndicators": 0
 } as const;
@@ -342,6 +342,28 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
   },
   {
     "sourceRow": 11,
+    "code": "1.1.2.2.1",
+    "sourceCode": "1.1.2.2.1",
+    "officialCode": "1.1.2.2.1",
+    "name": "REPORTE DE ATENCIÓN A ESTUDIANTES EN NIVELACIÓN ACADÉMICA PARA EL PERIODO ORDINARIO",
+    "responsible": "Marcial Aviña Iglesias",
+    "contributors": "Planteles",
+    "activity": "NIVELACION ACADEMICA_ agosto 2025_ENERO2026 (1).xlsx",
+    "classification": "operational",
+    "visible": true,
+    "classificationReason": [],
+    "dedupeKey": "5c80de99ee2b86ed",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "official_code_detected",
+      "private_fields_blank",
+      "source_workbook_template",
+      "source_zip_indicator"
+    ]
+  },
+  {
+    "sourceRow": 12,
     "code": "1.1.2.2.10",
     "sourceCode": "1.1.2.2.10",
     "officialCode": "1.1.2.2.10",
@@ -363,7 +385,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 12,
+    "sourceRow": 13,
     "code": "1.1.2.2.11",
     "sourceCode": "1.1.2.2.11",
     "officialCode": "1.1.2.2.11",
@@ -385,7 +407,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 13,
+    "sourceRow": 14,
     "code": "1.1.2.3.1",
     "sourceCode": "1.1.2.3.1",
     "officialCode": "1.1.2.3.1",
@@ -407,7 +429,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 14,
+    "sourceRow": 15,
     "code": "1.1.2.3.1",
     "sourceCode": "1.1.2.3.1-FMT-2A7229AD",
     "officialCode": "1.1.2.3.1",
@@ -433,7 +455,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 15,
+    "sourceRow": 16,
     "code": "1.1.2.3.1",
     "sourceCode": "1.1.2.3.1-FMT-6434504C",
     "officialCode": "1.1.2.3.1",
@@ -459,7 +481,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 16,
+    "sourceRow": 17,
     "code": "1.1.2.3.1",
     "sourceCode": "1.1.2.3.1-FMT-AB95A3B8",
     "officialCode": "1.1.2.3.1",
@@ -485,7 +507,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 17,
+    "sourceRow": 18,
     "code": "1.1.2.3.1",
     "sourceCode": "1.1.2.3.1-FMT-FBF5B718",
     "officialCode": "1.1.2.3.1",
@@ -511,7 +533,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 18,
+    "sourceRow": 19,
     "code": "1.1.2.5.10",
     "sourceCode": "1.1.2.5.10",
     "officialCode": "1.1.2.5.10",
@@ -533,7 +555,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 19,
+    "sourceRow": 20,
     "code": "1.1.2.5.3",
     "sourceCode": "1.1.2.5.3",
     "officialCode": "1.1.2.5.3",
@@ -557,7 +579,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 20,
+    "sourceRow": 21,
     "code": "1.1.2.5.3-FMT-F28103DD",
     "sourceCode": "1.1.2.5.3-FMT-F28103DD",
     "officialCode": "1.1.2.5.3",
@@ -583,7 +605,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 21,
+    "sourceRow": 22,
     "code": "2.1.4.1.2",
     "sourceCode": "2.1.4.1.2",
     "officialCode": "2.1.4.1.2",
@@ -605,7 +627,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 22,
+    "sourceRow": 23,
     "code": "3.1.0.0.1",
     "sourceCode": "3.1.0.0.1",
     "officialCode": "3.1.0.0.1",
@@ -627,7 +649,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 23,
+    "sourceRow": 24,
     "code": "3.1.1.3.6",
     "sourceCode": "3.1.1.3.6",
     "officialCode": "3.1.1.3.6",
@@ -649,7 +671,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 24,
+    "sourceRow": 25,
     "code": "4.1.1.0.1",
     "sourceCode": "4.1.1.0.1",
     "officialCode": "4.1.1.0.1",
@@ -671,7 +693,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 25,
+    "sourceRow": 26,
     "code": "4.1.1.1.1",
     "sourceCode": "4.1.1.1.1",
     "officialCode": "4.1.1.1.1",
@@ -693,7 +715,29 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 26,
+    "sourceRow": 27,
+    "code": "4.1.2.2.1",
+    "sourceCode": "4.1.2.2.1",
+    "officialCode": "4.1.2.2.1",
+    "name": "Porcentaje de UO que realizan acciones de actualización, mantenimiento preventivo y/o correctivo a la infraestructura tecnológica",
+    "responsible": "Angel Ordoñez",
+    "contributors": "Planteles",
+    "activity": "41221 - Porcentaje de UO que realizan acciones de actualización, mantenimiento preventivo o correctivo de la insfraestructura tecnologica.xlsx",
+    "classification": "operational",
+    "visible": true,
+    "classificationReason": [],
+    "dedupeKey": "2038703dc1040675",
+    "isDuplicate": false,
+    "duplicateOfSourceRow": null,
+    "dataQuality": [
+      "official_code_detected",
+      "private_fields_blank",
+      "source_workbook_template",
+      "source_zip_indicator"
+    ]
+  },
+  {
+    "sourceRow": 28,
     "code": "FMT-01-43FE55CA-formacion-docente-2026",
     "sourceCode": "FMT-01-43FE55CA-formacion-docente-2026",
     "officialCode": null,
@@ -718,7 +762,7 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
     ]
   },
   {
-    "sourceRow": 27,
+    "sourceRow": 29,
     "code": "FMT-01-D30B3A90-formacion-apoyo-academic",
     "sourceCode": "FMT-01-D30B3A90-formacion-apoyo-academic",
     "officialCode": null,
@@ -733,56 +777,6 @@ export const officialCatalogRows: OfficialCatalogRow[] = [
       "no_official_code"
     ],
     "dedupeKey": "736f89c9d9ee3466",
-    "isDuplicate": false,
-    "duplicateOfSourceRow": null,
-    "dataQuality": [
-      "pending_indicator_code",
-      "private_fields_blank",
-      "source_workbook_template",
-      "source_zip_indicator"
-    ]
-  },
-  {
-    "sourceRow": 28,
-    "code": "FMT-01-E81E8473-41221-porcentaje-de-uo-q",
-    "sourceCode": "FMT-01-E81E8473-41221-porcentaje-de-uo-q",
-    "officialCode": null,
-    "name": "41221 - Porcentaje de UO que realizan acciones de actualización, mantenimiento preventivo o correctivo de la insfraestructura tecnologica",
-    "responsible": "Angel Ordoñez",
-    "contributors": "Planteles",
-    "activity": "41221 - Porcentaje de UO que realizan acciones de actualización, mantenimiento preventivo o correctivo de la insfraestructura tecnologica.xlsx",
-    "classification": "pending_mapping",
-    "visible": false,
-    "classificationReason": [
-      "synthetic_code",
-      "no_official_code"
-    ],
-    "dedupeKey": "14ea03f1842b9d5d",
-    "isDuplicate": false,
-    "duplicateOfSourceRow": null,
-    "dataQuality": [
-      "pending_indicator_code",
-      "private_fields_blank",
-      "source_workbook_template",
-      "source_zip_indicator"
-    ]
-  },
-  {
-    "sourceRow": 29,
-    "code": "FMT-01-F2A88F7E-nivelacion-academica-ago",
-    "sourceCode": "FMT-01-F2A88F7E-nivelacion-academica-ago",
-    "officialCode": null,
-    "name": "NIVELACION ACADEMICA_ agosto 2025_ENERO2026 (1)",
-    "responsible": "Marcial Aviña Iglesias",
-    "contributors": "Planteles",
-    "activity": "NIVELACION ACADEMICA_ agosto 2025_ENERO2026 (1).xlsx",
-    "classification": "pending_mapping",
-    "visible": false,
-    "classificationReason": [
-      "synthetic_code",
-      "no_official_code"
-    ],
-    "dedupeKey": "246cc0f0c53cedc2",
     "isDuplicate": false,
     "duplicateOfSourceRow": null,
     "dataQuality": [

@@ -25,6 +25,7 @@ BACKEND_CATALOG_TARGET = REPO_ROOT / "apps/backend/src/official-catalog.generate
 FRONTEND_CATALOG_TARGET = REPO_ROOT / "apps/frontend/src/catalog/officialCatalog.generated.ts"
 BACKEND_DATA_TARGET = REPO_ROOT / "apps/backend/src/official-data.generated.ts"
 FRONTEND_DATA_TARGET = REPO_ROOT / "apps/frontend/src/catalog/officialData.generated.ts"
+CLASSIFICATION_MATRIX_TARGET = REPO_ROOT / "docs/project/indicator-classification-matrix.md"
 
 CODE_RE = re.compile(r"\b\d+(?:\.\d+){3,}\b")
 PLANTEL_RE = re.compile(r"\bBACH(?:ILLERATO)?\s*\.?\s*(\d+)\b|\bBachillerato\s+(\d+)\b", re.I)
@@ -147,6 +148,50 @@ def write_text(path: Path, text: str) -> None:
     path.write_text(text.rstrip() + "\n", encoding="utf-8")
 
 
+def markdown_cell(value: Any) -> str:
+    return clean_text(value).replace("|", "\\|")
+
+
+def generate_classification_matrix(rows: list[dict[str, Any]], stats: dict[str, Any]) -> str:
+    lines = [
+        "# Matriz de clasificación de indicadores oficiales",
+        "",
+        f"Fuente: `{INDICADORES_ZIP.name}`",
+        "",
+        "Este archivo se regenera mediante `python tools/import-official-data.py`; no se edita manualmente.",
+        "",
+        "| Código visible | Código fuente | Clasificación | Visible | Responsable | Fuente |",
+        "| --- | --- | --- | --- | --- | --- |",
+    ]
+
+    for row in rows:
+        visible_code = row.get("code") if row.get("visible") else "-"
+        lines.append("| " + " | ".join([
+            markdown_cell(visible_code),
+            markdown_cell(row.get("sourceCode")),
+            markdown_cell(row.get("classification")),
+            "sí" if row.get("visible") else "no",
+            markdown_cell(row.get("responsible")),
+            markdown_cell(row.get("activity")),
+        ]) + " |")
+
+    lines.extend([
+        "",
+        "## Resumen",
+        "",
+        f"- Filas físicas trazables: `{stats['sourceRows']}`.",
+        f"- Indicadores operativos visibles y únicos: `{stats['uniqueIndicators']}`.",
+        f"- Fuentes operativas: `{stats['operationalRows']}`.",
+        f"- Plantillas internas: `{stats['templateRows']}`.",
+        f"- Variantes de plantilla internas: `{stats['templateVariantRows']}`.",
+        f"- Fuentes pendientes de mapeo: `{stats['pendingMappingRows']}`.",
+        "- `operational`: aparece en el flujo normal cuando el rol y alcance lo permiten.",
+        "- `template` y `template_variant`: estructura interna; nunca aparecen como indicadores independientes.",
+        "- `pending_mapping`: fuente conservada sin inventar un indicador o columnas operativas.",
+    ])
+    return "\n".join(lines)
+
+
 def catalog_stats(rows: list[dict[str, Any]]) -> dict[str, Any]:
     operational_rows = [row for row in rows if row.get("classification") == "operational"]
     contributors = sorted(
@@ -214,6 +259,22 @@ def frontend_catalog_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 def is_synthetic_indicator_code(code: str) -> bool:
     return code.startswith("FMT-") or "-FMT-" in code or code.startswith("TMP-")
+
+
+def inferred_indicator_code_from_table(sheets: list[dict[str, Any]]) -> str:
+    """Return one code only when the workbook table identifies it unambiguously."""
+    candidates: set[str] = set()
+
+    for sheet in sheets:
+        if not sheet.get("table"):
+            continue
+
+        descriptions = [clean_text(value) for value in sheet.get("codeDescriptions", [])]
+        for code in sheet.get("_codes", []):
+            if any(code in description for description in descriptions):
+                candidates.add(code)
+
+    return next(iter(candidates)) if len(candidates) == 1 else ""
 
 
 def person_aliases(rows: list[dict[str, Any]]) -> dict[str, str]:
@@ -500,6 +561,10 @@ def workbook_summaries() -> tuple[
                 if not planteles and source_scope:
                     planteles.add(source_scope)
                 table_sheets = [sheet for sheet in sheets if sheet.get("table")]
+                if not indicator_codes:
+                    inferred_code = inferred_indicator_code_from_table(sheets)
+                    if inferred_code:
+                        indicator_codes.add(inferred_code)
                 source_codes = sorted(indicator_codes, key=normalize_key)
                 template_codes = source_codes or (
                     [synthetic_workbook_code(info.filename, digest)] if table_sheets else []
@@ -2044,12 +2109,14 @@ def main() -> None:
         frontend_workbook_templates(workbook_templates, operational_names),
         frontend=True,
     )
+    classification_matrix_text = generate_classification_matrix(rows, stats)
 
     frontend_only = os.environ.get("ADPEAK_FRONTEND_ONLY") == "1"
 
     if not frontend_only:
         write_text(BACKEND_CATALOG_TARGET, backend_catalog_text)
         write_text(BACKEND_DATA_TARGET, backend_data_text)
+        write_text(CLASSIFICATION_MATRIX_TARGET, classification_matrix_text)
 
     write_text(FRONTEND_CATALOG_TARGET, frontend_catalog_text)
     write_text(FRONTEND_DATA_TARGET, frontend_data_text)

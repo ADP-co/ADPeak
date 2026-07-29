@@ -30,10 +30,8 @@ export async function loadOfficialIndicatorCodes() {
       .filter((code) => typeof code === "string" && code.length > 0)
   )].sort(compareText);
 
-  if (codes.length !== BASELINE.indicators) {
-    throw new QaHarnessError(
-      `Repository catalog baseline changed: expected ${BASELINE.indicators} visible indicators, found ${codes.length}.`
-    );
+  if (codes.length === 0) {
+    throw new QaHarnessError("Repository catalog does not contain visible operational indicators.");
   }
 
   return codes;
@@ -90,10 +88,10 @@ export async function sanitizeCloneStateRows(rows, passwordHashes) {
 
   const indicators = officialCodes.map((code) => indicatorByCode.get(code)).filter(Boolean).sort(sortByNumericId);
 
-  if (indicators.length !== BASELINE.indicators) {
+  if (indicators.length !== officialCodes.length) {
     const missing = officialCodes.filter((code) => !indicatorByCode.has(code));
     throw new QaHarnessError(
-      `Clone baseline requires ${BASELINE.indicators} official indicators; missing ${missing.join(", ") || "unknown"}.`
+      `Clone baseline requires ${officialCodes.length} generated official indicators; missing ${missing.join(", ") || "unknown"}.`
     );
   }
 
@@ -219,8 +217,10 @@ function validateCertificationState(state, passwordHashes, officialCodes) {
   assertOfficialAccountBaseline(users);
 
   const actualCodes = indicators.map((indicator) => indicator?.code).sort(compareText);
-  if (indicators.length !== BASELINE.indicators || !sameStringArray(actualCodes, [...officialCodes].sort(compareText))) {
-    throw new QaHarnessError("Certification state does not contain the exact 14-code official indicator baseline.");
+  if (indicators.length !== officialCodes.length || !sameStringArray(actualCodes, [...officialCodes].sort(compareText))) {
+    throw new QaHarnessError(
+      `Certification state does not contain the exact ${officialCodes.length}-code generated indicator baseline.`
+    );
   }
 
   if (containsVisibleMarker(state)) {

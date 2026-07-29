@@ -859,6 +859,373 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
     "footerNote": "",
     "quality": []
   },
+  "1.1.2.2.1": {
+    "indicatorCode": "1.1.2.2.1",
+    "officialCode": "1.1.2.2.1",
+    "indicatorName": "REPORTE DE ATENCIÓN A ESTUDIANTES EN NIVELACIÓN ACADÉMICA PARA EL PERIODO ORDINARIO",
+    "activityLabel": "",
+    "sourceLabel": "Development fallback",
+    "sourcePath": "",
+    "sheetName": "",
+    "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "PLANTEL",
+          "rowspan": 2
+        },
+        {
+          "label": "GRADO",
+          "rowspan": 2
+        },
+        {
+          "label": "MATRICULA",
+          "colspan": 3
+        },
+        {
+          "label": "No. ESTUDIANTES EN ORDINARIO POR GRUPO (Se contabilizará por estudiante, independenientemente la cantidad de materias que vaya a presentar)",
+          "colspan": 8
+        },
+        {
+          "label": "No. ASIGNATURAS CON ALUMNOS EN ORDINARIO",
+          "rowspan": 2
+        },
+        {
+          "label": "No.ASIGNATURAS QUE DIERON NIVELACIÓN ACADÉMICA",
+          "rowspan": 2
+        },
+        {
+          "label": "CANTIDAD ESTUDIANTES QUE ASISTIERON",
+          "colspan": 3
+        },
+        {
+          "label": "% ATENCIÓN",
+          "rowspan": 2
+        }
+      ],
+      [
+        {
+          "label": "H"
+        },
+        {
+          "label": "M"
+        },
+        {
+          "label": "T"
+        },
+        {
+          "label": "A"
+        },
+        {
+          "label": "B"
+        },
+        {
+          "label": "C"
+        },
+        {
+          "label": "D"
+        },
+        {
+          "label": "E"
+        },
+        {
+          "label": "F"
+        },
+        {
+          "label": "G"
+        },
+        {
+          "label": "H"
+        },
+        {
+          "label": "H"
+        },
+        {
+          "label": "M"
+        },
+        {
+          "label": "T"
+        }
+      ]
+    ],
+    "columns": [
+      {
+        "key": "plantel",
+        "label": "PLANTEL",
+        "type": "readonly"
+      },
+      {
+        "key": "grado",
+        "label": "GRADO",
+        "type": "text"
+      },
+      {
+        "key": "matricula_h",
+        "label": "H",
+        "type": "number"
+      },
+      {
+        "key": "matricula_m",
+        "label": "M",
+        "type": "number"
+      },
+      {
+        "key": "matricula_t",
+        "label": "T",
+        "type": "number"
+      },
+      {
+        "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi",
+        "label": "A",
+        "type": "number"
+      },
+      {
+        "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_2",
+        "label": "B",
+        "type": "number"
+      },
+      {
+        "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_3",
+        "label": "C",
+        "type": "number"
+      },
+      {
+        "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_4",
+        "label": "D",
+        "type": "number"
+      },
+      {
+        "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_5",
+        "label": "E",
+        "type": "number"
+      },
+      {
+        "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_6",
+        "label": "F",
+        "type": "number"
+      },
+      {
+        "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_7",
+        "label": "G",
+        "type": "number"
+      },
+      {
+        "key": "no_estudiantes_en_ordinario_por_grupo_se_contabi_8",
+        "label": "H",
+        "type": "number"
+      },
+      {
+        "key": "no_asignaturas_con_alumnos_en_ordinario",
+        "label": "No. ASIGNATURAS CON ALUMNOS EN ORDINARIO",
+        "type": "number"
+      },
+      {
+        "key": "no_asignaturas_que_dieron_nivelacion_academica",
+        "label": "No.ASIGNATURAS QUE DIERON NIVELACIÓN ACADÉMICA",
+        "type": "text"
+      },
+      {
+        "key": "cantidad_estudiantes_que_asistieron_h",
+        "label": "H",
+        "type": "number"
+      },
+      {
+        "key": "cantidad_estudiantes_que_asistieron_m",
+        "label": "M",
+        "type": "number"
+      },
+      {
+        "key": "cantidad_estudiantes_que_asistieron_t",
+        "label": "T",
+        "type": "number"
+      },
+      {
+        "key": "atencion",
+        "label": "% ATENCIÓN",
+        "type": "calculated",
+        "calculation": {
+          "type": "percentage",
+          "numeratorKey": "cantidad_estudiantes_que_asistieron_t",
+          "denominatorKey": "matricula_t",
+          "decimals": 2
+        }
+      }
+    ],
+    "initialRows": [
+      {
+        "plantel": "",
+        "grado": "1°",
+        "matricula_h": 0.0,
+        "matricula_m": 0.0,
+        "matricula_t": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_2": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_3": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_4": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_5": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "",
+        "cantidad_estudiantes_que_asistieron_h": 0.0,
+        "cantidad_estudiantes_que_asistieron_m": 0.0,
+        "cantidad_estudiantes_que_asistieron_t": "",
+        "atencion": ""
+      },
+      {
+        "plantel": "",
+        "grado": "3°",
+        "matricula_h": 0.0,
+        "matricula_m": 0.0,
+        "matricula_t": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_2": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_3": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_4": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_5": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "",
+        "cantidad_estudiantes_que_asistieron_h": 0.0,
+        "cantidad_estudiantes_que_asistieron_m": 0.0,
+        "cantidad_estudiantes_que_asistieron_t": "",
+        "atencion": ""
+      },
+      {
+        "plantel": "",
+        "grado": "5°",
+        "matricula_h": 0.0,
+        "matricula_m": 0.0,
+        "matricula_t": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_2": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_3": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_4": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_5": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "",
+        "cantidad_estudiantes_que_asistieron_h": 0.0,
+        "cantidad_estudiantes_que_asistieron_m": 0.0,
+        "cantidad_estudiantes_que_asistieron_t": "",
+        "atencion": ""
+      },
+      {
+        "plantel": "SEMIESCOLARIZADO",
+        "grado": "",
+        "matricula_h": "",
+        "matricula_m": "",
+        "matricula_t": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_2": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_3": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_4": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_5": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "",
+        "cantidad_estudiantes_que_asistieron_h": "",
+        "cantidad_estudiantes_que_asistieron_m": "",
+        "cantidad_estudiantes_que_asistieron_t": "",
+        "atencion": ""
+      },
+      {
+        "plantel": "PLANTEL",
+        "grado": "GRADO",
+        "matricula_h": "",
+        "matricula_m": "",
+        "matricula_t": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_2": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_3": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_4": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_5": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "No.ASIGNATURAS QUE DIERON NIVELACIÓN ACADÉMICA",
+        "cantidad_estudiantes_que_asistieron_h": "",
+        "cantidad_estudiantes_que_asistieron_m": "",
+        "cantidad_estudiantes_que_asistieron_t": "",
+        "atencion": ""
+      },
+      {
+        "plantel": "",
+        "grado": "1°",
+        "matricula_h": 0.0,
+        "matricula_m": 0.0,
+        "matricula_t": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_2": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_3": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_4": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_5": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "",
+        "cantidad_estudiantes_que_asistieron_h": 0.0,
+        "cantidad_estudiantes_que_asistieron_m": 0.0,
+        "cantidad_estudiantes_que_asistieron_t": "",
+        "atencion": ""
+      },
+      {
+        "plantel": "",
+        "grado": "3°",
+        "matricula_h": 0.0,
+        "matricula_m": 0.0,
+        "matricula_t": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_2": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_3": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_4": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_5": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
+        "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
+        "no_asignaturas_con_alumnos_en_ordinario": "",
+        "no_asignaturas_que_dieron_nivelacion_academica": "",
+        "cantidad_estudiantes_que_asistieron_h": 0.0,
+        "cantidad_estudiantes_que_asistieron_m": 0.0,
+        "cantidad_estudiantes_que_asistieron_t": "",
+        "atencion": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "plantel": "",
+      "grado": "",
+      "matricula_h": "",
+      "matricula_m": "",
+      "matricula_t": "",
+      "no_estudiantes_en_ordinario_por_grupo_se_contabi": "",
+      "no_estudiantes_en_ordinario_por_grupo_se_contabi_2": "",
+      "no_estudiantes_en_ordinario_por_grupo_se_contabi_3": "",
+      "no_estudiantes_en_ordinario_por_grupo_se_contabi_4": "",
+      "no_estudiantes_en_ordinario_por_grupo_se_contabi_5": "",
+      "no_estudiantes_en_ordinario_por_grupo_se_contabi_6": "",
+      "no_estudiantes_en_ordinario_por_grupo_se_contabi_7": "",
+      "no_estudiantes_en_ordinario_por_grupo_se_contabi_8": "",
+      "no_asignaturas_con_alumnos_en_ordinario": "",
+      "no_asignaturas_que_dieron_nivelacion_academica": "",
+      "cantidad_estudiantes_que_asistieron_h": "",
+      "cantidad_estudiantes_que_asistieron_m": "",
+      "cantidad_estudiantes_que_asistieron_t": ""
+    },
+    "footerNote": "",
+    "quality": []
+  },
   "1.1.2.2.10": {
     "indicatorCode": "1.1.2.2.10",
     "officialCode": "1.1.2.2.10",
@@ -1938,6 +2305,208 @@ export const officialWorkbookTemplates: Record<string, OfficialWorkbookTemplate>
       "respnsable": "",
       "descripcion_breve_del_cambio": "",
       "autorizo": "",
+      "observaciones": ""
+    },
+    "footerNote": "",
+    "quality": []
+  },
+  "4.1.2.2.1": {
+    "indicatorCode": "4.1.2.2.1",
+    "officialCode": "4.1.2.2.1",
+    "indicatorName": "Porcentaje de UO que realizan acciones de actualización, mantenimiento preventivo y/o correctivo a la infraestructura tecnológica",
+    "activityLabel": "",
+    "sourceLabel": "Development fallback",
+    "sourcePath": "",
+    "sheetName": "",
+    "groups": [],
+    "headerRows": [
+      [
+        {
+          "label": "Registro"
+        },
+        {
+          "label": "Dependencia / Área"
+        },
+        {
+          "label": "Responsable"
+        },
+        {
+          "label": "Actividad"
+        },
+        {
+          "label": "Descripción"
+        },
+        {
+          "label": "Fecha"
+        },
+        {
+          "label": "Estatus"
+        },
+        {
+          "label": "Total de Equipos"
+        },
+        {
+          "label": "Equipos Atendidos"
+        },
+        {
+          "label": "% de equipos atendidos"
+        },
+        {
+          "label": "Observaciones"
+        }
+      ]
+    ],
+    "columns": [
+      {
+        "key": "registro",
+        "label": "Registro",
+        "type": "text"
+      },
+      {
+        "key": "dependencia_area",
+        "label": "Dependencia / Área",
+        "type": "text"
+      },
+      {
+        "key": "responsable",
+        "label": "Responsable",
+        "type": "text"
+      },
+      {
+        "key": "actividad",
+        "label": "Actividad",
+        "type": "text"
+      },
+      {
+        "key": "descripcion",
+        "label": "Descripción",
+        "type": "text"
+      },
+      {
+        "key": "fecha",
+        "label": "Fecha",
+        "type": "text"
+      },
+      {
+        "key": "estatus",
+        "label": "Estatus",
+        "type": "text"
+      },
+      {
+        "key": "total_de_equipos",
+        "label": "Total de Equipos",
+        "type": "number"
+      },
+      {
+        "key": "equipos_atendidos",
+        "label": "Equipos Atendidos",
+        "type": "text"
+      },
+      {
+        "key": "de_equipos_atendidos",
+        "label": "% de equipos atendidos",
+        "type": "text"
+      },
+      {
+        "key": "observaciones",
+        "label": "Observaciones",
+        "type": "text"
+      }
+    ],
+    "initialRows": [
+      {
+        "registro": "",
+        "dependencia_area": "",
+        "responsable": "",
+        "actividad": "Actividad",
+        "descripcion": "Descripción",
+        "fecha": "",
+        "estatus": "Estatus",
+        "total_de_equipos": "",
+        "equipos_atendidos": "",
+        "de_equipos_atendidos": "",
+        "observaciones": ""
+      },
+      {
+        "registro": "",
+        "dependencia_area": "",
+        "responsable": "",
+        "actividad": "Actualización de software",
+        "descripcion": "Instalación de actualizaciones, parches y mejoras de seguridad",
+        "fecha": "",
+        "estatus": "Concluida",
+        "total_de_equipos": "",
+        "equipos_atendidos": "",
+        "de_equipos_atendidos": "",
+        "observaciones": ""
+      },
+      {
+        "registro": "",
+        "dependencia_area": "",
+        "responsable": "",
+        "actividad": "Mantenimiento preventivo",
+        "descripcion": "Limpieza física, revisión y optimización de equipos",
+        "fecha": "",
+        "estatus": "Pendiente",
+        "total_de_equipos": "",
+        "equipos_atendidos": "",
+        "de_equipos_atendidos": "",
+        "observaciones": ""
+      },
+      {
+        "registro": "",
+        "dependencia_area": "",
+        "responsable": "",
+        "actividad": "Respaldo de información",
+        "descripcion": "Ejecución y validación de respaldos institucionales",
+        "fecha": "",
+        "estatus": "",
+        "total_de_equipos": "",
+        "equipos_atendidos": "",
+        "de_equipos_atendidos": "",
+        "observaciones": ""
+      },
+      {
+        "registro": "",
+        "dependencia_area": "",
+        "responsable": "",
+        "actividad": "Optimización de red",
+        "descripcion": "Validación y configuración de conectividad y rendimiento",
+        "fecha": "",
+        "estatus": "",
+        "total_de_equipos": "",
+        "equipos_atendidos": "",
+        "de_equipos_atendidos": "",
+        "observaciones": ""
+      },
+      {
+        "registro": "",
+        "dependencia_area": "",
+        "responsable": "",
+        "actividad": "Corrección de incidencias",
+        "descripcion": "Atención y solución de fallas detectadas",
+        "fecha": "",
+        "estatus": "",
+        "total_de_equipos": "",
+        "equipos_atendidos": "",
+        "de_equipos_atendidos": "",
+        "observaciones": ""
+      }
+    ],
+    "showTotals": true,
+    "allowAddRows": true,
+    "addRowLabel": "Agregar fila",
+    "emptyRow": {
+      "registro": "",
+      "dependencia_area": "",
+      "responsable": "",
+      "actividad": "",
+      "descripcion": "",
+      "fecha": "",
+      "estatus": "",
+      "total_de_equipos": "",
+      "equipos_atendidos": "",
+      "de_equipos_atendidos": "",
       "observaciones": ""
     },
     "footerNote": "",

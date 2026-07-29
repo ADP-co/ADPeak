@@ -65,10 +65,13 @@ URLs locales:
 Ejecutar siempre:
 
 ```bash
+npm run secrets:check
+python tools/import-official-data.test.py
 npm run repo:verify
 ```
 
-Ese comando corre tipado, pruebas, build y revision de whitespace con Git. Para validar Docker:
+`secrets:check` inspecciona exclusivamente archivos versionados. `repo:verify` corre tipado,
+pruebas, build y revisión de whitespace con Git. Para validar Docker:
 
 ```bash
 npm run docker:config
@@ -92,6 +95,7 @@ Docker local ni tuneles temporales.
 - [Demo](docs/development/DEMO.md)
 - [Checklist QA demo](docs/development/DEMO_QA_CHECKLIST.md)
 - [Cierre QA empresarial](docs/project/ENTERPRISE_QA_CLOSURE.md)
+- [Clasificación trazable de fuentes oficiales](docs/project/indicator-classification-matrix.md)
 - [Matriz de indicadores oficiales](docs/project/INDICATOR_IMPORT_VALIDATION_MATRIX.md)
 - [Requerimientos](docs/project/REQUIREMENTS.md)
 - [Resumen funcional](docs/project/PROJECT_BRIEF.md)

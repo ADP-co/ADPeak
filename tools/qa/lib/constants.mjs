@@ -11,7 +11,6 @@ export const MANIFEST_SCHEMA_VERSION = 1;
 
 export const BASELINE = Object.freeze({
   accounts: 56,
-  indicators: 14,
   roles: Object.freeze({
     director: 1,
     responsable: 18,

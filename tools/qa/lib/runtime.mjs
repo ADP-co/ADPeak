@@ -7,7 +7,10 @@ import path from "node:path";
 import { REPO_ROOT } from "./constants.mjs";
 import { QaHarnessError } from "./common.mjs";
 
-export async function withTestBackend({ authSecret, artifactDirectory, databaseUrl, initialPasswords }, operation) {
+export async function withTestBackend(
+  { authSecret, artifactDirectory, databaseUrl, initialPasswords, factoryResetVersion },
+  operation
+) {
   const port = await reservePort();
   const baseUrl = `http://127.0.0.1:${port}`;
   const backendRequire = createRequire(path.join(REPO_ROOT, "apps", "backend", "package.json"));
@@ -15,7 +18,15 @@ export async function withTestBackend({ authSecret, artifactDirectory, databaseU
   const serverEntry = path.join(REPO_ROOT, "apps", "backend", "src", "server.ts");
   const child = spawn(process.execPath, [tsxCli, serverEntry], {
     cwd: os.tmpdir(),
-    env: runtimeEnvironment({ authSecret, artifactDirectory, databaseUrl, initialPasswords, port, baseUrl }),
+    env: runtimeEnvironment({
+      authSecret,
+      artifactDirectory,
+      databaseUrl,
+      initialPasswords,
+      factoryResetVersion,
+      port,
+      baseUrl
+    }),
     stdio: ["ignore", "pipe", "pipe"],
     windowsHide: true
   });
@@ -34,7 +45,15 @@ export async function withTestBackend({ authSecret, artifactDirectory, databaseU
   }
 }
 
-function runtimeEnvironment({ authSecret, artifactDirectory, databaseUrl, initialPasswords, port, baseUrl }) {
+function runtimeEnvironment({
+  authSecret,
+  artifactDirectory,
+  databaseUrl,
+  initialPasswords,
+  factoryResetVersion,
+  port,
+  baseUrl
+}) {
   const environment = {};
   const passThrough = [
     "COMSPEC",
@@ -71,6 +90,7 @@ function runtimeEnvironment({ authSecret, artifactDirectory, databaseUrl, initia
     INITIAL_DIRECTOR_PASSWORD: initialPasswords.director,
     INITIAL_RESPONSABLE_PASSWORD: initialPasswords.responsable,
     INITIAL_PLANTEL_PASSWORD: initialPasswords.plantel,
+    ...(factoryResetVersion ? { OFFICIAL_FACTORY_RESET_VERSION: factoryResetVersion } : {}),
     AUTH_TOKEN_TTL_MINUTES: "30",
     FILE_STORAGE_DRIVER: "local",
     FILE_STORAGE_PATH: path.join(artifactDirectory, "runtime-files"),

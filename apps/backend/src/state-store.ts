@@ -44,6 +44,10 @@ export function isPersistenceEnabled() {
   return Boolean(stateFilePath || databaseUrl);
 }
 
+export function isPersistedStateHydrated() {
+  return !databaseUrl || hydratedFromDatabase;
+}
+
 export function readPersistedCollection<T>(key: string): T[] | undefined {
   const value = cachedState[key];
   return Array.isArray(value) ? value as T[] : undefined;
