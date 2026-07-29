@@ -14,7 +14,7 @@ function readSource(relativePath: string) {
     throw new Error(`Missing source fixture: ${relativePath}`);
   }
 
-  return source;
+  return source.replace(/\r\n/g, '\n');
 }
 
 function productionSourceEntries() {
