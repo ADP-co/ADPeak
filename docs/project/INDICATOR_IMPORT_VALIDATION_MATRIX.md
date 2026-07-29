@@ -1,6 +1,6 @@
 # Matriz de validacion de indicadores oficiales
 
-Fecha de revision: 2026-06-29
+Fecha de revision: 2026-07-29
 
 ## Alcance validado
 
@@ -12,9 +12,7 @@ Esta matriz documenta el ciclo de tres misiones aplicado a los indicadores impor
 
 ## Fuentes
 
-- `drive-download-20260428T232937Z-3-001.zip`
-- `Bachillerato 16-20260424T001029Z-3-001.zip`
-- `indicadores-20260622T210134Z-3-001.zip`
+- `indicadores-20260628T002121Z-3-001.zip`
 
 Fuentes generadas y versionadas:
 
@@ -28,7 +26,7 @@ Fuentes generadas y versionadas:
 | Mision | Evidencia | Resultado |
 |---|---|---|
 | Analista | ZIP vigente con 32 archivos: 30 Excel, 1 PDF y 1 DOCX | Cumple |
-| Implementador | 14 indicadores operativos visibles y 28 plantillas oficiales tecnicas disponibles desde el paquete vigente | Cumple |
+| Implementador | 16 indicadores operativos visibles derivados de 28 fuentes fisicas trazables | Cumple |
 | Validador | Pruebas unitarias, typecheck, build, flujo API por rol y regresion empresarial de plantillas visibles | Cumple |
 
 ## Reglas de calidad aplicadas
@@ -43,11 +41,12 @@ Fuentes generadas y versionadas:
 
 | Grupo | Cantidad | Criterio de implementacion | Verificacion |
 |---|---:|---|---|
-| Indicadores operativos visibles | 14 | Catalogo oficial derivado del ZIP `indicadores-20260622T210134Z-3-001.zip`; formatos internos ocultos | API `/api/v1/indicadores` con Director |
-| Formatos con Excel oficial | 28 | Plantilla generada desde encabezados/filas del libro | Auditoria de `/indicadores/:code/template` |
+| Indicadores operativos visibles | 16 | Catalogo oficial derivado del ZIP `indicadores-20260628T002121Z-3-001.zip`; formatos internos ocultos | API `/api/v1/indicadores` con Director |
+| Fuentes fisicas trazables | 28 | Plantilla generada desde encabezados/filas del libro o fuente clasificada | Auditoria de `/indicadores/:code/template` |
 | Libros Excel revisados | 30 | Paquete vigente local, sin versionar binarios | Importador oficial |
-| Grupos de evidencia oficial | 30 | Resumen agregado de libros oficiales, sin exponer rutas privadas | Reporte Director |
-| Falsos positivos retirados | 0 visibles | `FMT-*`, variantes `*-FMT-*` y notas tipo `La tabla anterior incide...` quedan fuera del flujo operativo | `rg` sobre generados y pruebas unitarias |
+| Filas operativas de fuente | 22 | Evidencia operacional consolidada sin exponer rutas privadas | Importador oficial |
+| Fuentes no operativas | 6 | 1 plantilla, 3 variantes internas y 2 fuentes pendientes de mapeo | Clasificacion generada |
+| Falsos positivos retirados | 0 visibles | `FMT-*`, variantes `*-FMT-*` y notas tipo `La tabla anterior incide...` quedan fuera del flujo operativo | Pruebas de catalogo y API |
 
 ## Revision de plantillas visuales 2026-06-29
 
@@ -73,4 +72,4 @@ Fuentes generadas y versionadas:
 
 ## Veredicto
 
-Los indicadores disponibles en el paquete nuevo quedaron importados de forma reproducible desde `indicadores-20260622T210134Z-3-001.zip`. La validacion final confirma que la suite automatizada cubre indicadores visibles, plantillas oficiales, falsos positivos, encabezados genericos y planteles incompletos antes de cada entrega.
+Los indicadores disponibles en el paquete final quedaron importados de forma reproducible desde `indicadores-20260628T002121Z-3-001.zip`. La validacion final confirma 16 indicadores operativos visibles, 28 fuentes fisicas trazables y cero formatos internos expuestos antes de la entrega.
