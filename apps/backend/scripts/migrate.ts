@@ -2,18 +2,25 @@ import { mkdir, readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { Pool } from "pg";
 import { loadLocalEnv } from "../src/config.js";
+import {
+  migrationPoolConfig,
+  resolveMigrationDatabaseUrl,
+  selectMigrationFiles
+} from "./migration-config.js";
 
 const migrationsDir = path.resolve(process.cwd(), "migrations");
 
 loadLocalEnv();
 
-const databaseUrl = process.env.DATABASE_URL;
+const resolvedDatabase = resolveMigrationDatabaseUrl();
 
 await mkdir(migrationsDir, { recursive: true });
 
-const migrationFiles = (await readdir(migrationsDir))
+const allMigrationFiles = await readdir(migrationsDir);
+const migrationFiles = selectMigrationFiles(allMigrationFiles, process.env.APP_ENV);
+const excludedDemoMigrations = allMigrationFiles
   .filter((fileName) => fileName.endsWith(".sql"))
-  .sort();
+  .filter((fileName) => !migrationFiles.includes(fileName));
 
 if (migrationFiles.length === 0) {
   console.log("No hay migraciones SQL pendientes.");
@@ -21,21 +28,27 @@ if (migrationFiles.length === 0) {
   process.exit(0);
 }
 
-if (!databaseUrl) {
+if (!resolvedDatabase) {
   console.log("Migraciones SQL encontradas:");
 
   for (const fileName of migrationFiles) {
     console.log(`- ${fileName}`);
   }
 
-  console.log("DATABASE_URL no configurado; las migraciones se listaron pero no se ejecutaron.");
+  console.log(
+    "No se configuró DATABASE_URL, POSTGRES_URL, POSTGRES_PRISMA_URL ni " +
+    "POSTGRES_URL_NON_POOLING; las migraciones se listaron pero no se ejecutaron."
+  );
   process.exit(0);
 }
 
-const pool = new Pool({
-  connectionString: databaseUrl,
-  ssl: shouldUseSsl(databaseUrl) ? { rejectUnauthorized: false } : undefined
-});
+if (excludedDemoMigrations.length > 0) {
+  console.log(`Migraciones demo excluidas para APP_ENV=${process.env.APP_ENV || "development"}:`);
+  excludedDemoMigrations.sort().forEach((fileName) => console.log(`- ${fileName}`));
+}
+
+console.log(`Conexión de migración resuelta desde ${resolvedDatabase.key}.`);
+const pool = new Pool(migrationPoolConfig(resolvedDatabase.value));
 
 try {
   await pool.query(`
@@ -70,8 +83,4 @@ try {
   console.log("Migraciones completadas.");
 } finally {
   await pool.end();
-}
-
-function shouldUseSsl(url: string) {
-  return !/localhost|127\.0\.0\.1/i.test(url);
 }

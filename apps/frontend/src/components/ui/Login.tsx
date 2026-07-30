@@ -30,7 +30,11 @@ export const Login = () => {
     try {
       const authenticatedUser = await loginWithCredentials(username, password);
       login(authenticatedUser);
-      navigate(redirectByRole[authenticatedUser.role as keyof typeof redirectByRole] ?? '/indicadores');
+      navigate(
+        authenticatedUser.passwordChangeRequired
+          ? '/cuenta'
+          : redirectByRole[authenticatedUser.role as keyof typeof redirectByRole] ?? '/indicadores'
+      );
       return;
     } catch (error) {
       setLoginError(error instanceof Error ? error.message : 'Usuario o contraseña incorrectos.');

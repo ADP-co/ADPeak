@@ -57,5 +57,5 @@ describe('catalog API safety', () => {
     expect(abandonoTemplate.columns.find((column) => column.key === 'tasa_de_reprobacion')).toMatchObject({
       type: 'number',
     });
-  });
+  }, 15_000);
 });

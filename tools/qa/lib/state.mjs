@@ -37,6 +37,18 @@ export async function loadOfficialIndicatorCodes() {
   return codes;
 }
 
+export async function loadOfficialCatalogVersion() {
+  const storePath = path.join(REPO_ROOT, "apps", "backend", "src", "sigi-store.ts");
+  const source = await readFile(storePath, "utf8");
+  const match = source.match(/const officialCatalogImportVersion = "([^"]+)";/);
+
+  if (!match?.[1]) {
+    throw new QaHarnessError("Could not locate the official catalog import version.");
+  }
+
+  return match[1];
+}
+
 export function stateFromRows(rows) {
   const state = {};
 
@@ -57,6 +69,7 @@ export function stateFromRows(rows) {
 
 export async function sanitizeCloneStateRows(rows, passwordHashes) {
   const officialCodes = await loadOfficialIndicatorCodes();
+  const officialCatalogVersion = await loadOfficialCatalogVersion();
   const officialCodeSet = new Set(officialCodes);
   const state = stateFromRows(rows);
   const rawUsers = requiredArray(state.users, "users");
@@ -131,6 +144,8 @@ export async function sanitizeCloneStateRows(rows, passwordHashes) {
   sanitizedState.nextCaptureId = nextNumericId(captures);
   sanitizedState.nextNotificationId = nextNumericId(notifications);
   sanitizedState.nextAuditEventId = nextNumericId(auditEvents);
+  sanitizedState.loginRateLimits = {};
+  sanitizedState.catalogImportVersion = officialCatalogVersion;
 
   validateCertificationState(sanitizedState, passwordHashes, officialCodes);
 
@@ -247,7 +262,7 @@ function validateCertificationState(state, passwordHashes, officialCodes) {
       throw new QaHarnessError(`Clone password hash mismatch for role ${user.role}.`);
     }
 
-    if (!/^[a-f0-9]{64}$/.test(user.passwordHash ?? "")) {
+    if (!/^scrypt\$\d+\$\d+\$\d+\$[A-Za-z0-9_-]+\$[A-Za-z0-9_-]+$/.test(user.passwordHash ?? "")) {
       throw new QaHarnessError(`Invalid password hash for official account ${user.id}.`);
     }
 
@@ -313,6 +328,7 @@ function normalizeOfficialUser(user, passwordHashes, officialCodeSet) {
     username: String(user.username ?? "").trim().toLowerCase(),
     active: true,
     passwordHash: passwordHashes[role],
+    passwordChangeRequired: false,
     indicatorCodes: role === "responsable"
       ? uniqueStrings(cleanArray(user.indicatorCodes).filter((code) => officialCodeSet.has(code)))
       : []

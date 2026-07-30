@@ -43,8 +43,11 @@ coverage/
 output/
 playwright-report/
 test-results/
+.playwright-cli/
 site/
 docs/_build/
+docs/project/qa-runs/
+docs/project/PLAN_FORMAL_PRUEBAS_ADPEAK.md
 *.o
 *.obj
 *.a
@@ -97,5 +100,3 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
-.vercel
-.env*

@@ -1,18 +1,56 @@
-export function applyCors(response: any) {
-  response.setHeader("Access-Control-Allow-Origin", "*");
-  response.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,OPTIONS");
-  response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, x-session-token, x-user-id, x-role, x-plantel-id, x-responsable-id");
-}
+import {
+  API_SECURITY_HEADERS,
+  corsDecision
+} from "../../apps/backend/src/http-security.js";
 
-export function handleOptions(request: any, response: any) {
-  applyCors(response);
+const ALLOWED_METHODS = "GET,POST,PUT,PATCH,DELETE,OPTIONS";
+const ALLOWED_HEADERS = [
+  "Authorization",
+  "Content-Type",
+  "x-session-token",
+  "x-user-id",
+  "x-role",
+  "x-plantel-id",
+  "x-responsable-id",
+  "x-request-id"
+].join(", ");
 
-  if (request.method === "OPTIONS") {
-    response.status(204).end();
+export function applyCors(response: any, request?: any) {
+  applySecurityHeaders(response);
+  const decision = corsDecision(request?.headers ?? {});
+
+  if (!decision.allowed) {
+    return false;
+  }
+
+  if (!decision.origin) {
     return true;
   }
 
-  return false;
+  response.setHeader("Access-Control-Allow-Origin", decision.origin);
+  response.setHeader("Access-Control-Allow-Credentials", "true");
+  response.setHeader("Access-Control-Allow-Methods", ALLOWED_METHODS);
+  response.setHeader("Access-Control-Allow-Headers", ALLOWED_HEADERS);
+  appendVary(response, "Origin");
+  return true;
+}
+
+export function handleOptions(request: any, response: any) {
+  if (request.method !== "OPTIONS") {
+    applySecurityHeaders(response);
+    return false;
+  }
+
+  if (!applyCors(response, request)) {
+    response.status(403).json({
+      error: "origin_not_allowed",
+      message: "El origen de la solicitud no está autorizado."
+    });
+    return true;
+  }
+
+  response.status(204).end();
+  return true;
 }
 
 export function methodNotAllowed(response: any, allowed: string[]) {
@@ -51,4 +89,24 @@ export function isRecord(value: unknown): value is Record<string, unknown> {
 
 export function positiveInteger(value: unknown) {
   return Number.isInteger(value) && Number(value) > 0;
+}
+
+function applySecurityHeaders(response: any) {
+  for (const [name, value] of Object.entries(API_SECURITY_HEADERS)) {
+    response.setHeader(name, value);
+  }
+}
+
+function appendVary(response: any, value: string) {
+  const current = response.getHeader?.("Vary");
+  const entries = String(current ?? "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+
+  if (!entries.some((entry) => entry.toLowerCase() === value.toLowerCase())) {
+    entries.push(value);
+  }
+
+  response.setHeader("Vary", entries.join(", "));
 }

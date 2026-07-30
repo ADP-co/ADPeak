@@ -63,7 +63,7 @@ export const UserBanner = ({
         <button
           onClick={() => {
             if (onNavigate) {
-              onNavigate('perfil');
+              onNavigate('cuenta');
             }
           }}
           className="group -ml-3 flex min-h-11 min-w-0 cursor-pointer items-center gap-3 rounded-md px-3 text-left transition-colors duration-200 hover:bg-brand-Blanco/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Blanco focus-visible:ring-offset-2 focus-visible:ring-offset-brand-Verde_oscuro"

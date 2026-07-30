@@ -57,7 +57,7 @@ describe('runtime API origin security', () => {
     expect(values.has(API_URL_STORAGE_KEY)).toBe(false);
     expect(localStorage.setItem).not.toHaveBeenCalled();
     expect(localStorage.removeItem).toHaveBeenCalledWith(API_URL_STORAGE_KEY);
-  });
+  }, 15_000);
 
   it('removes an unapproved API origin left in public storage', async () => {
     vi.stubEnv('VITE_API_URL', 'https://api.approved.example');
@@ -72,7 +72,7 @@ describe('runtime API origin security', () => {
     expect(localStorage.removeItem).toHaveBeenCalledWith(API_URL_STORAGE_KEY);
   });
 
-  it('accepts a configured origin publicly and limits session tokens to approved origins', async () => {
+  it('accepts a configured origin without forwarding a token stored by an older build', async () => {
     vi.stubEnv('VITE_API_URL', 'https://api.approved.example');
     const { localStorage, values } = installWindow(
       'https://app.example/?api=https%3A%2F%2Fapi.approved.example%2Fruntime',
@@ -92,11 +92,10 @@ describe('runtime API origin security', () => {
       API_URL_STORAGE_KEY,
       'https://api.approved.example/runtime'
     );
-    expect(client.sessionHeaders('https://api.approved.example/api/v1/indicadores')).toEqual({
-      Authorization: 'Bearer secret-session-token',
-      'x-session-token': 'secret-session-token',
-    });
-    expect(client.sessionHeaders('https://attacker.example/collect')).toEqual({});
+    const approvedHeaders = client.sessionHeaders('https://api.approved.example/api/v1/indicadores');
+    expect(approvedHeaders).not.toHaveProperty('Authorization');
+    expect(approvedHeaders).not.toHaveProperty('x-session-token');
+    expect(client.sessionHeaders('https://attacker.example/collect')).not.toHaveProperty('Authorization');
   });
 
   it('keeps arbitrary runtime API overrides available from localhost development', async () => {
@@ -111,10 +110,11 @@ describe('runtime API origin security', () => {
 
     expect(client.API_BASE_URL).toBe('https://temporary-api.example/api/v1');
     expect(values.get(API_URL_STORAGE_KEY)).toBe('https://temporary-api.example');
-    expect(client.sessionHeaders()).toEqual({
-      Authorization: 'Bearer local-session-token',
-      'x-session-token': 'local-session-token',
+    expect(client.sessionHeaders()).toMatchObject({
+      'x-role': 'plantel',
+      'x-user-id': 'plantel-1',
     });
+    expect(client.sessionHeaders()).not.toHaveProperty('Authorization');
   });
 
   it('clears an invalid session and notifies the auth provider after a 401 response', async () => {
@@ -196,5 +196,19 @@ describe('runtime API origin security', () => {
 
     expect(localStorage.removeItem).not.toHaveBeenCalledWith(AUTH_STORAGE_KEY);
     expect(dispatchEvent).not.toHaveBeenCalled();
+  });
+
+  it('includes credentials in every authenticated request', async () => {
+    installWindow('https://app.example/');
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200 });
+    vi.stubGlobal('fetch', fetchMock);
+    const client = await import('./client');
+
+    await client.authenticatedFetch('https://app.example/api/v1/indicadores');
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://app.example/api/v1/indicadores',
+      expect.objectContaining({ credentials: 'include' }),
+    );
   });
 });

@@ -80,10 +80,10 @@ describe("serverless route parity", () => {
     const localServer = readFileSync(new URL("./server.ts", import.meta.url), "utf8");
 
     const serverlessAccess = handlers.indexOf(
-      'sigi.assertCaptureAccess(session, { ...draft, payload: body.payload }, "draft")'
+      'sigi.assertCaptureAccess(session, { ...draft, payload: trustedPayload }, "draft")'
     );
     const serverlessVersion = handlers.indexOf("const expectedVersion = positiveExpectedVersion(body)", serverlessAccess);
-    const localAccess = localServer.indexOf('assertCaptureAccess(session, { ...draft, payload }, "draft")');
+    const localAccess = localServer.indexOf('assertCaptureAccess(session, { ...draft, payload: trustedPayload }, "draft")');
     const localVersion = localServer.indexOf("const expectedVersion = positiveExpectedVersion(body)", localAccess);
 
     expect(serverlessAccess).toBeGreaterThan(-1);
@@ -102,13 +102,14 @@ describe("serverless route parity", () => {
     expect(handlers.match(/error: "invalid_json"/g)).toHaveLength(1);
   });
 
-  it("renews the token after a password change and persists legacy hash upgrades", () => {
+  it("renews the secure session cookie after login and password changes", () => {
     const handlers = workspaceSource("api/_lib/sigi-handlers.ts");
     const localServer = workspaceSource("apps/backend/src/server.ts");
 
-    expect(handlers).toContain("await flushRuntimeState();\n    sendJson(response, 200, { user, sessionToken: sigi.createSessionToken(user) });");
-    expect(handlers.match(/sessionToken: sigi\.createSessionToken\(user\)/g)).toHaveLength(2);
-    expect(localServer.match(/sessionToken: createSessionToken\(user\)/g)).toHaveLength(2);
+    expect(handlers.match(/setSessionCookie\(response, sessionToken\)/g)).toHaveLength(2);
+    expect(localServer.match(/setSessionCookie\(response, sessionToken\)/g)).toHaveLength(2);
+    expect(handlers).toContain("authenticateUserResultAsync");
+    expect(localServer).toContain("authenticateUserResultAsync");
     expect(localServer).toContain("catch (error) {\n      sendMutationError(response, error);");
   });
 });

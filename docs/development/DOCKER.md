@@ -72,8 +72,9 @@ Para ejecutar el punto unico de migraciones dentro del entorno Docker:
 npm run docker:migrate
 ```
 
-El comando actual prepara y lista archivos SQL en `apps/backend/migrations`
-hasta que el equipo cierre el motor de migraciones definitivo.
+El comando aplica en orden las migraciones productivas y registra sus nombres
+en `schema_migrations`. Los archivos `_demo_` quedan excluidos salvo que el
+contenedor use `APP_ENV=demo`.
 
 ## Volumenes
 

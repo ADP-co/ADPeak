@@ -1184,60 +1184,6 @@ function buildParticipantActionTemplate(indicator: CatalogIndicator, plantelName
   };
 }
 
-function buildInfrastructureTemplate(indicator: CatalogIndicator, plantelName: string): IndicatorTemplateResponse {
-  const emptyRow = {
-    plantel: plantelName,
-    actividad: '',
-    rubro: '',
-    descripcion: '',
-    cantidad_actual: '',
-    cantidad_solicitada: '',
-    estado: '',
-    observaciones: '',
-  };
-
-  return {
-    indicatorCode: indicator.code,
-    indicatorName: indicator.name,
-    groups: [],
-    infoBlocks: baseInfoBlocks(indicator, 'Rubro de infraestructura o equipamiento'),
-    headerRows: [
-      [
-        { label: 'Contexto', colspan: 4 },
-        { label: 'Cantidad', colspan: 3 },
-        { label: 'Seguimiento', colspan: 2 },
-      ],
-      [
-        { label: 'Plantel' },
-        { label: 'Actividad' },
-        { label: 'Rubro' },
-        { label: 'Descripción' },
-        { label: 'Actual' },
-        { label: 'Solicitada' },
-        { label: 'Total' },
-        { label: 'Estado' },
-        { label: 'Observaciones' },
-      ],
-    ],
-    columns: [
-      { key: 'plantel', label: 'Plantel', type: 'readonly' },
-      { key: 'actividad', label: 'Actividad', type: 'readonly' },
-      { key: 'rubro', label: 'Rubro', type: 'text' },
-      { key: 'descripcion', label: 'Descripción', type: 'text' },
-      { key: 'cantidad_actual', label: 'Actual', type: 'number' },
-      { key: 'cantidad_solicitada', label: 'Solicitada', type: 'number' },
-      { key: 'cantidad_total', label: 'Total', type: 'calculated', calculation: { type: 'sum', sourceKeys: ['cantidad_actual', 'cantidad_solicitada'] } },
-      { key: 'estado', label: 'Estado', type: 'text' },
-      { key: 'observaciones', label: 'Observaciones', type: 'text' },
-    ],
-    initialRows: rowsFromActivities(indicator, plantelName, (activity) => ({ ...emptyRow, actividad: activity })),
-    allowAddRows: true,
-    addRowLabel: 'Agregar rubro',
-    emptyRow,
-    showTotals: true,
-  };
-}
-
 function buildGenericTemplate(indicator: CatalogIndicator, plantelName: string): IndicatorTemplateResponse {
   return {
     indicatorCode: indicator.code,

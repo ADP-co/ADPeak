@@ -4,6 +4,12 @@ apps/*/dist
 dist
 build
 coverage
+.playwright-cli
+.vercel
+output
+test-results
+playwright-report
+docs/project/qa-runs
 .git
 .env
 .env.*

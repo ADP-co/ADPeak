@@ -33,7 +33,7 @@ npm run check
 | `npm run env:check` | Valida variables requeridas desde `.env`. |
 | `npm run dev:frontend` | Levanta Vite en `http://127.0.0.1:5173`. |
 | `npm run dev:backend` | Levanta la API local en `http://127.0.0.1:8000`. |
-| `npm run migrate` | Prepara/lista migraciones SQL en `apps/backend/migrations`. |
+| `npm run migrate` | Aplica migraciones del ambiente; excluye `_demo_` salvo con `APP_ENV=demo`. |
 | `npm run docker:up` | Levanta frontend, backend y PostgreSQL con Docker Compose. |
 | `npm run docker:down` | Detiene el entorno Docker local. |
 | `npm run docker:logs` | Muestra logs del entorno Docker local. |
@@ -54,7 +54,14 @@ npm run check
 | `npm run build` | Compila frontend y backend. |
 | `npm run typecheck` | Valida TypeScript en todos los workspaces. |
 | `npm run check` | Corre `typecheck`, `test` y `build`. |
-| `npm run repo:verify` | Corre `check` y `git diff --check` antes de un PR o entrega. |
+| `npm run secrets:check` | Busca secretos en archivos versionados y candidatos a commit. |
+| `npm run hygiene:check` | Rechaza binarios, temporales, rutas no portables y mojibake. |
+| `npm run audit:check` | Audita dependencias y controla excepciones con vencimiento. |
+| `npm run official-data:verify` | Verifica el importador y catálogo oficial. |
+| `npm run qa:dry-run` | Valida guardas y cobertura del harness sin conectarse. |
+| `npm run repo:verify` | Ejecuta calidad, tipado, pruebas, build, QA dry-run y whitespace. |
+| `npm run release:build` | Genera un ZIP reproducible desde el commit limpio. |
+| `npm run release:verify` | Extrae el ZIP, instala y repite pruebas/build/importador. |
 
 ## Comandos por workspace
 
@@ -81,6 +88,9 @@ npm --workspace @adpeak/backend run start
 | `VITE_API_URL` | `http://127.0.0.1:8000` | URL de backend usada por el frontend. |
 | `VITE_API_BASE_URL` | `http://127.0.0.1:8000/api/v1` | URL base de API versionada consumida por el frontend. |
 | `DATABASE_URL` | `postgresql://sigi_poa:local_dev_password_not_secret@127.0.0.1:5432/sigi_poa_dev` | URL local para herramientas fuera de Docker. |
+| `POSTGRES_SSL_MODE` | `disable` en loopback, `verify-full` remoto | Política TLS del ejecutor de migraciones. |
+| `POSTGRES_SSL_CA` | Vacío | CA PEM opcional para PostgreSQL remoto. |
+| `POSTGRES_ALLOW_INSECURE_DB` | `false` | Override explícito para una conexión remota sin verificación. |
 | `AUTH_SECRET` | `local-dev-auth-secret-change-me` | Placeholder local para auth; no usar en produccion. |
 | `AUTH_TOKEN_TTL_MINUTES` | `60` | Duracion local de tokens. |
 | `FILE_STORAGE_DRIVER` | `local` | Driver de archivos. |
@@ -98,7 +108,8 @@ La guia especifica de demo esta en [DEMO.md](DEMO.md).
 
 ## Migraciones
 
-Mientras el motor de base de datos final no este cerrado, el script
-`npm run migrate` prepara el directorio `apps/backend/migrations` y lista los
-archivos `.sql` versionados. Cuando se defina PostgreSQL o MySQL, este comando
-debe mantenerse como punto unico para ejecutar migraciones reales.
+`npm run migrate` resuelve la misma cadena de variables PostgreSQL que el
+runtime, aplica en orden los archivos SQL versionados y registra cada uno en
+`schema_migrations`. En producción excluye migraciones `_demo_`; estas solo se
+aplican con `APP_ENV=demo`. El esquema productivo usa PostgreSQL con `app_state`
+para dominio y `app_evidence` para archivos PDF.

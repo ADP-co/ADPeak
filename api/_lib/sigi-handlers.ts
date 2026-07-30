@@ -1,15 +1,31 @@
 import { applyCors, handleOptions, InvalidJsonBodyError, methodNotAllowed, positiveInteger, readJsonBody } from "./http";
+import {
+  assertLoginAllowed,
+  clearLoginFailures,
+  loginAttemptKey,
+  recordLoginFailure
+} from "../../apps/backend/src/auth-rate-limit.js";
+import {
+  authenticationResponse,
+  clearSessionCookie,
+  setSessionCookie
+} from "../../apps/backend/src/session-cookie.js";
 
 type RequestLike = {
   method?: string;
   headers?: Record<string, string | string[] | undefined>;
   query?: Record<string, unknown>;
   body?: unknown;
+  socket?: { remoteAddress?: string };
 };
 
-let sigiModulePromise: Promise<any> | undefined;
-let captureModulePromise: Promise<any> | undefined;
-let stateModulePromise: Promise<any> | undefined;
+type SigiModule = typeof import("../../apps/backend/src/sigi-store.js");
+type CaptureModule = typeof import("../../apps/backend/src/capture-store.js");
+type StateModule = typeof import("../../apps/backend/src/state-store.js");
+
+let sigiModulePromise: Promise<SigiModule> | undefined;
+let captureModulePromise: Promise<CaptureModule> | undefined;
+let stateModulePromise: Promise<StateModule> | undefined;
 
 async function hydrateRuntimeState() {
   stateModulePromise ??= import("../../apps/backend/src/state-store.js");
@@ -58,10 +74,13 @@ export async function handleLogin(request: RequestLike, response: any) {
       : typeof payload.contrasena === "string"
         ? payload.contrasena
         : "";
-    const authResult = sigi.authenticateUserResult(username, password);
+    const attemptKey = loginAttemptKey(request, username);
+    await assertLoginAllowed(attemptKey);
+    const authResult = await sigi.authenticateUserResultAsync(username, password);
     const user = authResult.user;
 
     if (!user) {
+      await recordLoginFailure(attemptKey);
       const inactiveUser = authResult.reason === "inactive_user";
 
       sendJson(response, inactiveUser ? 403 : 401, {
@@ -73,11 +92,37 @@ export async function handleLogin(request: RequestLike, response: any) {
       return;
     }
 
+    await clearLoginFailures(attemptKey);
     await flushRuntimeState();
-    sendJson(response, 200, { user, sessionToken: sigi.createSessionToken(user) });
+    const sessionToken = sigi.createSessionToken(user);
+    setSessionCookie(response, sessionToken);
+    sendJson(response, 200, authenticationResponse(user, sessionToken));
   } catch (error) {
     sendErrorResponse(response, error);
   }
+}
+
+export async function handleSession(request: RequestLike, response: any) {
+  if (prepare(request, response, ["GET", "OPTIONS"])) {
+    return;
+  }
+
+  try {
+    const sigi = await loadSigi();
+    const session = sigi.sessionFromHeaders(request.headers ?? {}, { allowPasswordChange: true });
+    sendJson(response, 200, { user: sigi.authenticatedUserForSession(session) });
+  } catch (error) {
+    sendErrorResponse(response, error);
+  }
+}
+
+export async function handleLogout(request: RequestLike, response: any) {
+  if (prepare(request, response, ["POST", "OPTIONS"])) {
+    return;
+  }
+
+  clearSessionCookie(response);
+  response.status(204).end();
 }
 
 export async function handleUpdatePassword(request: RequestLike, response: any) {
@@ -87,7 +132,7 @@ export async function handleUpdatePassword(request: RequestLike, response: any) 
 
   try {
     const sigi = await loadSigi();
-    const session = sigi.sessionFromHeaders(request.headers ?? {});
+    const session = sigi.sessionFromHeaders(request.headers ?? {}, { allowPasswordChange: true });
     const user = sigi.updateOwnPassword(session, await readJsonBody(request));
 
     sigi.recordAuditEvent(session, {
@@ -99,7 +144,9 @@ export async function handleUpdatePassword(request: RequestLike, response: any) 
     });
 
     await flushRuntimeState();
-    sendJson(response, 200, { user, sessionToken: sigi.createSessionToken(user) });
+    const sessionToken = sigi.createSessionToken(user);
+    setSessionCookie(response, sessionToken);
+    sendJson(response, 200, authenticationResponse(user, sessionToken));
   } catch (error) {
     sendErrorResponse(response, error);
   }
@@ -162,7 +209,7 @@ export async function handleUserAction(request: RequestLike, response: any) {
     }
 
     if (request.method === "PUT" && !action) {
-      const before = sigi.listUsers(session).find((candidate: any) => candidate.id === userId);
+      const before = sigi.listUsers(session).find((candidate) => candidate.id === userId);
       const saved = sigi.saveUser(session, { ...(await readJsonBody(request)), id: userId });
       sigi.recordAuditEvent(session, {
         action: "user_updated",
@@ -179,7 +226,7 @@ export async function handleUserAction(request: RequestLike, response: any) {
     }
 
     if (request.method === "PATCH" && action === "desactivar") {
-      const before = sigi.listUsers(session).find((candidate: any) => candidate.id === userId);
+      const before = sigi.listUsers(session).find((candidate) => candidate.id === userId);
       const updated = sigi.deactivateUser(session, userId);
 
       if (!updated) {
@@ -313,7 +360,7 @@ export async function handleIndicatorAction(request: RequestLike, response: any)
     const indicator = Number.isInteger(indicatorId) ? sigi.getIndicatorById(indicatorId) : sigi.getIndicatorByCode(idOrCode);
 
     if (request.method === "GET" && action === "template") {
-      if (!indicator || !sigi.listIndicators(session, { includeInactive: session.role === "director" }).some((item: any) => item.id === indicator.id)) {
+      if (!indicator || !sigi.listIndicators(session, { includeInactive: session.role === "director" }).some((item) => item.id === indicator.id)) {
         sendJson(response, 404, { error: "indicator_not_found", message: "No existe un indicador con ese ID o código." });
         return;
       }
@@ -514,8 +561,12 @@ export async function handleCaptureDrafts(request: RequestLike, response: any) {
         return;
       }
 
-      sigi.assertCaptureAccess(session, body, "draft");
       const existingDraft = captures.findCaptureDraftByScope(body);
+      const trustedBody = {
+        ...body,
+        payload: captures.withTrustedEvidence(body.payload, existingDraft)
+      };
+      sigi.assertCaptureAccess(session, trustedBody, "draft");
 
       if (existingDraft && !isEditableCaptureStatus(existingDraft.estado)) {
         sendJson(response, 409, {
@@ -525,12 +576,16 @@ export async function handleCaptureDrafts(request: RequestLike, response: any) {
         return;
       }
 
-      if (existingDraft && body.expectedVersion !== existingDraft.versionActual) {
+      if (existingDraft && trustedBody.expectedVersion !== existingDraft.versionActual) {
         sendCaptureVersionConflict(response, existingDraft.versionActual);
         return;
       }
 
-      const created = captures.createCaptureDraft(body);
+      const createdWithInlineEvidence = captures.createCaptureDraft(trustedBody);
+      const created = await captures.externalizeCaptureEvidence(
+        createdWithInlineEvidence.id,
+        existingDraft?.payload.evidencia?.storageRef
+      ) ?? createdWithInlineEvidence;
       sigi.recordAuditEvent(session, {
         action: "capture_saved",
         resourceType: "capture",
@@ -599,9 +654,9 @@ export async function handleCaptureEvidence(request: RequestLike, response: any)
 
     sigi.assertCaptureAccess(session, draft, "read");
     const evidence = draft.payload.evidencia;
-    const content = Buffer.from(evidence?.contenidoBase64 ?? "", "base64");
+    const content = await captures.readCaptureEvidenceContent(draft);
 
-    if (!evidence?.nombre || content.length === 0) {
+    if (!evidence?.nombre || !content?.length) {
       sendJson(response, 404, {
         error: "evidence_not_available",
         message: "La evidencia no está disponible. Solicita que el plantel reenvíe el archivo."
@@ -667,7 +722,8 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
         return;
       }
 
-      sigi.assertCaptureAccess(session, { ...draft, payload: body.payload }, "draft");
+      const trustedPayload = captures.withTrustedEvidence(body.payload, draft);
+      sigi.assertCaptureAccess(session, { ...draft, payload: trustedPayload }, "draft");
       const expectedVersion = positiveExpectedVersion(body);
 
       if (!expectedVersion) {
@@ -675,18 +731,23 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
         return;
       }
 
-      const updatedDraft = captures.updateCaptureDraft(id, body.payload, {
+      const updatedDraftWithInlineEvidence = captures.updateCaptureDraft(id, trustedPayload, {
         allowReviewStatus: false,
         expectedVersion
       });
 
-      if (!updatedDraft) {
+      if (!updatedDraftWithInlineEvidence) {
         sendJson(response, 409, {
           error: "capture_not_editable",
           message: "La captura ya fue enviada y no puede modificarse hasta que se solicite corrección."
         });
         return;
       }
+
+      const updatedDraft = await captures.externalizeCaptureEvidence(
+        id,
+        draft.payload.evidencia?.storageRef
+      ) ?? updatedDraftWithInlineEvidence;
 
       sigi.recordAuditEvent(session, {
         action: "capture_updated",
@@ -752,6 +813,7 @@ export async function handleCaptureAction(request: RequestLike, response: any) {
       }
 
       sigi.assertCaptureAccess(session, draft, "review");
+      await captures.assertCaptureEvidenceAvailable(draft);
       sigi.assertEvidenceOpenedBeforeApproval(session, draft);
       const updatedDraft = captures.approveCapture(id, expectedVersion);
 
@@ -836,7 +898,13 @@ function prepare(request: RequestLike, response: any, allowed: string[]) {
     return true;
   }
 
-  applyCors(response);
+  if (!applyCors(response, request)) {
+    sendJson(response, 403, {
+      error: "origin_not_allowed",
+      message: "El origen de la solicitud no está autorizado."
+    });
+    return true;
+  }
 
   if (!allowed.includes(request.method ?? "")) {
     methodNotAllowed(response, allowed);
@@ -942,7 +1010,12 @@ function sendKnownError(response: any, error: unknown) {
     "statusCode" in error &&
     "code" in error
   ) {
-    const knownError = error as { statusCode: number; code: string; message?: string };
+    const knownError = error as { statusCode: number; code: string; message?: string; retryAfterSeconds?: number };
+
+    if (knownError.retryAfterSeconds) {
+      response.setHeader("Retry-After", String(knownError.retryAfterSeconds));
+    }
+
     sendJson(response, knownError.statusCode, { error: knownError.code, message: knownError.message });
     return true;
   }

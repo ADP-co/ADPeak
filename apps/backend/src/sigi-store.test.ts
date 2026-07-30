@@ -603,7 +603,8 @@ describe("SIGI store and RBAC", () => {
         responsableId: 1,
         indicatorCodes: ["codigo-obsoleto"],
         active: false,
-        passwordHash: "hash-personalizado"
+        passwordHash: "hash-personalizado",
+        passwordChangeRequired: false
       },
       {
         id: "plantel-1",
@@ -613,7 +614,8 @@ describe("SIGI store and RBAC", () => {
         plantelId: 1,
         indicatorCodes: ["codigo-obsoleto"],
         active: true,
-        passwordHash: "hash-plantel-personalizado"
+        passwordHash: "hash-plantel-personalizado",
+        passwordChangeRequired: true
       },
       {
         id: "responsable-99",
@@ -637,7 +639,8 @@ describe("SIGI store and RBAC", () => {
       username: "responsable-personalizado",
       name: "Responsable Personalizado",
       active: false,
-      passwordHash: "hash-personalizado"
+      passwordHash: "hash-personalizado",
+      passwordChangeRequired: false
     });
     expect(responsible?.indicatorCodes).not.toContain("codigo-obsoleto");
     expect(plantel).toMatchObject({
@@ -645,6 +648,7 @@ describe("SIGI store and RBAC", () => {
       name: "Plantel Personalizado",
       active: true,
       passwordHash: "hash-plantel-personalizado",
+      passwordChangeRequired: true,
       indicatorCodes: []
     });
   });
@@ -754,7 +758,10 @@ describe("SIGI store and RBAC", () => {
     });
     const authenticatedBeforeReset = authenticateUser(created.username ?? "", "Anterior2026!")!;
     const tokenBeforeReset = createSessionToken(authenticatedBeforeReset);
-    expect(sessionFromHeaders({ authorization: `Bearer ${tokenBeforeReset}` })).toMatchObject({
+    expect(sessionFromHeaders(
+      { authorization: `Bearer ${tokenBeforeReset}` },
+      { allowPasswordChange: true }
+    )).toMatchObject({
       userId: created.id
     });
 
@@ -783,6 +790,12 @@ describe("SIGI store and RBAC", () => {
     expect(authenticateUser(created.username ?? "", "Anterior2026!")).toBeUndefined();
     expect(authenticateUser(created.username ?? "", "Nueva2026!")).toMatchObject({ id: created.id });
     expect(() => sessionFromHeaders({ authorization: `Bearer ${tokenBeforeReset}` })).toThrow(SigiAuthError);
+    const resetToken = createSessionToken(authenticateUser(created.username ?? "", "Nueva2026!")!);
+    expect(() => sessionFromHeaders({ authorization: `Bearer ${resetToken}` })).toThrow(SigiAuthError);
+    expect(sessionFromHeaders(
+      { authorization: `Bearer ${resetToken}` },
+      { allowPasswordChange: true }
+    )).toMatchObject({ userId: created.id, passwordChangeRequired: true });
     expect(() =>
       resetUserPassword(director, "director-1", {
         password: "Otra2026!",

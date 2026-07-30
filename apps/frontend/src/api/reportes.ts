@@ -1118,73 +1118,6 @@ function chunkDetailItems(items: Array<[string, string]>, size: number) {
   return chunks;
 }
 
-function buildPdfLines(report: ExportReport) {
-  const statusSummary = summarizeReport(report);
-  const lines = [
-    'Resumen',
-    report.identidadReporte.nombre,
-    `Periodo: ${report.periodo} | Ciclo escolar: ${report.cicloEscolar}`,
-    `Generado: ${formatReportDate(report.fechaGeneracion)}`,
-    '',
-    `Registros revisados: ${statusSummary.total}`,
-    `Aprobados: ${statusSummary.approved} | En revisión: ${statusSummary.inReview} | Observados: ${statusSummary.observed}`,
-    `Pendientes: ${statusSummary.pending} | Atrasados: ${statusSummary.late}`,
-    '',
-    'Indicadores',
-    '',
-  ];
-
-  report.indicadores.forEach((indicator) => {
-    lines.push(indicator.nombre);
-    lines.push(`${indicator.datos.length} registros | Avance promedio: ${averageProgress(indicator.datos)} | ${statusCountsText(indicator.datos)}`);
-
-    indicator.datos.forEach((dataRow) => {
-      lines.push(buildRecordLine(dataRow, report));
-
-      const details = buildRecordDetails(dataRow);
-      if (details) {
-        lines.push(details);
-      }
-    });
-
-    lines.push('');
-  });
-
-  return lines.flatMap((line) => wrapPdfLine(line));
-}
-
-function renderPdfPage(lines: string[], pageNumber: number, pageCount: number, hasHeaderImage: boolean) {
-  const titleY = hasHeaderImage ? 705 : 750;
-  const content = new PdfContentBuilder();
-
-  if (hasHeaderImage) {
-    content.line('q');
-    content.line('520 0 0 72 46 712 cm');
-    content.line('/HeaderLogos Do');
-    content.line('Q');
-  } else {
-    content.fillRect(50, 772, 120, 4, PDF_GREEN);
-  }
-
-  content.line('BT');
-  content.line('/F1 16 Tf');
-  content.line(`50 ${titleY} Td`);
-  content.text(lines[0] ?? '');
-  content.line('/F1 10 Tf');
-
-  lines.slice(1).forEach((line) => {
-    content.line('0 -15 Td');
-    content.text(line);
-  });
-
-  content.line('/F1 9 Tf');
-  content.line('0 -24 Td');
-  content.text(`Página ${pageNumber} de ${pageCount}`);
-  content.line('ET');
-
-  return content.toBytes();
-}
-
 async function createHeaderImage(): Promise<PdfHeaderImage | undefined> {
   if (
     typeof document === 'undefined' ||
@@ -1743,20 +1676,6 @@ function averageProgress(rows: ReportDataRow[]) {
   return `${Math.round(average)}%`;
 }
 
-function dominantStatus(rows: ReportDataRow[]) {
-  if (rows.length === 0) {
-    return 'Sin registros';
-  }
-
-  const counts = rows.reduce<Record<string, number>>((current, row) => {
-    const status = formatStatusLabel(row.estado);
-    current[status] = (current[status] ?? 0) + 1;
-    return current;
-  }, {});
-
-  return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'Sin registros';
-}
-
 function statusCountsText(rows: ReportDataRow[]) {
   if (rows.length === 0) {
     return 'Sin registros';
@@ -1782,33 +1701,4 @@ function statusCountsText(rows: ReportDataRow[]) {
   );
 
   return `Pendientes ${counts.pendientes} | En revisión ${counts.enRevision} | Observados ${counts.observados} | Aprobados ${counts.aprobados}`;
-}
-
-function buildRecordLine(dataRow: ReportDataRow, report: ExportReport) {
-  const plantel = dataRow.plantel ?? report.identidadReporte.nombre;
-  return `- ${dataRow.actividad} | ${plantel} | ${dataRow.responsable} | ${formatStatusLabel(dataRow.estado)} | ${dataRow.avance}`;
-}
-
-function buildRecordDetails(dataRow: ReportDataRow) {
-  const details: string[] = [];
-  const deadline = formatDeadline(dataRow.vencimiento);
-  const rowDetails = formatDetailSummary(dataRow);
-
-  if (rowDetails) {
-    details.push(rowDetails);
-  }
-
-  if (typeof dataRow.evidencias === 'number' && dataRow.evidencias > 0) {
-    details.push(`Evidencias: ${dataRow.evidencias}`);
-  }
-
-  if (dataRow.qualityWarnings?.length) {
-    details.push(`Alertas de calidad: ${dataRow.qualityWarnings.join('; ')}`);
-  }
-
-  if (deadline === 'Atrasado') {
-    details.push('Atención: vencido');
-  }
-
-  return details.length > 0 ? `  ${details.join(' | ')}` : '';
 }

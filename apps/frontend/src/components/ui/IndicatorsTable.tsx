@@ -80,7 +80,7 @@ export const IndicatorsTable = ({
       return 'Ver datos';
     }
 
-    const isRestrictedRole = user?.role === 'admin' || user?.role === 'responsable';
+    const isRestrictedRole = user?.role === 'admin';
     if (isRestrictedRole && (status === 'Corregir' || status === 'Pendiente')) {
       return 'Ver Datos';
     }

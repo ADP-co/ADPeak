@@ -1,5 +1,6 @@
 import {
   authenticateDemoUser,
+  demoEnabled,
   demoDatasetPayload,
   demoReportCsv,
   demoReportPayload,
@@ -15,7 +16,15 @@ export default async function handler(request: any, response: any) {
     return;
   }
 
-  applyCors(response);
+  if (!applyCors(response, request)) {
+    response.status(403).json({ error: "origin_not_allowed", message: "El origen de la solicitud no está autorizado." });
+    return;
+  }
+
+  if (!demoEnabled()) {
+    response.status(404).json({ error: "not_found", message: "Ruta no disponible." });
+    return;
+  }
 
   const endpoint = String(request.query?.endpoint ?? "");
 

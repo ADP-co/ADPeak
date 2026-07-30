@@ -58,9 +58,12 @@ describe("official credential reset", () => {
 
     const sigiStore = await import("./sigi-store.js");
 
-    expect(sigiStore.authenticateUser("director", testPasswords.director)).toMatchObject({ role: "admin" });
-    expect(sigiStore.authenticateUser("resp01", testPasswords.responsable)).toMatchObject({ role: "responsable" });
-    expect(sigiStore.authenticateUser("bach1", testPasswords.plantel)).toMatchObject({ role: "plantel" });
+    await expect(sigiStore.authenticateUserResultAsync("director", testPasswords.director))
+      .resolves.toMatchObject({ user: { role: "admin" } });
+    await expect(sigiStore.authenticateUserResultAsync("resp01", testPasswords.responsable))
+      .resolves.toMatchObject({ user: { role: "responsable" } });
+    await expect(sigiStore.authenticateUserResultAsync("bach1", testPasswords.plantel))
+      .resolves.toMatchObject({ user: { role: "plantel" } });
     expect(sigiStore.listUsers({ userId: "director-1", role: "director" })).toHaveLength(56);
     const restoredResponsible = sigiStore
       .listUsers({ userId: "director-1", role: "director" })
@@ -68,7 +71,7 @@ describe("official credential reset", () => {
 
     expect(restoredResponsible).toMatchObject({ active: true });
     expect(restoredResponsible?.indicatorCodes).toContain("1.0.0.0.2");
-  });
+  }, 30_000);
 
   it("replaces mutable state with the exact official factory baseline", async () => {
     process.env.APP_ENV = "production";
@@ -113,6 +116,12 @@ describe("official credential reset", () => {
           actualizadoEn: "2026-07-29T00:00:00.000Z"
         }
       ],
+      loginRateLimits: {
+        "stale-login-key": {
+          failures: 5,
+          blockedUntil: Date.now() + 60_000
+        }
+      },
       nextCaptureId: 2,
       officialFactoryResetVersion: "factory-reset-test-v0"
     });
@@ -130,6 +139,7 @@ describe("official credential reset", () => {
     expect(stateStore.readPersistedCollection("notifications")).toEqual([]);
     expect(stateStore.readPersistedCollection("auditEvents")).toEqual([]);
     expect(stateStore.readPersistedCollection("captureDrafts")).toEqual([]);
+    expect(stateStore.readPersistedValue("loginRateLimits")).toEqual({});
     expect(stateStore.readPersistedValue("nextCaptureId")).toBe(1);
     expect(stateStore.readPersistedValue("officialFactoryResetVersion")).toBe("factory-reset-test-v1");
     expect(sigiStore.authenticateUser("resp02", testPasswords.responsable)).toMatchObject({

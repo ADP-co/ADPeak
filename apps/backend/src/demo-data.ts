@@ -1,5 +1,9 @@
 export type DemoRole = "admin_dgems" | "plantel" | "responsable_indicador";
 
+export function demoEnabled(environment: NodeJS.ProcessEnv = process.env) {
+  return environment.APP_ENV !== "production" && !environment.VERCEL;
+}
+
 export type DemoUser = {
   id: string;
   displayName: string;

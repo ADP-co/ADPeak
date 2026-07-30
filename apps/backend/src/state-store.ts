@@ -1,11 +1,13 @@
 /// <reference types="node" />
 
 import { AsyncLocalStorage } from "node:async_hooks";
+import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import type { PoolClient } from "pg";
 import { loadLocalEnv } from "./config.js";
+import { databasePoolConfig } from "./database-config.js";
 
 type PersistedState = Record<string, unknown>;
 
@@ -58,7 +60,11 @@ export function readPersistedValue<T>(key: string): T | undefined {
 }
 
 export function persistState(patch: PersistedState) {
-  const persistedPatch = { ...patch, updatedAt: new Date().toISOString() };
+  const persistedPatch = {
+    ...patch,
+    ...(clearsEvidenceForPatch(patch) ? { captureEvidenceBlobs: {} } : {}),
+    updatedAt: new Date().toISOString()
+  };
   cachedState = { ...cachedState, ...persistedPatch };
 
   const context = mutationContext.getStore();
@@ -137,6 +143,80 @@ export async function flushPersistedState() {
   if (pendingDatabaseWrite) {
     await pendingDatabaseWrite;
   }
+}
+
+export async function persistEvidenceBlob(storageRef: string, content: Buffer) {
+  if (!storageRef || content.length === 0) {
+    throw new Error("Evidence storage requires a reference and non-empty content.");
+  }
+
+  const expectedHash = storageRef.match(/\/([a-f0-9]{64})$/i)?.[1]?.toLowerCase();
+  const actualHash = createHash("sha256").update(content).digest("hex");
+
+  if (!expectedHash || expectedHash !== actualHash) {
+    throw new Error("Evidence storage reference does not match the content checksum.");
+  }
+
+  if (databaseUrl) {
+    const context = mutationContext.getStore();
+    const queryable = context?.client ?? await getPool();
+    await ensureEvidenceTable(queryable);
+    await queryable.query(
+      `insert into app_evidence (storage_ref, content, size_bytes, updated_at)
+       values ($1, $2, $3, now())
+       on conflict (storage_ref) do update
+       set content = excluded.content, size_bytes = excluded.size_bytes, updated_at = now()`,
+      [storageRef, content, content.length]
+    );
+    return;
+  }
+
+  const blobs = readPersistedValue<Record<string, string>>("captureEvidenceBlobs") ?? {};
+  persistState({
+    captureEvidenceBlobs: {
+      ...blobs,
+      [storageRef]: content.toString("base64")
+    }
+  });
+}
+
+export async function deleteEvidenceBlob(storageRef: string) {
+  if (!storageRef) {
+    return;
+  }
+
+  if (databaseUrl) {
+    const context = mutationContext.getStore();
+    const queryable = context?.client ?? await getPool();
+    await ensureEvidenceTable(queryable);
+    await queryable.query("delete from app_evidence where storage_ref = $1", [storageRef]);
+    return;
+  }
+
+  const blobs = { ...(readPersistedValue<Record<string, string>>("captureEvidenceBlobs") ?? {}) };
+  delete blobs[storageRef];
+  persistState({ captureEvidenceBlobs: blobs });
+}
+
+export async function readEvidenceBlob(storageRef: string) {
+  if (!storageRef) {
+    return undefined;
+  }
+
+  if (databaseUrl) {
+    const context = mutationContext.getStore();
+    const queryable = context?.client ?? await getPool();
+    await ensureEvidenceTable(queryable);
+    const result = await queryable.query<{ content: Buffer }>(
+      "select content from app_evidence where storage_ref = $1",
+      [storageRef]
+    );
+    const content = result.rows[0]?.content;
+    return content ? Buffer.from(content) : undefined;
+  }
+
+  const encoded = (readPersistedValue<Record<string, string>>("captureEvidenceBlobs") ?? {})[storageRef];
+  return encoded ? Buffer.from(encoded, "base64") : undefined;
 }
 
 export async function withPersistedStateMutation<T>(operation: () => Promise<T>): Promise<T> {
@@ -234,6 +314,11 @@ async function writeStateToDatabase(state: PersistedState) {
 }
 
 async function writeStatePatch(client: Queryable, patch: PersistedState) {
+  if (clearsEvidenceForPatch(patch)) {
+    await ensureEvidenceTable(client);
+    await client.query("delete from app_evidence");
+  }
+
   await Promise.all(
     Object.entries(patch).map(([key, value]) =>
       client.query(
@@ -264,20 +349,34 @@ async function getPool() {
   }
 
   const { Pool } = await import("pg");
-  pool ??= new Pool({
-    connectionString: databaseUrl,
-    ssl: shouldUseSsl(databaseUrl) ? { rejectUnauthorized: false } : undefined
-  });
+  pool ??= new Pool(databasePoolConfig(databaseUrl));
 
   return pool;
 }
 
-function shouldUseSsl(url: string) {
-  return !/localhost|127\.0\.0\.1/i.test(url);
-}
-
 function safeErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "unknown";
+}
+
+function clearsEvidenceForPatch(patch: PersistedState) {
+  return Array.isArray(patch.captureDrafts) &&
+    patch.captureDrafts.length === 0 &&
+    (
+      typeof patch.officialFactoryResetVersion === "string" ||
+      typeof patch.catalogImportVersion === "string" ||
+      typeof patch.officialCatalogImportVersion === "string"
+    );
+}
+
+async function ensureEvidenceTable(client: Queryable) {
+  await client.query(`
+    create table if not exists app_evidence (
+      storage_ref text primary key,
+      content bytea not null,
+      size_bytes integer not null check (size_bytes > 0),
+      updated_at timestamptz not null default now()
+    )
+  `);
 }
 
 function clonePersistedState(state: PersistedState): PersistedState {

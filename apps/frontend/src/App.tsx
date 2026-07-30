@@ -22,8 +22,6 @@ import {
   type SigiNotification,
 } from './api/notificaciones';
 import {
-  buildHealthIntegralTemplate,
-  buildTemplateForCatalogIndicator,
   catalogPlanteles,
   effectivePlantelIdsForIndicator,
   fetchIndicatorTemplate,
@@ -31,7 +29,6 @@ import {
   plantelScopeLabelForIndicator,
   type CatalogIndicator,
 } from './api/catalog';
-import { API_REQUESTS_ENABLED } from './api/client';
 
 const IndicatorForm = lazyNamed(() => import('./components/forms/IndicatorForm'), 'IndicatorForm');
 const IndicatorConfigForm = lazyNamed(() => import('./components/forms/IndicatorConfigForm'), 'IndicatorConfigForm');
@@ -49,74 +46,6 @@ function lazyNamed<Module, Key extends keyof Module>(
   return lazy(async () => ({ default: (await loader())[exportName] as ComponentType<any> }));
 }
 
-const UNASSIGNED_PLANTEL_LABEL = 'Todos los planteles';
-
-  const template1_0_0_0_2: IndicatorTemplate = {
-    indicatorCode: '1.0.0.0.2',
-    indicatorName: 'Porcentaje de titulación por cohorte del NMS',
-    groups: [
-      { label: 'Contexto Escolar', colspan: 3 },
-      { label: 'Egresados titulados en el año 2025', colspan: 3 },
-      { label: 'Matrícula de primer ingreso (agosto 2022)', colspan: 3 },
-      { label: 'Resultados', colspan: 1 },
-    ],
-    columns: [
-      { key: 'delegacion', label: 'Delegación', type: 'readonly' },
-      { key: 'plantel', label: 'Plantel', type: 'readonly' },
-      { key: 'programa', label: 'Programa Educativo', type: 'readonly' },
-      { key: 'egresados_mujeres', label: 'Mujeres', type: 'number', required: true },
-      { key: 'egresados_hombres', label: 'Hombres', type: 'number', required: true },
-      {
-        key: 'egresados_total',
-        label: 'Total',
-        type: 'calculated',
-        calculation: { type: 'sum', sourceKeys: ['egresados_mujeres', 'egresados_hombres'] },
-      },
-      { key: 'matricula_mujeres', label: 'Mujeres', type: 'number', required: true },
-      { key: 'matricula_hombres', label: 'Hombres', type: 'number', required: true },
-      {
-        key: 'matricula_total',
-        label: 'Total',
-        type: 'calculated',
-        calculation: { type: 'sum', sourceKeys: ['matricula_mujeres', 'matricula_hombres'] },
-      },
-      {
-        key: 'porcentaje_titulacion',
-        label: '% de titulación',
-        type: 'calculated',
-        calculation: {
-          type: 'percentage',
-          numeratorKey: 'egresados_total',
-          denominatorKey: 'matricula_total',
-          decimals: 2,
-        },
-      },
-    ],
-  };
-
-  const mockInitialData = [
-    {
-      delegacion: 'Villa de Álvarez',
-      plantel: UNASSIGNED_PLANTEL_LABEL,
-      programa: 'Técnico Analista Programador',
-      egresados_mujeres: '',
-      egresados_hombres: '',
-      matricula_mujeres: '',
-      matricula_hombres: '',
-    },
-    {
-      delegacion: 'Villa de Álvarez',
-      plantel: UNASSIGNED_PLANTEL_LABEL,
-      programa: 'Técnico Analista Químico',
-      egresados_mujeres: '',
-      egresados_hombres: '',
-      matricula_mujeres: '',
-      matricula_hombres: '',
-    },
-  ];
-
-const INDICATOR_STATUS_STORAGE_KEY = 'adpeak.indicator.statuses';
-
 function homePathForRole(role?: string) {
   if (role === 'admin') {
     return '/analisis';
@@ -127,14 +56,6 @@ function homePathForRole(role?: string) {
   }
 
   return '/indicadores';
-}
-
-function readIndicatorStatusOverrides() {
-  try {
-    return JSON.parse(window.localStorage.getItem(INDICATOR_STATUS_STORAGE_KEY) ?? '{}') as Record<string, Indicator['status']>;
-  } catch {
-    return {};
-  }
 }
 
 function plantelNameFromId(id?: number) {
@@ -310,56 +231,6 @@ function hasBlankEditableCells(rows: Record<string, unknown>[], template: Indica
   );
 }
 
-function fallbackTemplateForIndicator(
-  selectedCode: string,
-  selectedIndicator?: Indicator,
-  selectedCatalogIndicator?: CatalogIndicator
-): IndicatorTemplate & { initialRows?: Record<string, unknown>[] } {
-  if (selectedCatalogIndicator) {
-    return buildTemplateForCatalogIndicator(selectedCatalogIndicator, selectedIndicator?.plantel ?? UNASSIGNED_PLANTEL_LABEL);
-  }
-
-  if (selectedCode === template1_0_0_0_2.indicatorCode) {
-    return {
-      ...template1_0_0_0_2,
-      initialRows: mockInitialData,
-    };
-  }
-
-  if (selectedCode === '1.1.2.1.4') {
-    return buildHealthIntegralTemplate({
-      code: selectedCode,
-      name: selectedIndicator?.name ?? 'Porcentaje de estudiantes de educación media superior y superior atendidos en los servicios de salud integral',
-      activities: ['Promoción de la salud'],
-    }, selectedIndicator?.plantel ?? UNASSIGNED_PLANTEL_LABEL);
-  }
-
-  return {
-    indicatorCode: selectedCode,
-    indicatorName: selectedIndicator?.name ?? 'Indicador',
-    groups: [
-      { label: 'Contexto', colspan: 2 },
-      { label: 'Seguimiento', colspan: 3 },
-    ],
-    columns: [
-      { key: 'plantel', label: 'Plantel', type: 'readonly' },
-      { key: 'actividad', label: 'Actividad', type: 'readonly' },
-      { key: 'meta', label: 'Meta', type: 'number' },
-      { key: 'avance', label: 'Avance', type: 'number' },
-      { key: 'observaciones', label: 'Observaciones', type: 'text' },
-    ],
-    initialRows: [
-      {
-        plantel: selectedIndicator?.plantel ?? UNASSIGNED_PLANTEL_LABEL,
-        actividad: 'Actividad general',
-        meta: '',
-        avance: '',
-        observaciones: '',
-      },
-    ],
-  };
-}
-
 interface IndicatorFormWrapperProps {
   onIndicatorStatusChange?: (code: string, status: Indicator['status']) => void;
   catalogIndicators?: CatalogIndicator[];
@@ -377,7 +248,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
   const requestedPeriodoId = positiveQueryParam(queryParams, 'periodoId');
   const requestedCaptureId = positiveQueryParam(queryParams, 'captureId');
   const requestedSource = queryParams.get('source');
-  const selectedCode = code ?? template1_0_0_0_2.indicatorCode;
+  const selectedCode = code ?? '';
   const selectedCatalogIndicator = catalogIndicators.find((indicator) => indicator.code === selectedCode);
   const evidenceRules = selectedCatalogIndicator?.evidenceRules ?? DEFAULT_EVIDENCE_RULES;
   const selectedIndicator = selectedCatalogIndicator
@@ -386,13 +257,13 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
   const isWaitingForCatalogIndicator = !selectedCatalogIndicator && !catalogLoaded;
   const isUnknownIndicator = !selectedCatalogIndicator && catalogLoaded;
   const resolvedIndicatorId = selectedCatalogIndicator?.id ?? 0;
-  const fallbackTemplate = fallbackTemplateForIndicator(selectedCode, selectedIndicator, selectedCatalogIndicator);
   const [remoteTemplate, setRemoteTemplate] = useState<(IndicatorTemplate & { initialRows?: Record<string, unknown>[] }) | null>(null);
   const [templateLoadError, setTemplateLoadError] = useState('');
-  const selectedTemplate = {
-    ...(remoteTemplate ?? fallbackTemplate),
-    indicatorCode: remoteTemplate?.indicatorCode ?? selectedCode,
-    indicatorName: remoteTemplate?.indicatorName ?? selectedIndicator?.name ?? fallbackTemplate.indicatorName,
+  const selectedTemplate: IndicatorTemplate = remoteTemplate ?? {
+    indicatorCode: selectedCode,
+    indicatorName: selectedIndicator?.name ?? 'Indicador',
+    groups: [],
+    columns: [],
   };
   const selectedIndicatorPlantelIds = selectedCatalogIndicator
     ? effectivePlantelIdsForIndicator(selectedCatalogIndicator)
@@ -454,7 +325,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
     setEvidenceOpenedForCaptureId(undefined);
   }, [captureDraft.capture?.id]);
 
-  const templateInitialRows = remoteTemplate?.initialRows ?? fallbackTemplate.initialRows ?? mockInitialData;
+  const templateInitialRows = remoteTemplate?.initialRows ?? [];
   const formInitialData = useMemo(
     () => mergeRowsWithTemplate(selectedTemplate, templateInitialRows, captureDraft.capture?.payload.rows),
     [captureDraft.capture?.payload.rows, selectedTemplate, templateInitialRows]
@@ -509,7 +380,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
     );
   }
 
-  if (API_REQUESTS_ENABLED && !remoteTemplate) {
+  if (!remoteTemplate) {
     return (
       <section className="w-full max-w-[1250px] mx-auto bg-brand-Blanco rounded-lg shadow-md border border-brand-Gris_bajo/20 p-8">
         <h1 className="font-title text-xl font-bold text-brand-Gris_oscuro mb-2">
@@ -713,7 +584,7 @@ function IndicatorFormWrapper({ onIndicatorStatusChange, catalogIndicators = [],
 }
 
 function ProtectedLayout() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<SigiNotification[]>([]);
@@ -785,9 +656,16 @@ function ProtectedLayout() {
     navigate(targetPath);
   };
 
-  // Si no está logueado, lo mandamos directo al login
+  if (isLoading) {
+    return <SessionLoading />;
+  }
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (user?.passwordChangeRequired && location.pathname !== '/cuenta') {
+    return <Navigate to="/cuenta" replace />;
   }
 
   const currentView = location.pathname.split('/')[1] || 'analisis';
@@ -801,8 +679,7 @@ function ProtectedLayout() {
       <Navbar />
       {user && (
         <UserBanner
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          role={user.role as any}
+          role={user.role}
           name={user.name}
           description={user.description}
           onNavigate={handleNavigate}
@@ -815,7 +692,6 @@ function ProtectedLayout() {
       )}
 
       <main className="flex-1 px-6 pt-10 pb-10 min-h-[calc(100vh-8rem)]">
-        {/* Outlet renderizará las sub-rutas dinámicamente aquí */}
         <Outlet />
       </main>
 
@@ -829,10 +705,14 @@ function ProtectedLayout() {
 }
 
 function LoginRoute() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
+
+  if (isLoading) {
+    return <SessionLoading />;
+  }
 
   if (isAuthenticated) {
-    return <Navigate to={homePathForRole(user?.role)} replace />;
+    return <Navigate to={user?.passwordChangeRequired ? '/cuenta' : homePathForRole(user?.role)} replace />;
   }
 
   return <Login />;
@@ -843,10 +723,6 @@ function AppContent() {
   const navigate = useNavigate();
   const [catalogIndicators, setCatalogIndicators] = useState<CatalogIndicator[]>([]);
   const [catalogLoaded, setCatalogLoaded] = useState(false);
-  const [indicatorStatusOverrides, setIndicatorStatusOverrides] = useState<Record<string, Indicator['status']>>(
-    () => readIndicatorStatusOverrides()
-  );
-
   const loadCatalogIndicators = useCallback(async () => {
     if (!user) {
       setCatalogIndicators([]);
@@ -860,14 +736,6 @@ function AppContent() {
       const items = await fetchIndicators();
 
       setCatalogIndicators(items);
-      setIndicatorStatusOverrides((current) => {
-        const next = { ...current };
-        items.forEach((item) => {
-          delete next[item.code];
-        });
-        window.localStorage.setItem(INDICATOR_STATUS_STORAGE_KEY, JSON.stringify(next));
-        return next;
-      });
       setCatalogLoaded(true);
     } catch {
       setCatalogIndicators([]);
@@ -892,12 +760,8 @@ function AppContent() {
     () =>
       catalogIndicators
         .filter((indicator) => canDisplayCatalogIndicatorForUser(indicator, user))
-        .map((indicator) => catalogToIndicator(indicator, user))
-        .map((indicator) => ({
-        ...indicator,
-        status: API_REQUESTS_ENABLED ? indicator.status : indicatorStatusOverrides[indicator.code] ?? indicator.status,
-      })),
-    [catalogIndicators, catalogLoaded, indicatorStatusOverrides, user]
+        .map((indicator) => catalogToIndicator(indicator, user)),
+    [catalogIndicators, user]
   );
   const completedIndicatorCount = useMemo(
     () => indicators.filter((indicator) => indicator.status === 'Aprobado' || indicator.status === 'En revisión').length,
@@ -921,21 +785,11 @@ function AppContent() {
     navigate(`/indicadores/configurar/${code}`);
   };
 
-  const handleIndicatorStatusChange = (code: string, status: Indicator['status']) => {
-    if (API_REQUESTS_ENABLED) {
-      void loadCatalogIndicators();
-      return;
-    }
-
-    setIndicatorStatusOverrides((current) => {
-      const next = { ...current, [code]: status };
-      window.localStorage.setItem(INDICATOR_STATUS_STORAGE_KEY, JSON.stringify(next));
-      return next;
-    });
+  const handleIndicatorStatusChange = () => {
     void loadCatalogIndicators();
   };
 
-  const role = user?.role || 'plantel'; // Fallback por defecto
+  const role = user?.role;
 
   return (
     <Suspense fallback={<div className="flex min-h-screen items-center justify-center" role="status">Cargando...</div>}>
@@ -1015,12 +869,22 @@ function AppContent() {
 
         {/* Reportes disponibles por alcance de sesión. */}
         <Route path="/reportes" element={<ReportsDashboard />} />
-        <Route path="/perfil" element={<AccountProfile onBack={() => navigate(homePathForRole(role))} />} />
+        <Route path="/cuenta" element={<AccountProfile onBack={() => navigate(homePathForRole(role))} />} />
+        <Route path="/perfil" element={<Navigate to="/cuenta" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
-
-      <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>
+  );
+}
+
+function SessionLoading() {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-brand-Fondo px-6" aria-busy="true">
+      <p className="font-body text-base font-semibold text-brand-Gris_oscuro" role="status">
+        Verificando sesión...
+      </p>
+    </main>
   );
 }
 

@@ -76,28 +76,6 @@ const parseNumberInput = (value: unknown) => {
   return value;
 };
 
-const createNumberSchema = (required = false) =>
-  z
-    .preprocess(parseNumberInput, z.any())
-    .superRefine((value, ctx) => {
-      if (value === undefined) {
-        if (required) {
-          ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Campo requerido' });
-        }
-        return;
-      }
-
-      if (typeof value !== 'number' || !Number.isFinite(value)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Debe ser un número' });
-        return;
-      }
-
-      if (value < 0) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'No puede ser negativo' });
-      }
-    })
-    .transform((value) => (typeof value === 'number' ? value : undefined));
-
 type ResolvedNumberValidation = {
   min?: number;
   max?: number;

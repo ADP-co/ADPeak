@@ -183,11 +183,18 @@ export async function readSourceAppState(sourceConnection) {
       const stateResult = await client.query(
         "select key, value, updated_at from public.app_state order by key"
       );
+      const evidenceTable = await client.query("select to_regclass('public.app_evidence')::text as table_name");
+      const evidenceResult = ["app_evidence", "public.app_evidence"].includes(evidenceTable.rows[0]?.table_name)
+        ? await client.query(
+            "select storage_ref, encode(content, 'base64') as content_base64, size_bytes, updated_at from public.app_evidence order by storage_ref"
+          )
+        : { rows: [] };
       await client.query("commit");
 
       return {
         identity,
-        rows: stateResult.rows.map(normalizeStateRow)
+        rows: stateResult.rows.map(normalizeStateRow),
+        evidenceRows: evidenceResult.rows.map(normalizeEvidenceRow)
       };
     } catch (error) {
       await client.query("rollback").catch(() => undefined);
@@ -196,7 +203,7 @@ export async function readSourceAppState(sourceConnection) {
   });
 }
 
-export async function createDatabaseAndCopyState(sourceConnection, targetConnection, rows) {
+export async function createDatabaseAndCopyState(sourceConnection, targetConnection, rows, evidenceRows = []) {
   await withClient(sourceConnection.url, "adpeak-qa-clone-control", async (client) => {
     await assertCurrentDatabase(client, sourceConnection.database);
     const existing = await client.query("select 1 from pg_database where datname = $1", [targetConnection.database]);
@@ -222,11 +229,32 @@ export async function createDatabaseAndCopyState(sourceConnection, targetConnect
           )
         `);
         await client.query("create index app_state_updated_at_idx on public.app_state (updated_at desc)");
+        await client.query(`
+          create table public.app_evidence (
+            storage_ref text primary key,
+            content bytea not null,
+            size_bytes integer not null,
+            updated_at timestamptz not null default now()
+          )
+        `);
 
         for (const row of rows) {
           await client.query(
             "insert into public.app_state (key, value, updated_at) values ($1, $2::jsonb, $3::timestamptz)",
             [row.key, JSON.stringify(row.value), row.updatedAt]
+          );
+        }
+
+        for (const row of evidenceRows) {
+          const content = Buffer.from(row.contentBase64, "base64");
+
+          if (content.length !== row.sizeBytes) {
+            throw new QaHarnessError(`Evidence backup size mismatch for ${row.storageRef}.`);
+          }
+
+          await client.query(
+            "insert into public.app_evidence (storage_ref, content, size_bytes, updated_at) values ($1, $2, $3, $4::timestamptz)",
+            [row.storageRef, content, row.sizeBytes, row.updatedAt]
           );
         }
 
@@ -252,10 +280,14 @@ export async function readTargetAppState(targetConnection) {
       const stateResult = await client.query(
         "select key, value, updated_at from public.app_state order by key"
       );
+      const evidenceResult = await client.query(
+        "select storage_ref, encode(content, 'base64') as content_base64, size_bytes, updated_at from public.app_evidence order by storage_ref"
+      );
       await client.query("commit");
       return {
         readOnly: readOnly.rows[0]?.transaction_read_only === "on",
-        rows: stateResult.rows.map(normalizeStateRow)
+        rows: stateResult.rows.map(normalizeStateRow),
+        evidenceRows: evidenceResult.rows.map(normalizeEvidenceRow)
       };
     } catch (error) {
       await client.query("rollback").catch(() => undefined);
@@ -264,19 +296,34 @@ export async function readTargetAppState(targetConnection) {
   });
 }
 
-export async function replaceTargetAppState(targetConnection, rows) {
+export async function replaceTargetAppState(targetConnection, rows, evidenceRows = []) {
   await withClient(targetConnection.url, "adpeak-qa-seed", async (client) => {
     await assertCurrentDatabase(client, targetConnection.database);
     await client.query("begin");
 
     try {
       await client.query("lock table public.app_state in exclusive mode");
+      await client.query("lock table public.app_evidence in exclusive mode");
       await client.query("delete from public.app_state");
+      await client.query("delete from public.app_evidence");
 
       for (const row of rows) {
         await client.query(
           "insert into public.app_state (key, value, updated_at) values ($1, $2::jsonb, $3::timestamptz)",
           [row.key, JSON.stringify(row.value), row.updatedAt]
+        );
+      }
+
+      for (const row of evidenceRows) {
+        const content = Buffer.from(row.contentBase64, "base64");
+
+        if (content.length !== row.sizeBytes) {
+          throw new QaHarnessError(`Evidence restore size mismatch for ${row.storageRef}.`);
+        }
+
+        await client.query(
+          "insert into public.app_evidence (storage_ref, content, size_bytes, updated_at) values ($1, $2, $3, $4::timestamptz)",
+          [row.storageRef, content, row.sizeBytes, row.updatedAt]
         );
       }
 
@@ -340,17 +387,20 @@ async function dropDatabase(adminConnection, targetDatabase) {
 }
 
 async function withClient(url, applicationName, operation) {
+  const connectionUrl = new URL(url);
+  connectionUrl.searchParams.delete("sslmode");
+  connectionUrl.searchParams.delete("uselibpqcompat");
   const options = {
-    connectionString: url.toString(),
+    connectionString: connectionUrl.toString(),
     application_name: applicationName,
     connectionTimeoutMillis: 15_000,
     query_timeout: 60_000,
     statement_timeout: 60_000
   };
 
-  if (!isLoopbackHost(url.hostname) && !url.searchParams.has("sslmode")) {
-    options.ssl = { rejectUnauthorized: false };
-  }
+  options.ssl = isLoopbackHost(url.hostname)
+    ? false
+    : { rejectUnauthorized: true };
 
   const client = new Client(options);
   await client.connect();
@@ -374,6 +424,15 @@ function normalizeStateRow(row) {
   return {
     key: row.key,
     value: row.value,
+    updatedAt: new Date(row.updated_at).toISOString()
+  };
+}
+
+function normalizeEvidenceRow(row) {
+  return {
+    storageRef: row.storage_ref,
+    contentBase64: row.content_base64,
+    sizeBytes: Number(row.size_bytes),
     updatedAt: new Date(row.updated_at).toISOString()
   };
 }

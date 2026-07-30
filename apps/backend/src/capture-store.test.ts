@@ -1,16 +1,22 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import {
+  assertCaptureEvidenceAvailable,
   createCaptureDraft,
+  CaptureEvidenceIntegrityError,
   CaptureVersionConflictError,
   approveCapture,
+  externalizeCaptureEvidence,
   findCaptureDraftByScope,
   getCaptureDraft,
   isCaptureDraftRequest,
+  readCaptureEvidenceContent,
   requestCaptureCorrection,
   resetCaptureDraftsForTest,
   sendCaptureToReview,
-  updateCaptureDraft
+  updateCaptureDraft,
+  withTrustedEvidence
 } from "./capture-store.js";
+import { persistEvidenceBlob } from "./state-store.js";
 
 describe("capture store", () => {
   beforeEach(() => {
@@ -257,5 +263,132 @@ describe("capture store", () => {
     const updated = updateCaptureDraft(draft.id, draft.payload);
     expect(updated?.payload.evidencia?.sha256).toBe(draft.payload.evidencia?.sha256);
     expect(updated?.payload.evidencia?.storageRef).toBe(draft.payload.evidencia?.storageRef);
+  });
+
+  it("externalizes evidence with verified metadata and reads it back intact", async () => {
+    const content = Buffer.from("%PDF-1.4\n% verified evidence\n%%EOF", "utf8");
+    const draft = createCaptureDraft({
+      plantelId: 1,
+      indicadorId: 1,
+      actividadId: 1,
+      periodoId: 1,
+      payload: {
+        rows: [{ avance: 25 }],
+        evidencia: {
+          nombre: "evidencia.pdf",
+          tipo: "application/pdf",
+          tamanoBytes: content.length,
+          contenidoBase64: content.toString("base64")
+        }
+      }
+    });
+
+    const stored = await externalizeCaptureEvidence(draft.id);
+
+    expect(stored?.payload.evidencia).toMatchObject({ storageVerified: true });
+    expect(stored?.payload.evidencia).not.toHaveProperty("contenidoBase64");
+    await expect(readCaptureEvidenceContent(stored!)).resolves.toEqual(content);
+  });
+
+  it("does not trust client-supplied evidence references", () => {
+    const forged = withTrustedEvidence({
+      rows: [],
+      evidencia: {
+        nombre: "forged.pdf",
+        tipo: "application/pdf",
+        tamanoBytes: 100,
+        sha256: "a".repeat(64),
+        storageRef: `state://captures/1/evidence/${"a".repeat(64)}`,
+        storageVerified: true
+      }
+    });
+
+    expect(forged.evidencia).toBeUndefined();
+  });
+
+  it("rejects verified evidence metadata that did not come from the stored draft", () => {
+    const hash = "a".repeat(64);
+
+    expect(() => createCaptureDraft({
+      plantelId: 1,
+      indicadorId: 1,
+      actividadId: 1,
+      periodoId: 1,
+      payload: {
+        rows: [],
+        evidencia: {
+          nombre: "forged.pdf",
+          tipo: "application/pdf",
+          tamanoBytes: 100,
+          sha256: hash,
+          storageRef: `state://captures/1/evidence/${hash}`,
+          storageVerified: true
+        }
+      }
+    })).toThrow(CaptureEvidenceIntegrityError);
+  });
+
+  it("preserves an existing verified reference through the trusted adapter", async () => {
+    const content = Buffer.from("%PDF-1.4\n% reusable evidence\n%%EOF", "utf8");
+    const draft = createCaptureDraft({
+      plantelId: 1,
+      indicadorId: 1,
+      actividadId: 1,
+      periodoId: 1,
+      payload: {
+        rows: [{ avance: 25 }],
+        evidencia: {
+          nombre: "evidencia.pdf",
+          tipo: "application/pdf",
+          tamanoBytes: content.length,
+          contenidoBase64: content.toString("base64")
+        }
+      }
+    });
+    const stored = await externalizeCaptureEvidence(draft.id);
+    const trustedPayload = withTrustedEvidence({ rows: [{ avance: 50 }] }, stored);
+    const updated = updateCaptureDraft(draft.id, trustedPayload);
+
+    expect(updated?.payload.evidencia).toMatchObject({
+      storageRef: stored?.payload.evidencia?.storageRef,
+      storageVerified: true
+    });
+    await expect(readCaptureEvidenceContent(updated!)).resolves.toEqual(content);
+  });
+
+  it("requires domain verification of the current evidence before approval", async () => {
+    const content = Buffer.from("%PDF-1.4\n% approval evidence\n%%EOF", "utf8");
+    const draft = createCaptureDraft({
+      plantelId: 1,
+      indicadorId: 1,
+      actividadId: 1,
+      periodoId: 1,
+      payload: {
+        rows: [{ avance: 25 }],
+        evidencia: {
+          nombre: "evidencia.pdf",
+          tipo: "application/pdf",
+          tamanoBytes: content.length,
+          contenidoBase64: content.toString("base64")
+        }
+      }
+    });
+    const stored = await externalizeCaptureEvidence(draft.id);
+    const reviewed = sendCaptureToReview(stored!.id, undefined, stored!.versionActual)!;
+
+    expect(() => approveCapture(reviewed.id, reviewed.versionActual)).toThrow(CaptureEvidenceIntegrityError);
+
+    await expect(assertCaptureEvidenceAvailable(reviewed)).resolves.toBeUndefined();
+    expect(approveCapture(reviewed.id, reviewed.versionActual)).toMatchObject({
+      estado: "aprobado",
+      versionActual: reviewed.versionActual + 1
+    });
+  });
+
+  it("rejects a blob whose checksum does not match its storage reference", async () => {
+    await expect(persistEvidenceBlob(
+      `state://captures/1/evidence/${"a".repeat(64)}`,
+      Buffer.from("different content")
+    )).rejects.toThrow("checksum");
   });
 });

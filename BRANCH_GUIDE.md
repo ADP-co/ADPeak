@@ -39,7 +39,7 @@ Usar nombres claros y orientados al módulo:
 - `feature/audit-security`
 - `bugfix/descripcion-corta`
 - `hotfix/descripcion-corta`
-- `release/v0.1.0`
+- `release/v1.0.1`
 
 ## Flujo para una feature
 

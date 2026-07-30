@@ -8,10 +8,12 @@ import {
   handleIndicatorHistory,
   handleIndicators,
   handleLogin,
+  handleLogout,
   handleNotificationAction,
   handleNotifications,
   handleOfficialSources,
   handleReports,
+  handleSession,
   handleUpdatePassword,
   handleUserAction,
   handleUsers,
@@ -23,7 +25,13 @@ export default async function handler(request: any, response: any) {
     return;
   }
 
-  applyCors(response);
+  if (!applyCors(response, request)) {
+    response.status(403).json({
+      error: "origin_not_allowed",
+      message: "El origen de la solicitud no está autorizado."
+    });
+    return;
+  }
 
   const path = routePath(request);
   const dispatch = () => dispatchRequest(request, response, path);
@@ -44,6 +52,16 @@ async function dispatchRequest(request: any, response: any, path: string) {
 
   if (path === "auth/login") {
     await handleLogin(request, response);
+    return;
+  }
+
+  if (path === "auth/session") {
+    await handleSession(request, response);
+    return;
+  }
+
+  if (path === "auth/logout") {
+    await handleLogout(request, response);
     return;
   }
 

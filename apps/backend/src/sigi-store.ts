@@ -1,6 +1,7 @@
 /// <reference types="node" />
 
-import { createHash, createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, randomBytes, scrypt, scryptSync, timingSafeEqual } from "node:crypto";
+import { SESSION_COOKIE_NAME } from "./session-cookie.js";
 import {
   officialCatalogRows,
   officialIndicatorPlantelScopes
@@ -48,6 +49,7 @@ export type SigiSession = {
   role: SystemRole;
   plantelId?: number;
   responsableId?: number;
+  passwordChangeRequired?: boolean;
 };
 
 export type SigiUser = {
@@ -61,6 +63,7 @@ export type SigiUser = {
   active: boolean;
   passwordHash: string;
   credentialVersion?: number;
+  passwordChangeRequired?: boolean;
 };
 
 export type PublicSigiUser = Omit<SigiUser, "passwordHash" | "credentialVersion"> & {
@@ -76,6 +79,7 @@ export type AuthenticatedSigiUser = {
   description: string;
   plantelId?: number;
   responsableId?: number;
+  passwordChangeRequired: boolean;
 };
 
 export type AuthenticationFailureReason = "invalid_credentials" | "inactive_user";
@@ -403,7 +407,6 @@ const officialResponsibleAccounts = [
   { responsableId: 18, username: "resp18", name: "Salvador Aguilar Aguilar" }
 ] as const;
 
-const responsibleNames = officialResponsibleAccounts.map((account) => account.name);
 const officialResponsibleAccountById = new Map<number, (typeof officialResponsibleAccounts)[number]>(
   officialResponsibleAccounts.map((account) => [account.responsableId, account])
 );
@@ -448,11 +451,20 @@ let nextAuditEventId = 1;
 
 reloadSigiStateFromPersistence();
 
-export function sessionFromHeaders(headers: Record<string, string | string[] | undefined>): SigiSession {
+export function sessionFromHeaders(
+  headers: Record<string, string | string[] | undefined>,
+  options: { allowPasswordChange?: boolean } = {}
+): SigiSession {
   const token = bearerTokenFromHeaders(headers);
 
   if (token) {
-    return sessionFromToken(token);
+    const session = sessionFromToken(token);
+
+    if (session.passwordChangeRequired && !options.allowPasswordChange) {
+      throw new SigiAuthError("Debes cambiar la contraseña temporal antes de continuar.");
+    }
+
+    return session;
   }
 
   if (!allowUnsafeHeaderSessions()) {
@@ -474,8 +486,19 @@ export function sessionFromHeaders(headers: Record<string, string | string[] | u
     userId,
     role,
     plantelId: role === "plantel" ? plantelId ?? 1 : plantelId,
-    responsableId: role === "responsable" ? responsableId ?? 1 : responsableId
+    responsableId: role === "responsable" ? responsableId ?? 1 : responsableId,
+    passwordChangeRequired: false
   };
+}
+
+export function authenticatedUserForSession(session: SigiSession) {
+  const user = users.get(session.userId);
+
+  if (!user?.active) {
+    throw new SigiAuthError("La sesión no corresponde a un usuario activo.");
+  }
+
+  return authenticatedUser(user);
 }
 
 export function reloadSigiStateFromPersistence() {
@@ -483,13 +506,18 @@ export function reloadSigiStateFromPersistence() {
   const persistedUsers = readPersistedCollection<SigiUser>("users");
   const persistedNotifications = readPersistedCollection<SigiNotification>("notifications") ?? [];
   const persistedAuditEvents = readPersistedCollection<SigiAuditEvent>("auditEvents") ?? [];
-  const needsCatalogMigration = readPersistedValue<string>("catalogImportVersion") !== officialCatalogImportVersion;
+  const persistedStateReady = isPersistedStateHydrated();
+  const needsCatalogMigration = Boolean(
+    persistedStateReady &&
+    readPersistedValue<string>("catalogImportVersion") !== officialCatalogImportVersion
+  );
   const needsCredentialReset = Boolean(
+    persistedStateReady &&
     officialCredentialResetVersion &&
     readPersistedValue<string>("officialCredentialResetVersion") !== officialCredentialResetVersion
   );
   const needsFactoryReset = Boolean(
-    isPersistedStateHydrated() &&
+    persistedStateReady &&
     officialFactoryResetVersion &&
     readPersistedValue<string>("officialFactoryResetVersion") !== officialFactoryResetVersion
   );
@@ -550,6 +578,7 @@ export function reloadSigiStateFromPersistence() {
       nextAuditEventId,
       captureDrafts: [],
       nextCaptureId: 1,
+      loginRateLimits: {},
       catalogImportVersion: officialCatalogImportVersion,
       ...(officialCredentialResetVersion
         ? { officialCredentialResetVersion }
@@ -658,6 +687,9 @@ export function saveUser(session: SigiSession, input: Partial<SigiUser> & { pass
     indicatorCodes: sanitizeUserIndicatorCodes(role, input.indicatorCodes ?? existing?.indicatorCodes ?? []),
     active: input.active ?? existing?.active ?? true,
     passwordHash: normalizedPassword ? hashPassword(normalizedPassword) : existing?.passwordHash ?? defaultPasswordHashForRole(role),
+    passwordChangeRequired: normalizedPassword
+      ? true
+      : existing?.passwordChangeRequired ?? !existing,
     credentialVersion: existing
       ? credentialVersionFor(existing) + (passwordChanged || activeChanged ? 1 : 0)
       : 1
@@ -742,6 +774,35 @@ export function authenticateUserResult(username: string, password: string): Auth
   return { user: authenticatedUser(user) };
 }
 
+export async function authenticateUserResultAsync(username: string, password: string): Promise<AuthenticationResult> {
+  const normalizedUsername = normalizeUsername(username);
+  const user = Array.from(users.values()).find((candidate) =>
+    matchesLoginUsername(candidate, normalizedUsername)
+  );
+
+  if (!user) {
+    return { reason: "invalid_credentials" };
+  }
+
+  if (!user.active) {
+    return { reason: "inactive_user" };
+  }
+
+  if (!(await verifyPasswordAsync(user.passwordHash, password))) {
+    return { reason: "invalid_credentials" };
+  }
+
+  if (!user.passwordHash.startsWith("scrypt$")) {
+    users.set(user.id, {
+      ...user,
+      passwordHash: hashPassword(password)
+    });
+    persistCatalogState();
+  }
+
+  return { user: authenticatedUser(user) };
+}
+
 export function authenticateUser(username: string, password: string): AuthenticatedSigiUser | undefined {
   return authenticateUserResult(username, password).user;
 }
@@ -778,6 +839,7 @@ export function updateOwnPassword(
   const updated = {
     ...user,
     passwordHash: hashPassword(newPassword),
+    passwordChangeRequired: false,
     credentialVersion: credentialVersionFor(user) + 1
   };
   users.set(user.id, updated);
@@ -819,6 +881,7 @@ export function resetUserPassword(
   const updated = {
     ...user,
     passwordHash: hashPassword(password),
+    passwordChangeRequired: true,
     credentialVersion: credentialVersionFor(user) + 1
   };
   users.set(user.id, updated);
@@ -1171,9 +1234,10 @@ function isSensitiveAuditString(value: string) {
 
 export function recordEvidenceOpened(session: SigiSession, draft: CaptureDraft, requestId?: string) {
   assertCaptureAccess(session, draft, "read");
+  const evidence = draft.payload.evidencia;
 
-  if (!draft.payload.evidencia?.nombre || !draft.payload.evidencia.contenidoBase64) {
-    throw new SigiValidationError("La evidencia no esta disponible. Solicita que el plantel reenvie el archivo.");
+  if (!hasStoredEvidence(evidence)) {
+    throw new SigiValidationError("La evidencia no está disponible. Solicita que el plantel reenvíe el archivo.");
   }
 
   return recordAuditEvent(session, {
@@ -1181,7 +1245,7 @@ export function recordEvidenceOpened(session: SigiSession, draft: CaptureDraft, 
     resourceType: "capture",
     resourceId: String(draft.id),
     after: {
-      evidencia: draft.payload.evidencia.nombre,
+      evidencia: evidence!.nombre,
       indicadorId: draft.indicadorId,
       plantelId: draft.plantelId,
       versionActual: draft.versionActual
@@ -1199,8 +1263,8 @@ export function assertEvidenceOpenedBeforeApproval(session: SigiSession, draft: 
     return;
   }
 
-  if (evidenceRules.required && (!draft.payload.evidencia?.nombre || !draft.payload.evidencia.contenidoBase64)) {
-    throw new SigiValidationError("La evidencia no esta disponible. Solicita que el plantel reenvie el archivo antes de aprobar.");
+  if (evidenceRules.required && !hasStoredEvidence(draft.payload.evidencia)) {
+    throw new SigiValidationError("La evidencia no está disponible. Solicita que el plantel reenvíe el archivo antes de aprobar.");
   }
 
   if (!evidenceRules.requireOpenBeforeApproval) {
@@ -1958,6 +2022,15 @@ function validateEvidenceMetadata(evidence: NonNullable<CapturePayload["evidenci
 
   const encodedContent = evidence.contenidoBase64?.replace(/\s+/g, "") ?? "";
 
+  if (
+    !encodedContent &&
+    evidence.storageVerified === true &&
+    evidence.storageRef &&
+    /^[a-f0-9]{64}$/i.test(evidence.sha256 ?? "")
+  ) {
+    return;
+  }
+
   if (!encodedContent || encodedContent.length % 4 !== 0 || !/^[A-Za-z0-9+/]+={0,2}$/.test(encodedContent)) {
     throw new SigiValidationError("La evidencia PDF no contiene datos válidos.");
   }
@@ -1977,6 +2050,14 @@ function validateEvidenceMetadata(evidence: NonNullable<CapturePayload["evidenci
   if (!trailer.includes("%%EOF")) {
     throw new SigiValidationError("El PDF está incompleto o dañado.");
   }
+}
+
+function hasStoredEvidence(evidence: CapturePayload["evidencia"]) {
+  return Boolean(
+    evidence?.nombre &&
+    evidence.tamanoBytes > 0 &&
+    (evidence.contenidoBase64 || (evidence.storageVerified === true && evidence.storageRef && evidence.sha256))
+  );
 }
 
 function validateTextColumns(
@@ -3220,6 +3301,7 @@ function buildInitialUsers(): SigiUser[] {
     indicatorCodes: [],
     active: true,
     passwordHash: defaultPasswordHashForRole("director"),
+    passwordChangeRequired: true,
     credentialVersion: 1
   };
   const responsibleUsers = officialResponsibleAccounts.map((account) => {
@@ -3235,6 +3317,7 @@ function buildInitialUsers(): SigiUser[] {
         .map((indicator) => indicator.code),
       active: true,
       passwordHash: defaultPasswordHashForRole("responsable"),
+      passwordChangeRequired: true,
       credentialVersion: 1
     };
   });
@@ -3247,6 +3330,7 @@ function buildInitialUsers(): SigiUser[] {
     indicatorCodes: [],
     active: true,
     passwordHash: defaultPasswordHashForRole("plantel"),
+    passwordChangeRequired: true,
     credentialVersion: 1
   }));
 
@@ -3279,7 +3363,8 @@ function authenticatedUser(user: SigiUser): AuthenticatedSigiUser {
     role: user.role === "director" ? "admin" : user.role,
     description: roleDescription(user.role),
     plantelId: user.plantelId,
-    responsableId: user.responsableId
+    responsableId: user.responsableId,
+    passwordChangeRequired: user.passwordChangeRequired ?? false
   };
 }
 
@@ -3303,6 +3388,7 @@ function normalizePersistedUser(user: SigiUser): SigiUser {
     role,
     username: normalizeUsername(user.username || usernameForUser(user.id, user.name, role)),
     passwordHash: user.passwordHash || defaultPasswordHashForRole(role),
+    passwordChangeRequired: user.passwordChangeRequired ?? false,
     credentialVersion: credentialVersionFor(user),
     indicatorCodes: sanitizeUserIndicatorCodes(role, user.indicatorCodes ?? []),
     active: user.active ?? true
@@ -3908,6 +3994,7 @@ function mergeInitialUsers(persisted?: SigiUser[], resetToInitial = false) {
         name: normalizedUser.name,
         active: normalizedUser.active,
         passwordHash: normalizedUser.passwordHash,
+        passwordChangeRequired: normalizedUser.passwordChangeRequired,
         credentialVersion: normalizedUser.credentialVersion
       });
     }
@@ -4040,6 +4127,7 @@ function resetOfficialUserCredentials() {
       ...user,
       active: true,
       passwordHash: defaultPasswordHashForRole(user.role),
+      passwordChangeRequired: true,
       credentialVersion: credentialVersionFor(user) + 1
     });
   }
@@ -4074,6 +4162,7 @@ function replaceWithOfficialFactoryState() {
     nextAuditEventId: 1,
     captureDrafts: [],
     nextCaptureId: 1,
+    loginRateLimits: {},
     catalogImportVersion: officialCatalogImportVersion,
     officialFactoryResetVersion,
     ...(officialCredentialResetVersion
@@ -4098,22 +4187,23 @@ function factoryCredentialVersion() {
 
 function hashPassword(password: string) {
   const salt = randomBytes(16);
-  const digest = scryptSync(password, salt, 32);
-  return `scrypt$${salt.toString("base64url")}$${digest.toString("base64url")}`;
+  const params = scryptParameters();
+  const digest = scryptSync(password, salt, 32, params);
+  return `scrypt$${params.N}$${params.r}$${params.p}$${salt.toString("base64url")}$${digest.toString("base64url")}`;
 }
 
 function verifyPassword(storedHash: string, password: string) {
   if (storedHash.startsWith("scrypt$")) {
-    const [, encodedSalt, encodedDigest] = storedHash.split("$");
+    const parsed = parseScryptHash(storedHash);
 
-    if (!encodedSalt || !encodedDigest) {
+    if (!parsed) {
       return false;
     }
 
     try {
-      const salt = Buffer.from(encodedSalt, "base64url");
-      const expected = Buffer.from(encodedDigest, "base64url");
-      const actual = scryptSync(password, salt, expected.length);
+      const salt = Buffer.from(parsed.encodedSalt, "base64url");
+      const expected = Buffer.from(parsed.encodedDigest, "base64url");
+      const actual = scryptSync(password, salt, expected.length, parsed.options);
       return expected.length === actual.length && timingSafeEqual(expected, actual);
     } catch {
       return false;
@@ -4125,15 +4215,94 @@ function verifyPassword(storedHash: string, password: string) {
   return stored.length === legacy.length && timingSafeEqual(stored, legacy);
 }
 
+async function verifyPasswordAsync(storedHash: string, password: string) {
+  if (!storedHash.startsWith("scrypt$")) {
+    return verifyPassword(storedHash, password);
+  }
+
+  const parsed = parseScryptHash(storedHash);
+
+  if (!parsed) {
+    return false;
+  }
+
+  try {
+    const salt = Buffer.from(parsed.encodedSalt, "base64url");
+    const expected = Buffer.from(parsed.encodedDigest, "base64url");
+    const actual = await deriveScryptAsync(password, salt, expected.length, parsed.options);
+    return expected.length === actual.length && timingSafeEqual(expected, actual);
+  } catch {
+    return false;
+  }
+}
+
+function deriveScryptAsync(
+  password: string,
+  salt: Buffer,
+  keyLength: number,
+  options: { N: number; r: number; p: number; maxmem: number }
+) {
+  return new Promise<Buffer>((resolve, reject) => {
+    scrypt(password, salt, keyLength, options, (error, derivedKey) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      resolve(Buffer.from(derivedKey));
+    });
+  });
+}
+
+function parseScryptHash(storedHash: string) {
+  const parts = storedHash.split("$");
+
+  if (parts.length === 3) {
+    return {
+      encodedSalt: parts[1],
+      encodedDigest: parts[2],
+      options: { N: 16384, r: 8, p: 1, maxmem: 64 * 1024 * 1024 }
+    };
+  }
+
+  if (parts.length !== 6) {
+    return undefined;
+  }
+
+  const N = Number(parts[1]);
+  const r = Number(parts[2]);
+  const p = Number(parts[3]);
+
+  if (!Number.isInteger(N) || !Number.isInteger(r) || !Number.isInteger(p) || N < 1024 || r < 1 || p < 1) {
+    return undefined;
+  }
+
+  return {
+    encodedSalt: parts[4],
+    encodedDigest: parts[5],
+    options: { N, r, p, maxmem: 64 * 1024 * 1024 }
+  };
+}
+
+function scryptParameters() {
+  const N = process.env.NODE_ENV === "test" || process.env.VITEST === "true" ? 1024 : 16384;
+  return { N, r: 8, p: 1, maxmem: 64 * 1024 * 1024 };
+}
+
 function bearerTokenFromHeaders(headers: Record<string, string | string[] | undefined>) {
   const authorization = headerValue(headers.authorization ?? headers.Authorization);
   const sessionHeader = headerValue(headers["x-session-token"]);
+  const cookieHeader = headerValue(headers.cookie ?? headers.Cookie);
 
   if (authorization?.startsWith("Bearer ")) {
     return authorization.slice("Bearer ".length).trim();
   }
 
-  return sessionHeader?.trim();
+  if (sessionHeader?.trim()) {
+    return sessionHeader.trim();
+  }
+
+  return cookieValue(cookieHeader, SESSION_COOKIE_NAME);
 }
 
 function sessionFromToken(token: string): SigiSession {
@@ -4169,7 +4338,8 @@ function sessionFromToken(token: string): SigiSession {
     userId: user.id,
     role: user.role,
     plantelId: user.role === "plantel" ? user.plantelId : user.plantelId ?? payload.plantelId,
-    responsableId: user.role === "responsable" ? user.responsableId : user.responsableId ?? payload.responsableId
+    responsableId: user.role === "responsable" ? user.responsableId : user.responsableId ?? payload.responsableId,
+    passwordChangeRequired: user.passwordChangeRequired ?? false
   };
 }
 
@@ -4177,8 +4347,30 @@ function allowUnsafeHeaderSessions() {
   return (
     process.env.NODE_ENV === "test" ||
     process.env.VITEST === "true" ||
-    process.env.ADPEAK_ALLOW_UNSAFE_HEADERS === "true"
+    (process.env.ADPEAK_ALLOW_UNSAFE_HEADERS === "true" && !isProductionRuntime())
   );
+}
+
+function cookieValue(cookieHeader: string | undefined, name: string) {
+  if (!cookieHeader) {
+    return undefined;
+  }
+
+  for (const pair of cookieHeader.split(";")) {
+    const separator = pair.indexOf("=");
+
+    if (separator < 0) {
+      continue;
+    }
+
+    const key = pair.slice(0, separator).trim();
+
+    if (key === name) {
+      return decodeURIComponent(pair.slice(separator + 1).trim());
+    }
+  }
+
+  return undefined;
 }
 
 function sessionTtlSeconds() {

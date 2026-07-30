@@ -1,5 +1,11 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import {
+  assertLoginAllowed,
+  clearLoginFailures,
+  loginAttemptKey,
+  recordLoginFailure
+} from "./auth-rate-limit.js";
+import {
   ConfigurationError,
   getAppConfig,
   loadLocalEnv,
@@ -7,21 +13,26 @@ import {
 } from "./config.js";
 import {
   approveCapture,
+  assertCaptureEvidenceAvailable,
   CaptureVersionConflictError,
   createCaptureDraft,
+  externalizeCaptureEvidence,
   findCaptureDraftByScope,
   getCaptureDraft,
   isCaptureDraftRequest,
   isCapturePayload,
+  readCaptureEvidenceContent,
   requestCaptureCorrection,
   reloadCaptureDraftsFromState,
   sendCaptureToReview,
-  updateCaptureDraft
+  updateCaptureDraft,
+  withTrustedEvidence
 } from "./capture-store.js";
 import {
   assertCaptureAccess,
   assertEvidenceOpenedBeforeApproval,
-  authenticateUserResult,
+  authenticatedUserForSession,
+  authenticateUserResultAsync,
   buildReportPayload,
   createSessionToken,
   deactivateIndicator,
@@ -52,7 +63,13 @@ import {
   updateOwnPassword
 } from "./sigi-store.js";
 import {
+  authenticationResponse,
+  clearSessionCookie,
+  setSessionCookie
+} from "./session-cookie.js";
+import {
   authenticateDemoUser,
+  demoEnabled,
   demoDatasetPayload,
   demoReportCsv,
   demoReportPayload,
@@ -64,6 +81,7 @@ import {
   type DemoRole
 } from "./demo-data.js";
 import { healthPayload } from "./health.js";
+import { API_SECURITY_HEADERS, corsDecision } from "./http-security.js";
 import {
   flushPersistedState,
   hydrateState,
@@ -101,7 +119,6 @@ function sendJson(
   payload: unknown
 ) {
   response.writeHead(statusCode, {
-    "Access-Control-Allow-Origin": "*",
     "Content-Type": "application/json; charset=utf-8"
   });
   response.end(JSON.stringify(payload));
@@ -109,7 +126,6 @@ function sendJson(
 
 function sendCsv(response: ServerResponse, payload: string) {
   response.writeHead(200, {
-    "Access-Control-Allow-Origin": "*",
     "Content-Disposition": "attachment; filename=\"adpeak-demo-report.csv\"",
     "Content-Type": "text/csv; charset=utf-8"
   });
@@ -126,6 +142,30 @@ function sendError(response: ServerResponse, error: unknown) {
     sendJson(response, error.statusCode, {
       error: error.code,
       message: error.message
+    });
+    return true;
+  }
+
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "statusCode" in error &&
+    "code" in error
+  ) {
+    const knownError = error as {
+      statusCode: number;
+      code: string;
+      message?: string;
+      retryAfterSeconds?: number;
+    };
+
+    if (knownError.retryAfterSeconds) {
+      response.setHeader("Retry-After", String(knownError.retryAfterSeconds));
+    }
+
+    sendJson(response, knownError.statusCode, {
+      error: knownError.code,
+      message: knownError.message
     });
     return true;
   }
@@ -189,12 +229,20 @@ const server = createServer(async (request, response) => {
   );
   const requestId = request.headers["x-request-id"]?.toString() || `req-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   response.setHeader("X-Request-Id", requestId);
+  applySecurityHeaders(response);
+
+  if (!applyCors(request, response)) {
+    sendJson(response, 403, {
+      error: "origin_not_allowed",
+      message: "El origen de la solicitud no está autorizado."
+    });
+    return;
+  }
 
   if (request.method === "OPTIONS") {
     response.writeHead(204, {
       "Access-Control-Allow-Headers": "Authorization, Content-Type, x-session-token, x-user-id, x-role, x-plantel-id, x-responsable-id, x-request-id",
-      "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,OPTIONS",
-      "Access-Control-Allow-Origin": "*"
+      "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS"
     });
     response.end();
     return;
@@ -220,10 +268,13 @@ const server = createServer(async (request, response) => {
         : typeof payload.contrasena === "string"
           ? payload.contrasena
           : "";
-      const authResult = authenticateUserResult(username, password);
+      const attemptKey = loginAttemptKey(request, username);
+      await assertLoginAllowed(attemptKey);
+      const authResult = await authenticateUserResultAsync(username, password);
       const user = authResult.user;
 
       if (!user) {
+        await recordLoginFailure(attemptKey);
         const inactiveUser = authResult.reason === "inactive_user";
 
         sendJson(response, inactiveUser ? 403 : 401, {
@@ -235,7 +286,10 @@ const server = createServer(async (request, response) => {
         return;
       }
 
-      sendJson(response, 200, { user, sessionToken: createSessionToken(user) });
+      await clearLoginFailures(attemptKey);
+      const sessionToken = createSessionToken(user);
+      setSessionCookie(response, sessionToken);
+      sendJson(response, 200, authenticationResponse(user, sessionToken));
       return;
     } catch (error) {
       sendMutationError(response, error);
@@ -243,9 +297,26 @@ const server = createServer(async (request, response) => {
     }
   }
 
+  if (request.method === "GET" && url.pathname === "/api/v1/auth/session") {
+    try {
+      const session = sessionFromHeaders(request.headers, { allowPasswordChange: true });
+      sendJson(response, 200, { user: authenticatedUserForSession(session) });
+    } catch (error) {
+      sendMutationError(response, error);
+    }
+    return;
+  }
+
+  if (request.method === "POST" && url.pathname === "/api/v1/auth/logout") {
+    clearSessionCookie(response);
+    response.writeHead(204);
+    response.end();
+    return;
+  }
+
   if (request.method === "PATCH" && url.pathname === "/api/v1/auth/password") {
     try {
-      const session = sessionFromHeaders(request.headers);
+      const session = sessionFromHeaders(request.headers, { allowPasswordChange: true });
       const user = updateOwnPassword(session, await readJsonBody(request));
       recordAuditEvent(session, {
         action: "password_changed",
@@ -255,7 +326,9 @@ const server = createServer(async (request, response) => {
         requestId
       });
       await flushPersistedState();
-      sendJson(response, 200, { user, sessionToken: createSessionToken(user) });
+      const sessionToken = createSessionToken(user);
+      setSessionCookie(response, sessionToken);
+      sendJson(response, 200, authenticationResponse(user, sessionToken));
       return;
     } catch (error) {
       sendMutationError(response, error);
@@ -640,8 +713,12 @@ const server = createServer(async (request, response) => {
         return;
       }
 
-      assertCaptureAccess(session, payload, "draft");
       const existingDraft = findCaptureDraftByScope(payload);
+      const trustedPayload = {
+        ...payload,
+        payload: withTrustedEvidence(payload.payload, existingDraft)
+      };
+      assertCaptureAccess(session, trustedPayload, "draft");
 
       if (existingDraft && !isEditableCaptureStatus(existingDraft.estado)) {
         sendJson(response, 409, {
@@ -651,12 +728,16 @@ const server = createServer(async (request, response) => {
         return;
       }
 
-      if (existingDraft && payload.expectedVersion !== existingDraft.versionActual) {
+      if (existingDraft && trustedPayload.expectedVersion !== existingDraft.versionActual) {
         sendCaptureVersionConflict(response, existingDraft.versionActual);
         return;
       }
 
-      const created = createCaptureDraft(payload);
+      const createdWithInlineEvidence = createCaptureDraft(trustedPayload);
+      const created = await externalizeCaptureEvidence(
+        createdWithInlineEvidence.id,
+        existingDraft?.payload.evidencia?.storageRef
+      ) ?? createdWithInlineEvidence;
       recordAuditEvent(session, {
         action: "capture_saved",
         resourceType: "capture",
@@ -694,9 +775,9 @@ const server = createServer(async (request, response) => {
       assertCaptureAccess(session, draft, "read");
       const evidence = draft.payload.evidencia;
       const fileName = sanitizeDownloadFileName(evidence?.nombre || `evidencia-${captureId}.pdf`);
-      const content = Buffer.from(evidence?.contenidoBase64 ?? "", "base64");
+      const content = await readCaptureEvidenceContent(draft);
 
-      if (!evidence?.nombre || content.length === 0) {
+      if (!evidence?.nombre || !content?.length) {
         sendJson(response, 404, {
           error: "evidence_not_available",
           message: "La evidencia no está disponible. Solicita que el plantel reenvíe el archivo."
@@ -794,7 +875,8 @@ const server = createServer(async (request, response) => {
           return;
         }
 
-        assertCaptureAccess(session, { ...draft, payload }, "draft");
+        const trustedPayload = withTrustedEvidence(payload, draft);
+        assertCaptureAccess(session, { ...draft, payload: trustedPayload }, "draft");
         const expectedVersion = positiveExpectedVersion(body);
 
         if (!expectedVersion) {
@@ -802,15 +884,20 @@ const server = createServer(async (request, response) => {
           return;
         }
 
-        const updatedDraft = updateCaptureDraft(captureId, payload, { expectedVersion });
+        const updatedDraftWithInlineEvidence = updateCaptureDraft(captureId, trustedPayload, { expectedVersion });
 
-        if (!updatedDraft) {
+        if (!updatedDraftWithInlineEvidence) {
           sendJson(response, 409, {
             error: "capture_not_editable",
             message: "La captura ya fue enviada y no puede modificarse hasta que se solicite corrección."
           });
           return;
         }
+
+        const updatedDraft = await externalizeCaptureEvidence(
+          captureId,
+          draft.payload.evidencia?.storageRef
+        ) ?? updatedDraftWithInlineEvidence;
 
         recordAuditEvent(session, {
           action: "capture_updated",
@@ -969,6 +1056,7 @@ const server = createServer(async (request, response) => {
         }
 
         assertCaptureAccess(session, draft, "review");
+        await assertCaptureEvidenceAvailable(draft);
         assertEvidenceOpenedBeforeApproval(session, draft);
         const updatedDraft = approveCapture(captureId, expectedVersion);
 
@@ -1001,6 +1089,11 @@ const server = createServer(async (request, response) => {
       }
       return;
     }
+  }
+
+  if (url.pathname.startsWith("/demo/") && !demoEnabled()) {
+    sendJson(response, 404, { error: "not_found", message: "Ruta no disponible." });
+    return;
   }
 
   if (request.method === "GET" && url.pathname === "/demo/status") {
@@ -1092,6 +1185,29 @@ const server = createServer(async (request, response) => {
     message: "Ruta no configurada"
   });
 });
+
+function applyCors(request: IncomingMessage, response: ServerResponse) {
+  const decision = corsDecision(request.headers);
+
+  if (!decision.allowed) {
+    return false;
+  }
+
+  if (!decision.origin) {
+    return true;
+  }
+
+  response.setHeader("Access-Control-Allow-Origin", decision.origin);
+  response.setHeader("Access-Control-Allow-Credentials", "true");
+  response.setHeader("Vary", "Origin");
+  return true;
+}
+
+function applySecurityHeaders(response: ServerResponse) {
+  for (const [name, value] of Object.entries(API_SECURITY_HEADERS)) {
+    response.setHeader(name, value);
+  }
+}
 
 server.listen(port, () => {
   console.log(`Backend listo en http://127.0.0.1:${port}`);

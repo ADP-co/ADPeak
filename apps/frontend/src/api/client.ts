@@ -22,7 +22,6 @@ type StoredSession = {
   role?: string;
   plantelId?: number;
   responsableId?: number;
-  sessionToken?: string;
 };
 
 function readStoredSession(): StoredSession {
@@ -37,20 +36,10 @@ function readStoredSession(): StoredSession {
   }
 }
 
-export function sessionHeaders(requestUrl = API_BASE_URL) {
+export function sessionHeaders(_requestUrl = API_BASE_URL) {
   const session = readStoredSession();
   const role = session.role ?? import.meta.env.VITE_ROLE ?? 'plantel';
   const headers: Record<string, string> = {};
-
-  if (session.sessionToken) {
-    if (!isApprovedRequestUrl(requestUrl)) {
-      return headers;
-    }
-
-    headers.Authorization = `Bearer ${session.sessionToken}`;
-    headers['x-session-token'] = session.sessionToken;
-    return headers;
-  }
 
   if (!import.meta.env.DEV && import.meta.env.MODE !== 'test') {
     return headers;
@@ -69,7 +58,10 @@ export async function authenticatedFetch(
   init: RequestInit = {},
   options: { invalidateOnUnauthorized?: boolean } = {},
 ) {
-  const response = await fetch(input, init);
+  const response = await fetch(input, {
+    ...init,
+    credentials: init.credentials ?? 'include',
+  });
 
   if (response.status === 401 && options.invalidateOnUnauthorized !== false) {
     await invalidateStoredSession(response);
@@ -224,18 +216,6 @@ function apiOrigins(...values: Array<string | undefined>) {
   });
 
   return origins;
-}
-
-function isApprovedRequestUrl(value: string) {
-  if (typeof window === 'undefined' || isLocalHostname(window.location.hostname)) {
-    return true;
-  }
-
-  try {
-    return approvedApiOrigins.has(new URL(value, window.location.origin).origin);
-  } catch {
-    return false;
-  }
 }
 
 function isLocalHostname(hostname: string) {

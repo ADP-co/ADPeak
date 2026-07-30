@@ -1,7 +1,7 @@
 # QA certification harness
 
 This harness creates and certifies an isolated PostgreSQL clone for ADPeak. It
-copies only `public.app_state`; it does not run against an inherited
+copies `public.app_state` and `public.app_evidence`; it does not run against an inherited
 `DATABASE_URL` or mutate the source database.
 
 ## Requirements
@@ -44,9 +44,9 @@ their application hashes are written to the ignored QA environment.
 
 | Command | Behavior |
 | --- | --- |
-| `npm run qa:clone` | Reads source state in a repeatable-read, read-only transaction; writes an ignored backup and SHA-256 digest; creates a unique `adpeak_qa_cert_*` database on the same host and port; copies `app_state`; writes the ignored manifest and environment. |
+| `npm run qa:clone` | Reads source state and evidence in a repeatable-read, read-only transaction; writes an ignored backup and SHA-256 digest; creates a unique `adpeak_qa_cert_*` database on the same host and port; copies both tables; writes the ignored manifest and environment. |
 | `npm run qa:seed` | Requires clone-only passwords, keeps the 56 official accounts and the generated official indicator set, removes visible QA/TMP/FMT state and dependent records, synchronizes assignments, and commits the target replacement atomically. |
-| `npm run qa:run` | Reads the target in a read-only transaction and certifies inventory, auth, roles, indicators, reports, and security. Backend HTTP probes run in `NODE_ENV=test`, where application persistence is memory only. |
+| `npm run qa:run` | Certifies inventory, auth, roles, indicators, evidence, reports and security against the isolated target. The mutable flow snapshots and restores both tables even when a check fails. |
 | `npm run qa:cleanup` | Drops only the database recorded by the manifest after exact URL fingerprint, host, port, source separation, and strict prefix checks. Artifacts are retained. |
 
 Every command supports `--help` and `--dry-run`. A custom clone artifact root can
@@ -58,7 +58,7 @@ later commands with `--manifest <path>`.
 The default root is `output/qa-certification`, which is already ignored by git.
 Each database gets a run directory containing:
 
-- `source-app_state.json`
+- `source-app_state.json` (estado y evidencia serializada en base64)
 - `source-app_state.json.sha256`
 - `qa.env`
 - `manifest.json`

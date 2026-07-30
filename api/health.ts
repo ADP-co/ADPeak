@@ -5,7 +5,10 @@ export default function handler(request: any, response: any) {
     return;
   }
 
-  applyCors(response);
+  if (!applyCors(response, request)) {
+    response.status(403).json({ error: "origin_not_allowed", message: "El origen de la solicitud no está autorizado." });
+    return;
+  }
 
   if (request.method !== "GET") {
     methodNotAllowed(response, ["GET", "OPTIONS"]);

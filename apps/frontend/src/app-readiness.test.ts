@@ -31,6 +31,21 @@ describe('frontend readiness invariants', () => {
     expect(source).not.toContain('roleProfiles');
   });
 
+  it('does not override backend indicator states from local storage', () => {
+    const source = readSource('App.tsx');
+
+    expect(source).not.toContain('adpeak.indicator.statuses');
+    expect(source).not.toContain('indicatorStatusOverrides');
+  });
+
+  it('resolves capture drafts from the backend instead of a stored browser id', () => {
+    const source = readSource('hooks/useCaptureDraft.ts');
+
+    expect(source).not.toContain('localStorage');
+    expect(source).not.toContain('sigi-poa:capture-draft-id');
+    expect(source).toContain('findCaptureDraft(captureOptions)');
+  });
+
   it('does not keep synthetic report builders in the reports screen', () => {
     const source = readSource('components/ui/ReportsDashboard.tsx');
 
@@ -40,15 +55,44 @@ describe('frontend readiness invariants', () => {
     expect(source).not.toContain('Estados para simular');
   });
 
-  it('stores the renewed session token after changing the current password', () => {
+  it('keeps authentication tokens out of browser storage after a password change', () => {
     const accountProfile = readSource('components/ui/AccountProfile.tsx');
     const authApi = readSource('api/auth.ts');
     const authContext = readSource('context/AuthContext.tsx');
 
-    expect(accountProfile).toContain('login({ ...updatedSession.user, sessionToken: updatedSession.sessionToken })');
-    expect(authApi).toContain('Promise<{ user: User; sessionToken: string }>');
-    expect(authContext).toContain('!Number.isInteger(payload.exp)');
-    expect(authContext).toContain('parsedUser.sessionToken && !isExpiredToken(parsedUser.sessionToken)');
+    expect(accountProfile).toContain('login(updatedSession.user)');
+    expect(authApi).toContain('fetchCurrentSession');
+    expect(authApi).toContain('logoutSession');
+    expect(authContext).toContain('publicSessionUser');
+    expect(authContext).not.toContain('isExpiredToken');
+    expect(authContext).not.toContain('parsedUser.sessionToken');
+  });
+
+  it('sends the authenticated cookie from the capture client', () => {
+    const source = readSource('api/capturas.ts');
+
+    expect(source).toContain('withCredentials: true');
+  });
+
+  it('routes temporary-password sessions to the registered account screen', () => {
+    const source = readSource('App.tsx');
+
+    expect(source).toContain("location.pathname !== '/cuenta'");
+    expect(source).toContain('path="/cuenta" element={<AccountProfile');
+    expect(source).toContain('path="/perfil" element={<Navigate to="/cuenta" replace />}');
+  });
+
+  it('keeps private deep links stable while the authenticated session hydrates', () => {
+    const source = readSource('App.tsx');
+    const protectedLayoutStart = source.indexOf('<Route element={<ProtectedLayout />}>');
+    const protectedLayoutEnd = source.indexOf('</Route>', protectedLayoutStart);
+    const wildcardRoute = '<Route path="*" element={<Navigate to="/" replace />} />';
+
+    expect(protectedLayoutStart).toBeGreaterThan(-1);
+    expect(protectedLayoutEnd).toBeGreaterThan(protectedLayoutStart);
+    expect(source.indexOf(wildcardRoute)).toBeGreaterThan(protectedLayoutStart);
+    expect(source.indexOf(wildcardRoute)).toBeLessThan(protectedLayoutEnd);
+    expect(source.slice(protectedLayoutEnd + '</Route>'.length)).not.toContain(wildcardRoute);
   });
 
   it('disables both scoped report exports and renders the blocking reason', () => {

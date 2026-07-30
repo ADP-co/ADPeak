@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from "node:crypto";
+import { createHash, randomBytes, scryptSync } from "node:crypto";
 import { constants as fsConstants } from "node:fs";
 import { access, mkdir, open, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -130,7 +130,12 @@ export function readClonePasswords() {
 }
 
 export function hashApplicationPassword(password) {
-  return createHash("sha256").update(`adpeak:${password}`).digest("hex");
+  const salt = randomBytes(16);
+  const N = 1024;
+  const r = 8;
+  const p = 1;
+  const digest = scryptSync(password, salt, 32, { N, r, p, maxmem: 64 * 1024 * 1024 });
+  return `scrypt$${N}$${r}$${p}$${salt.toString("base64url")}$${digest.toString("base64url")}`;
 }
 
 export function expectedPasswordHashes(passwords) {
@@ -151,7 +156,7 @@ export function readExpectedPasswordHashes(environment) {
   for (const [role, key] of Object.entries(EXPECTED_PASSWORD_HASH_ENV_KEYS)) {
     const value = environment[key];
 
-    if (!/^[a-f0-9]{64}$/.test(value ?? "")) {
+    if (!/^scrypt\$\d+\$\d+\$\d+\$[A-Za-z0-9_-]+\$[A-Za-z0-9_-]+$/.test(value ?? "")) {
       throw new QaHarnessError(`Generated QA environment is missing a valid ${key}. Run qa:seed first.`);
     }
 
@@ -366,7 +371,15 @@ export function createArtifactPaths(outputRoot, targetDatabase) {
   };
 }
 
-export function createManifest({ artifacts, source, target, snapshotSha256, snapshotRows, connectionFingerprint }) {
+export function createManifest({
+  artifacts,
+  source,
+  target,
+  snapshotSha256,
+  snapshotRows,
+  snapshotEvidenceRows = 0,
+  connectionFingerprint
+}) {
   const now = new Date().toISOString();
   return {
     schemaVersion: MANIFEST_SCHEMA_VERSION,
@@ -383,6 +396,7 @@ export function createManifest({ artifacts, source, target, snapshotSha256, snap
     baseline: BASELINE,
     sourceSnapshot: {
       rows: snapshotRows,
+      evidenceRows: snapshotEvidenceRows,
       sha256: snapshotSha256
     },
     artifacts

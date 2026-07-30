@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { createSerializedWriter } from "./state-store.js";
+import {
+  createSerializedWriter,
+  persistState,
+  readPersistedValue
+} from "./state-store.js";
 
 describe("serialized state writer", () => {
   it("never lets an older snapshot finish after a newer snapshot", async () => {
@@ -41,5 +45,25 @@ describe("serialized state writer", () => {
     await expect(writer.enqueue({ version: 1 })).rejects.toThrow("temporary failure");
     await expect(writer.enqueue({ version: 2 })).resolves.toBeUndefined();
     expect(written).toEqual([2]);
+  });
+
+  it("clears file-backed evidence blobs with an official factory reset", () => {
+    persistState({ captureEvidenceBlobs: { "state://evidence": "cGRm" } });
+    persistState({
+      captureDrafts: [],
+      officialFactoryResetVersion: "test-reset"
+    });
+
+    expect(readPersistedValue("captureEvidenceBlobs")).toEqual({});
+  });
+
+  it("clears evidence blobs when a new catalog version resets captures", () => {
+    persistState({ captureEvidenceBlobs: { "state://orphaned-evidence": "cGRm" } });
+    persistState({
+      captureDrafts: [],
+      catalogImportVersion: "test-catalog-version"
+    });
+
+    expect(readPersistedValue("captureEvidenceBlobs")).toEqual({});
   });
 });

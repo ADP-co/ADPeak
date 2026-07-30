@@ -15,20 +15,12 @@ import {
 } from '../api/capturas';
 import { notifyCaptureChanged } from '../api/captureEvents';
 
-const STORAGE_KEY_PREFIX = 'sigi-poa:capture-draft-id';
-
 type UseCaptureDraftOptions = Omit<CaptureDraftRequest, 'payload' | 'motivoCambio'> & {
   requestedCaptureId?: number;
   strictRequestedCaptureId?: boolean;
   storageScope?: string;
   enabled?: boolean;
 };
-
-function initialCaptureId(storageKey: string) {
-  const value = window.localStorage.getItem(storageKey);
-  const parsed = value ? Number(value) : undefined;
-  return parsed && Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
-}
 
 function isRecoverableCaptureLookupError(error: unknown) {
   return error instanceof CaptureRequestError &&
@@ -43,17 +35,17 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
     ? requestedCaptureId
     : undefined;
   const hasRequestedCapture = Boolean(effectiveRequestedCaptureId);
-  const storageKey = `${STORAGE_KEY_PREFIX}:${storageScope ?? [
+  const storageKey = `capture-scope:${storageScope ?? [
     options.plantelId,
     options.indicadorId,
     options.periodoId,
     options.actividadId,
   ].join(':')}`;
-  const [captureId, setCaptureId] = useState<number | undefined>(() => effectiveRequestedCaptureId ?? initialCaptureId(storageKey));
+  const [captureId, setCaptureId] = useState<number | undefined>(() => effectiveRequestedCaptureId);
 
   useEffect(() => {
-    setCaptureId(effectiveRequestedCaptureId ?? initialCaptureId(storageKey));
-  }, [effectiveRequestedCaptureId, storageKey]);
+    setCaptureId(effectiveRequestedCaptureId);
+  }, [effectiveRequestedCaptureId]);
 
   const captureQuery = useQuery({
     queryKey: ['capture-draft', storageKey, captureId],
@@ -64,7 +56,6 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
 
   const persistCapture = (capture: CaptureDraft) => {
     setCaptureId(capture.id);
-    window.localStorage.setItem(storageKey, String(capture.id));
     queryClient.setQueryData(['capture-draft', storageKey, capture.id], capture);
     if (!hasRequestedCapture) {
       queryClient.setQueryData(['capture-draft-scope', storageKey], capture);
@@ -94,7 +85,6 @@ export function useCaptureDraft(options: UseCaptureDraftOptions) {
 
   useEffect(() => {
     if (isRecoverableCaptureLookupError(captureQuery.error) && !strictRequestedCaptureId) {
-      window.localStorage.removeItem(storageKey);
       if (requestedCaptureId) {
         setIgnoredRequestedCaptureId(requestedCaptureId);
       }

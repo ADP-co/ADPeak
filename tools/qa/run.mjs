@@ -71,11 +71,11 @@ await runCommand(async () => {
       "Erase inherited DATABASE_URL and PostgreSQL fallback variables",
       `Validate seeded manifest ${displayPath(options.manifest)} and generated QA environment`,
       "Read clone inventory in a repeatable-read, read-only PostgreSQL transaction",
-      "Verify backup SHA, 56/14 baseline, role hashes, scopes, captures, and marker stripping",
+      "Verify backup SHA, 56/16 baseline, role hashes, scopes, captures, evidence, and marker stripping",
       "Start the real backend against the isolated clone on an ephemeral localhost port",
       "Log in all 56 official accounts and probe role scoping, indicators, reports, and security rejections",
       "Temporarily assign one official indicator and run draft, conflict, review, evidence, correction, approval, notification, audit, and detail-report checks",
-      "Stop the backend and restore the exact initial app_state snapshot even when the mutable flow fails",
+      "Stop the backend and restore the exact initial app_state and app_evidence snapshot even when the mutable flow fails",
       "Write ignored QA_MATRIX.csv, QA_REPORT.md, and QA_FINDINGS.md"
     ]);
     return;
@@ -174,7 +174,8 @@ await runCommand(async () => {
     addDatabaseChecks(matrix, validation, passwordHashes, officialCodes);
 
     const initialRows = structuredClone(snapshot.rows);
-    const initialSnapshotDigest = appStateRowsDigest(initialRows);
+    const initialEvidenceRows = structuredClone(snapshot.evidenceRows);
+    const initialSnapshotDigest = databaseSnapshotDigest(initialRows, initialEvidenceRows);
     let cloneTargetApproved = false;
 
     try {
@@ -214,7 +215,13 @@ await runCommand(async () => {
       }
     } finally {
       if (cloneTargetApproved) {
-        await restoreInitialSnapshot(matrix, targetConnection, initialRows, initialSnapshotDigest);
+        await restoreInitialSnapshot(
+          matrix,
+          targetConnection,
+          initialRows,
+          initialEvidenceRows,
+          initialSnapshotDigest
+        );
       }
     }
 
@@ -234,8 +241,9 @@ async function addBackupIntegrityCheck(matrix, manifest) {
     const pass =
       digest === manifest.sourceSnapshot.sha256 &&
       digestFile.trim() === expectedLine &&
-      parsed?.format === "adpeak-qa-app-state-backup-v1" &&
-      parsed?.rows?.length === manifest.sourceSnapshot.rows;
+      ["adpeak-qa-app-state-backup-v1", "adpeak-qa-app-state-backup-v2"].includes(parsed?.format) &&
+      parsed?.rows?.length === manifest.sourceSnapshot.rows &&
+      (parsed?.evidenceRows?.length ?? 0) === (manifest.sourceSnapshot.evidenceRows ?? 0);
     addCheck(matrix, {
       id: "INV-002",
       area: "inventory",
@@ -336,8 +344,9 @@ function addDatabaseChecks(matrix, validation, passwordHashes, officialCodes) {
   });
 
   const serialized = JSON.stringify(state);
+  const allowedPasswordFields = new Set(["passwordHash", "passwordChangeRequired"]);
   const hasUnexpectedPasswordField = users.some((user) =>
-    Object.keys(user).some((key) => key.toLowerCase().includes("password") && key !== "passwordHash")
+    Object.keys(user).some((key) => key.toLowerCase().includes("password") && !allowedPasswordFields.has(key))
   );
   addCheck(matrix, {
     id: "SEC-001",
@@ -385,6 +394,38 @@ async function addRuntimeChecks(matrix, runtime, officialCodes, users, clonePass
     }
   }
 
+  const representativeIds = ["director-1", "responsable-1", "plantel-1"];
+  const refreshedSessions = await Promise.all(representativeIds.map(async (userId) => {
+    const user = users.find((candidate) => candidate.id === userId);
+    if (!user) {
+      return { userId, token: undefined, status: 0 };
+    }
+
+    const login = await runtime.request("/api/v1/auth/login", {
+      method: "POST",
+      body: { username: user.username, password: clonePasswords[user.role] }
+    });
+    return {
+      userId,
+      token: typeof login.body?.sessionToken === "string" ? login.body.sessionToken : undefined,
+      status: login.status
+    };
+  }));
+
+  for (const refreshed of refreshedSessions) {
+    if (refreshed.token) {
+      sessions.set(refreshed.userId, refreshed.token);
+    }
+  }
+
+  addCheck(matrix, {
+    id: "AUTH-004",
+    area: "auth",
+    test: "Representative sessions remain available after the full account smoke",
+    pass: refreshedSessions.every((session) => session.status === 200 && Boolean(session.token)),
+    detail: refreshedSessions.map((session) => `${session.userId}=HTTP ${session.status}`).join(", ") + "."
+  });
+
   const tokens = {
     director: sessions.get("director-1"),
     responsable: sessions.get("responsable-1"),
@@ -406,7 +447,14 @@ async function addRuntimeChecks(matrix, runtime, officialCodes, users, clonePass
     area: "auth",
     test: "Signed session and invalid-login contracts",
     pass: sessions.size === users.length && directorUsers.status === 200 && invalidLogin.status === 401,
-    detail: `official_logins=${sessions.size}/${users.length}, signed_session=${directorUsers.status}, invalid_login=${invalidLogin.status}.`
+    detail: [
+      `official_logins=${sessions.size}/${users.length}`,
+      `signed_session=${directorUsers.status}`,
+      directorUsers.status === 200
+        ? "signed_session_contract=ok"
+        : `signed_session_error=${directorUsers.body?.error ?? "unknown"}: ${directorUsers.body?.message ?? "no message"}`,
+      `invalid_login=${invalidLogin.status}`
+    ].join(", ") + "."
   });
   const directorList = arrayBody(directorUsers.body, "users");
   const responsibleList = arrayBody(responsibleUsers.body, "users");
@@ -444,6 +492,40 @@ async function addRuntimeChecks(matrix, runtime, officialCodes, users, clonePass
       responsibleIndicators.status === 200 &&
       responsibleScopeValid,
     detail: `director=${directorIndicatorList.length}, responsable_scope=${responsibleIndicatorList.length}.`
+  });
+
+  const templateChecks = await Promise.all(directorIndicatorList.map(async (indicator) => {
+    const response = await runtime.request(
+      `/api/v1/indicadores/${encodeURIComponent(indicator.code)}/template`,
+      { token: tokens.director }
+    );
+    const columns = Array.isArray(response.body?.columns) ? response.body.columns : [];
+    const keys = columns.map((column) => column.key).filter(Boolean);
+    const labels = columns.map((column) => String(column.label ?? "").trim());
+
+    return {
+      code: indicator.code,
+      pass:
+        response.status === 200 &&
+        columns.length > 0 &&
+        keys.length === columns.length &&
+        new Set(keys).size === keys.length &&
+        labels.every((label) => label.length > 0 && !/^columna\s+\d+$/i.test(label)),
+      status: response.status,
+      columns: columns.length
+    };
+  }));
+  const invalidTemplates = templateChecks.filter((result) => !result.pass);
+  addCheck(matrix, {
+    id: "IND-004",
+    area: "indicators",
+    test: "Every official indicator exposes a usable capture template",
+    pass:
+      templateChecks.length === officialCodes.length &&
+      invalidTemplates.length === 0,
+    detail: invalidTemplates.length === 0
+      ? `${templateChecks.length}/${officialCodes.length} official templates expose unique keys and visible labels.`
+      : `Invalid templates: ${invalidTemplates.map((item) => `${item.code} (HTTP ${item.status}, columns=${item.columns})`).join(", ")}.`
   });
 
   const [directorReport, responsibleReport, plantelReport] = await Promise.all([
@@ -987,24 +1069,32 @@ function assertMutableCloneTarget(manifest, environment, targetConnection) {
   }
 }
 
-async function restoreInitialSnapshot(matrix, targetConnection, initialRows, initialDigest) {
+async function restoreInitialSnapshot(
+  matrix,
+  targetConnection,
+  initialRows,
+  initialEvidenceRows,
+  initialDigest
+) {
   try {
-    await replaceTargetAppState(targetConnection, initialRows);
+    await replaceTargetAppState(targetConnection, initialRows, initialEvidenceRows);
     const restored = await readTargetAppState(targetConnection);
-    const restoredDigest = appStateRowsDigest(restored.rows);
+    const restoredDigest = databaseSnapshotDigest(restored.rows, restored.evidenceRows);
     addCheck(matrix, {
       id: "MUT-RESTORE-001",
       area: "mutable-flow",
-      test: "Backend stopped and initial PostgreSQL app_state snapshot was restored exactly",
-      pass: restored.rows.length === initialRows.length && restoredDigest === initialDigest,
+      test: "Backend stopped and initial PostgreSQL state and evidence snapshot was restored exactly",
+      pass: restored.rows.length === initialRows.length &&
+        restored.evidenceRows.length === initialEvidenceRows.length &&
+        restoredDigest === initialDigest,
       severity: "critical",
-      detail: `rows=${restored.rows.length}/${initialRows.length}; snapshot_digest_match=${restoredDigest === initialDigest}.`
+      detail: `state_rows=${restored.rows.length}/${initialRows.length}; evidence_rows=${restored.evidenceRows.length}/${initialEvidenceRows.length}; snapshot_digest_match=${restoredDigest === initialDigest}.`
     });
   } catch (error) {
     addCheck(matrix, {
       id: "MUT-RESTORE-001",
       area: "mutable-flow",
-      test: "Backend stopped and initial PostgreSQL app_state snapshot was restored exactly",
+      test: "Backend stopped and initial PostgreSQL state and evidence snapshot was restored exactly",
       pass: false,
       severity: "critical",
       detail: safeErrorMessage(error)
@@ -1017,6 +1107,18 @@ function appStateRowsDigest(rows) {
     .map((row) => ({ key: row.key, value: row.value, updatedAt: String(row.updatedAt) }))
     .sort((left, right) => compareText(left.key, right.key));
   return sha256(stableJson(normalized));
+}
+
+function databaseSnapshotDigest(rows, evidenceRows) {
+  const normalizedEvidence = [...evidenceRows]
+    .map((row) => ({
+      storageRef: row.storageRef,
+      contentBase64: row.contentBase64,
+      sizeBytes: Number(row.sizeBytes),
+      updatedAt: String(row.updatedAt)
+    }))
+    .sort((left, right) => compareText(left.storageRef, right.storageRef));
+  return sha256(stableJson({ appState: appStateRowsDigest(rows), evidence: normalizedEvidence }));
 }
 
 function stableJson(value) {

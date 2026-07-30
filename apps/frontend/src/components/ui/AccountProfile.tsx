@@ -93,7 +93,7 @@ export const AccountProfile = ({ onBack }: AccountProfileProps) => {
     try {
       setIsSavingPassword(true);
       const updatedSession = await updatePassword(currentPassword, newPassword, confirmPassword);
-      login({ ...updatedSession.user, sessionToken: updatedSession.sessionToken });
+      login(updatedSession.user);
       setPasswordError('');
       setCurrentPassword('');
       setNewPassword('');
@@ -135,6 +135,13 @@ export const AccountProfile = ({ onBack }: AccountProfileProps) => {
         </div>
 
         <div className="flex flex-1 flex-col gap-6">
+          {user?.passwordChangeRequired && (
+            <div className="rounded-md border border-brand-Status_amarillo/60 bg-brand-Status_amarillo/10 p-4" role="alert">
+              <p className="font-body text-sm font-semibold text-brand-Gris_oscuro">
+                Por seguridad, cambia la contraseña temporal antes de continuar.
+              </p>
+            </div>
+          )}
           <div className="flex w-full flex-col gap-1">
             <span className="font-title text-sm font-bold text-brand-Gris_oscuro">Usuario</span>
             <div className="flex h-10 w-full items-center rounded-md bg-brand-Verde_principal/15 px-3">

@@ -65,7 +65,7 @@ await runCommand(async () => {
       "Require both test environment guards and three strong clone-only role passwords",
       `Load and validate manifest ${displayPath(options.manifest)}`,
       "Read the manifest target, sanitize visible state, and validate 56 accounts plus the generated indicator baseline",
-      "Replace target public.app_state in one transaction and verify the committed baseline",
+      "Replace target public.app_state and clear target public.app_evidence in one transaction, then verify the committed baseline",
       "Store only expected password hashes in the ignored QA environment; never log passwords"
     ]);
     return;
@@ -110,7 +110,7 @@ await runCommand(async () => {
     const current = await readTargetAppState(targetConnection);
     const sanitized = await sanitizeCloneStateRows(current.rows, hashes);
 
-    await replaceTargetAppState(targetConnection, sanitized.rows);
+    await replaceTargetAppState(targetConnection, sanitized.rows, []);
     const committed = await readTargetAppState(targetConnection);
     await validateCertificationRows(committed.rows, hashes);
 

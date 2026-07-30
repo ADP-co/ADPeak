@@ -1,6 +1,6 @@
 {
   "name": "sigi-poa-dgems",
-  "version": "0.1.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Scripts de desarrollo para SIGI-POA DGEMS.",
   "engines": {
@@ -38,13 +38,20 @@
     "qa:run": "node tools/qa/run.mjs",
     "qa:serve": "node tools/qa/serve.mjs",
     "qa:cleanup": "node tools/qa/cleanup.mjs",
+    "qa:dry-run": "node tools/qa/clone.mjs --dry-run && node tools/qa/seed.mjs --dry-run && node tools/qa/run.mjs --dry-run && node tools/qa/cleanup.mjs --dry-run",
     "secrets:check": "node tools/quality/check-secrets.mjs",
+    "hygiene:check": "node tools/quality/check-repository-hygiene.mjs",
+    "audit:check": "node tools/quality/check-dependency-audit.mjs",
+    "official-data:verify": "python tools/import-official-data.test.py",
+    "release:build": "python tools/release/build-release.py",
+    "release:verify": "python tools/release/build-release.py --verify-install",
     "test": "npm --workspaces --if-present run test",
     "test:frontend": "npm --workspace @adpeak/frontend run test",
     "test:backend": "npm --workspace @adpeak/backend run test",
     "typecheck": "npm --workspaces --if-present run typecheck",
     "build": "npm --workspaces --if-present run build",
     "check": "npm run typecheck && npm test && npm run build",
-    "repo:verify": "npm run check && git diff --check"
+    "quality:verify": "npm run secrets:check && npm run hygiene:check && npm run audit:check && npm run official-data:verify",
+    "repo:verify": "npm run quality:verify && npm run check && npm run qa:dry-run && git diff --check"
   }
 }

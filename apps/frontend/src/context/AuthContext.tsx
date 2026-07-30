@@ -1,15 +1,16 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { AUTH_INVALIDATED_EVENT, AUTH_STORAGE_KEY } from '../api/client';
+import { fetchCurrentSession, logoutSession } from '../api/auth';
 
 export interface User {
   id: string;
   username?: string;
   name: string;
-  role: string;
+  role: 'plantel' | 'admin' | 'responsable';
   description: string;
-  sessionToken?: string;
   plantelId?: number;
   responsableId?: number;
+  passwordChangeRequired?: boolean;
 }
 
 export interface AuthContextType {
@@ -17,6 +18,7 @@ export interface AuthContextType {
   login: (userData: User) => void;
   logout: () => void;
   isAuthenticated: boolean;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,33 +27,56 @@ const LAST_ACTIVITY_STORAGE_KEY = 'adpeak.session.lastActivity';
 const ACTIVITY_EVENTS = ['click', 'keydown', 'mousemove', 'scroll', 'touchstart'] as const;
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    try {
-      const storedUser = window.localStorage.getItem(AUTH_STORAGE_KEY);
-      const parsedUser = storedUser ? JSON.parse(storedUser) as User : null;
-
-      if (parsedUser && (!parsedUser.sessionToken || isExpiredToken(parsedUser.sessionToken))) {
-        window.localStorage.removeItem(AUTH_STORAGE_KEY);
-        window.localStorage.removeItem(LAST_ACTIVITY_STORAGE_KEY);
-        return null;
-      }
-
-      return parsedUser;
-    } catch {
-      return null;
-    }
-  });
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const login = useCallback((userData: User) => {
-    setUser(userData);
-    window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
+    const safeUser = publicSessionUser(userData);
+    setUser(safeUser);
+    window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(safeUser));
     window.localStorage.setItem(LAST_ACTIVITY_STORAGE_KEY, String(Date.now()));
   }, []);
 
   const logout = useCallback(() => {
+    void logoutSession().catch(() => undefined);
     setUser(null);
     window.localStorage.removeItem(AUTH_STORAGE_KEY);
     window.localStorage.removeItem(LAST_ACTIVITY_STORAGE_KEY);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    void fetchCurrentSession()
+      .then((sessionUser) => {
+        if (!active) {
+          return;
+        }
+
+        if (sessionUser) {
+          const safeUser = publicSessionUser(sessionUser);
+          setUser(safeUser);
+          window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(safeUser));
+        } else {
+          setUser(null);
+          window.localStorage.removeItem(AUTH_STORAGE_KEY);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setUser(null);
+          window.localStorage.removeItem(AUTH_STORAGE_KEY);
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -72,8 +97,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       try {
-        const parsedUser = JSON.parse(event.newValue) as User;
-        setUser(parsedUser.sessionToken && !isExpiredToken(parsedUser.sessionToken) ? parsedUser : null);
+        void fetchCurrentSession().then((sessionUser) => setUser(sessionUser ? publicSessionUser(sessionUser) : null));
       } catch {
         setUser(null);
       }
@@ -121,20 +145,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [logout, user]);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-function isExpiredToken(token: string) {
-  try {
-    const encodedPayload = token.split('.')[0];
-    const payload = JSON.parse(atob(encodedPayload.replace(/-/g, '+').replace(/_/g, '/'))) as { exp?: unknown };
-    return !Number.isInteger(payload.exp) || Number(payload.exp) <= Math.floor(Date.now() / 1000);
-  } catch {
-    return true;
-  }
+function publicSessionUser(user: User) {
+  const { sessionToken: _sessionToken, ...safeUser } = user as User & { sessionToken?: string };
+  return safeUser;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components

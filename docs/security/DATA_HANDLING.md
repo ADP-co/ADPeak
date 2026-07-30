@@ -2,9 +2,15 @@
 
 ## Regla principal
 
-Este repositorio público no debe contener documentos fuente, evidencias reales, datos personales, hojas Excel institucionales, ZIPs, PDFs de constancias, resultados de admisión ni archivos exportados desde carpetas de trabajo.
+Este repositorio público no debe contener documentos fuente, evidencias reales,
+datos personales de estudiantes o beneficiarios, hojas Excel institucionales,
+ZIPs, PDFs de constancias, resultados de admisión ni archivos exportados desde
+carpetas de trabajo.
 
-El código puede ser público; la información operativa y documental debe permanecer privada.
+El catálogo backend sí conserva nombres laborales de responsables
+institucionales y rutas nominales de procedencia para mantener trazabilidad con
+la fuente oficial. Su publicación requiere autorización institucional; no debe
+ampliarse con correos, teléfonos, identificadores, firmas ni información privada.
 
 ## Separación de repositorios
 
@@ -17,6 +23,8 @@ Uso permitido:
 - Plan de acción público.
 - Modelos conceptuales sin datos personales.
 - Ejemplos ficticios.
+- Nombres laborales mínimos de responsables autorizados cuando sean necesarios
+  para la trazabilidad oficial.
 
 Uso prohibido:
 
@@ -27,6 +35,8 @@ Uso prohibido:
 - Constancias, certificados o memorias individuales.
 - Hojas de cálculo originales.
 - Credenciales o configuraciones reales.
+- Correos, teléfonos, CURP, RFC, firmas u otros identificadores personales de
+  responsables.
 
 `.env.example` puede contener unicamente placeholders locales no secretos. Los
 archivos `.env` reales y cualquier configuracion con credenciales deben quedar
@@ -54,14 +64,14 @@ Para programar y probar:
 
 ## Evidencias en el sistema
 
-Cuando se implemente el módulo de archivos:
-
-- Guardar archivos fuera del repositorio Git.
-- Registrar solo metadatos necesarios en base de datos.
-- Validar tamaño y extensión.
-- Aplicar permisos de descarga.
-- Registrar quién sube, reemplaza o descarga evidencia.
-- Definir política de retención y eliminación.
+- El contenido PDF se guarda en `app_evidence`, separado de `app_state`.
+- La referencia incluye SHA-256 y se verifica al escribir y al leer.
+- El backend valida firma PDF, marcador final, tamaño y tipo permitido.
+- Abrir o descargar requiere sesión y alcance sobre la captura.
+- El historial registra apertura, reemplazo y descarga sin guardar base64.
+- El reset oficial y el harness QA limpian/restauran estado y evidencia juntos.
+- La política institucional de retención debe definirse antes de almacenar
+  evidencias reales de largo plazo.
 
 ## Pull Requests
 

@@ -83,6 +83,12 @@ describe("Vercel demo privacy", () => {
     const demoRewrite = vercelConfig.rewrites?.find((rewrite) => rewrite.source === "/demo/(.*)");
 
     expect(demoRewrite?.destination).toBe("/api/demo-endpoint?endpoint=disabled");
+
+    const endpointSource = readFileSync(
+      new URL("../../../api/demo-endpoint.ts", import.meta.url),
+      "utf8"
+    );
+    expect(endpointSource).toContain("if (!demoEnabled())");
   });
 });
 

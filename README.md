@@ -1,133 +1,129 @@
 # ADPeak / SIGI-POA DGEMS
 
-Sistema web para la captura, seguimiento, revision y reporte de indicadores del Programa Operativo Anual de la Direccion General de Educacion Media Superior.
+Sistema web institucional para captura, revisión, aprobación y reporte de los
+indicadores del Programa Operativo Anual de la Dirección General de Educación
+Media Superior.
 
-Este repositorio contiene el codigo y la documentacion tecnica no confidencial del proyecto. No debe almacenar evidencias reales, hojas de calculo institucionales, documentos fuente con datos personales ni credenciales.
+## Estado
 
-## Estado del proyecto
+- Versión: `1.0.1`.
+- Integración: rama `develop`.
+- Frontend: React, Vite y TypeScript.
+- Backend: Node.js, TypeScript y PostgreSQL.
+- Despliegue integrado: Vercel, con frontend y `/api/v1` en el mismo dominio.
+- Catálogo: 16 indicadores operativos trazables a la fuente oficial.
+- Baseline: 1 Director, 18 Responsables y 37 Planteles.
 
-- Producto: SIGI-POA DGEMS.
-- Nombre interno: ADPeak.
-- Ciclo inicial: POA 2026.
-- Rama de integracion: `develop`.
-- Stack actual: monorepo npm con frontend React/TypeScript y backend TypeScript/Node.
-- Base local: PostgreSQL por Docker Compose.
-- Demo local: datos ficticios bajo scripts `demo:*`.
+El repositorio no contiene contraseñas, evidencias, hojas de cálculo fuente ni
+datos personales de estudiantes o beneficiarios. El catálogo backend conserva
+únicamente los nombres laborales de responsables institucionales autorizados y
+la trazabilidad nominal de sus archivos fuente. Las credenciales iniciales se
+entregan por un canal privado y obligan a cambio de contraseña.
 
-## Arquitectura
+## Estructura
 
-```txt
-apps/
-  frontend/        React, Vite, TypeScript, Tailwind, React Hook Form, Zod
-  backend/         TypeScript, API HTTP nativa, validaciones y endpoints demo
-docs/
-  architecture/    Vision tecnica y limites del sistema
-  development/     Configuracion, scripts, Docker, demo y mantenimiento
-  project/         Alcance funcional, requisitos y planeacion
-  security/        Manejo de informacion sensible
+```text
+api/                    Adaptadores serverless para Vercel
+apps/frontend/          Interfaz React
+apps/backend/           Dominio, API local, persistencia y migraciones
+docs/                   Arquitectura, operación, seguridad y matrices oficiales
+tools/import-*.py       Importador reproducible de fuentes oficiales
+tools/qa/               Certificación sobre una base clonada
+tools/quality/          Escaneos de seguridad e higiene
+tools/release/          Empaquetado reproducible y portable
 ```
-
-El detalle tecnico esta en [docs/architecture/OVERVIEW.md](docs/architecture/OVERVIEW.md).
 
 ## Requisitos
 
-- Node.js `20.19+` o `22.12+`.
-- npm `10+`.
-- Docker Desktop para levantar frontend, backend y PostgreSQL juntos.
+- Node.js 22 LTS.
+- npm 10 o superior.
+- Python 3.12 con `openpyxl` para verificar el importador.
+- PostgreSQL 15 o superior para ejecución local persistente.
+- Docker Desktop es opcional.
 
-## Inicio rapido
+## Instalación
 
 ```bash
 npm ci
 copy .env.example .env
 npm run env:check
-npm run check
-```
-
-Comandos principales:
-
-```bash
-npm run dev:frontend
-npm run dev:backend
-npm run docker:up
-npm run demo:up
-```
-
-URLs locales:
-
-- Frontend: `http://127.0.0.1:5173`
-- Backend: `http://127.0.0.1:8000`
-- Healthcheck: `http://127.0.0.1:8000/health`
-- Dataset demo: `http://127.0.0.1:8000/demo/data`
-
-## Verificacion antes de entregar
-
-Ejecutar siempre:
-
-```bash
-npm run secrets:check
-python tools/import-official-data.test.py
 npm run repo:verify
 ```
 
-`secrets:check` inspecciona exclusivamente archivos versionados. `repo:verify` corre tipado,
-pruebas, build y revisión de whitespace con Git. Para validar Docker:
+Desarrollo local:
+
+```bash
+npm run dev:backend
+npm run dev:frontend
+```
+
+- Frontend: `http://127.0.0.1:5173`
+- Backend: `http://127.0.0.1:8000`
+- Salud: `http://127.0.0.1:8000/health`
+
+## Calidad
+
+El comando obligatorio antes de integrar o entregar es:
+
+```bash
+npm run repo:verify
+```
+
+Incluye:
+
+- TypeScript estricto y detección de código sin uso.
+- Pruebas frontend y backend.
+- Build de ambos workspaces.
+- Escaneo de secretos y archivos no permitidos.
+- Auditoría de dependencias con excepciones acotadas y vencimiento.
+- Verificación del importador oficial.
+- Aplicación aislada de migraciones productivas sobre PostgreSQL en CI.
+- Dry-run de clonación, seed, certificación y limpieza QA.
+- Validación de whitespace de Git.
+
+Las verificaciones de Docker se ejecutan con:
 
 ```bash
 npm run docker:config
 npm run demo:config
 ```
 
-## Despliegue publico
+## Certificación aislada
 
-El repositorio incluye `vercel.json` y funciones serverless en `api/` para
-desplegar frontend y API en un mismo dominio de Vercel. En hosting, el
-frontend usa `/api/v1` por defecto, por lo que no depende de `127.0.0.1`,
-Docker local ni tuneles temporales.
+Los comandos `qa:clone`, `qa:seed`, `qa:run`, `qa:serve` y `qa:cleanup`
+trabajan únicamente con una base `adpeak_qa_cert_*`. Sus guardas impiden usar
+producción. Consulte [docs/development/QA_HARNESS.md](docs/development/QA_HARNESS.md).
 
-## Documentacion clave
+## Entrega reproducible
+
+Con un árbol versionado limpio:
+
+```bash
+npm run release:build
+```
+
+El paquete se escribe fuera del repositorio en `../release`, usa rutas POSIX,
+incluye manifiesto SHA-256 por archivo y excluye entornos, evidencias, reportes,
+fuentes privadas, dependencias y artefactos QA. Para extraerlo en un directorio
+temporal, instalar dependencias y repetir todas las pruebas:
+
+```bash
+npm run release:verify
+```
+
+## Documentación
 
 - [Arquitectura](docs/architecture/OVERVIEW.md)
-- [Guia de mantenimiento](docs/development/MAINTENANCE.md)
-- [Configuracion](docs/development/CONFIGURATION.md)
-- [Scripts](docs/development/SCRIPTS.md)
-- [Docker](docs/development/DOCKER.md)
-- [Demo](docs/development/DEMO.md)
-- [Checklist QA demo](docs/development/DEMO_QA_CHECKLIST.md)
-- [Cierre QA empresarial](docs/project/ENTERPRISE_QA_CLOSURE.md)
-- [Clasificación trazable de fuentes oficiales](docs/project/indicator-classification-matrix.md)
-- [Matriz de indicadores oficiales](docs/project/INDICATOR_IMPORT_VALIDATION_MATRIX.md)
-- [Requerimientos](docs/project/REQUIREMENTS.md)
-- [Resumen funcional](docs/project/PROJECT_BRIEF.md)
-- [Manejo de datos confidenciales](docs/security/DATA_HANDLING.md)
-- [Guia de ramas](BRANCH_GUIDE.md)
+- [Acceso y cuentas](docs/development/ACCESS.md)
+- [Configuración](docs/development/CONFIGURATION.md)
+- [QA aislado](docs/development/QA_HARNESS.md)
+- [Manejo de datos](docs/security/DATA_HANDLING.md)
+- [Auditoría de dependencias](docs/security/DEPENDENCY_AUDIT.md)
+- [Matriz oficial](docs/project/INDICATOR_IMPORT_VALIDATION_MATRIX.md)
 
-## Convenciones de codigo
+## Seguridad de datos
 
-- Frontend canonical: `apps/frontend/src/components`.
-- API frontend: `apps/frontend/src/api`.
-- Estado transversal frontend: `apps/frontend/src/context` y `apps/frontend/src/hooks`.
-- Backend: `apps/backend/src`.
-- Scripts backend: `apps/backend/scripts`.
-- Migraciones SQL: `apps/backend/migrations`.
-- Documentacion tecnica: `docs/development` y `docs/architecture`.
-
-No crear carpetas duplicadas para el mismo concepto. Si se cambia un flujo, actualizar su documentacion en el mismo Pull Request.
-
-## Seguridad
-
-- `.env` esta ignorado por Git.
-- Solo se versionan `.env.example` y `.env.demo.example`.
-- No subir ZIP, Excel, PDFs de evidencia, documentos fuente ni datos personales.
-- No usar secretos reales en desarrollo, demo, documentacion o capturas.
-- Los valores `*_not_secret`, `placeholder` y `change-me` son solo placeholders locales.
-
-## Flujo de trabajo
-
-1. Crear rama desde `develop`.
-2. Mantener cambios acotados por modulo.
-3. Ejecutar `npm run repo:verify`.
-4. Abrir Pull Request hacia `develop` con alcance, pruebas y riesgos.
-5. Fusionar a `main` solo desde una rama de release aprobada.
-
-La politica completa esta en [BRANCH_GUIDE.md](BRANCH_GUIDE.md).
+No se deben versionar ZIP, Excel, PDF, CSV, documentos institucionales,
+credenciales ni evidencias. `.env`, `output/`, `.vercel/`, resultados de
+navegador y corridas QA están excluidos. Los valores de los archivos
+`.env*.example` son únicamente placeholders locales.

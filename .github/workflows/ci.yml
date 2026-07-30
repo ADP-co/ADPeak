@@ -11,7 +11,21 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: sigi_poa_ci
+          POSTGRES_USER: sigi_poa_ci
+          POSTGRES_PASSWORD: ci_password_not_secret
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sigi_poa_ci -d sigi_poa_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,7 +37,26 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: python -m pip install openpyxl
-      - run: npm ci
-      - run: npm run secrets:check
-      - run: python tools/import-official-data.test.py
+      - run: npm ci --ignore-scripts
+      - run: node --test tools/quality/check-secrets.test.mjs
       - run: npm run repo:verify
+      - run: npm run docker:config
+      - run: npm run demo:config
+      - name: Apply production migrations
+        run: npm --workspace @adpeak/backend run migrate
+        env:
+          APP_ENV: production
+          DATABASE_URL: postgresql://sigi_poa_ci:ci_password_not_secret@127.0.0.1:5432/sigi_poa_ci
+          POSTGRES_SSL_MODE: disable
+      - name: Verify production migration scope
+        run: node tools/quality/check-migration-result.mjs
+        env:
+          DATABASE_URL: postgresql://sigi_poa_ci:ci_password_not_secret@127.0.0.1:5432/sigi_poa_ci
+      - run: npm run release:verify
+      - uses: actions/upload-artifact@v4
+        with:
+          name: adpeak-source-${{ github.sha }}
+          path: |
+            ../release/*.zip
+            ../release/*.sha256
+          if-no-files-found: error

@@ -7,9 +7,9 @@ export default defineConfig({
   envDir: fileURLToPath(new URL("../..", import.meta.url)),
   plugins: [react()],
   preview: {
-    allowedHosts: true
+    allowedHosts: ["localhost", "127.0.0.1"]
   },
   server: {
-    allowedHosts: true
+    allowedHosts: ["localhost", "127.0.0.1"]
   }
 });

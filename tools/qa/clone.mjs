@@ -35,7 +35,7 @@ scrubInheritedDatabaseEnvironment();
 
 const HELP = `Usage: npm run qa:clone -- [options]
 
-Read public.app_state through an explicit read-only source transaction, create an
+Read public.app_state and public.app_evidence through an explicit read-only source transaction, create an
 isolated adpeak_qa_cert_* database on the same PostgreSQL host and port, and write
 an ignored source backup, SHA-256 file, manifest, and QA environment.
 
@@ -65,10 +65,10 @@ await runCommand(async () => {
     printDryRun("qa:clone", [
       "Erase inherited DATABASE_URL and PostgreSQL fallback variables",
       "Require APP_ENV=test, NODE_ENV=test, and explicit QA_SOURCE_DATABASE_URL for a real run",
-      "Read source public.app_state inside a repeatable-read, read-only transaction",
-      "Write an ignored JSON backup and SHA-256 digest",
+      "Read source public.app_state and public.app_evidence inside one repeatable-read, read-only transaction",
+      "Write an ignored JSON backup with state, evidence, and a SHA-256 digest",
       "Create a unique adpeak_qa_cert_* database on the identical source host and port",
-      "Copy only public.app_state and write a secret-bearing ignored QA environment",
+      "Copy public.app_state and public.app_evidence and write a secret-bearing ignored QA environment",
       `Record the active manifest below ${displayPath(options.outputDir)}`
     ]);
     return;
@@ -93,7 +93,7 @@ await runCommand(async () => {
     const snapshot = await readSourceAppState(sourceConnection);
     const capturedAt = new Date().toISOString();
     const backup = `${JSON.stringify({
-      format: "adpeak-qa-app-state-backup-v1",
+      format: "adpeak-qa-app-state-backup-v2",
       capturedAt,
       source: {
         host: sourceConnection.host,
@@ -101,7 +101,8 @@ await runCommand(async () => {
         database: sourceConnection.database,
         serverAddress: snapshot.identity.server_address ?? null
       },
-      rows: snapshot.rows
+      rows: snapshot.rows,
+      evidenceRows: snapshot.evidenceRows
     }, null, 2)}\n`;
     const backupSha256 = sha256(backup);
 
@@ -134,6 +135,7 @@ await runCommand(async () => {
       },
       snapshotSha256: backupSha256,
       snapshotRows: snapshot.rows.length,
+      snapshotEvidenceRows: snapshot.evidenceRows.length,
       connectionFingerprint: connectionFingerprint(targetConnection.url)
     });
 
@@ -141,7 +143,12 @@ await runCommand(async () => {
     await saveManifest(creatingManifest);
 
     try {
-      await createDatabaseAndCopyState(sourceConnection, targetConnection, snapshot.rows);
+      await createDatabaseAndCopyState(
+        sourceConnection,
+        targetConnection,
+        snapshot.rows,
+        snapshot.evidenceRows
+      );
       await saveManifest(manifest);
     } catch (error) {
       try {
@@ -160,6 +167,7 @@ await runCommand(async () => {
     }
 
     console.log(`Source read-only snapshot: ${sanitizedConnection(sourceConnection)} (${snapshot.rows.length} rows)`);
+    console.log(`Evidence blobs copied: ${snapshot.evidenceRows.length}`);
     console.log(`Isolated QA database: ${sanitizedConnection(targetConnection)}`);
     console.log(`Backup SHA-256: ${backupSha256}`);
     console.log(`Manifest: ${displayPath(artifacts.activeManifest)}`);
