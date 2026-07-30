@@ -1,0 +1,205 @@
+import { useId, useState } from 'react';
+import { ArrowLeft, Eye, EyeOff, User } from 'lucide-react';
+import { updatePassword } from '../../api/auth';
+import { useAuth } from '../../context/AuthContext';
+import { Button } from './Button';
+
+interface PasswordFieldProps {
+  label: string;
+  placeholder?: string;
+  value: string;
+  onChange: (value: string) => void;
+  autoComplete?: string;
+  describedBy?: string;
+  invalid?: boolean;
+}
+
+const PasswordField = ({
+  label,
+  placeholder = 'Escribe aquí',
+  value,
+  onChange,
+  autoComplete,
+  describedBy,
+  invalid = false,
+}: PasswordFieldProps) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const inputId = useId();
+
+  return (
+    <div className="flex w-full flex-col gap-1">
+      <label htmlFor={inputId} className="font-title text-sm font-bold text-brand-Gris_oscuro">
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          id={inputId}
+          type={showPassword ? 'text' : 'password'}
+          placeholder={placeholder}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          autoComplete={autoComplete}
+          required
+          minLength={label === 'Contraseña actual' ? undefined : 8}
+          aria-invalid={invalid}
+          aria-describedby={describedBy}
+          className="h-11 w-full rounded-md border border-brand-Gris_bajo/50 bg-brand-Blanco pl-3 pr-12 font-body text-sm text-brand-Gris_oscuro transition-colors focus:border-brand-Verde_oscuro focus:outline-none focus:ring-2 focus:ring-brand-Verde_oscuro"
+        />
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          aria-label={showPassword ? `Ocultar ${label}` : `Mostrar ${label}`}
+          className="absolute right-0 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md text-brand-Gris_oscuro transition-colors hover:bg-brand-Verde_principal/10 hover:text-brand-Verde_oscuro focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal"
+        >
+          {showPassword ? <Eye size={20} strokeWidth={2} /> : <EyeOff size={20} strokeWidth={2} />}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+interface AccountProfileProps {
+  onBack?: () => void;
+}
+
+export const AccountProfile = ({ onBack }: AccountProfileProps) => {
+  const { user, login } = useAuth();
+  const [saveMessage, setSaveMessage] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
+  const passwordFeedbackId = useId();
+
+  const handleSavePassword = async () => {
+    setSaveMessage('');
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordError('Completa los tres campos de contraseña.');
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setPasswordError('La nueva contraseña debe tener al menos 8 caracteres.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError('La confirmación no coincide con la nueva contraseña.');
+      return;
+    }
+
+    try {
+      setIsSavingPassword(true);
+      const updatedSession = await updatePassword(currentPassword, newPassword, confirmPassword);
+      login(updatedSession.user);
+      setPasswordError('');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setSaveMessage('Contraseña actualizada.');
+    } catch (error) {
+      setPasswordError(error instanceof Error ? error.message : 'No se pudo actualizar la contraseña.');
+    } finally {
+      setIsSavingPassword(false);
+    }
+  };
+
+  return (
+    <div className="mx-auto w-full max-w-[900px] pb-10 pt-8">
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="font-title text-3xl font-bold text-brand-Gris_oscuro">Cuenta</h1>
+        <button
+          type="button"
+          onClick={onBack}
+          aria-label="Regresar"
+          className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-brand-Verde_oscuro transition-colors hover:bg-brand-Verde_oscuro/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-Verde_principal"
+          title="Regresar"
+        >
+          <ArrowLeft size={24} strokeWidth={2.5} />
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-8 rounded-lg border border-brand-Gris_bajo/20 bg-brand-Blanco p-4 shadow-md sm:p-8 md:flex-row md:gap-10 md:p-10">
+        <div className="flex flex-col items-center justify-center border-brand-Gris_bajo/20 md:w-[35%] md:border-r md:pr-10">
+          <div className="mb-6 flex h-36 w-36 items-center justify-center rounded-full bg-brand-Gris_bajo/10 text-brand-Verde_oscuro">
+            <User size={80} strokeWidth={2} />
+          </div>
+          <h2 className="text-center font-title text-xl font-bold text-brand-Gris_oscuro">
+            {user?.name || 'Nombre de Usuario'}
+          </h2>
+          <p className="mt-1 text-center font-body text-base text-brand-Gris_oscuro/70">
+            {user?.description || 'Descripción'}
+          </p>
+        </div>
+
+        <div className="flex flex-1 flex-col gap-6">
+          {user?.passwordChangeRequired && (
+            <div className="rounded-md border border-brand-Status_amarillo/60 bg-brand-Status_amarillo/10 p-4" role="alert">
+              <p className="font-body text-sm font-semibold text-brand-Gris_oscuro">
+                Por seguridad, cambia la contraseña temporal antes de continuar.
+              </p>
+            </div>
+          )}
+          <div className="flex w-full flex-col gap-1">
+            <span className="font-title text-sm font-bold text-brand-Gris_oscuro">Usuario</span>
+            <div className="flex h-10 w-full items-center rounded-md bg-brand-Verde_principal/15 px-3">
+              <span className="font-body text-sm font-bold text-brand-Verde_oscuro">
+                {user?.username || user?.name || 'Nombre de Usuario'}
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-2 flex flex-col gap-5">
+            <PasswordField
+              label="Contraseña actual"
+              placeholder="Escribe tu contraseña actual"
+              value={currentPassword}
+              onChange={setCurrentPassword}
+              autoComplete="current-password"
+              describedBy={passwordFeedbackId}
+              invalid={Boolean(passwordError)}
+            />
+            <PasswordField
+              label="Nueva Contraseña"
+              placeholder="Escribe la nueva contraseña"
+              value={newPassword}
+              onChange={setNewPassword}
+              autoComplete="new-password"
+              describedBy={passwordFeedbackId}
+              invalid={Boolean(passwordError)}
+            />
+            <PasswordField
+              label="Confirmar Nueva Contraseña"
+              placeholder="Repite la nueva contraseña"
+              value={confirmPassword}
+              onChange={setConfirmPassword}
+              autoComplete="new-password"
+              describedBy={passwordFeedbackId}
+              invalid={Boolean(passwordError)}
+            />
+            {passwordError && (
+              <p id={passwordFeedbackId} role="alert" className="rounded-md border border-brand-Status_rojo/30 bg-brand-Status_rojo/10 px-3 py-2 text-sm font-semibold text-brand-Status_rojo">{passwordError}</p>
+            )}
+          </div>
+
+          {saveMessage && (
+            <p id={passwordFeedbackId} role="status" aria-live="polite" className="rounded-md border border-brand-Verde_principal/30 bg-brand-Verde_principal/10 px-3 py-2 text-right font-body text-sm font-semibold text-brand-Verde_oscuro">{saveMessage}</p>
+          )}
+
+          <div className="mt-4 flex justify-stretch sm:justify-end">
+            <Button
+              variant="primary"
+              onClick={() => void handleSavePassword()}
+              disabled={isSavingPassword}
+              className="w-full px-8 py-2.5 text-sm sm:w-auto"
+            >
+              {isSavingPassword ? 'Guardando' : 'Guardar contraseña'}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

@@ -1,0 +1,30 @@
+{
+  "name": "@adpeak/backend",
+  "version": "1.0.3",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "env:check": "tsx scripts/check-config.ts",
+    "migrate": "tsx scripts/migrate.ts",
+    "demo:prepare-env": "tsx scripts/prepare-demo-env.ts",
+    "demo:seed": "tsx scripts/seed-demo.ts",
+    "demo:validate": "tsx scripts/validate-demo.ts",
+    "demo:validate-access": "tsx scripts/validate-demo-access.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.41",
+    "@types/pg": "^8.20.0",
+    "tsx": "^4.22.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.6"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "pg": "^8.21.0"
+  }
+}

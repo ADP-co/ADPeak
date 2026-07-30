@@ -1,0 +1,1121 @@
+import {
+  forwardRef,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PropsWithChildren,
+} from 'react';
+import { KeyRound, Lock, Pencil, PlusCircle, Search, Unlock, X } from 'lucide-react';
+import {
+  ConfirmModal,
+  focusInitialModalElement,
+  handleModalKeyDown,
+  restoreModalFocus,
+} from './ConfirmModal';
+import {
+  catalogPlanteles,
+  deactivateUser,
+  fetchIndicators,
+  fetchUsers,
+  resetUserPassword,
+  saveUser,
+  type CatalogIndicator,
+  type CatalogUser,
+} from '../../api/catalog';
+
+export type SystemRole = 'Administrador' | 'Responsable' | 'Plantel';
+
+export interface UserRecord {
+  id: string;
+  username?: string;
+  name: string;
+  role: SystemRole;
+  plantel: string;
+  indicadores: string;
+  plantelId?: number;
+  responsableId?: number;
+  isBlocked?: boolean;
+  password?: string;
+  confirmPassword?: string;
+}
+
+const KNOWN_PLANTELES = catalogPlanteles.map((plantel) => ({
+  id: plantel.id,
+  label: shortPlantelLabel(plantel.name),
+  name: plantel.name,
+}));
+const MOCK_PLANTELES = ['-', ...KNOWN_PLANTELES.map((plantel) => plantel.label)];
+
+export type IndicatorAssignmentOption = Pick<CatalogIndicator, 'code' | 'name'>;
+
+export function dedupeIndicatorAssignmentOptions(indicators: CatalogIndicator[]) {
+  const options = new Map<string, IndicatorAssignmentOption>();
+
+  indicators.forEach((indicator) => {
+    const code = indicator.code.trim();
+    const key = code.toLocaleLowerCase('es');
+
+    if (!indicator.active || !code || options.has(key)) {
+      return;
+    }
+
+    options.set(key, { code, name: indicator.name.trim() || code });
+  });
+
+  return Array.from(options.values())
+    .sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }));
+}
+
+function normalizeSearch(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase();
+}
+
+function splitIndicators(value: string) {
+  if (value === '-' || !value) {
+    return [];
+  }
+
+  const codes = new Map<string, string>();
+  value.split(',').forEach((indicator) => {
+    const code = indicator.trim();
+    const key = code.toLocaleLowerCase('es');
+
+    if (code && !codes.has(key)) {
+      codes.set(key, code);
+    }
+  });
+
+  return Array.from(codes.values());
+}
+
+function shortPlantelLabel(name: string) {
+  const numericName = name.match(/\d+/)?.[0];
+  return numericName ? `Bach. ${numericName}` : name;
+}
+
+const rolePriority: Record<SystemRole, number> = {
+  Administrador: 1,
+  Responsable: 2,
+  Plantel: 3,
+};
+
+export const USER_ACTION_BUTTON_CLASS =
+  'min-h-9 min-w-[124px] rounded-full border px-4 py-1.5 inline-flex items-center justify-center gap-1.5 text-sm font-bold transition-colors cursor-pointer';
+
+interface UserModalFrameProps extends PropsWithChildren {
+  labelledBy: string;
+}
+
+export const UserModalFrame = forwardRef<HTMLDivElement, UserModalFrameProps>(
+  ({ children, labelledBy }, ref) => (
+    <div
+      role="presentation"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain bg-brand-Gris_oscuro/60 p-3 backdrop-blur-sm sm:p-4"
+    >
+      <div
+        ref={ref}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={labelledBy}
+        tabIndex={-1}
+        className="relative my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-y-auto rounded-lg border border-brand-Gris_bajo/20 bg-brand-Blanco p-4 shadow-xl sm:max-h-[calc(100dvh-2rem)] sm:p-6"
+      >
+        {children}
+      </div>
+    </div>
+  )
+);
+
+UserModalFrame.displayName = 'UserModalFrame';
+
+const useUserModalFocusTrap = <T extends HTMLElement>(isOpen: boolean, onClose: () => void) => {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const initialFocusRef = useRef<T>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const previouslyFocusedElement =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousBodyOverflow = document.body.style.overflow;
+
+    document.body.style.overflow = 'hidden';
+    focusInitialModalElement(initialFocusRef.current, dialogRef.current);
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      handleModalKeyDown(
+        event,
+        dialogRef.current,
+        document.activeElement,
+        onCloseRef.current
+      );
+    };
+
+    document.addEventListener('keydown', handleKeyDown, true);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown, true);
+      document.body.style.overflow = previousBodyOverflow;
+      restoreModalFocus(previouslyFocusedElement);
+    };
+  }, [isOpen]);
+
+  return { dialogRef, initialFocusRef };
+};
+
+function roleFromCatalog(role: CatalogUser['role']): SystemRole {
+  if (role === 'director') {
+    return 'Administrador';
+  }
+
+  if (role === 'responsable') {
+    return 'Responsable';
+  }
+
+  return 'Plantel';
+}
+
+function roleToCatalog(role: SystemRole): CatalogUser['role'] {
+  if (role === 'Administrador') {
+    return 'director';
+  }
+
+  if (role === 'Responsable') {
+    return 'responsable';
+  }
+
+  return 'plantel';
+}
+
+function plantelLabelFromId(id?: number) {
+  if (!id) {
+    return '-';
+  }
+
+  return KNOWN_PLANTELES.find((plantel) => plantel.id === id)?.label ?? `Bach. ${id}`;
+}
+
+function plantelIdFromLabel(label: string) {
+  if (!label || label === '-') {
+    return undefined;
+  }
+
+  const knownPlantel = KNOWN_PLANTELES.find((plantel) => plantel.label === label);
+  if (knownPlantel) {
+    return knownPlantel.id;
+  }
+
+  const numericId = Number(label.match(/\d+/)?.[0]);
+  return Number.isInteger(numericId) && numericId > 0 ? numericId : undefined;
+}
+
+function plantelDisplayNameFromLabel(label: string) {
+  if (!label || label === '-') {
+    return '';
+  }
+
+  return KNOWN_PLANTELES.find((plantel) => plantel.label === label)?.name ?? label;
+}
+
+function fromCatalogUser(user: CatalogUser): UserRecord {
+  return {
+    id: user.id,
+    username: user.username,
+    name: user.name,
+    role: roleFromCatalog(user.role),
+    plantel: plantelLabelFromId(user.plantelId),
+    indicadores: (user.reviewerIndicatorCodes ?? user.indicatorCodes).length > 0
+      ? (user.reviewerIndicatorCodes ?? user.indicatorCodes).join(', ')
+      : '-',
+    plantelId: user.plantelId,
+    responsableId: user.responsableId,
+    isBlocked: !user.active,
+  };
+}
+
+function indicatorLabel(code: string, options: IndicatorAssignmentOption[]) {
+  const option = options.find((indicator) => indicator.code === code);
+  return option ? `${option.code} - ${option.name}` : code;
+}
+
+function isStatusError(message: string) {
+  const normalized = normalizeSearch(message);
+  return [
+    'no se',
+    'define',
+    'completa',
+    'solo',
+    'contrasena',
+    'contraseña',
+    'error'
+  ].some((token) => normalized.includes(token));
+}
+
+function isPasswordValidationMessage(message: string) {
+  const normalized = normalizeSearch(message);
+  return normalized.includes('contrasena') || normalized.includes('contraseña');
+}
+
+export const UsersTable = () => {
+  const [users, setUsers] = useState<UserRecord[]>([]);
+  const [indicatorOptions, setIndicatorOptions] = useState<IndicatorAssignmentOption[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeSearch, setActiveSearch] = useState('');
+  const [statusMessage, setStatusMessage] = useState('');
+  const [editingUser, setEditingUser] = useState<UserRecord | null>(null);
+  const [userToToggleBlock, setUserToToggleBlock] = useState<UserRecord | null>(null);
+  const [userToResetPassword, setUserToResetPassword] = useState<UserRecord | null>(null);
+  const [passwordResetForm, setPasswordResetForm] = useState({ password: '', confirmPassword: '' });
+  const [indicatorPickerSearch, setIndicatorPickerSearch] = useState('');
+
+  const closeUserEditor = () => {
+    setEditingUser(null);
+    setIndicatorPickerSearch('');
+    setStatusMessage('');
+  };
+
+  const closePasswordReset = () => {
+    setUserToResetPassword(null);
+    setPasswordResetForm({ password: '', confirmPassword: '' });
+    setStatusMessage('');
+  };
+
+  const {
+    dialogRef: userEditorDialogRef,
+    initialFocusRef: userEditorInitialFocusRef,
+  } = useUserModalFocusTrap<HTMLInputElement>(Boolean(editingUser), closeUserEditor);
+  const {
+    dialogRef: passwordResetDialogRef,
+    initialFocusRef: passwordResetInitialFocusRef,
+  } = useUserModalFocusTrap<HTMLInputElement>(Boolean(userToResetPassword), closePasswordReset);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    setIsLoadingUsers(true);
+    Promise.all([fetchUsers(), fetchIndicators()])
+      .then(([items, indicators]) => {
+        if (isMounted) {
+          setUsers(items.map(fromCatalogUser));
+          setIndicatorOptions(dedupeIndicatorAssignmentOptions(indicators));
+        }
+      })
+      .catch((error) => {
+        if (isMounted) {
+          setStatusMessage(error instanceof Error ? error.message : 'No se pudieron cargar los usuarios.');
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoadingUsers(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleAddUser = () => {
+    setEditingUser({
+      id: `local-${Date.now()}`,
+      name: '',
+      role: 'Responsable',
+      plantel: '-',
+      indicadores: '-',
+      responsableId: undefined,
+      password: '',
+      confirmPassword: '',
+    });
+    setIndicatorPickerSearch('');
+    setStatusMessage('');
+  };
+
+  const handleEditUser = (user: UserRecord) => {
+    if (user.isBlocked) {
+      setStatusMessage('Desbloquea el usuario antes de modificarlo.');
+      return;
+    }
+
+    setEditingUser(user);
+    setIndicatorPickerSearch('');
+    setStatusMessage('');
+  };
+
+  const saveEditedUser = async () => {
+    if (!editingUser) {
+      return;
+    }
+
+    const normalizedUser: UserRecord = {
+      ...editingUser,
+      name: editingUser.role === 'Plantel' ? plantelDisplayNameFromLabel(editingUser.plantel) : editingUser.name.trim(),
+      plantel: editingUser.role === 'Plantel' ? editingUser.plantel : '-',
+      plantelId: editingUser.role === 'Plantel' ? plantelIdFromLabel(editingUser.plantel) : undefined,
+      indicadores: editingUser.role === 'Responsable' ? editingUser.indicadores : '-',
+    };
+
+    if (!normalizedUser.name || normalizedUser.name === '-') {
+      setStatusMessage('Completa el nombre del responsable antes de guardar.');
+      return;
+    }
+
+    const isDuplicatedAdmin = normalizedUser.role === 'Administrador' &&
+      users.some((user) => user.role === 'Administrador' && user.id !== normalizedUser.id);
+
+    if (isDuplicatedAdmin) {
+      setStatusMessage('Solo puede existir un administrador.');
+      return;
+    }
+
+    const isNew = !users.some((user) => user.id === normalizedUser.id);
+    const initialPassword = normalizedUser.password?.trim() ?? '';
+    const initialConfirmPassword = normalizedUser.confirmPassword?.trim() ?? '';
+
+    if (isNew && normalizedUser.role === 'Responsable' && initialPassword.length < 8) {
+      setStatusMessage('Define una contraseña inicial de al menos 8 caracteres.');
+      return;
+    }
+
+    if (isNew && normalizedUser.role === 'Responsable' && initialPassword !== initialConfirmPassword) {
+      setStatusMessage('La confirmación no coincide con la contraseña inicial.');
+      return;
+    }
+
+    try {
+      const saved = await saveUser({
+        id: normalizedUser.id.startsWith('local-') ? undefined : normalizedUser.id,
+        name: normalizedUser.name,
+        role: roleToCatalog(normalizedUser.role),
+        plantelId: normalizedUser.role === 'Plantel' ? normalizedUser.plantelId : undefined,
+        responsableId: normalizedUser.role === 'Responsable' ? normalizedUser.responsableId : undefined,
+        indicatorCodes: splitIndicators(normalizedUser.indicadores),
+        active: !normalizedUser.isBlocked,
+        password: isNew ? initialPassword : undefined,
+      });
+      const savedRecord = fromCatalogUser(saved);
+
+      setUsers((current) =>
+        isNew
+          ? [savedRecord, ...current]
+          : current.map((user) => (user.id === normalizedUser.id ? savedRecord : user))
+      );
+      setEditingUser(null);
+      setStatusMessage(isNew ? `Usuario agregado: ${savedRecord.username ?? savedRecord.name}.` : 'Usuario actualizado.');
+    } catch (error) {
+      setStatusMessage(error instanceof Error ? error.message : 'No se pudo guardar el usuario.');
+      return;
+    }
+  };
+
+  const confirmToggleBlockUser = async () => {
+    if (!userToToggleBlock) {
+      return;
+    }
+
+    try {
+      let saved: CatalogUser | undefined;
+
+      if (userToToggleBlock.isBlocked) {
+        saved = await saveUser({
+          id: userToToggleBlock.id,
+          name: userToToggleBlock.name,
+          role: roleToCatalog(userToToggleBlock.role),
+          plantelId: userToToggleBlock.role === 'Plantel' ? plantelIdFromLabel(userToToggleBlock.plantel) : undefined,
+          responsableId: userToToggleBlock.role === 'Responsable' ? userToToggleBlock.responsableId : undefined,
+          indicatorCodes: splitIndicators(userToToggleBlock.indicadores),
+          active: true,
+        });
+      } else {
+        saved = await deactivateUser(userToToggleBlock.id);
+      }
+
+      if (!saved) {
+        setStatusMessage('No se encontró el usuario.');
+        setUserToToggleBlock(null);
+        return;
+      }
+
+      const savedRecord = fromCatalogUser(saved);
+      setUsers((current) =>
+        current.map((user) => (user.id === userToToggleBlock.id ? savedRecord : user))
+      );
+      setStatusMessage(userToToggleBlock.isBlocked ? 'Usuario desbloqueado.' : 'Usuario bloqueado.');
+      setUserToToggleBlock(null);
+    } catch (error) {
+      setStatusMessage(error instanceof Error ? error.message : 'No se pudo actualizar el usuario.');
+      setUserToToggleBlock(null);
+      return;
+    }
+  };
+
+  const openPasswordReset = (user: UserRecord) => {
+    setUserToResetPassword(user);
+    setPasswordResetForm({ password: '', confirmPassword: '' });
+    setStatusMessage('');
+  };
+
+  const confirmPasswordReset = async () => {
+    if (!userToResetPassword) {
+      return;
+    }
+
+    if (passwordResetForm.password.length < 8) {
+      setStatusMessage('La nueva contraseña debe tener al menos 8 caracteres.');
+      return;
+    }
+
+    if (passwordResetForm.password !== passwordResetForm.confirmPassword) {
+      setStatusMessage('La confirmación no coincide con la nueva contraseña.');
+      return;
+    }
+
+    try {
+      const updated = await resetUserPassword(
+        userToResetPassword.id,
+        passwordResetForm.password,
+        passwordResetForm.confirmPassword
+      );
+      const updatedRecord = fromCatalogUser(updated);
+
+      setUsers((current) =>
+        current.map((user) => (user.id === userToResetPassword.id ? updatedRecord : user))
+      );
+      setUserToResetPassword(null);
+      setPasswordResetForm({ password: '', confirmPassword: '' });
+      setStatusMessage('Contraseña actualizada.');
+    } catch (error) {
+      setStatusMessage(error instanceof Error ? error.message : 'No se pudo actualizar la contraseña.');
+    }
+  };
+
+  const normalizedSearch = normalizeSearch(activeSearch);
+  const filteredUsers = users
+    .filter((user) => {
+      if (!normalizedSearch) {
+        return true;
+      }
+
+      return [
+        user.name,
+        user.username ?? '',
+        user.role,
+        user.plantel,
+        user.indicadores,
+        user.isBlocked ? 'bloqueado' : 'activo',
+      ].some((value) => normalizeSearch(value).includes(normalizedSearch));
+    })
+    .sort((a, b) => {
+      if (rolePriority[a.role] !== rolePriority[b.role]) {
+        return rolePriority[a.role] - rolePriority[b.role];
+      }
+
+      return a.name.localeCompare(b.name, undefined, { numeric: true });
+    });
+
+  const isCreatingUser = editingUser ? !users.some((user) => user.id === editingUser.id) : false;
+  const statusIsError = isStatusError(statusMessage);
+  const editingIndicatorCodes = editingUser?.indicadores ?? '-';
+  const assignedIndicatorCodes = useMemo(() => splitIndicators(editingIndicatorCodes), [editingIndicatorCodes]);
+  const availableIndicatorOptions = useMemo(() => {
+    const assigned = new Set(assignedIndicatorCodes);
+    const normalizedFilter = normalizeSearch(indicatorPickerSearch);
+
+    return indicatorOptions.filter((indicator) => {
+      if (assigned.has(indicator.code)) {
+        return false;
+      }
+
+      if (!normalizedFilter) {
+        return true;
+      }
+
+      return normalizeSearch(`${indicator.code} ${indicator.name}`).includes(normalizedFilter);
+    }).slice(0, 40);
+  }, [assignedIndicatorCodes, indicatorOptions, indicatorPickerSearch]);
+  const clearPasswordMessageIfValid = (password: string, confirmPassword: string) => {
+    if (password.length >= 8 && confirmPassword.length >= 8 && password === confirmPassword && isPasswordValidationMessage(statusMessage)) {
+      setStatusMessage('');
+    }
+  };
+
+  return (
+    <div className="w-full max-w-[1250px] mx-auto pt-8 pb-10">
+      <div className="flex flex-col gap-4 mb-6">
+        <h1 className="font-title text-3xl font-bold text-brand-Gris_oscuro">
+          Gestión de Usuarios
+        </h1>
+
+        <div className="flex flex-wrap items-center justify-between gap-4 w-full">
+          <div className="flex items-center gap-2 w-full max-w-xl">
+            <input
+              type="text"
+              aria-label="Filtro de usuarios por nombre, rol, plantel o indicador"
+              placeholder="Buscar por nombre, rol, plantel o indicador..."
+              value={searchTerm}
+              onChange={(event) => {
+                const value = event.target.value;
+                setSearchTerm(value);
+                if (!value.trim()) {
+                  setActiveSearch('');
+                }
+              }}
+              onKeyDown={(event) => event.key === 'Enter' && setActiveSearch(searchTerm.trim())}
+              className="w-full h-9 pl-4 pr-4 rounded-full border border-brand-Gris_bajo/50 focus:outline-none focus:border-brand-Verde_principal text-sm text-brand-Gris_oscuro"
+            />
+            <button
+              type="button"
+              onClick={() => setActiveSearch(searchTerm.trim())}
+              aria-label="Buscar usuarios"
+              className="h-9 flex items-center justify-center bg-brand-Verde_oscuro text-brand-Blanco px-4 rounded-full hover:bg-brand-Verde_principal transition-colors shrink-0"
+            >
+              <Search size={18} />
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleAddUser}
+            aria-label="Agregar responsable"
+            className="h-9 flex items-center gap-2 bg-brand-Verde_oscuro text-brand-Blanco px-5 rounded-full font-bold text-sm hover:bg-brand-Verde_principal transition-colors"
+          >
+            Agregar responsable
+            <PlusCircle size={18} strokeWidth={2.5} />
+          </button>
+        </div>
+
+        {statusMessage && !editingUser && !userToResetPassword && (
+          <p className={`text-sm font-body font-semibold ${statusIsError ? 'text-brand-Status_rojo' : 'text-brand-Verde_oscuro'}`} role="status">
+            {statusMessage}
+          </p>
+        )}
+      </div>
+
+      <div className="bg-brand-Blanco rounded-lg shadow-md overflow-hidden border border-brand-Gris_bajo/20">
+        <div className="space-y-3 p-3 sm:hidden" aria-label="Usuarios del sistema">
+          {isLoadingUsers && (
+            <p className="px-3 py-8 text-center text-sm text-brand-Gris_oscuro/70" role="status">
+              Cargando usuarios...
+            </p>
+          )}
+          {!isLoadingUsers && filteredUsers.map((user) => (
+            <article
+              key={`mobile-${user.id}`}
+              className={`rounded-lg border border-brand-Gris_bajo/30 bg-brand-Blanco p-4 shadow-sm ${user.isBlocked ? 'opacity-60' : ''}`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h2 className="break-words font-title text-base font-bold text-brand-Gris_oscuro">{user.name}</h2>
+                  {user.username && <p className="mt-0.5 font-mono text-xs text-brand-Gris_oscuro/60">{user.username}</p>}
+                </div>
+                <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${
+                  user.isBlocked
+                    ? 'bg-brand-Status_rojo/10 text-brand-Status_rojo'
+                    : 'bg-brand-Verde_principal/15 text-brand-Verde_oscuro'
+                }`}>
+                  {user.isBlocked ? 'Bloqueado' : user.role}
+                </span>
+              </div>
+              <div className="mt-4">
+                <p className="text-xs font-bold uppercase text-brand-Gris_oscuro/65">Indicadores</p>
+                {splitIndicators(user.indicadores).length === 0 ? (
+                  <p className="mt-1 text-sm text-brand-Gris_oscuro/70">Sin indicadores asignados</p>
+                ) : (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {splitIndicators(user.indicadores)
+                      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+                      .map((indicator) => (
+                        <span key={indicator} className="rounded bg-brand-Gris_bajo/10 px-2 py-0.5 font-mono text-xs">
+                          {indicator}
+                        </span>
+                      ))}
+                  </div>
+                )}
+              </div>
+              <div className="mt-4 grid gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleEditUser(user)}
+                  disabled={user.isBlocked}
+                  className={`${USER_ACTION_BUTTON_CLASS} w-full border-brand-Verde_oscuro text-brand-Verde_oscuro hover:bg-brand-Verde_oscuro hover:text-brand-Blanco disabled:cursor-not-allowed disabled:opacity-50`}
+                >
+                  <Pencil size={16} />
+                  <span>Modificar</span>
+                </button>
+                {user.role !== 'Administrador' && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => openPasswordReset(user)}
+                      className={`${USER_ACTION_BUTTON_CLASS} min-w-0 border-brand-Verde_oscuro/40 px-2 text-brand-Verde_oscuro hover:bg-brand-Verde_oscuro hover:text-brand-Blanco`}
+                    >
+                      <KeyRound size={16} />
+                      <span>Contraseña</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setUserToToggleBlock(user)}
+                      className={`${USER_ACTION_BUTTON_CLASS} min-w-0 px-2 ${
+                        user.isBlocked
+                          ? 'border-brand-Status_rojo/40 text-brand-Status_rojo hover:bg-brand-Status_rojo hover:text-brand-Blanco'
+                          : 'border-brand-Verde_oscuro/40 text-brand-Verde_oscuro hover:bg-brand-Status_amarillo hover:text-brand-Gris_oscuro'
+                      }`}
+                    >
+                      {user.isBlocked ? <Unlock size={16} /> : <Lock size={16} />}
+                      <span>{user.isBlocked ? 'Desbloquear' : 'Bloquear'}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </article>
+          ))}
+          {!isLoadingUsers && filteredUsers.length === 0 && (
+            <p className="px-3 py-8 text-center text-sm text-brand-Gris_oscuro/70">
+              Sin resultados para la búsqueda actual.
+            </p>
+          )}
+        </div>
+        <div className="hidden w-full overflow-x-auto sm:block">
+          <table className="w-full min-w-[860px] border-collapse text-center">
+            <thead>
+              <tr className="bg-brand-Gris_bajo/35 text-brand-Gris_oscuro font-title font-bold text-sm select-none border-b border-brand-Gris_bajo/20">
+                <th className="py-4 px-6 w-[25%]">Usuario</th>
+                <th className="py-4 px-6 w-[25%]">Rol</th>
+                <th className="py-4 px-6 w-[25%]">Indicadores</th>
+                <th className="py-4 px-6 w-[25%]">Acciones</th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-brand-Gris_bajo/20 font-body text-sm text-brand-Gris_oscuro">
+              {isLoadingUsers && (
+                <tr>
+                  <td colSpan={4} className="py-8 px-6 text-center text-brand-Gris_oscuro/70">
+                    Cargando usuarios...
+                  </td>
+                </tr>
+              )}
+              {!isLoadingUsers && filteredUsers.map((user) => (
+                <tr
+                  key={user.id}
+                  className={`hover:bg-brand-Gris_bajo/15 transition-colors duration-150 ease-in-out ${
+                    user.isBlocked ? 'opacity-60' : ''
+                  }`}
+                >
+                  <td className="py-4 px-6 font-medium leading-relaxed text-brand-Gris_oscuro">
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span>{user.name}</span>
+                      {user.username && (
+                        <span className="text-xs font-mono text-brand-Gris_oscuro/60">{user.username}</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="py-4 px-6 font-medium leading-relaxed text-brand-Gris_oscuro/80">
+                    {user.role}
+                  </td>
+                  <td className="py-4 px-6 text-center font-mono font-medium text-brand-Gris_oscuro/80">
+                    {splitIndicators(user.indicadores).length === 0 ? (
+                      '-'
+                    ) : (
+                      <div className="flex flex-wrap gap-1 justify-center">
+                        {splitIndicators(user.indicadores)
+                          .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+                          .map((indicator) => (
+                            <span key={indicator} className="bg-brand-Gris_bajo/10 px-2 py-0.5 rounded text-xs">
+                              {indicator}
+                            </span>
+                          ))}
+                      </div>
+                    )}
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleEditUser(user)}
+                        disabled={user.isBlocked}
+                        aria-label={`Modificar usuario ${user.name}`}
+                        className={`${USER_ACTION_BUTTON_CLASS} border-brand-Verde_oscuro text-brand-Verde_oscuro hover:bg-brand-Verde_oscuro hover:text-brand-Blanco disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-brand-Verde_oscuro`}
+                      >
+                        <Pencil size={16} />
+                        <span>Modificar</span>
+                      </button>
+
+                      {user.role !== 'Administrador' && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => openPasswordReset(user)}
+                            aria-label={`Restablecer contraseña de ${user.name}`}
+                            className={`${USER_ACTION_BUTTON_CLASS} border-brand-Verde_oscuro/40 text-brand-Verde_oscuro hover:text-brand-Blanco hover:bg-brand-Verde_oscuro`}
+                          >
+                            <KeyRound size={16} />
+                            <span>Contraseña</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setUserToToggleBlock(user)}
+                            aria-label={user.isBlocked ? `Desbloquear usuario ${user.name}` : `Bloquear usuario ${user.name}`}
+                            className={`${USER_ACTION_BUTTON_CLASS} ${
+                              user.isBlocked
+                                ? 'border-brand-Status_rojo/40 text-brand-Status_rojo hover:bg-brand-Status_rojo hover:text-brand-Blanco'
+                                : 'border-brand-Verde_oscuro/40 text-brand-Verde_oscuro hover:bg-brand-Status_amarillo hover:text-brand-Gris_oscuro'
+                            }`}
+                          >
+                            {user.isBlocked ? <Unlock size={16} /> : <Lock size={16} />}
+                            <span>{user.isBlocked ? 'Desbloquear' : 'Bloquear'}</span>
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {!isLoadingUsers && filteredUsers.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="py-8 px-6 text-center text-brand-Gris_oscuro/70">
+                    Sin resultados para la búsqueda actual.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {editingUser && (
+        <UserModalFrame ref={userEditorDialogRef} labelledBy="user-editor-title">
+            <h2 id="user-editor-title" className="text-xl font-title font-bold text-brand-Gris_oscuro mb-6">
+              {isCreatingUser ? 'Agregar responsable' : 'Modificar usuario'}
+            </h2>
+            {statusMessage && (
+              <p
+                className={`mb-4 rounded-md border px-3 py-2 text-sm font-semibold ${
+                  statusIsError
+                    ? 'border-brand-Status_rojo/30 bg-brand-Status_rojo/10 text-brand-Status_rojo'
+                    : 'border-brand-Verde_principal/30 bg-brand-Verde_principal/10 text-brand-Verde_oscuro'
+                }`}
+                role={statusIsError ? 'alert' : 'status'}
+              >
+                {statusMessage}
+              </p>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="user-editor-name" className="block text-sm font-semibold text-brand-Gris_oscuro font-body">
+                  Nombre
+                </label>
+                <input
+                  ref={editingUser.role === 'Plantel' ? undefined : userEditorInitialFocusRef}
+                  id="user-editor-name"
+                  type="text"
+                  value={editingUser.name}
+                  onChange={(event) => setEditingUser({ ...editingUser, name: event.target.value })}
+                  disabled={editingUser.role === 'Plantel'}
+                  placeholder={editingUser.role === 'Plantel' ? 'Se asigna desde el plantel' : 'Nombre del usuario'}
+                  className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco disabled:bg-brand-Gris_bajo/10 disabled:opacity-70 disabled:cursor-not-allowed"
+                />
+              </div>
+
+              {isCreatingUser && (
+                <div>
+                  <label htmlFor="user-editor-role-create" className="block text-sm font-semibold text-brand-Gris_oscuro font-body">
+                    Rol
+                  </label>
+                  <select
+                    id="user-editor-role-create"
+                    value="Responsable"
+                    disabled
+                    className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none bg-brand-Gris_bajo/10 opacity-80 cursor-not-allowed"
+                  >
+                    <option value="Responsable">Responsable</option>
+                  </select>
+                  <p className="mt-1 text-xs text-brand-Gris_oscuro/60">
+                    El administrador y los planteles base ya están definidos; las altas nuevas son responsables.
+                  </p>
+                </div>
+              )}
+
+              {isCreatingUser && editingUser.role === 'Responsable' && (
+                <div>
+                  <label htmlFor="user-editor-password" className="block text-sm font-semibold text-brand-Gris_oscuro font-body">
+                    Contraseña inicial
+                  </label>
+                  <input
+                    id="user-editor-password"
+                    type="password"
+                    value={editingUser.password ?? ''}
+                    onChange={(event) => {
+                      const password = event.target.value;
+                      const confirmPassword = editingUser.confirmPassword ?? '';
+                      setEditingUser({ ...editingUser, password });
+                      clearPasswordMessageIfValid(password, confirmPassword);
+                    }}
+                    placeholder="Mínimo 8 caracteres"
+                    autoComplete="new-password"
+                    className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco"
+                  />
+                </div>
+              )}
+
+              {isCreatingUser && editingUser.role === 'Responsable' && (
+                <div>
+                  <label htmlFor="user-editor-confirm-password" className="block text-sm font-semibold text-brand-Gris_oscuro font-body">
+                    Confirmar contraseña
+                  </label>
+                  <input
+                    id="user-editor-confirm-password"
+                    type="password"
+                    value={editingUser.confirmPassword ?? ''}
+                    onChange={(event) => {
+                      const confirmPassword = event.target.value;
+                      const password = editingUser.password ?? '';
+                      setEditingUser({ ...editingUser, confirmPassword });
+                      clearPasswordMessageIfValid(password, confirmPassword);
+                    }}
+                    placeholder="Repite la contraseña"
+                    autoComplete="new-password"
+                    className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco"
+                  />
+                </div>
+              )}
+
+              {!isCreatingUser && (
+                <div>
+                  <label htmlFor="user-editor-role" className="block text-sm font-semibold text-brand-Gris_oscuro font-body">
+                    Rol
+                  </label>
+                  <select
+                    id="user-editor-role"
+                    value={editingUser.role}
+                    disabled
+                    onChange={(event) => {
+                      const role = event.target.value as SystemRole;
+                      setEditingUser({
+                        ...editingUser,
+                        role,
+                        plantel: role === 'Plantel' ? editingUser.plantel : '-',
+                        plantelId: role === 'Plantel' ? plantelIdFromLabel(editingUser.plantel) : undefined,
+                        responsableId: role === 'Responsable' ? editingUser.responsableId : undefined,
+                        indicadores: role === 'Responsable' ? editingUser.indicadores : '-',
+                        name: role === 'Plantel' ? plantelDisplayNameFromLabel(editingUser.plantel) : editingUser.name,
+                      });
+                    }}
+                    className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco disabled:bg-brand-Gris_bajo/10 disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {editingUser.role === 'Administrador' && (
+                      <option value="Administrador">Administrador</option>
+                    )}
+                    <option value="Responsable">Responsable</option>
+                    <option value="Plantel">Plantel</option>
+                  </select>
+                </div>
+              )}
+
+              {editingUser.role === 'Plantel' && (
+                <div>
+                  <label htmlFor="user-editor-campus" className="block text-sm font-semibold text-brand-Gris_oscuro font-body">
+                    Plantel
+                  </label>
+                  <select
+                    id="user-editor-campus"
+                    value={editingUser.plantel}
+                    disabled
+                    onChange={(event) => {
+                      const plantel = event.target.value;
+                      setEditingUser({
+                        ...editingUser,
+                        plantel,
+                        plantelId: plantelIdFromLabel(plantel),
+                        name: plantelDisplayNameFromLabel(plantel),
+                      });
+                    }}
+                    className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco disabled:bg-brand-Gris_bajo/10 disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {MOCK_PLANTELES.map((plantel) => (
+                      <option key={plantel} value={plantel}>{plantel === '-' ? 'Sin asignar' : plantel}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {editingUser.role === 'Responsable' && (
+                <div>
+                  <label htmlFor="user-indicator-select" className="block text-sm font-semibold text-brand-Gris_oscuro font-body mb-1">
+                    Indicadores asignados
+                  </label>
+                  <input
+                    id="user-indicator-select"
+                    type="search"
+                    value={indicatorPickerSearch}
+                    onChange={(event) => setIndicatorPickerSearch(event.target.value)}
+                    placeholder="Buscar por código o nombre..."
+                    className="w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco mb-2"
+                  />
+                  <div className="max-h-40 overflow-y-auto rounded-md border border-brand-Gris_bajo/30 bg-brand-Blanco mb-3">
+                    {availableIndicatorOptions.length > 0 ? (
+                      availableIndicatorOptions.map((indicator) => (
+                        <button
+                          key={indicator.code}
+                          type="button"
+                          onClick={() => {
+                            const next = [...assignedIndicatorCodes, indicator.code]
+                              .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+                            setEditingUser({ ...editingUser, indicadores: next.join(', ') });
+                            setIndicatorPickerSearch('');
+                          }}
+                          className="block w-full px-3 py-2 text-left text-sm text-brand-Gris_oscuro hover:bg-brand-Verde_principal/10 focus:bg-brand-Verde_principal/10 focus:outline-none"
+                        >
+                          <span className="font-mono font-semibold">{indicator.code}</span>
+                          <span className="ml-2 text-brand-Gris_oscuro/70">{indicator.name}</span>
+                        </button>
+                      ))
+                    ) : (
+                      <p className="px-3 py-3 text-center text-xs text-brand-Gris_oscuro/60">
+                        Sin indicadores disponibles para agregar.
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 p-3 bg-brand-Gris_bajo/5 rounded-md border border-brand-Gris_bajo/20 min-h-[50px] items-center">
+                    {assignedIndicatorCodes.length > 0 ? (
+                      assignedIndicatorCodes.map((indicator) => (
+                        <span key={indicator} title={indicatorLabel(indicator, indicatorOptions)} className="flex items-center gap-1.5 bg-brand-Verde_oscuro text-brand-Blanco px-2.5 py-1 rounded-full text-xs font-accent font-semibold shadow-sm">
+                          {indicator}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const next = assignedIndicatorCodes.filter((item) => item !== indicator);
+                              setEditingUser({ ...editingUser, indicadores: next.length > 0 ? next.join(', ') : '-' });
+                            }}
+                            className="hover:text-brand-Status_rojo transition-colors p-0.5 rounded-full hover:bg-brand-Blanco/20 cursor-pointer"
+                            aria-label={`Quitar indicador ${indicator}`}
+                          >
+                            <X size={12} strokeWidth={3} />
+                          </button>
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-xs text-brand-Gris_oscuro/50 font-body italic w-full text-center">
+                        Sin indicadores asignados
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-3 mt-8">
+              <button
+                type="button"
+                onClick={closeUserEditor}
+                className="px-5 py-2 rounded-md border border-brand-Gris_bajo/50 text-brand-Gris_oscuro text-sm font-bold hover:bg-brand-Gris_bajo/10 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={saveEditedUser}
+                className="px-5 py-2 rounded-md bg-brand-Verde_oscuro text-brand-Blanco text-sm font-bold hover:bg-brand-Verde_principal transition-colors"
+              >
+                {isCreatingUser ? 'Crear responsable' : 'Guardar cambios'}
+              </button>
+            </div>
+        </UserModalFrame>
+      )}
+
+      {userToResetPassword && (
+        <UserModalFrame ref={passwordResetDialogRef} labelledBy="password-reset-title">
+            <h2 id="password-reset-title" className="text-xl font-title font-bold text-brand-Gris_oscuro mb-2">
+              Restablecer contraseña
+            </h2>
+            <p className="text-sm text-brand-Gris_oscuro/70 mb-6">
+              {userToResetPassword.name}
+            </p>
+            {statusMessage && (
+              <p
+                className={`mb-4 rounded-md border px-3 py-2 text-sm font-semibold ${
+                  statusIsError
+                    ? 'border-brand-Status_rojo/30 bg-brand-Status_rojo/10 text-brand-Status_rojo'
+                    : 'border-brand-Verde_principal/30 bg-brand-Verde_principal/10 text-brand-Verde_oscuro'
+                }`}
+                role={statusIsError ? 'alert' : 'status'}
+              >
+                {statusMessage}
+              </p>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="reset-password" className="block text-sm font-semibold text-brand-Gris_oscuro font-body">
+                  Nueva contraseña
+                </label>
+                <input
+                  ref={passwordResetInitialFocusRef}
+                  id="reset-password"
+                  type="password"
+                  value={passwordResetForm.password}
+                  onChange={(event) => setPasswordResetForm({ ...passwordResetForm, password: event.target.value })}
+                  placeholder="Mínimo 8 caracteres"
+                  autoComplete="new-password"
+                  className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="reset-password-confirm" className="block text-sm font-semibold text-brand-Gris_oscuro font-body">
+                  Confirmar contraseña
+                </label>
+                <input
+                  id="reset-password-confirm"
+                  type="password"
+                  value={passwordResetForm.confirmPassword}
+                  onChange={(event) => setPasswordResetForm({ ...passwordResetForm, confirmPassword: event.target.value })}
+                  placeholder="Repite la nueva contraseña"
+                  autoComplete="new-password"
+                  className="mt-1 w-full h-10 rounded-md border border-brand-Gris_bajo/50 px-3 text-sm text-brand-Gris_oscuro outline-none focus:border-brand-Verde_principal focus:ring-1 focus:ring-brand-Verde_principal bg-brand-Blanco"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-8">
+              <button
+                type="button"
+                onClick={closePasswordReset}
+                className="px-5 py-2 rounded-md border border-brand-Gris_bajo/50 text-brand-Gris_oscuro text-sm font-bold hover:bg-brand-Gris_bajo/10 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={confirmPasswordReset}
+                className="px-5 py-2 rounded-md bg-brand-Verde_oscuro text-brand-Blanco text-sm font-bold hover:bg-brand-Verde_principal transition-colors"
+              >
+                Actualizar
+              </button>
+            </div>
+        </UserModalFrame>
+      )}
+
+      <ConfirmModal
+        isOpen={!!userToToggleBlock}
+        title={userToToggleBlock?.isBlocked ? 'Desbloquear usuario' : 'Bloquear usuario'}
+        message={`¿Deseas ${userToToggleBlock?.isBlocked ? 'desbloquear' : 'bloquear'} al usuario ${userToToggleBlock?.name}?`}
+        onConfirm={confirmToggleBlockUser}
+        onCancel={() => setUserToToggleBlock(null)}
+        confirmText={userToToggleBlock?.isBlocked ? 'Desbloquear' : 'Bloquear'}
+        isDestructive={!userToToggleBlock?.isBlocked}
+      />
+    </div>
+  );
+};

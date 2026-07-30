@@ -1,0 +1,10 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>SIGI-POA DGEMS</title>
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="#FFFFFF"/>
+  <rect x="2.5" y="2.5" width="59" height="59" rx="13.5" stroke="#527C32" stroke-opacity="0.18"/>
+  <rect x="9" y="21" width="4" height="22" rx="1.25" fill="#FF9600"/>
+  <rect x="20" y="21" width="4" height="22" rx="1.25" fill="#D437AD"/>
+  <rect x="31" y="21" width="4" height="22" rx="1.25" fill="#5D4BA8"/>
+  <rect x="42" y="21" width="4" height="22" rx="1.25" fill="#16AEE1"/>
+  <rect x="53" y="21" width="4" height="22" rx="1.25" fill="#B7D91A"/>
+</svg>

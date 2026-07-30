@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-Fondo: #F9F9F9;
+  --color-brand-Blanco: #FFFFFF;
+  --color-brand-Verde_principal: #64B32E;
+  --color-brand-Verde_oscuro: #527630;
+  --color-brand-Status_verde: #C1D82F;
+  --color-brand-Status_azul: #00A4E4;
+  --color-brand-Status_amarillo: #FFD100;
+  --color-brand-Status_rojo: #770F00;
+  --color-brand-Gris_oscuro: #4E4D4D;
+  --color-brand-Gris_Medio: #B4B4B4;
+  --color-brand-Gris_bajo: #B4B4B4;
+}
+
+html {
+  scroll-padding-top: 5rem;
+}
+
+body {
+  overflow-wrap: anywhere;
+}
+
+button,
+input,
+select,
+summary,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:not(:disabled),
+a[href],
+summary,
+select:not(:disabled),
+label[for],
+[role="button"]:not([aria-disabled="true"]),
+input[type="button"]:not(:disabled),
+input[type="submit"]:not(:disabled),
+input[type="checkbox"]:not(:disabled),
+input[type="radio"]:not(:disabled),
+input[type="file"]:not(:disabled) {
+  cursor: pointer;
+}
+
+button:disabled,
+select:disabled,
+[role="button"][aria-disabled="true"],
+input:disabled {
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

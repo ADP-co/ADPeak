@@ -1,0 +1,61 @@
+{
+  "name": "sigi-poa-dgems",
+  "version": "1.0.3",
+  "private": true,
+  "description": "Scripts de desarrollo para SIGI-POA DGEMS.",
+  "engines": {
+    "node": "22.x",
+    "npm": ">=10.0.0"
+  },
+  "workspaces": [
+    "apps/frontend",
+    "apps/backend"
+  ],
+  "scripts": {
+    "setup": "npm install",
+    "dev:frontend": "npm --workspace @adpeak/frontend run dev",
+    "dev:backend": "npm --workspace @adpeak/backend run dev",
+    "env:check": "npm --workspace @adpeak/backend run env:check",
+    "migrate": "npm --workspace @adpeak/backend run migrate",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "docker:config": "docker compose --env-file .env.example -f compose.yaml config",
+    "docker:migrate": "docker compose run --rm backend npm run migrate",
+    "demo:prepare-env": "npm --workspace @adpeak/backend run demo:prepare-env",
+    "demo:seed": "npm --workspace @adpeak/backend run demo:seed",
+    "demo:validate": "npm --workspace @adpeak/backend run demo:validate",
+    "demo:validate-access": "npm --workspace @adpeak/backend run demo:validate-access",
+    "demo:preview": "npm --workspace @adpeak/frontend run demo:preview",
+    "demo:build": "npm run demo:prepare-env && npm run demo:validate && npm run build",
+    "demo:check": "npm run demo:prepare-env && npm run demo:seed && npm run check && npm run demo:validate",
+    "demo:up": "docker compose --env-file .env.demo.example -f compose.yaml -f compose.demo.yaml up --build",
+    "demo:down": "docker compose --env-file .env.demo.example -f compose.yaml -f compose.demo.yaml down",
+    "demo:logs": "docker compose --env-file .env.demo.example -f compose.yaml -f compose.demo.yaml logs -f",
+    "demo:config": "docker compose --env-file .env.demo.example -f compose.yaml -f compose.demo.yaml config",
+    "qa:clone": "node tools/qa/clone.mjs",
+    "qa:seed": "node tools/qa/seed.mjs",
+    "qa:run": "node tools/qa/run.mjs",
+    "qa:serve": "node tools/qa/serve.mjs",
+    "qa:cleanup": "node tools/qa/cleanup.mjs",
+    "qa:dry-run": "node tools/qa/clone.mjs --dry-run && node tools/qa/seed.mjs --dry-run && node tools/qa/run.mjs --dry-run && node tools/qa/cleanup.mjs --dry-run",
+    "secrets:check": "node tools/quality/check-secrets.mjs",
+    "hygiene:check": "node tools/quality/check-repository-hygiene.mjs",
+    "audit:check": "node tools/quality/check-dependency-audit.mjs",
+    "serverless:verify": "node tools/quality/check-serverless-bundle.mjs",
+    "official-data:verify": "python tools/import-official-data.test.py",
+    "release:build": "python tools/release/build-release.py",
+    "release:verify": "python tools/release/build-release.py --verify-install",
+    "test": "npm --workspaces --if-present run test",
+    "test:frontend": "npm --workspace @adpeak/frontend run test",
+    "test:backend": "npm --workspace @adpeak/backend run test",
+    "typecheck": "npm --workspaces --if-present run typecheck",
+    "build": "npm --workspaces --if-present run build",
+    "check": "npm run typecheck && npm test && npm run build",
+    "quality:verify": "npm run secrets:check && npm run hygiene:check && npm run audit:check && npm run official-data:verify && npm run serverless:verify",
+    "repo:verify": "npm run quality:verify && npm run check && npm run qa:dry-run && git diff --check"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.1"
+  }
+}
