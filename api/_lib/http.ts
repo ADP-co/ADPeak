@@ -1,7 +1,4 @@
-import {
-  API_SECURITY_HEADERS,
-  corsDecision
-} from "../../apps/backend/src/http-security.js";
+import { API_SECURITY_HEADERS, corsDecision } from "./http-security";
 
 const ALLOWED_METHODS = "GET,POST,PUT,PATCH,DELETE,OPTIONS";
 const ALLOWED_HEADERS = [

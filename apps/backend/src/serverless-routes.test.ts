@@ -13,6 +13,16 @@ describe("serverless route parity", () => {
     expect(router).not.toContain('from "../../apps/backend/src/state-store"');
   });
 
+  it("keeps the serverless security policy local and exactly aligned with the backend", () => {
+    const http = workspaceSource("api/_lib/http.ts");
+    const serverlessSecurity = workspaceSource("api/_lib/http-security.ts");
+    const backendSecurity = workspaceSource("apps/backend/src/http-security.ts");
+
+    expect(http).toContain('from "./http-security"');
+    expect(http).not.toContain("apps/backend/src/http-security");
+    expect(serverlessSecurity).toBe(backendSecurity);
+  });
+
   it("routes authenticated evidence requests with hardened PDF responses in both runtimes", () => {
     const router = workspaceSource("api/v1/router.ts");
     const handlers = workspaceSource("api/_lib/sigi-handlers.ts");

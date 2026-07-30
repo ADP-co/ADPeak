@@ -42,6 +42,7 @@
     "secrets:check": "node tools/quality/check-secrets.mjs",
     "hygiene:check": "node tools/quality/check-repository-hygiene.mjs",
     "audit:check": "node tools/quality/check-dependency-audit.mjs",
+    "serverless:verify": "node tools/quality/check-serverless-bundle.mjs",
     "official-data:verify": "python tools/import-official-data.test.py",
     "release:build": "python tools/release/build-release.py",
     "release:verify": "python tools/release/build-release.py --verify-install",
@@ -51,7 +52,10 @@
     "typecheck": "npm --workspaces --if-present run typecheck",
     "build": "npm --workspaces --if-present run build",
     "check": "npm run typecheck && npm test && npm run build",
-    "quality:verify": "npm run secrets:check && npm run hygiene:check && npm run audit:check && npm run official-data:verify",
+    "quality:verify": "npm run secrets:check && npm run hygiene:check && npm run audit:check && npm run official-data:verify && npm run serverless:verify",
     "repo:verify": "npm run quality:verify && npm run check && npm run qa:dry-run && git diff --check"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.1"
   }
 }
