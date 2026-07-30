@@ -1,15 +1,4 @@
 import { applyCors, handleOptions, InvalidJsonBodyError, methodNotAllowed, positiveInteger, readJsonBody } from "./http";
-import {
-  assertLoginAllowed,
-  clearLoginFailures,
-  loginAttemptKey,
-  recordLoginFailure
-} from "../../apps/backend/src/auth-rate-limit.js";
-import {
-  authenticationResponse,
-  clearSessionCookie,
-  setSessionCookie
-} from "../../apps/backend/src/session-cookie.js";
 
 type RequestLike = {
   method?: string;
@@ -22,10 +11,14 @@ type RequestLike = {
 type SigiModule = typeof import("../../apps/backend/src/sigi-store.js");
 type CaptureModule = typeof import("../../apps/backend/src/capture-store.js");
 type StateModule = typeof import("../../apps/backend/src/state-store.js");
+type AuthRateLimitModule = typeof import("../../apps/backend/src/auth-rate-limit.js");
+type SessionCookieModule = typeof import("../../apps/backend/src/session-cookie.js");
 
 let sigiModulePromise: Promise<SigiModule> | undefined;
 let captureModulePromise: Promise<CaptureModule> | undefined;
 let stateModulePromise: Promise<StateModule> | undefined;
+let authRateLimitModulePromise: Promise<AuthRateLimitModule> | undefined;
+let sessionCookieModulePromise: Promise<SessionCookieModule> | undefined;
 
 async function hydrateRuntimeState() {
   stateModulePromise ??= import("../../apps/backend/src/state-store.js");
@@ -56,13 +49,27 @@ async function loadCaptures() {
   return captures;
 }
 
+async function loadAuthRateLimit() {
+  authRateLimitModulePromise ??= import("../../apps/backend/src/auth-rate-limit.js");
+  return authRateLimitModulePromise;
+}
+
+async function loadSessionCookie() {
+  sessionCookieModulePromise ??= import("../../apps/backend/src/session-cookie.js");
+  return sessionCookieModulePromise;
+}
+
 export async function handleLogin(request: RequestLike, response: any) {
   if (prepare(request, response, ["POST", "OPTIONS"])) {
     return;
   }
 
   try {
-    const sigi = await loadSigi();
+    const [sigi, rateLimit, sessionCookie] = await Promise.all([
+      loadSigi(),
+      loadAuthRateLimit(),
+      loadSessionCookie()
+    ]);
     const payload = await readJsonBody(request);
     const username = typeof payload.username === "string"
       ? payload.username
@@ -74,13 +81,13 @@ export async function handleLogin(request: RequestLike, response: any) {
       : typeof payload.contrasena === "string"
         ? payload.contrasena
         : "";
-    const attemptKey = loginAttemptKey(request, username);
-    await assertLoginAllowed(attemptKey);
+    const attemptKey = rateLimit.loginAttemptKey(request, username);
+    await rateLimit.assertLoginAllowed(attemptKey);
     const authResult = await sigi.authenticateUserResultAsync(username, password);
     const user = authResult.user;
 
     if (!user) {
-      await recordLoginFailure(attemptKey);
+      await rateLimit.recordLoginFailure(attemptKey);
       const inactiveUser = authResult.reason === "inactive_user";
 
       sendJson(response, inactiveUser ? 403 : 401, {
@@ -92,11 +99,11 @@ export async function handleLogin(request: RequestLike, response: any) {
       return;
     }
 
-    await clearLoginFailures(attemptKey);
+    await rateLimit.clearLoginFailures(attemptKey);
     await flushRuntimeState();
     const sessionToken = sigi.createSessionToken(user);
-    setSessionCookie(response, sessionToken);
-    sendJson(response, 200, authenticationResponse(user, sessionToken));
+    sessionCookie.setSessionCookie(response, sessionToken);
+    sendJson(response, 200, sessionCookie.authenticationResponse(user, sessionToken));
   } catch (error) {
     sendErrorResponse(response, error);
   }
@@ -121,7 +128,8 @@ export async function handleLogout(request: RequestLike, response: any) {
     return;
   }
 
-  clearSessionCookie(response);
+  const sessionCookie = await loadSessionCookie();
+  sessionCookie.clearSessionCookie(response);
   response.status(204).end();
 }
 
@@ -131,7 +139,7 @@ export async function handleUpdatePassword(request: RequestLike, response: any) 
   }
 
   try {
-    const sigi = await loadSigi();
+    const [sigi, sessionCookie] = await Promise.all([loadSigi(), loadSessionCookie()]);
     const session = sigi.sessionFromHeaders(request.headers ?? {}, { allowPasswordChange: true });
     const user = sigi.updateOwnPassword(session, await readJsonBody(request));
 
@@ -145,8 +153,8 @@ export async function handleUpdatePassword(request: RequestLike, response: any) 
 
     await flushRuntimeState();
     const sessionToken = sigi.createSessionToken(user);
-    setSessionCookie(response, sessionToken);
-    sendJson(response, 200, authenticationResponse(user, sessionToken));
+    sessionCookie.setSessionCookie(response, sessionToken);
+    sendJson(response, 200, sessionCookie.authenticationResponse(user, sessionToken));
   } catch (error) {
     sendErrorResponse(response, error);
   }

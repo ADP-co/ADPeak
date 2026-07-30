@@ -13,6 +13,14 @@ describe("serverless route parity", () => {
     expect(router).not.toContain('from "../../apps/backend/src/state-store"');
   });
 
+  it("loads every backend authentication dependency lazily from Vercel handlers", () => {
+    const handlers = workspaceSource("api/_lib/sigi-handlers.ts");
+
+    expect(handlers).toContain('import("../../apps/backend/src/auth-rate-limit.js")');
+    expect(handlers).toContain('import("../../apps/backend/src/session-cookie.js")');
+    expect(handlers).not.toMatch(/\bfrom\s+["'][^"']*apps\/backend\/src\//);
+  });
+
   it("keeps the serverless security policy local and exactly aligned with the backend", () => {
     const http = workspaceSource("api/_lib/http.ts");
     const serverlessSecurity = workspaceSource("api/_lib/http-security.ts");
