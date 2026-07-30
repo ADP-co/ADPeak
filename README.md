@@ -6,7 +6,7 @@ Media Superior.
 
 ## Estado
 
-- Versión: `1.0.1`.
+- Versión: `1.0.2`.
 - Integración: rama `develop`.
 - Frontend: React, Vite y TypeScript.
 - Backend: Node.js, TypeScript y PostgreSQL.

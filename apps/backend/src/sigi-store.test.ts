@@ -48,6 +48,7 @@ import {
   updateOwnPassword,
   SigiAuthError,
   SigiForbiddenError,
+  SigiPasswordChangeRequiredError,
   SigiValidationError,
   templateSessionForPlantelScope
 } from "./sigi-store.js";
@@ -796,6 +797,13 @@ describe("SIGI store and RBAC", () => {
       { authorization: `Bearer ${resetToken}` },
       { allowPasswordChange: true }
     )).toMatchObject({ userId: created.id, passwordChangeRequired: true });
+    try {
+      sessionFromHeaders({ authorization: `Bearer ${resetToken}` });
+      throw new Error("Expected the temporary-password session to be restricted");
+    } catch (error) {
+      expect(error).toBeInstanceOf(SigiPasswordChangeRequiredError);
+      expect(error).toMatchObject({ statusCode: 403, code: "password_change_required" });
+    }
     expect(() =>
       resetUserPassword(director, "director-1", {
         password: "Otra2026!",

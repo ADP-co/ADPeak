@@ -324,6 +324,11 @@ export class SigiAuthError extends Error {
   code = "session_required";
 }
 
+export class SigiPasswordChangeRequiredError extends SigiAuthError {
+  statusCode = 403;
+  code = "password_change_required";
+}
+
 export class SigiForbiddenError extends Error {
   statusCode = 403;
   code = "forbidden";
@@ -461,7 +466,7 @@ export function sessionFromHeaders(
     const session = sessionFromToken(token);
 
     if (session.passwordChangeRequired && !options.allowPasswordChange) {
-      throw new SigiAuthError("Debes cambiar la contraseña temporal antes de continuar.");
+      throw new SigiPasswordChangeRequiredError("Debes cambiar la contraseña temporal antes de continuar.");
     }
 
     return session;

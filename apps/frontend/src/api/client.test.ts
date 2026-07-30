@@ -198,6 +198,28 @@ describe('runtime API origin security', () => {
     expect(dispatchEvent).not.toHaveBeenCalled();
   });
 
+  it('keeps a temporary-password session active when a protected request is rejected', async () => {
+    const { localStorage, dispatchEvent } = installWindow('https://app.example/', {
+      [AUTH_STORAGE_KEY]: JSON.stringify({ id: 'responsable-2', passwordChangeRequired: true }),
+    });
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: false,
+      status: 403,
+      json: vi.fn().mockResolvedValue({
+        error: 'password_change_required',
+        message: 'Debes cambiar la contraseña temporal antes de continuar.',
+      }),
+    }));
+
+    const client = await import('./client');
+
+    await expect(client.apiJson('/indicadores')).rejects.toThrow(
+      'Debes cambiar la contraseña temporal antes de continuar.',
+    );
+    expect(localStorage.removeItem).not.toHaveBeenCalledWith(AUTH_STORAGE_KEY);
+    expect(dispatchEvent).not.toHaveBeenCalled();
+  });
+
   it('includes credentials in every authenticated request', async () => {
     installWindow('https://app.example/');
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200 });

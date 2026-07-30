@@ -80,6 +80,7 @@ describe('frontend readiness invariants', () => {
     expect(source).toContain("location.pathname !== '/cuenta'");
     expect(source).toContain('path="/cuenta" element={<AccountProfile');
     expect(source).toContain('path="/perfil" element={<Navigate to="/cuenta" replace />}');
+    expect(source.match(/!user \|\| user\.passwordChangeRequired/g)).toHaveLength(2);
   });
 
   it('keeps private deep links stable while the authenticated session hydrates', () => {

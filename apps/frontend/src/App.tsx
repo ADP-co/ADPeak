@@ -591,7 +591,7 @@ function ProtectedLayout() {
   const [notificationError, setNotificationError] = useState('');
 
   const loadNotifications = useCallback(async () => {
-    if (!isAuthenticated || !user) {
+    if (!isAuthenticated || !user || user.passwordChangeRequired) {
       setNotifications([]);
       setNotificationError('');
       return;
@@ -724,7 +724,7 @@ function AppContent() {
   const [catalogIndicators, setCatalogIndicators] = useState<CatalogIndicator[]>([]);
   const [catalogLoaded, setCatalogLoaded] = useState(false);
   const loadCatalogIndicators = useCallback(async () => {
-    if (!user) {
+    if (!user || user.passwordChangeRequired) {
       setCatalogIndicators([]);
       setCatalogLoaded(false);
       return;
