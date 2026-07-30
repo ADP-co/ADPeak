@@ -13,8 +13,8 @@ import MediaSuperiorLogo from './assets/MediaSuperiorLogo.png';
 import { AuthProvider, useAuth, type User } from './context/AuthContext';
 import { Toaster, toast } from 'sonner';
 import { useCaptureDraft } from './hooks/useCaptureDraft';
+import { useLiveCaptureRefresh } from './hooks/useLiveCaptureRefresh';
 import { fetchCaptureEvidence } from './api/capturas';
-import { CAPTURE_CHANGED_EVENT } from './api/captureEvents';
 import {
   fetchNotifications,
   markNotificationRead,
@@ -610,37 +610,10 @@ function ProtectedLayout() {
     void loadNotifications();
   }, [loadNotifications]);
 
-  useEffect(() => {
-    const handleCaptureChanged = () => {
-      void loadNotifications();
-    };
-
-    window.addEventListener(CAPTURE_CHANGED_EVENT, handleCaptureChanged);
-    return () => window.removeEventListener(CAPTURE_CHANGED_EVENT, handleCaptureChanged);
-  }, [loadNotifications]);
-
-  useEffect(() => {
-    if (!isAuthenticated || !user) {
-      return;
-    }
-
-    const refresh = () => void loadNotifications();
-    const refreshWhenVisible = () => {
-      if (document.visibilityState === 'visible') {
-        refresh();
-      }
-    };
-    const intervalId = window.setInterval(refresh, 15_000);
-
-    window.addEventListener('focus', refresh);
-    document.addEventListener('visibilitychange', refreshWhenVisible);
-
-    return () => {
-      window.clearInterval(intervalId);
-      window.removeEventListener('focus', refresh);
-      document.removeEventListener('visibilitychange', refreshWhenVisible);
-    };
-  }, [isAuthenticated, loadNotifications, user]);
+  useLiveCaptureRefresh(
+    () => void loadNotifications(),
+    { enabled: Boolean(isAuthenticated && user && !user.passwordChangeRequired) },
+  );
 
   const handleReadNotification = async (id: number) => {
     try {
@@ -747,14 +720,10 @@ function AppContent() {
     void loadCatalogIndicators();
   }, [loadCatalogIndicators]);
 
-  useEffect(() => {
-    const handleCaptureChanged = () => {
-      void loadCatalogIndicators();
-    };
-
-    window.addEventListener(CAPTURE_CHANGED_EVENT, handleCaptureChanged);
-    return () => window.removeEventListener(CAPTURE_CHANGED_EVENT, handleCaptureChanged);
-  }, [loadCatalogIndicators]);
+  useLiveCaptureRefresh(
+    () => void loadCatalogIndicators(),
+    { enabled: Boolean(user && !user.passwordChangeRequired) },
+  );
 
   const indicators = useMemo(
     () =>

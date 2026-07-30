@@ -45,6 +45,8 @@ describe('UsersTable modal accessibility', () => {
     expect(markup).toContain('tabindex="-1"');
     expect(markup).toContain('overflow-y-auto');
     expect(markup).toContain('overscroll-contain');
+    expect(markup).toContain('items-center');
+    expect(markup).toContain('justify-center');
     expect(markup).toContain('max-h-[calc(100dvh-1.5rem)]');
     expect(markup).toContain('sm:max-h-[calc(100dvh-2rem)]');
   });

@@ -30,6 +30,27 @@ textarea {
   -webkit-tap-highlight-color: transparent;
 }
 
+button:not(:disabled),
+a[href],
+summary,
+select:not(:disabled),
+label[for],
+[role="button"]:not([aria-disabled="true"]),
+input[type="button"]:not(:disabled),
+input[type="submit"]:not(:disabled),
+input[type="checkbox"]:not(:disabled),
+input[type="radio"]:not(:disabled),
+input[type="file"]:not(:disabled) {
+  cursor: pointer;
+}
+
+button:disabled,
+select:disabled,
+[role="button"][aria-disabled="true"],
+input:disabled {
+  cursor: not-allowed;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

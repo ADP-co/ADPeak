@@ -10,8 +10,8 @@ import {
   type ExportReport,
   type ReportDataRow,
 } from '../../api/reportes';
-import { CAPTURE_CHANGED_EVENT } from '../../api/captureEvents';
 import { useAuth } from '../../context/AuthContext';
+import { useLiveCaptureRefresh } from '../../hooks/useLiveCaptureRefresh';
 
 // Tarjeta de Gráfica de Dona
 interface DonutCardProps {
@@ -265,12 +265,10 @@ export const ReportsDashboard = () => {
   const [reportMessageKind, setReportMessageKind] = useState<'info' | 'success' | 'error'>('info');
   const [generatingDocumentId, setGeneratingDocumentId] = useState<string | null>(null);
 
-  useEffect(() => {
-    const handleCaptureChanged = () => setRefreshToken((current) => current + 1);
-
-    window.addEventListener(CAPTURE_CHANGED_EVENT, handleCaptureChanged);
-    return () => window.removeEventListener(CAPTURE_CHANGED_EVENT, handleCaptureChanged);
-  }, []);
+  useLiveCaptureRefresh(
+    () => setRefreshToken((current) => current + 1),
+    { enabled: Boolean(user) },
+  );
 
   useEffect(() => {
     let isMounted = true;

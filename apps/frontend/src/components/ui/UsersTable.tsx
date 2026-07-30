@@ -115,7 +115,7 @@ export const UserModalFrame = forwardRef<HTMLDivElement, UserModalFrameProps>(
   ({ children, labelledBy }, ref) => (
     <div
       role="presentation"
-      className="fixed inset-0 z-50 flex overflow-y-auto overscroll-contain bg-brand-Gris_oscuro/60 p-3 backdrop-blur-sm sm:p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain bg-brand-Gris_oscuro/60 p-3 backdrop-blur-sm sm:p-4"
     >
       <div
         ref={ref}

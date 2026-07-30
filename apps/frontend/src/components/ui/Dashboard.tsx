@@ -1,15 +1,25 @@
 import { useEffect, useMemo, useState } from 'react';
-import { IndicatorsTable, type Indicator, type IndicatorStatus } from './IndicatorsTable';
+import { IndicatorsTable, type Indicator } from './IndicatorsTable';
 import { Select } from './Select';
 import { useAuth } from '../../context/AuthContext';
 import { catalogPlanteles } from '../../api/catalog';
 import { fetchReviewCaptures, type ReviewCapture } from '../../api/capturas';
-import { CAPTURE_CHANGED_EVENT } from '../../api/captureEvents';
 import { fetchExportReport, type ExportReport, type ReportDataRow } from '../../api/reportes';
+import {
+  aggregateIndicatorStatus,
+  countIndicatorStatuses,
+  emptyIndicatorStatusCounts,
+  normalizeIndicatorStatus,
+  summarizeIndicatorStatusCounts,
+  type IndicatorStatusCounts,
+} from '../../domain/indicatorStatus';
+import { useLiveCaptureRefresh } from '../../hooks/useLiveCaptureRefresh';
 
 interface DonutCardProps {
   title: string;
   percentage: number;
+  count: number;
+  total: number;
   colorClass: string;
   strokeColor: string;
 }
@@ -24,7 +34,7 @@ const periodByCycle: Record<string, string> = {
   '2024-2025': '2025-2',
 };
 
-const DonutCard = ({ title, percentage, colorClass, strokeColor }: DonutCardProps) => {
+const DonutCard = ({ title, percentage, count, total, colorClass, strokeColor }: DonutCardProps) => {
   const radius = 38;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
@@ -64,6 +74,9 @@ const DonutCard = ({ title, percentage, colorClass, strokeColor }: DonutCardProp
           {percentage}%
         </span>
       </div>
+      <p className="mt-2 text-xs font-semibold text-brand-Gris_oscuro/70">
+        {count} de {total} registros
+      </p>
     </div>
   );
 };
@@ -99,12 +112,10 @@ export const Dashboard = ({ onSelectIndicator, mode = 'general' }: DashboardProp
     [user?.role]
   );
 
-  useEffect(() => {
-    const handleCaptureChanged = () => setRefreshToken((current) => current + 1);
-
-    window.addEventListener(CAPTURE_CHANGED_EVENT, handleCaptureChanged);
-    return () => window.removeEventListener(CAPTURE_CHANGED_EVENT, handleCaptureChanged);
-  }, []);
+  useLiveCaptureRefresh(
+    () => setRefreshToken((current) => current + 1),
+    { enabled: Boolean(user) },
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -165,15 +176,22 @@ export const Dashboard = ({ onSelectIndicator, mode = 'general' }: DashboardProp
   );
 
   const totalIndicators = scopedIndicators.length;
-  const approvedCount = scopedIndicators.filter((indicator) => indicator.status === 'Aprobado').length;
-  const pendingCount = scopedIndicators.filter((indicator) => indicator.status === 'Pendiente').length;
-  const correctionCount = scopedIndicators.filter((indicator) => indicator.status === 'Corregir').length;
-  const reviewCount = scopedIndicators.filter((indicator) => indicator.status === 'En revisión').length;
+  const dashboardCounts = useMemo(
+    () => report?.estadoConteos && !isResponsibleReview
+      ? report.estadoConteos
+      : statusCountsFromIndicators(scopedIndicators),
+    [isResponsibleReview, report?.estadoConteos, scopedIndicators],
+  );
+  const approvedCount = dashboardCounts.aprobados;
+  const pendingCount = dashboardCounts.pendientes;
+  const correctionCount = dashboardCounts.observados;
+  const reviewCount = dashboardCounts.enRevision;
+  const totalStatusRows = dashboardCounts.total;
 
-  const approvedPercentage = percentage(approvedCount, totalIndicators);
-  const pendingPercentage = percentage(pendingCount, totalIndicators);
-  const correctionPercentage = percentage(correctionCount, totalIndicators);
-  const reviewPercentage = percentage(reviewCount, totalIndicators);
+  const approvedPercentage = percentage(approvedCount, totalStatusRows);
+  const pendingPercentage = percentage(pendingCount, totalStatusRows);
+  const correctionPercentage = percentage(correctionCount, totalStatusRows);
+  const reviewPercentage = percentage(reviewCount, totalStatusRows);
   const selectedCycleLabel = cycleOptions.find((option) => option.value === selectedCycle)?.label ?? selectedCycle;
 
   return (
@@ -226,33 +244,39 @@ export const Dashboard = ({ onSelectIndicator, mode = 'general' }: DashboardProp
           <p className="sr-only" role="status" aria-live="polite">Actualizando información del tablero.</p>
         )}
 
-        <div className={`grid grid-cols-1 gap-6 ${isResponsible ? 'md:grid-cols-4' : 'md:grid-cols-3'}`}>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
           <DonutCard
-            title={isResponsible ? 'Pendientes' : 'Indicadores Aprobados'}
+            title={isResponsible ? 'Pendientes' : 'Registros aprobados'}
             percentage={isResponsible ? pendingPercentage : approvedPercentage}
+            count={isResponsible ? pendingCount : approvedCount}
+            total={totalStatusRows}
             colorClass={isResponsible ? 'bg-[#fcd34d]' : 'bg-[#c2d500]'}
             strokeColor={isResponsible ? '#FFD100' : '#C1D82F'}
           />
           <DonutCard
-            title={isResponsible ? 'En revisión' : 'Indicadores Pendientes'}
+            title={isResponsible ? 'En revisión' : 'Registros pendientes'}
             percentage={isResponsible ? reviewPercentage : pendingPercentage}
+            count={isResponsible ? reviewCount : pendingCount}
+            total={totalStatusRows}
             colorClass={isResponsible ? 'bg-[#0ea5e9]' : 'bg-[#fcd34d]'}
             strokeColor={isResponsible ? '#00A4E4' : '#FFD100'}
           />
           <DonutCard
-            title={isResponsible ? 'Con observación' : 'Indicadores En Revisión'}
+            title={isResponsible ? 'Con observación' : 'Registros en revisión'}
             percentage={isResponsible ? correctionPercentage : reviewPercentage}
+            count={isResponsible ? correctionCount : reviewCount}
+            total={totalStatusRows}
             colorClass={isResponsible ? 'bg-[#770F00]' : 'bg-[#0ea5e9]'}
             strokeColor={isResponsible ? '#770F00' : '#00A4E4'}
           />
-          {isResponsible && (
-            <DonutCard
-              title="Aprobados"
-              percentage={approvedPercentage}
-              colorClass="bg-[#c2d500]"
-              strokeColor="#C1D82F"
-            />
-          )}
+          <DonutCard
+            title={isResponsible ? 'Aprobados' : 'Con observación'}
+            percentage={isResponsible ? approvedPercentage : correctionPercentage}
+            count={isResponsible ? approvedCount : correctionCount}
+            total={totalStatusRows}
+            colorClass={isResponsible ? 'bg-[#c2d500]' : 'bg-[#770F00]'}
+            strokeColor={isResponsible ? '#C1D82F' : '#770F00'}
+          />
         </div>
       </div>
 
@@ -304,13 +328,15 @@ function reportToIndicators(report: ExportReport | null, options: { splitByCaptu
         : [indicator.datos];
 
       return groupedRows.map((rows, groupIndex) => {
-        const bestRow = rows.find((row) => normalizeStatus(row.estado) === 'En revisión') ?? rows[0];
+        const bestRow = rows.find((row) => normalizeIndicatorStatus(row.estado) === 'En revisión') ?? rows[0];
         const planteles = uniqueLabels(rows.map((row) => row.plantel).filter(Boolean));
         const responsables = uniqueLabels(rows.map((row) => row.responsable).filter(Boolean));
         const code = indicator.id ?? slugCode(indicator.nombre);
         const rowKey = options.splitByCapture
           ? `${code}:${bestRow?.captureId ?? bestRow?.plantelId ?? groupIndex}`
           : code;
+
+        const statusCounts = countIndicatorStatuses(rows.map((row) => row.estado));
 
         return {
           rowKey,
@@ -320,7 +346,8 @@ function reportToIndicators(report: ExportReport | null, options: { splitByCaptu
           captureId: bestRow?.captureId,
           actividadId: bestRow?.actividadId,
           periodoId: bestRow?.periodoId,
-          status: statusFromRows(rows),
+          status: aggregateIndicatorStatus(statusCounts),
+          statusSummary: summarizeIndicatorStatusCounts(statusCounts),
           plantel: summarizeLabels(planteles, 'planteles'),
           supervisor: summarizeLabels(responsables, 'responsables'),
           responsable: summarizeLabels(responsables, 'responsables'),
@@ -348,51 +375,17 @@ function groupRowsForReview(rows: ReportDataRow[]) {
   return Array.from(grouped.values());
 }
 
-function statusFromRows(rows: ReportDataRow[]): IndicatorStatus {
-  if (rows.length === 0) {
-    return 'Pendiente';
-  }
+function statusCountsFromIndicators(indicators: Indicator[]): IndicatorStatusCounts {
+  return indicators.reduce<IndicatorStatusCounts>((counts, indicator) => {
+    counts.total += 1;
 
-  const statusPriority: Record<IndicatorStatus, number> = {
-    Corregir: 1,
-    Pendiente: 2,
-    'En revisión': 3,
-    Aprobado: 4,
-  };
-  const counts = rows.reduce<Record<IndicatorStatus, number>>((current, row) => {
-    const status = normalizeStatus(row.estado);
-    current[status] = (current[status] ?? 0) + 1;
-    return current;
-  }, {
-    Corregir: 0,
-    Pendiente: 0,
-    'En revisión': 0,
-    Aprobado: 0,
-  });
+    if (indicator.status === 'Aprobado') counts.aprobados += 1;
+    else if (indicator.status === 'En revisión') counts.enRevision += 1;
+    else if (indicator.status === 'Corregir') counts.observados += 1;
+    else counts.pendientes += 1;
 
-  return (Object.entries(counts) as Array<[IndicatorStatus, number]>)
-    .sort((a, b) => b[1] - a[1] || statusPriority[a[0]] - statusPriority[b[0]])[0][0];
-}
-
-function normalizeStatus(value: string): IndicatorStatus {
-  const normalized = value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase();
-
-  if (normalized.includes('observado')) {
-    return 'Corregir';
-  }
-
-  if (normalized.includes('borrador') || normalized.includes('pendiente')) {
-    return 'Pendiente';
-  }
-
-  if (normalized.includes('enviado') || normalized.includes('revision')) {
-    return 'En revisión';
-  }
-
-  return 'Aprobado';
+    return counts;
+  }, emptyIndicatorStatusCounts());
 }
 
 function uniqueLabels(values: Array<string | undefined>): string[] {

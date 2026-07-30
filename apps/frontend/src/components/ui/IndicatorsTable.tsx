@@ -4,9 +4,9 @@ import { Input } from './Input';
 import { Select } from './Select';
 import { useAuth } from '../../context/AuthContext';
 import type { CatalogAllowedAction } from '../../api/catalog';
+import type { IndicatorStatus } from '../../domain/indicatorStatus';
 
-// Estados posibles de los Indicadores
-export type IndicatorStatus = 'Corregir' | 'Pendiente' | 'En revisión' | 'Aprobado';
+export type { IndicatorStatus } from '../../domain/indicatorStatus';
 
 // Estructura de datos que requiere cada fila de la tabla
 export interface Indicator {
@@ -29,6 +29,7 @@ export interface Indicator {
   responsable?: string;
   contribuidor?: string;
   status: IndicatorStatus;
+  statusSummary?: string;
 }
 
 interface IndicatorsTableProps {
@@ -58,6 +59,7 @@ export const IndicatorsTable = ({
     'Corregir': 'bg-brand-Status_rojo text-brand-Blanco',
     'Pendiente': 'bg-brand-Status_amarillo text-brand-Gris_oscuro',
     'En revisión': 'bg-brand-Status_azul text-brand-Blanco',
+    'Avance parcial': 'bg-brand-Verde_principal/20 text-brand-Verde_oscuro ring-1 ring-inset ring-brand-Verde_principal/40',
     'Aprobado': 'bg-brand-Status_verde text-brand-Gris_oscuro',
   };
 
@@ -97,9 +99,10 @@ export const IndicatorsTable = ({
   // Mapeo de prioridad para ordenar por estatus cuando el filtro es "todos"
   const statusPriority: Record<IndicatorStatus, number> = {
     'Corregir': 1,
-    'Pendiente': 2,
-    'En revisión': 3,
-    'Aprobado': 4,
+    'En revisión': 2,
+    'Avance parcial': 3,
+    'Pendiente': 4,
+    'Aprobado': 5,
   };
 
   // Filtramos los indicadores según el valor seleccionado en el Select
@@ -108,6 +111,7 @@ export const IndicatorsTable = ({
       if (filter === 'todos') return true;
       if (filter === 'aprobado') return indicator.status === 'Aprobado';
       if (filter === 'revision') return indicator.status === 'En revisión';
+      if (filter === 'parcial') return indicator.status === 'Avance parcial';
       if (filter === 'pendiente') return indicator.status === 'Pendiente';
       if (filter === 'corregir') return indicator.status === 'Corregir';
       return true;
@@ -162,6 +166,7 @@ export const IndicatorsTable = ({
                   { value: 'todos', label: 'Todos' },
                   { value: 'aprobado', label: 'Aprobado' },
                   { value: 'revision', label: 'En revisión' },
+                  { value: 'parcial', label: 'Avance parcial' },
                   { value: 'pendiente', label: 'Pendiente' },
                   { value: 'corregir', label: 'Corregir' }
                 ]}
@@ -184,9 +189,16 @@ export const IndicatorsTable = ({
                 <span className="font-mono text-xs font-bold text-brand-Gris_oscuro/70">
                   {indicator.code}
                 </span>
-                <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold font-accent ${statusStyles[indicator.status]}`}>
-                  {indicator.status}
-                </span>
+                <div className="flex shrink-0 flex-col items-end gap-1">
+                  <span className={`rounded-full px-3 py-1 text-xs font-bold font-accent ${statusStyles[indicator.status]}`}>
+                    {indicator.status}
+                  </span>
+                  {indicator.statusSummary && (
+                    <span className="max-w-44 text-right text-[11px] leading-tight text-brand-Gris_oscuro/70">
+                      {indicator.statusSummary}
+                    </span>
+                  )}
+                </div>
               </div>
               <h2 className="mt-3 font-body text-base font-semibold leading-snug text-brand-Gris_oscuro">
                 {indicator.name}
@@ -272,10 +284,17 @@ export const IndicatorsTable = ({
                   )}
 
                   {/* Estatus (Badge estilizado) */}
-                  <td className="py-4 px-6 text-center whitespace-nowrap">
-                    <span className={`inline-block px-4 py-1 text-xs font-bold font-accent rounded-full shadow-xs tracking-wide min-w-[100px] ${statusStyles[indicator.status]}`}>
-                      {indicator.status}
-                    </span>
+                  <td className="py-4 px-6 text-center">
+                    <div className="flex flex-col items-center gap-1">
+                      <span className={`inline-block min-w-[100px] rounded-full px-4 py-1 text-xs font-bold font-accent shadow-xs tracking-wide ${statusStyles[indicator.status]}`}>
+                        {indicator.status}
+                      </span>
+                      {indicator.statusSummary && (
+                        <span className="max-w-44 text-[11px] leading-tight text-brand-Gris_oscuro/70">
+                          {indicator.statusSummary}
+                        </span>
+                      )}
+                    </div>
                   </td>
 
                   {/* Acción (Button atómico) */}

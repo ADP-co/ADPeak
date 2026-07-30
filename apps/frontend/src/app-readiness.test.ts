@@ -158,10 +158,19 @@ describe('frontend readiness invariants', () => {
   it('refreshes notifications across tabs and devices without a manual reload', () => {
     const source = readSource('App.tsx');
     const bannerSource = readSource('components/layout/UserBanner.tsx');
+    const refreshHookSource = readSource('hooks/useLiveCaptureRefresh.ts');
+    const captureEventsSource = readSource('api/captureEvents.ts');
+    const dashboardSource = readSource('components/ui/Dashboard.tsx');
+    const reportsSource = readSource('components/ui/ReportsDashboard.tsx');
 
-    expect(source).toContain('window.setInterval(refresh, 15_000)');
-    expect(source).toContain("window.addEventListener('focus', refresh)");
-    expect(source).toContain("document.addEventListener('visibilitychange', refreshWhenVisible)");
+    expect(refreshHookSource).toContain('window.setInterval(refresh, intervalMs)');
+    expect(refreshHookSource).toContain("window.addEventListener('focus', refresh)");
+    expect(refreshHookSource).toContain("document.addEventListener('visibilitychange', refreshWhenVisible)");
+    expect(captureEventsSource).toContain('new BroadcastChannel(CAPTURE_CHANGED_CHANNEL)');
+    expect(captureEventsSource).toContain("window.addEventListener('storage', handleStorage)");
+    expect(source).toContain('useLiveCaptureRefresh(');
+    expect(dashboardSource).toContain('useLiveCaptureRefresh(');
+    expect(reportsSource).toContain('useLiveCaptureRefresh(');
     expect(source).toContain("const targetWindow = window.open('', '_blank');");
     expect(source).toContain('targetWindow.location.replace(url)');
     expect(source).toContain('notificationTargetPath(notification');
